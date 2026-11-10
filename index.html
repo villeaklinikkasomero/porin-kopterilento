@@ -112,6 +112,7 @@
 <script type="module">
 import * as THREE from './three.module.min.js';
 import CITY from './city.js';
+import { GLTFLoader } from './GLTFLoader.js';
 
 const HW = CITY.hw, YS = CITY.ys, YN = CITY.yn, HH = -YS, YSPAN = YN - YS;
 const $ = id => document.getElementById(id);
@@ -131,7 +132,7 @@ function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h
 addEventListener('resize', resize); resize();
 
 scene.add(new THREE.HemisphereLight(0xdfeeff, 0x6b6a5c, 1.25));
-const sun = new THREE.DirectionalLight(0xfff2d8, 1.7); sun.position.set(-0.55, 1, 0.75); scene.add(sun);
+const sun = new THREE.DirectionalLight(0xfff2d8, 1.7); sun.position.set(0.79, 0.81, 0.62);   // matches the sun in the aerial image (shadows fall north-west) scene.add(sun);
 
 // sky dome
 {
@@ -157,7 +158,7 @@ const groundMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a });
 // ---------- buildings ----------
 const PAL = [0xe9dcc0, 0xd9c7a2, 0xf0ead9, 0xcdb593, 0xb9805e, 0xa8563f, 0xd8d5cc, 0xbfc4c6, 0xe6cf9a, 0xc7a988, 0x9aa3a8, 0xe3d6c4, 0xb46a4c, 0xdcd0b8];
 const blds = [];           // {pts:[[x,y]..], h, minx,maxx,miny,maxy}
-const LMAT = { kirkko: [293.4, 369.7], raati: [-115.6, 394.1], kaupungintalo: [-57.7, 331.2], teatteri: [-201, 378], taidemuseo: [-94.8, 462.6], kauppahalli: [150, -32.8], vesitorni: [-835, -135], puuvilla: [230, 1000], promenadi: [9.2, -238.7], bepop: [58.3, -382.3], kirjasto: [-258, 114], museo: [-264.8, 455.9], tehdas: [160.2, 763.6], kehraamo: [85, 834], tori: [31, 81], lava: [90, 61], lokki: [-389, 998] };
+const LMAT = { kirkko: [293.4, 369.7], raati: [-115.6, 394.1], kaupungintalo: [-57.7, 331.2], teatteri: [-201, 378], taidemuseo: [-94.8, 462.6], kauppahalli: [150, -32.8], vesitorni: [-835, -135], puuvilla: [230, 1000], promenadi: [9.2, -238.7], bepop: [58.3, -382.3], kirjasto: [-258, 114], museo: [-264.8, 455.9], tehdas: [160.2, 763.6], kehraamo: [85, 834], tori: [31, 81], lava: [90, 61], lokki: [-389, 998], isokarhu: [120.9, -179.4] };
 const LMB = {};
 const GRID = 40, grid = new Map();
 const gkey = (i, j) => i * 4096 + j;
@@ -174,8 +175,10 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     t.anisotropy = 4; return t;
   })();
   const wp = [], wn = [], wu = [], wc = [], rp = [], ru = [];
+  const KW = [0, 1, 2, 3].map(() => ({ p: [], n: [], u: [], c: [] })); let bIdx = -1; const OWNROOF = new Set([1717, 1488, 1489, 1492, 1427, 1428]), karhuPts = [];   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
   const col = new THREE.Color(), rc = new THREE.Color();
   for (const b of CITY.b) {
+    bIdx++;
     const pts = []; for (let i = 0; i < b.p.length; i += 2) pts.push([b.p[i] / 10, b.p[i + 1] / 10]);
     let h = b.h;
     const rec = { pts, h, minx: 1e9, maxx: -1e9, miny: 1e9, maxy: -1e9 };
@@ -187,6 +190,9 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
       }
     let lk = null; for (const k in LMAT) if (!LMB[k] && pip(LMAT[k][0], LMAT[k][1], pts)) lk = k;
     if (lk) { LMB[lk] = { pts, rec }; continue; }
+    let T = null; { let cx = 0, cy = 0; for (const q of pts) { cx += q[0]; cy += q[1]; } cx /= pts.length; cy /= pts.length;
+      if (cx > -385 && cx < 75 && cy > 268 && cy < 505) T = KW[(cx > -150 ? 1 : 0) + (cy > 385 ? 2 : 0)]; }
+    const tp = T ? T.p : wp, tn = T ? T.n : wn, tu = T ? T.u : wu, tc = T ? T.c : wc;
     // wall colour: palette tinted a little by the roof colour seen in the aerial image
     col.setHex(PAL[b.i % PAL.length]); rc.setRGB(b.c[0] / 255, b.c[1] / 255, b.c[2] / 255, THREE.SRGBColorSpace);
     col.lerp(rc, 0.18); const shade = 0.86 + (b.i % 7) * 0.025; col.multiplyScalar(shade);
@@ -197,17 +203,37 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
       const nx = dy / len, nz = dx / len;
       const n = Math.max(1, Math.round(len / 3.6)), fl = Math.max(1, Math.round(h / 3.2));
       const u1 = win ? n : 0.02, v1 = win ? fl : 0.02, u0 = win ? 0 : 0.01, v0 = win ? 0 : 0.01;
-      wp.push(a[0], 0, -a[1], c2[0], 0, -c2[1], c2[0], h, -c2[1], a[0], 0, -a[1], c2[0], h, -c2[1], a[0], h, -a[1]);
-      wu.push(u0, v0, u1, v0, u1, v1, u0, v0, u1, v1, u0, v1);
-      for (let k = 0; k < 6; k++) { wn.push(nx, 0, nz); wc.push(col.r, col.g, col.b); }
+      tp.push(a[0], 0, -a[1], c2[0], 0, -c2[1], c2[0], h, -c2[1], a[0], 0, -a[1], c2[0], h, -c2[1], a[0], h, -a[1]);
+      tu.push(u0, v0, u1, v0, u1, v1, u0, v0, u1, v1, u0, v1);
+      for (let k = 0; k < 6; k++) { tn.push(nx, 0, nz); const ao = (k === 0 || k === 1 || k === 3) ? 0.74 : 1; tc.push(col.r * ao, col.g * ao, col.b * ao); }   // darker towards the street
     }
     const tris = THREE.ShapeUtils.triangulateShape(pts.map(q => new THREE.Vector2(q[0], q[1])), []);
-    for (const t of tris) for (const k of t) { const q = pts[k]; rp.push(q[0], h, -q[1]); ru.push((q[0] + HW) / (2 * HW), (q[1] - YS) / YSPAN); }
+    if (OWNROOF.has(bIdx) && T) { const g = bIdx === 1717 ? 0.2 : 0.56; if (bIdx !== 1717) for (const q of pts) karhuPts.push(q); for (const t of tris) for (const k of t) { const q = pts[k]; tp.push(q[0], h, -q[1]); tu.push(0.02, 0.02); tn.push(0, 1, 0); tc.push(g, g, g + 0.02); } }   // new restaurant: the aerial image predates it, so no photo roof
+    else for (const t of tris) for (const k of t) { const q = pts[k]; rp.push(q[0], h, -q[1]); ru.push((q[0] + HW) / (2 * HW), (q[1] - YS) / YSPAN); }
   }
   const wg = new THREE.BufferGeometry();
   wg.setAttribute('position', new THREE.Float32BufferAttribute(wp, 3)); wg.setAttribute('normal', new THREE.Float32BufferAttribute(wn, 3));
   wg.setAttribute('uv', new THREE.Float32BufferAttribute(wu, 2)); wg.setAttribute('color', new THREE.Float32BufferAttribute(wc, 3));
-  scene.add(new THREE.Mesh(wg, new THREE.MeshLambertMaterial({ map: facade, vertexColors: true })));
+  // Karhukortteli: the aerial image still shows the demolished brewery here, so cover the block with plain paving
+  if (karhuPts.length > 2) {
+    const P = karhuPts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]), cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]), lo = [], up = [];
+    for (const q of P) { while (lo.length > 1 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); }
+    for (const q of P.slice().reverse()) { while (up.length > 1 && cr(up[up.length - 2], up[up.length - 1], q) <= 0) up.pop(); up.push(q); }
+    const hull = lo.slice(0, -1).concat(up.slice(0, -1)), cx = hull.reduce((a, q) => a + q[0], 0) / hull.length, cy = hull.reduce((a, q) => a + q[1], 0) / hull.length, pos = [];
+    const ex = hull.map(q => { const d = Math.hypot(q[0] - cx, q[1] - cy) || 1; return [q[0] + (q[0] - cx) / d * 5, q[1] + (q[1] - cy) / d * 5]; });
+    for (let i = 1; i < ex.length - 1; i++) pos.push(ex[0][0], 0.12, -ex[0][1], ex[i][0], 0.12, -ex[i][1], ex[i + 1][0], 0.12, -ex[i + 1][1]);
+    const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    scene.add(new THREE.Mesh(pg, new THREE.MeshBasicMaterial({ color: 0xa9a69d, side: THREE.DoubleSide })));
+  }
+  const wallMat = new THREE.MeshLambertMaterial({ map: facade, vertexColors: true });
+  scene.add(new THREE.Mesh(wg, wallMat));
+  KW.forEach((k, ci) => { if (!k.p.length) return;
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(k.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(k.n, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(k.u, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(k.c, 3));
+    const me = new THREE.Mesh(g, wallMat); scene.add(me);
+    loadModel('bl_kivi' + ci, (root, K) => { root.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = new THREE.MeshBasicMaterial({ map }); } });
+      const gr = new THREE.Group(); gr.position.set(K.x, 0, -K.y); gr.add(root); scene.add(gr); scene.remove(me); (window.__bl = window.__bl || []).push('kivi' + ci); });
+  });
   const rg = new THREE.BufferGeometry();
   rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); rg.setAttribute('uv', new THREE.Float32BufferAttribute(ru, 2));
   scene.add(new THREE.Mesh(rg, roofMat));
@@ -301,8 +327,21 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     return pts;
   }
 
+  // Blender-built models (sunlight and soft shadows baked into one texture) replace the code-built ones once they have loaded
+  function track(key, fn) {
+    const start = scene.children.length; fn(); const proc = scene.children.slice(start);
+    import(`./bl_${key}.js`).then(K => {
+      const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+      new GLTFLoader().parse(buf.buffer, '', gl => {
+        gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = new THREE.MeshBasicMaterial({ map }); } });
+        const g = new THREE.Group(); g.position.set(K.x, 0, -K.y); g.add(gl.scene); scene.add(g);
+        for (const q of proc) if (K.roof || q.material !== roofMat) scene.remove(q);
+        (window.__bl = window.__bl || []).push(key);
+      }, () => {});
+    }).catch(() => {});
+  }
   // Raatihuone (C. L. Engel, 1841): cream empire facade, three rows of windows, pedimented centre, tall clock tower
-  if (LMB.raati) {
+  if (LMB.raati) track('raati', () => {
     const L = LMB.raati, h = 13.5, rise = 3, wallC = 0xefe3ba;
     const pts = styled(L, { h, floors: 3, bay: 3.1, mat: facade({ wall: '#efe3ba', arch: false, win: [0.33, 0.2, 0.34, 0.56] }), roof: { inset: 6.2, rise, color: 0x7fb7a6 } });
     const o = obb(pts), g = frame(o), W = 14, z = o.b;
@@ -323,21 +362,21 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     m(new THREE.CylinderGeometry(0.5, 0.9, 1.4, 8), green, 0, top + 11.6, 0);
     m(new THREE.ConeGeometry(0.5, 3.4, 8), green, 0, top + 14, 0);
     L.rec.h = h + rise; const tc = toMap(o, 0, 0); block(tc[0], tc[1], 3, top + 13);
-  }
+  });
   // Kaupungintalo, Junneliuksen palatsi (1895): Venetian palazzo, diamond-patterned brick above a rusticated stone ground floor
-  if (LMB.kaupungintalo) {
+  if (LMB.kaupungintalo) track('kaupungintalo', () => {
     const L = LMB.kaupungintalo, h = 17;
     styled(L, { h, floors: 2, bay: 3.4, base: { h: 6.2, mat: facade({ wall: '#8d7f70', trim: '#b9ad9c', rust: true, pil: false, course: false, win: [0.3, 0.2, 0.4, 0.6] }) },
       mat: facade({ wall: '#c87850', trim: '#ead9c0', diamond: 'rgba(250,222,190,.85)', pair: true, pil: false, win: [0.24, 0.2, 0.52, 0.56] }), roof: { inset: 3, rise: 0.9, color: 0x4b5157 } });
-  }
+  });
   // Porin Teatteri (1884): yellow neo-renaissance
-  if (LMB.teatteri) styled(LMB.teatteri, { h: 12.5, floors: 2, bay: 3.6, mat: facade({ wall: '#ecd9a0', arch: true, win: [0.3, 0.14, 0.4, 0.66] }) });
+  if (LMB.teatteri) track('teatteri', () => styled(LMB.teatteri, { h: 12.5, floors: 2, bay: 3.6, mat: facade({ wall: '#ecd9a0', arch: true, win: [0.3, 0.14, 0.4, 0.66] }) }));
   // Porin taidemuseo: former customs warehouse, pale rusticated plaster and tall arched openings
-  if (LMB.taidemuseo) styled(LMB.taidemuseo, { h: 8.2, floors: 1, bay: 6.2, mat: facade({ wall: '#d9d3c4', trim: '#ece8dd', rust: true, arch: true, glass: '#22303a', win: [0.26, 0.2, 0.48, 0.7] }) });
+  if (LMB.taidemuseo) track('taidemuseo', () => styled(LMB.taidemuseo, { h: 8.2, floors: 1, bay: 6.2, mat: facade({ wall: '#d9d3c4', trim: '#ece8dd', rust: true, arch: true, glass: '#22303a', win: [0.26, 0.2, 0.48, 0.7] }) }));
   // Kauppahalli (1927)
-  if (LMB.kauppahalli) styled(LMB.kauppahalli, { h: 8.5, floors: 2, bay: 4.2, mat: facade({ wall: '#d8c88e', arch: true, win: [0.26, 0.16, 0.48, 0.62] }) });
+  if (LMB.kauppahalli) track('kauppahalli', () => styled(LMB.kauppahalli, { h: 8.5, floors: 2, bay: 4.2, mat: facade({ wall: '#d8c88e', arch: true, win: [0.26, 0.16, 0.48, 0.62] }) }));
   // Vesitorni (Bertel Strömmer, 1935): dark red-brick slab with a rounded stair turret
-  if (LMB.vesitorni) {
+  if (LMB.vesitorni) track('vesitorni', () => {
     const L = LMB.vesitorni, pts = clean(L.pts), h = 47, o = obb(pts), g = frame(o), brickM = lam(0x8a3e2e);
     add(wallGeo(offset(pts, 0.25), 0, 2.2), STONE);
     add(wallGeo(pts, 2.2, h, 4.9, 8), facade({ wall: '#8a3e2e', trim: '#cdb48e', brick: true, arch: false, pil: false, win: [0.44, 0.3, 0.12, 0.34] }));
@@ -346,17 +385,18 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     for (let y = 8; y < h; y += 7.5) { const r = new THREE.Mesh(new THREE.CylinderGeometry(2.56, 2.56, 0.35, 18), lam(0xcdb48e)); r.position.set(0, y, -o.b); g.add(r); }
     const cap = new THREE.Mesh(new THREE.CylinderGeometry(2.7, 2.7, 0.5, 18), lam(0x4a3a35)); cap.position.set(0, h + 4.2, -o.b); g.add(cap);
     L.rec.h = h + 1; const tc = toMap(o, 0, -o.b); block(tc[0], tc[1], 3, h + 4.5);
-  }
+  });
   // Kauppakeskus Puuvilla (2014): red brick and glass, red canopy band
-  if (LMB.puuvilla) {
+  if (LMB.puuvilla) track('puuvilla', () => {
     const L = LMB.puuvilla, pts = clean(L.pts), h = 14;
     add(wallGeo(pts, 0, 5, 6, 1), facade({ wall: '#2b3540', trim: '#55626e', glass: '#3f5568', arch: false, pil: false, course: false, win: [0.06, 0.1, 0.88, 0.8] }));
     add(wallGeo(pts, 5, h - 1.2, 6, 2), facade({ wall: '#a8473a', trim: '#8c382e', brick: true, arch: false, pil: false, course: false, glass: '#33414d', win: [0.3, 0.3, 0.4, 0.36] }));
     const co = offset(pts, 0.8); add(wallGeo(co, h - 1.2, h), lam(0xd2232a)); add(capGeo(co, h - 0.03), lam(0xd2232a)); add(wallGeo(co, 4.8, 5.4), lam(0xd2232a));
     add(capGeo(pts, h + 0.03, true), roofMat); L.rec.h = h;
-  }
+  });
   // Keski-Porin kirkko (1863): red-brick Gothic Revival, 72 m tower with a cast-iron spire
   if (LMB.kirkko) {
+    const procStart = scene.children.length;
     const L = LMB.kirkko, pts = L.pts, o = obb(pts), g = frame(o), a = o.a, b = o.b, eave = 15, ridge = 27.5;
     const BR = 0x9a4a36, brick = lam(BR), slate = lam(0x79a892, DS), copper = lam(0x79a892, DS), iron = lam(0x2a3331, { flatShading: true }), pale = lam(0x8a4030);
     add(wallGeo(offset(pts, 0.2), 0, 1.4), STONE);
@@ -384,6 +424,12 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const ln = new THREE.LineSegments(new THREE.WireframeGeometry(spire), new THREE.LineBasicMaterial({ color: 0x8fa39c, transparent: true, opacity: 0.6 })); ln.position.set(tx, th + 15.9, 0); ln.rotation.y = Math.PI / 8; g.add(ln);
     m(new THREE.BoxGeometry(0.16, 2.6, 0.16), lam(0xd9c36a), tx, th + 32.4, 0); m(new THREE.BoxGeometry(1.3, 0.16, 0.16), lam(0xd9c36a), tx, th + 32.8, 0);
     L.rec.h = 22; const tc = toMap(o, tx, 0); block(tc[0], tc[1], 5.5, 60);
+    // Blender-built model with baked sunlight replaces the simple one once it has loaded
+    const proc = scene.children.slice(procStart);
+    import('./kirkko.js').then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i); new GLTFLoader().parse(buf.buffer, '', gl => {
+      gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = new THREE.MeshBasicMaterial({ map }); } });
+      for (const q of proc) scene.remove(q); frame(o).add(gl.scene);
+    }, () => {}); }).catch(() => {});
   }
   // modern blocks: glazed ground floor, ribbon windows above
   function modern(L, { h, floors, wall, stripes = false, cap = 0x3a3f44, base = 4.6 }) {
@@ -393,14 +439,15 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const co = offset(pts, 0.3); add(wallGeo(co, h - 0.5, h + 0.3), lam(cap)); add(wallGeo(co, base - 0.25, base + 0.15), lam(cap));
     add(capGeo(pts, h + 0.03, true), roofMat); L.rec.h = h + 0.3;
   }
-  if (LMB.promenadi) modern(LMB.promenadi, { h: 12.5, floors: 2, wall: '#41464c', stripes: true });
-  if (LMB.bepop) modern(LMB.bepop, { h: 17, floors: 3, wall: '#b4bcb8', cap: 0x4d5a57 });
-  if (LMB.kirjasto) modern(LMB.kirjasto, { h: 10.5, floors: 2, wall: '#bcb4a5', cap: 0x6b6258, base: 3.6 });
-  if (LMB.museo) modern(LMB.museo, { h: 14, floors: 3, wall: '#e5e2d9', cap: 0x8c8a84, base: 4 });
+  if (LMB.promenadi) track('promenadi', () => modern(LMB.promenadi, { h: 12.5, floors: 2, wall: '#41464c', stripes: true }));
+  if (LMB.bepop) track('bepop', () => modern(LMB.bepop, { h: 17, floors: 3, wall: '#b4bcb8', cap: 0x4d5a57 }));
+  if (LMB.kirjasto) track('kirjasto', () => modern(LMB.kirjasto, { h: 10.5, floors: 2, wall: '#bcb4a5', cap: 0x6b6258, base: 3.6 }));
+  if (LMB.museo) track('museo', () => modern(LMB.museo, { h: 10, floors: 1, wall: '#a9a294', cap: 0x8c8a84, base: 3 }));
+  if (LMB.isokarhu) track('isokarhu', () => modern(LMB.isokarhu, { h: 13, floors: 2, wall: '#4b4c52', stripes: true }));
   // Porin Puuvilla: the old cotton mill, red brick with arched windows
   { const millM = facade({ wall: '#9c4a38', trim: '#c9a58c', brick: true, arch: true, pil: false, course: false, win: [0.3, 0.2, 0.4, 0.58] }), bt = lam(0x7e3a2c);
-    if (LMB.tehdas) styled(LMB.tehdas, { h: 15, floors: 4, bay: 3.6, mat: millM, trim: bt });
-    if (LMB.kehraamo) styled(LMB.kehraamo, { h: 9.5, floors: 2, bay: 3.6, mat: millM, trim: bt }); }
+    if (LMB.tehdas) track('tehdas', () => styled(LMB.tehdas, { h: 15, floors: 4, bay: 3.6, mat: millM, trim: bt }));
+    if (LMB.kehraamo) track('kehraamo', () => styled(LMB.kehraamo, { h: 9.5, floors: 2, bay: 3.6, mat: millM, trim: bt })); }
 
   // ---------- bridges: railings, trusses and lamp posts on top of the aerial image ----------
   {
@@ -438,7 +485,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
       for (const s of [-11, 11]) { const e = side(a, b, s); rail(e[0], e[1], () => 1.3, concrete, 1); } lamps(a, b, [0], 30, 11); }
   }
   // Kauppatori: the 2022 market pavilion (two glazed pavilions under one long curved-edge roof, passage through the middle)
-  if (LMB.tori) {
+  if (LMB.tori) track('tori', () => {
     const L = LMB.tori; let o = obb(L.pts);
     if (o.a < o.b) { let ux = -o.uy, uy = o.ux; if (ux < 0) { ux = -ux; uy = -uy; } o = { ...o, ux, uy, a: o.b, b: o.a }; }
     const g = frame(o), a = o.a, b = o.b, H = 4.4, gap = 3.6;
@@ -451,7 +498,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const full = a - 1.5 - gap, gl = full * 0.45, cu = full - gl, w = 2 * b - 3.5;
     for (const sgn of [-1, 1]) { box(gl, w, sgn * (gap + gl / 2), glassM, Math.round(gl / 2.4)); box(cu, w - 0.6, sgn * (gap + gl + cu / 2), copper); }
     L.rec.h = H + 0.8;
-  }
+  });
   // Kohtaamislava Satakieli: open stage canopy on the east side of the square
   if (LMB.lava) { const L = LMB.lava, pts = clean(L.pts);
     add(hipGeo(offset(pts, 1.2), offset(pts, -2.5), 4.4, 5.3), lam(0xe9e6de, DS)); add(wallGeo(pts, 0, 0.9), lam(0x4a4f55));
@@ -464,6 +511,11 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   { const ch = add(new THREE.CylinderGeometry(1.5, 2.7, 54, 14), lam(0x9a4f3a)); ch.position.set(165.3, 27, -792.6); block(165.3, 792.6, 3, 54); }
 }
 
+// embedded Blender models: base64 glb inside a script file
+function loadModel(name, done) {
+  import(`./${name}.js`).then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    new GLTFLoader().parse(buf.buffer, '', gl => done(gl.scene, K), () => {}); }).catch(() => {});
+}
 // ---------- trees ----------
 {
   const n = CITY.t.length / 2;
@@ -479,6 +531,18 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     p.set(x, th / 2, z); s.set(1, th + 1, 1); trunk.setMatrixAt(i, m.compose(p, q, s));
   }
   scene.add(crown, trunk);
+  // Blender-made trees (three species, soft shading baked into vertex colours) replace the simple ones once loaded
+  loadModel('trees', root => {
+    const geo = ['tree0', 'tree1', 'tree2'].map(k => root.getObjectByName(k).geometry), lists = [[], [], []];
+    let sd = 23; const r2 = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    for (let i = 0; i < n; i++) { const v = r2(); lists[v < 0.1 ? 2 : v < 0.38 ? 1 : 0].push(i); }
+    const tm = new THREE.MeshLambertMaterial({ vertexColors: true });
+    lists.forEach((ids, k) => { const im = new THREE.InstancedMesh(geo[k], tm, ids.length);
+      ids.forEach((ti, j) => { const sc = 0.85 + r2() * 0.6; p.set(CITY.t[ti * 2], 0, -CITY.t[ti * 2 + 1]); s.set(sc, sc * (0.9 + r2() * 0.25), sc); q.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, r2() * 6.28);
+        im.setMatrixAt(j, m.compose(p, q, s)); const t = r2(); c.setRGB(0.82 + 0.18 * t, 0.86 + 0.14 * r2(), 0.78 + 0.18 * t); im.setColorAt(j, c); });
+      scene.add(im); });
+    scene.remove(crown, trunk); window.__trees = true;
+  });
 }
 
 // ---------- text helpers ----------
@@ -594,6 +658,14 @@ let rotor, tailRotor;
     for (const sz of [-1.4, 0.8]) { const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 1.1, 5), dark); leg.position.set(sx * 1.05, -1.3, sz); leg.rotation.z = sx * 0.35; heli.add(leg); }
   }
   scene.add(heli);
+  // Blender-made helicopter replaces the simple one once loaded
+  loadModel('heli', root => {
+    const pm = new THREE.MeshPhongMaterial({ vertexColors: true, shininess: 55, specular: 0x3a3a3a });
+    root.traverse(q => { if (q.isMesh) q.material = pm; });
+    const nr = root.getObjectByName('rotor'), nt = root.getObjectByName('trotor'); if (!nr || !nt) return;
+    const disc = new THREE.Mesh(new THREE.CircleGeometry(5.1, 32), new THREE.MeshBasicMaterial({ color: 0x15191d, transparent: true, opacity: 0.12, side: THREE.DoubleSide, depthWrite: false })); disc.rotation.x = -Math.PI / 2; nr.add(disc);
+    heli.clear(); heli.add(root); rotor = nr; tailRotor = nt; window.__heli = true;
+  });
 }
 // soft shadow blob under the helicopter
 const blob = (() => {
@@ -602,6 +674,38 @@ const blob = (() => {
   const p = new THREE.PlaneGeometry(13, 13); p.rotateX(-Math.PI / 2);
   const m = new THREE.Mesh(p, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.renderOrder = 5; scene.add(m); return m;
 })();
+
+// ---------- traffic: cars wandering the street network, sized like the cars in the aerial image ----------
+const cars = [];
+{
+  const nodes = new Map(), key = (x, y) => x + ',' + y, inb = (x, y) => Math.abs(x) < HW - 8 && y > YS + 8 && y < YN - 8;
+  const node = (x, y) => { const k = key(x, y); if (!nodes.has(k)) nodes.set(k, { x, y, nb: [] }); return nodes.get(k); };
+  for (const r of CITY.r) { if (!r.k) continue;                                   // k = 0 is a pedestrian street
+    for (let i = 0; i + 3 < r.p.length; i += 2) { const ax = r.p[i], ay = r.p[i + 1], bx = r.p[i + 2], by = r.p[i + 3];
+      if (!inb(ax, ay) || !inb(bx, by) || (ax === bx && ay === by)) continue; const a = node(ax, ay), b = node(bx, by); if (!a.nb.includes(b)) a.nb.push(b); if (!b.nb.includes(a)) b.nb.push(a); } }
+  const list = [...nodes.values()].filter(n => n.nb.length);
+  const N = Math.min(140, list.length), L = 4.4, W = 1.8;
+  const bodyG = new THREE.BoxGeometry(W, 0.62, L); bodyG.translate(0, 0.56, 0);
+  const cabG = new THREE.BoxGeometry(W * 0.86, 0.5, L * 0.5); cabG.translate(0, 1.1, 0.15);
+  const baseG = new THREE.BoxGeometry(W * 0.94, 0.3, L * 0.9); baseG.translate(0, 0.17, 0);
+  const body = new THREE.InstancedMesh(bodyG, new THREE.MeshLambertMaterial(), N), cab = new THREE.InstancedMesh(cabG, new THREE.MeshLambertMaterial({ color: 0x1c242c }), N), base = new THREE.InstancedMesh(baseG, new THREE.MeshLambertMaterial({ color: 0x15171a }), N);
+  const PAINT = [0xf2f2f0, 0xf2f2f0, 0xc9cdd1, 0xc9cdd1, 0x8b9096, 0x2c2f33, 0x2c2f33, 0x2f4f7c, 0xa3231f, 0x5b6a4d, 0xd8d2c2], col = new THREE.Color();
+  let sd = 77; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < N; i++) { const a = list[Math.floor(rnd() * list.length)], b = a.nb[Math.floor(rnd() * a.nb.length)];
+    cars.push({ a, b, t: rnd(), v: 7 + rnd() * 6, yaw: Math.atan2(b.x - a.x, b.y - a.y) }); body.setColorAt(i, col.setHex(PAINT[Math.floor(rnd() * PAINT.length)])); }
+  scene.add(body, cab, base);
+  const m4 = new THREE.Matrix4(), q4 = new THREE.Quaternion(), p3 = new THREE.Vector3(), s3 = new THREE.Vector3(1, 1, 1), UP = new THREE.Vector3(0, 1, 0);
+  cars.update = dt => {
+    for (let i = 0; i < N; i++) { const c = cars[i]; let dx = c.b.x - c.a.x, dy = c.b.y - c.a.y, len = Math.hypot(dx, dy) || 1;
+      c.t += c.v * dt / len;
+      if (c.t >= 1) { const opts = c.b.nb.filter(n => n !== c.a), nx = opts.length ? opts[Math.floor(rnd() * opts.length)] : c.a; c.a = c.b; c.b = nx; c.t = 0; dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
+      const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * 1.7, y = c.a.y + dy * c.t - ux * 1.7;        // keep to the right-hand lane
+      let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
+      p3.set(x, 0.03, -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); body.setMatrixAt(i, m4); cab.setMatrixAt(i, m4); base.setMatrixAt(i, m4); }
+    body.instanceMatrix.needsUpdate = cab.instanceMatrix.needsUpdate = base.instanceMatrix.needsUpdate = true;
+  };
+  cars.update(0);
+}
 
 // ---------- state ----------
 const SKID = 1.85;
@@ -819,7 +923,7 @@ function hud(dt) {
 let lastT = performance.now(), bt = 0;
 function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; bt += dt;
-  step(dt); updateCamera(dt); hud(dt);
+  step(dt); cars.update(dt); updateCamera(dt); hud(dt);
   const r1 = beacon.getObjectByName('ring'), r2 = beacon.getObjectByName('ring2'); const pu = 1 + Math.sin(bt * 3) * 0.06; r1.scale.setScalar(pu); r2.scale.setScalar(0.72 + (bt * 0.5 % 1) * 0.5); r2.material.opacity = 0.8 - (bt * 0.5 % 1) * 0.8;
   for (const sp of sprites) { const d = sp.position.distanceTo(camera.position), far = sp.userData.big ? 2600 : 1100;
     const o = Math.min(1, Math.max(0, (d - 70) / 110)) * Math.min(1, Math.max(0, (far - d) / 250)); sp.visible = o > 0.02; sp.material.opacity = o; }
@@ -843,7 +947,7 @@ for (const id of ['mission', 'mapwrap', 'gauges', 'street', 'help']) $(id).style
   img.src = './orto.jpg';
 }
 setTarget();
-window.__game = { S, begin, keys, setCam: m => camMode = m, step };
+window.__game = { S, begin, keys, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
 requestAnimationFrame(frame);
 </script>
 </body>
