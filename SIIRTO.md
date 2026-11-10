@@ -13,6 +13,9 @@ rakennusten pohjat ja korkeudet `city.js`:stä (koordinaatit metreinä, x itää
   1. Kauppatorin ympäryskorttelit `bl_tori0..5` (75 rakennusta). Julkisivut Satakunnan Museon inventoinnin kuvausten mukaan
      (Porin ruutukaavakeskusta, modernin rakennusperinnön inventointi 2019, satakunnanmuseo.pori.fi). Rakennusten kohdistus osoitteisiin on päättelyä, värit arvioita.
   2. Autot: `cars.js` (kolme Blender-mallia, vertex-värit) ja `parked.js` (n. 13 400 ilmakuvasta tunnistettua autoa: x*10, y*10, suunta*100, väri).
+  3. BePOP tehty uudelleen (`bl_bepop.js`, maamerkki, `roof = false` eli ilmakuvakatto säilyy): sinertävät elementtijulkisivut, kaareva lasikatto,
+     pyöreä torni ja sisäänkäyntikatos; sijainnit mitattu ilmakuvasta, kuvaus finnisharchitecture.fi/bepop. Keskustan uimahalli (`bl_uima.js`,
+     kortteli 11 `KN`:ssä, rakennus 587): ulkoasu on arvattu ilmakuvasta (lasiseinät länteen ja etelään, vesiliukumäki koilliskulmassa) – pyydä käyttäjältä valokuva.
 - Käyttäjän toiveet: talot muistuttamaan oikeita kohteita, tehdään Blenderissä. Seuraavaksi luontevaa: kävelykadun varsi etelään, muut ruutukaavakorttelit.
 
 ## Ympäristön pystytys (hiekkalaatikko)

@@ -121,6 +121,84 @@ SPEC[1217] = dict(P=dict(wall=M('#e2d3a4'), band=M('#f2ecd8'), sign=SIGNS, gwall
 SPEC[1218] = dict(P=dict(wall=M('#f1eee6'), sign=SIGNS, gframe=DARK, gwall=M('#f1eee6')), layout=lay(10, 'ribbon', gh=4.6, bw=3.4, fh=5.0, P=dict(wh=1.9, sill=1.3, nx=3, pier=0.1)))
 SPEC[1219] = dict(P=dict(wall=M('#e9e7e1'), spandrel=M('#3d4347', 0.4), sign=SIGNS, gwall=M('#2f3235', 0.3), gframe=ALU, rail=M('#a9b4ba', 0.3)), layout=lay(23, 'ribbon', gh=4.2, bw=3.6, fh=3.1, cols=every(2, 'F')))
 
+
+# ---------------------------------------------------------------- BePOP (Nurmela-Raimoranta-Tasa 1989)
+# bluish terrazzo elements, lively changing window rhythm, monumental canopy over the entrance at the end of the pedestrian street,
+# curved glass-roofed gallery through the block, round tower piercing the glass roof (positions measured from the aerial image)
+import numpy as _np
+def _bid(x, y):
+    for i in range(len(B)):
+        pts = poly(i)[0]; ins = False
+        for k in range(len(pts)):
+            a, b = pts[k], pts[(k + 1) % len(pts)]
+            if (a[1] > y) != (b[1] > y) and x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]: ins = not ins
+        if ins: return i
+BEPOP = _bid(58.3, -382.3); UIMA = _bid(567.6, -660.3)
+BP_H = 17.0
+def _ring(cx, cy, r, n): return [(cx + r * math.cos(a * 2 * math.pi / n), cy + r * math.sin(a * 2 * math.pi / n)) for a in range(n)]
+def bepop_extra(Z, pts, h, P):
+    L = lambda x, y, z: (x - Z.cx, y - Z.cy, z)
+    # gallery glass roof: circle fitted through the middle of the glass band in the aerial image
+    Mp = _np.array([(41, -353), (46.4, -376), (67.1, -393.3), (96.4, -401.9)], float)
+    A = _np.c_[2 * Mp, _np.ones(4)]; sol = _np.linalg.lstsq(A, (Mp ** 2).sum(1), rcond=None)[0]; cx, cy = sol[0], sol[1]; R = math.sqrt(sol[2] + cx * cx + cy * cy)
+    a0 = math.atan2(Mp[0][1] - cy, Mp[0][0] - cx); a1 = math.atan2(Mp[-1][1] - cy, Mp[-1][0] - cx)
+    if a1 < a0: a1 += 2 * math.pi
+    if a1 - a0 > math.pi: a0, a1 = a1, a0 + 2 * math.pi
+    N, J, hw, rise = 26, 6, 5.6, 3.6; g1 = M((0.05, 0.36, 0.38), 0.12); g2 = M((0.07, 0.44, 0.46), 0.12); rib = M('#e9eef0')
+    def pt(i, j):
+        a = a0 + (a1 - a0) * i / N; f = math.pi * j / J; r = R + hw * math.cos(f); return L(cx + r * math.cos(a), cy + r * math.sin(a), h + 0.4 + rise * math.sin(f))
+    for i in range(N):
+        for j in range(J): add_solid(Z, [pt(i, j), pt(i + 1, j), pt(i + 1, j + 1), pt(i, j + 1)], g1 if (i + j) % 2 else g2, 0.45)
+    for i in (0, N): add_solid(Z, [pt(i, j) for j in range(J + 1)], rib, 0.4)
+    for j in (0, J):                                                      # kerb under the glass
+        for i in range(N):
+            a, b = pt(i, j), pt(i + 1, j); add_solid(Z, [(a[0], a[1], h), (b[0], b[1], h), (b[0], b[1], h + 0.45), (a[0], a[1], h + 0.45)], rib, 0.3)
+    # round tower through the glass roof, bank offices fan out around it
+    tw = dict(wall=M('#e8edf0'), frame=M('#1f4a4f'), joints=M('#8f9ea8'))
+    ring = _ring(55.0, -375.5, 5.4, 18)
+    for k in range(18): build_wall(Z, ring[k], ring[(k + 1) % 18], h, h + 9.6, dict(bw=1.9, rows=[(3.2, 'punched', 'F')] * 3, cols=lambda c, nb: 'W', P=dict(ww=1.05, wh=1.5, nx=1, sill=0.9), rowP={}), tw, 900 + k, 0)
+    add_solid(Z, [L(x, y, h + 9.6) for x, y in ring], M('#5d6d78', 0.5), 0.3)
+    hat = _ring(55.0, -375.5, 6.5, 18)
+    add_solid(Z, [L(x, y, h + 9.9) for x, y in hat], M('#e9eef0'), 0.3); add_solid(Z, [L(x, y, h + 9.6) for x, y in hat][::-1], M('#e9eef0'), 0.3)
+    for k in range(18):
+        a, b = hat[k], hat[(k + 1) % 18]; add_solid(Z, [L(a[0], a[1], h + 9.6), L(b[0], b[1], h + 9.6), L(b[0], b[1], h + 9.9), L(a[0], a[1], h + 9.9)], M('#e9eef0'), 0.4)
+    small = _ring(36.5, -379.8, 2.7, 12)
+    for k in range(12):
+        a, b = small[k], small[(k + 1) % 12]; add_solid(Z, [L(a[0], a[1], h), L(b[0], b[1], h), L(b[0], b[1], h + 3.4), L(a[0], a[1], h + 3.4)], M('#e8edf0'), 0.4)
+    add_solid(Z, [L(x, y, h + 3.4) for x, y in small], M('#5d6d78', 0.5), 0.3)
+    # monumental entrance canopy at the north-west corner
+    c, s_ = math.cos(GRID), math.sin(GRID); ox, oy = 33.0, -350.5; G = lambda u, v, z: L(ox + u * c - v * s_, oy + u * s_ + v * c, z)
+    wh_ = M('#f2f4f4'); red = M('#c23a2e')
+    def box(u0, v0, u1, v1, z0, z1, m, dn=0.5):
+        add_solid(Z, [G(u0, v0, z1), G(u1, v0, z1), G(u1, v1, z1), G(u0, v1, z1)], m, dn); add_solid(Z, [G(u0, v1, z0), G(u1, v1, z0), G(u1, v0, z0), G(u0, v0, z0)], m, dn)
+        add_solid(Z, [G(u0, v0, z0), G(u1, v0, z0), G(u1, v0, z1), G(u0, v0, z1)], m, dn); add_solid(Z, [G(u1, v0, z0), G(u1, v1, z0), G(u1, v1, z1), G(u1, v0, z1)], m, dn)
+        add_solid(Z, [G(u1, v1, z0), G(u0, v1, z0), G(u0, v1, z1), G(u1, v1, z1)], m, dn); add_solid(Z, [G(u0, v1, z0), G(u0, v0, z0), G(u0, v0, z1), G(u0, v1, z1)], m, dn)
+    box(-7.5, -6.5, 7.5, 6.5, 14.2, 15.1, wh_); box(-7.62, -6.62, 7.62, 6.62, 14.45, 14.8, red, 0.4)
+    for u, v in ((-6.6, 5.6), (-6.6, -0.5), (0.5, 5.6)): box(u - 0.35, v - 0.35, u + 0.35, v + 0.35, 0, 14.2, wh_, 0.6)
+_bpP = dict(wall=M('#a3b8c6'), frame=M('#1f4a4f'), joints=M('#7f95a3'), spandrel=M('#a3b8c6'), gwall=M('#8ea5b4'), plinth=M('#4d5f6b', 0.4), fascia=M('#6f8a9c'), gframe=M('#1f4a4f'), sign=SIGNS, rail=M('#c23a2e'))
+_bpat = 'WWRRRWNWTTWRRWWNWWRRRRWTWNW'
+SPEC[BEPOP] = dict(h=BP_H, P=_bpP, layout=lay(BP_H, 'punched', gh=4.6, bw=3.0, fh=4.1, cols=lambda c, nb: _bpat[(c + nb) % len(_bpat)],
+                   P=dict(colmod={'R': 'ribbon', 'N': 'plain'}, ww=1.5, wh=1.5, nx=2, sill=1.1, wh2=1), rowP={}), cornice=(0.18, 0.55, M('#5f7f93')), extra=[bepop_extra])
+
+# ---------------------------------------------------------------- Keskustan uimahalli (appearance inferred from the aerial image only)
+def uima_extra(Z, pts, h, P):
+    L = lambda x, y, z: (x - Z.cx, y - Z.cy, z)
+    cx, cy, R, r = 594.6, -623.4, 4.2, 0.62; blue = M('#2f86c8', 0.4); N = 44; turns = 2.3; z0, z1 = 10.2, 1.4
+    def ring(i):
+        t = i / N; a = t * turns * 2 * math.pi; ctr = (cx + R * math.cos(a), cy + R * math.sin(a), z0 + (z1 - z0) * t); rad = (math.cos(a), math.sin(a))
+        return [L(ctr[0] + rad[0] * r * math.cos(b * math.pi / 3), ctr[1] + rad[1] * r * math.cos(b * math.pi / 3), ctr[2] + r * math.sin(b * math.pi / 3)) for b in range(6)]
+    rs = [ring(i) for i in range(N + 1)]
+    for i in range(N):
+        for b in range(6): add_solid(Z, [rs[i][b], rs[i + 1][b], rs[i + 1][(b + 1) % 6], rs[i][(b + 1) % 6]], blue, 0.5)
+    tw = _ring(cx, cy, 1.5, 8); g = M('#c9cdcf')
+    for k in range(8):
+        a, b = tw[k], tw[(k + 1) % 8]; add_solid(Z, [L(a[0], a[1], 0), L(b[0], b[1], 0), L(b[0], b[1], 11.5), L(a[0], a[1], 11.5)], g, 0.4)
+    add_solid(Z, [L(x, y, 11.5) for x, y in tw], g, 0.3)
+_uP = dict(wall=M('#e6e8e5'), frame=M('#59636b', 0.5, 0.4), spandrel=M('#e6e8e5'), band=None)
+SPEC[UIMA] = dict(h=11.5, P=_uP, layout=lay(11.5, 'ribbon', bw=4.2, fh=3.8, P=dict(sill=2.3, wh=0.9, nx=3)),
+                  dirs={'W': (lay(11.5, 'ribbon', bw=4.0, fh=5.75, P=dict(sill=0.5, wh=4.6, nx=3, pier=0.25)), 14), 'S': (lay(11.5, 'ribbon', bw=4.0, fh=5.75, P=dict(sill=0.5, wh=4.6, nx=3, pier=0.25)), 14)},
+                  cornice=(0.2, 0.8, M('#4f5a62')), extra=[uima_extra])
+
 ZONES = {
     'tori0': [1725, 1726, 1727, 1728, 1729, 1730, 1731, 1732, 1600, 1621],
     'tori1': [1315, 1490, 1491, 1492, 1493, 1494, 1495, 1496, 1361, 1363, 1367, 1488, 1489, 1362, 1364, 1365, 1366, 1372],
@@ -128,4 +206,6 @@ ZONES = {
     'tori3': [563, 564, 603, 604, 637, 638, 639, 641, 642, 1216],
     'tori4': [602, 1220, 640, 1599, 1723, 1724, 1734, 1217, 1218, 1219, 1192],
     'tori5': [1601, 1623, 1624, 1720, 1721, 1722],
+    'bepop': [BEPOP], 'uima': [UIMA],
 }
+NOROOF = {'bepop'}

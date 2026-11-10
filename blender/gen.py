@@ -111,6 +111,8 @@ def m_punched(mb, col, P):
     else:
         holes.append(mb.window(bw / 2 - ww / 2, sill, bw / 2 + ww / 2, sill + wh, W, nx=P.get('nx', 2), fmat=P.get('frame', WHITE)))
     mb.wall(holes, W)
+    if P.get('joints'):                     # prefabricated panel joints
+        mb.q(0, 0, 0.035, fh, 0.004, P['joints']); mb.q(0, 0, bw, 0.035, 0.004, P['joints'])
     if P.get('band'):                       # storey band under the windows (Laaksovirta)
         mb.prot(0, sill - 0.14, bw, sill - 0.02, 0.07, P['band'])
         if P.get('band2', True): mb.prot(0, sill + wh + 0.02, bw, sill + wh + 0.14, 0.07, P['band'])
@@ -493,5 +495,5 @@ def bake_zone(Z, outdir, samples=24, sun_az=118, sun_el=38):
     glb = os.path.join(outdir, Z.name + '.glb')
     bpy.ops.export_scene.gltf(filepath=glb, export_format='GLB', use_selection=True, export_image_format='JPEG', export_jpeg_quality=88, export_yup=True, export_apply=True)
     b64 = base64.b64encode(open(glb, 'rb').read()).decode()
-    open(os.path.join(outdir, 'bl_' + Z.name + '.js'), 'w').write('export const x = %s, y = %s, roof = true;\nexport default "%s";\n' % (Z.cx, Z.cy, b64))
+    open(os.path.join(outdir, 'bl_' + Z.name + '.js'), 'w').write('export const x = %s, y = %s, roof = %s;\nexport default "%s";\n' % (Z.cx, Z.cy, 'true' if getattr(Z, 'roofflag', True) else 'false', b64))
     print('DONE', Z.name, 'verts', len(ex.data.vertices), 'glb MB', round(os.path.getsize(glb) / 1e6, 2))

@@ -1,7 +1,7 @@
 import asyncio, sys, subprocess, time
 from playwright.async_api import async_playwright
-shots = [  # x, y, alt, yaw(deg, 0 = north), file
-    (215, 60, 38, 0, 'c1.png'), (60, 20, 30, 0, 'c2.png')]
+shots = [
+    (-10, -330, 55, 125, 'b1.png'), (120, -440, 60, -50, 'b2.png'), (520, -700, 45, 45, 'u1.png'), (640, -590, 50, -120, 'u2.png')]
 async def main():
     srv = subprocess.Popen(['python3', '-m', 'http.server', '8765', '--directory', '/home/claude/pori'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); time.sleep(1)
     async with async_playwright() as p:
