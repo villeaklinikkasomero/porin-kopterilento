@@ -157,7 +157,7 @@ const groundMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a });
 // ---------- buildings ----------
 const PAL = [0xe9dcc0, 0xd9c7a2, 0xf0ead9, 0xcdb593, 0xb9805e, 0xa8563f, 0xd8d5cc, 0xbfc4c6, 0xe6cf9a, 0xc7a988, 0x9aa3a8, 0xe3d6c4, 0xb46a4c, 0xdcd0b8];
 const blds = [];           // {pts:[[x,y]..], h, minx,maxx,miny,maxy}
-const LMAT = { kirkko: [293.4, 369.7], raati: [-115.6, 394.1], kaupungintalo: [-57.7, 331.2], teatteri: [-201, 378], taidemuseo: [-94.8, 462.6], kauppahalli: [150, -32.8], vesitorni: [-835, -135], puuvilla: [230, 1000] };
+const LMAT = { kirkko: [293.4, 369.7], raati: [-115.6, 394.1], kaupungintalo: [-57.7, 331.2], teatteri: [-201, 378], taidemuseo: [-94.8, 462.6], kauppahalli: [150, -32.8], vesitorni: [-835, -135], puuvilla: [230, 1000], promenadi: [9.2, -238.7], bepop: [58.3, -382.3], kirjasto: [-258, 114], museo: [-264.8, 455.9], tehdas: [160.2, 763.6], kehraamo: [85, 834], tori: [31, 81], lava: [90, 61], lokki: [-389, 998] };
 const LMB = {};
 const GRID = 40, grid = new Map();
 const gkey = (i, j) => i * 4096 + j;
@@ -291,11 +291,11 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   }
 
   // plinth + windowed walls + cornice + roof for a stone-town building
-  function styled(L, { h, floors, bay, mat, roof, base }) {
+  function styled(L, { h, floors, bay, mat, roof, base, trim = TRIM }) {
     const pts = clean(L.pts);
     add(wallGeo(offset(pts, 0.14), 0, 1.1), STONE); const y0 = base ? base.h : 1.1; if (base) { add(wallGeo(offset(pts, 0.08), 1.1, y0, bay, 1), base.mat); add(wallGeo(offset(pts, 0.3), y0 - 0.35, y0, 0, 1), TRIM); }
     add(wallGeo(pts, y0, h - 0.7, bay, floors), mat);
-    const co = offset(pts, 0.45); add(wallGeo(co, h - 0.7, h), TRIM); add(capGeo(co, h - 0.03), TRIM);
+    const co = offset(pts, 0.45); add(wallGeo(co, h - 0.7, h), trim); add(capGeo(co, h - 0.03), trim);
     if (roof) { add(hipGeo(offset(pts, 0.6), offset(pts, -roof.inset), h, h + roof.rise), lam(roof.color, DS)); L.rec.h = h + roof.rise; }
     else { add(capGeo(pts, h + 0.03, true), roofMat); L.rec.h = h; }
     return pts;
@@ -385,6 +385,81 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     m(new THREE.BoxGeometry(0.16, 2.6, 0.16), lam(0xd9c36a), tx, th + 32.4, 0); m(new THREE.BoxGeometry(1.3, 0.16, 0.16), lam(0xd9c36a), tx, th + 32.8, 0);
     L.rec.h = 22; const tc = toMap(o, tx, 0); block(tc[0], tc[1], 5.5, 60);
   }
+  // modern blocks: glazed ground floor, ribbon windows above
+  function modern(L, { h, floors, wall, stripes = false, cap = 0x3a3f44, base = 4.6 }) {
+    const pts = clean(L.pts);
+    add(wallGeo(pts, 0, base, 6, 1), facade({ wall: '#27313b', trim: '#59666f', glass: '#41586a', arch: false, pil: false, course: false, win: [0.05, 0.12, 0.9, 0.8] }));
+    add(wallGeo(pts, base, h - 0.5, 6.4, floors), facade({ wall, trim: '#6d7880', glass: '#2c3c4a', band: true, pil: false, course: false, rust: stripes }));
+    const co = offset(pts, 0.3); add(wallGeo(co, h - 0.5, h + 0.3), lam(cap)); add(wallGeo(co, base - 0.25, base + 0.15), lam(cap));
+    add(capGeo(pts, h + 0.03, true), roofMat); L.rec.h = h + 0.3;
+  }
+  if (LMB.promenadi) modern(LMB.promenadi, { h: 12.5, floors: 2, wall: '#41464c', stripes: true });
+  if (LMB.bepop) modern(LMB.bepop, { h: 17, floors: 3, wall: '#b4bcb8', cap: 0x4d5a57 });
+  if (LMB.kirjasto) modern(LMB.kirjasto, { h: 10.5, floors: 2, wall: '#bcb4a5', cap: 0x6b6258, base: 3.6 });
+  if (LMB.museo) modern(LMB.museo, { h: 14, floors: 3, wall: '#e5e2d9', cap: 0x8c8a84, base: 4 });
+  // Porin Puuvilla: the old cotton mill, red brick with arched windows
+  { const millM = facade({ wall: '#9c4a38', trim: '#c9a58c', brick: true, arch: true, pil: false, course: false, win: [0.3, 0.2, 0.4, 0.58] }), bt = lam(0x7e3a2c);
+    if (LMB.tehdas) styled(LMB.tehdas, { h: 15, floors: 4, bay: 3.6, mat: millM, trim: bt });
+    if (LMB.kehraamo) styled(LMB.kehraamo, { h: 9.5, floors: 2, bay: 3.6, mat: millM, trim: bt }); }
+
+  // ---------- bridges: railings, trusses and lamp posts on top of the aerial image ----------
+  {
+    const trussTex = (() => { const c = document.createElement('canvas'); c.width = 128; c.height = 128; const x = c.getContext('2d');
+      x.strokeStyle = '#cfd6d8'; x.lineWidth = 9; x.strokeRect(0, 5, 128, 118); x.lineWidth = 6; x.beginPath(); x.moveTo(0, 123); x.lineTo(64, 5); x.lineTo(128, 123); x.moveTo(64, 5); x.lineTo(64, 123); x.stroke();
+      const t = new THREE.CanvasTexture(c); t.wrapS = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; })();
+    const trussM = new THREE.MeshBasicMaterial({ map: trussTex, transparent: true, alphaTest: 0.35, side: THREE.DoubleSide });
+    const concrete = new THREE.MeshLambertMaterial({ color: 0xc9c9c2, side: THREE.DoubleSide }), postM = lam(0x3a4045), lampM = new THREE.MeshBasicMaterial({ color: 0xfff3c4 });
+    // vertical strip from a to b (map coords); hf(t) gives its height along the way
+    function rail(a, b, hf, mat, rep) {
+      const N = 40, p = [], u = [], len = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      for (let i = 0; i < N; i++) { const t0 = i / N, t1 = (i + 1) / N, x0 = a[0] + (b[0] - a[0]) * t0, y0 = a[1] + (b[1] - a[1]) * t0, x1 = a[0] + (b[0] - a[0]) * t1, y1 = a[1] + (b[1] - a[1]) * t1, h0 = hf(t0), h1 = hf(t1), u0 = t0 * len / rep, u1 = t1 * len / rep;
+        p.push(x0, 0.2, -y0, x1, 0.2, -y1, x1, h1, -y1, x0, 0.2, -y0, x1, h1, -y1, x0, h0, -y0); u.push(u0, 0, u1, 0, u1, 1, u0, 0, u1, 1, u0, 1); }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', fattr(p, 3)); g.setAttribute('uv', fattr(u, 2)); g.computeVertexNormals(); add(g, mat);
+    }
+    function lamps(a, b, off, step, h) {
+      const len = Math.hypot(b[0] - a[0], b[1] - a[1]), dx = (b[0] - a[0]) / len, dy = (b[1] - a[1]) / len;
+      for (let d = step / 2; d < len; d += step) for (const s of off) { const x = a[0] + dx * d + dy * s, y = a[1] + dy * d - dx * s;
+        const po = add(new THREE.CylinderGeometry(0.1, 0.14, h, 6), postM); po.position.set(x, h / 2, -y); const l = add(new THREE.SphereGeometry(0.38, 8, 6), lampM); l.position.set(x, h + 0.2, -y); }
+    }
+    const side = (a, b, s) => { const len = Math.hypot(b[0] - a[0], b[1] - a[1]), nx = (b[1] - a[1]) / len, ny = -(b[0] - a[0]) / len; return [[a[0] + nx * s, a[1] + ny * s], [b[0] + nx * s, b[1] + ny * s]]; };
+    for (const br of CITY.br || []) {
+      const P = br.p, a = [P[0], P[1]], b = [P[P.length - 2], P[P.length - 1]], len = Math.hypot(b[0] - a[0], b[1] - a[1]); if (len < 40) continue;
+      if (br.n === 'Porinsilta' && br.k !== 'cycleway') {            // 1926 steel truss bridge with one raised span
+        const south = a[1] < b[1] ? a : b, north = a[1] < b[1] ? b : a;
+        const hf = t => 2.9 + (t > 0.5 && t < 0.78 ? 5.6 * Math.sin((t - 0.5) / 0.28 * Math.PI) : 0);
+        for (const s of [-4.6, 4.6]) { const e = side(south, north, s); rail(e[0], e[1], hf, trussM, 5.5); }
+        for (const t of [0.57, 0.64, 0.71]) { const e0 = side(south, north, -4.6), e1 = side(south, north, 4.6), x0 = e0[0][0] + (e0[1][0] - e0[0][0]) * t, y0 = e0[0][1] + (e0[1][1] - e0[0][1]) * t, x1 = e1[0][0] + (e1[1][0] - e1[0][0]) * t, y1 = e1[0][1] + (e1[1][1] - e1[0][1]) * t;
+          const bm = add(new THREE.BoxGeometry(Math.hypot(x1 - x0, y1 - y0), 0.3, 0.3), lam(0xcfd6d8)); bm.position.set((x0 + x1) / 2, hf(t) - 0.1, -(y0 + y1) / 2); bm.rotation.y = Math.atan2(y1 - y0, x1 - x0); }
+        lamps(south, north, [-5.6, 5.6], 26, 6.5);
+      } else if (br.n === 'Taavi-silta') { for (const s of [-2.2, 2.2]) { const e = side(a, b, s); rail(e[0], e[1], () => 1.5, trussM, 1.5); } lamps(a, b, [2.4], 18, 4.5); }
+      else if (!br.n) { for (const s of [-2, 2]) { const e = side(a, b, s); rail(e[0], e[1], () => 1.4, trussM, 1.4); } }
+    }
+    { const a = [396, 442], b = [396, 652];                              // Linnansilta (1974): concrete girder bridge
+      for (const s of [-11, 11]) { const e = side(a, b, s); rail(e[0], e[1], () => 1.3, concrete, 1); } lamps(a, b, [0], 30, 11); }
+  }
+  // Kauppatori: the 2022 market pavilion (two glazed pavilions under one long curved-edge roof, passage through the middle)
+  if (LMB.tori) {
+    const L = LMB.tori; let o = obb(L.pts);
+    if (o.a < o.b) { let ux = -o.uy, uy = o.ux; if (ux < 0) { ux = -ux; uy = -uy; } o = { ...o, ux, uy, a: o.b, b: o.a }; }
+    const g = frame(o), a = o.a, b = o.b, H = 4.4, gap = 3.6;
+    const m = (geo, mat, x, y, z) => { const q = new THREE.Mesh(geo, mat); q.position.set(x, y, z); g.add(q); return q; };
+    const rr = (w, d, r) => { const sh = new THREE.Shape(), x = -w / 2, y = -d / 2; sh.moveTo(x + r, y); sh.lineTo(x + w - r, y); sh.quadraticCurveTo(x + w, y, x + w, y + r); sh.lineTo(x + w, y + d - r); sh.quadraticCurveTo(x + w, y + d, x + w - r, y + d); sh.lineTo(x + r, y + d); sh.quadraticCurveTo(x, y + d, x, y + d - r); sh.lineTo(x, y + r); sh.quadraticCurveTo(x, y, x + r, y); return sh; };
+    const slab = (w, d, r, t, y, c) => { const ge = new THREE.ExtrudeGeometry(rr(w, d, r), { depth: t, bevelEnabled: false, curveSegments: 8 }); ge.rotateX(-Math.PI / 2); return m(ge, lam(c), 0, y, 0); };
+    slab(2 * a + 7, 2 * b + 8, 6, 0.5, H + 0.25, 0x4b3b30); slab(2 * a + 6, 2 * b + 7, 5.5, 0.12, H + 0.14, 0xc9a06b);
+    const glassM = facade({ wall: '#2a3540', trim: '#1e2429', glass: '#3d566a', arch: false, pil: false, course: false, win: [0.05, 0.05, 0.9, 0.9] }), copper = lam(0x7d4b33);
+    const box = (len, w, x, mat, rep) => { const q = m(new THREE.BoxGeometry(len, H, w), mat, x, H / 2 + 0.1, 0); if (rep) { const uv = q.geometry.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setX(i, uv.getX(i) * rep); } };
+    const full = a - 1.5 - gap, gl = full * 0.45, cu = full - gl, w = 2 * b - 3.5;
+    for (const sgn of [-1, 1]) { box(gl, w, sgn * (gap + gl / 2), glassM, Math.round(gl / 2.4)); box(cu, w - 0.6, sgn * (gap + gl + cu / 2), copper); }
+    L.rec.h = H + 0.8;
+  }
+  // Kohtaamislava Satakieli: open stage canopy on the east side of the square
+  if (LMB.lava) { const L = LMB.lava, pts = clean(L.pts);
+    add(hipGeo(offset(pts, 1.2), offset(pts, -2.5), 4.4, 5.3), lam(0xe9e6de, DS)); add(wallGeo(pts, 0, 0.9), lam(0x4a4f55));
+    for (const q of pts) { const po = add(new THREE.CylinderGeometry(0.16, 0.16, 4.4, 8), lam(0x3a4045)); po.position.set(q[0], 2.2, -q[1]); } L.rec.h = 5.3; }
+  // Lokki-lava, Kirjurinluoto: white tent-roofed bandstand
+  if (LMB.lokki) { const L = LMB.lokki, pts = clean(L.pts);
+    add(hipGeo(offset(pts, 0.8), offset(pts, -8.5), 5, 11), lam(0xf4f2ec, DS)); add(wallGeo(pts, 0, 1.2), lam(0x55595c));
+    for (const q of pts) { const po = add(new THREE.CylinderGeometry(0.22, 0.22, 5, 8), lam(0xdedbd2)); po.position.set(q[0], 2.5, -q[1]); } L.rec.h = 11; }
   // Puuvillan savupiippu (54 m)
   { const ch = add(new THREE.CylinderGeometry(1.5, 2.7, 54, 14), lam(0x9a4f3a)); ch.position.set(165.3, 27, -792.6); block(165.3, 792.6, 3, 54); }
 }
@@ -463,7 +538,7 @@ const TOUR = ['Porin kauppahalli', 'Promenadikeskus', 'BePop', 'Porin vesitorni'
   'Taavi-silta', 'Raatihuone', 'Porinsilta', 'Kauppakeskus Puuvilla', 'Linnansilta', 'Keski-Porin kirkko']
   .map(n => n === 'Kirjurinluoto' ? KIRJURI : find(n)).filter(Boolean).map(d => ({ n: d.n, x: d.x, y: d.y, h: d.h || 0 }));
 const TORI = find('Kauppatori') || { n: 'Kauppatori', x: 64, y: 65 };
-const HOME = { x: TORI.x + 6, y: TORI.y - 4 };
+const HOME = { x: 70, y: 45 };   // open paving south of the stalls, clear of the stage and the pavilion
 {
   const seen = new Set(); var sprites = [];
   const labels = [...TOUR, { n: 'Kauppatori', x: TORI.x, y: TORI.y, h: 0 }, ...CITY.named.filter(d => d.a > 900), ...CITY.places.filter(p => /puisto|aukio|tori/i.test(p.n))];
@@ -482,7 +557,7 @@ const HOME = { x: TORI.x + 6, y: TORI.y - 4 };
   x.fillStyle = 'rgba(30,40,50,.55)'; x.beginPath(); x.arc(128, 128, 122, 0, 7); x.fill();
   x.strokeStyle = '#ffc928'; x.lineWidth = 10; x.beginPath(); x.arc(128, 128, 112, 0, 7); x.stroke();
   x.fillStyle = '#fff'; x.font = '700 150px ui-sans-serif, system-ui, Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('H', 128, 136);
-  const g = new THREE.PlaneGeometry(22, 22); g.rotateX(-Math.PI / 2);
+  const g = new THREE.PlaneGeometry(17, 17); g.rotateX(-Math.PI / 2);
   const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.position.set(HOME.x, 0.25, -HOME.y); m.renderOrder = 1; scene.add(m);
 }
 
