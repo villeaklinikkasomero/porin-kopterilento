@@ -1,0 +1,1 @@
+https://files.pythonhosted.org/packages/85/da/79a86492f2a3b1f08c40cbd5e3db5200f9ad7279cab44e5ba82cf398856a/bpy-5.2.4-cp313-cp313-manylinux_2_28_x86_64.whl

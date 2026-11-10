@@ -1,0 +1,131 @@
+import math
+from gen import *
+
+def lay(h, mod='punched', gh=0, bw=3.3, fh=3.0, cols=None, P=None, rowP=None, top=None, second=None, plain=False):
+    nf = max(1, round((h - gh) / fh)); rows = ([(gh, 'shop', 'G')] if gh else [])
+    for f in range(nf):
+        if second and f == 0: rows.append((fh, second[0], 'S'))
+        elif top and f == nf - 1: rows.append((fh, top[0], 'T'))
+        else: rows.append((fh, mod, 'F'))
+    rp = dict(rowP or {})
+    if second: rp['S'] = second[1]
+    if top: rp['T'] = top[1]
+    return dict(bw=bw, rows=rows, cols=cols or (lambda c, nb: 'W'), P=P or {}, rowP=rp, plain=plain)
+
+every = lambda k, key, off=1, other='W': (lambda c, nb: key if (c % k == off and nb > 2) else other)
+def ends(key, other='W'): return lambda c, nb: key if (c == 0 or c == nb - 1) and nb > 3 else other
+SIGNS = [M('#b3202a'), M('#1f4f9a'), M('#f2c230'), M('#1d7a46'), M('#e8e6df'), M('#222326'), M('#e07a1f')]
+TILE = M('#a8482f', 0.7); TILE2 = M('#8f3f2c', 0.7); COPPER = M('#6fa893', 0.6); SHEET = M('#4a4f54', 0.5); LIGHTSHEET = M('#9fa5a8', 0.5)
+PALW = ['#e3ddcf', '#d6cdb8', '#ece8dd', '#cfc9bd', '#d9d2c2', '#c9c4b8', '#e6dcc4', '#d2d5d3', '#dccfb5', '#bfc2c0']
+
+def auto(i):
+    """building with no reference: plausible 1950-80s Pori block by height"""
+    b = B[i]; h = b['h']; r = (i * 2654435761 >> 7) % 1000 / 1000; wall = M(PALW[i % len(PALW)])
+    P = dict(wall=wall)
+    if h < 6.5: return dict(P=P, layout=lay(h, plain=True))
+    if h < 13:
+        return dict(P=dict(wall=wall, sign=SIGNS), layout=lay(h, 'punched' if r < 0.6 else 'ribbon', gh=0, bw=3.4, fh=3.3, P=dict(ww=1.7)))
+    if r < 0.45:
+        return dict(P=dict(wall=wall, sign=SIGNS), layout=lay(h, 'punched', gh=3.9, bw=3.5, fh=3.0, cols=every(3, 'B'), P=dict(ww=1.6, rail=M('#d9d9d4'))))
+    if r < 0.8:
+        return dict(P=dict(wall=wall, sign=SIGNS, spandrel=M(['#6f7b80', '#8a6f5a', '#55606a', '#b9b3a4'][i % 4])), layout=lay(h, 'ribbon', gh=3.9, bw=3.4, fh=3.0, cols=every(4, 'F', 2)))
+    return dict(P=dict(wall=wall, sign=SIGNS, rail=M('#70777c'), corr=True), layout=lay(h, 'punched', gh=3.9, bw=3.6, fh=3.0, cols=every(2, 'L'), P=dict(colmod={'L': 'loggia'}, ww=1.5)))
+
+SPEC = {}
+# ---------------------------------------------------------------- tori, north side (Pohjoiskauppatori)
+TERASTI = M('#b9b5a7'); TERASTI2 = M('#c6c0ae'); STONE_BK = M('#1b1c1e', 0.25); STONE_LG = M('#b9bbb9', 0.4)
+# 1728  ent. Kansallis-Osake-Pankki, Pohjoiskauppatori 1 (Strömmer 1954): 7 storeys, vertical raster + black glass to the square,
+#       terasti render, black / light grey stone at street level, corner entrance with a rounded canopy
+def kop_canopy(Z, pts, h, P):
+    # canopy over the corner entrance (SE corner of the building, towards the square and Yrjönkatu)
+    c = max(pts, key=lambda p: p[0] * math.cos(GRID) + p[1] * math.sin(GRID) - (-p[0] * math.sin(GRID) + p[1] * math.cos(GRID)))
+    r = 3.2; n = 10; ring = [(c[0] + r * math.cos(a * 2 * math.pi / n) - Z.cx, c[1] + r * math.sin(a * 2 * math.pi / n) - Z.cy) for a in range(n)]
+    cm = M('#3d3a33', 0.4, 0.5)
+    add_solid(Z, [(x, y, 4.15) for x, y in ring], cm, 0.4); add_solid(Z, [(x, y, 3.85) for x, y in ring][::-1], cm, 0.4)
+    for k in range(n):
+        a, b = ring[k], ring[(k + 1) % n]; add_solid(Z, [(a[0], a[1], 3.85), (b[0], b[1], 3.85), (b[0], b[1], 4.15), (a[0], a[1], 4.15)], cm, 0.5)
+_kopP = dict(wall=TERASTI, gwall=STONE_LG, plinth=STONE_BK, fascia=STONE_LG, fasc_h=0.5, gframe=M('#5b4630', 0.4, 0.6), frame=M('#e8e6de'))
+SPEC[1728] = dict(P=_kopP, layout=lay(27, 'punched', gh=4.6, bw=3.1, fh=3.2, P=dict(ww=1.35, wh=1.5)),
+                  dirs={'S': (lay(27, 'vraster', gh=4.6, bw=2.1, fh=3.2, P=dict(frame=M('#d8d6cf'), nx=1)), 8)},
+                  roof=dict(kind='flat', mat=SHEET, pent=(3.0, 2.6)), extra=[kop_canopy])
+# 1726  ent. Helsingin Osakepankki, Pohjoiskauppatori 3 (Gripenberg 1956): 7 storeys, smooth render, flat roof, recessed balconies
+#       with (now dark) corrugated railings, small windows in white frames, glazed street level, black columns at the corner
+_hopP = dict(wall=M('#d8d0bd'), surround=WHITE, rail=M('#3a3f45'), corr=True, linner=M('#e9e4d6'), gwall=M('#2a2b2d', 0.3), plinth=STONE_BK, fascia=M('#d8d0bd'), gframe=ALU, gpier=0.12, fasc_h=0.5)
+SPEC[1726] = dict(P=_hopP, layout=lay(27, 'punched', gh=4.4, bw=3.3, fh=3.2, P=dict(ww=1.3, wh=1.4)),
+                  dirs={'S': (lay(27, 'punched', gh=4.4, bw=3.4, fh=3.2, cols=lambda c, nb: 'L' if c % 3 != 1 else 'W', P=dict(colmod={'L': 'loggia'}, ww=1.3, wh=1.4)), 8)},
+                  roof=dict(kind='flat', mat=SHEET, pent=(3.5, 2.4)))
+SPEC[1725] = dict(P=dict(_hopP), layout=lay(10, 'punched', gh=4.4, bw=3.3, fh=2.8, P=dict(ww=1.6, wh=1.4)))      # two-storey shop wing on Antinkatu
+SPEC[1727] = dict(P=dict(wall=M('#d8d0bd')), layout=lay(4.7, plain=True))                                           # banking hall in the yard
+# 1729/1730  Juseliuksenkulma, Yrjönkatu 7: 3-storey rendered house (Finnilä 1940) + 6-storey block (1961)
+SPEC[1730] = dict(P=dict(wall=M('#e9e3d2'), sign=SIGNS, band=M('#f4f1e8')), layout=lay(10, 'punched', gh=3.6, bw=3.2, fh=3.2, P=dict(ww=1.7, wh=1.4, nx=3)))
+SPEC[1729] = dict(P=dict(wall=M('#ddd9cd'), sign=SIGNS, spandrel=M('#7d8a8f')), layout=lay(23, 'ribbon', gh=3.9, bw=3.3, fh=3.15, cols=every(4, 'F', 1)), roof=dict(kind='flat', mat=SHEET))
+SPEC[1621] = dict(P=dict(wall=M('#d2cdbf'), sign=SIGNS, rail=M('#e4e2da')), layout=lay(20, 'punched', gh=3.9, bw=3.5, fh=3.2, cols=every(3, 'B'), P=dict(ww=1.7)))
+SPEC[1731] = dict(P=dict(wall=M('#c9c6bd'), sign=SIGNS, spandrel=M('#5d666c')), layout=lay(12, 'ribbon', gh=4.0, bw=3.6, fh=4.0, P=dict(wh=1.8, sill=1.1)))
+
+
+# ---------------------------------------------------------------- west of the square, north block (Gallen-Kallelankatu north side ... Valtakatu)
+# 1315/1490  ent. Pohjoismaiden Yhdyspankki, Gallen-Kallelankatu 5 (Malmio 1956): white-concrete raster, blue-grey mosaic, recessed balconies on Antinkatu
+_pyp = dict(wall=M('#efede6'), panel=M('#7b8e9b', 0.5), rail=M('#e9e7e0'), linner=M('#8597a3'), gwall=M('#3a3d40', 0.3), plinth=STONE_BK, fascia=M('#efede6'), gframe=ALU, sign=SIGNS)
+for i in (1315, 1490):
+    SPEC[i] = dict(P=_pyp, layout=lay(27, 'punched', gh=4.4, bw=3.2, fh=3.2, P=dict(ww=1.5)),
+                   dirs={'E': (lay(27, 'raster', gh=4.4, bw=3.0, fh=3.2, cols=every(3, 'L', 1)), 7), 'S': (lay(27, 'raster', gh=4.4, bw=3.0, fh=3.75), 7), 'N': (lay(27, 'raster', gh=4.4, bw=3.0, fh=3.2), 7)},
+                   roof=dict(kind='flat', mat=SHEET))
+# 1494  Hotelli Vaakuna, Gallen-Kallelankatu 7 (SOK / Blomstedt 1939): 5 storeys, render, window band on the first floor, recessed balconies at both ends
+SPEC[1494] = dict(P=dict(wall=M('#eee8d8'), rail=M('#e2dccb'), gwall=M('#d9d3c4'), plinth=M('#4a4a48'), fascia=M('#eee8d8'), sign=[M('#1d7a46'), M('#e8e6df')], canopy=1.2, canopy_mat=M('#3c4a41')),
+                  layout=lay(20, 'punched', gh=4.2, bw=3.1, fh=3.15, second=('ribbon', dict(pier=0.0, wh=1.6, nx=3)), cols=ends('L'), P=dict(colmod={'L': 'loggia'}, ww=1.5, wh=1.4, nx=2)))
+# 1366  ent. Porin Seudun Osuuskassa, Gallen-Kallelankatu 9 (Blomstedt & Stenbäck 1952): 6 storeys, render, new wider balconies
+SPEC[1366] = dict(P=dict(wall=M('#e4dac3'), rail=M('#d7d9d6'), sign=SIGNS), layout=lay(23, 'punched', gh=4.0, bw=3.3, fh=3.1, cols=every(3, 'B'), P=dict(ww=1.5)), roof=dict(kind='hip', inset=3.2, rise=1.6, mat=SHEET))
+SPEC[1364] = dict(P=dict(wall=M('#dcd8cc'), spandrel=M('#8b8f8c'), sign=SIGNS), layout=lay(27, 'ribbon', gh=3.9, bw=3.4, fh=3.2, cols=every(3, 'F', 1)))   # Pohjoispuisto 4 (1962)
+# 1361  Sataraudan talo / Vidbominkulma, Valtakatu 10 (Laaksovirta 1940): 5 storeys, render, storey bands along the window rows, bay windows at the corners
+SPEC[1361] = dict(P=dict(wall=M('#e3d6b4'), band=M('#f3eedf'), sign=SIGNS, ewall=M('#f0ead9'), gwall=M('#d2c7a8')),
+                  layout=lay(23, 'punched', gh=4.2, bw=3.2, fh=3.7, cols=ends('E'), P=dict(colmod={'E': 'erker'}, ww=2.0, wh=1.5, nx=3)), roof=dict(kind='hip', inset=3.5, rise=1.4, mat=SHEET))
+SPEC[1367] = dict(P=dict(wall=M('#d8d4c8'), sign=SIGNS, rail=M('#6f777c'), corr=True), layout=lay(23, 'punched', gh=4.0, bw=3.5, fh=3.15, cols=every(2, 'L'), P=dict(colmod={'L': 'loggia'}, ww=1.6)))   # 1961 part (Valli)
+
+# ---------------------------------------------------------------- west of the square, south block (Antinkatu 13-15)
+# 1497/1314  Liikekulma, Antinkatu 13 (Ström & Tuomisto 1960): terasti, window bands with dark panels, french balconies; single-storey shops between
+_lk = dict(wall=M('#cfcbbd'), sidepanel=0.9, sidemat=M('#3b4147', 0.4), rail=M('#3b4147'), sign=SIGNS, gwall=M('#3f4245', 0.3), fascia=M('#cfcbbd'), gframe=ALU)
+SPEC[1497] = dict(P=_lk, layout=lay(23, 'ribbon', gh=4.0, bw=3.6, fh=2.7, cols=every(4, 'F', 2), P=dict(wh=1.35, sill=0.9)), roof=dict(kind='flat', mat=SHEET, pent=(3.0, 2.2)))
+SPEC[1314] = dict(P=_lk, layout=lay(23, 'ribbon', gh=4.0, bw=3.6, fh=3.15, cols=every(3, 'F', 1), P=dict(wh=1.4)))
+for i in (1313, 1498): SPEC[i] = dict(P=dict(wall=M('#cfcbbd'), sign=SIGNS, gwall=M('#cfcbbd'), gframe=ALU), layout=dict(bw=4.0, rows=[(4.7, 'shop', 'G')], cols=lambda c, nb: 'W', P={}, rowP={}))
+# 161  Kehityksen talo, Antinkatu 15 a (Laaksovirta 1939): 5 storeys, render, storey bands, bay window at the north end, shops
+SPEC[161] = dict(P=dict(wall=M('#e7dfc8'), band=M('#f5f1e6'), sign=SIGNS, ewall=M('#f1ecdd')),
+                 layout=lay(20, 'punched', gh=4.0, bw=3.1, fh=3.2, P=dict(ww=1.8, wh=1.45, nx=3)),
+                 dirs={'E': lay(20, 'punched', gh=4.0, bw=3.1, fh=3.2, cols=lambda c, nb: 'E' if c == nb - 1 else ('S' if c == nb // 2 else 'W'), P=dict(colmod={'E': 'erker'}, ww=1.8, wh=1.45, nx=3))},
+                 roof=dict(kind='hip', inset=3.0, rise=1.2, mat=SHEET))
+# 163  ent. Porin Säästöpankki, Antinkatu 15 b (Strömmer 1935/1953): render, granite at the entrance, copper-clad balconies
+SPEC[163] = dict(P=dict(wall=M('#d9d2c0'), rail=COPPER, slab=COPPER, gwall=M('#8a7f78', 0.4), plinth=M('#5e5552', 0.4), sign=SIGNS),
+                 layout=lay(23, 'punched', gh=4.4, bw=3.3, fh=3.1, cols=every(4, 'B', 1), P=dict(ww=1.5, wh=1.5)), roof=dict(kind='hip', inset=3.0, rise=1.3, mat=COPPER))
+
+# ---------------------------------------------------------------- south of the square (Eteläkauppatori ... Itäpuisto)
+# 604  Torilinna, Eteläkauppatori 4 (Tähtinen 1936, raised 1987): plain rendered functionalism, three lower storeys on top
+_tl = dict(wall=M('#f0ece2'), sign=SIGNS, gframe=M('#6b4a2c', 0.5), gwall=M('#e4dfd3'))
+SPEC[604] = dict(P=_tl, layout=dict(bw=3.2, rows=[(4.0, 'shop', 'G')] + [(3.4, 'punched', 'F')] * 3 + [(2.9, 'punched', 'T')] * 3, cols=lambda c, nb: 'W', P=dict(ww=1.7, wh=1.5, nx=3),
+                                    rowP={'T': dict(ww=1.5, wh=1.2, nx=2, sill=0.9, wall=M('#e6e2d8'))}), roof=dict(kind='flat', mat=SHEET))
+# 603  Eteläkauppatori 2 (1961)
+SPEC[603] = dict(P=dict(wall=M('#e2dfd6'), spandrel=M('#5f6f7a', 0.5), sign=SIGNS, gwall=M('#35383b', 0.3), fascia=M('#e2dfd6'), gframe=ALU), layout=lay(30, 'ribbon', gh=4.2, bw=3.3, fh=3.2, cols=every(4, 'F', 1)), roof=dict(kind='flat', mat=SHEET, pent=(3.0, 2.4)))
+# 564  Kansankulma, Antinkatu 14 (Karhulahti 1954): terasti, band of large windows on the first floor, small two-pane windows above, stone-clad street level
+SPEC[564] = dict(P=dict(wall=TERASTI2, gwall=M('#9c9a92', 0.4), plinth=M('#6d6b66', 0.4), sign=SIGNS),
+                 layout=lay(23, 'punched', gh=4.0, bw=2.9, fh=3.15, second=('ribbon', dict(wh=1.7, sill=0.8, nx=3, pier=0.15)), P=dict(ww=1.25, wh=1.35, nx=2)), roof=dict(kind='hip', inset=3.2, rise=1.5, mat=SHEET))
+# 637  As.oy Itäpuisto 5 (Valli 1955): terasti, bay windows with brown clinker, hipped tile roof, red mosaic at street level
+SPEC[637] = dict(P=dict(wall=TERASTI2, epanel=M('#6e4a35', 0.5), gwall=M('#9a3b30', 0.4), plinth=M('#5a2a25', 0.4), sign=SIGNS, fascia=TERASTI2),
+                 layout=lay(23, 'punched', gh=3.9, bw=3.3, fh=3.15, cols=every(3, 'E', 1), P=dict(colmod={'E': 'erker'}, ww=1.5, wh=1.4, edepth=0.6)), roof=dict(kind='hip', inset=4.2, rise=2.6, mat=TILE))
+SPEC[641] = dict(P=dict(wall=M('#e9dfc4'), band=M('#f4efe2'), sign=SIGNS), layout=lay(10, 'punched', gh=3.8, bw=3.0, fh=3.1, P=dict(ww=1.3, wh=1.6)))   # 1928 two-storey house
+
+# ---------------------------------------------------------------- east of the square (Yrjönkatu east side)
+# 602  Yrjönkymppi, ent. Porin Suomalainen Säästöpankki, Yrjönkatu 10 (Schreck 1954-55): 7 storeys, terasti, steep tiled saddle roof
+SPEC[602] = dict(P=dict(wall=M('#cfc7b2'), rail=M('#b9b5a8'), gwall=M('#8f8b80', 0.4), plinth=STONE_BK, sign=SIGNS, fasc_h=1.0),
+                 layout=lay(27, 'punched', gh=5.2, bw=3.2, fh=3.1, cols=every(4, 'B', 2), P=dict(ww=1.45, wh=1.45)), roof=dict(kind='hip', inset=5.6, rise=6.5, mat=TILE, ov=0.5))
+SPEC[1599] = dict(P=dict(wall=M('#dedad0'), spandrel=M('#6a7479', 0.5), sign=SIGNS, gwall=M('#3a3d40', 0.3), fascia=M('#dedad0'), gframe=ALU), layout=lay(30, 'ribbon', gh=4.2, bw=3.4, fh=3.2, cols=every(3, 'F', 1)))
+# Hallitalo (Viljanen): 1217 Hellmanin pilvenpiirtäjä 1927 (classicist, 5 storeys), 1218 funkis wing 1938 (shop windows, window band above)
+SPEC[1217] = dict(P=dict(wall=M('#e2d3a4'), band=M('#f2ecd8'), sign=SIGNS, gwall=M('#d5c697')), layout=lay(20, 'punched', gh=4.2, bw=2.8, fh=3.15, P=dict(ww=1.15, wh=1.7, nx=2, band2=False)), roof=dict(kind='hip', inset=3.5, rise=2.2, mat=SHEET), cornice=(0.35, 0.4, M('#f2ecd8')))
+SPEC[1218] = dict(P=dict(wall=M('#f1eee6'), sign=SIGNS, gframe=DARK, gwall=M('#f1eee6')), layout=lay(10, 'ribbon', gh=4.6, bw=3.4, fh=5.0, P=dict(wh=1.9, sill=1.3, nx=3, pier=0.1)))
+SPEC[1219] = dict(P=dict(wall=M('#e9e7e1'), spandrel=M('#3d4347', 0.4), sign=SIGNS, gwall=M('#2f3235', 0.3), gframe=ALU, rail=M('#a9b4ba', 0.3)), layout=lay(23, 'ribbon', gh=4.2, bw=3.6, fh=3.1, cols=every(2, 'F')))
+
+ZONES = {
+    'tori0': [1725, 1726, 1727, 1728, 1729, 1730, 1731, 1732, 1600, 1621],
+    'tori1': [1315, 1490, 1491, 1492, 1493, 1494, 1495, 1496, 1361, 1363, 1367, 1488, 1489, 1362, 1364, 1365, 1366, 1372],
+    'tori2': [161, 162, 163, 207, 208, 561, 562, 1313, 1314, 1344, 1345, 1346, 1347, 1348, 1349, 1497, 1498, 1499, 1312, 1259],
+    'tori3': [563, 564, 603, 604, 637, 638, 639, 641, 642, 1216],
+    'tori4': [602, 1220, 640, 1599, 1723, 1724, 1734, 1217, 1218, 1219, 1192],
+    'tori5': [1601, 1623, 1624, 1720, 1721, 1722],
+}
