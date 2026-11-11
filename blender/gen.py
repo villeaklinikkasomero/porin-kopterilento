@@ -38,9 +38,14 @@ def MT(col, kind, rough=0.85, metal=0.0):
     """material key with a surface pattern: kind in brick / plaster / concrete / wood / None"""
     k = M(col, rough, metal); DETAIL[k] = kind; return k
 
+SURF = os.environ.get('PORI_SURF', '')                    # 'plaster': every wall gets the same even render (city run)
+SURF_K = float(os.environ.get('PORI_SURF_STRENGTH', '0.3'))
 def detail_kind(k):
-    if k in DETAIL: return DETAIL[k]
     r, g, b, rough, metal = k
+    if SURF:
+        if metal > 0.2 or rough < 0.6: return None
+        return SURF if 0.03 < 0.3 * r + 0.59 * g + 0.11 * b else None
+    if k in DETAIL: return DETAIL[k]
     if metal > 0.2 or rough < 0.6: return None                      # glass, metal, polished stone
     mx, mn = max(r, g, b), min(r, g, b); lum = 0.3 * r + 0.59 * g + 0.11 * b
     if r > 2.3 * g and r > 0.06 and lum < 0.19: return 'brick'          # dark red-brown walls read as brick (salmon and pink render stays render)
@@ -57,6 +62,7 @@ def bmat(k):
         kind = detail_kind(k) if TEXDIR else None
         if kind:
             fn, size, strength, mean = TEXF[kind]
+            if SURF: strength = SURF_K
             if fn not in _texcache: _texcache[fn] = bpy.data.images.load(os.path.join(TEXDIR, fn))
             tc = nt.nodes.new('ShaderNodeTexCoord'); mp = nt.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (1 / size, 1 / size, 1 / size)
             tx = nt.nodes.new('ShaderNodeTexImage'); tx.image = _texcache[fn]; tx.projection = 'BOX'; tx.projection_blend = 0.25
@@ -610,6 +616,27 @@ def mkobj(name, faces, uvs=None, mats=None):
         me.polygons.foreach_set('material_index', [idx[m] for m in mats])
     return ob
 
+def recompress_glb(data, q):
+    """Re-encode the embedded JPEGs at quality q (Blender writes its bake at ~90 whatever the export option says)."""
+    import struct, json, io
+    try: from PIL import Image
+    except ImportError: return data
+    jl = struct.unpack('<I', data[12:16])[0]; j = json.loads(data[20:20 + jl]); b0 = 20 + jl + 8
+    bl = struct.unpack('<I', data[20 + jl:24 + jl])[0]; binc = data[b0:b0 + bl]
+    imgv = {im['bufferView'] for im in j.get('images', []) if 'bufferView' in im}
+    out = bytearray(); views = j['bufferViews']
+    for k, v in enumerate(views):
+        o = v.get('byteOffset', 0); d = binc[o:o + v['byteLength']]
+        if k in imgv:
+            bio = io.BytesIO(); Image.open(io.BytesIO(d)).convert('RGB').save(bio, 'JPEG', quality=q, optimize=True, progressive=True); d = bio.getvalue()
+        while len(out) % 4: out.append(0)
+        v['byteOffset'] = len(out); v['byteLength'] = len(d); out += d
+    while len(out) % 4: out.append(0)
+    j['buffers'][0]['byteLength'] = len(out)
+    js = json.dumps(j, separators=(',', ':')).encode()
+    while len(js) % 4: js += b' '
+    return struct.pack('<III', 0x46546C67, 2, 12 + 8 + len(js) + 8 + len(out)) + struct.pack('<I', len(js)) + b'JSON' + js + struct.pack('<I', len(out)) + b'BIN\x00' + bytes(out)
+
 def bake_zone(Z, outdir, samples=24, sun_az=118, sun_el=38):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     for k in list(_mats): _mats[k] = None
@@ -664,7 +691,9 @@ def bake_zone(Z, outdir, samples=24, sun_az=118, sun_el=38):
     bpy.ops.object.select_all(action='DESELECT'); ex.select_set(True); bpy.context.view_layer.objects.active = ex
     bpy.ops.object.shade_flat()
     glb = os.path.join(outdir, Z.name + '.glb')
-    bpy.ops.export_scene.gltf(filepath=glb, export_format='GLB', use_selection=True, export_image_format='JPEG', export_jpeg_quality=88, export_yup=True, export_apply=True)
-    b64 = base64.b64encode(open(glb, 'rb').read()).decode()
+    bpy.ops.export_scene.gltf(filepath=glb, export_format='GLB', use_selection=True, export_image_format='JPEG', export_jpeg_quality=int(os.environ.get('PORI_JPEGQ', '88')), export_yup=True, export_apply=True)
+    data = open(glb, 'rb').read()
+    if os.environ.get('PORI_JPEGQ'): data = recompress_glb(data, int(os.environ['PORI_JPEGQ']))
+    b64 = base64.b64encode(data).decode()
     open(os.path.join(outdir, 'bl_' + Z.name + '.js'), 'w').write('export const x = %s, y = %s, roof = %s;\nexport default "%s";\n' % (Z.cx, Z.cy, 'true' if getattr(Z, 'roofflag', True) else 'false', b64))
     print('DONE', Z.name, 'verts', len(ex.data.vertices), 'glb MB', round(os.path.getsize(glb) / 1e6, 2))

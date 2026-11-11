@@ -79,7 +79,8 @@ def city_zone(name: str, samples: int = 64, day: str = ''):
     """Bake one automatically split city block (blender/city.py) on its own GPU; up to 10 run side by side."""
     from porikit import jobs
     t0 = time.time(); jobs.layout()
-    env = dict(os.environ, PORI_ATLAS='4096', PORI_PHS='/repo/phs.json')
+    # 2048 atlas + JPEG 75 keeps a block around 1 MB (4096 made the game crawl); one even render on all walls
+    env = dict(os.environ, PORI_ATLAS='2048', PORI_JPEGQ='75', PORI_SURF='plaster', PORI_SURF_STRENGTH='0.18', PORI_PHS='/repo/phs.json')
     r = subprocess.run(['python3', '/home/claude/city.py', name, str(samples)], cwd='/home/claude', env=env, capture_output=True, text=True)
     src = Path('/home/claude/out') / f'bl_{name}.js'; ok = r.returncode == 0 and src.exists()
     if ok:

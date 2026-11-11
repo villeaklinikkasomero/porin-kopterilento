@@ -911,7 +911,7 @@ function streamUpdate(x, y) {
         const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
         new GLTFLoader().parse(buf.buffer, '', gl => {
           if (e.st !== 1) return;
-          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { shrinkMap(map, 1024); map.anisotropy = 4; } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
+          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { shrinkMap(map, 2048); map.anisotropy = 4; } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
           const gr = new THREE.Group(); gr.position.set(ax, 0, -ay); gr.add(gl.scene); scene.add(gr); e.me.visible = false; e.gr = gr; e.st = 2; }, () => { e.st = 0; });
       }).catch(() => { e.st = 3; });   // not baked yet: keep the plain walls
     } else if (d > 850 && e.st === 2) {
