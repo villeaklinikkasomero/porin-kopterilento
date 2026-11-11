@@ -27,11 +27,45 @@ CURT = M((0.55, 0.52, 0.46), 0.6)
 BLACKGL = M((0.012, 0.014, 0.018), 0.06)
 WHITE = M('#f1efe8'); DARK = M('#2c2e31'); ALU = M('#9aa0a3', 0.5, 0.6)
 
+# ---------------------------------------------------------------- CC0 surface detail (Poly Haven, CC0): brick, render, concrete, wood cladding
+# The building's own colour stays; the photo texture only adds its pattern (mortar joints, render grain, board edges), projected on all
+# faces from the object coordinates (box mapping), so it needs no UVs.  Folder: blender/tex (or PORI_TEX).
+TEXDIR = next((d for d in (os.environ.get('PORI_TEX', ''), '/home/claude/tex', '/repo/blender/tex', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tex')) if d and os.path.isdir(d)), None)
+TEXF = dict(brick=('red_brick_03_diff_2k.jpg', 2.2, 0.9, (0.157, 0.102, 0.085)), plaster=('plastered_wall_02_diff_2k.jpg', 2.5, 0.55, (0.494, 0.44, 0.369)),
+            concrete=('concrete_wall_008_diff_2k.jpg', 3.0, 0.6, (0.266, 0.237, 0.162)), wood=('exterior_wall_cladding_diff_2k.jpg', 2.0, 0.7, (0.199, 0.175, 0.147)))
+DETAIL = {}
+def MT(col, kind, rough=0.85, metal=0.0):
+    """material key with a surface pattern: kind in brick / plaster / concrete / wood / None"""
+    k = M(col, rough, metal); DETAIL[k] = kind; return k
+
+def detail_kind(k):
+    if k in DETAIL: return DETAIL[k]
+    r, g, b, rough, metal = k
+    if metal > 0.2 or rough < 0.6: return None                      # glass, metal, polished stone
+    mx, mn = max(r, g, b), min(r, g, b); lum = 0.3 * r + 0.59 * g + 0.11 * b
+    if r > 2.3 * g and r > 0.06 and lum < 0.19: return 'brick'          # dark red-brown walls read as brick (salmon and pink render stays render)
+    if mx - mn < 0.035 * max(mx, 0.05) * 10 and 0.08 < lum < 0.45: return 'concrete'   # unsaturated mid greys: precast concrete
+    if lum > 0.12: return 'plaster'
+    return None
+
+_texcache = {}
 def bmat(k):
     if _mats[k] is None:
         m = bpy.data.materials.new('m%d' % len(bpy.data.materials)); m.use_nodes = True
-        b = m.node_tree.nodes['Principled BSDF']
+        nt = m.node_tree; b = nt.nodes['Principled BSDF']
         b.inputs['Base Color'].default_value = (k[0], k[1], k[2], 1); b.inputs['Roughness'].default_value = k[3]; b.inputs['Metallic'].default_value = k[4]
+        kind = detail_kind(k) if TEXDIR else None
+        if kind:
+            fn, size, strength, mean = TEXF[kind]
+            if fn not in _texcache: _texcache[fn] = bpy.data.images.load(os.path.join(TEXDIR, fn))
+            tc = nt.nodes.new('ShaderNodeTexCoord'); mp = nt.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (1 / size, 1 / size, 1 / size)
+            tx = nt.nodes.new('ShaderNodeTexImage'); tx.image = _texcache[fn]; tx.projection = 'BOX'; tx.projection_blend = 0.25
+            nt.links.new(tc.outputs['Object'], mp.inputs['Vector']); nt.links.new(mp.outputs['Vector'], tx.inputs['Vector'])
+            sc = nt.nodes.new('ShaderNodeVectorMath'); sc.operation = 'MULTIPLY'; sc.inputs[1].default_value = tuple(1 / max(c, 1e-3) for c in mean)
+            nt.links.new(tx.outputs['Color'], sc.inputs[0])
+            mx = nt.nodes.new('ShaderNodeMix'); mx.data_type = 'RGBA'; mx.blend_type = 'MULTIPLY'; mx.inputs['Factor'].default_value = strength
+            mx.inputs[6].default_value = (k[0], k[1], k[2], 1); nt.links.new(sc.outputs['Vector'], mx.inputs[7])
+            nt.links.new(mx.outputs[2], b.inputs['Base Color'])
         _mats[k] = m
     return _mats[k]
 
@@ -586,6 +620,10 @@ def bake_zone(Z, outdir, samples=24, sun_az=118, sun_el=38):
     except Exception: pass
     w = bpy.data.worlds.new('w'); sc.world = w; w.use_nodes = True
     bg = w.node_tree.nodes['Background']; bg.inputs[0].default_value = (0.62, 0.76, 1.0, 1); bg.inputs[1].default_value = 0.62
+    hdr = os.path.join(TEXDIR, 'kloofendal_48d_partly_cloudy_puresky_2k.hdr') if TEXDIR else None
+    if hdr and os.path.exists(hdr):                                               # real sky light (Poly Haven CC0) instead of one flat blue
+        env = w.node_tree.nodes.new('ShaderNodeTexEnvironment'); env.image = bpy.data.images.load(hdr)
+        w.node_tree.links.new(env.outputs['Color'], bg.inputs[0]); bg.inputs[1].default_value = float(os.environ.get('PORI_SKY', '0.55'))
     sun = bpy.data.lights.new('sun', 'SUN'); sun.energy = 1.55; sun.angle = math.radians(3); sun.color = (1.0, 0.95, 0.86)
     so = bpy.data.objects.new('sun', sun); sc.collection.objects.link(so)
     az, el = math.radians(sun_az), math.radians(sun_el)

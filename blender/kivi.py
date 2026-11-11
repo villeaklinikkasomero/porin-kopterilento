@@ -84,7 +84,7 @@ SPECK[1513] = classic_spec(1513, wall='#9b4b36', trim='#b9654c', rust=False, gar
 # balconies, dark pitched metal roofs. Wall colours are estimates.
 KARHU = {1450: ('#7a4535', 'brick'), 1451: ('#d9d6cf', 'render'), 1511: ('#e8e6e0', 'render'), 1512: ('#8a5a44', 'brick'), 1515: ('#cfc6b6', 'render')}
 for i, (wc, kind) in KARHU.items():
-    W_ = M(wc, 0.8); rise = 3.2
+    W_ = MT(wc, 'brick' if kind == 'brick' else 'plaster', 0.8); rise = 3.2
     SPECK[i] = dict(h=B[i]['h'] - rise, P=dict(wall=W_, sign=SIGNS, gwall=M('#3b3f44', 0.4), fascia=M('#2d3135'), frame=M('#2f3337', 0.5), rail=M('#c9ced2', 0.3, 0.5), slab=M('#e9e9e6')),
                     layout=lay(B[i]['h'] - rise, 'punched', gh=4.4, bw=3.6, fh=3.05, cols=lambda c, nb: 'B' if c % 3 == 1 else 'W', P=dict(ww=2.1, wh=1.9, sill=0.55, nx=2)),
                     roof=dict(kind='gable', rise=rise, mat=M('#34393d', 0.5, 0.3), ov=0.35), footprint=True)

@@ -60,10 +60,10 @@ def split(houses=False):
 HOUSEC = ['#e8d58a', '#f1efe8', '#9b3b2c', '#cfd8c4', '#b9c7cf', '#e3c9a0', '#d6b35e', '#f1efe8', '#a8463a', '#e9e2cf', '#c7cbbf', '#e8d58a']
 def house_spec(i):
     import kivi
-    from gen import M, hexlin, offset
+    from gen import M, MT, hexlin, offset
     b = kivi.B[i]; r = kivi.h01(i, 3); shed = b.get('k') == 2
     wall = '#8f3a2c' if shed and r < 0.7 else HOUSEC[int(kivi.h01(i, 5) * len(HOUSEC))]
-    W = M(wall, 0.9); dark = M(tuple(c * 0.62 for c in hexlin(wall)), 0.9)
+    W = MT(wall, 'wood', 0.9); dark = M(tuple(c * 0.62 for c in hexlin(wall)), 0.9)
     h = b['h']; nf = 1 if h < 5.2 else 2
     rowP = {'G': dict(plinth_h=0.45, ww=1.15, wh=1.35, nx=2), 'U': dict(ww=1.0, wh=1.15, nx=2, frieze=True)}
     def cols(c, nb):
