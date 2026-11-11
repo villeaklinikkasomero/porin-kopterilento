@@ -48,6 +48,24 @@
   #go:focus-visible { outline:3px solid #fff; outline-offset:2px; }
   #src { font-size:11.5px !important; margin-top:14px !important; }
   #src a { color:var(--ink); }
+  #daily { margin:14px 0 4px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.04); }
+  #daily .dh { font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
+  #daily .dh b { color:var(--accent); letter-spacing:0; }
+  #droute { font-size:13.5px; line-height:1.45; margin:6px 0 10px; color:var(--ink); }
+  #nickrow { display:flex; gap:10px; align-items:center; font-size:14px; color:var(--dim); flex-wrap:wrap; }
+  #nick { pointer-events:auto; font:700 17px ui-monospace, Menlo, Consolas, monospace; letter-spacing:.18em; width:7.2em; padding:6px 8px; text-transform:uppercase;
+    color:var(--ink); background:rgba(0,0,0,.35); border:1px solid var(--line); border-radius:6px; }
+  #nick:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .top { margin:10px 0 0; padding:0; list-style:none; font-variant-numeric:tabular-nums; font-size:14px; }
+  .top li { display:flex; gap:10px; padding:3px 0; border-bottom:1px solid rgba(255,255,255,.06); }
+  .top li .r { width:1.6em; color:var(--dim); text-align:right; }
+  .top li .n { flex:1; font-family:ui-monospace, Menlo, Consolas, monospace; letter-spacing:.12em; }
+  .top li .t { font-weight:700; }
+  .top li.me { color:var(--accent); }
+  .topnote { font-size:12.5px; color:var(--dim); margin-top:6px; min-height:1em; }
+  #board { left:50%; top:50%; transform:translate(-50%,-50%); width:min(340px,86vw); padding:16px 18px; display:none; }
+  #board h2 { margin:0 0 2px; font-size:19px; }
+  #board .sub { font-size:12.5px; color:var(--dim); }
   /* touch */
   #touch { display:none; }
   .touch #touch { display:block; }
@@ -82,11 +100,12 @@
 </div>
 <div id="street" class="hud"><div class="s" id="sn"></div><div class="p" id="sp"></div></div>
 <div id="toast" class="hud panel"></div>
+<div id="board" class="hud panel"><h2>Päivän top-10</h2><div class="sub" id="bsub"></div><ol class="top" id="top1"></ol><div class="topnote" id="note1"></div></div>
 <div id="help" class="hud panel">
   <kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
-  <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi kierros
+  <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
 </div>
-<div id="credit">Ilmakuva: Porin kaupunki · Kartta-aineisto © OpenStreetMapin tekijät · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0), ilmakuva © Porin kaupunki</div>
+<div id="credit">Ilmakuva: Porin kaupunki · Kartta-aineisto © OpenStreetMapin tekijät · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0), ilmakuva ja valokuvat © Porin kaupunki</div>
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
@@ -96,13 +115,19 @@
 <div id="start">
   <div id="card" class="panel">
     <h1>Porin <span>kopterilento</span></h1>
-    <p>Lennä helikopterilla Porin keskustan katujen yllä ja välissä. Nouse Kauppatorilta, kierrä maamerkit valopylväiden kautta ja laskeudu takaisin torille.</p>
+    <p>Lennä helikopterilla Porin keskustan katujen yllä ja välissä. Joka päivä arvotaan uusi kierros: nouse Kauppatorilta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja laskeudu takaisin torille. Nopeimmat ajat pääsevät päivän top-10:een.</p>
     <div id="keys">
       <div><kbd>W</kbd> <kbd>S</kbd> / <kbd>↑</kbd> <kbd>↓</kbd></div><div>eteen ja taakse</div>
       <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>käännä</div>
       <div><kbd>Q</kbd> <kbd>E</kbd></div><div>liu'u sivulle</div>
       <div><kbd>Väli</kbd> / <kbd>Shift</kbd></div><div>ylös ja alas</div>
-      <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd></div><div>kamera, ääni, uusi kierros</div>
+      <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
+    </div>
+    <div id="daily">
+      <div class="dh">Päivän kierros <b id="dday"></b></div>
+      <div id="droute"></div>
+      <div id="nickrow"><label for="nick">Nimimerkki</label><input id="nick" maxlength="5" autocomplete="off" spellcheck="false" placeholder="5 merkkiä"><span style="font-size:12.5px">Älä käytä oikeaa nimeäsi.</span></div>
+      <ol class="top" id="top0"></ol><div class="topnote" id="note0"></div>
     </div>
     <button id="go" disabled>Ladataan ilmakuvaa…</button>
     <p id="src">Rakennukset, kadut ja puut: © OpenStreetMapin tekijät (ODbL). Ilmakuva: Porin kaupungin avoin WMS-rajapinta. Rakennusten korkeudet ovat osin arvioita.</p>
@@ -298,8 +323,12 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     if (best && best.a < best.b) best = { ...best, ux: -best.uy, uy: best.ux, a: best.b, b: best.a };
     return best; };
   const SB = STY.map(() => ({ p: [], n: [], u: [], c: [] }));
+  // photo facades from Porin kaupunki street photos: one bay-wide strip from street to eave per building (photos/build_ph.py)
+  // building index -> styles; 'west' picks the second style for walls west of that x (one footprint, two facades)
+  const PHS = { 603: [{ t: 'ph_603', bw: 10.16 }], 604: [{ t: 'ph_604y', bw: 4.81 }, { t: 'ph_604b', bw: 4.59, west: 15 }], 1726: [{ t: 'ph_1726', bw: 8.12 }], 1599: [{ t: 'ph_1599', bw: 12.11 }], 602: [{ t: 'ph_602', bw: 2.23 }] };
+  const PB = {};
   const hsh = (i, k) => { let x = (i * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
-  const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1'], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {125:12,126:12,127:12,129:12,169:12,272:12,273:12,133:12,135:12,275:12,276:12,277:12,290:12,291:12,587:11,1725:5,1726:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,603:8,604:8,637:8,638:8,639:8,641:8,642:8,1216:8,602:9,1220:9,640:9,1599:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
+  const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1'], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {125:12,126:12,127:12,129:12,169:12,272:12,273:12,133:12,135:12,275:12,276:12,277:12,290:12,291:12,587:11,1725:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,637:8,638:8,639:8,641:8,642:8,1216:8,1220:9,640:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
   const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2, 100026585: 3 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
   const col = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
   for (const b of CITY.b) {
@@ -339,6 +368,22 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     col.lerp(rc, 0.18); const shade = 0.86 + (b.i % 7) * 0.025; col.multiplyScalar(shade);
     if (srk === 1) col.setHex(SRBRICK[b.i % SRBRICK.length]); else if (srk === 2) col.setHex(0x2f63a6); else if (srk === 3) col.setHex(0x2b4f86);
     const win = house ? true : shed ? false : h >= 5;
+    if (L2 && PHS[bIdx]) {   // photo-textured walls
+      const ox = L2.o[0], oy = L2.o[1], W = L2.w, E = Math.max(2.4, L2.e || L2.h), st = PHS[bIdx];
+      for (let k = 0; k < W.length; k += 12) {
+        const ax = (W[k] + ox) / 10, ay = (W[k + 1] + oy) / 10, bx = (W[k + 4] + ox) / 10, by = (W[k + 5] + oy) / 10, cx = (W[k + 8] + ox) / 10, cy = (W[k + 9] + oy) / 10;
+        const az = W[k + 2] / 10, bz = W[k + 6] / 10, cz = W[k + 10] / 10;
+        let nx = (by - ay) * (cz - az) - (bz - az) * (cy - ay), nz = -((bz - az) * (cx - ax) - (bx - ax) * (cz - az)); const nl = Math.hypot(nx, nz) || 1; nx /= nl; nz /= nl;
+        const S = st.length > 1 && (ax + bx + cx) / 3 < st[1].west ? st[1] : st[0], B = PB[S.t] || (PB[S.t] = { s: S, p: [], n: [], u: [], c: [] });
+        for (let j = 0; j < 3; j++) { const x = (W[k + j * 4] + ox) / 10, y = (W[k + j * 4 + 1] + oy) / 10, z = W[k + j * 4 + 2] / 10, u = W[k + j * 4 + 3] / 10;
+          B.p.push(x, z, -y); B.n.push(nx, 0, nz);
+          if (u >= 0) B.u.push(u / S.bw, Math.min(0.995, z / E)); else B.u.push(0.5, 0.997);
+          const ao = 0.8 + 0.2 * Math.min(1, z / 3); B.c.push(ao, ao, ao); }
+      }
+      const R = L2.r;
+      for (let k = 0; k < R.length; k += 3) { const q = [(R[k] + ox) / 10, (R[k + 1] + oy) / 10]; RP.push(q[0], R[k + 2] / 10 + 0.03, -q[1]); const uv = ruv(q); RU.push(uv[0], uv[1]); }
+      continue;
+    }
     if (L2) {   // measured massing: walls with the facade texture (or a Blender block), roofs with the aerial photo
       const ox = L2.o[0], oy = L2.o[1], W = L2.w, Bw = T || SB[sty], bw = BAYW[sty], E = Math.max(2.4, L2.e || L2.h);
       const nf = Math.max(1, house || shed || E < 7.5 ? Math.round((E - 0.4) / 2.9) : Math.round(E / FLH[sty])), fh = E / nf;   // whole storeys up to the measured eave
@@ -413,6 +458,11 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     m.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <color_fragment>', '').replace('#include <map_fragment>',
       'vec4 fT = texture2D( map, vMapUv ); float tw = clamp( ( fT.a - 0.5 ) * 2.0, 0.0, 1.0 ); diffuseColor.rgb *= mix( fT.rgb, fT.rgb * vColor, tw );'); };
     scene.add(new THREE.Mesh(g, m)); });
+  Object.values(PB).forEach(B => {
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(B.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(B.n, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(B.u, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(B.c, 3));
+    const t = tl.load(`./${B.s.t}.jpg`); t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.ClampToEdgeWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    scene.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ map: t, vertexColors: true }))); });
   KW.forEach((k, ci) => { if (!k.p.length) return;
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(k.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(k.n, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(k.u, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(k.c, 3));
@@ -783,6 +833,16 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
       const st = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.3, 4), lampPost); st.position.set(um.position.x, 1.15, um.position.z); gr.add(st); } }
 }
 
+// ---------- Kauppatori today: brick paving with grey bands (colour from Porin kaupunki photos) over the old aerial image's parked cars ----------
+{
+  const P = [[20, 44], [31, 41], [89, 27], [105, 96], [46, 110], [22, 112]];
+  const inP = (x, y) => { let c = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const [xi, yi] = P[i], [xj, yj] = P[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+  const g = gridGeo(19, 26, 106, 113, 0.5, (x, y) => [x / 8, y / 8], (x, y) => !inP(x, y), 0.09); g.computeVertexNormals();
+  const t = new THREE.TextureLoader().load('./tori_pave.jpg'); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  const m = new THREE.MeshLambertMaterial({ map: t, color: 0xffffff, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
+  const me = noT(new THREE.Mesh(g, m)); scene.add(me);
+}
+
 // embedded Blender models: base64 glb inside a script file
 function loadModel(name, done) {
   import(`./${name}.js`).then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
@@ -870,9 +930,27 @@ function nearestStreet(x, y) {
 // ---------- landmarks ----------
 const find = n => CITY.named.find(d => d.n === n) || CITY.places.find(d => d.n === n);
 const KIRJURI = { n: 'Kirjurinluoto', x: -755, y: 690, h: 0 };
-const TOUR = ['Porin kauppahalli', 'Promenadikeskus', 'BePop', 'Porin vesitorni', 'Porin pääkirjasto', 'Porin Teatteri', 'Satakunnan Museo', 'Kirjurinluoto',
+// landmark pool: every day a new route of 10 is drawn from it (same for everyone, Finnish date as the seed)
+const POOL = ['Porin kauppahalli', 'Promenadikeskus', 'BePop', 'Porin vesitorni', 'Porin pääkirjasto', 'Porin Teatteri', 'Satakunnan Museo', 'Kirjurinluoto',
   'Taavi-silta', 'Raatihuone', 'Porinsilta', 'Kauppakeskus Puuvilla', 'Linnansilta', 'Keski-Porin kirkko']
-  .map(n => n === 'Kirjurinluoto' ? KIRJURI : find(n)).filter(Boolean).map(d => ({ n: d.n, x: d.x, y: d.y, h: d.h || 0 }));
+  .map(n => n === 'Kirjurinluoto' ? KIRJURI : find(n)).filter(Boolean).map(d => ({ n: d.n, x: d.x, y: d.y, h: d.h || 0 }))
+  .concat([['Porin rautatieasema', -443, -956, 12], ['SAMK-kampus', -260, -997, 18], ['Isomäki Areena', -1615, -1392, 14], ['Porin stadion', -1187, -1058, 0],
+    ['Juseliuksen mausoleumi', -1946, 198, 10], ['Aittaluodon voimalaitos', 1177, 322, 70], ['Sampo-Rosenlew', 570, 827, 8], ['Keskustan uimahalli', 568, -660, 12],
+    ['Urheilutalo', 676, -806, 10], ['IsoKarhu', 121, -179, 12], ['Cygnaeuksen koulu', -321, -491, 23], ['Porin oikeustalo', 290, 189, 16], ['Barco-laiva', -236, 510, 6],
+    ['Herralahden kenttä', 667, 99, 0], ['Antinpuisto', 832, -446, 0], ['Länsipuisto', -414, 31, 0], ['Pormestarinsilta', -462, 1196, 4], ['Keskuspuisto', -26, -817, 0],
+    ['Porin taidemuseo', -95, 463, 8], ['Vanha hautausmaa', -921, -73, 0], ['Sofianpuisto', 50, 972, 0], ['Karhuhalli', -1669, -1040, 9]].map(([n, x, y, h]) => ({ n, x, y, h })));
+const DAY = (() => { const p = Object.fromEntries(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Helsinki', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date()).map(q => [q.type, q.value]));
+  return { key: p.year + p.month + p.day, label: +p.day + '.' + +p.month + '.' + p.year }; })();
+const TOUR = (() => {
+  let sd = +DAY.key * 2654435761 >>> 0; const rnd = () => { sd = (sd + 0x6D2B79F5) >>> 0; let t = sd; t = Math.imul(t ^ t >>> 15, t | 1); t ^= t + Math.imul(t ^ t >>> 7, t | 61); return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const bag = POOL.slice(); for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+  const pick = []; for (const p of bag) { if (pick.length === 10) break; if (pick.every(q => Math.hypot(q.x - p.x, q.y - p.y) > 160)) pick.push(p); }
+  // flying order: nearest neighbour from the market square, then 2-opt on the closed loop back to it
+  const H = { x: 70, y: 45 }, d = (a, b) => Math.hypot(a.x - b.x, a.y - b.y); let cur = H; const ord = [], left = pick.slice();
+  while (left.length) { let bi = 0; left.forEach((p, i) => { if (d(cur, p) < d(cur, left[bi])) bi = i; }); cur = left.splice(bi, 1)[0]; ord.push(cur); }
+  const len = r => { let s = d(H, r[0]) + d(r[r.length - 1], H); for (let i = 1; i < r.length; i++) s += d(r[i - 1], r[i]); return s; };
+  let r = ord, imp = true; while (imp) { imp = false; for (let i = 0; i < r.length - 1; i++) for (let j = i + 1; j < r.length; j++) { const c = r.slice(0, i).concat(r.slice(i, j + 1).reverse(), r.slice(j + 1)); if (len(c) < len(r) - 0.01) { r = c; imp = true; } } }
+  return r; })();
 const TORI = find('Kauppatori') || { n: 'Kauppatori', x: 64, y: 65 };
 const HOME = { x: 70, y: 45 };   // open paving south of the stalls, clear of the stage and the pavilion
 {
@@ -894,7 +972,7 @@ const HOME = { x: 70, y: 45 };   // open paving south of the stalls, clear of th
   x.strokeStyle = '#ffc928'; x.lineWidth = 10; x.beginPath(); x.arc(128, 128, 112, 0, 7); x.stroke();
   x.fillStyle = '#fff'; x.font = '700 150px ui-sans-serif, system-ui, Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('H', 128, 136);
   const g = new THREE.PlaneGeometry(17, 17); g.rotateX(-Math.PI / 2);
-  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.position.set(HOME.x, 0.25, -HOME.y); m.renderOrder = 1; scene.add(m);
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.material.polygonOffset = true; m.material.polygonOffsetFactor = -8; m.material.polygonOffsetUnits = -8; m.position.set(HOME.x, TZg(HOME.x, HOME.y) + 0.2, -HOME.y); m.renderOrder = 1; scene.add(noT(m));
 }
 
 // checkpoint beacon
@@ -1005,7 +1083,7 @@ const S = { x: HOME.x, y: HOME.y, alt: SKID, vx: 0, vy: 0, vz: 0, yaw: 0, yawRat
 const input = { f: 0, t: 0, s: 0, l: 0 };
 const keys = new Set();
 let started = false, camMode = 0, tourIdx = 0, tourT = 0, tourOn = false, tourDone = false, best = null;
-try { best = parseFloat(localStorage.getItem('pori-kopteri-best')) || null; } catch (e) {}
+const BESTKEY = 'pori-kopteri-best-' + DAY.key; try { best = parseFloat(localStorage.getItem(BESTKEY)) || null; } catch (e) {}
 
 function pip(x, y, pts) { let r = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const a = pts[i], b = pts[j]; if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) r = !r; } return r; }
 const PROBE = [[0, 0], [3, 0], [-3, 0], [0, 3], [0, -3], [2.1, 2.1], [-2.1, 2.1], [2.1, -2.1], [-2.1, -2.1]];
@@ -1025,9 +1103,10 @@ function roofAt(x, y) {
 let toastT = 0;
 function toast(msg, sec = 2.2) { const t = $('toast'); t.textContent = msg; t.classList.add('on'); toastT = sec; }
 const fmtT = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+const fmtT1 = s => fmtT(s) + '.' + Math.floor(s * 10 % 10);
 
 function resetHeli() { Object.assign(S, { x: HOME.x, y: HOME.y, alt: SKID, vx: 0, vy: 0, vz: 0, yaw: 0, yawRate: 0, hp: 100, landed: true, dead: 0 }); heli.visible = true; }
-function newTour() { tourIdx = 0; tourT = 0; tourOn = false; tourDone = false; resetHeli(); setTarget(); toast('Nouse ilmaan ja lennä valopylvääseen'); }
+function newTour() { LB.show(false); tourIdx = 0; tourT = 0; tourOn = false; tourDone = false; resetHeli(); setTarget(); toast('Nouse ilmaan ja lennä valopylvääseen'); }
 function target() { return tourIdx < TOUR.length ? TOUR[tourIdx] : { n: 'Laskeudu Kauppatorille', x: HOME.x, y: HOME.y, h: 0, land: true }; }
 function setTarget() {
   const t = target(); beacon.position.set(t.x, 0, -t.y);
@@ -1059,10 +1138,12 @@ function damage(d) {
 
 // ---------- input ----------
 addEventListener('keydown', e => {
+  if (e.target && e.target.tagName === 'INPUT') { if (e.code === 'Enter' && !$('go').disabled) { e.target.blur(); begin(); } return; }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (e.repeat) return; keys.add(e.code);
   if (!started) { if (e.code === 'Enter' && !$('go').disabled) begin(); return; }
   if (e.code === 'KeyC') camMode = (camMode + 1) % 3;
+  if (e.code === 'KeyT') LB.show(!LB.open);
   if (e.code === 'KeyM') toggleSound();
   if (e.code === 'KeyN') newTour();
 });
@@ -1167,7 +1248,7 @@ function step(dt) {
     tourT += dt; const tg = target(), d = Math.hypot(tg.x - S.x, tg.y - S.y);
     if (tg.land) {
       if (d < 45 && S.landed && S.alt < SKID + 0.5) {
-        tourDone = true; tourOn = false; const rec = !best || tourT < best; if (rec) { best = tourT; try { localStorage.setItem('pori-kopteri-best', String(best)); } catch (e) {} }
+        tourDone = true; tourOn = false; const rec = !best || tourT < best; if (rec) { best = tourT; try { localStorage.setItem(BESTKEY, String(best)); } catch (e) {} } LB.submit(tourT); LB.show(true);
         toast(`Kierros valmis ajassa ${fmtT(tourT)}${rec ? ' – uusi ennätys!' : ''}  ·  N = uusi kierros`, 7); setTarget(); $('prog').firstElementChild.style.width = '100%';
       }
     } else if (d < 30) { tourIdx++; toast('✓ ' + tg.n, 1.6); setTarget(); }
@@ -1214,7 +1295,7 @@ function hud(dt) {
   $('sp').textContent = pl && pl !== st ? pl : '';
   const tg = target(), d = Math.hypot(tg.x - S.x, tg.y - S.y);
   $('md').textContent = tourDone ? '–' : d < 1000 ? Math.round(d / 5) * 5 + ' m' : (d / 1000).toFixed(1) + ' km';
-  $('mtime').textContent = fmtT(tourT) + (best ? '' : ''); $('mk').textContent = best ? 'Maamerkkikierros · ennätys ' + fmtT(best) : 'Maamerkkikierros';
+  $('mtime').textContent = fmtT(tourT) + (best ? '' : ''); $('mk').textContent = 'Päivän kierros ' + DAY.label + (best ? ' · paras ' + fmtT(best) : '');
   // minimap (north up, 700 m across)
   const W = mini.width, R = 350, sc = W / (2 * R);
   mx.fillStyle = '#5c6a55'; mx.fillRect(0, 0, W, W);
@@ -1242,6 +1323,47 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
+// ---------- daily top-10: one document per player (runs/<their id>) with a field per day, d<YYYYMMDD> = best seconds, n = nickname
+const LB = { open: false, rows: [], uid: null, ref: null, field: 'd' + DAY.key, saved: null, err: '' };
+{
+  $('dday').textContent = DAY.label; $('bsub').textContent = DAY.label + ' · ' + TOUR.length + ' maamerkkiä';
+  $('droute').textContent = TOUR.map(t => t.n).join(' → ') + ' → Kauppatori';
+  const nk = $('nick'), clean = v => (v || '').toUpperCase().replace(/[^A-Z0-9ÅÄÖ]/g, '').slice(0, 5);
+  try { nk.value = clean(localStorage.getItem('pori-kopteri-nick')); } catch (e) {}
+  nk.addEventListener('input', () => { const c = clean(nk.value); if (c !== nk.value) nk.value = c; try { localStorage.setItem('pori-kopteri-nick', c); } catch (e) {} });
+  const note = m => { $('note0').textContent = m; $('note1').textContent = m; };
+  const render = () => { for (const id of ['top0', 'top1']) { const ol = $(id); ol.textContent = '';
+      LB.rows.forEach((r, i) => { const li = document.createElement('li'); if (r.id === LB.uid) li.className = 'me';
+        for (const [c, v] of [['r', i + 1 + '.'], ['n', r.n], ['t', fmtT1(r.t)]]) { const sp = document.createElement('span'); sp.className = c; sp.textContent = v; li.appendChild(sp); }
+        ol.appendChild(li); });
+      if (!LB.rows.length) { const li = document.createElement('li'); li.textContent = 'Ei vielä tuloksia tänään – ole ensimmäinen!'; li.style.color = 'var(--dim)'; ol.appendChild(li); } } };
+  LB.show = on => { LB.open = on; $('board').style.display = on ? 'block' : 'none'; };
+  LB.submit = async t => {
+    const n = clean(nk.value);
+    if (!LB.ref) { note(LB.err || 'Tulostaulu ei ole käytössä tässä näkymässä.'); return; }
+    if (!n) { note('Tulosta ei tallennettu: anna nimimerkki aloitusruudussa (N = uusi yritys).'); return; }
+    if (t < 30) return;
+    if (LB.saved !== null && t >= LB.saved) { note('Päivän paras aikasi on ' + fmtT1(LB.saved) + '.'); return; }
+    const body = { n, [LB.field]: Math.round(t * 10) / 10, at: Date.now() };
+    try { const cur = await LB.ref.get(); if (cur.exists) await LB.ref.update(body); else await LB.ref.set(body); LB.saved = body[LB.field]; note('Aika ' + fmtT1(t) + ' tallennettu nimimerkillä ' + n + '.'); }
+    catch (e) { note(e && e.code === 'invalid_argument' ? 'Sinulla ei ole oikeutta tallentaa tuloksia tähän peliin.' : 'Tuloksen tallennus ei onnistunut.'); }
+  };
+  render(); note('Ladataan tulostaulua…');
+  (async () => {
+    const db = window.claude ? await window.claude.use('db') : null, user = window.claude ? await window.claude.use('user') : null;
+    if (!db) { note('Tulostaulu toimii, kun peli on avattu kirjautuneena Claudessa.'); return; }
+    try { LB.uid = user ? await user.id() : null; } catch (e) {}
+    if (LB.uid) LB.ref = db.collection('runs').doc(LB.uid); else LB.err = 'Tuloksia ei voi tallentaa tässä näkymässä.';
+    try { if (user && (await user.can('data.write')) === false && !LB.uid) LB.ref = null; } catch (e) {}
+    if (LB.ref) LB.ref.get().then(d => { const v = d.exists ? d.data()[LB.field] : null; if (typeof v === 'number') LB.saved = v; }).catch(() => {});
+    const timer = setTimeout(() => note('Tulostaulua ei saada juuri nyt yhteyttä.'), 10000);
+    db.collection('runs').where(LB.field, '>', 0).orderBy(LB.field).limit(10).onSnapshot(snap => {
+      if (!snap.metadata.fromCache) clearTimeout(timer);
+      LB.rows = snap.docs.map(d => { const v = d.data(); return { id: d.id, n: String(v.n || '?????').slice(0, 5), t: +v[LB.field] }; }).filter(r => r.t > 0);
+      render(); if ($('note0').textContent.startsWith('Ladataan') || $('note0').textContent.startsWith('Tulostaulua ei saada')) note(LB.ref ? '' : LB.err);
+    }, () => { clearTimeout(timer); note('Tulostaulua ei voitu ladata.'); });
+  })();
+}
 function begin() {
   if (started) return; started = true; $('start').style.display = 'none';
   camPos.copy(camera.position); camLook.set(HOME.x, 5, -HOME.y);

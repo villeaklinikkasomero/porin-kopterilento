@@ -118,3 +118,19 @@ Huom: käyttöehtojen hyväksyntä (MML-tilaukset) ja GitHub-push vaativat käyt
   (lelumainen, ei käytössä) on työtilassa. Käyttäjä haluaa myöhemmin realistiset eurooppalaiset autot Blenderissä
   (viistoperä, farmari, katumaasturi, pakettiauto, Scania-tyyppinen kuorma-auto), hillityt värit.
 - Taivaalla näkyy vaalea kupolimainen haamu kaukana (vanha vika, ei korjattu).
+
+## Päivitys 11.11.2026 klo 12 – kaupungin valokuvat ja päivän kierros
+- **Valokuvat:** Porin kaupungin kuvat (268 kpl, 17 aluetta, SharePoint-kansio Kuvat_kopterilento). Kreditointi "Porin kaupunki".
+  Alkuperäisiä kuvia EI viedä repoon (ihmisiä, koko); repossa vain valmiit julkisivutekstuurit `ph_*.jpg`.
+  Haku: SharePoint `getpreview.ashx?...&resolution=5` (2560 px) selaimessa, nippuina Downloads-kansioon.
+- **Valokuvajulkisivut:** `blender/build_ph.py`, `blender/build_ph2.py` tekevät kerroksen×jakson moduulista talon korkuisen
+  nauhan (katutaso tehty liikeikkunaksi, koska teltat peittävät). Pelissä `PHS` (index.html): rakennusindeksi → nauha + jakson leveys;
+  seinät LoD2-mallista, v = korkeus / räystäs. Tehty: 603, 604 (keltainen + beige länsipää), 1726, 1599, 602 (kauppatorin sivut).
+  Nämä on poistettu Blender-kortteleista (`zones.py`: tori0, tori3, tori4 rakennettu uudelleen, `run.py toriN`).
+- **Kauppatori:** `tori_pave.jpg` tiilikiveys torialueella (vanhan ilmakuvan autot peittoon). Uusi torirakennus ennallaan.
+- **Päivän kierros:** `POOL` 36 maamerkkiä; `DAY` = Suomen päivämäärä; siemenellä arvotaan 10, järjestys lähin naapuri + 2-opt.
+- **Top-10:** artifaktin db-kyky (`runs/<käyttäjän id>`: `n` = 5-merkkinen nimimerkki, `dYYYYMMDD` = paras aika s).
+  Säännöt: runs read view / write owner, runs/{self} write interact. Tallennus vaatii Contributor-oikeuden.
+  GitHub-versiossa tulostaulu ei toimi (ei db:tä), päivän kierros toimii.
+- Seuraavaksi: kadut joista suorat kuvat (Gallen-Kallelankatu, Annankatu/Lyseo, Länsipuisto, Mikonkatu, Katariinankatu),
+  torin kellopaviljonki ja veistokset, realistiset eurooppalaiset autot Blenderissä.
