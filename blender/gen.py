@@ -38,13 +38,10 @@ def MT(col, kind, rough=0.85, metal=0.0):
     """material key with a surface pattern: kind in brick / plaster / concrete / wood / None"""
     k = M(col, rough, metal); DETAIL[k] = kind; return k
 
-SURF = os.environ.get('PORI_SURF', '')                    # 'plaster': every wall gets the same even render (city run)
+SURF = os.environ.get('PORI_SURF', '')                    # 'plaster': rendered walls get an even, faint render grain (brick and wood stay as they are)
 SURF_K = float(os.environ.get('PORI_SURF_STRENGTH', '0.3'))
 def detail_kind(k):
     r, g, b, rough, metal = k
-    if SURF:
-        if metal > 0.2 or rough < 0.6: return None
-        return SURF if 0.03 < 0.3 * r + 0.59 * g + 0.11 * b else None
     if k in DETAIL: return DETAIL[k]
     if metal > 0.2 or rough < 0.6: return None                      # glass, metal, polished stone
     mx, mn = max(r, g, b), min(r, g, b); lum = 0.3 * r + 0.59 * g + 0.11 * b
@@ -62,7 +59,7 @@ def bmat(k):
         kind = detail_kind(k) if TEXDIR else None
         if kind:
             fn, size, strength, mean = TEXF[kind]
-            if SURF: strength = SURF_K
+            if SURF and kind == SURF: strength = SURF_K
             if fn not in _texcache: _texcache[fn] = bpy.data.images.load(os.path.join(TEXDIR, fn))
             tc = nt.nodes.new('ShaderNodeTexCoord'); mp = nt.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (1 / size, 1 / size, 1 / size)
             tx = nt.nodes.new('ShaderNodeTexImage'); tx.image = _texcache[fn]; tx.projection = 'BOX'; tx.projection_blend = 0.25
@@ -628,7 +625,12 @@ def recompress_glb(data, q):
     for k, v in enumerate(views):
         o = v.get('byteOffset', 0); d = binc[o:o + v['byteLength']]
         if k in imgv:
-            bio = io.BytesIO(); Image.open(io.BytesIO(d)).convert('RGB').save(bio, 'JPEG', quality=q, optimize=True, progressive=True); d = bio.getvalue()
+            im = Image.open(io.BytesIO(d)).convert('RGB')
+            try:                                                   # the bake has Cycles sample noise (the denoiser does not run on bakes): non-local means keeps edges
+                import cv2, numpy as np
+                im = Image.fromarray(cv2.fastNlMeansDenoisingColored(np.asarray(im), None, 11, 11, 5, 17))
+            except ImportError: pass
+            bio = io.BytesIO(); im.save(bio, 'JPEG', quality=q, optimize=True, progressive=True); d = bio.getvalue()
         while len(out) % 4: out.append(0)
         v['byteOffset'] = len(out); v['byteLength'] = len(d); out += d
     while len(out) % 4: out.append(0)
