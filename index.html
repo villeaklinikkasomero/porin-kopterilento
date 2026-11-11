@@ -950,7 +950,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
 
 // embedded Blender models: base64 glb inside a script file
 // whole-city blocks: fetched when the helicopter comes within 600 m, dropped again beyond 850 m (the plain walls stay as a stand-in)
-const CITY_ON = new URLSearchParams(location.search).has('city');   // city blocks are off by default until the lighter, textured bake is ready (?city to test)
+const CITY_ON = !new URLSearchParams(location.search).has('nocity');   // whole-city blocks (2048 px bakes); ?nocity turns them off
 function shrinkMap(map, max) {   // the city atlases are 4096 px: downscale before the GPU upload (64 MB -> 4 MB per block)
   const im = map && map.image; if (!im || !(im.width > max)) return;
   const c = document.createElement('canvas'); c.width = c.height = max; c.getContext('2d').drawImage(im, 0, 0, max, max);
@@ -967,7 +967,7 @@ function streamUpdate(x, y) {
         const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
         new GLTFLoader().parse(buf.buffer, '', gl => {
           if (e.st !== 1) return;
-          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { shrinkMap(map, 2048); map.anisotropy = 4; } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
+          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { shrinkMap(map, isTouch ? 512 : 1024); map.anisotropy = 4; } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
           const gr = new THREE.Group(); gr.position.set(ax, 0, -ay); gr.add(gl.scene); scene.add(gr); e.me.visible = false; e.gr = gr; e.st = 2; }, () => { e.st = 0; });
       }).catch(() => { e.st = 3; });   // not baked yet: keep the plain walls
     } else if (d > 850 && e.st === 2) {
