@@ -71,7 +71,10 @@ def task(cmd: str):
     return r.returncode
 
 
-@app.function(gpu=GPU, volumes={'/vol': vol}, region=REGION, timeout=3600, max_containers=10, retries=modal.Retries(max_retries=1, initial_delay=10.0))
+# city blocks are built from public map data only (no photos), so they may run in any region and on any of three RTX-class GPUs:
+# pinning them to L4 in the EU left the calls waiting for free GPUs for over half an hour
+CITY_GPU = ['L4', 'A10', 'L40S']
+@app.function(gpu=CITY_GPU, volumes={'/vol': vol}, timeout=3600, max_containers=10, retries=modal.Retries(max_retries=1, initial_delay=10.0))
 def city_zone(name: str, samples: int = 64, day: str = ''):
     """Bake one automatically split city block (blender/city.py) on its own GPU; up to 10 run side by side."""
     from porikit import jobs
@@ -86,13 +89,13 @@ def city_zone(name: str, samples: int = 64, day: str = ''):
     return name, ok, round(time.time() - t0)
 
 
-@app.function(volumes={'/vol': vol}, region=REGION, timeout=6 * 3600, is_generator=True)
+@app.function(volumes={'/vol': vol}, timeout=6 * 3600, is_generator=True)
 def city(samples: int = 64, only: str = ''):
     """Whole-city run: every block in city_zones.json (or only the listed ones, comma separated) on up to 10 GPUs at once."""
     zones = json.loads((Path('/repo') / 'city_zones.json').read_text())['zones']
     names = [n for n in zones if not only or n in only.split(',') or (only in ('c', 'h') and n.startswith(only))]   # 'c' = apartment / commercial blocks, 'h' = houses
     day = datetime.date.today().isoformat(); t0 = time.time(); res = []
-    yield f'{len(names)} blocks to bake on up to 10 GPUs'
+    yield f'{len(names)} blocks to bake on up to 10 GPUs (L4 / A10 / L40S, any region); the first GPUs usually start within a few minutes'
     for out in city_zone.map(names, [samples] * len(names), [day] * len(names), return_exceptions=True, order_outputs=False):
         res.append(out if isinstance(out, tuple) else ('?', False, 0)); print(res[-1], flush=True); yield res[-1]
     good = sum(1 for r in res if r[1])
