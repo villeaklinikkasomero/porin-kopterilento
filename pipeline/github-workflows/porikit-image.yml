@@ -1,0 +1,16 @@
+# Deploys the Modal app (builds the GPU image with Blender, OpenCV and Chrome) whenever the pipeline or the Blender scripts change.
+name: porikit image
+on:
+  push:
+    branches: [main]
+    paths: ['pipeline/**', 'blender/**']
+  workflow_dispatch:
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env: { MODAL_TOKEN_ID: '${{ secrets.MODAL_TOKEN_ID }}', MODAL_TOKEN_SECRET: '${{ secrets.MODAL_TOKEN_SECRET }}' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - run: pip install modal && modal deploy pipeline/modal_app.py

@@ -448,6 +448,7 @@ def bake_zone(Z, outdir, samples=24, sun_az=118, sun_el=38):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     for k in list(_mats): _mats[k] = None
     sc = bpy.context.scene; sc.render.engine = 'CYCLES'; sc.cycles.samples = samples; sc.cycles.use_denoising = False
+    import gpu_hook; gpu_hook.enable(sc)                                        # GPU on AWS (PORI_GPU=1)
     sc.cycles.max_bounces = 3; sc.cycles.diffuse_bounces = 2; sc.cycles.glossy_bounces = 2; sc.cycles.use_adaptive_sampling = False
     try: sc.cycles.sample_clamp_indirect = 3.0
     except Exception: pass

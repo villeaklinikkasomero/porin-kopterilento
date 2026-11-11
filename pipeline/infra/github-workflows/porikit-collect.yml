@@ -1,0 +1,33 @@
+# Every morning: the night's results from S3 -> a pull request (review the screenshots, merge to publish).
+name: porikit collect
+on:
+  schedule: [{ cron: '0 5 * * *' }]      # 07:00 / 08:00 Finnish time
+  workflow_dispatch:
+permissions: { id-token: write, contents: write, pull-requests: write }
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with: { role-to-assume: '${{ vars.AWS_ROLE_ARN }}', aws-region: '${{ vars.AWS_REGION }}' }
+      - name: fetch results
+        id: fetch
+        run: |
+          D=$(date -u +%F); mkdir -p night
+          aws s3 sync "s3://${{ vars.PORI_BUCKET }}/results/$D/" night/ || true
+          if [ -d night/game ]; then cp night/game/* . ; fi
+          echo "day=$D" >> $GITHUB_OUTPUT
+          { echo "## Yöajo $D"; for f in night/*.status.json; do [ -f "$f" ] && python3 -c "import json,sys; d=json.load(open(sys.argv[1])); print('-', d['task'].get('kind'), d['status'], str(d['seconds'])+' s')" "$f"; done; } > night/summary.md || true
+          rm -rf night/game
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: night/${{ steps.fetch.outputs.day }}
+          title: 'Yöajo ${{ steps.fetch.outputs.day }}'
+          body-path: night/summary.md
+          commit-message: 'Yöajon tulokset ${{ steps.fetch.outputs.day }}'
+          add-paths: |
+            bl_*.js
+            ph_*.jpg
+            phs.json
+            night/**

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Julkisivujen tarkistus – Porin kopterilento</title>
+<style>
+  :root { --bg:#14191f; --panel:#1d242c; --line:#33404c; --ink:#eef0ea; --dim:#9aa6b0; --acc:#f2b632; --ok:#5fbf77; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.45 system-ui, sans-serif; background:var(--bg); color:var(--ink); display:grid; grid-template-columns:260px 1fr 380px; height:100vh; }
+  aside, main, section { overflow:auto; }
+  aside { border-right:1px solid var(--line); padding:10px; }
+  section { border-left:1px solid var(--line); padding:12px; }
+  main { padding:12px; display:flex; flex-direction:column; gap:8px; }
+  h1 { font-size:15px; margin:4px 0 10px; } h2 { font-size:13px; margin:14px 0 6px; color:var(--dim); text-transform:uppercase; letter-spacing:.08em; }
+  select, input, button { font:inherit; color:var(--ink); background:#0f1419; border:1px solid var(--line); border-radius:6px; padding:5px 8px; }
+  button { cursor:pointer; background:#25303a; } button.primary { background:var(--acc); color:#1a1408; border-color:var(--acc); font-weight:700; }
+  button:disabled { opacity:.5; cursor:default; }
+  .list div { padding:4px 6px; border-radius:5px; cursor:pointer; display:flex; justify-content:space-between; gap:6px; }
+  .list div:hover { background:#25303a; } .list div.sel { background:#2f3c48; } .list .ok { color:var(--ok); }
+  #wrap { position:relative; align-self:flex-start; max-width:100%; }
+  #ph { display:block; max-width:100%; user-select:none; }
+  #ov { position:absolute; inset:0; width:100%; height:100%; cursor:crosshair; }
+  #map { width:100%; height:330px; background:#0f1419; border:1px solid var(--line); border-radius:6px; }
+  #map polygon { fill:#3a4652; stroke:#7d8a96; stroke-width:.6; cursor:pointer; } #map polygon:hover { fill:#56636f; }
+  #map polygon.sel { fill:var(--acc); } #map polygon.done { fill:#2f6b42; }
+  #map polyline { fill:none; stroke:#c9d2da; stroke-width:1.2; }
+  .row { display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  #strip { display:flex; margin-top:8px; background:#0f1419; border-radius:6px; overflow:hidden; min-height:40px; }
+  #strip img { height:300px; display:block; }
+  .hint { color:var(--dim); font-size:12.5px; } #msg { min-height:1.4em; color:var(--acc); }
+  kbd { border:1px solid var(--line); border-radius:4px; padding:0 4px; font-size:12px; }
+</style>
+</head>
+<body>
+<aside>
+  <h1>Kuvat</h1>
+  <div class="row"><select id="dist"><option value="">Kaikki alueet</option></select></div>
+  <div class="list" id="plist" style="margin-top:8px"></div>
+</aside>
+<main>
+  <div class="row"><b id="pname">Valitse kuva</b><span class="hint" id="phint">Klikkaa yhden talon julkisivun kulmat: vasen ylä, oikea ylä, oikea ala, vasen ala (vain puhtaat kerrokset riittävät). <kbd>Backspace</kbd> poistaa viimeisen.</span></div>
+  <div id="wrap"><img id="ph" alt=""><svg id="ov"></svg></div>
+</main>
+<section>
+  <h2>Rakennus</h2>
+  <div class="row"><select id="street" style="max-width:100%"></select></div>
+  <svg id="map" viewBox="0 0 100 100"></svg>
+  <div class="row" style="margin-top:6px"><span>Rakennus <b id="bid">–</b></span><span>Räystäs <input id="eave" size="5"> m</span></div>
+  <h2>Julkisivu</h2>
+  <div class="row">
+    <button class="primary" id="calc" disabled>Laske</button>
+    <span class="hint">Kerros</span><button data-m="floor:0.5">÷2</button><button data-m="floor:2">×2</button>
+    <span class="hint">Jakso</span><button data-m="bay:0.5">÷2</button><button data-m="bay:2">×2</button>
+  </div>
+  <div id="msg"></div>
+  <div class="hint" id="info"></div>
+  <div id="strip"></div>
+  <div class="row" style="margin-top:8px"><button class="primary" id="ok" disabled>Hyväksy</button><span class="hint" id="count"></span></div>
+</section>
+<script>
+const $ = id => document.getElementById(id);
+let P = [], cur = null, scale = 1, quad = [], bsel = null, mul = { floor: 1, bay: 1 }, lastOk = false;
+const api = (u, o) => fetch(u, o).then(async r => { if (!r.ok) throw new Error((await r.json().catch(() => ({}))).detail || r.statusText); return r.json(); });
+
+async function loadPhotos() {
+  P = await api('/api/photos');
+  const ds = [...new Set(P.map(p => p.district))]; for (const d of ds) { const o = document.createElement('option'); o.value = d; o.textContent = d || '(juuri)'; $('dist').appendChild(o); }
+  renderList();
+  const st = await api('/api/streets'); for (const s of st) { const o = document.createElement('option'); o.value = s; o.textContent = s; $('street').appendChild(o); }
+}
+function renderList() {
+  const L = $('plist'); L.textContent = ''; const d = $('dist').value;
+  for (const p of P.filter(p => !d || p.district === d)) {
+    const e = document.createElement('div'); if (cur && cur.id === p.id) e.className = 'sel';
+    const a = document.createElement('span'); a.textContent = p.name; const b = document.createElement('span'); b.className = 'ok'; b.textContent = p.done ? '✓' : '';
+    e.append(a, b); e.onclick = () => pick(p); L.appendChild(e);
+  }
+}
+$('dist').onchange = renderList;
+async function pick(p) {
+  cur = p; quad = []; mul = { floor: 1, bay: 1 }; renderList(); $('pname').textContent = p.rel;
+  const r = await fetch('/api/photo/' + p.id); scale = +r.headers.get('X-Scale'); $('ph').src = URL.createObjectURL(await r.blob());
+  drawQuad(); if (p.street) { $('street').value = p.street; loadBuildings(); }
+  updateButtons();
+}
+$('ph').onload = () => { const s = $('ov'); s.setAttribute('viewBox', `0 0 ${$('ph').naturalWidth} ${$('ph').naturalHeight}`); drawQuad(); };
+$('ov').addEventListener('click', e => {
+  if (!cur || quad.length >= 4) return; const r = $('ov').getBoundingClientRect(), w = $('ph').naturalWidth;
+  quad.push([(e.clientX - r.left) / r.width * w, (e.clientY - r.top) / r.height * $('ph').naturalHeight]); drawQuad(); updateButtons();
+});
+addEventListener('keydown', e => { if (e.key === 'Backspace' && document.activeElement.tagName !== 'INPUT') { quad.pop(); drawQuad(); updateButtons(); } });
+function drawQuad() {
+  const s = $('ov'); s.textContent = ''; const ns = 'http://www.w3.org/2000/svg', k = $('ph').naturalWidth / 400;
+  if (quad.length > 1) { const pl = document.createElementNS(ns, 'polygon'); pl.setAttribute('points', quad.map(q => q.join(',')).join(' ')); pl.setAttribute('fill', 'rgba(242,182,50,.15)'); pl.setAttribute('stroke', '#f2b632'); pl.setAttribute('stroke-width', 2 * k); s.appendChild(pl); }
+  quad.forEach((q, i) => { const c = document.createElementNS(ns, 'circle'); c.setAttribute('cx', q[0]); c.setAttribute('cy', q[1]); c.setAttribute('r', 5 * k); c.setAttribute('fill', '#f2b632'); s.appendChild(c);
+    const t = document.createElementNS(ns, 'text'); t.setAttribute('x', q[0] + 7 * k); t.setAttribute('y', q[1] - 7 * k); t.setAttribute('fill', '#fff'); t.setAttribute('font-size', 14 * k); t.textContent = i + 1; s.appendChild(t); });
+}
+$('street').onchange = loadBuildings;
+async function loadBuildings() {
+  const d = await api('/api/buildings?street=' + encodeURIComponent($('street').value)); const m = $('map'); m.textContent = '';
+  const xs = [], ys = []; d.buildings.forEach(b => b.pts.forEach(p => { xs.push(p[0]); ys.push(p[1]); }));
+  if (!xs.length) return; const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys), S = 100 / Math.max(x1 - x0, y1 - y0, 1);
+  const tx = (x, y) => [(x - x0) * S, (y1 - y) * S]; const ns = 'http://www.w3.org/2000/svg';
+  m.setAttribute('viewBox', `-2 -2 ${(x1 - x0) * S + 4} ${(y1 - y0) * S + 4}`);
+  for (const s of d.segs) { const pl = document.createElementNS(ns, 'polyline'); pl.setAttribute('points', [tx(s[0], s[1]), tx(s[2], s[3])].map(q => q.join(',')).join(' ')); m.appendChild(pl); }
+  for (const b of d.buildings) { const pg = document.createElementNS(ns, 'polygon'); pg.setAttribute('points', b.pts.map(p => tx(...p).join(',')).join(' '));
+    if (b.done) pg.classList.add('done'); if (bsel === b.i) pg.classList.add('sel');
+    const t = document.createElementNS(ns, 'title'); t.textContent = `#${b.i} räystäs ${b.eave ?? '?'} m`; pg.appendChild(t);
+    pg.onclick = () => { bsel = b.i; $('bid').textContent = '#' + b.i; $('eave').value = b.eave ?? ''; [...m.querySelectorAll('polygon')].forEach(x => x.classList.remove('sel')); pg.classList.add('sel'); updateButtons(); };
+    m.appendChild(pg); }
+}
+function updateButtons() { $('calc').disabled = !(cur && quad.length === 4 && bsel !== null); $('ok').disabled = !lastOk; }
+document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { const [k, v] = b.dataset.m.split(':'); mul[k] *= +v; calc(); });
+$('calc').onclick = () => { mul = { floor: 1, bay: 1 }; calc(); };
+async function calc() {
+  if ($('calc').disabled) return; $('msg').textContent = 'Lasketaan…'; lastOk = false; updateButtons();
+  try {
+    const r = await api('/api/facade', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photo_id: cur.id, quad: quad.map(q => [q[0] / scale, q[1] / scale]), building: bsel, eave: parseFloat($('eave').value) || null, floor_mul: mul.floor, bay_mul: mul.bay }) });
+    const s = $('strip'); s.textContent = ''; const t = Date.now();
+    for (let i = 0; i < 4; i++) { const im = new Image(); im.src = r.strip + '?' + t; s.appendChild(im); }
+    const m = r.module, si = r.strip_info;
+    $('info').textContent = `${si.floors} kerrosta à ${si.floor_m} m, jakso ${si.bay_m} m · ${m.tiles_used}/${m.tiles_total} palaa käytetty (loput peittyneitä)`;
+    $('msg').textContent = 'Tarkista: toistuuko kerros ja ikkunajakso oikein? Korjaa tarvittaessa ÷2 / ×2.'; lastOk = true;
+  } catch (e) { $('msg').textContent = 'Ei onnistunut: ' + e.message + ' – rajaa tiiviimmin puhtaisiin kerroksiin.'; }
+  updateButtons();
+}
+$('ok').onclick = async () => {
+  const r = await api('/api/approve', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ photo_id: cur.id, building: bsel }) });
+  $('count').textContent = `${r.count} julkisivua hyväksytty`; cur.done = true; renderList(); loadBuildings(); lastOk = false; updateButtons();
+};
+loadPhotos();
+</script>
+</body>
+</html>

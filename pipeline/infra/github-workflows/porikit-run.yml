@@ -1,0 +1,19 @@
+# Starts one job on a GPU machine right away, e.g. "bake tori0 tori3 --samples 64" or "landmarks tehdas asema".
+name: porikit run
+on:
+  workflow_dispatch:
+    inputs:
+      command: { description: 'porikit command (after "porikit")', required: true, default: 'bake all' }
+permissions: { id-token: write, contents: read }
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: aws-actions/configure-aws-credentials@v4
+        with: { role-to-assume: '${{ vars.AWS_ROLE_ARN }}', aws-region: '${{ vars.AWS_REGION }}' }
+      - name: submit to AWS Batch
+        env: { CMD: '${{ inputs.command }}' }
+        run: |
+          ARGS=$(python3 -c 'import json,os,shlex; print(json.dumps(["sh","-c","porikit layout && porikit "+os.environ["CMD"]+" && python3 -c \"from porikit import jobs; import datetime; d=datetime.date.today().isoformat(); jobs.sync_up(jobs.REPO, \x27results/\x27+d+\x27/game\x27, \x27bl_*.js\x27)\""]))')
+          aws batch submit-job --job-name "porikit-$(date +%H%M%S)" --job-queue porikit-gpu --job-definition porikit-task \
+            --container-overrides "{\"command\": $ARGS}"

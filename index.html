@@ -139,7 +139,9 @@ import * as THREE from './three.module.min.js';
 import CITY from './city.js';
 import LOD2 from './lod2.js';
 import RIV from './river.js';
-import TER from './terrain.js';   // ground heights: Maanmittauslaitos 2 m elevation model (CC BY 4.0)   // Kokemäenjoki below street level (OpenStreetMap river area)   // measured LoD2 building models (Maanmittauslaitos Rakennukset 3D)
+import TER from './terrain.js';
+// photo facades approved in the review tool (porikit export): building index -> [{ t: texture name, bw: bay width m }]
+const PHSJ = await fetch('./phs.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));   // ground heights: Maanmittauslaitos 2 m elevation model (CC BY 4.0)   // Kokemäenjoki below street level (OpenStreetMap river area)   // measured LoD2 building models (Maanmittauslaitos Rakennukset 3D)
 import PARKED from './parked.js';
 import { GLTFLoader } from './GLTFLoader.js';
 
@@ -325,10 +327,11 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const SB = STY.map(() => ({ p: [], n: [], u: [], c: [] }));
   // photo facades from Porin kaupunki street photos: one bay-wide strip from street to eave per building (photos/build_ph.py)
   // building index -> styles; 'west' picks the second style for walls west of that x (one footprint, two facades)
-  const PHS = { 603: [{ t: 'ph_603', bw: 10.16 }], 604: [{ t: 'ph_604y', bw: 4.81 }, { t: 'ph_604b', bw: 4.59, west: 15 }], 1726: [{ t: 'ph_1726', bw: 8.12 }], 1599: [{ t: 'ph_1599', bw: 12.11 }], 602: [{ t: 'ph_602', bw: 2.23 }] };
+  let PHS = { 603: [{ t: 'ph_603', bw: 10.16 }], 604: [{ t: 'ph_604y', bw: 4.81 }, { t: 'ph_604b', bw: 4.59, west: 15 }], 1726: [{ t: 'ph_1726', bw: 8.12 }], 1599: [{ t: 'ph_1599', bw: 12.11 }], 602: [{ t: 'ph_602', bw: 2.23 }] };
+  Object.assign(PHS, PHSJ);
   const PB = {};
   const hsh = (i, k) => { let x = (i * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
-  const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1'], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {125:12,126:12,127:12,129:12,169:12,272:12,273:12,133:12,135:12,275:12,276:12,277:12,290:12,291:12,587:11,1725:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,637:8,638:8,639:8,641:8,642:8,1216:8,1220:9,640:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
+  const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1'], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {125:12,126:12,127:12,129:12,169:12,272:12,273:12,133:12,135:12,275:12,276:12,277:12,290:12,291:12,587:11,1725:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,637:8,638:8,639:8,641:8,642:8,1216:8,1220:9,640:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ for (const k in PHSJ) delete ZB[k];   /* photo facades: the night bake leaves these out of the Blender blocks */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
   const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2, 100026585: 3 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
   const col = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
   for (const b of CITY.b) {

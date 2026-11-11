@@ -617,7 +617,7 @@ w = bpy.data.worlds.new('w'); scene.world = w; w.use_nodes = True; bg = w.node_t
 try: sky.sun_elevation = el; sky.sun_rotation = math.pi / 2 - az; sky.sun_disc = False
 except Exception as e: print('sky', e)
 w.node_tree.links.new(sky.outputs['Color'], bg.inputs['Color']); bg.inputs['Strength'].default_value = 0.07
-scene.render.engine = 'CYCLES'; scene.cycles.device = 'CPU'; scene.view_settings.view_transform = 'Standard'
+scene.render.engine = 'CYCLES'; scene.cycles.device = 'CPU'; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import gpu_hook; gpu_hook.enable(scene); scene.view_settings.view_transform = 'Standard'
 
 if STILL:
     cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam')); scene.collection.objects.link(cam); scene.camera = cam; cam.data.lens = 30; cam.data.clip_end = 3000

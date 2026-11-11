@@ -1,0 +1,33 @@
+# Every two hours: finished results from the Modal volume -> one pull request per day that grows during the day (look at the screenshots, merge to publish).
+name: porikit collect
+on:
+  schedule: [{ cron: '0 */2 * * *' }]
+  workflow_dispatch:
+permissions: { contents: write, pull-requests: write }
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    env: { MODAL_TOKEN_ID: '${{ secrets.MODAL_TOKEN_ID }}', MODAL_TOKEN_SECRET: '${{ secrets.MODAL_TOKEN_SECRET }}' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - name: fetch results
+        id: fetch
+        run: |
+          pip install modal
+          D=$(TZ=Europe/Helsinki date -d yesterday +%F); T=$(TZ=Europe/Helsinki date +%F); mkdir -p night
+          for d in $D $T; do modal volume get pori-data "results/$d" night/ --force 2>/dev/null || true; done
+          if [ -d night ]; then find night -path '*/game/*' -name 'bl_*.js' -exec cp {} . \; ; fi
+          echo "day=$T" >> $GITHUB_OUTPUT
+          { echo "## Valmistuneet työt $T"; for f in $(find night -name '*.status.json'); do python3 -c "import json,sys; d=json.load(open(sys.argv[1])); t=d['task']; print('-', t.get('kind'), t.get('cmd') or t.get('zones') or t.get('names') or '', '→', d['status'], str(d['seconds'])+' s')" "$f"; done; } > summary.md
+          find night -path '*/game/*' -delete || true
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: night/${{ steps.fetch.outputs.day }}
+          title: 'Grafiikka ${{ steps.fetch.outputs.day }}'
+          body-path: summary.md
+          commit-message: 'Grafiikkaputken tulokset ${{ steps.fetch.outputs.day }}'
+          add-paths: |
+            bl_*.js
+            night/**

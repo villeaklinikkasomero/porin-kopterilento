@@ -1,0 +1,15 @@
+# One GPU job right away, e.g. "bake tori0 tori3 --samples 64" or "landmarks tehdas asema"; results appear in tomorrow's PR (or run "porikit collect").
+name: porikit run
+on:
+  workflow_dispatch:
+    inputs:
+      command: { description: 'porikit command', required: true, default: 'bake tori0' }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env: { MODAL_TOKEN_ID: '${{ secrets.MODAL_TOKEN_ID }}', MODAL_TOKEN_SECRET: '${{ secrets.MODAL_TOKEN_SECRET }}', CMD: '${{ inputs.command }}' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - run: pip install modal && modal run pipeline/modal_app.py --cmd "$CMD"

@@ -209,3 +209,10 @@ ZONES = {
     'bepop': [BEPOP], 'uima': [UIMA],
 }
 NOROOF = {'bepop'}
+
+
+# buildings with an approved photo facade (phs.json from the review tool) are drawn by the game itself: leave them out of the blocks
+import os as _os, json as _json
+if _os.environ.get('PORI_PHS') and _os.path.exists(_os.environ['PORI_PHS']):
+    _ex = {int(k) for k in _json.load(open(_os.environ['PORI_PHS']))}
+    ZONES = {k: [i for i in v if i not in _ex] for k, v in ZONES.items()}

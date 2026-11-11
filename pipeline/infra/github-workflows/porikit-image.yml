@@ -1,0 +1,23 @@
+# Builds the porikit image (Blender + facade pipeline + Chrome) and pushes it to ECR.
+name: porikit image
+on:
+  push:
+    branches: [main]
+    paths: ['pipeline/**', 'blender/**']
+  workflow_dispatch:
+permissions: { id-token: write, contents: read }
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with: { role-to-assume: '${{ vars.AWS_ROLE_ARN }}', aws-region: '${{ vars.AWS_REGION }}' }
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: build and push
+        run: |
+          cp pipeline/dockerignore.root .dockerignore
+          IMG=${{ steps.ecr.outputs.registry }}/porikit
+          docker build -f pipeline/Dockerfile -t $IMG:latest -t $IMG:${GITHUB_SHA::7} .
+          docker push --all-tags $IMG

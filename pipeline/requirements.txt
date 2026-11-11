@@ -1,0 +1,13 @@
+bpy==5.2.3
+numpy>=2.1
+opencv-python-headless>=4.10
+pillow>=11
+shapely>=2.0
+scipy>=1.14
+rasterio>=1.4
+pyproj>=3.7
+boto3>=1.35
+fastapi>=0.115
+uvicorn>=0.30
+pydantic>=2.8
+python-multipart>=0.0.9
