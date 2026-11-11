@@ -48,3 +48,55 @@ lataa rinnakkain `dl.sh`:llä (osoite `bpyurl.txt`), aja kunnes osien summa on 4
 - Autotunnistus: arviolta runsas puolet osuu oikean auton päälle; rivien suunta paikoin 90° väärin, vääriä osumia pihoilla ja varjojen reunoilla,
   vaaleat autot vaalealla soralla puuttuvat. Vain ydinalueen ilmakuvasta.
 - Zipin pakkaus: `cd pori && zip -r ../Porin_kopterilento_claude.zip .`
+
+---
+
+# Siirto 11.11.2026 – tilanne seuraavalle Claudelle
+
+Peli: `index.html` + moduulit, julkaistu artefaktina "Porin kopterilento" (claude.ai/artifact/PvpEPUUtoM8XAJDq8bNvmw) ja repoon
+`villeaklinikkasomero/porin-kopterilento` (käyttäjä pushaa GitHub Desktopilla, kansio `C:\Users\ville.somero\Documents\GitHub\porin-kopterilento`).
+Koordinaatit: kartta-metrit, origo lon 21.796 / lat 61.486, x = (lon-21.796)*53278, y = (lat-61.486)*111437; three.js: (x, korkeus, -y).
+
+## Uudet aineistot (kaikki avoimia, lähde näkyy pelin alalaidassa)
+- **Maanmittauslaitos Rakennukset 3D (LoD2, CityGML, CC BY 4.0)**: karttalehdet M3412C/D/E/F (6×6 km, mittaus 2023).
+  `blender/parse.py` (CityGML -> b.pkl pelikoordinaateissa) -> `blender/mml_city.py` -> `lod2.js`
+  (kaikki ~4 200 rakennusta mitatuilla seinillä ja katoilla; ikkunat vain räystään alle, kerrosluku räystäskorkeudesta;
+  `hide` = OSM-osat jotka toinen LoD2-malli peittää; `raw.pkl` = polygonit Blenderille).
+  Pelissä LoD2 ei koske Kivi-Porin/torin Blender-kortteleita (ZB < 12, Kivi-suorakaide) eikä OWNROOF-taloja.
+- **Maanmittauslaitos Korkeusmalli 2 m (GeoTIFF)**: samat lehdet. `blender/dem_build.py` -> `terrain.js`
+  (REF = 4.0 m: pelin y = N2000 - 4; `hg` = todellinen maa 6 m ruudukko, joen pohja vedenpinnan alla;
+  `hs` = jokialue täytetty + pehmennetty kenttä, jolla KAIKKI muut objektit nostetaan shaderissa `terrainize()`;
+  vedenpinta `TER.wl` ≈ -3.6). Maa on ruudukkoverkko (`gridGeo`, ydin 6 m, ulko 18 m).
+  Objektit joita EI nosteta merkitään `noT()` / `userData.noT` (helikopteri, varjo, vesi, maa, ponttonit suhteessa `WREL`).
+  Lentologiikka: `roofAt()` käyttää TZs/TZg/TER.wl.
+- **Kokemäenjoki**: OSM-relaatio 186982 (haettu selaimella) -> `river.pkl` -> `blender/river_build.py` -> `river.js`
+  (vesi, 4 m maski `inRiver`, siltakannet `RIV.br`, Etelärannan rantaviiva `RIV.quay`, Etelärannan kaistale jätetty maasta pois).
+- **Porin kaupungin ilmakuva-WMS** (`kartta.pori.fi/TeklaOGCWeb/WMS.ashx`, taso Ilmakuva, ~10 v vanha, natiivi ~10 cm):
+  30 ruutua `ot/ot_i_j.jpg` (512 m, 0.25 m/px, x -1280..1792, y -1280..1280), ladataan helikopterin ympäriltä (`hrUpdate`).
+  Haku: selaimessa kartta.pori.fi-sivulla fetch + OffscreenCanvas -> yksi bin-tiedosto Downloads-kansioon -> device_stage_files.
+
+## Uudet mallit / koodi
+- `blender/lm.py`: `mml_shell()` (LoD2-kuori Blenderiin) ja `rich_deco()` (sokkeli, kerroslistat, ikkunat, kaari-ikkunat,
+  lesenat, räystäslista). Kohteet: `tehdas` (Puuvilla, LoD2 + torni + lyhdyt), `asema` (rautatieasema), `samk`,
+  `cygnaeus` (Cygnaeuksen koulu, Tasavallankatu 1). Pakkaus: glb -> base64 `bl_KEY.js`, LMAT + plain-listaan index.html:ssä.
+- `blender/zones2.py` + `run2.py`: Blender-julkisivut LoD2-rungoille (gen.py-moduulit), pilotti `bl_p1.js` (ZB=12).
+  Ajo: `python3 run2.py NIMI '[indeksit]' 12` (~1 min / 14 taloa).
+- `bridge.py`: Porinsilta (portaalit pilarien 1 ja 2 päällä, 1971 kuvan mukaan).
+- Aittaluodon voimalaitoksen piiput (126 m @ (1177,322), 70 m @ (1203,300)) ja sininen voimalaitos (SRW 3), Sampo-Rosenlewin tiilet (SRW).
+- Eteläranta (index.html "Eteläranta (renewed quay)"): alempi rantakäytävä -1.05, 3 porrasta, pensaat, kaide, 3 ponttonia,
+  2 paviljonkia, purjelaiva. Paikat arvioitu käyttäjän kuvista.
+- Nurmikko: `grassify()` (proseduraalinen nurmitekstuuri vihreisiin kohtiin), vesi: `waterify()`.
+
+## Testit
+`node shot4.mjs '[["nimi",x,y,alt,yaw]]'` (kuvat v_nimi.jpg, kestää ~2 min) ja `node logic4.mjs` (loppu "no errors").
+Testipalvelin palvelee `/home/claude/pori`.
+
+## Kesken / seuraavaksi
+1. Autot paremmiksi ilmaisilla CC0-malleilla (esim. Kenney "Car Kit", Quaternius "Cars"; tarkista lisenssi) -> korvaa `cars.js`/parkkiautojen geometria.
+2. Kivi-Pori uudelleen LoD2-rungoilla + rich_deco, kun kaupungin valokuvat tulevat (käyttäjä saa tällä viikolla).
+3. Keskustan muut korttelit zones2-pipelinella (pilotti p1 hyväksytty suunnaksi; värit kuvista).
+4. Ihantolanpiha 3 ja Kansakoulukatu 26 talot (odottaa tarkennusta), repon "– kopio"-tiedostojen siivous (käyttäjä lykkäsi).
+5. Käyttäjä voi hankkia kaupungilta kerrosluvut ja uudemman ilmakuvan.
+
+Huom: käyttöehtojen hyväksyntä (MML-tilaukset) ja GitHub-push vaativat käyttäjän luvan; MML-tilauksen viimeisen
+"Tilaa tuotteet" -napin painaa käyttäjä itse.

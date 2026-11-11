@@ -187,7 +187,7 @@ def pilasters(pts, z0, z1, bay, m, w=0.5, d=0.16):
 # ---------------------------------------------------------------- footprints
 CITY = json.loads(open('/home/claude/game/city.js').read()[len('export default '):-2])
 LMAT = dict(raati=(-115.6, 394.1), kaupungintalo=(-57.7, 331.2), teatteri=(-201, 378), taidemuseo=(-94.8, 462.6), kauppahalli=(150, -32.8), vesitorni=(-835, -135),
-            puuvilla=(230, 1000), promenadi=(9.2, -238.7), bepop=(58.3, -382.3), kirjasto=(-258, 114), museo=(-264.8, 455.9), tehdas=(160.2, 763.6), kehraamo=(85, 834), tori=(31, 81), isokarhu=(120.9, -179.4), mausoleumi=(-1946, 198.1), areena=(-1615.1, -1391.6), isokappeli=(-1809.2, 141.6), pienikappeli=(-2008.2, 191.1), harjoitushalli=(-1614.9, -1120.8))
+            puuvilla=(230, 1000), promenadi=(9.2, -238.7), bepop=(58.3, -382.3), kirjasto=(-258, 114), museo=(-264.8, 455.9), tehdas=(160.2, 763.6), asema=(-443.0, -954.0), cygnaeus=(-321.0, -491.0), samk=(-268.0, -992.0), kehraamo=(85, 834), tori=(31, 81), isokarhu=(120.9, -179.4), mausoleumi=(-1946, 198.1), areena=(-1615.1, -1391.6), isokappeli=(-1809.2, 141.6), pienikappeli=(-2008.2, 191.1), harjoitushalli=(-1614.9, -1120.8))
 
 def pip(x, y, pts):
     r = False; j = len(pts) - 1
@@ -234,6 +234,65 @@ def modern(wall, h, floors, base=4.6, capc='dark'):
     walls(P, 0, h, wall); fh = (h - base - 0.5) / floors
     ribbons(P, 0, base, 1, hgt=base - 0.9, sill=0.4, mull=2.4); ribbons(P, base, fh, floors, hgt=fh * 0.48, sill=fh * 0.28)
     ledge(P, 0.3, h - 0.5, h + 0.3, capc); ledge(P, 0.3, base - 0.25, base + 0.15, capc)
+
+
+def mml_shell(cidx, wallm, roofm, deco=None, rest_ok=True):
+    """measured LoD2 shell (Maanmittauslaitos Rakennukset 3D) of city building cidx in the local frame; deco(pts, nrm, u, us, zb, ztop) decorates walls"""
+    import pickle
+    RAW = pickle.load(open('/home/claude/mmlproc/raw.pkl', 'rb'))[cidx]
+    for k, r, ins in RAW:
+        if k == 'G' or len(r) < 3: continue
+        pts = [Vector((p[0] - AX, p[1] - AY, max(0.0, p[2]))) for p in r]
+        mesh(pts, [tuple(range(len(pts)))], roofm if k == 'R' else wallm, recalc=False)
+        if k != 'W' or deco is None: continue
+        nrm = Vector((0, 0, 0))
+        for i in range(len(pts)):
+            a_, b_ = pts[i], pts[(i + 1) % len(pts)]; nrm += Vector(((a_.y - b_.y) * (a_.z + b_.z), (a_.z - b_.z) * (a_.x + b_.x), (a_.x - b_.x) * (a_.y + b_.y)))
+        nrm.z = 0
+        if nrm.length < 1e-6: continue
+        nrm.normalize(); u = Vector((-nrm.y, nrm.x, 0)); us = [(p - pts[0]).dot(u) for p in pts]
+        def ztop(uu, pts=pts, us=us):
+            best = None
+            for i in range(len(pts)):
+                a_, b_ = pts[i], pts[(i + 1) % len(pts)]; ua, ub = us[i], us[(i + 1) % len(pts)]
+                if (ua - uu) * (ub - uu) <= 0 and abs(ub - ua) > 1e-6:
+                    z = a_.z + (b_.z - a_.z) * (uu - ua) / (ub - ua); best = z if best is None else max(best, z)
+            return best or 0
+        deco(pts, nrm, u, us, min(p.z for p in pts), ztop)
+
+
+def rich_deco(bay=3.6, ww=1.5, fh0=4.4, frame='white', glass='dark', plinth=None, ph=1.1, cornice=None, band=None, pil=None, pil_every=1,
+              arch_rows=(), arch_mid_rows=(), min_len=3.0, wall_max_zb=2.5):
+    """facade dressing for a measured LoD2 wall: plinth, storey bands, windows (some rows arched), pilasters and an eave cornice"""
+    def deco(pts, nrm, u, us, zb, ztop):
+        u0, u1 = min(us), max(us); L_ = u1 - u0
+        if L_ < min_len or zb > wall_max_zb: return
+        zt = min(ztop(u0 + L_ * f) for f in (0.03, 0.5, 0.97))
+        if zt - zb < 3: return
+        base = pts[0] + nrm * 0.01; mid = (base + u * ((u0 + u1) / 2)).to_2d(); n2 = nrm.to_2d()
+        at = lambda d: Vector((mid.x + n2.x * d, mid.y + n2.y * d))
+        if plinth: obox(at(0.07), u, L_ / 2 + 0.07, 0.08, zb - 0.2, zb + ph, plinth)
+        if cornice:
+            obox(at(0.2), u, L_ / 2 + 0.2, 0.22, zt - 0.75, zt - 0.05, cornice); obox(at(0.1), u, L_ / 2 + 0.1, 0.12, zt - 1.15, zt - 0.75, cornice)
+        fl = max(1, round((zt - zb - ph - 0.9) / fh0)); fh = (zt - zb - ph - 0.9) / fl
+        nb = max(1, round(L_ / bay))
+        if band:
+            for f in range(1, fl):
+                z_ = zb + ph + f * fh; obox(at(0.06), u, L_ / 2 + 0.06, 0.07, z_ - 0.12, z_ + 0.08, band)
+        for kb in range(nb):
+            uu = u0 + L_ * (kb + 0.5) / nb; midb = abs(kb + 0.5 - nb / 2) < nb / 6
+            for f in range(fl):
+                z_ = zb + ph + f * fh + 0.35 * fh * 0.35 + 0.2
+                tall = f in arch_mid_rows and midb and L_ > 30
+                h_ = min(fh * (0.88 if tall else 0.6), fh - 0.6)
+                window(base + u * uu, u, nrm, ww * (1.25 if tall else 1), h_, z_, arch=(f in arch_rows) or tall, frame=frame, glass=glass, sill=True, mull=True)
+            if pil and kb > 0 and kb % pil_every == 0:
+                ub = u0 + L_ * kb / nb; c2 = (base + u * ub).to_2d()
+                obox(Vector((c2.x + n2.x * 0.14, c2.y + n2.y * 0.14)), u, 0.32, 0.15, zb + ph, zt - 1.1, pil)
+        if pil:
+            for ub in (u0 + 0.35, u1 - 0.35):
+                c2 = (base + u * ub).to_2d(); obox(Vector((c2.x + n2.x * 0.16, c2.y + n2.y * 0.16)), u, 0.38, 0.17, zb + ph, zt - 1.1, pil)
+    return deco
 
 
 def gable(c, u, a, b, z0, z1, roofm, wallm, ov=0.4, ends=True):
@@ -363,45 +422,83 @@ elif KEY == 'kehraamo':
     M('brick', '#9c4a38', tex='brick'); M('btrim', '#7e3a2c')
     classic('brick', 9.5, 2, 3.6, 1.3, 2.1, True, trim='btrim', frame=None, glass='dark', cornice=0.35)
 elif KEY == 'tehdas':
-    # Porin Puuvilla mill (August Krook, 1899-1912). Massing, roofs, pavilion lanterns and the stair tower come straight from the
-    # National Land Survey LoD2 building model (Rakennukset 3D, measured by laser scanning, CC BY 4.0); on top of that the
-    # red-brick walls get rows of white-framed round-arched windows like in the photos.
+    # Porin Puuvilla mill (1899-1912): measured LoD2 shell (Maanmittauslaitos Rakennukset 3D, CC BY 4.0) dressed like the photos:
+    # red brick, segment-arched white windows in every bay, brick pilasters between the bays, a corbelled cornice, granite plinth,
+    # the low lanterns on the end pavilions and the stair tower with its tall dark pyramid roof
+    M('brick', '#9c4a38', tex='brick'); M('btrim', '#7d3a2c', tex='brick'); M('slate', '#3e4247', rough=0.7); M('granite', '#8d8a85', rough=0.9); ROOF_IN_MODEL = True
     import pickle
-    M('brick', '#9c4a38', tex='brick'); M('btrim', '#c9a58c'); M('slate', '#3e4247', rough=0.7); ROOF_IN_MODEL = True; TEX = 4096
-    MB = next(b for b in pickle.load(open('/home/claude/mmlproc/b.pkl', 'rb')) if b['id'] == 'pori_2022_370597')
-    z0 = MB['z0']; L3 = lambda p: Vector((p[0] - AX, p[1] - AY, max(0.0, p[2] - z0)))
-    for k, r, ins in MB['p']:
+    MB = next(b for b in pickle.load(open('/home/claude/mmlproc/b.pkl', 'rb')) if b['id'] == 'pori_2022_370597'); z0 = MB['z0']
+    shellpolys = [(k, [(p[0], p[1], p[2] - z0) for p in r], h) for k, r, h in MB['p']]
+    import types
+    dec = rich_deco(bay=3.7, ww=1.5, fh0=4.5, frame='white', glass='dark', plinth='granite', ph=1.0, cornice='btrim', band=None, pil='btrim', pil_every=1, arch_rows=(0, 1, 2, 3, 4))
+    for k, r, ins in shellpolys:
         if k == 'G' or len(r) < 3: continue
-        pts = [L3(p) for p in r]
-        o = mesh(pts, [tuple(range(len(pts)))], 'slate' if k == 'R' else 'brick', recalc=False)
-        if k == 'W':                                                             # windows on the tall wall faces
-            nrm = Vector((0, 0, 0))
+        pts = [Vector((p[0] - AX, p[1] - AY, max(0.0, p[2]))) for p in r]
+        mesh(pts, [tuple(range(len(pts)))], 'slate' if k == 'R' else 'brick', recalc=False)
+        if k != 'W': continue
+        nrm = Vector((0, 0, 0))
+        for i in range(len(pts)):
+            a_, b_ = pts[i], pts[(i + 1) % len(pts)]; nrm += Vector(((a_.y - b_.y) * (a_.z + b_.z), (a_.z - b_.z) * (a_.x + b_.x), (a_.x - b_.x) * (a_.y + b_.y)))
+        nrm.z = 0
+        if nrm.length < 1e-6: continue
+        nrm.normalize(); u = Vector((-nrm.y, nrm.x, 0)); us = [(p - pts[0]).dot(u) for p in pts]
+        def ztop(uu, pts=pts, us=us):
+            best = None
             for i in range(len(pts)):
-                a_, b_ = pts[i], pts[(i + 1) % len(pts)]; nrm += Vector(((a_.y - b_.y) * (a_.z + b_.z), (a_.z - b_.z) * (a_.x + b_.x), (a_.x - b_.x) * (a_.y + b_.y)))
-            nrm.z = 0
-            if nrm.length < 1e-6: continue
-            nrm.normalize(); u = Vector((-nrm.y, nrm.x, 0))
-            us = [(p - pts[0]).dot(u) for p in pts]; u0, u1 = min(us), max(us); Lw = u1 - u0
-            zb = min(p.z for p in pts)
-            def ztop(uu):                                                        # wall top at position uu along the face
-                best = None
-                for i in range(len(pts)):
-                    a_, b_ = pts[i], pts[(i + 1) % len(pts)]; ua, ub = us[i], us[(i + 1) % len(pts)]
-                    if (ua - uu) * (ub - uu) <= 0 and abs(ub - ua) > 1e-6:
-                        z = a_.z + (b_.z - a_.z) * (uu - ua) / (ub - ua); best = z if best is None else max(best, z)
-                    elif abs(ub - ua) <= 1e-6 and abs(ua - uu) < 1e-6: best = max(a_.z, b_.z) if best is None else max(best, a_.z, b_.z)
-                return best
-            if Lw < 3.0 or zb > 3.0: continue
-            nb = max(1, round(Lw / 3.7)); base = pts[0] + nrm * 0.02
-            for kb in range(nb):
-                uu = u0 + Lw * (kb + 0.5) / nb; zt = min(ztop(uu - 0.9) or 0, ztop(uu + 0.9) or 0)
-                if zt - zb < 6: continue
-                fl = max(1, min(5, round((zt - zb - 2.2) / 4.6))); fh = (zt - zb - 2.2) / fl
-                for f in range(fl):
-                    z_ = zb + 1.3 + f * fh + 0.25 * fh
-                    window(base + u * uu, u, nrm, 1.5, min(2.9, fh * 0.62), z_, arch=True, frame='white', glass='dark', sill=True, mull=True)
-            for zz in (zb + 1.1,):                                               # plinth line
-                pass
+                a_, b_ = pts[i], pts[(i + 1) % len(pts)]; ua, ub = us[i], us[(i + 1) % len(pts)]
+                if (ua - uu) * (ub - uu) <= 0 and abs(ub - ua) > 1e-6:
+                    z = a_.z + (b_.z - a_.z) * (uu - ua) / (ub - ua); best = z if best is None else max(best, z)
+            return best or 0
+        dec(pts, nrm, u, us, min(p.z for p in pts), ztop)
+    # stair tower roof: tall square pyramid with a finial over the measured tower (peak 37.4 m in the scan)
+    t = Vector((211.6 - AX, 741.4 - AY, 0)); ang = math.atan2(-0.22, 1.0)
+    frustum((t.x, t.y), 4.3 * 1.414, 0.25, 28.4, 39.5, 4, 'slate', math.pi / 4 + ang)
+    frustum((t.x, t.y), 0.12, 0.05, 39.5, 41.5, 6, 'dark')
+    frustum((t.x, t.y), 4.5 * 1.414, 4.5 * 1.414, 27.9, 28.5, 4, 'btrim', math.pi / 4 + ang)
+    # lanterns on the end pavilions
+    for lx, ly in ((73.0, 753.1), (225.0, 718.2)):
+        c = Vector((lx - AX, ly - AY, 0))
+        frustum((c.x, c.y), 2.6, 2.6, 25.2, 27.0, 8, 'brick', math.pi / 8)
+        for k8 in range(8):
+            a8 = math.radians(22.5 + 45 * k8); n8 = Vector((math.cos(a8), math.sin(a8), 0))
+            window(c + n8 * 2.42, Vector((-n8.y, n8.x, 0)), n8, 0.7, 0.85, 25.6, arch=True, frame='white', glass='dark', sill=False, mull=False)
+        frustum((c.x, c.y), 2.95, 2.95, 27.0, 27.25, 8, 'btrim', math.pi / 8)
+        frustum((c.x, c.y), 2.9, 0.4, 27.25, 28.6, 8, 'slate', math.pi / 8)
+        frustum((c.x, c.y), 0.08, 0.03, 28.6, 29.9, 6, 'dark')
+elif KEY == 'cygnaeus':
+    # Cygnaeuksen koulu (1912, Riihiketo): ochre render, white storey bands and cornice, white multi-pane windows, tall arched windows
+    # in the middle of the main facades, granite plinth and a green copper roof; LoD2 massing
+    M('ochre', '#d8b56a'); M('white', '#f2efe6'); M('copper', '#4d8366', rough=0.6); M('granite', '#9a968f', rough=0.9); ROOF_IN_MODEL = True
+    mml_shell(91, 'ochre', 'copper', rich_deco(bay=3.2, ww=1.45, fh0=4.2, frame='white', glass='dark', plinth='granite', ph=1.4, cornice='white', band='white', arch_rows=(), arch_mid_rows=(1, 2)))
+elif KEY == 'asema':
+    # Porin rautatieasema (Thure Hellström 1937): light yellow rendered functionalist station, brown-framed windows with small
+    # hoods over the upper row, low red roofs on the wings, white eaves; massing from the LoD2 model
+    M('render', '#e8d7a0'); M('brownf', '#6b3f23'); M('redroof', '#8e3a2c', rough=0.7); M('eave', '#f1ede2'); ROOF_IN_MODEL = True
+    def deco(pts, nrm, u, us, zb, ztop):
+        u0, u1 = min(us), max(us); L_ = u1 - u0
+        if L_ < 3 or zb > 2: return
+        nb = max(1, round(L_ / 3.0)); base = pts[0] + nrm * 0.02
+        for kb in range(nb):
+            uu = u0 + L_ * (kb + 0.5) / nb; zt = min(ztop(uu - 0.7), ztop(uu + 0.7))
+            if zt < 3.5: continue
+            fl = 1 if zt < 6.5 else 2; fh = (zt - 0.6) / fl
+            for f in range(fl):
+                z_ = 0.9 + f * fh
+                window(base + u * uu, u, nrm, 1.25, min(2.0, fh * 0.55), z_, arch=False, frame='brownf', glass='dark', sill=True, mull=True)
+                if f == fl - 1 and fl > 1: obox((base + u * uu + nrm * 0.25).to_2d(), u, 0.8, 0.25, z_ + min(2.0, fh * 0.55) + 0.15, z_ + min(2.0, fh * 0.55) + 0.32, 'brownf')
+    mml_shell(3, 'render', 'redroof', deco)
+elif KEY == 'samk':
+    # SAMK-kampus Pori (Arkkitehti Asmala, 2017): dark glazing behind white horizontal metal bars, glazed street level; LoD2 massing
+    M('slat', '#f3f3ef', rough=0.5); M('panel', '#2e3438', rough=0.3); M('roofgrey', '#5d6164', rough=0.8); ROOF_IN_MODEL = True
+    def deco(pts, nrm, u, us, zb, ztop):
+        u0, u1 = min(us), max(us); L_ = u1 - u0
+        if L_ < 2: return
+        zt = min(ztop(u0 + L_ * f) for f in (0.05, 0.5, 0.95)); base = pts[0] + nrm * 0.25
+        c = base + u * ((u0 + u1) / 2)
+        z = max(zb, 0) + 3.6
+        while z < zt - 0.4:
+            obox(c.to_2d(), u, L_ / 2, 0.06, z, z + 0.32, 'slat'); z += 0.75
+    mml_shell(531, 'panel', 'roofgrey', deco)
 elif KEY == 'vesitorni':
     M('brick', '#8a3e2e', tex='brick'); M('band', '#cdb48e'); h = 47.0; TEX = 1024; ROOF_IN_MODEL = True
     walls(offset(P, 0.25), 0, 2.2, 'granite'); cap(offset(P, 0.25), 2.2, 'granite'); walls(P, 2.2, h + 0.9, 'brick'); cap(offset(P, -0.4), h, 'roofdark'); walls([p for p in reversed(offset(P, -0.4))], h, h + 0.9, 'brick')

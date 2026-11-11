@@ -112,6 +112,9 @@
 <script type="module">
 import * as THREE from './three.module.min.js';
 import CITY from './city.js';
+import LOD2 from './lod2.js';
+import RIV from './river.js';
+import TER from './terrain.js';   // ground heights: Maanmittauslaitos 2 m elevation model (CC BY 4.0)   // Kokemäenjoki below street level (OpenStreetMap river area)   // measured LoD2 building models (Maanmittauslaitos Rakennukset 3D)
 import PARKED from './parked.js';
 import { GLTFLoader } from './GLTFLoader.js';
 
@@ -119,6 +122,42 @@ const HW = CITY.hw, YS = CITY.ys, YN = CITY.yn, HH = -YS, YSPAN = YN - YS;   // 
 const OX0 = CITY.ox0, OX1 = CITY.ox1, OY0 = CITY.oy0, OY1 = CITY.oy1, OXS = OX1 - OX0, OYS = OY1 - OY0;   // whole map: coarser aerial image
 const PSIL = { x: 207.45, y: 477.95, len: 170.04, head: Math.atan2(245.85 - 207.45, 643.6 - 477.95), deck: 2.6, half: 7.4 };
 const inCore = (x, y) => Math.abs(x) < HW && y > YS && y < YN;
+// ---------- terrain: true ground (river bed below the water) and a smoothed, river-filled field that lifts everything else ----------
+const TDEC = b => { const s = atob(b), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
+const THG = new Int16Array(TDEC(TER.hg).buffer), THS = new Int16Array(TDEC(TER.hs).buffer), TSKIP = TDEC(TER.skip);
+function tBil(A, x, y) { const fx = Math.min(TER.nx - 1.001, Math.max(0, (x - TER.x0) / TER.g)), fy = Math.min(TER.ny - 1.001, Math.max(0, (y - TER.y0) / TER.g)), i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j, k = j * TER.nx + i;
+  return ((A[k] * (1 - u) + A[k + 1] * u) * (1 - v) + (A[k + TER.nx] * (1 - u) + A[k + TER.nx + 1] * u) * v) / 10; }
+const TZg = (x, y) => tBil(THG, x, y), TZs = (x, y) => tBil(THS, x, y);
+const tSkip = (x, y) => { const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
+let gridGeo;
+const WREL = (x, y) => TER.wl - TZs(x, y);          // water level relative to the lifted objects at (x, y)
+const terrainTex = (() => { const n = TER.nx * TER.ny, d = new Uint16Array(n); for (let i = 0; i < n; i++) d[i] = THREE.DataUtils.toHalfFloat(THS[i] / 10);
+  const t = new THREE.DataTexture(d, TER.nx, TER.ny, THREE.RedFormat, THREE.HalfFloatType); t.minFilter = t.magFilter = THREE.LinearFilter; t.needsUpdate = true; return t; })();
+function terrainize(mat) {
+  if (mat.userData.tDone || mat.userData.noT || mat.isShaderMaterial || mat.isSpriteMaterial) return; mat.userData.tDone = true;
+  const prev = mat.onBeforeCompile;
+  mat.onBeforeCompile = (sh, r) => { if (prev) prev.call(mat, sh, r);
+    sh.uniforms.tHeight = { value: terrainTex }; sh.uniforms.tGrid = { value: new THREE.Vector4(TER.x0, TER.y0, TER.g, 0) }; sh.uniforms.tSize = { value: new THREE.Vector2(TER.nx, TER.ny) };
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform sampler2D tHeight; uniform vec4 tGrid; uniform vec2 tSize;').replace('#include <project_vertex>', `
+      vec4 mvPosition = vec4( transformed, 1.0 );
+      #ifdef USE_INSTANCING
+        mvPosition = instanceMatrix * mvPosition;
+      #endif
+      vec4 tWp = modelMatrix * mvPosition;
+      vec2 tUv = vec2(((tWp.x - tGrid.x) / tGrid.z + 0.5) / tSize.x, ((-tWp.z - tGrid.y) / tGrid.z + 0.5) / tSize.y);
+      tWp.y += texture2D(tHeight, tUv).r;
+      mvPosition = viewMatrix * tWp;
+      gl_Position = projectionMatrix * mvPosition;`);
+  };
+  mat.customProgramCacheKey = () => 'terrain' + (prev ? prev.toString().length : 0);
+  mat.needsUpdate = true;
+}
+function terrainizeScene() { const walk = o => { if (o.userData.noT) return; const m = o.material; if (m) for (const q of Array.isArray(m) ? m : [m]) terrainize(q); for (const c of o.children) walk(c); }; walk(scene); }
+const noT = o => { o.traverse(q => { q.userData.noT = true; const m = q.material; if (m) for (const x of Array.isArray(m) ? m : [m]) x.userData.noT = true; }); return o; };
+const RMASK = (() => { const M = RIV.mask, b = atob(M.b), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return { ...M, a }; })();
+function inRiver(x, y) { const i = Math.floor((x - OX0) / RMASK.g), j = Math.floor((y - OY0) / RMASK.g); if (i < 0 || j < 0 || i >= RMASK.nx || j >= RMASK.ny) return false; const k = j * RMASK.nx + i; return (RMASK.a[k >> 3] >> (7 - (k & 7))) & 1; }
+function onBridgeDeck(x, y) { for (const b of RIV.br) { const P = b.p; for (let i = 0; i + 3 < P.length; i += 2) { const ax = P[i], ay = P[i + 1], dx = P[i + 2] - ax, dy = P[i + 3] - ay, L2 = dx * dx + dy * dy, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L2));
+  if (Math.hypot(ax + dx * t - x, ay + dy * t - y) < b.w / 2 + 0.5) return true; } } return false; }
 const $ = id => document.getElementById(id);
 const isTouch = matchMedia('(pointer:coarse)').matches;
 if (isTouch) document.body.classList.add('touch');
@@ -155,21 +194,81 @@ const groundMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a });
 const outerTex = new THREE.TextureLoader().load('./outer.jpg'); outerTex.colorSpace = THREE.SRGBColorSpace; outerTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 const outerMat = new THREE.MeshBasicMaterial({ map: outerTex }), roofMat2 = new THREE.MeshBasicMaterial({ map: outerTex, side: THREE.DoubleSide });
 {
-  const g = new THREE.PlaneGeometry(HW * 2, YSPAN); g.rotateX(-Math.PI / 2);
-  const gm = new THREE.Mesh(g, groundMat); gm.position.z = -(YS + YN) / 2; scene.add(gm);
-  // the wider, coarser image as a frame around the core (no overlap, so nothing flickers)
-  const fp = [], fu = [], rect = (x0, x1, y0, y1) => { for (const [x, y] of [[x0, y0], [x1, y0], [x1, y1], [x0, y0], [x1, y1], [x0, y1]]) { fp.push(x, 0, -y); fu.push((x - OX0) / OXS, (y - OY0) / OYS); } };
-  rect(OX0, -HW, OY0, OY1); rect(HW, OX1, OY0, OY1); rect(-HW, HW, OY0, YS); rect(-HW, HW, YN, OY1);
-  const fg = new THREE.BufferGeometry(); fg.setAttribute('position', new THREE.Float32BufferAttribute(fp, 3)); fg.setAttribute('uv', new THREE.Float32BufferAttribute(fu, 2));
-  scene.add(new THREE.Mesh(fg, outerMat));
+  // ground with the river cut out: the core photo, the coarser frame around it, sloped banks / stone quays and the water
+  const tris = (a, uvf, y = 0) => { const p = [], u = []; for (let i = 0; i < a.length; i += 2) { p.push(a[i], y, -a[i + 1]); u.push(...uvf(a[i], a[i + 1])); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(u, 2)); return g; };
+  const cuv = (x, y) => [(x + HW) / (2 * HW), (y - YS) / YSPAN], ouv = (x, y) => [(x - OX0) / OXS, (y - OY0) / OYS];
+  // ground as height grids from the elevation model: 6 m cells in the core, 18 m around it; the Eteläranta quay strip is left open
+  gridGeo = (x0, y0, x1, y1, step, uvf, skipf, dy = 0) => { const nx = Math.round((x1 - x0) / step), ny = Math.round((y1 - y0) / step), P = [], U = [], I = [];
+    for (let j = 0; j <= ny; j++) for (let i = 0; i <= nx; i++) { const x = x0 + i * step, y = y0 + j * step; P.push(x, TZg(x, y) + dy, -y); U.push(...uvf(x, y)); }
+    for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) { const x = x0 + (i + 0.5) * step, y = y0 + (j + 0.5) * step; if (skipf && skipf(x, y)) continue;
+      const k = j * (nx + 1) + i; I.push(k, k + 1, k + nx + 2, k, k + nx + 2, k + nx + 1); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I); g.rotateX(0); return g; };
+  scene.add(noT(new THREE.Mesh(gridGeo(-HW, YS, HW, YN, 6, cuv, tSkip), groundMat)));
+  scene.add(noT(new THREE.Mesh(gridGeo(OX0, OY0, OX1, OY1, 18, ouv, (x, y) => Math.abs(x) < HW - 9 && y > YS + 9 && y < YN - 9), outerMat)));
+  { const pc = [], po = [], A = RIV.water;               // the water keeps the river's own colours from the photo, with the sky in it
+    for (let i = 0; i < A.length; i += 6) { const cx = (A[i] + A[i + 2] + A[i + 4]) / 3, cy = (A[i + 1] + A[i + 3] + A[i + 5]) / 3; (inCore(cx, cy) ? pc : po).push(...A.slice(i, i + 6)); }
+    scene.add(noT(new THREE.Mesh(tris(pc, cuv, TER.wl), waterify(new THREE.MeshBasicMaterial({ map: orto })))));
+    scene.add(noT(new THREE.Mesh(tris(po, ouv, TER.wl), waterify(new THREE.MeshBasicMaterial({ map: outerTex }))))); }
   const o = new THREE.PlaneGeometry(14000, 14000); o.rotateX(-Math.PI / 2);
-  const om = new THREE.Mesh(o, new THREE.MeshBasicMaterial({ color: 0x74836f })); om.position.y = -0.6; scene.add(om);
+  const om = noT(new THREE.Mesh(o, new THREE.MeshBasicMaterial({ color: 0x74836f }))); om.position.y = -12; scene.add(om);
+}
+
+// ---------- ground detail: grass texture where the photo is green ----------
+const grassTex = (() => {
+  const N = 256, c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d'), d = g.createImageData(N, N);
+  let sd = 7; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  const v = new Float32Array(N * N); for (let i = 0; i < N * N; i++) v[i] = rnd();
+  for (let k = 0; k < 2600; k++) { let x = rnd() * N, y = rnd() * N; const a = rnd() * 6.28, L = 3 + rnd() * 7, b = 0.4 + rnd() * 0.6;   // short blades
+    for (let t = 0; t < L; t++) { const xi = ((x | 0) % N + N) % N, yi = ((y | 0) % N + N) % N; v[yi * N + xi] = v[yi * N + xi] * 0.4 + b; x += Math.cos(a) * 0.7; y += Math.sin(a) * 0.7; } }
+  const w = new Float32Array(N * N);                               // light blur so it reads as turf, not static
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { let s2 = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) s2 += v[((y + dy + N) % N) * N + (x + dx + N) % N]; w[y * N + x] = s2 / 9; }
+  for (let i = 0; i < N * N; i++) { const q = Math.max(0, Math.min(255, w[i] * 255)); d.data[i * 4] = d.data[i * 4 + 1] = d.data[i * 4 + 2] = q; d.data[i * 4 + 3] = 255; }
+  g.putImageData(d, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; return t; })();
+function grassify(mat) {
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.grassTex = { value: grassTex };
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vGw;').replace('#include <project_vertex>', '#include <project_vertex>\nvGw = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vGw; uniform sampler2D grassTex;').replace('#include <map_fragment>', `#include <map_fragment>
+      { vec3 cc = diffuseColor.rgb; float gr = smoothstep(0.004, 0.03, cc.g - max(cc.r, cc.b) * 0.97) * smoothstep(0.9, 0.5, cc.g * 3.0 - cc.r - cc.b);
+        float dist = length(vGw - cameraPosition); float fade = 1.0 - smoothstep(70.0, 320.0, dist);
+        float n1 = texture2D(grassTex, vGw.xz * 0.42).r, n2 = texture2D(grassTex, vGw.xz * 0.061 + 0.37).r, n3 = texture2D(grassTex, vGw.xz * 1.7).r;
+        float det = 0.62 + 0.38 * n1 + 0.30 * (n2 - 0.5) + 0.22 * (n3 - 0.5) * (1.0 - smoothstep(10.0, 45.0, dist));
+        diffuseColor.rgb = mix(cc, cc * det * vec3(0.97, 1.03, 0.93), gr * fade); }`);
+  }; mat.needsUpdate = true; return mat;
+}
+grassify(groundMat); grassify(outerMat);
+function waterify(mat) {          // sky reflection grows towards grazing angles, a faint ripple breaks it up
+  mat.onBeforeCompile = sh => {
+    sh.uniforms.grassTex = { value: grassTex };
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vGw;').replace('#include <project_vertex>', '#include <project_vertex>\nvGw = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vGw; uniform sampler2D grassTex;').replace('#include <map_fragment>', `#include <map_fragment>
+      { vec3 v = normalize(cameraPosition - vGw); float rip = texture2D(grassTex, vGw.xz * 0.05).r * 0.6 + texture2D(grassTex, vGw.xz * 0.013 + 0.5).r * 0.4;
+        float fr = clamp(pow(1.0 - v.y, 3.0) * 0.85 + 0.18 + (rip - 0.5) * 0.12, 0.0, 0.92);
+        vec3 sky = mix(vec3(0.30, 0.38, 0.46), vec3(0.62, 0.72, 0.84), 1.0 - v.y);
+        diffuseColor.rgb = mix(diffuseColor.rgb * vec3(0.9, 1.0, 1.05) + 0.03, sky, fr); }`);
+  }; mat.needsUpdate = true; return mat;
+}
+// ---------- sharper aerial photo near the helicopter: 512 m tiles at 0.25 m/px (Porin kaupunki WMS), loaded by distance ----------
+const HR = { S: 512, X0: -1280, Y0: -1280, NI: 6, NJ: 5, t: new Map(), loader: new THREE.TextureLoader(), last: -1e9 };
+function hrUpdate(x, y) {
+  for (let i = 0; i < HR.NI; i++) for (let j = 0; j < HR.NJ; j++) {
+    const k = i + '_' + j, cx = HR.X0 + (i + 0.5) * HR.S, cy = HR.Y0 + (j + 0.5) * HR.S, d = Math.max(Math.abs(cx - x), Math.abs(cy - y)) - HR.S / 2, e = HR.t.get(k);
+    if (d < 420 && !e) {
+      const m = grassify(new THREE.MeshBasicMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, transparent: true, opacity: 0 }));
+      const x0t = cx - HR.S / 2, y0t = cy - HR.S / 2, g = gridGeo(x0t, y0t, x0t + HR.S, y0t + HR.S, 6, (x, y) => [(x - x0t) / HR.S, (y - y0t) / HR.S], tSkip, 0.03); g.translate(-cx, 0, cy);
+      const me = noT(new THREE.Mesh(g, m)); me.position.set(cx, 0, -cy); me.renderOrder = -1;
+      const rec = { me, m, alive: true }; HR.t.set(k, rec);
+      HR.loader.load(`./ot/ot_${i}_${j}.jpg`, tex => { if (!rec.alive) { tex.dispose(); return; } tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+        m.map = tex; m.transparent = false; m.opacity = 1; m.needsUpdate = true; scene.add(me); });
+    } else if (e && d > 650) { e.alive = false; scene.remove(e.me); e.me.geometry.dispose(); if (e.m.map) e.m.map.dispose(); e.m.dispose(); HR.t.delete(k); }
+  }
 }
 
 // ---------- buildings ----------
 const PAL = [0xe9dcc0, 0xd9c7a2, 0xf0ead9, 0xcdb593, 0xb9805e, 0xa8563f, 0xd8d5cc, 0xbfc4c6, 0xe6cf9a, 0xc7a988, 0x9aa3a8, 0xe3d6c4, 0xb46a4c, 0xdcd0b8];
 const blds = [];           // {pts:[[x,y]..], h, minx,maxx,miny,maxy}
-const LMAT = { kirkko: [293.4, 369.7], raati: [-115.6, 394.1], kaupungintalo: [-57.7, 331.2], teatteri: [-201, 378], taidemuseo: [-94.8, 462.6], kauppahalli: [150, -32.8], vesitorni: [-835, -135], puuvilla: [230, 1000], promenadi: [9.2, -238.7], bepop: [58.3, -382.3], kirjasto: [-258, 114], museo: [-264.8, 455.9], tehdas: [160.2, 763.6], kehraamo: [85, 834], tori: [31, 81], lava: [90, 61], lokki: [-389, 998], isokarhu: [120.9, -179.4], mausoleumi: [-1946, 198.1], areena: [-1615.1, -1391.6], isokappeli: [-1809.2, 141.6], pienikappeli: [-2008.2, 191.1], harjoitushalli: [-1614.9, -1120.8] };
+const LMAT = { kirkko: [293.4, 369.7], raati: [-115.6, 394.1], kaupungintalo: [-57.7, 331.2], teatteri: [-201, 378], taidemuseo: [-94.8, 462.6], kauppahalli: [150, -32.8], vesitorni: [-835, -135], puuvilla: [230, 1000], promenadi: [9.2, -238.7], bepop: [58.3, -382.3], kirjasto: [-258, 114], museo: [-264.8, 455.9], tehdas: [160.2, 763.6], kehraamo: [85, 834], tori: [31, 81], lava: [90, 61], lokki: [-389, 998], isokarhu: [120.9, -179.4], mausoleumi: [-1946, 198.1], areena: [-1615.1, -1391.6], isokappeli: [-1809.2, 141.6], pienikappeli: [-2008.2, 191.1], harjoitushalli: [-1614.9, -1120.8], asema: [-443.0, -954.0], samk: [-268.0, -992.0], cygnaeus: [-321.0, -491.0] };
 const LMB = {};
 const GRID = 40, grid = new Map();
 const gkey = (i, j) => i * 4096 + j;
@@ -199,13 +298,19 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     return best; };
   const SB = STY.map(() => ({ p: [], n: [], u: [], c: [] }));
   const hsh = (i, k) => { let x = (i * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
-  const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima'], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {587:11,1725:5,1726:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,603:8,604:8,637:8,638:8,639:8,641:8,642:8,1216:8,602:9,1220:9,640:9,1599:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
-  const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
-  const col = new THREE.Color(), rc = new THREE.Color();
+  const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1'], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {125:12,126:12,127:12,129:12,169:12,272:12,273:12,133:12,135:12,275:12,276:12,277:12,290:12,291:12,587:11,1725:5,1726:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,603:8,604:8,637:8,638:8,639:8,641:8,642:8,1216:8,602:9,1220:9,640:9,1599:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
+  const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2, 100026585: 3 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
+  const col = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
   for (const b of CITY.b) {
     bIdx++;
     const pts = []; for (let i = 0; i < b.p.length; i += 2) pts.push([b.p[i] / 10, b.p[i + 1] / 10]);
-    let h = b.h;
+    const L2raw = LOD2.b[bIdx];
+    let kc = [0, 0]; for (const q of pts) { kc[0] += q[0] / pts.length; kc[1] += q[1] / pts.length; }
+    const inKivi = (kc[0] > -385 && kc[0] < 75 && kc[1] > 268 && kc[1] < 505) || (kc[0] >= 75 && kc[0] < 200 && kc[1] > 380 && kc[1] < 470);
+    const ownBlock = inKivi || (ZB[bIdx] !== undefined && ZB[bIdx] < 12);
+    if (LHIDE.has(bIdx) && !ownBlock) continue;   // covered by a neighbour's LoD2 model
+    const L2 = L2raw && !OWNROOF.has(b.w) && (ZB[bIdx] === undefined ? !inKivi : ZB[bIdx] >= 12) ? L2raw : null;   // Blender blocks keep their own heights
+    let h = L2 ? L2.h : b.h;
     const rec = { pts, h, minx: 1e9, maxx: -1e9, miny: 1e9, maxy: -1e9 };
     for (const q of pts) { rec.minx = Math.min(rec.minx, q[0]); rec.maxx = Math.max(rec.maxx, q[0]); rec.miny = Math.min(rec.miny, q[1]); rec.maxy = Math.max(rec.maxy, q[1]); }
     const bi = blds.push(rec) - 1;
@@ -222,7 +327,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     // facade style from height, colour and position (no building-type data in the map for most houses)
     const srk = SRW[b.w];   // Sampo-Rosenlew works: 1800s red brick halls, one blue press hall
     const house = b.k === 1 && !srk, shed = b.k === 2 && !srk, brickish = !house && !shed && [4, 5, 12].includes(b.i % PAL.length), r1 = hsh(b.w || bIdx, 1), r2 = hsh(b.w || bIdx, 2);
-    const sty = srk === 2 ? 3 : srk ? 5 : house || shed ? 6 : h < 5 ? 0 : brickish ? 5 : h >= 14 ? (r1 < 0.72 ? 2 : 3) : (r1 < 0.48 ? 0 : r1 < 0.62 ? 1 : 2);
+    const sty = srk >= 2 ? 3 : srk ? 5 : house || shed ? 6 : h < 5 ? 0 : brickish ? 5 : h >= 14 ? (r1 < 0.72 ? 2 : 3) : (r1 < 0.48 ? 0 : r1 < 0.62 ? 1 : 2);
     let bcx = 0, bcy = 0; for (const q of pts) { bcx += q[0]; bcy += q[1]; } bcx /= pts.length; bcy /= pts.length;
     const coreB = inCore(bcx, bcy), RP = coreB ? rp : rp2, RU = coreB ? ru : ru2, ruv = q => coreB ? [(q[0] + HW) / (2 * HW), (q[1] - YS) / YSPAN] : [(q[0] - OX0) / OXS, (q[1] - OY0) / OYS];
     if (house || shed) col.setHex(WOODPAL[(b.i + (shed ? 3 : 0)) % WOODPAL.length]).multiplyScalar(1.02 + (b.i % 5) * 0.03);
@@ -230,8 +335,24 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     // wall colour: palette tinted a little by the roof colour seen in the aerial image
     col.setHex(PAL[b.i % PAL.length]); rc.setRGB(b.c[0] / 255, b.c[1] / 255, b.c[2] / 255, THREE.SRGBColorSpace);
     col.lerp(rc, 0.18); const shade = 0.86 + (b.i % 7) * 0.025; col.multiplyScalar(shade);
-    if (srk === 1) col.setHex(SRBRICK[b.i % SRBRICK.length]); else if (srk === 2) col.setHex(0x2f63a6);
+    if (srk === 1) col.setHex(SRBRICK[b.i % SRBRICK.length]); else if (srk === 2) col.setHex(0x2f63a6); else if (srk === 3) col.setHex(0x2b4f86);
     const win = house ? true : shed ? false : h >= 5;
+    if (L2) {   // measured massing: walls with the facade texture (or a Blender block), roofs with the aerial photo
+      const ox = L2.o[0], oy = L2.o[1], W = L2.w, Bw = T || SB[sty], bw = BAYW[sty], E = Math.max(2.4, L2.e || L2.h);
+      const nf = Math.max(1, house || shed || E < 7.5 ? Math.round((E - 0.4) / 2.9) : Math.round(E / FLH[sty])), fh = E / nf;   // whole storeys up to the measured eave
+      for (let k = 0; k < W.length; k += 12) {
+        const ax = (W[k] + ox) / 10, ay = (W[k + 1] + oy) / 10, bx = (W[k + 4] + ox) / 10, by = (W[k + 5] + oy) / 10, cx = (W[k + 8] + ox) / 10, cy = (W[k + 9] + oy) / 10;
+        const az = W[k + 2] / 10, bz = W[k + 6] / 10, cz = W[k + 10] / 10;
+        let nx = (by - ay) * (cz - az) - (bz - az) * (cy - ay), nz = -((bz - az) * (cx - ax) - (bx - ax) * (cz - az)); const nl = Math.hypot(nx, nz) || 1; nx /= nl; nz /= nl;
+        for (let j = 0; j < 3; j++) { const x = (W[k + j * 4] + ox) / 10, y = (W[k + j * 4 + 1] + oy) / 10, z = W[k + j * 4 + 2] / 10, u = W[k + j * 4 + 3] / 10;
+          Bw.p.push(x, z, -y); Bw.n.push(nx, 0, nz);
+          if (win && u >= 0) Bw.u.push(u / bw, z / fh); else Bw.u.push(0.015, 0.015);
+          const ao = 0.74 + 0.26 * Math.min(1, z / 3); Bw.c.push(col.r * ao, col.g * ao, col.b * ao); }
+      }
+      const R = L2.r;
+      for (let k = 0; k < R.length; k += 3) { const q = [(R[k] + ox) / 10, (R[k + 1] + oy) / 10]; RP.push(q[0], R[k + 2] / 10 + 0.03, -q[1]); const uv = ruv(q); RU.push(uv[0], uv[1]); }
+      continue;
+    }
     for (let i = 0; i < pts.length; i++) {
       const a = pts[i], c2 = pts[(i + 1) % pts.length];
       const dx = c2[0] - a[0], dy = c2[1] - a[1], len = Math.hypot(dx, dy); if (len < 0.05) continue;
@@ -407,7 +528,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   }
   // landmarks outside the core: plain stand-ins until their Blender models have loaded
   const plain = (L, h, c) => { const pts = clean(L.pts); add(wallGeo(pts, 0, h), lam(c)); add(capGeo(pts, h), lam(0x8a8d90)); L.rec.h = h; };
-  for (const [k, h, c] of [['mausoleumi', 12, 0xd9d4c8], ['areena', 16, 0xcfd3d6], ['isokappeli', 9, 0xe8e2d2], ['pienikappeli', 7, 0xe8e2d2], ['harjoitushalli', 10, 0xcfd3d6]]) if (LMB[k]) track(k, () => plain(LMB[k], h, c));
+  for (const [k, h, c] of [['mausoleumi', 12, 0xd9d4c8], ['areena', 16, 0xcfd3d6], ['isokappeli', 9, 0xe8e2d2], ['pienikappeli', 7, 0xe8e2d2], ['harjoitushalli', 10, 0xcfd3d6], ['asema', 12.6, 0xe8d7a0], ['samk', 28, 0xd8dadb], ['cygnaeus', 22.9, 0xd8b56a]]) if (LMB[k]) track(k, () => plain(LMB[k], h, c));
   // Raatihuone (C. L. Engel, 1841): cream empire facade, three rows of windows, pedimented centre, tall clock tower
   if (LMB.raati) track('raati', () => {
     const L = LMB.raati, h = 13.5, rise = 3, wallC = 0xefe3ba;
@@ -547,6 +668,20 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     // Porinsilta (1926): Blender model with the truss, the raised bowstring span, portal arches, granite piers and lattice lamp masts
     loadModel('bl_porinsilta', (root, K) => { const m = new THREE.MeshLambertMaterial({ vertexColors: true }); root.traverse(q => { if (q.isMesh) q.material = m; });
       const g = new THREE.Group(); g.position.set(K.x, 0, -K.y); g.add(root); scene.add(g); window.__porinsilta = true; });
+    // decks over the lowered river (the bridges are in the aerial photo, so the deck keeps the photo), concrete edge beams and piers
+    { const dp = [], du = [], fp = [], conc = lam(0x9a9890);
+      for (const b of RIV.br) { const P = b.p;
+        if (onPorinsilta((P[0] + P[P.length - 2]) / 2, (P[1] + P[P.length - 1]) / 2, 12)) continue;
+        for (let i = 0; i + 3 < P.length; i += 2) { const ax = P[i], ay = P[i + 1], bx = P[i + 2], by = P[i + 3], L = Math.hypot(bx - ax, by - ay); if (L < 0.5) continue;
+          const nx = (by - ay) / L * b.w / 2, ny = -(bx - ax) / L * b.w / 2, q = [[ax + nx, ay + ny], [bx + nx, by + ny], [bx - nx, by - ny], [ax + nx, ay + ny], [bx - nx, by - ny], [ax - nx, ay - ny]];
+          for (const [x, y] of q) { dp.push(x, 0.05, -y); du.push(inCore(x, y) ? (x + HW) / (2 * HW) : 0, inCore(x, y) ? (y - YS) / YSPAN : 0); }
+          for (const sg of [1, -1]) { const e = [[ax + nx * sg, ay + ny * sg], [bx + nx * sg, by + ny * sg]];
+            fp.push(e[0][0], 0.05, -e[0][1], e[1][0], 0.05, -e[1][1], e[1][0], -0.95, -e[1][1], e[0][0], 0.05, -e[0][1], e[1][0], -0.95, -e[1][1], e[0][0], -0.95, -e[0][1]); }
+          for (let d = 12; d < L - 6; d += 24) { const x = ax + (bx - ax) * d / L, y = ay + (by - ay) * d / L; if (!inRiver(x, y)) continue;
+            const wr = WREL(x, y), pr = add(new THREE.BoxGeometry(1.2, -wr - 0.9, b.w * 0.8), conc); pr.position.set(x, (wr - 0.95) / 2, -y); pr.rotation.y = Math.atan2(by - ay, bx - ax); } } }
+      const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3)); dg.setAttribute('uv', new THREE.Float32BufferAttribute(du, 2));
+      add(dg, new THREE.MeshBasicMaterial({ map: orto, side: THREE.DoubleSide }));
+      const fg = new THREE.BufferGeometry(); fg.setAttribute('position', new THREE.Float32BufferAttribute(fp, 3)); fg.computeVertexNormals(); add(fg, new THREE.MeshLambertMaterial({ color: 0x8f8d86, side: THREE.DoubleSide })); }
     { const a = [396, 442], b = [396, 652];                              // Linnansilta (1974): concrete girder bridge
       for (const s of [-11, 11]) { const e = side(a, b, s); rail(e[0], e[1], () => 1.3, concrete, 1); } lamps(a, b, [0], 30, 11); }
   }
@@ -575,6 +710,79 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     for (const q of pts) { const po = add(new THREE.CylinderGeometry(0.22, 0.22, 5, 8), lam(0xdedbd2)); po.position.set(q[0], 2.5, -q[1]); } L.rec.h = 11; }
   // Puuvillan savupiippu (54 m)
   { const ch = add(new THREE.CylinderGeometry(1.5, 2.7, 54, 14), lam(0x9a4f3a)); ch.position.set(165.3, 27, -792.6); block(165.3, 792.6, 3, 54); }
+  // Aittaluodon voimalaitos (Pori Energia): the 126 m chimney of 1937 is the tallest point of Pori's skyline, with the
+  // 70 m steel stack of the auxiliary boiler beside it (heights: Porin korkean rakentamisen selvitys 2019, ympäristölupa 2020)
+  { const stack = (x, y, h, rb, rt, col, cap, capC) => {
+      const ch = add(new THREE.CylinderGeometry(rt, rb, h, 20), lam(col)); ch.position.set(x, h / 2, -y);
+      const c2 = add(new THREE.CylinderGeometry(rt * 1.08, rt * 1.08, cap, 20), lam(capC)); c2.position.set(x, h - cap / 2, -y);
+      const ring = add(new THREE.CylinderGeometry(rt * 1.35, rt * 1.35, 0.35, 20), lam(0x3a3b3c)); ring.position.set(x, h - cap - 1.2, -y);
+      block(x, y, rb + 0.5, h); };
+    stack(1177, 322, 126, 5.2, 2.6, 0x6e4636, 4, 0x2f2f30);
+    stack(1203, 300, 70, 1.6, 1.4, 0x5a4136, 5, 0xb8bcbf); }
+}
+
+// ---------- Eteläranta (renewed quay): lower walk by the water, seating steps with hedges, railing, pontoons, pavilions ----------
+{
+  const Q = []; for (let i = 0; i < RIV.quay.length; i += 2) Q.push([RIV.quay[i], RIV.quay[i + 1]]);
+  const N = Q.map((p, i) => { const a = Q[Math.max(0, i - 1)], b = Q[Math.min(Q.length - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy); return [-dy / L, dx / L]; });
+  if (inRiver(Q[2][0] + N[2][0] * 3, Q[2][1] + N[2][1] * 3)) for (const n of N) { n[0] = -n[0]; n[1] = -n[1]; }   // N points inland
+  const at = (i, o) => [Q[i][0] + N[i][0] * o, Q[i][1] + N[i][1] * o];
+  const P = [], C = [], push = (a, b, c, col) => { for (const v of [a, b, c]) { P.push(v[0], v[2], -v[1]); C.push(col[0], col[1], col[2]); } };
+  const quad = (a, b, c, d, col) => { push(a, b, c, col); push(a, c, d, col); };
+  const gran = [0.66, 0.65, 0.62], pave = [0.74, 0.73, 0.70], riser = [0.55, 0.54, 0.52], wallc = [0.45, 0.44, 0.42];
+  const LOW = -1.05, steps = [[4.5, LOW], [5.3, LOW + 0.35], [6.1, LOW + 0.7], [7.25, 0]];
+  for (let i = 0; i + 1 < Q.length; i++) {
+    const s2 = (o, z, j) => { const p = at(j, o); return [p[0], p[1], z]; };
+    quad(s2(0, LOW, i), s2(0, LOW, i + 1), s2(4.5, LOW, i + 1), s2(4.5, LOW, i), pave);                     // lower walk
+    for (let k = 0; k < 3; k++) { const [o0, z0] = steps[k], o1 = steps[k + 1][0], z1 = z0 + 0.35;
+      quad(s2(o0, z0, i), s2(o0, z0, i + 1), s2(o0, z1, i + 1), s2(o0, z1, i), riser);                       // riser
+      quad(s2(o0, z1, i), s2(o0, z1, i + 1), s2(o1, z1, i + 1), s2(o1, z1, i), gran); }                      // tread
+    quad(s2(0, WREL(Q[i][0], Q[i][1]) - 0.4, i), s2(0, WREL(Q[i + 1][0], Q[i + 1][1]) - 0.4, i + 1), s2(0, LOW, i + 1), s2(0, LOW, i), wallc);      // quay wall into the water
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(C, 3)); g.computeVertexNormals();
+  scene.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })));
+  // walk along the line: railing posts, hedges on the steps, lamps on the street edge
+  const segs = []; let tot = 0; for (let i = 0; i + 1 < Q.length; i++) { const L = Math.hypot(Q[i + 1][0] - Q[i][0], Q[i + 1][1] - Q[i][1]); segs.push([tot, L]); tot += L; }
+  const along = (d, o) => { let i = 0; while (i < segs.length - 1 && d > segs[i][0] + segs[i][1]) i++; const f = Math.min(1, Math.max(0, (d - segs[i][0]) / segs[i][1]));
+    const a = at(i, o), b = at(i + 1, o); return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, Math.atan2(Q[i + 1][1] - Q[i][1], Q[i + 1][0] - Q[i][0])]; };
+  const nearTaavi = d => { const p = along(d, 0); return Math.abs(p[0] + 149) < 9; };
+  const dark = new THREE.MeshLambertMaterial({ color: 0x2a2d30 }), hedge = new THREE.MeshLambertMaterial({ color: 0x3f6b2f }), M4 = new THREE.Matrix4(), Q4 = new THREE.Quaternion(), V3 = new THREE.Vector3(), S3 = new THREE.Vector3(1, 1, 1), UP = new THREE.Vector3(0, 1, 0);
+  const posts = []; for (let d = 1; d < tot - 1; d += 2.2) if (!nearTaavi(d)) posts.push(along(d, 0.25));
+  const pm = new THREE.InstancedMesh(new THREE.BoxGeometry(0.07, 1.05, 0.07), dark, posts.length);
+  posts.forEach((p, k) => pm.setMatrixAt(k, M4.compose(V3.set(p[0], LOW + 0.52, -p[1]), Q4.setFromAxisAngle(UP, p[2]), S3))); scene.add(pm);
+  { const rp = []; for (let i = 0; i + 1 < Q.length; i++) { const a = at(i, 0.25), b = at(i + 1, 0.25); for (const h of [LOW + 1.05, LOW + 0.55]) rp.push(a[0], h, -a[1], b[0], h, -b[1]); }
+    const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); scene.add(new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0x222528 }))); }
+  for (let d = 12; d < tot - 20; d += 40) { if (nearTaavi(d) || nearTaavi(d + 22)) continue;
+    const a = along(d, 5.7), b = along(d + 22, 5.7), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const hm = new THREE.Mesh(new THREE.BoxGeometry(L, 1.0, 1.5), hedge); hm.position.set(mx, LOW + 0.7 + 0.5, -my); hm.rotation.y = -Math.atan2(b[1] - a[1], b[0] - a[0]); scene.add(hm);
+    const bm = new THREE.Mesh(new THREE.BoxGeometry(L + 0.2, 0.5, 1.7), new THREE.MeshLambertMaterial({ color: 0x5c5a56 })); bm.position.set(mx, LOW + 0.7 + 0.1, -my); bm.rotation.y = hm.rotation.y; scene.add(bm); }
+  const lampPost = new THREE.MeshLambertMaterial({ color: 0x1f2326 }), lampGlass = new THREE.MeshBasicMaterial({ color: 0xfff3d6 });
+  for (let d = 8; d < tot; d += 22) { const p = along(d, 8.5); const po = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.13, 4.2, 8), lampPost); po.position.set(p[0], 2.1, -p[1]); scene.add(po);
+    const lg = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.16, 0.6, 6), lampGlass); lg.position.set(p[0], 4.45, -p[1]); scene.add(lg);
+    const cp = new THREE.Mesh(new THREE.ConeGeometry(0.33, 0.3, 6), lampPost); cp.position.set(p[0], 4.9, -p[1]); scene.add(cp); }
+  // pontoon jetties with moored boats
+  const pont = new THREE.MeshLambertMaterial({ color: 0x9b9890 }), hullM = new THREE.MeshLambertMaterial({ color: 0xf2f2ee }), cabM = new THREE.MeshLambertMaterial({ color: 0x32404a });
+  for (const f of [0.12, 0.3, 0.47]) { const p = along(tot * f, 0), ang = p[2], nx = -Math.sin(ang), ny = Math.cos(ang);
+    const sgn = inRiver(p[0] + nx * 6, p[1] + ny * 6) ? 1 : -1, L = 24, cx = p[0] + nx * sgn * L / 2, cy = p[1] + ny * sgn * L / 2;
+    const pm2 = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.45, L), pont); pm2.position.set(cx, WREL(cx, cy) + 0.2, -cy); pm2.rotation.y = -ang; scene.add(pm2);
+    for (const k of [-1, 1]) for (const t of [0.35, 0.75]) { const bx = p[0] + nx * sgn * L * t + Math.cos(ang) * k * 3.4, by = p[1] + ny * sgn * L * t + Math.sin(ang) * k * 3.4;
+      const hl = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 7.5), hullM); hl.position.set(bx, WREL(bx, by) + 0.35, -by); hl.rotation.y = -ang; scene.add(hl);
+      const cb = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.9, 2.6), cabM); cb.position.set(bx, WREL(bx, by) + 1.2, -by); cb.rotation.y = -ang; scene.add(cb); } }
+  // the old sailing ship at the west end of the quay
+  { const p = along(tot * 0.86, -4.2), ang = p[2];
+    const ship = new THREE.Group(); ship.position.set(p[0], WREL(p[0], p[1]), -p[1]); ship.rotation.y = -ang; scene.add(ship);
+    const hullS = new THREE.Mesh(new THREE.BoxGeometry(26, 2.6, 6.2), new THREE.MeshLambertMaterial({ color: 0x8e2a1f })); hullS.position.y = 1.0; ship.add(hullS);
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(25.6, 0.2, 5.8), new THREE.MeshLambertMaterial({ color: 0x8a6a45 })); deck.position.y = 2.35; ship.add(deck);
+    const bow = new THREE.Mesh(new THREE.ConeGeometry(3.1, 6, 4), hullS.material); bow.rotation.z = -Math.PI / 2; bow.rotation.x = Math.PI / 4; bow.position.set(16, 1.2, 0); ship.add(bow);
+    for (const mx of [-6, 4]) { const ma = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 16, 6), new THREE.MeshLambertMaterial({ color: 0x5a4632 })); ma.position.set(mx, 10.3, 0); ship.add(ma); } }
+  // two restaurant pavilions: glazed walls under light green standing-seam hip roofs, terraces with white parasols
+  const roofG = new THREE.MeshLambertMaterial({ color: 0x9ccab3 }), glassP = new THREE.MeshLambertMaterial({ color: 0x3b4c58 }), frameP = new THREE.MeshLambertMaterial({ color: 0xe9ebe6 }), para = new THREE.MeshLambertMaterial({ color: 0xf6f6f2, side: THREE.DoubleSide });
+  for (const [f, w, dpt] of [[0.38, 17, 9], [0.62, 13, 8]]) { const p = along(tot * f, 17), ang = p[2], gr = new THREE.Group(); gr.position.set(p[0], 0, -p[1]); gr.rotation.y = -ang; scene.add(gr);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(w, 3.4, dpt), glassP); body.position.y = 1.7; gr.add(body);
+    for (let x = -w / 2; x <= w / 2 + 0.01; x += 1.6) for (const z of [-dpt / 2 - 0.02, dpt / 2 + 0.02]) { const fm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 3.4, 0.08), frameP); fm.position.set(x, 1.7, z); gr.add(fm); }
+    const rf = new THREE.Mesh(new THREE.ConeGeometry(Math.hypot(w, dpt) / 2 + 1.2, 2.2, 4, 1), roofG); rf.rotation.y = Math.PI / 4; rf.scale.set((w + 2.4) / (dpt + 2.4) * 0.72, 1, 0.72); rf.position.y = 3.4 + 1.1; gr.add(rf);
+    for (let k = 0; k < 6; k++) { const um = new THREE.Mesh(new THREE.ConeGeometry(1.5, 0.6, 8, 1, true), para); um.position.set(-w / 2 + 1.5 + k * (w - 3) / 5, 2.5, -dpt / 2 - 3.2); gr.add(um);
+      const st = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.3, 4), lampPost); st.position.set(um.position.x, 1.15, um.position.z); gr.add(st); } }
 }
 
 // embedded Blender models: base64 glb inside a script file
@@ -677,7 +885,7 @@ const HOME = { x: 70, y: 45 };   // open paving south of the stalls, clear of th
     const big = TOUR.includes(d) || d.n === 'Kauppatori';
     const t = textCanvas(d.n, { size: 40, color: big ? '#16110a' : '#f4f1e8', bg: big ? 'rgba(255,201,40,.95)' : 'rgba(14,22,30,.72)', pad: 18 });
     const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t.tex, transparent: true, depthWrite: false, fog: false }));
-    const hh = big ? 9 : 6.5; s.scale.set(hh * t.aspect, hh, 1); s.position.set(d.x, Math.min((d.h || 0), 70) + (big ? 16 : 11), -d.y); s.renderOrder = 3; s.userData.big = big; sprites.push(s); scene.add(s);
+    const hh = big ? 9 : 6.5; s.scale.set(hh * t.aspect, hh, 1); s.position.set(d.x, TZs(d.x, d.y) + Math.min((d.h || 0), 70) + (big ? 16 : 11), -d.y); s.renderOrder = 3; s.userData.big = big; sprites.push(s); scene.add(s);
   }
 }
 
@@ -702,7 +910,7 @@ const beacon = new THREE.Group();
 }
 
 // ---------- helicopter ----------
-const heli = new THREE.Group(); heli.rotation.order = 'YXZ';
+const heli = new THREE.Group(); heli.rotation.order = 'YXZ'; heli.userData.noT = true;
 let rotor, tailRotor;
 {
   const yel = new THREE.MeshLambertMaterial({ color: 0xffc928 }), dark = new THREE.MeshLambertMaterial({ color: 0x1d2b3a }), glass = new THREE.MeshLambertMaterial({ color: 0x25394d, emissive: 0x16283a });
@@ -738,7 +946,7 @@ const blob = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'); const g = x.createRadialGradient(32, 32, 2, 32, 32, 30);
   g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64);
   const p = new THREE.PlaneGeometry(13, 13); p.rotateX(-Math.PI / 2);
-  const m = new THREE.Mesh(p, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.renderOrder = 5; scene.add(m); return m;
+  const m = new THREE.Mesh(p, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.renderOrder = 5; m.userData.noT = true; scene.add(m); return m;
 })();
 
 // ---------- traffic: cars wandering the street network, sized like the cars in the aerial image ----------
@@ -804,9 +1012,10 @@ function onPorinsilta(x, y, extra = 0) { const ux = Math.sin(PSIL.head), uy = Ma
 function bridgeZ(x, y) { const t = onPorinsilta(x, y); if (t === null) return 0;
   return t < 3 ? PSIL.deck * Math.max(0, (t + 14) / 17) : t > PSIL.len - 3 ? PSIL.deck * Math.max(0, (PSIL.len + 14 - t) / 17) : PSIL.deck; }
 function roofAt(x, y) {
-  const l = grid.get(gkey(Math.floor(x / GRID) + 100, Math.floor(y / GRID) + 100)); let h = bridgeZ(x, y); if (!l) return h;
-  for (const bi of l) { const b = blds[bi]; if (x < b.minx - 4 || x > b.maxx + 4 || y < b.miny - 4 || y > b.maxy + 4 || b.h <= h) continue;
-    for (const p of PROBE) if (pip(x + p[0], y + p[1], b.pts)) { h = b.h; break; } }
+  const tb = TZs(x, y), l = grid.get(gkey(Math.floor(x / GRID) + 100, Math.floor(y / GRID) + 100));
+  let h = onPorinsilta(x, y) !== null ? bridgeZ(x, y) + tb : inRiver(x, y) && !onBridgeDeck(x, y) ? TER.wl : Math.max(TZg(x, y), tb - 0.5); if (!l) return h;
+  for (const bi of l) { const b = blds[bi]; if (x < b.minx - 4 || x > b.maxx + 4 || y < b.miny - 4 || y > b.maxy + 4 || b.h + tb <= h) continue;
+    for (const p of PROBE) if (pip(x + p[0], y + p[1], b.pts)) { h = b.h + tb; break; } }
   return h;
 }
 
@@ -946,6 +1155,7 @@ function step(dt) {
   const tp = S.landed ? 0 : -(f * 0.2 + spF * 0.0035), tr = S.landed ? 0 : -(S.yawRate * 0.14 * Math.min(1, Math.abs(spF) / 25 + 0.25) + s * 0.18 + spR * 0.004);
   S.pitch += (tp - S.pitch) * Math.min(1, dt * 4); S.roll += (tr - S.roll) * Math.min(1, dt * 4);
   heli.position.set(S.x, S.alt, -S.y); heli.rotation.set(S.pitch, -S.yaw, S.roll);
+  if (performance.now() - HR.last > 500) { HR.last = performance.now(); hrUpdate(S.x, S.y); }
   rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt;
   blob.position.set(S.x, roofAt(S.x, S.y) + 0.3, -S.y); const bs = Math.max(0.35, 1 - (S.alt - SKID) / 160); blob.scale.setScalar(bs); blob.material.opacity = bs;
 
@@ -1046,6 +1256,7 @@ for (const id of ['mission', 'mapwrap', 'gauges', 'street', 'help']) $(id).style
 }
 setTarget();
 window.__game = { S, begin, keys, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
+terrainizeScene(); setInterval(terrainizeScene, 1000);
 requestAnimationFrame(frame);
 </script>
 </body>
