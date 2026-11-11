@@ -30,7 +30,16 @@ def build():
     R = pickle.load(open('/home/claude/river.pkl', 'rb'))
     riv = shapely.contains_xy(R, X, Y)
     WLabs = float(np.nanmedian(sample(X[riv], Y[riv]))) - REF       # water surface from the scan
-    Hg = H.copy(); Hg[riv] = np.minimum(Hg[riv], WLabs - 1.2)       # river bed below the water plane
+    # smooth banks: signed distance to the shoreline (+ land, - water) shapes the bank so the waterline follows the
+    # river outline instead of the 6 m grid; land within 10 m of the water eases down to it, the bed shelves out
+    Bd = R.boundary; dist = shapely.distance(Bd, shapely.points(X.ravel(), Y.ravel())).reshape(X.shape)
+    sd = np.where(riv, -dist, dist)
+    bed = WLabs - np.minimum(2.6, 0.35 + 0.22 * np.maximum(0, -sd))
+    bank = WLabs + 0.25 + 0.30 * sd
+    Hg = H.copy()
+    Hg = np.where(sd < 0, np.minimum(Hg, bed), Hg)
+    near = (sd >= 0) & (sd < 10); Hg[near] = np.minimum(Hg[near], np.maximum(bank[near], WLabs + 0.05))
+    Hg[(sd >= 0) & (sd < 1.5)] = (WLabs + 0.25 + 0.30 * sd)[(sd >= 0) & (sd < 1.5)]
     # object field: river filled from the banks, then smoothed, so buildings and bridges sit level
     Hs = H.copy(); idx = ndimage.distance_transform_edt(riv, return_distances=False, return_indices=True)
     Hs = Hs[idx[0], idx[1]]

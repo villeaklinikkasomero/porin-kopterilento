@@ -100,3 +100,21 @@ Testipalvelin palvelee `/home/claude/pori`.
 
 Huom: käyttöehtojen hyväksyntä (MML-tilaukset) ja GitHub-push vaativat käyttäjän luvan; MML-tilauksen viimeisen
 "Tilaa tuotteet" -napin painaa käyttäjä itse.
+
+## Päivitys 11.11.2026 klo 10.30
+- **Tarkka ilmakuva koko alueelle:** 58 uutta 512 m ruutua (`ot/ot_i_j.jpg`, i −3..7, j −1..6, 1536 px = 0,33 m/px)
+  keskustan 30 ruudun (2048 px) ympärille. Ladataan vasta kun kopteri on alle 420 m päässä (`HR` + `hrUpdate`).
+  Haku: kartta.pori.fi-sivulla selaimessa WMS 1.1.1 GetMap (EPSG:4326, LAYERS=Ilmakuva) → OffscreenCanvas → JPEG →
+  nippuna (`otbN.bin`: 4 tavun pituus + JSON-otsake + kuvat) Downloads-kansioon → device_stage_files → purku.
+  XML-sivulla latauslinkki pitää luoda `createElementNS('http://www.w3.org/1999/xhtml','a')`.
+- **Pehmeät joenrannat:** `blender/dem_build.py` laskee etäisyyden rantaviivaan (OSM-joki): ranta laskee loivasti veteen
+  ja pohja syvenee asteittain, joten rantaviiva seuraa joen muotoa eikä 6 m ruudukkoa.
+- **Eteläranta:** uudistus (portaat, kaide, pensaat, ponttonit, paviljongit) vain Porinsillalta Taavi-sillalle
+  (`QSEG` x > −143 tiedostossa `blender/river_build.py`); Taavi-sillan länsipuolella vanha ranta ilmakuvan mukaan.
+- **Barco-laiva:** `blender/barco.py` → `bl_barco.js` (musta runko, valkoinen raita, keula­kansi ja keulapuu, kaksi
+  valkoista mastoa, valkoinen peräkansirakennus BARCO-kyltillä, kaiteet, valosarjat). OSM:n laivan "rakennus"
+  (id 1196441531) ohitetaan. Paikka ja suunta OSM-ääriviivasta, vesirajaan `TER.wl` (`noT`).
+- **Autot:** `cars.js` on edelleen vanha (car0–car2). Koodi hyväksyy myös 7 tyypin tiedoston. Kenneyn kokeiluversio
+  (lelumainen, ei käytössä) on työtilassa. Käyttäjä haluaa myöhemmin realistiset eurooppalaiset autot Blenderissä
+  (viistoperä, farmari, katumaasturi, pakettiauto, Scania-tyyppinen kuorma-auto), hillityt värit.
+- Taivaalla näkyy vaalea kupolimainen haamu kaukana (vanha vika, ei korjattu).

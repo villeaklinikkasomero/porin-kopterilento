@@ -86,7 +86,7 @@
   <kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
   <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi kierros
 </div>
-<div id="credit">Ilmakuva: Porin kaupunki · Kartta-aineisto © OpenStreetMapin tekijät · 3D-rakennukset © Maanmittauslaitos (CC BY 4.0)</div>
+<div id="credit">Ilmakuva: Porin kaupunki · Kartta-aineisto © OpenStreetMapin tekijät · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0), ilmakuva © Porin kaupunki</div>
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
@@ -250,9 +250,10 @@ function waterify(mat) {          // sky reflection grows towards grazing angles
   }; mat.needsUpdate = true; return mat;
 }
 // ---------- sharper aerial photo near the helicopter: 512 m tiles at 0.25 m/px (Porin kaupunki WMS), loaded by distance ----------
-const HR = { S: 512, X0: -1280, Y0: -1280, NI: 6, NJ: 5, t: new Map(), loader: new THREE.TextureLoader(), last: -1e9 };
+// 0.25 m/px tiles over the centre (i 0..5, j 0..4), 0.33 m/px tiles over the rest of the map (i -3..7, j -1..6)
+const HR = { S: 512, X0: -1280, Y0: -1280, I0: -3, I1: 7, J0: -1, J1: 6, t: new Map(), loader: new THREE.TextureLoader(), last: -1e9 };
 function hrUpdate(x, y) {
-  for (let i = 0; i < HR.NI; i++) for (let j = 0; j < HR.NJ; j++) {
+  for (let i = HR.I0; i <= HR.I1; i++) for (let j = HR.J0; j <= HR.J1; j++) {
     const k = i + '_' + j, cx = HR.X0 + (i + 0.5) * HR.S, cy = HR.Y0 + (j + 0.5) * HR.S, d = Math.max(Math.abs(cx - x), Math.abs(cy - y)) - HR.S / 2, e = HR.t.get(k);
     if (d < 420 && !e) {
       const m = grassify(new THREE.MeshBasicMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, transparent: true, opacity: 0 }));
@@ -303,6 +304,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const col = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
   for (const b of CITY.b) {
     bIdx++;
+    if (b.w === 1196441531) continue;   // Barco: the moored ship is a Blender model (below), not a building
     const pts = []; for (let i = 0; i < b.p.length; i += 2) pts.push([b.p[i] / 10, b.p[i + 1] / 10]);
     const L2raw = LOD2.b[bIdx];
     let kc = [0, 0]; for (const q of pts) { kc[0] += q[0] / pts.length; kc[1] += q[1] / pts.length; }
@@ -762,22 +764,18 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const cp = new THREE.Mesh(new THREE.ConeGeometry(0.33, 0.3, 6), lampPost); cp.position.set(p[0], 4.9, -p[1]); scene.add(cp); }
   // pontoon jetties with moored boats
   const pont = new THREE.MeshLambertMaterial({ color: 0x9b9890 }), hullM = new THREE.MeshLambertMaterial({ color: 0xf2f2ee }), cabM = new THREE.MeshLambertMaterial({ color: 0x32404a });
-  for (const f of [0.12, 0.3, 0.47]) { const p = along(tot * f, 0), ang = p[2], nx = -Math.sin(ang), ny = Math.cos(ang);
+  for (const f of [64, 159, 249]) { const p = along(Math.min(tot - 15, f), 0), ang = p[2], nx = -Math.sin(ang), ny = Math.cos(ang);
     const sgn = inRiver(p[0] + nx * 6, p[1] + ny * 6) ? 1 : -1, L = 24, cx = p[0] + nx * sgn * L / 2, cy = p[1] + ny * sgn * L / 2;
     const pm2 = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.45, L), pont); pm2.position.set(cx, WREL(cx, cy) + 0.2, -cy); pm2.rotation.y = -ang; scene.add(pm2);
     for (const k of [-1, 1]) for (const t of [0.35, 0.75]) { const bx = p[0] + nx * sgn * L * t + Math.cos(ang) * k * 3.4, by = p[1] + ny * sgn * L * t + Math.sin(ang) * k * 3.4;
       const hl = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.9, 7.5), hullM); hl.position.set(bx, WREL(bx, by) + 0.35, -by); hl.rotation.y = -ang; scene.add(hl);
       const cb = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.9, 2.6), cabM); cb.position.set(bx, WREL(bx, by) + 1.2, -by); cb.rotation.y = -ang; scene.add(cb); } }
-  // the old sailing ship at the west end of the quay
-  { const p = along(tot * 0.86, -4.2), ang = p[2];
-    const ship = new THREE.Group(); ship.position.set(p[0], WREL(p[0], p[1]), -p[1]); ship.rotation.y = -ang; scene.add(ship);
-    const hullS = new THREE.Mesh(new THREE.BoxGeometry(26, 2.6, 6.2), new THREE.MeshLambertMaterial({ color: 0x8e2a1f })); hullS.position.y = 1.0; ship.add(hullS);
-    const deck = new THREE.Mesh(new THREE.BoxGeometry(25.6, 0.2, 5.8), new THREE.MeshLambertMaterial({ color: 0x8a6a45 })); deck.position.y = 2.35; ship.add(deck);
-    const bow = new THREE.Mesh(new THREE.ConeGeometry(3.1, 6, 4), hullS.material); bow.rotation.z = -Math.PI / 2; bow.rotation.x = Math.PI / 4; bow.position.set(16, 1.2, 0); ship.add(bow);
-    for (const mx of [-6, 4]) { const ma = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.18, 16, 6), new THREE.MeshLambertMaterial({ color: 0x5a4632 })); ma.position.set(mx, 10.3, 0); ship.add(ma); } }
+  // Barco, the restaurant ship moored west of Taavi-silta: Blender model at the water level
+  loadModel('bl_barco', (root, K) => { const m = new THREE.MeshLambertMaterial({ vertexColors: true }); root.traverse(q => { if (q.isMesh) q.material = m; });
+    const g = new THREE.Group(); g.position.set(K.x, TER.wl, -K.y); g.add(root); scene.add(noT(g)); window.__barco = true; });
   // two restaurant pavilions: glazed walls under light green standing-seam hip roofs, terraces with white parasols
   const roofG = new THREE.MeshLambertMaterial({ color: 0x9ccab3 }), glassP = new THREE.MeshLambertMaterial({ color: 0x3b4c58 }), frameP = new THREE.MeshLambertMaterial({ color: 0xe9ebe6 }), para = new THREE.MeshLambertMaterial({ color: 0xf6f6f2, side: THREE.DoubleSide });
-  for (const [f, w, dpt] of [[0.38, 17, 9], [0.62, 13, 8]]) { const p = along(tot * f, 17), ang = p[2], gr = new THREE.Group(); gr.position.set(p[0], 0, -p[1]); gr.rotation.y = -ang; scene.add(gr);
+  for (const [f, w, dpt] of [[201, 17, 9], [315, 13, 8]]) { const p = along(Math.min(tot - 12, f), 17), ang = p[2], gr = new THREE.Group(); gr.position.set(p[0], 0, -p[1]); gr.rotation.y = -ang; scene.add(gr);
     const body = new THREE.Mesh(new THREE.BoxGeometry(w, 3.4, dpt), glassP); body.position.y = 1.7; gr.add(body);
     for (let x = -w / 2; x <= w / 2 + 0.01; x += 1.6) for (const z of [-dpt / 2 - 0.02, dpt / 2 + 0.02]) { const fm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 3.4, 0.08), frameP); fm.position.set(x, 1.7, z); gr.add(fm); }
     const rf = new THREE.Mesh(new THREE.ConeGeometry(Math.hypot(w, dpt) / 2 + 1.2, 2.2, 4, 1), roofG); rf.rotation.y = Math.PI / 4; rf.scale.set((w + 2.4) / (dpt + 2.4) * 0.72, 1, 0.72); rf.position.y = 3.4 + 1.1; gr.add(rf);
@@ -967,7 +965,7 @@ const cars = [];
   let sd = 77; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < N; i++) { const a = list[Math.floor(rnd() * list.length)], b = a.nb[Math.floor(rnd() * a.nb.length)];
     cars.push({ a, b, t: rnd(), v: 7 + rnd() * 6, yaw: Math.atan2(b.x - a.x, b.y - a.y) }); body.setColorAt(i, col.setHex(PAINT[Math.floor(rnd() * PAINT.length)])); }
-  scene.add(body, cab, base); let parts = [body, cab, base];
+  scene.add(body, cab, base); let parts = [body, cab, base], typed = false;
   const m4 = new THREE.Matrix4(), q4 = new THREE.Quaternion(), p3 = new THREE.Vector3(), s3 = new THREE.Vector3(1, 1, 1), UP = new THREE.Vector3(0, 1, 0);
   cars.update = dt => {
     for (let i = 0; i < N; i++) { const c = cars[i]; let dx = c.b.x - c.a.x, dy = c.b.y - c.a.y, len = Math.hypot(dx, dy) || 1;
@@ -975,20 +973,25 @@ const cars = [];
       if (c.t >= 1) { const opts = c.b.nb.filter(n => n !== c.a), nx = opts.length ? opts[Math.floor(rnd() * opts.length)] : c.a; c.a = c.b; c.b = nx; c.t = 0; dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
       const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * 1.7, y = c.a.y + dy * c.t - ux * 1.7;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
-      p3.set(x, 0.03 + bridgeZ(x, y), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); for (const q of parts) q.setMatrixAt(i, m4); }
+      p3.set(x, 0.03 + bridgeZ(x, y), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
     for (const q of parts) q.instanceMatrix.needsUpdate = true;
   };
   cars.update(0);
   // Blender-made car models: the traffic switches to them, and one is parked on top of every car found in the aerial image
+  // car models car0..car6 (hatchback, saloon, SUV, van, box lorry, flatbed lorry, refuse lorry); types missing from cars.js are skipped
   loadModel('cars', root => {
-    const geo = ['car0', 'car1', 'car2'].map(k => root.getObjectByName(k).geometry), cm = new THREE.MeshLambertMaterial({ vertexColors: true });
-    const tm = new THREE.InstancedMesh(geo[0], cm, N), tc = new THREE.Color();
-    for (let i = 0; i < N; i++) { body.getColorAt(i, tc); tm.setColorAt(i, tc); }
-    scene.remove(body, cab, base); scene.add(tm); parts = [tm]; cars.update(0);
-    const lists = [[], [], []], n = PARKED.length / 4, hs = (i, k) => { let x = (i * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
-    for (let i = 0; i < n; i++) { const v = hs(i, 1); lists[v < 0.58 ? 0 : v < 0.92 ? 1 : 2].push(i); }
+    const geo = ['car0', 'car1', 'car2', 'car3', 'car4', 'car5', 'car6'].map((k, i) => (root.getObjectByName(k) || root.getObjectByName('car' + (i % 3))).geometry), has = k => !!root.getObjectByName('car' + k), cm = new THREE.MeshLambertMaterial({ vertexColors: true }), tc = new THREE.Color();
+    const pick = (v, w) => { let a = 0; for (let k = 0; k < w.length; k++) { a += w[k]; if (v < a) return k; } return 0; };
+    const TW = [0.27, 0.22, 0.16, 0.17, 0.08, 0.06, 0.04].map((w, k) => has(k) ? w : 0), tws = TW.reduce((a, b) => a + b, 0); TW.forEach((w, k) => TW[k] = w / tws), LORRY = [0xf4f4f2, 0xf4f4f2, 0xd9dcdf, 0x2f5f9e, 0xb52a22, 0x2e6b45, 0xe9c33a];
+    const cnt = [0, 0, 0, 0, 0, 0, 0]; for (const c of cars) { c.k = pick(rnd(), TW); c.j = cnt[c.k]++; }
+    const tms = geo.map((g, k) => new THREE.InstancedMesh(g, cm, Math.max(1, cnt[k])));
+    cars.forEach((c, i) => { if (c.k >= 4) tc.setHex(LORRY[Math.floor(rnd() * LORRY.length)]); else body.getColorAt(i, tc); tms[c.k].setColorAt(c.j, tc); });
+    tms.forEach(t => { t.frustumCulled = false; scene.add(t); });
+    scene.remove(body, cab, base); parts = tms; typed = true; cars.update(0);
+    const lists = [[], [], [], []], n = PARKED.length / 4, hs = (i, k) => { let x = (i * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
+    for (let i = 0; i < n; i++) lists[pick(hs(i, 1), [0.36, 0.28, 0.24, 0.12])].push(i);
     lists.forEach((ids, k) => { const im = new THREE.InstancedMesh(geo[k], cm, ids.length);
-      ids.forEach((ci, j) => { const yaw = PARKED[ci * 4 + 2] / 100, sc = (k === 2 ? 0.86 : 0.93) + hs(ci, 3) * 0.1;      // heading already faces the traffic (kerbside) or the bay (car parks)
+      ids.forEach((ci, j) => { const yaw = PARKED[ci * 4 + 2] / 100, sc = (k === 3 ? 0.9 : 0.94) + hs(ci, 3) * 0.08;      // heading already faces the traffic (kerbside) or the bay (car parks)
         p3.set(PARKED[ci * 4] / 10, 0.02, -PARKED[ci * 4 + 1] / 10); q4.setFromAxisAngle(UP, -yaw); s3.set(sc, sc, sc); im.setMatrixAt(j, m4.compose(p3, q4, s3));
         tc.setHex(PARKED[ci * 4 + 3]); const mxc = Math.max(tc.r, tc.g, tc.b); if (mxc < 0.05) tc.setRGB(0.05, 0.055, 0.06); im.setColorAt(j, tc); });
       s3.set(1, 1, 1); im.frustumCulled = false; scene.add(im); });

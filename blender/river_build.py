@@ -21,7 +21,7 @@ def flat(g):
         for x, y in tri(p): out += [round(x, 2), round(y, 2)]
     return out
 # Eteläranta (renewed 2020s): lower quay walk 1.05 m below the street, three seating steps up to street level
-QSEG = box(-330, 455, 195, 530)
+QSEG = box(-143, 455, 195, 530)                   # renewal reaches Taavi-silta (x -149); west of it the old bank remains
 qline = R.exterior.intersection(QSEG)
 qline = max(getattr(qline, 'geoms', [qline]), key=lambda g: g.length).simplify(0.3)
 STRIP = qline.buffer(7.2, cap_style=2).difference(R).buffer(0)
