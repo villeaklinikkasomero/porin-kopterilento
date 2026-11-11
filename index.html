@@ -893,21 +893,28 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
 }
 
 // embedded Blender models: base64 glb inside a script file
-// whole-city blocks: fetched when the helicopter comes within 750 m, dropped again beyond 1150 m (the plain walls stay as a stand-in)
+// whole-city blocks: fetched when the helicopter comes within 600 m, dropped again beyond 850 m (the plain walls stay as a stand-in)
+const CITY_ON = new URLSearchParams(location.search).has('city');   // city blocks are off by default until the lighter, textured bake is ready (?city to test)
+function shrinkMap(map, max) {   // the city atlases are 4096 px: downscale before the GPU upload (64 MB -> 4 MB per block)
+  const im = map && map.image; if (!im || !(im.width > max)) return;
+  const c = document.createElement('canvas'); c.width = c.height = max; c.getContext('2d').drawImage(im, 0, 0, max, max);
+  if (im.close) im.close(); map.image = c; map.flipY = false; map.needsUpdate = true;
+}
 function streamUpdate(x, y) {
+  if (!CITY_ON) return;
   let busy = STREAM.filter(e => e.st === 1).length;
   for (const e of STREAM.slice().sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))) {
     const d = Math.hypot(e.x - x, e.y - y);
-    if (d < 750 && e.st === 0 && busy < 3) { e.st = 1; busy++;
+    if (d < 600 && e.st === 0 && busy < 2) { e.st = 1; busy++;
       fetch(`./bl_${e.name}.js`).then(r => r.ok ? r.text() : Promise.reject()).then(t => {
         const ax = +t.match(/x = (-?[\d.]+)/)[1], ay = +t.match(/y = (-?[\d.]+)/)[1], b64 = t.slice(t.indexOf('"') + 1, t.lastIndexOf('"'));
         const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
         new GLTFLoader().parse(buf.buffer, '', gl => {
           if (e.st !== 1) return;
-          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
+          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { shrinkMap(map, 1024); map.anisotropy = 4; } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
           const gr = new THREE.Group(); gr.position.set(ax, 0, -ay); gr.add(gl.scene); scene.add(gr); e.me.visible = false; e.gr = gr; e.st = 2; }, () => { e.st = 0; });
       }).catch(() => { e.st = 3; });   // not baked yet: keep the plain walls
-    } else if (d > 1150 && e.st === 2) {
+    } else if (d > 850 && e.st === 2) {
       scene.remove(e.gr); e.gr.traverse(q => { if (q.isMesh) { q.geometry.dispose(); if (q.material.map) q.material.map.dispose(); q.material.dispose(); } });
       e.gr = null; e.me.visible = true; e.st = 0;
     }
