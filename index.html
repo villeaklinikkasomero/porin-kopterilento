@@ -344,8 +344,15 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const ownBlock = inKivi || (ZB[bIdx] !== undefined && ZB[bIdx] < 12);
     if (LHIDE.has(bIdx) && !ownBlock) continue;   // covered by a neighbour's LoD2 model
     const L2 = L2raw && !OWNROOF.has(b.w) && (ZB[bIdx] === undefined ? !inKivi : ZB[bIdx] >= 12) ? L2raw : null;   // Blender blocks keep their own heights
-    let h = L2 ? L2.h : b.h;
+    let isLm = false; for (const k in LMAT) if (!LMB[k] && pip(LMAT[k][0], LMAT[k][1], pts)) isLm = true;
+    const L2c = isLm ? null : L2;                    // landmarks are Blender models with their own height
+    let h = L2c ? L2c.h : b.h;
     const rec = { pts, h, minx: 1e9, maxx: -1e9, miny: 1e9, maxy: -1e9 };
+    if (L2c) {   // collide with the measured roof surfaces, not the tallest point over the whole footprint (Sokos: 56 m tower part)
+      const R = L2c.r, ox = L2c.o[0], oy = L2c.o[1], T = new Float32Array(R.length);
+      for (let k = 0; k < R.length; k += 3) { T[k] = (R[k] + ox) / 10; T[k + 1] = (R[k + 1] + oy) / 10; T[k + 2] = R[k + 2] / 10; }
+      rec.tris = T;
+    }
     for (const q of pts) { rec.minx = Math.min(rec.minx, q[0]); rec.maxx = Math.max(rec.maxx, q[0]); rec.miny = Math.min(rec.miny, q[1]); rec.maxy = Math.max(rec.maxy, q[1]); }
     const bi = blds.push(rec) - 1;
     for (let i = Math.floor((rec.minx - 5) / GRID); i <= Math.floor((rec.maxx + 5) / GRID); i++)
@@ -1095,10 +1102,22 @@ function onPorinsilta(x, y, extra = 0) { const ux = Math.sin(PSIL.head), uy = Ma
   return Math.abs(s) < PSIL.half + extra && t > -14 && t < PSIL.len + 14 ? t : null; }
 function bridgeZ(x, y) { const t = onPorinsilta(x, y); if (t === null) return 0;
   return t < 3 ? PSIL.deck * Math.max(0, (t + 14) / 17) : t > PSIL.len - 3 ? PSIL.deck * Math.max(0, (PSIL.len + 14 - t) / 17) : PSIL.deck; }
+function triZ(T, x, y) {   // highest roof triangle under (x, y), or null
+  let best = null;
+  for (let k = 0; k < T.length; k += 9) {
+    const ax = T[k], ay = T[k + 1], bx = T[k + 3], by = T[k + 4], cx = T[k + 6], cy = T[k + 7];
+    const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy); if (Math.abs(d) < 1e-6) continue;
+    const u = ((by - cy) * (x - cx) + (cx - bx) * (y - cy)) / d, v = ((cy - ay) * (x - cx) + (ax - cx) * (y - cy)) / d, w = 1 - u - v;
+    if (u < -0.02 || v < -0.02 || w < -0.02) continue;
+    const z = u * T[k + 2] + v * T[k + 5] + w * T[k + 8]; if (best === null || z > best) best = z;
+  }
+  return best;
+}
 function roofAt(x, y) {
   const tb = TZs(x, y), l = grid.get(gkey(Math.floor(x / GRID) + 100, Math.floor(y / GRID) + 100));
   let h = onPorinsilta(x, y) !== null ? bridgeZ(x, y) + tb : inRiver(x, y) && !onBridgeDeck(x, y) ? TER.wl : Math.max(TZg(x, y), tb - 0.5); if (!l) return h;
   for (const bi of l) { const b = blds[bi]; if (x < b.minx - 4 || x > b.maxx + 4 || y < b.miny - 4 || y > b.maxy + 4 || b.h + tb <= h) continue;
+    if (b.tris) { for (const p of PROBE) { const z = triZ(b.tris, x + p[0], y + p[1]); if (z !== null && z + tb > h) h = z + tb; } continue; }
     for (const p of PROBE) if (pip(x + p[0], y + p[1], b.pts)) { h = b.h + tb; break; } }
   return h;
 }
@@ -1250,7 +1269,7 @@ function step(dt) {
   if (tourOn && !tourDone) {
     tourT += dt; const tg = target(), d = Math.hypot(tg.x - S.x, tg.y - S.y);
     if (tg.land) {
-      if (d < 45 && S.landed && S.alt < SKID + 0.5) {
+      if (d < 45 && S.landed && S.alt < roofAt(S.x, S.y) + SKID + 0.5) {
         tourDone = true; tourOn = false; const rec = !best || tourT < best; if (rec) { best = tourT; try { localStorage.setItem(BESTKEY, String(best)); } catch (e) {} } LB.submit(tourT); LB.show(true);
         toast(`Kierros valmis ajassa ${fmtT(tourT)}${rec ? ' – uusi ennätys!' : ''}  ·  N = uusi kierros`, 7); setTarget(); $('prog').firstElementChild.style.width = '100%';
       }
@@ -1383,7 +1402,7 @@ for (const id of ['mission', 'mapwrap', 'gauges', 'street', 'help']) $(id).style
   img.src = './orto.jpg';
 }
 setTarget();
-window.__game = { S, begin, keys, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
+window.__game = { S, begin, keys, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
 terrainizeScene(); setInterval(terrainizeScene, 1000);
 requestAnimationFrame(frame);
 </script>
