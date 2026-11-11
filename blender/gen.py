@@ -305,7 +305,36 @@ def m_classic(mb, col, P):
             for u0, u1 in wins: bh.append(mb.window(u0 + 0.1, 0.12, u1 - 0.1, ph - 0.12, pl, r=0.12, nx=2, fmat=fr, glass=GLASS2, d=0.07, curt=0))
         mb.wall(bh, pl, d=0.07, v1=ph); mb.sides(0, 0, bw, ph, 0, 0.07, pl, bottom=False)
 
-MODS = dict(classic=m_classic, plain=m_plain, punched=m_punched, ribbon=m_ribbon, raster=m_raster, vraster=m_vraster, loggia=m_loggia, erker=m_erker, shop=m_shop)
+def m_wood(mb, col, P):
+    """Finnish wooden house bay: horizontal board cladding, white corner boards and frieze, framed windows with mullions,
+    grey concrete plinth.  col: 'W' window, 'N' blank, 'L' / 'R' / 'E' corner board left / right / both (with a window), 'l' / 'r' / 'e' the same without"""
+    bw, fh, W = mb.bw, mb.fh, P['wall']; T = P.get('trim', WHITE); ph = P.get('plinth_h', 0)
+    holes = []
+    win = col in ('W', 'L', 'R', 'E') and bw > 1.6
+    if win:
+        ww = min(P.get('ww', 1.1), bw - 0.8); wh = min(P.get('wh', 1.3), fh - ph - 1.1); sill = max(ph + 0.35, (fh - wh) * 0.5 + 0.05)
+        u0 = bw / 2 - ww / 2; u1 = bw / 2 + ww / 2
+        holes.append(mb.window(u0, sill, u1, sill + wh, W, r=0.1, fr=0.07, nx=P.get('nx', 2), ny=2 if wh > 1.2 else 1, fmat=T))
+        s_ = 0.11
+        mb.prot(u0 - s_, sill, u0, sill + wh, 0.025, T); mb.prot(u1, sill, u1 + s_, sill + wh, 0.025, T)
+        mb.prot(u0 - s_ - 0.04, sill + wh, u1 + s_ + 0.04, sill + wh + 0.16, 0.05, T); mb.prot(u0 - s_, sill - 0.09, u1 + s_, sill, 0.07, T)
+    mb.wall(holes + ([(0, 0, bw, ph)] if ph else []), W)
+    dark = P.get('board', M('#000000')); step = P.get('board_step', 0.17); v = ph + step       # board shadow lines
+    while v < fh - 0.05:
+        cuts = sorted((h[0], h[2]) for h in holes if h[1] - 0.02 <= v <= h[3] + 0.18)
+        u = 0
+        for a, b in cuts + [(bw, bw)]:
+            if a - 0.13 > u: mb.q(u, v - 0.012, a - 0.13, v + 0.012, 0.003, dark)
+            u = max(u, b + 0.13)
+        v += step
+    cw = 0.14
+    if col in ('L', 'E', 'l', 'e'): mb.prot(0, ph, cw, fh, 0.04, T)
+    if col in ('R', 'E', 'r', 'e'): mb.prot(bw - cw, ph, bw, fh, 0.04, T)
+    if P.get('frieze'): mb.prot(0, fh - 0.22, bw, fh, 0.05, T)
+    if ph:
+        pl = P.get('plinth', M('#8d8d88', 0.9)); mb.wall([], pl, d=0.03, v1=ph); mb.sides(0, 0, bw, ph, 0, 0.03, pl, bottom=False)
+
+MODS = dict(wood=m_wood, classic=m_classic, plain=m_plain, punched=m_punched, ribbon=m_ribbon, raster=m_raster, vraster=m_vraster, loggia=m_loggia, erker=m_erker, shop=m_shop)
 
 # ---------------------------------------------------------------- geometry collectors
 class Zone:

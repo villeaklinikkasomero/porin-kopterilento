@@ -86,21 +86,22 @@ def city_zone(name: str, samples: int = 64, day: str = ''):
     return name, ok, round(time.time() - t0)
 
 
-@app.function(volumes={'/vol': vol}, region=REGION, timeout=6 * 3600)
+@app.function(volumes={'/vol': vol}, region=REGION, timeout=6 * 3600, is_generator=True)
 def city(samples: int = 64, only: str = ''):
     """Whole-city run: every block in city_zones.json (or only the listed ones, comma separated) on up to 10 GPUs at once."""
     zones = json.loads((Path('/repo') / 'city_zones.json').read_text())['zones']
-    names = [n for n in zones if not only or n in only.split(',')]
+    names = [n for n in zones if not only or n in only.split(',') or (only in ('c', 'h') and n.startswith(only))]   # 'c' = apartment / commercial blocks, 'h' = houses
     day = datetime.date.today().isoformat(); t0 = time.time(); res = []
+    yield f'{len(names)} blocks to bake on up to 10 GPUs'
     for out in city_zone.map(names, [samples] * len(names), [day] * len(names), return_exceptions=True, order_outputs=False):
-        res.append(out if isinstance(out, tuple) else ('?', False, 0)); print(res[-1], flush=True)
+        res.append(out if isinstance(out, tuple) else ('?', False, 0)); print(res[-1], flush=True); yield res[-1]
     good = sum(1 for r in res if r[1])
     from porikit import jobs
     jobs.put_text(f"results/{day}/{time.strftime('%H%M%S')}-city.status.json",
                   json.dumps({'task': {'kind': 'city', 'zones': len(names)}, 'status': f'{good}/{len(names)} ok', 'seconds': round(time.time() - t0),
                               'failed': [r[0] for r in res if not r[1]]}))
     vol.commit()
-    return good, len(names)
+    yield f'done: {good}/{len(names)} ok'
 
 
 @app.function(volumes={'/vol': vol}, region=REGION)
@@ -112,8 +113,15 @@ def enqueue(kind: str, body: str):
 
 @app.local_entrypoint()
 def main(cmd: str = '', queue: str = '', body: str = '{}'):
-    if cmd.split()[:1] == ['city']:                     # "city", "city 96" (samples) or "city 64 c001,c002"
-        a = cmd.split(); print('city blocks ok:', city.remote(int(a[1]) if len(a) > 1 else 64, a[2] if len(a) > 2 else ''))
+    print('porikit command:', repr(cmd), repr(queue), flush=True)
+    if cmd.strip().lower().split()[:1] == ['city']:     # "city", "city 96" (samples), "city 64 h" (house blocks only) or "city 64 c001,c002"
+        a = cmd.split(); samples = int(a[1]) if len(a) > 1 else 64; only = a[2] if len(a) > 2 else ''
+        print(f'city run: samples {samples}, blocks {only or "all"}; one line per finished block follows', flush=True)
+        n_ok = n_all = 0
+        for out in city.remote_gen(samples, only):           # progress streams back to the terminal / GitHub Actions log
+            print(out, flush=True)
+            if isinstance(out, tuple) and len(out) == 3: n_all += 1; n_ok += bool(out[1])
+        print('city blocks ok:', (n_ok, n_all), flush=True)
     elif queue: print('queued, the GPU worker is starting:', enqueue.remote(queue, body))
     elif cmd: print('exit code', task.remote(cmd))
     else: print(__doc__)

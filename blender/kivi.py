@@ -9,12 +9,13 @@ import zones2
 from shapely.geometry import LineString, Point
 
 ZONESK = {
-    'kivi0': [1450, 1515, 1513, 1512, 1511, 1249, 1284, 1454, 1281, 1456, 1311, 1308],                       # brewery block, Hotelli Otava, seurakuntatoimisto
+    'kivi0': [1513, 1249, 1284, 1454, 1281, 1456, 1311, 1308],                       # brewery block, Hotelli Otava, seurakuntatoimisto
     'kivi1': [1292, 1293, 1294, 1296, 1341, 1295, 1576, 1574, 1577, 1622, 1575],                 # Kaupungintalo block
     'kivi2': [1287, 1288, 1285, 1286, 1565, 1289, 1564, 1290, 1559, 8386, 1563, 1562, 1561, 1560, 1744],   # river block east of the Raatihuone
     'kivi3': [1581, 1716, 1586, 1604, 1578, 1603, 1579, 1585, 1583],                                   # Hallituskatu - Valtakatu, east
     'kivi4': [1572, 1573, 1607, 1566, 1567, 8385],                                               # river block at Yrjönkatu
     'kivi5': [1553, 1620, 1550, 1619, 1552, 1551, 1548, 1549],                                   # Signelinna block
+    'karhu': [1450, 1451, 1511, 1512, 1515],                                                 # Karhukortteli (2016-2020) on the old brewery site
     'kl0': [1261, 1336, 1337, 1338, 1351, 1357, 1368, 1369, 1370, 1446, 1447, 1448, 1449, 1458, 1461, 1462, 1516, 1517, 1525, 1535],                                                                       # west of Kivi-Pori (modern blocks)
     'kl1': [1297, 1309, 1310, 1352, 1353, 1373, 1374, 1375, 1377, 1398, 1407, 1527, 1528],
 }
@@ -76,11 +77,17 @@ SPECK[1551] = classic_spec(1551, wall='#b5705a', trim=_sig, rust=True, garch=Tru
                            top=dict(blank=True, dentils=True, panels=True, panel_mat=M('#c8875f')), lay=dict(gh=6.0, fh=5.6, frieze=2.2), cornice=(0.5, 0.6, M(_sig)))
 SPECK[1249] = classic_spec(1249, wall='#e4d09d', trim='#f3eee2', rust=True, garch=True, hood='pediment', pil=False)   # Hotelli Otava
 SPECK[1284] = classic_spec(1284, wall='#e7dcc3', trim='#f3eee2', hood='cornice')                                      # Keski-Porin seurakuntatoimisto
-for i in (1450, 1511, 1512, 1513, 1515):                                                                              # Porin Oluttehdas: red brick
-    SPECK[i] = classic_spec(i, wall='#9b4b36', trim='#b9654c', rust=False, garch=True, hood=None, pil=True, bw=4.6,
-                            ground=dict(plinth_h=0.6, basement=False, ww=1.6, wh=2.6), first=dict(arch=True, sband=0.25, ww=1.3, wh=2.0, surround=0, pil_mat=M('#8a412f'), archivolt=True),
-                            top=dict(arch=True, ww=1.1, wh=1.7, surround=0, pil_mat=M('#8a412f')), lay=dict(gh=5.0, fh=5.2, door_mid=False, cols=lambda c, nb: 'N' if c % 3 == 1 else 'W'),
-                            cornice=(0.3, 0.7, M('#7f3d2c')), yard_same=True)
+SPECK[1513] = classic_spec(1513, wall='#9b4b36', trim='#b9654c', rust=False, garch=True, hood=None, pil=True, bw=4.6, cornice=(0.3, 0.7, M('#7f3d2c')))   # brewery remnant
+
+# Karhukortteli: five apartment buildings (2016-2020) where the Porin Oluttehdas stood. The LoD2 shells and the aerial image still show
+# the brewery, so these are built from the OSM footprints and heights: business premises at street level, large windows,
+# balconies, dark pitched metal roofs. Wall colours are estimates.
+KARHU = {1450: ('#7a4535', 'brick'), 1451: ('#d9d6cf', 'render'), 1511: ('#e8e6e0', 'render'), 1512: ('#8a5a44', 'brick'), 1515: ('#cfc6b6', 'render')}
+for i, (wc, kind) in KARHU.items():
+    W_ = M(wc, 0.8); rise = 3.2
+    SPECK[i] = dict(h=B[i]['h'] - rise, P=dict(wall=W_, sign=SIGNS, gwall=M('#3b3f44', 0.4), fascia=M('#2d3135'), frame=M('#2f3337', 0.5), rail=M('#c9ced2', 0.3, 0.5), slab=M('#e9e9e6')),
+                    layout=lay(B[i]['h'] - rise, 'punched', gh=4.4, bw=3.6, fh=3.05, cols=lambda c, nb: 'B' if c % 3 == 1 else 'W', P=dict(ww=2.1, wh=1.9, sill=0.55, nx=2)),
+                    roof=dict(kind='gable', rise=rise, mat=M('#34393d', 0.5, 0.3), ov=0.35), footprint=True)
 
 def kspec(i):
     if i in SPECK: return SPECK[i]
@@ -93,11 +100,11 @@ def build_and_bake(name, ids, samples=16, spec=None):
         ex = {int(k) for k in json.load(open(os.environ['PORI_PHS']))}; ids = [i for i in ids if i not in ex]
     t = time.time()
     for i in ids:
-        if RAW.get(i): B[i]['h'] = eave_of(i)
-    Z = Zone(name, ids); Z.roofflag = False
+        if RAW.get(i) and not spec(i).get('footprint'): B[i]['h'] = eave_of(i)
+    Z = Zone(name, ids); Z.roofflag = any(spec(i).get('roof') for i in ids)
     for i in ids:
         sp = spec(i)
-        if RAW.get(i): build_lod2(Z, i, sp)
+        if RAW.get(i) and not sp.get('footprint'): build_lod2(Z, i, sp)
         else:
             sp2 = dict(sp); sp2['layout'] = sp['fit'](sp['layout'], B[i]['h'], True) if 'fit' in sp else sp['layout']
             build_building(Z, i, sp2)

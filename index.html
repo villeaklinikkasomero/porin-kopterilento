@@ -208,21 +208,8 @@ const STREAM = window.__stream = [];   // whole-city blocks loaded by distance (
 // aerial haze: distant blocks fade into the sky colour instead of ending at a hard fog line
 renderer.toneMapping = THREE.NoToneMapping;   // ACES and AgX were tried: both wash out the baked colours and the aerial photo
 scene.fog = new THREE.FogExp2(0xb4cfe4, 0.00042);
-// window glass: dark, unsaturated texels on vertical faces of the baked blocks reflect the sky by the viewing angle (Fresnel)
-function glassify(m) {
-  m.onBeforeCompile = sh => {
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vGw2;').replace('#include <project_vertex>', '#include <project_vertex>\nvGw2 = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vGw2;').replace('#include <map_fragment>', `#include <map_fragment>
-      { vec3 N = normalize(cross(dFdx(vGw2), dFdy(vGw2))); vec3 V = normalize(cameraPosition - vGw2); if (dot(N, V) < 0.0) N = -N;
-        vec3 c = diffuseColor.rgb; float lum = dot(c, vec3(0.3, 0.59, 0.11)), sat = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
-        float mask = smoothstep(0.13, 0.04, lum) * smoothstep(0.10, 0.02, sat) * smoothstep(0.45, 0.2, abs(N.y));
-        vec3 R = reflect(-V, N); float up = clamp(R.y, -1.0, 1.0);
-        vec3 refl = up > 0.0 ? mix(vec3(0.66, 0.74, 0.82), vec3(0.36, 0.52, 0.72), pow(up, 0.6)) : mix(vec3(0.42, 0.44, 0.45), vec3(0.16, 0.17, 0.18), clamp(-up * 3.0, 0.0, 1.0));
-        float fr = 0.06 + 0.94 * pow(1.0 - clamp(dot(N, V), 0.0, 1.0), 5.0);
-        diffuseColor.rgb = mix(c, refl, mask * clamp(0.18 + fr * 0.8, 0.0, 0.85)); }`);
-  };
-  return m;
-}
+// (a sky reflection on dark window texels was tried here: it veiled dark facades in white, so baked blocks are drawn as baked)
+function glassify(m) { return m; }
 
 // sky dome
 {
@@ -359,7 +346,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   Object.assign(PHS, PHSJ);
   const PB = {};
   const hsh = (i, k) => { let x = (i * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
-  const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1', 'kivi5', 'kl0', 'kl1', ...CZN], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {1261:14,1336:14,1337:14,1338:14,1351:14,1357:14,1368:14,1369:14,1370:14,1446:14,1447:14,1448:14,1449:14,1458:14,1461:14,1462:14,1516:14,1517:14,1525:14,1535:14,1297:15,1309:15,1310:15,1352:15,1353:15,1373:15,1374:15,1375:15,1377:15,1398:15,1407:15,1527:15,1528:15,1583:3,1311:0,1308:0,1450:0,1515:0,1513:0,1512:0,1511:0,1249:0,1284:0,1454:0,1281:0,1456:0,1292:1,1293:1,1294:1,1296:1,1341:1,1295:1,1576:1,1574:1,1577:1,1622:1,1575:1,1287:2,1288:2,1285:2,1286:2,1565:2,1289:2,1564:2,1290:2,1559:2,8386:2,1563:2,1562:2,1561:2,1560:2,1744:2,1581:3,1716:3,1586:3,1604:3,1578:3,1603:3,1579:3,1585:3,1572:4,1573:4,1607:4,1566:4,1567:4,8385:4,1553:13,1620:13,1550:13,1619:13,1552:13,1551:13,1548:13,1549:13,125:12,126:12,127:12,129:12,169:12,272:12,273:12,133:12,135:12,275:12,276:12,277:12,290:12,291:12,587:11,1725:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,637:8,638:8,639:8,641:8,642:8,1216:8,1220:9,640:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ for (const n of CZN) for (const i of CZ.zones[n].ids) if (ZB[i] === undefined) ZB[i] = KN.indexOf(n);   /* city blocks */ for (const k in PHSJ) delete ZB[k];   /* photo facades: the night bake leaves these out of the Blender blocks */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
+  const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1', 'kivi5', 'kl0', 'kl1', 'karhu', ...CZN], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), KWP = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {1450:16,1451:16,1511:16,1512:16,1515:16,1261:14,1336:14,1337:14,1338:14,1351:14,1357:14,1368:14,1369:14,1370:14,1446:14,1447:14,1448:14,1449:14,1458:14,1461:14,1462:14,1516:14,1517:14,1525:14,1535:14,1297:15,1309:15,1310:15,1352:15,1353:15,1373:15,1374:15,1375:15,1377:15,1398:15,1407:15,1527:15,1528:15,1583:3,1311:0,1308:0,1513:0,1249:0,1284:0,1454:0,1281:0,1456:0,1292:1,1293:1,1294:1,1296:1,1341:1,1295:1,1576:1,1574:1,1577:1,1622:1,1575:1,1287:2,1288:2,1285:2,1286:2,1565:2,1289:2,1564:2,1290:2,1559:2,8386:2,1563:2,1562:2,1561:2,1560:2,1744:2,1581:3,1716:3,1586:3,1604:3,1578:3,1603:3,1579:3,1585:3,1572:4,1573:4,1607:4,1566:4,1567:4,8385:4,1553:13,1620:13,1550:13,1619:13,1552:13,1551:13,1548:13,1549:13,125:12,126:12,127:12,129:12,169:12,272:12,273:12,133:12,135:12,275:12,276:12,277:12,290:12,291:12,587:11,1725:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,637:8,638:8,639:8,641:8,642:8,1216:8,1220:9,640:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ for (const n of CZN) for (const i of CZ.zones[n].ids) if (ZB[i] === undefined) ZB[i] = KN.indexOf(n);   /* city blocks */ for (const k in PHSJ) delete ZB[k];   /* photo facades: the night bake leaves these out of the Blender blocks */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
   const L2Z = new Set(['p1', 'kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1', ...CZN].map(n => KN.indexOf(n)));   // Kivi-Pori and p1: facades on the LoD2 shells
   const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2, 100026585: 3 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
   const col = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
@@ -447,7 +434,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
       const quad = (B, y0, y1, uu0, uu1, vv0, vv1, aoB) => { B.p.push(a[0], y0, -a[1], c2[0], y0, -c2[1], c2[0], y1, -c2[1], a[0], y0, -a[1], c2[0], y1, -c2[1], a[0], y1, -a[1]);
         B.u.push(uu0, vv0, uu1, vv0, uu1, vv1, uu0, vv0, uu1, vv1, uu0, vv1);
         for (let k = 0; k < 6; k++) { B.n.push(nx, 0, nz); const ao = (k === 0 || k === 1 || k === 3) ? aoB : 1; B.c.push(col.r * ao, col.g * ao, col.b * ao); } };   // darker towards the street
-      if (T) { quad(T, 0, h, u0, u1, v0, v1, 0.74); continue; }
+      if (T) { if (CZ.zones[KN[ZB[bIdx]]]) quad(KWP[ZB[bIdx]], 0, h, 0.01, 0.02, 0.01, 0.02, 0.74); else quad(T, 0, h, u0, u1, v0, v1, 0.74); continue; }   // streamed blocks: plain stand-in
       if (!win || len < 2.2) { quad(SB[sty], 0, h, 0.01, 0.02, 0.01, 0.02, 0.74); continue; }
       const gf = shops && len >= 7 ? 3.8 : 0;
       if (gf) quad(SB[4], 0, gf, 0, Math.max(1, Math.round(len / BAYW[4])), 0, 1, 0.8);
@@ -464,7 +451,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
         const o = gable, ov = 0.45, rise = Math.min(4.6, o.b * 0.66), vx = -o.uy, vy = o.ux, P = (su, sv, e) => [o.cx + o.ux * su * (o.a + e) + vx * sv * (o.b + e), o.cy + o.uy * su * (o.a + e) + vy * sv * (o.b + e)];
         const A = P(-1, -1, ov), B = P(1, -1, ov), C = P(1, 1, ov), D = P(-1, 1, ov), R0 = P(-1, 0, ov), R1 = P(1, 0, ov), top = h + rise;
         for (const [q, y] of [[A, h], [B, h], [R1, top], [A, h], [R1, top], [R0, top], [C, h], [D, h], [R0, top], [C, h], [R0, top], [R1, top]]) { RP.push(q[0], y - (y === h ? 0.25 : 0), -q[1]); const uv = ruv(q); RU.push(uv[0], uv[1]); }
-        const W = SB[6];
+        const W = T ? (CZ.zones[KN[ZB[bIdx]]] ? KWP[ZB[bIdx]] : T) : SB[6];   // a house in a streamed block: the stand-in gable goes with the block's stand-in walls
         for (const su of [-1, 1]) { const g0 = P(su, -1, 0), g1 = P(su, 1, 0), g2 = P(su, 0, 0);
           for (const tri3 of [[g0, g1, g2], [g1, g0, g2]]) tri3.forEach((q, k) => { W.p.push(q[0], k === 2 ? top - 0.15 : h, -q[1]); W.u.push(0.015, 0.015); W.n.push(o.ux * su, 0, -o.uy * su); W.c.push(col.r, col.g, col.b); }); }
         rec.h = h + rise * 0.7;
@@ -483,9 +470,20 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const ex = hull.map(q => { const d = Math.hypot(q[0] - cx, q[1] - cy) || 1; return [q[0] + (q[0] - cx) / d * 5, q[1] + (q[1] - cy) / d * 5]; });
     for (let i = 1; i < ex.length - 1; i++) pos.push(ex[0][0], 0.12, -ex[0][1], ex[i][0], 0.12, -ex[i][1], ex[i + 1][0], 0.12, -ex[i + 1][1]);
     const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-    scene.add(new THREE.Mesh(pg, new THREE.MeshBasicMaterial({ color: 0xa9a69d, side: THREE.DoubleSide })));
+    // the shared courtyard of the new Karhukortteli (the aerial image still shows the brewery): pavers, lawn and planting beds
+    const cv = document.createElement('canvas'); cv.width = cv.height = 512; const x = cv.getContext('2d');
+    x.fillStyle = '#b3aea4'; x.fillRect(0, 0, 512, 512);
+    for (let i = 0; i < 2600; i++) { x.fillStyle = `rgba(${90 + Math.random() * 60 | 0},${88 + Math.random() * 55 | 0},${80 + Math.random() * 50 | 0},0.12)`; x.fillRect(Math.random() * 512, Math.random() * 512, 6, 3); }
+    x.fillStyle = '#6f8f4a'; x.beginPath(); x.roundRect(150, 150, 212, 212, 40); x.fill();
+    for (let i = 0; i < 900; i++) { x.fillStyle = `rgba(${60 + Math.random() * 40 | 0},${110 + Math.random() * 40 | 0},${40 + Math.random() * 30 | 0},0.35)`; x.fillRect(150 + Math.random() * 212, 150 + Math.random() * 212, 3, 3); }
+    x.strokeStyle = '#c9c3b6'; x.lineWidth = 14; x.beginPath(); x.moveTo(256, 150); x.lineTo(256, 362); x.moveTo(150, 256); x.lineTo(362, 256); x.stroke();
+    for (const [a, b] of [[110, 110], [400, 120], [120, 400], [395, 395]]) { x.fillStyle = '#3f5f34'; x.beginPath(); x.arc(a, b, 26, 0, 7); x.fill(); }
+    const ct = new THREE.CanvasTexture(cv); ct.colorSpace = THREE.SRGBColorSpace;
+    const uv = []; for (let k = 0; k < pos.length; k += 3) uv.push((pos[k] - cx) / 90 + 0.5, (-pos[k + 2] - cy) / 90 + 0.5);
+    pg.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    scene.add(new THREE.Mesh(pg, new THREE.MeshBasicMaterial({ map: ct, side: THREE.DoubleSide })));
   }
-  const wallMat = new THREE.MeshLambertMaterial({ map: facade, vertexColors: true });
+  const wallMat = new THREE.MeshLambertMaterial({ map: facade, vertexColors: true }), wallMat2 = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });   // plain stand-in walls of the streamed city blocks until their Blender block arrives (the facade texture does not map onto these)
   scene.add(new THREE.Mesh(wg, wallMat));
   const tl = new THREE.TextureLoader();
   STY.forEach((st, si) => { const B = SB[si]; if (!B.p.length) return;
@@ -501,10 +499,10 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     g.setAttribute('uv', new THREE.Float32BufferAttribute(B.u, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(B.c, 3));
     const t = tl.load(`./${B.s.t}.jpg`); t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.ClampToEdgeWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
     scene.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ map: t, vertexColors: true }))); });
-  KW.forEach((k, ci) => { if (!k.p.length) return;
-    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(k.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(k.n, 3));
-    g.setAttribute('uv', new THREE.Float32BufferAttribute(k.u, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(k.c, 3));
-    const me = new THREE.Mesh(g, wallMat); scene.add(me);
+  const kwMesh = (k, mat) => { if (!k.p.length) return null; const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(k.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(k.n, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(k.u, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(k.c, 3)); const me = new THREE.Mesh(g, mat); scene.add(me); return me; };
+  KW.forEach((k, ci) => { if (!k.p.length && !KWP[ci].p.length) return;
+    const me0 = kwMesh(k, wallMat), me1 = kwMesh(KWP[ci], wallMat2), me = new THREE.Group(); for (const q of [me0, me1]) if (q) { scene.remove(q); me.add(q); } scene.add(me);
     if (CZ.zones[KN[ci]]) { const z = CZ.zones[KN[ci]]; STREAM.push({ name: KN[ci], me, x: z.x, y: z.y, st: 0, gr: null }); return; }
     loadModel('bl_' + KN[ci], (root, K) => { root.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
       const gr = new THREE.Group(); gr.position.set(K.x, 0, -K.y); gr.add(root); scene.add(gr); scene.remove(me); (window.__bl = window.__bl || []).push(KN[ci]); });
