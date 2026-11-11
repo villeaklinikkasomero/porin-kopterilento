@@ -2,7 +2,7 @@
 <html lang="fi">
 <head>
 <meta charset="utf-8">
-<title>Porin kopterilento</title>
+<title>Porikopteri</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <style>
   :root { --ink:#f4f1e8; --dim:rgba(244,241,232,.68); --panel:rgba(14,22,30,.62); --line:rgba(244,241,232,.16); --accent:#ffc928; --ok:#7be08a; --bad:#ff6a57; }
@@ -64,6 +64,7 @@
   .top li.me { color:var(--accent); }
   .topnote { font-size:12.5px; color:var(--dim); margin-top:6px; min-height:1em; }
   #board { left:50%; top:50%; transform:translate(-50%,-50%); width:min(340px,86vw); padding:16px 18px; display:none; }
+  #nicksave { pointer-events:auto; font:700 14px inherit; font-family:inherit; color:#16110a; background:var(--accent); border:0; border-radius:6px; padding:8px 14px; cursor:pointer; }
   #board h2 { margin:0 0 2px; font-size:19px; }
   #board .sub { font-size:12.5px; color:var(--dim); }
   /* touch */
@@ -100,7 +101,7 @@
 </div>
 <div id="street" class="hud"><div class="s" id="sn"></div><div class="p" id="sp"></div></div>
 <div id="toast" class="hud panel"></div>
-<div id="board" class="hud panel"><h2>Päivän top-10</h2><div class="sub" id="bsub"></div><ol class="top" id="top1"></ol><div class="topnote" id="note1"></div></div>
+<div id="board" class="hud panel"><h2>Päivän top-10</h2><div class="sub" id="bsub"></div><div id="nickrow" style="display:none;margin:10px 0 4px"><label for="nick">Pääsit listalle! Nimimerkki</label><input id="nick" maxlength="5" autocomplete="off" spellcheck="false" placeholder="5 merkkiä"><button id="nicksave" >Tallenna</button><span style="font-size:12px;width:100%">Älä käytä oikeaa nimeäsi.</span></div><ol class="top" id="top1"></ol><div class="topnote" id="note1"></div></div>
 <div id="help" class="hud panel">
   <kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
   <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
@@ -114,7 +115,7 @@
 
 <div id="start">
   <div id="card" class="panel">
-    <h1>Porin <span>kopterilento</span></h1>
+    <h1>Pori<span>kopteri</span></h1>
     <p>Lennä helikopterilla Porin keskustan katujen yllä ja välissä. Joka päivä arvotaan uusi kierros: nouse Kauppatorilta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja laskeudu takaisin torille. Nopeimmat ajat pääsevät päivän top-10:een.</p>
     <div id="keys">
       <div><kbd>W</kbd> <kbd>S</kbd> / <kbd>↑</kbd> <kbd>↓</kbd></div><div>eteen ja taakse</div>
@@ -126,8 +127,6 @@
     <div id="daily">
       <div class="dh">Päivän kierros <b id="dday"></b></div>
       <div id="droute"></div>
-      <div id="nickrow"><label for="nick">Nimimerkki</label><input id="nick" maxlength="5" autocomplete="off" spellcheck="false" placeholder="5 merkkiä"><span style="font-size:12.5px">Älä käytä oikeaa nimeäsi.</span></div>
-      <ol class="top" id="top0"></ol><div class="topnote" id="note0"></div>
     </div>
     <button id="go" disabled>Ladataan ilmakuvaa…</button>
     <p id="src">Rakennukset, kadut ja puut: © OpenStreetMapin tekijät (ODbL). Ilmakuva: Porin kaupungin avoin WMS-rajapinta. Rakennusten korkeudet ovat osin arvioita.</p>
@@ -141,6 +140,7 @@ import LOD2 from './lod2.js';
 import RIV from './river.js';
 import TER from './terrain.js';
 // photo facades approved in the review tool (porikit export): building index -> [{ t: texture name, bw: bay width m }]
+const CZ = await fetch('./city_zones.json').then(r => r.ok ? r.json() : { zones: {} }).catch(() => ({ zones: {} })), CZN = Object.keys(CZ.zones);   // whole-city blocks (blender/city.py), streamed by distance
 const PHSJ = await fetch('./phs.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));   // ground heights: Maanmittauslaitos 2 m elevation model (CC BY 4.0)   // Kokemäenjoki below street level (OpenStreetMap river area)   // measured LoD2 building models (Maanmittauslaitos Rakennukset 3D)
 import PARKED from './parked.js';
 import { GLTFLoader } from './GLTFLoader.js';
@@ -202,7 +202,27 @@ function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h
 addEventListener('resize', resize); resize();
 
 scene.add(new THREE.HemisphereLight(0xdfeeff, 0x6b6a5c, 1.25));
-const sun = new THREE.DirectionalLight(0xfff2d8, 1.7); sun.position.set(0.79, 0.81, 0.62);   // matches the sun in the aerial image (shadows fall north-west) scene.add(sun);
+const sun = new THREE.DirectionalLight(0xfff2d8, 1.7); sun.position.set(0.79, 0.81, 0.62);   // matches the sun in the aerial image (shadows fall north-west)
+const TREES = { update: () => {} };   // leaf-card trees near the helicopter
+const STREAM = window.__stream = [];   // whole-city blocks loaded by distance (streamUpdate)
+// aerial haze: distant blocks fade into the sky colour instead of ending at a hard fog line
+renderer.toneMapping = THREE.NoToneMapping;   // ACES and AgX were tried: both wash out the baked colours and the aerial photo
+scene.fog = new THREE.FogExp2(0xb4cfe4, 0.00042);
+// window glass: dark, unsaturated texels on vertical faces of the baked blocks reflect the sky by the viewing angle (Fresnel)
+function glassify(m) {
+  m.onBeforeCompile = sh => {
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vGw2;').replace('#include <project_vertex>', '#include <project_vertex>\nvGw2 = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vGw2;').replace('#include <map_fragment>', `#include <map_fragment>
+      { vec3 N = normalize(cross(dFdx(vGw2), dFdy(vGw2))); vec3 V = normalize(cameraPosition - vGw2); if (dot(N, V) < 0.0) N = -N;
+        vec3 c = diffuseColor.rgb; float lum = dot(c, vec3(0.3, 0.59, 0.11)), sat = max(c.r, max(c.g, c.b)) - min(c.r, min(c.g, c.b));
+        float mask = smoothstep(0.13, 0.04, lum) * smoothstep(0.10, 0.02, sat) * smoothstep(0.45, 0.2, abs(N.y));
+        vec3 R = reflect(-V, N); float up = clamp(R.y, -1.0, 1.0);
+        vec3 refl = up > 0.0 ? mix(vec3(0.66, 0.74, 0.82), vec3(0.36, 0.52, 0.72), pow(up, 0.6)) : mix(vec3(0.42, 0.44, 0.45), vec3(0.16, 0.17, 0.18), clamp(-up * 3.0, 0.0, 1.0));
+        float fr = 0.06 + 0.94 * pow(1.0 - clamp(dot(N, V), 0.0, 1.0), 5.0);
+        diffuseColor.rgb = mix(c, refl, mask * clamp(0.18 + fr * 0.8, 0.0, 0.85)); }`);
+  };
+  return m;
+}
 
 // sky dome
 {
@@ -279,6 +299,14 @@ function waterify(mat) {          // sky reflection grows towards grazing angles
 // ---------- sharper aerial photo near the helicopter: 512 m tiles at 0.25 m/px (Porin kaupunki WMS), loaded by distance ----------
 // 0.25 m/px tiles over the centre (i 0..5, j 0..4), 0.33 m/px tiles over the rest of the map (i -3..7, j -1..6)
 const HR = { S: 512, X0: -1280, Y0: -1280, I0: -3, I1: 7, J0: -1, J1: 6, t: new Map(), loader: new THREE.TextureLoader(), last: -1e9 };
+const ROOFT = new Map();   // aerial tile key -> roof meshes that switch to that tile's texture
+function roofTile(k, tex) {
+  for (const me of ROOFT.get(k) || []) {
+    if (me.material !== me.userData.fb) { if (me.material.map) me.material.map.dispose(); me.material.dispose(); }
+    if (tex) { const t = tex.clone(); t.channel = 1; t.needsUpdate = true; me.material = new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }); }
+    else me.material = me.userData.fb;
+  }
+}
 function hrUpdate(x, y) {
   for (let i = HR.I0; i <= HR.I1; i++) for (let j = HR.J0; j <= HR.J1; j++) {
     const k = i + '_' + j, cx = HR.X0 + (i + 0.5) * HR.S, cy = HR.Y0 + (j + 0.5) * HR.S, d = Math.max(Math.abs(cx - x), Math.abs(cy - y)) - HR.S / 2, e = HR.t.get(k);
@@ -288,8 +316,8 @@ function hrUpdate(x, y) {
       const me = noT(new THREE.Mesh(g, m)); me.position.set(cx, 0, -cy); me.renderOrder = -1;
       const rec = { me, m, alive: true }; HR.t.set(k, rec);
       HR.loader.load(`./ot/ot_${i}_${j}.jpg`, tex => { if (!rec.alive) { tex.dispose(); return; } tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        m.map = tex; m.transparent = false; m.opacity = 1; m.needsUpdate = true; scene.add(me); });
-    } else if (e && d > 650) { e.alive = false; scene.remove(e.me); e.me.geometry.dispose(); if (e.m.map) e.m.map.dispose(); e.m.dispose(); HR.t.delete(k); }
+        m.map = tex; m.transparent = false; m.opacity = 1; m.needsUpdate = true; scene.add(me); roofTile(k, tex); });
+    } else if (e && d > 650) { roofTile(k, null); e.alive = false; scene.remove(e.me); e.me.geometry.dispose(); if (e.m.map) e.m.map.dispose(); e.m.dispose(); HR.t.delete(k); }
   }
 }
 
@@ -331,7 +359,8 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   Object.assign(PHS, PHSJ);
   const PB = {};
   const hsh = (i, k) => { let x = (i * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
-  const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1'], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {125:12,126:12,127:12,129:12,169:12,272:12,273:12,133:12,135:12,275:12,276:12,277:12,290:12,291:12,587:11,1725:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,637:8,638:8,639:8,641:8,642:8,1216:8,1220:9,640:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ for (const k in PHSJ) delete ZB[k];   /* photo facades: the night bake leaves these out of the Blender blocks */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
+  const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1', 'kivi5', 'kl0', 'kl1', ...CZN], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {1261:14,1336:14,1337:14,1338:14,1351:14,1357:14,1368:14,1369:14,1370:14,1446:14,1447:14,1448:14,1449:14,1458:14,1461:14,1462:14,1516:14,1517:14,1525:14,1535:14,1297:15,1309:15,1310:15,1352:15,1353:15,1373:15,1374:15,1375:15,1377:15,1398:15,1407:15,1527:15,1528:15,1583:3,1311:0,1308:0,1450:0,1515:0,1513:0,1512:0,1511:0,1249:0,1284:0,1454:0,1281:0,1456:0,1292:1,1293:1,1294:1,1296:1,1341:1,1295:1,1576:1,1574:1,1577:1,1622:1,1575:1,1287:2,1288:2,1285:2,1286:2,1565:2,1289:2,1564:2,1290:2,1559:2,8386:2,1563:2,1562:2,1561:2,1560:2,1744:2,1581:3,1716:3,1586:3,1604:3,1578:3,1603:3,1579:3,1585:3,1572:4,1573:4,1607:4,1566:4,1567:4,8385:4,1553:13,1620:13,1550:13,1619:13,1552:13,1551:13,1548:13,1549:13,125:12,126:12,127:12,129:12,169:12,272:12,273:12,133:12,135:12,275:12,276:12,277:12,290:12,291:12,587:11,1725:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,637:8,638:8,639:8,641:8,642:8,1216:8,1220:9,640:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ for (const n of CZN) for (const i of CZ.zones[n].ids) if (ZB[i] === undefined) ZB[i] = KN.indexOf(n);   /* city blocks */ for (const k in PHSJ) delete ZB[k];   /* photo facades: the night bake leaves these out of the Blender blocks */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
+  const L2Z = new Set(['p1', 'kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1', ...CZN].map(n => KN.indexOf(n)));   // Kivi-Pori and p1: facades on the LoD2 shells
   const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2, 100026585: 3 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
   const col = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
   for (const b of CITY.b) {
@@ -340,10 +369,9 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const pts = []; for (let i = 0; i < b.p.length; i += 2) pts.push([b.p[i] / 10, b.p[i + 1] / 10]);
     const L2raw = LOD2.b[bIdx];
     let kc = [0, 0]; for (const q of pts) { kc[0] += q[0] / pts.length; kc[1] += q[1] / pts.length; }
-    const inKivi = (kc[0] > -385 && kc[0] < 75 && kc[1] > 268 && kc[1] < 505) || (kc[0] >= 75 && kc[0] < 200 && kc[1] > 380 && kc[1] < 470);
-    const ownBlock = inKivi || (ZB[bIdx] !== undefined && ZB[bIdx] < 12);
-    if (LHIDE.has(bIdx) && !ownBlock) continue;   // covered by a neighbour's LoD2 model
-    const L2 = L2raw && !OWNROOF.has(b.w) && (ZB[bIdx] === undefined ? !inKivi : ZB[bIdx] >= 12) ? L2raw : null;   // Blender blocks keep their own heights
+    const ownBlock = ZB[bIdx] !== undefined && !L2Z.has(ZB[bIdx]);   // Blender blocks with their own heights (tori, uima)
+    if (LHIDE.has(bIdx) && ZB[bIdx] === undefined) continue;   // covered by a neighbour's LoD2 model
+    const L2 = L2raw && !OWNROOF.has(b.w) && (ZB[bIdx] === undefined || L2Z.has(ZB[bIdx])) ? L2raw : null;   // blocks built on the LoD2 shells keep the measured roofs
     let isLm = false; for (const k in LMAT) if (!LMB[k] && pip(LMAT[k][0], LMAT[k][1], pts)) isLm = true;
     const L2c = isLm ? null : L2;                    // landmarks are Blender models with their own height
     let h = L2c ? L2c.h : b.h;
@@ -362,7 +390,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     let lk = null; for (const k in LMAT) if (!LMB[k] && pip(LMAT[k][0], LMAT[k][1], pts)) lk = k;
     if (lk) { LMB[lk] = { pts, rec }; continue; }
     let T = null; { let cx = 0, cy = 0; for (const q of pts) { cx += q[0]; cy += q[1]; } cx /= pts.length; cy /= pts.length;
-      if (cx > -385 && cx < 75 && cy > 268 && cy < 505) T = KW[(cx > -150 ? 1 : 0) + (cy > 385 ? 2 : 0)]; else if (cx >= 75 && cx < 200 && cy > 380 && cy < 470) T = KW[4]; }
+      }
     if (ZB[bIdx] !== undefined) T = KW[ZB[bIdx]];
     const tp = T ? T.p : wp, tn = T ? T.n : wn, tu = T ? T.u : wu, tc = T ? T.c : wc;
     // facade style from height, colour and position (no building-type data in the map for most houses)
@@ -477,14 +505,27 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(k.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(k.n, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(k.u, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(k.c, 3));
     const me = new THREE.Mesh(g, wallMat); scene.add(me);
-    loadModel('bl_' + KN[ci], (root, K) => { root.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = new THREE.MeshBasicMaterial({ map }); } });
+    if (CZ.zones[KN[ci]]) { const z = CZ.zones[KN[ci]]; STREAM.push({ name: KN[ci], me, x: z.x, y: z.y, st: 0, gr: null }); return; }
+    loadModel('bl_' + KN[ci], (root, K) => { root.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
       const gr = new THREE.Group(); gr.position.set(K.x, 0, -K.y); gr.add(root); scene.add(gr); scene.remove(me); (window.__bl = window.__bl || []).push(KN[ci]); });
   });
-  const rg = new THREE.BufferGeometry();
-  rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); rg.setAttribute('uv', new THREE.Float32BufferAttribute(ru, 2));
-  scene.add(new THREE.Mesh(rg, roofMat));
-  const rg2 = new THREE.BufferGeometry(); rg2.setAttribute('position', new THREE.Float32BufferAttribute(rp2, 3)); rg2.setAttribute('uv', new THREE.Float32BufferAttribute(ru2, 2));
-  scene.add(new THREE.Mesh(rg2, roofMat2));
+  // roofs are cut along the 512 m aerial tiles: each piece shows the sharp 0.25 m tile once it is loaded, the coarse image until then
+  for (const [P, U, fb] of [[rp, ru, roofMat], [rp2, ru2, roofMat2]]) {
+    const parts = new Map();
+    for (let k = 0; k < P.length; k += 9) {
+      const cx = (P[k] + P[k + 3] + P[k + 6]) / 3, cy = -(P[k + 2] + P[k + 5] + P[k + 8]) / 3;
+      const i = Math.floor((cx - HR.X0) / HR.S), j = Math.floor((cy - HR.Y0) / HR.S), key = i + '_' + j;
+      let e = parts.get(key); if (!e) parts.set(key, e = { i, j, p: [], u: [], t: [] });
+      for (let v = 0; v < 3; v++) { const x = P[k + v * 3], y = -P[k + v * 3 + 2]; e.p.push(P[k + v * 3], P[k + v * 3 + 1], P[k + v * 3 + 2]);
+        e.u.push(U[(k / 3 + v) * 2], U[(k / 3 + v) * 2 + 1]); e.t.push((x - (HR.X0 + i * HR.S)) / HR.S, (y - (HR.Y0 + j * HR.S)) / HR.S); }
+    }
+    for (const [key, e] of parts) {
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(e.p, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(e.u, 2));
+      g.setAttribute('uv1', new THREE.Float32BufferAttribute(e.t, 2));
+      const me = new THREE.Mesh(g, fb); me.userData.fb = fb; scene.add(me);
+      if (!ROOFT.has(key)) ROOFT.set(key, []); ROOFT.get(key).push(me);
+    }
+  }
 }
 
 // ---------- Kivi-Porin maamerkit: yksilölliset mallit ----------
@@ -581,7 +622,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     import(`./bl_${key}.js`).then(K => {
       const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
       new GLTFLoader().parse(buf.buffer, '', gl => {
-        gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = new THREE.MeshBasicMaterial({ map }); } });
+        gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
         const g = new THREE.Group(); g.position.set(K.x, 0, -K.y); g.add(gl.scene); scene.add(g);
         for (const q of proc) if (K.roof || q.material !== roofMat) scene.remove(q);
         (window.__bl = window.__bl || []).push(key);
@@ -678,7 +719,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     // Blender-built model with baked sunlight replaces the simple one once it has loaded
     const proc = scene.children.slice(procStart);
     import('./kirkko.js').then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i); new GLTFLoader().parse(buf.buffer, '', gl => {
-      gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = new THREE.MeshBasicMaterial({ map }); } });
+      gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
       for (const q of proc) scene.remove(q); frame(o).add(gl.scene);
     }, () => {}); }).catch(() => {});
   }
@@ -854,6 +895,26 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
 }
 
 // embedded Blender models: base64 glb inside a script file
+// whole-city blocks: fetched when the helicopter comes within 750 m, dropped again beyond 1150 m (the plain walls stay as a stand-in)
+function streamUpdate(x, y) {
+  let busy = STREAM.filter(e => e.st === 1).length;
+  for (const e of STREAM.slice().sort((a, b) => Math.hypot(a.x - x, a.y - y) - Math.hypot(b.x - x, b.y - y))) {
+    const d = Math.hypot(e.x - x, e.y - y);
+    if (d < 750 && e.st === 0 && busy < 3) { e.st = 1; busy++;
+      fetch(`./bl_${e.name}.js`).then(r => r.ok ? r.text() : Promise.reject()).then(t => {
+        const ax = +t.match(/x = (-?[\d.]+)/)[1], ay = +t.match(/y = (-?[\d.]+)/)[1], b64 = t.slice(t.indexOf('"') + 1, t.lastIndexOf('"'));
+        const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+        new GLTFLoader().parse(buf.buffer, '', gl => {
+          if (e.st !== 1) return;
+          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
+          const gr = new THREE.Group(); gr.position.set(ax, 0, -ay); gr.add(gl.scene); scene.add(gr); e.me.visible = false; e.gr = gr; e.st = 2; }, () => { e.st = 0; });
+      }).catch(() => { e.st = 3; });   // not baked yet: keep the plain walls
+    } else if (d > 1150 && e.st === 2) {
+      scene.remove(e.gr); e.gr.traverse(q => { if (q.isMesh) { q.geometry.dispose(); if (q.material.map) q.material.map.dispose(); q.material.dispose(); } });
+      e.gr = null; e.me.visible = true; e.st = 0;
+    }
+  }
+}
 function loadModel(name, done) {
   import(`./${name}.js`).then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
     new GLTFLoader().parse(buf.buffer, '', gl => done(gl.scene, K), () => {}); }).catch(() => {});
@@ -873,16 +934,26 @@ function loadModel(name, done) {
     p.set(x, th / 2, z); s.set(1, th + 1, 1); trunk.setMatrixAt(i, m.compose(p, q, s));
   }
   scene.add(crown, trunk);
-  // Blender-made trees (three species, soft shading baked into vertex colours) replace the simple ones once loaded
+  // leaf-card trees (blender/trees2.py: linden, birch, spruce; alpha-cut leaf atlas, bent normals, self-shadowing in vertex colours).
+  // Only trees within 900 m are drawn (the haze hides the rest); the visible set is refreshed once a second.
   loadModel('trees', root => {
-    const geo = ['tree0', 'tree1', 'tree2'].map(k => root.getObjectByName(k).geometry), lists = [[], [], []];
+    const src = ['tree0', 'tree1', 'tree2'].map(k => root.getObjectByName(k)), map = src[0].material.map;
+    if (map) { map.anisotropy = 8; }
+    const tm = new THREE.MeshLambertMaterial({ map, vertexColors: true, alphaTest: 0.5, side: THREE.DoubleSide }); tm.color.setScalar(1.22);
     let sd = 23; const r2 = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
-    for (let i = 0; i < n; i++) { const v = r2(); lists[v < 0.1 ? 2 : v < 0.38 ? 1 : 0].push(i); }
-    const tm = new THREE.MeshLambertMaterial({ vertexColors: true });
-    lists.forEach((ids, k) => { const im = new THREE.InstancedMesh(geo[k], tm, ids.length);
-      ids.forEach((ti, j) => { const sc = 0.85 + r2() * 0.6; p.set(CITY.t[ti * 2], 0, -CITY.t[ti * 2 + 1]); s.set(sc, sc * (0.9 + r2() * 0.25), sc); q.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, r2() * 6.28);
-        im.setMatrixAt(j, m.compose(p, q, s)); const t = r2(); c.setRGB(0.82 + 0.18 * t, 0.86 + 0.14 * r2(), 0.78 + 0.18 * t); im.setColorAt(j, c); });
-      scene.add(im); });
+    const all = [[], [], []];
+    for (let i = 0; i < n; i++) { const v = r2(), k = v < 0.1 ? 2 : v < 0.38 ? 1 : 0, sc = 0.8 + r2() * 0.55, t = r2();
+      all[k].push({ x: CITY.t[i * 2], y: CITY.t[i * 2 + 1], sc, sy: sc * (0.9 + r2() * 0.25), rot: r2() * 6.28, c: [0.84 + 0.16 * t, 0.88 + 0.12 * r2(), 0.8 + 0.16 * t] }); }
+    const ims = all.map((list, k) => { const im = new THREE.InstancedMesh(src[k].geometry, tm, list.length); im.count = 0; im.frustumCulled = false; scene.add(im); return im; });
+    let last = { x: 1e9, y: 1e9 };
+    TREES.update = (x, y) => {
+      if (Math.hypot(x - last.x, y - last.y) < 60) return; last = { x, y };
+      all.forEach((list, k) => { const im = ims[k]; let j = 0;
+        for (const t of list) { if (Math.abs(t.x - x) > 900 || Math.abs(t.y - y) > 900) continue;
+          p.set(t.x, 0, -t.y); s.set(t.sc, t.sy, t.sc); q.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, t.rot); im.setMatrixAt(j, m.compose(p, q, s)); c.setRGB(...t.c); im.setColorAt(j, c); j++; }
+        im.count = j; im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; });
+    };
+    TREES.update(70, 45);
     scene.remove(crown, trunk); window.__trees = true;
   });
 }
@@ -1160,7 +1231,7 @@ function damage(d) {
 
 // ---------- input ----------
 addEventListener('keydown', e => {
-  if (e.target && e.target.tagName === 'INPUT') { if (e.code === 'Enter' && !$('go').disabled) { e.target.blur(); begin(); } return; }
+  if (e.target && e.target.tagName === 'INPUT') { if (e.code === 'Enter') { e.target.blur(); LB.save(); } return; }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (e.repeat) return; keys.add(e.code);
   if (!started) { if (e.code === 'Enter' && !$('go').disabled) begin(); return; }
@@ -1261,7 +1332,7 @@ function step(dt) {
   const tp = S.landed ? 0 : -(f * 0.2 + spF * 0.0035), tr = S.landed ? 0 : -(S.yawRate * 0.14 * Math.min(1, Math.abs(spF) / 25 + 0.25) + s * 0.18 + spR * 0.004);
   S.pitch += (tp - S.pitch) * Math.min(1, dt * 4); S.roll += (tr - S.roll) * Math.min(1, dt * 4);
   heli.position.set(S.x, S.alt, -S.y); heli.rotation.set(S.pitch, -S.yaw, S.roll);
-  if (performance.now() - HR.last > 500) { HR.last = performance.now(); hrUpdate(S.x, S.y); }
+  if (performance.now() - HR.last > 500) { HR.last = performance.now(); hrUpdate(S.x, S.y); streamUpdate(S.x, S.y); TREES.update(S.x, S.y); }
   rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt;
   blob.position.set(S.x, roofAt(S.x, S.y) + 0.3, -S.y); const bs = Math.max(0.35, 1 - (S.alt - SKID) / 160); blob.scale.setScalar(bs); blob.material.opacity = bs;
 
@@ -1353,23 +1424,34 @@ const LB = { open: false, rows: [], uid: null, ref: null, field: 'd' + DAY.key, 
   const nk = $('nick'), clean = v => (v || '').toUpperCase().replace(/[^A-Z0-9ÅÄÖ]/g, '').slice(0, 5);
   try { nk.value = clean(localStorage.getItem('pori-kopteri-nick')); } catch (e) {}
   nk.addEventListener('input', () => { const c = clean(nk.value); if (c !== nk.value) nk.value = c; try { localStorage.setItem('pori-kopteri-nick', c); } catch (e) {} });
-  const note = m => { $('note0').textContent = m; $('note1').textContent = m; };
-  const render = () => { for (const id of ['top0', 'top1']) { const ol = $(id); ol.textContent = '';
+  const note = m => { $('note1').textContent = m; };
+  const render = () => { for (const id of ['top1']) { const ol = $(id); ol.textContent = '';
       LB.rows.forEach((r, i) => { const li = document.createElement('li'); if (r.id === LB.uid) li.className = 'me';
         for (const [c, v] of [['r', i + 1 + '.'], ['n', r.n], ['t', fmtT1(r.t)]]) { const sp = document.createElement('span'); sp.className = c; sp.textContent = v; li.appendChild(sp); }
         ol.appendChild(li); });
       if (!LB.rows.length) { const li = document.createElement('li'); li.textContent = 'Ei vielä tuloksia tänään – ole ensimmäinen!'; li.style.color = 'var(--dim)'; ol.appendChild(li); } } };
   LB.show = on => { LB.open = on; $('board').style.display = on ? 'block' : 'none'; };
-  LB.submit = async t => {
-    const n = clean(nk.value);
-    if (!LB.ref) { note(LB.err || 'Tulostaulu ei ole käytössä tässä näkymässä.'); return; }
-    if (!n) { note('Tulosta ei tallennettu: anna nimimerkki aloitusruudussa (N = uusi yritys).'); return; }
+  // at the finish: only a time that makes today's top-10 asks for a nickname
+  LB.pending = null;
+  LB.submit = t => {
+    $('nickrow').style.display = 'none'; LB.pending = null;
     if (t < 30) return;
-    if (LB.saved !== null && t >= LB.saved) { note('Päivän paras aikasi on ' + fmtT1(LB.saved) + '.'); return; }
+    const others = LB.rows.filter(r => r.id !== LB.uid), tenth = others.length >= 10 ? others[9].t : Infinity;
+    const own = LB.saved !== null ? LB.saved : Infinity;
+    if (t >= tenth) { note('Aikasi ' + fmtT1(t) + '. Listalle pääsi tänään ' + fmtT1(tenth) + ':llä. N = uusi yritys.'); return; }
+    if (t >= own) { note('Päivän paras aikasi on ' + fmtT1(own) + '. N = uusi yritys.'); return; }
+    if (!LB.ref) { note('Aikasi ' + fmtT1(t) + ' riittäisi listalle, mutta ' + (LB.err || 'tulostaulu ei ole käytössä tässä näkymässä.')); return; }
+    LB.pending = t; $('nickrow').style.display = 'flex'; note('Aikasi ' + fmtT1(t) + ' riittää päivän top-10:een.');
+    if (nk.value) { LB.save(); } else setTimeout(() => nk.focus(), 50);
+  };
+  LB.save = async () => {
+    const t = LB.pending, n = clean(nk.value); if (t === null || !LB.ref) return;
+    if (!n) { note('Anna nimimerkki (1–5 merkkiä).'); nk.focus(); return; }
     const body = { n, [LB.field]: Math.round(t * 10) / 10, at: Date.now() };
-    try { const cur = await LB.ref.get(); if (cur.exists) await LB.ref.update(body); else await LB.ref.set(body); LB.saved = body[LB.field]; note('Aika ' + fmtT1(t) + ' tallennettu nimimerkillä ' + n + '.'); }
+    try { const cur = await LB.ref.get(); if (cur.exists) await LB.ref.update(body); else await LB.ref.set(body); LB.saved = body[LB.field]; LB.pending = null; $('nickrow').style.display = 'none'; note('Aika ' + fmtT1(t) + ' tallennettu nimimerkillä ' + n + '.'); }
     catch (e) { note(e && e.code === 'invalid_argument' ? 'Sinulla ei ole oikeutta tallentaa tuloksia tähän peliin.' : 'Tuloksen tallennus ei onnistunut.'); }
   };
+  $('nicksave').addEventListener('click', () => LB.save());
   render(); note('Ladataan tulostaulua…');
   (async () => {
     const db = window.claude ? await window.claude.use('db') : null, user = window.claude ? await window.claude.use('user') : null;
@@ -1382,7 +1464,7 @@ const LB = { open: false, rows: [], uid: null, ref: null, field: 'd' + DAY.key, 
     db.collection('runs').where(LB.field, '>', 0).orderBy(LB.field).limit(10).onSnapshot(snap => {
       if (!snap.metadata.fromCache) clearTimeout(timer);
       LB.rows = snap.docs.map(d => { const v = d.data(); return { id: d.id, n: String(v.n || '?????').slice(0, 5), t: +v[LB.field] }; }).filter(r => r.t > 0);
-      render(); if ($('note0').textContent.startsWith('Ladataan') || $('note0').textContent.startsWith('Tulostaulua ei saada')) note(LB.ref ? '' : LB.err);
+      render(); if ($('note1').textContent.startsWith('Ladataan') || $('note1').textContent.startsWith('Tulostaulua ei saada')) note('');
     }, () => { clearTimeout(timer); note('Tulostaulua ei voitu ladata.'); });
   })();
 }

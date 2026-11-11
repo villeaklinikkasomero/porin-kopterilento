@@ -8,7 +8,7 @@ sys.path.insert(0, '/home/claude')
 from lib_city import B, poly, cen
 
 GRID = math.radians(-13.035)
-ATLAS = 2048
+ATLAS = int(os.environ.get('PORI_ATLAS', '2048'))   # 4096 on the GPU (city run)
 
 def hexlin(hx):
     hx = hx.lstrip('#'); c = [int(hx[i:i + 2], 16) / 255 for i in (0, 2, 4)]
@@ -202,7 +202,110 @@ def m_shop(mb, col, P):
     if P.get('canopy'):
         mb.s3box(0, fh0 - 0.02, bw, fh0 + 0.14, 0, P['canopy'], P.get('canopy_mat', DARK), dens=0.5)
 
-MODS = dict(plain=m_plain, punched=m_punched, ribbon=m_ribbon, raster=m_raster, vraster=m_vraster, loggia=m_loggia, erker=m_erker, shop=m_shop)
+
+def _arch_top(mb, u0, u1, vs, W, fmat, r=0.14, trim=None, glass=None):
+    """semicircular head over a window whose rect hole runs up to vs + rad"""
+    rad = (u1 - u0) / 2; uc = (u0 + u1) / 2; N = 12
+    arc = [(uc + rad * math.cos(math.pi * k / N), vs + rad * math.sin(math.pi * k / N)) for k in range(N + 1)]
+    mb.hq([(u, v, -r) for u, v in arc], glass or GLASS)
+    ri = rad - 0.07
+    for k in range(N):
+        a0, a1 = math.pi * k / N, math.pi * (k + 1) / N
+        mb.hq([(uc + ri * math.cos(a0), vs + ri * math.sin(a0), -r + 0.02), (uc + rad * math.cos(a0), vs + rad * math.sin(a0), -r + 0.02),
+               (uc + rad * math.cos(a1), vs + rad * math.sin(a1), -r + 0.02), (uc + ri * math.cos(a1), vs + ri * math.sin(a1), -r + 0.02)], fmat)
+    top = vs + rad
+    mb.hq([(u0, top, 0)] + [(u, v, 0) for u, v in arc[N:N // 2 - 1:-1]], W)          # wall in the corners above the arc
+    mb.hq([(u1, top, 0)] + [(u, v, 0) for u, v in arc[N // 2::-1]], W)
+    if trim:                                                                           # archivolt + keystone
+        ro = rad + 0.16
+        for k in range(N):
+            a0, a1 = math.pi * k / N, math.pi * (k + 1) / N
+            mb.hq([(uc + rad * math.cos(a0), vs + rad * math.sin(a0), 0.035), (uc + ro * math.cos(a0), vs + ro * math.sin(a0), 0.035),
+                   (uc + ro * math.cos(a1), vs + ro * math.sin(a1), 0.035), (uc + rad * math.cos(a1), vs + rad * math.sin(a1), 0.035)], trim)
+        mb.prot(uc - 0.12, top - 0.05, uc + 0.12, top + 0.28, 0.07, trim)
+    return top
+
+def m_classic(mb, col, P):
+    """19th-century rendered stone facade bay: framed window with sill, hood (cornice / pediment) or round arch,
+    optional rustication, pilasters, storey band and granite plinth.  col: 'W' window, 'D' door, 'S' shop, 'N' blank, 'P' window pair"""
+    bw, fh, W = mb.bw, mb.fh, P['wall']; T = P.get('trim', WHITE); fr = P.get('frame', WHITE)
+    ph = P.get('plinth_h', 0)                     # granite plinth at the foot of the row (ground floor)
+    ww = min(P.get('ww', 1.2), bw - 0.9); wh = P.get('wh', 2.0); sill = P.get('sill', 0.95) + ph
+    wh = min(wh, fh - sill - (0.75 if P.get('hood') else 0.35))
+    if col in ('D', 'S') and not P.get('ground'): col = 'W'
+    if P.get('blank'): col = 'N'
+    arch = P.get('arch', False); holes = []; uc = bw / 2
+    wins = []
+    if col == 'P' and bw > 2 * ww + 0.9: wins = [(uc - ww - 0.15, uc - 0.15), (uc + 0.15, uc + ww + 0.15)]
+    elif col in ('W', 'P'): wins = [(uc - ww / 2, uc + ww / 2)]
+    if col == 'D':
+        dw = min(1.7, bw - 0.8); dh = min(fh - ph - 0.6, 3.2) if not arch else min(fh - ph - 0.4 - dw / 2, 2.6)
+        u0, u1 = uc - dw / 2, uc + dw / 2
+        mb.sides(u0, ph, u1, ph + dh, 0, -0.35, W)
+        mb.q(u0, ph, u1, ph + dh, -0.35, P.get('door', M('#4a3323', 0.6)))
+        mb.q(uc - 0.02, ph, uc + 0.02, ph + dh, -0.33, DARK)
+        top = ph + dh
+        if arch: top = _arch_top(mb, u0, u1, ph + dh, W, fr, r=0.35, trim=T)
+        holes.append((u0, ph, u1, top))
+        mb.prot(u0 - 0.16, ph, u0, top, 0.04, T); mb.prot(u1, ph, u1 + 0.16, top, 0.04, T)
+        if not arch: mb.prot(u0 - 0.3, top, u1 + 0.3, top + 0.3, 0.12, T)
+    elif col == 'S':
+        u0, u1 = 0.35, bw - 0.35
+        holes.append(mb.window(u0, ph + 0.15, u1, fh - 0.5, W, r=0.15, nx=2, fmat=P.get('sframe', DARK), glass=GLASS, curt=0))
+        mb.prot(0, fh - 0.5, bw, fh - 0.1, 0.05, T)
+    for u0, u1 in wins:
+        if arch:
+            rad = (u1 - u0) / 2; vs = sill + wh - rad
+            h = mb.window(u0, sill, u1, vs, W, nx=2, ny=2 if wh > 1.6 else 1, fmat=fr)
+            top = _arch_top(mb, u0, u1, vs, W, fr, trim=T if P.get('archivolt', True) else None)
+            holes.append((u0, sill, u1, top))
+        else:
+            top = sill + wh
+            holes.append(mb.window(u0, sill, u1, top, W, nx=2, ny=2 if wh > 1.5 else 1, fmat=fr))
+            s_ = P.get('surround', 0.13)
+            if s_:
+                mb.prot(u0 - s_, sill, u0, top, 0.04, T); mb.prot(u1, sill, u1 + s_, top, 0.04, T); mb.prot(u0 - s_, top, u1 + s_, top + s_, 0.04, T)
+            hood = P.get('hood')
+            if hood == 'cornice':
+                mb.prot(u0 - s_ - 0.06, top + s_, u1 + s_ + 0.06, top + s_ + 0.22, 0.05, T)              # frieze
+                mb.prot(u0 - s_ - 0.16, top + s_ + 0.22, u1 + s_ + 0.16, top + s_ + 0.36, 0.13, T)        # cap
+            elif hood == 'pediment':
+                b0 = top + s_ + 0.04; a0, a1 = u0 - s_ - 0.18, u1 + s_ + 0.18; ap = b0 + min(0.55, (a1 - a0) * 0.28)
+                mb.prot(a0, b0 - 0.04, a1, b0 + 0.1, 0.13, T)
+                mb.hq([(a0, b0 + 0.1, 0.1), (a1, b0 + 0.1, 0.1), ((a0 + a1) / 2, ap + 0.1, 0.1)], T)
+                mb.hq([(a0 + 0.22, b0 + 0.16, 0.103), (a1 - 0.22, b0 + 0.16, 0.103), ((a0 + a1) / 2, ap - 0.05, 0.103)], W)
+        mb.prot(u0 - 0.14, sill - 0.12, u1 + 0.14, sill, 0.1, T)                                 # sill
+        if P.get('apron'): mb.prot(u0 - 0.05, max(ph + 0.1, sill - 0.75), u1 + 0.05, sill - 0.16, 0.03, P.get('apron_mat', T))
+    mb.wall(holes + ([(0, 0, bw, ph)] if ph else []), W)
+    if P.get('dentils'):                                                                         # bracket frieze under the eave cornice
+        n_ = max(2, int(bw / 0.55)); dm = P.get('dentil_mat', T)
+        for k in range(n_): u = (k + 0.5) * bw / n_; mb.prot(u - 0.09, fh - 0.42, u + 0.09, fh - 0.05, 0.14, dm)
+        mb.prot(0, fh - 0.05, bw, fh, 0.16, dm)
+    if P.get('panels'):                                                                          # recessed frieze panels
+        n_ = max(1, round(bw / 1.6)); pm = P.get('panel_mat', T)
+        for k in range(n_): u0 = k * bw / n_ + 0.15; mb.prot(u0, fh * 0.25, u0 + bw / n_ - 0.3, fh * 0.62, 0.025, pm)
+    if P.get('rust'):                                                                            # rusticated render: horizontal joints
+        rc = P.get('rustc', M('#000000')); step = P.get('rust_step', 0.42); v = ph + step
+        while v < fh - 0.1:
+            cuts = sorted((h[0], h[2]) for h in holes if h[1] - 0.01 <= v <= h[3] + 0.01)
+            u = 0
+            for a, b in cuts + [(bw, bw)]:
+                if a - 0.02 > u: mb.q(u, v - 0.025, a - 0.02, v + 0.025, 0.004, rc)
+                u = max(u, b + 0.02)
+            v += step
+    if P.get('pil'):
+        pw = P.get('pil_w', 0.24); pm = P.get('pil_mat', T)
+        mb.prot(0, ph, pw, fh, 0.08, pm); mb.prot(bw - pw, ph, bw, fh, 0.08, pm)
+    if P.get('sband'):                                                                           # storey band at the top of the row
+        mb.prot(0, fh - P['sband'], bw, fh, 0.09, P.get('sband_mat', T))
+    if ph:
+        pl = P.get('plinth', M('#5a5754', 0.8))
+        bh = [] 
+        if P.get('basement') and col in ('W', 'P'):
+            for u0, u1 in wins: bh.append(mb.window(u0 + 0.1, 0.12, u1 - 0.1, ph - 0.12, pl, r=0.12, nx=2, fmat=fr, glass=GLASS2, d=0.07, curt=0))
+        mb.wall(bh, pl, d=0.07, v1=ph); mb.sides(0, 0, bw, ph, 0, 0.07, pl, bottom=False)
+
+MODS = dict(classic=m_classic, plain=m_plain, punched=m_punched, ribbon=m_ribbon, raster=m_raster, vraster=m_vraster, loggia=m_loggia, erker=m_erker, shop=m_shop)
 
 # ---------------------------------------------------------------- geometry collectors
 class Zone:

@@ -71,6 +71,38 @@ def task(cmd: str):
     return r.returncode
 
 
+@app.function(gpu=GPU, volumes={'/vol': vol}, region=REGION, timeout=3600, max_containers=10, retries=modal.Retries(max_retries=1, initial_delay=10.0))
+def city_zone(name: str, samples: int = 64, day: str = ''):
+    """Bake one automatically split city block (blender/city.py) on its own GPU; up to 10 run side by side."""
+    from porikit import jobs
+    t0 = time.time(); jobs.layout()
+    env = dict(os.environ, PORI_ATLAS='4096', PORI_PHS='/repo/phs.json')
+    r = subprocess.run(['python3', '/home/claude/city.py', name, str(samples)], cwd='/home/claude', env=env, capture_output=True, text=True)
+    src = Path('/home/claude/out') / f'bl_{name}.js'; ok = r.returncode == 0 and src.exists()
+    if ok:
+        dst = Path('/vol/results') / day / 'game' / f'bl_{name}.js'; dst.parent.mkdir(parents=True, exist_ok=True); dst.write_bytes(src.read_bytes())
+    else: print(r.stdout[-3000:], r.stderr[-3000:])
+    vol.commit()
+    return name, ok, round(time.time() - t0)
+
+
+@app.function(volumes={'/vol': vol}, region=REGION, timeout=6 * 3600)
+def city(samples: int = 64, only: str = ''):
+    """Whole-city run: every block in city_zones.json (or only the listed ones, comma separated) on up to 10 GPUs at once."""
+    zones = json.loads((Path('/repo') / 'city_zones.json').read_text())['zones']
+    names = [n for n in zones if not only or n in only.split(',')]
+    day = datetime.date.today().isoformat(); t0 = time.time(); res = []
+    for out in city_zone.map(names, [samples] * len(names), [day] * len(names), return_exceptions=True, order_outputs=False):
+        res.append(out if isinstance(out, tuple) else ('?', False, 0)); print(res[-1], flush=True)
+    good = sum(1 for r in res if r[1])
+    from porikit import jobs
+    jobs.put_text(f"results/{day}/{time.strftime('%H%M%S')}-city.status.json",
+                  json.dumps({'task': {'kind': 'city', 'zones': len(names)}, 'status': f'{good}/{len(names)} ok', 'seconds': round(time.time() - t0),
+                              'failed': [r[0] for r in res if not r[1]]}))
+    vol.commit()
+    return good, len(names)
+
+
 @app.function(volumes={'/vol': vol}, region=REGION)
 def enqueue(kind: str, body: str):
     """Add a task to the queue and start the GPU worker right away."""
@@ -80,6 +112,8 @@ def enqueue(kind: str, body: str):
 
 @app.local_entrypoint()
 def main(cmd: str = '', queue: str = '', body: str = '{}'):
-    if queue: print('queued, the GPU worker is starting:', enqueue.remote(queue, body))
+    if cmd.split()[:1] == ['city']:                     # "city", "city 96" (samples) or "city 64 c001,c002"
+        a = cmd.split(); print('city blocks ok:', city.remote(int(a[1]) if len(a) > 1 else 64, a[2] if len(a) > 2 else ''))
+    elif queue: print('queued, the GPU worker is starting:', enqueue.remote(queue, body))
     elif cmd: print('exit code', task.remote(cmd))
     else: print(__doc__)

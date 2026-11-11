@@ -59,14 +59,21 @@ def layout():
     if not pori.exists(): pori.symlink_to(REPO)                  # the game files live at the repo root
     game = HOME / 'game'
     if not game.exists(): game.symlink_to(REPO)
-    for f in ('gen.py', 'zones.py', 'run.py', 'run2.py', 'zones2.py', 'lib_city.py', 'gpu_hook.py'):
+    for f in ('gen.py', 'zones.py', 'run.py', 'run2.py', 'zones2.py', 'lib_city.py', 'gpu_hook.py', 'kivi.py', 'city.py'):
         src = REPO / 'blender' / f
         if src.exists(): shutil.copy(src, HOME / f)
     for f in glob.glob(str(REPO / 'blender' / '*.py')): shutil.copy(f, HOME / 'blender' / os.path.basename(f))
     for f in ('mml_city.py', 'river_build.py', 'dem_build.py', 'parse.py'):
         src = REPO / 'blender' / f
         if src.exists(): shutil.copy(src, HOME / 'mmlproc' / f)
-    n = sync_down('data', HOME)                                  # mmlproc/*.pkl, river.pkl, data/*.json ... (not in git: large / licensed)
+    n = sync_down('data', HOME)                                  # mmlproc/*.pkl, river.pkl, data/*.json from S3 / the Modal volume
+    tgz = REPO / 'pipeline' / 'data' / 'porikit_data.tgz'         # or the bundle committed to the repo (no local Python needed)
+    if not (HOME / 'mmlproc' / 'b.pkl').exists() and tgz.exists():
+        import tarfile, tempfile
+        with tempfile.TemporaryDirectory() as t:
+            with tarfile.open(tgz) as tf: tf.extractall(t, filter='data')
+            for p in (Path(t) / 'data').rglob('*'):
+                if p.is_file(): q = HOME / p.relative_to(Path(t) / 'data'); q.parent.mkdir(parents=True, exist_ok=True); shutil.copy(p, q); n += 1
     print('layout ready, data files fetched:', n)
 
 

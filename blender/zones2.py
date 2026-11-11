@@ -8,6 +8,7 @@ from mathutils import Vector
 from mathutils.geometry import tessellate_polygon
 from zones import *
 RAW = pickle.load(open('/home/claude/mmlproc/raw.pkl', 'rb'))
+STREET = None        # optional fn(mid_xy, normal_xy) -> True when the wall faces a street
 ROOFOCC = M('#4f5459', 0.7)
 
 def newell(r):
@@ -67,9 +68,21 @@ def build_lod2(Z, i, spec, upper=None):
         ze = min(tops); seed += 1
         W3 = lambda u, z: L(o.x + t.x * u, o.y + t.y * u, z)
         if ze - zb > 1.2 and u1 - u0 > 0.4:
-            lay_ = spec['layout'] if zb < 1.5 else (upper or lay(ze - zb, 'punched', bw=3.3, fh=3.0))
             p = (o.x + t.x * u0, o.y + t.y * u0); q = (o.x + t.x * u1, o.y + t.y * u1)
-            build_wall(Z, p, q, zb, ze, lay_, P, i * 31 + seed, i)
+            mid2 = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2); street = STREET is None or STREET(mid2, (n.x, n.y))
+            lay_ = (spec['layout'] if street or 'yard' not in spec else spec['yard']) if zb < 1.5 else (spec.get('upper') or upper or lay(ze - zb, 'punched', bw=3.3, fh=3.0))
+            if spec.get('fit'): lay_ = spec['fit'](lay_, ze - zb, street)
+            build_wall(Z, p, q, zb, ze, lay_, spec.get('Pyard', P) if not street else P, i * 31 + seed, i)
+            if spec.get('cornice') and zb < 1.5 and (street or spec.get('cornice_all')):
+                cw, ch, cm = spec['cornice']; nn = Vector((n.x, n.y)).normalized()
+                for (dd, z0_, z1_) in ((cw * 0.45, ze - ch, ze - ch * 0.55), (cw, ze - ch * 0.55, ze)):
+                    a = (p[0] - t.x * dd, p[1] - t.y * dd); b = (q[0] + t.x * dd, q[1] + t.y * dd)
+                    a2 = (a[0] + nn.x * dd, a[1] + nn.y * dd); b2 = (b[0] + nn.x * dd, b[1] + nn.y * dd)
+                    add_solid(Z, [L(a2[0], a2[1], z0_), L(b2[0], b2[1], z0_), L(b2[0], b2[1], z1_), L(a2[0], a2[1], z1_)], cm, 0.5)
+                    add_solid(Z, [L(a[0], a[1], z0_), L(b[0], b[1], z0_), L(b2[0], b2[1], z0_), L(a2[0], a2[1], z0_)][::-1], cm, 0.3)
+                    add_solid(Z, [L(a[0], a[1], z1_), L(b[0], b[1], z1_), L(b2[0], b2[1], z1_), L(a2[0], a2[1], z1_)], cm, 0.3)
+                    for e0, e1 in ((a, a2), (b2, b)):
+                        add_solid(Z, [L(e0[0], e0[1], z0_), L(e1[0], e1[1], z0_), L(e1[0], e1[1], z1_), L(e0[0], e0[1], z1_)], cm, 0.2)
             rest = pg.difference(box(u0 - 0.01, zb - 0.01, u1 + 0.01, ze))
         else:
             rest = pg
@@ -79,14 +92,15 @@ def build_lod2(Z, i, spec, upper=None):
             if len(ring) < 3: continue
             pts3 = [W3(u, z) for u, z in ring]
             if newell(pts3) is not None and newell(pts3).dot(Vector((n.x, n.y, 0))) < 0: pts3.reverse()
-            add_solid(Z, pts3, P['wall'], 0.5)
+            hi_ = min(z for u, z in ring) >= ze - 0.2 and spec.get('upper_mat')
+            add_solid(Z, pts3, spec['upper_mat'] if hi_ else P['wall'], 0.5)
 
 HIDE = set(json.loads(open('/home/claude/pori/lod2.js').read()[len('export default '):-2])['hide']) if True else set()
 def context2(Z, margin=70):
     """neighbours as plain boxes for shadows, skipping OSM parts that sit inside the zone's LoD2 shells"""
     from shapely.ops import unary_union
     from shapely.geometry import Point
-    shells = unary_union([Polygon([(p[0], p[1]) for p in r]).buffer(0.3) for i in Z.ids for k, r, _ in RAW[i] if k == 'G' and len(r) >= 3])
+    shells = unary_union([Polygon([(p[0], p[1]) for p in r]).buffer(0.3) for i in Z.ids for k, r, _ in RAW.get(i, []) if k == 'G' and len(r) >= 3])
     x0, y0, x1, y1 = Z.bbox; ids = set(Z.ids)
     for i in range(len(B)):
         if i in ids or i in HIDE: continue
