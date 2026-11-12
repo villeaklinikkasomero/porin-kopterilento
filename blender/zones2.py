@@ -27,6 +27,10 @@ def look_wall(i):
 def look_mat(i):
     hx, kind = look_wall(i)
     if hx is None: return None
+    import colorsys                                      # ochre read as mustard: paler, cleaner yellow (same rule as in the game)
+    r, g, b = (int(hx[k:k + 2], 16) / 255 for k in (1, 3, 5)); h, l, s_ = colorsys.rgb_to_hls(r, g, b)
+    if 0.085 < h < 0.17 and s_ > 0.4:
+        r, g, b = colorsys.hls_to_rgb(h + 0.012, min(0.8, l * 1.1 + 0.04), s_ * 0.7); hx = '#%02x%02x%02x' % (int(r * 255), int(g * 255), int(b * 255))
     return MT(hx, 'brick', 0.8) if kind == 'brick' else M(hx)
 _ORTO = None
 def roof_mat(i):
@@ -87,8 +91,12 @@ def build_lod2(Z, i, spec, upper=None):
     FP = unary_union([Polygon([(p[0], p[1]) for p in r]).buffer(0) for k, r, _ in RAW[i] if k == 'G' and len(r) >= 3])
     for k, r, holes in RAW[i]:
         if k == 'G' or len(r) < 3: continue
+        spec_ = spec
+        if spec.get('alt'):                                    # part of the shell is another building (Lyseo: 1950s wing on the same footprint)
+            spec_ = spec['alt'](sum(p[0] for p in r) / len(r), sum(p[1] for p in r) / len(r)) or spec
+        P_ = spec_['P']
         if k == 'R':
-            if ROOFBAKE or spec.get('roofmat'): add_solid(Z, [L(*p) for p in r], spec.get('roofmat') or roof_mat(i), 0.45)
+            if ROOFBAKE or spec_.get('roofmat'): add_solid(Z, [L(*p) for p in r], spec_.get('roofmat') or roof_mat(i), 0.45)
             else: Z.hi.append(([L(*p) for p in r], ROOFOCC))
             continue
         n = newell(r)
@@ -99,6 +107,9 @@ def build_lod2(Z, i, spec, upper=None):
         if fa and fb:                                                            # upper wall: the inner side is under a higher roof
             fa = roofz(mx + nh.x * 0.6, my + nh.y * 0.6) > mz; fb = roofz(mx - nh.x * 0.6, my - nh.y * 0.6) > mz
             if fa and fb: continue                                               # internal wall between two parts of the model
+        elif not fa and not fb:                                                  # footprint test undecided: the side with a roof over it is inside
+            ra = roofz(mx + nh.x * 0.8, my + nh.y * 0.8) > -1e8; rb = roofz(mx - nh.x * 0.8, my - nh.y * 0.8) > -1e8
+            if ra and not rb: fa = True
         if fa and not fb:
             n = -n; r = r[::-1]                                                  # wall stored facing inwards
         t = Vector((-n.y, n.x)).normalized(); o = Vector((r[0][0], r[0][1]))
@@ -107,21 +118,32 @@ def build_lod2(Z, i, spec, upper=None):
         except Exception: continue
         if pg.area < 0.3: continue
         u0, zb, u1, zt = pg.bounds
-        # eave: lowest top edge across the wall
-        xs = [u0 + (u1 - u0) * f for f in (0.02, 0.25, 0.5, 0.75, 0.98)]; tops = []
+        # eave per run: where the top edge steps (a taller part, a notch), each stretch gets its own facade up to its own eave
+        # (one eave for the whole wall left everything above the lowest point blank)
+        ns = max(2, int((u1 - u0) / 1.0) + 1); xs = [u0 + (u1 - u0) * (0.5 + k) / ns for k in range(ns)]; tops = []
         for x in xs:
             seg = pg.intersection(box(x - 0.01, zb - 1, x + 0.01, zt + 1))
             tops.append(seg.bounds[3] if not seg.is_empty else zb)
-        ze = min(tops); seed += 1
+        runs = []; k0 = 0
+        for k in range(1, ns + 1):
+            if k == ns or max(tops[k0:k + 1]) - min(tops[k0:k + 1]) > 1.0:
+                runs.append((u0 if k0 == 0 else u0 + (u1 - u0) * k0 / ns, u1 if k == ns else u0 + (u1 - u0) * k / ns, min(tops[k0:k]))); k0 = k
+        merged = []
+        for r_ in runs:                                        # slivers join their neighbour
+            if merged and (r_[1] - r_[0] < 2.6 or merged[-1][1] - merged[-1][0] < 2.6): merged[-1] = (merged[-1][0], r_[1], min(merged[-1][2], r_[2]))
+            else: merged.append(r_)
+        runs = merged; seed += 1; boxes = []
         W3 = lambda u, z: L(o.x + t.x * u, o.y + t.y * u, z)
-        if ze - zb > 1.2 and u1 - u0 > 0.4:
-            p = (o.x + t.x * u0, o.y + t.y * u0); q = (o.x + t.x * u1, o.y + t.y * u1)
+        for u0r, u1r, ze in runs:
+            if not (ze - zb > 1.2 and u1r - u0r > 0.4): continue
+            seed += 1
+            p = (o.x + t.x * u0r, o.y + t.y * u0r); q = (o.x + t.x * u1r, o.y + t.y * u1r)
             mid2 = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2); street = STREET is None or STREET(mid2, (n.x, n.y))
-            lay_ = (spec['layout'] if street or 'yard' not in spec else spec['yard']) if zb < 1.5 else (spec.get('upper') or upper or lay(ze - zb, 'punched', bw=3.3, fh=3.0))
-            if spec.get('fit'): lay_ = spec['fit'](lay_, ze - zb, street)
-            build_wall(Z, p, q, zb, ze, lay_, spec.get('Pyard', P) if not street else P, i * 31 + seed, i)
-            if spec.get('cornice') and zb < 1.5 and (street or spec.get('cornice_all')):
-                cw, ch, cm = spec['cornice']; nn = Vector((n.x, n.y)).normalized()
+            lay_ = (spec_['layout'] if street or 'yard' not in spec_ else spec_['yard']) if zb < 1.5 else (spec_.get('upper') or upper or lay(ze - zb, 'punched', bw=3.3, fh=3.0))
+            if spec_.get('fit'): lay_ = spec_['fit'](lay_, ze - zb, street)
+            build_wall(Z, p, q, zb, ze, lay_, spec_.get('Pyard', P_) if not street else P_, i * 31 + seed, i)
+            if spec_.get('cornice') and zb < 1.5 and (street or spec_.get('cornice_all')):
+                cw, ch, cm = spec_['cornice']; nn = Vector((n.x, n.y)).normalized()
                 for (dd, z0_, z1_) in ((cw * 0.45, ze - ch, ze - ch * 0.55), (cw, ze - ch * 0.55, ze)):
                     a = (p[0] - t.x * dd, p[1] - t.y * dd); b = (q[0] + t.x * dd, q[1] + t.y * dd)
                     a2 = (a[0] + nn.x * dd, a[1] + nn.y * dd); b2 = (b[0] + nn.x * dd, b[1] + nn.y * dd)
@@ -130,17 +152,17 @@ def build_lod2(Z, i, spec, upper=None):
                     add_solid(Z, [L(a[0], a[1], z1_), L(b[0], b[1], z1_), L(b2[0], b2[1], z1_), L(a2[0], a2[1], z1_)], cm, 0.3)
                     for e0, e1 in ((a, a2), (b2, b)):
                         add_solid(Z, [L(e0[0], e0[1], z0_), L(e1[0], e1[1], z0_), L(e1[0], e1[1], z1_), L(e0[0], e0[1], z1_)], cm, 0.2)
-            rest = pg.difference(box(u0 - 0.01, zb - 0.01, u1 + 0.01, ze))
-        else:
-            rest = pg
+            boxes.append(box(u0r - 0.01, zb - 0.01, u1r + 0.01, ze))
+        rest = pg.difference(unary_union(boxes)) if boxes else pg
+        ze = min(r_[2] for r_ in runs)
         for part in getattr(rest, 'geoms', [rest]):
             if part.is_empty or part.area < 0.05 or part.geom_type != 'Polygon': continue
             ring = list(part.exterior.coords)[:-1]
             if len(ring) < 3: continue
             pts3 = [W3(u, z) for u, z in ring]
             if newell(pts3) is not None and newell(pts3).dot(Vector((n.x, n.y, 0))) < 0: pts3.reverse()
-            hi_ = min(z for u, z in ring) >= ze - 0.2 and spec.get('upper_mat')
-            add_solid(Z, pts3, spec['upper_mat'] if hi_ else P['wall'], 0.5)
+            hi_ = min(z for u, z in ring) >= ze - 0.2 and spec_.get('upper_mat')
+            add_solid(Z, pts3, spec_['upper_mat'] if hi_ else P_['wall'], 0.5)
 
 HIDE = set(json.loads(open('/home/claude/pori/lod2.js').read()[len('export default '):-2])['hide']) if True else set()
 def context2(Z, margin=70):
@@ -154,6 +176,10 @@ def context2(Z, margin=70):
         pts, a = poly(i); c = cen(pts)
         if not (x0 - margin < c[0] < x1 + margin and y0 - margin < c[1] < y1 + margin): continue
         if shells.contains(Point(c)): continue
+        try:                                                 # an OSM outline that overlaps a shell of this zone is the same building under another index:
+            pg_ = Polygon(pts).buffer(0)                     # as a shadow box it buried the facade and the bake came out black
+            if pg_.area > 0 and pg_.intersection(shells).area > 0.2 * pg_.area: continue
+        except Exception: pass
         h = B[i]['h']; n = len(pts)
         for k in range(n):
             p, q = pts[k], pts[(k + 1) % n]

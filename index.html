@@ -191,6 +191,19 @@ const isTouch = matchMedia('(pointer:coarse)').matches;
 if (isTouch) document.body.classList.add('touch');
 
 // ---------- renderer / scene ----------
+// Baked model textures by distance: every Blender model carries a 2048 px atlas (22 MB on the GPU with mipmaps) and there are over forty of them,
+// which ran integrated GPUs out of texture memory (black ground, missing parts). Far models now hold a 512 px copy; only the nearest few get the full atlas.
+const TEXLOD = { L: [], N: isTouch ? 3 : 8, R: 420,
+  add(map, x, y) { const im = map && map.image; if (!im || !(im.width > 512)) return;
+    const mk = n => { const c = document.createElement('canvas'); c.width = c.height = n; c.getContext('2d').drawImage(im, 0, 0, n, n); return c; };
+    const small = mk(isTouch ? 256 : 512); let full = im; if (isTouch && im.width > 1024) { full = mk(1024); if (im.close) im.close(); }
+    map.image = small; map.flipY = false; map.needsUpdate = true; this.L.push({ map, full, small, x, y, big: false }); },
+  update(cx, cy) { const L = this.L; if (!L.length) return;
+    for (const e of L) e.d = Math.hypot(e.x - cx, e.y - cy);
+    const near = L.filter(e => e.d < this.R).sort((a, b) => a.d - b.d).slice(0, this.N);
+    const up = near.find(e => !e.big), down = L.find(e => e.big && !near.includes(e) && e.d > this.R + 120);
+    const e = down || up; if (!e) return;   // one switch per call; free before allocating
+    e.big = !e.big; e.map.dispose(); e.map.image = e.big ? e.full : e.small; e.map.needsUpdate = true; } };
 const renderer = new THREE.WebGLRenderer({ canvas: $('gl'), antialias: true, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
 renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -202,8 +215,8 @@ const camera = new THREE.PerspectiveCamera(62, 1, 1, 7000);
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize();
 
-scene.add(new THREE.HemisphereLight(0xdfeeff, 0x6b6a5c, 1.25));
-const sun = new THREE.DirectionalLight(0xfff2d8, 1.7); sun.position.set(0.79, 0.81, 0.62);   // matches the sun in the aerial image (shadows fall north-west)
+scene.add(new THREE.HemisphereLight(0xfff0da, 0xd2c6b2, 2.65));   // warm fill: the oblique photos are the colour reference, and there even the shade sides read cream   // lighter shade side: pale render read as olive in shadow
+const sun = new THREE.DirectionalLight(0xffedd2, 1.0); sun.position.set(0.79, 0.81, 0.62);   // matches the sun in the aerial image (shadows fall north-west)
 const TREES = { update: () => {} };   // leaf-card trees near the helicopter
 const STREAM = window.__stream = [];   // whole-city blocks loaded by distance (streamUpdate)
 // aerial haze: distant blocks fade into the sky colour instead of ending at a hard fog line
@@ -291,8 +304,11 @@ const GRASS = (() => {
       float fade = smoothstep(uRing.x, uRing.y, d) * (1.0 - smoothstep(uRing.z, uRing.w, d));
       vec2 ou = vec2((w.x + uCore.x) / (2.0 * uCore.x), (w.y - uCore.y) / uCore.z);
       vec3 c = texture2D(uOrto, ou).rgb;
+      vec2 du = vec2(1.6 / (2.0 * uCore.x), 0.0), dv = vec2(0.0, 1.6 / uCore.z);   // lawn only where the photo is green all around (no tufts on paving, kerbs or parked cars)
+      vec3 c1 = texture2D(uOrto, ou + du).rgb, c2 = texture2D(uOrto, ou - du).rgb, c3 = texture2D(uOrto, ou + dv).rgb, c4 = texture2D(uOrto, ou - dv).rgb;
+      float gmin = min(min(c.g - max(c.r, c.b), c1.g - max(c1.r, c1.b)), min(min(c2.g - max(c2.r, c2.b), c3.g - max(c3.r, c3.b)), c4.g - max(c4.r, c4.b)));
       float inside = step(0.0, ou.x) * step(ou.x, 1.0) * step(0.0, ou.y) * step(ou.y, 1.0);
-      float gr = smoothstep(0.004, 0.03, c.g - max(c.r, c.b) * 0.97) * smoothstep(0.9, 0.5, c.g * 3.0 - c.r - c.b);
+      float gr = smoothstep(0.015, 0.04, gmin) * smoothstep(0.9, 0.5, c.g * 3.0 - c.r - c.b);
       float rnd = fract(iOff.z * 7.13), h = (0.5 + 0.8 * rnd) * uTile.y * gr * fade * inside * smoothstep(0.02, 0.09, c.g);
       if (h < 0.04) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
       float a = iOff.z * 6.2832, ca = cos(a), sa = sin(a);
@@ -354,14 +370,14 @@ function roofTile(k, tex) {
 function hrUpdate(x, y) {
   for (let i = HR.I0; i <= HR.I1; i++) for (let j = HR.J0; j <= HR.J1; j++) {
     const k = i + '_' + j, cx = HR.X0 + (i + 0.5) * HR.S, cy = HR.Y0 + (j + 0.5) * HR.S, d = Math.max(Math.abs(cx - x), Math.abs(cy - y)) - HR.S / 2, e = HR.t.get(k);
-    if (d < 420 && !e) {
+    if (d < (isTouch ? 200 : 330) && !e) {
       const m = grassify(new THREE.MeshBasicMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, transparent: true, opacity: 0 }));
       const x0t = cx - HR.S / 2, y0t = cy - HR.S / 2, g = gridGeo(x0t, y0t, x0t + HR.S, y0t + HR.S, 6, (x, y) => [(x - x0t) / HR.S, (y - y0t) / HR.S], tSkip, 0.03); g.translate(-cx, 0, cy);
       const me = noT(new THREE.Mesh(g, m)); me.position.set(cx, 0, -cy); me.renderOrder = -1;
       const rec = { me, m, alive: true }; HR.t.set(k, rec);
       HR.loader.load(`./ot/ot_${i}_${j}.jpg`, tex => { if (!rec.alive) { tex.dispose(); return; } tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
         m.map = tex; m.transparent = false; m.opacity = 1; m.needsUpdate = true; scene.add(me); roofTile(k, tex); });
-    } else if (e && d > 650) { roofTile(k, null); e.alive = false; scene.remove(e.me); e.me.geometry.dispose(); if (e.m.map) e.m.map.dispose(); e.m.dispose(); HR.t.delete(k); }
+    } else if (e && d > (isTouch ? 380 : 520)) { roofTile(k, null); e.alive = false; scene.remove(e.me); e.me.geometry.dispose(); if (e.m.map) e.m.map.dispose(); e.m.dispose(); HR.t.delete(k); }
   }
 }
 
@@ -399,14 +415,14 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const SB = STY.map(() => ({ p: [], n: [], u: [], c: [] }));
   // photo facades from Porin kaupunki street photos: one bay-wide strip from street to eave per building (photos/build_ph.py)
   // building index -> styles; 'west' picks the second style for walls west of that x (one footprint, two facades)
-  let PHS = { 603: [{ t: 'ph_603', bw: 10.16 }], 604: [{ t: 'ph_604y', bw: 4.81 }, { t: 'ph_604b', bw: 4.59, west: 15 }], 1726: [{ t: 'ph_1726', bw: 8.12 }], 1599: [{ t: 'ph_1599', bw: 12.11 }], 602: [{ t: 'ph_602', bw: 2.23 }] };
+  let PHS = { 603: [{ t: 'ph_603', bw: 10.16 }], 604: [{ t: 'ph_604y', bw: 4.81 }, { t: 'ph_604b', bw: 4.59, cut: 10.4 }], 1726: [{ t: 'ph_1726', bw: 8.12 }], 1599: [{ t: 'ph_1599', bw: 12.11 }], 602: [{ t: 'ph_602', bw: 2.23 }] };
   Object.assign(PHS, PHSJ);
   const PB = {};
   const hsh = (i, k) => { let x = (i * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
   const KN = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1', 'kivi5', 'kl0', 'kl1', 'karhu', ...CZN], KW = KN.map(() => ({ p: [], n: [], u: [], c: [] })), KWP = KN.map(() => ({ p: [], n: [], u: [], c: [] })), ZB = {1450:16,1451:16,1511:16,1512:16,1515:16,1261:14,1336:14,1337:14,1338:14,1351:14,1357:14,1368:14,1369:14,1370:14,1446:14,1447:14,1448:14,1449:14,1458:14,1461:14,1462:14,1516:14,1517:14,1525:14,1535:14,1297:15,1309:15,1310:15,1352:15,1353:15,1373:15,1374:15,1375:15,1377:15,1398:15,1407:15,1527:15,1528:15,1583:3,1311:0,1308:0,1513:0,1249:0,1284:0,1454:0,1281:0,1456:0,1292:1,1293:1,1294:1,1296:1,1341:1,1295:1,1576:1,1574:1,1577:1,1622:1,1575:1,1287:2,1288:2,1285:2,1286:2,1565:2,1289:2,1564:2,1290:2,1559:2,8386:2,1563:2,1562:2,1561:2,1560:2,1744:2,1581:3,1716:3,1586:3,1604:3,1578:3,1603:3,1579:3,1585:3,1572:4,1573:4,1607:4,1566:4,1567:4,8385:4,1553:13,1620:13,1550:13,1619:13,1552:13,1551:13,1548:13,1549:13,125:12,126:12,127:12,129:12,169:12,272:12,273:12,133:12,135:12,275:12,276:12,277:12,290:12,291:12,587:11,1725:5,1727:5,1728:5,1729:5,1730:5,1731:5,1732:5,1600:5,1621:5,1315:6,1490:6,1491:6,1492:6,1493:6,1494:6,1495:6,1496:6,1361:6,1363:6,1367:6,1488:6,1489:6,1362:6,1364:6,1365:6,1366:6,1372:6,161:7,162:7,163:7,207:7,208:7,561:7,562:7,1313:7,1314:7,1344:7,1345:7,1346:7,1347:7,1348:7,1349:7,1497:7,1498:7,1499:7,1312:7,1259:7,563:8,564:8,637:8,638:8,639:8,641:8,642:8,1216:8,1220:9,640:9,1723:9,1724:9,1734:9,1217:9,1218:9,1219:9,1192:9,1601:10,1623:10,1624:10,1720:10,1721:10,1722:10}, ZROOF = new Set([1726,1728,1729,1315,1490,1361,1366,161,163,1497,564,603,604,637,602,1217]); /* ZB: building index -> Blender-made block (blocks round the market square) */ for (const n of CZN) for (const i of CZ.zones[n].ids) if (ZB[i] === undefined) ZB[i] = KN.indexOf(n);   /* city blocks */ for (const k in PHSJ) delete ZB[k];   /* photo facades: the night bake leaves these out of the Blender blocks */ let bIdx = -1; const SKOOLI = 1504508728, OWNROOF = new Set([SKOOLI, 950288076, 950288077, 950288080, 513103884, 513103888]), karhuPts = [];   // map ids of   // buildings newer than the aerial image get a plain roof   // Kivi-Pori blocks are kept apart so Blender-made versions can replace them
   const L2Z = new Set(['p1', 'kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1', ...CZN].map(n => KN.indexOf(n)));   // Kivi-Pori and p1: facades on the LoD2 shells
   const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2, 100026585: 3 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
-  const col = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
+  const col = new THREE.Color(), col2 = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
   const wpick = (L, r) => { let t = 0; for (const e of L) t += e[1]; let k = r * t; for (const e of L) { k -= e[1]; if (k <= 0) return e[0]; } return L.length ? L[0][0] : '#e6dcc2'; };
   const ROOFZ = new Set(['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1'].map(n => KN.indexOf(n)));   // blocks whose roofs are in the Blender model
   for (const b of CITY.b) {
@@ -451,9 +467,11 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     if (house || shed) col.setHex(WOODPAL[(b.i + (shed ? 3 : 0)) % WOODPAL.length]).multiplyScalar(1.02 + (b.i % 5) * 0.03);
     const shops = !T && h >= 8 && Math.abs(bcx) < 520 && bcy > -560 && bcy < 330 && r2 < 0.65;   // shop fronts on the ground floor in the grid centre
     // wall colour: palette tinted a little by the roof colour seen in the aerial image
-    if (LOOK.pal.length) { col.set(lcol); col.multiplyScalar(lk_ ? 1 : 0.94 + (b.i % 5) * 0.02); }
+    if (LOOK.pal.length) { col.set(lcol); { const hs = {}; col.getHSL(hs); if (hs.h > 0.085 && hs.h < 0.17 && hs.s > 0.4) col.setHSL(hs.h + 0.012, hs.s * 0.7, Math.min(0.8, hs.l * 1.1 + 0.04)); }   // ochre read as mustard: paler, cleaner yellow
+    col.multiplyScalar(lk_ ? 1 : 0.94 + (b.i % 5) * 0.02); }
     else { col.setHex(PAL[b.i % PAL.length]); rc.setRGB(b.c[0] / 255, b.c[1] / 255, b.c[2] / 255, THREE.SRGBColorSpace); col.lerp(rc, 0.18); col.multiplyScalar(0.86 + (b.i % 7) * 0.025); }
     if (srk === 1) col.setHex(SRBRICK[b.i % SRBRICK.length]); else if (srk === 2) col.setHex(0x2f63a6); else if (srk === 3) col.setHex(0x2b4f86);
+    col2.copy(col); if (lk_ && lk_.w2) col2.set(lk_.w2);   // second wall colour in wide vertical bands (two strong colours measured on the same building)
     const win = house ? true : shed ? false : h >= 5;
     if (L2 && PHS[bIdx]) {   // photo-textured walls
       const ox = L2.o[0], oy = L2.o[1], W = L2.w, E = Math.max(2.4, L2.e || L2.h), st = PHS[bIdx];
@@ -461,11 +479,19 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
         const ax = (W[k] + ox) / 10, ay = (W[k + 1] + oy) / 10, bx = (W[k + 4] + ox) / 10, by = (W[k + 5] + oy) / 10, cx = (W[k + 8] + ox) / 10, cy = (W[k + 9] + oy) / 10;
         const az = W[k + 2] / 10, bz = W[k + 6] / 10, cz = W[k + 10] / 10;
         let nx = (by - ay) * (cz - az) - (bz - az) * (cy - ay), nz = -((bz - az) * (cx - ax) - (bx - ax) * (cz - az)); const nl = Math.hypot(nx, nz) || 1; nx /= nl; nz /= nl;
-        const S = st.length > 1 && (ax + bx + cx) / 3 < st[1].west ? st[1] : st[0], B = PB[S.t] || (PB[S.t] = { s: S, p: [], n: [], u: [], c: [] });
-        for (let j = 0; j < 3; j++) { const x = (W[k + j * 4] + ox) / 10, y = (W[k + j * 4 + 1] + oy) / 10, z = W[k + j * 4 + 2] / 10, u = W[k + j * 4 + 3] / 10;
-          B.p.push(x, z, -y); B.n.push(nx, 0, nz);
-          if (u >= 0) B.u.push(u / S.bw, Math.min(0.995, z / E)); else B.u.push(0.5, 0.997);
-          const ao = 0.8 + 0.2 * Math.min(1, z / 3); B.c.push(ao, ao, ao); }
+        // two photo facades on one footprint meet at a party wall: cut the triangles there (choosing by triangle centre gave a diagonal seam)
+        const V = [0, 1, 2].map(j => [(W[k + j * 4] + ox) / 10, (W[k + j * 4 + 1] + oy) / 10, W[k + j * 4 + 2] / 10, W[k + j * 4 + 3] / 10]);
+        const side = st.length > 1 ? (st[1].cut !== undefined ? q => q[0] * 0.9744 - q[1] * 0.225 - st[1].cut : q => q[0] - st[1].west) : null;
+        const parts = [[], []];   // [east / default, west]
+        if (!side) parts[0] = V; else for (let j = 0; j < 3; j++) { const p = V[j], q = V[(j + 1) % 3], dp = side(p), dq = side(q);
+          parts[dp < 0 ? 1 : 0].push(p);
+          if ((dp < 0) !== (dq < 0)) { const t = dp / (dp - dq), m = [0, 1, 2, 3].map(i => p[i] + (q[i] - p[i]) * t); if (p[3] < 0 || q[3] < 0) m[3] = -1; parts[0].push(m); parts[1].push(m); } }
+        for (let pi = 0; pi < 2; pi++) { const P = parts[pi]; if (P.length < 3) continue;
+          const S = st[pi], B = PB[S.t] || (PB[S.t] = { s: S, p: [], n: [], u: [], c: [] });
+          for (let f = 1; f + 1 < P.length; f++) for (const v of [P[0], P[f], P[f + 1]]) { const [x, y, z, u] = v;
+            B.p.push(x, z, -y); B.n.push(nx, 0, nz);
+            if (u >= 0) B.u.push(u / S.bw, Math.min(0.995, z / E)); else B.u.push(0.5, 0.997);
+            const ao = 0.8 + 0.2 * Math.min(1, z / 3); B.c.push(ao, ao, ao); } }
       }
       const R = L2.r;
       for (let k = 0; k < R.length; k += 3) { const q = [(R[k] + ox) / 10, (R[k + 1] + oy) / 10]; RP.push(q[0], R[k + 2] / 10 + 0.03, -q[1]); const uv = ruv(q); RU.push(uv[0], uv[1]); }
@@ -473,15 +499,22 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     }
     if (L2) {   // measured massing: walls with the facade texture (or a Blender block), roofs with the aerial photo
       const ox = L2.o[0], oy = L2.o[1], W = L2.w, Bw = T || SB[sty], bw = BAYW[sty], E = Math.max(2.4, L2.e || L2.h);
-      const nf = Math.max(1, house || shed || E < 7.5 ? Math.round((E - 0.4) / 2.9) : Math.round(E / FLH[sty])), fh = E / nf;   // whole storeys up to the measured eave
+      const nf = Math.max(1, lk_ && lk_.f && !house && !shed ? Math.min(lk_.f, Math.max(1, Math.floor(E / 2.5))) : house || shed || E < 7.5 ? Math.round((E - 0.4) / 2.9) : Math.round(E / FLH[sty])), fh = E / nf;   // storeys from the building register (Ryhti) when known   // whole storeys up to the measured eave
+      // timber houses are mostly 1.5 storeys: one window row over a plinth on the eave sides, a second window only in the gable ends
+      const wood15 = sty === 6 && house, wo = T ? 4000 : 0, gtop = new Map(), pkey = (x, y, nx, nz) => Math.round(nx * 20) + ',' + Math.round(nz * 20) + ',' + Math.round((x * nx - y * nz) * 2);
+      if (wood15) for (let k = 0; k < W.length; k += 12) {
+        const ax = (W[k] + ox) / 10, ay = (W[k + 1] + oy) / 10, bx = (W[k + 4] + ox) / 10, by = (W[k + 5] + oy) / 10, cx = (W[k + 8] + ox) / 10, cy = (W[k + 9] + oy) / 10, az = W[k + 2] / 10, bz = W[k + 6] / 10, cz = W[k + 10] / 10;
+        let nx = (by - ay) * (cz - az) - (bz - az) * (cy - ay), nz = -((bz - az) * (cx - ax) - (bx - ax) * (cz - az)); const nl = Math.hypot(nx, nz) || 1; nx /= nl; nz /= nl;
+        const key = pkey(ax, ay, nx, nz); gtop.set(key, Math.max(gtop.get(key) || 0, az, bz, cz)); }
       for (let k = 0; k < W.length; k += 12) {
         const ax = (W[k] + ox) / 10, ay = (W[k + 1] + oy) / 10, bx = (W[k + 4] + ox) / 10, by = (W[k + 5] + oy) / 10, cx = (W[k + 8] + ox) / 10, cy = (W[k + 9] + oy) / 10;
         const az = W[k + 2] / 10, bz = W[k + 6] / 10, cz = W[k + 10] / 10;
         let nx = (by - ay) * (cz - az) - (bz - az) * (cy - ay), nz = -((bz - az) * (cx - ax) - (bx - ax) * (cz - az)); const nl = Math.hypot(nx, nz) || 1; nx /= nl; nz /= nl;
         for (let j = 0; j < 3; j++) { const x = (W[k + j * 4] + ox) / 10, y = (W[k + j * 4 + 1] + oy) / 10, z = W[k + j * 4 + 2] / 10, u = W[k + j * 4 + 3] / 10;
           Bw.p.push(x, z, -y); Bw.n.push(nx, 0, nz);
-          if (win && u >= 0) Bw.u.push(u / bw, z / fh); else Bw.u.push(0.015, 0.015);
-          const ao = 0.74 + 0.26 * Math.min(1, z / 3); Bw.c.push(col.r * ao, col.g * ao, col.b * ao); }
+          if (wood15) { const gab = gtop.get(pkey(ax, ay, nx, nz)) > E + 0.8; if (u >= 0) Bw.u.push(u / bw + wo + (gab ? 2000 : 0), (z - 0.7) / 3); else Bw.u.push(0.015 + wo, 5); } else
+          if (win && u >= 0) Bw.u.push(u / bw, z / fh); else if (win && E >= 8) Bw.u.push((x * nz + y * nx) / bw, z / fh); else Bw.u.push(0.015, 0.015);   // walls the scan left without a facade coordinate still get windows on taller buildings (they were blank)
+          const ao = 0.74 + 0.26 * Math.min(1, z / 3); Bw.c.push(col.r * ao, col.g * ao, col.b * ao); (Bw.c2 || (Bw.c2 = [])).push(col2.r * ao, col2.g * ao, col2.b * ao); }
       }
       const R = L2.r;
       if (T && ROOFZ.has(ZB[bIdx])) for (let k = 0; k < R.length; k += 3) { T.p.push((R[k] + ox) / 10, R[k + 2] / 10 + 0.03, -(R[k + 1] + oy) / 10); T.n.push(0, 1, 0); T.u.push(0.015, 0.015); T.c.push(0.3, 0.31, 0.33); }
@@ -496,13 +529,13 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
       const u1 = win ? n : 0.02, v1 = win ? fl : 0.02, u0 = win ? 0 : 0.01, v0 = win ? 0 : 0.01;
       const quad = (B, y0, y1, uu0, uu1, vv0, vv1, aoB) => { B.p.push(a[0], y0, -a[1], c2[0], y0, -c2[1], c2[0], y1, -c2[1], a[0], y0, -a[1], c2[0], y1, -c2[1], a[0], y1, -a[1]);
         B.u.push(uu0, vv0, uu1, vv0, uu1, vv1, uu0, vv0, uu1, vv1, uu0, vv1);
-        for (let k = 0; k < 6; k++) { B.n.push(nx, 0, nz); const ao = (k === 0 || k === 1 || k === 3) ? aoB : 1; B.c.push(col.r * ao, col.g * ao, col.b * ao); } };   // darker towards the street
+        for (let k = 0; k < 6; k++) { B.n.push(nx, 0, nz); const ao = (k === 0 || k === 1 || k === 3) ? aoB : 1; B.c.push(col.r * ao, col.g * ao, col.b * ao); (B.c2 || (B.c2 = [])).push(col2.r * ao, col2.g * ao, col2.b * ao); } };   // darker towards the street
       if (T) { if (CZ.zones[KN[ZB[bIdx]]]) quad(KWP[ZB[bIdx]], 0, h, 0.01, 0.02, 0.01, 0.02, 0.74); else quad(T, 0, h, u0, u1, v0, v1, 0.74); continue; }   // streamed blocks: plain stand-in
       if (!win || len < 2.2) { quad(SB[sty], 0, h, 0.01, 0.02, 0.01, 0.02, 0.74); continue; }
       const gf = shops && len >= 7 ? 3.8 : 0;
       if (gf) quad(SB[4], 0, gf, 0, Math.max(1, Math.round(len / BAYW[4])), 0, 1, 0.8);
-      const nb = Math.max(1, Math.round(len / BAYW[sty])), nf = Math.max(1, Math.round((h - gf) / FLH[sty]));
-      quad(SB[sty], gf, h, 0, nb, 0, nf, gf ? 0.9 : 0.74);
+      const nb = Math.max(1, Math.round(len / BAYW[sty])), nf = Math.max(1, lk_ && lk_.f ? lk_.f - (gf ? 1 : 0) : Math.round((h - gf) / FLH[sty]));
+      if (sty === 6) quad(SB[6], 0, h, 0, nb, -0.7 / 3, (h - 0.7) / 3, 0.74); else quad(SB[sty], gf, h, 0, nb, 0, nf, gf ? 0.9 : 0.74);
     }
     const tris = THREE.ShapeUtils.triangulateShape(pts.map(q => new THREE.Vector2(q[0], q[1])), []);
     if (OWNROOF.has(b.w) && T) { const g = b.w === SKOOLI ? 0.2 : 0.56; if (b.w !== SKOOLI) for (const q of pts) karhuPts.push(q); for (const t of tris) for (const k of t) { const q = pts[k]; tp.push(q[0], h, -q[1]); tu.push(0.02, 0.02); tn.push(0, 1, 0); tc.push(g, g, g + 0.02); } }   // new restaurant: the aerial image predates it, so no photo roof
@@ -547,15 +580,26 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     scene.add(new THREE.Mesh(pg, new THREE.MeshBasicMaterial({ map: ct, side: THREE.DoubleSide })));
   }
   const wallMat = new THREE.MeshLambertMaterial({ map: facade, vertexColors: true }), wallMat2 = new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide });   // plain stand-in walls of the streamed city blocks until their Blender block arrives (the facade texture does not map onto these)
+  wallMat.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>',   // stand-in timber houses: plinth, one window row, a second only in the gable ends
+    'vec4 sampledDiffuseColor = texture2D( map, vMapUv ); if ( vMapUv.x > 3000.0 ) { if ( vMapUv.y < 0.0 ) sampledDiffuseColor = vec4( vec3( 0.5 ), 1.0 ); else if ( vMapUv.y > 1.0 && ! ( vMapUv.x > 5000.0 && vMapUv.y < 2.0 ) ) sampledDiffuseColor = vec4( 1.0 ); } diffuseColor *= sampledDiffuseColor;'); };
   scene.add(new THREE.Mesh(wg, wallMat));
   const tl = new THREE.TextureLoader();
   STY.forEach((st, si) => { const B = SB[si]; if (!B.p.length) return;
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(B.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(B.n, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(B.u, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(B.c, 3));
     const t = tl.load(`./f_${st}.png`); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    if (B.c2 && B.c2.length === B.c.length) g.setAttribute('color2', new THREE.Float32BufferAttribute(B.c2, 3));
     const m = new THREE.MeshLambertMaterial({ map: t, vertexColors: true });
     m.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <color_fragment>', '').replace('#include <map_fragment>',
-      'vec4 fT = texture2D( map, vMapUv ); float tw = clamp( ( fT.a - 0.5 ) * 2.0, 0.0, 1.0 ); diffuseColor.rgb *= mix( fT.rgb, fT.rgb * vColor, tw );'); };
+      si === 6 ? 'vec4 fT = texture2D( map, vMapUv ); float tw = clamp( ( fT.a - 0.5 ) * 2.0, 0.0, 1.0 ); bool gab = vMapUv.x > 1000.0; if ( vMapUv.y < 0.0 ) diffuseColor.rgb *= vec3( 0.42, 0.41, 0.39 ); else if ( vMapUv.y > 1.0 && ! ( gab && vMapUv.y < 2.0 ) ) diffuseColor.rgb *= vColor * 0.96; else diffuseColor.rgb *= mix( fT.rgb, fT.rgb * vColor, tw );'
+      : 'vec4 fT = texture2D( map, vMapUv ); vec3 wC = vColor; float tw = clamp( ( fT.a - 0.5 ) * 2.0, 0.0, 1.0 ); vec3 gl_ = mix( fT.rgb, vec3( 0.52, 0.56, 0.6 ), 0.45 ) * mix( vec3( 1.0 ), wC, 0.35 ); diffuseColor.rgb *= mix( gl_, fT.rgb * wC, tw );'); };   // windows lighter and tinted by the wall: from the air the facade must average to the wall colour of the photos, not to blue-grey
+    if (si !== 6 && g.attributes.color2) { const ob0 = m.onBeforeCompile; m.onBeforeCompile = sh => { ob0(sh);
+      sh.vertexShader = 'attribute vec3 color2; varying vec3 vC2;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvC2 = color2;');
+      sh.fragmentShader = 'varying vec3 vC2;\n' + sh.fragmentShader.replace('vec3 wC = vColor;', 'vec3 wC = mod( floor( vMapUv.x ), 4.0 ) < 1.5 ? vC2 : vColor;'); }; }
+    if (si !== 5) { const dt = tl.load(si === 6 ? './det_wood.jpg' : './det_plaster.jpg'); dt.wrapS = dt.wrapT = THREE.RepeatWrapping; dt.anisotropy = 4;   // surface grain on the flat colours: render or boards (CC0, Poly Haven)
+      const ob = m.onBeforeCompile, sc = si === 6 ? [BAYW[si] / 2.4, 3 / 2.4] : [BAYW[si] / 2.2, FLH[si] / 2.2], amp = si === 6 ? 0.55 : 0.4;
+      m.onBeforeCompile = sh => { ob(sh); sh.uniforms.detMap = { value: dt };
+        sh.fragmentShader = 'uniform sampler2D detMap;\n' + sh.fragmentShader.replace('#include <alphamap_fragment>', `diffuseColor.rgb *= 1.0 + ( texture2D( detMap, fract( vMapUv ) * vec2( ${sc[0].toFixed(3)}, ${sc[1].toFixed(3)} ) ).r - 0.5 ) * ${amp.toFixed(2)};\n#include <alphamap_fragment>`); }; }
     scene.add(new THREE.Mesh(g, m)); });
   Object.values(PB).forEach(B => {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(B.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(B.n, 3));
@@ -567,7 +611,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   KW.forEach((k, ci) => { if (!k.p.length && !KWP[ci].p.length) return;
     const me0 = kwMesh(k, wallMat), me1 = kwMesh(KWP[ci], wallMat2), me = new THREE.Group(); for (const q of [me0, me1]) if (q) { scene.remove(q); me.add(q); } scene.add(me);
     if (CZ.zones[KN[ci]]) { const z = CZ.zones[KN[ci]]; STREAM.push({ name: KN[ci], me, x: z.x, y: z.y, st: 0, gr: null }); return; }
-    loadModel('bl_' + KN[ci], (root, K) => { root.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
+    loadModel('bl_' + KN[ci], (root, K) => { root.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { map.anisotropy = 8; TEXLOD.add(map, K.x, K.y); } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
       const gr = new THREE.Group(); gr.position.set(K.x, 0, -K.y); gr.add(root); scene.add(gr); scene.remove(me); (window.__bl = window.__bl || []).push(KN[ci]); });
   });
   // roofs are cut along the 512 m aerial tiles: each piece shows the sharp 0.25 m tile once it is loaded, the coarse image until then
@@ -683,7 +727,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     import(`./bl_${key}.js`).then(K => {
       const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
       new GLTFLoader().parse(buf.buffer, '', gl => {
-        gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
+        gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { map.anisotropy = 8; TEXLOD.add(map, K.x, K.y); } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
         const g = new THREE.Group(); g.position.set(K.x, 0, -K.y); g.add(gl.scene); scene.add(g);
         for (const q of proc) if (K.roof || q.material !== roofMat) scene.remove(q);
         (window.__bl = window.__bl || []).push(key);
@@ -780,7 +824,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     // Blender-built model with baked sunlight replaces the simple one once it has loaded
     const proc = scene.children.slice(procStart);
     import('./kirkko.js').then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i); new GLTFLoader().parse(buf.buffer, '', gl => {
-      gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) map.anisotropy = 8; q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
+      gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { map.anisotropy = 8; TEXLOD.add(map, LMAT.kirkko[0], LMAT.kirkko[1]); } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
       for (const q of proc) scene.remove(q); frame(o).add(gl.scene);
     }, () => {}); }).catch(() => {});
   }
@@ -957,7 +1001,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
 
 // embedded Blender models: base64 glb inside a script file
 // whole-city blocks: fetched when the helicopter comes within 600 m, dropped again beyond 850 m (the plain walls stay as a stand-in)
-const CITY_ON = !new URLSearchParams(location.search).has('nocity');   // whole-city blocks (2048 px bakes); ?nocity turns them off
+const CITY_ON = !new URLSearchParams(location.search).has('nocity') && (!isTouch || new URLSearchParams(location.search).has('city'));   // phones and tablets skip the streamed blocks (the browser ran out of memory mid-flight); ?city forces them on   // whole-city blocks (2048 px bakes); ?nocity turns them off
 function shrinkMap(map, max) {   // the city atlases are 4096 px: downscale before the GPU upload (64 MB -> 4 MB per block)
   const im = map && map.image; if (!im || !(im.width > max)) return;
   const c = document.createElement('canvas'); c.width = c.height = max; c.getContext('2d').drawImage(im, 0, 0, max, max);
@@ -1400,7 +1444,7 @@ function step(dt) {
   const tp = S.landed ? 0 : -(f * 0.2 + spF * 0.0035), tr = S.landed ? 0 : -(S.yawRate * 0.14 * Math.min(1, Math.abs(spF) / 25 + 0.25) + s * 0.18 + spR * 0.004);
   S.pitch += (tp - S.pitch) * Math.min(1, dt * 4); S.roll += (tr - S.roll) * Math.min(1, dt * 4);
   heli.position.set(S.x, S.alt, -S.y); heli.rotation.set(S.pitch, -S.yaw, S.roll);
-  if (performance.now() - HR.last > 500) { HR.last = performance.now(); hrUpdate(S.x, S.y); streamUpdate(S.x, S.y); TREES.update(S.x, S.y); GRASS.update(); }
+  if (performance.now() - HR.last > 500) { HR.last = performance.now(); hrUpdate(S.x, S.y); TEXLOD.update(S.x, S.y); streamUpdate(S.x, S.y); TREES.update(S.x, S.y); GRASS.update(); }
   GRASS.tick(performance.now() / 1000);
   rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt;
   blob.position.set(S.x, roofAt(S.x, S.y) + 0.3, -S.y); const bs = Math.max(0.35, 1 - (S.alt - SKID) / 160); blob.scale.setScalar(bs); blob.material.opacity = bs;
@@ -1553,7 +1597,7 @@ for (const id of ['mission', 'mapwrap', 'gauges', 'street', 'help']) $(id).style
   img.src = './orto.jpg';
 }
 setTarget();
-window.__game = { S, begin, keys, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
+window.__game = { S, begin, keys, camera, renderer, scene, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
 terrainizeScene(); setInterval(terrainizeScene, 1000);
 requestAnimationFrame(frame);
 </script>

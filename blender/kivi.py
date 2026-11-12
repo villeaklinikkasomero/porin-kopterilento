@@ -84,6 +84,11 @@ _ly = dict(wall='#ecc3cb', trim='#f6f1ec', rust=False, garch=True, hood='cornice
            ground=dict(plinth_h=1.5, plinth=M('#77777a', 0.8), basement=True, arch=True, ww=1.35, wh=2.4, sband=0.35),
            first=dict(arch=True, ww=1.35, wh=2.5, sband=0.25), top=dict(arch=True, ww=1.3, wh=2.2),
            lay=dict(gh=5.2, fh=4.8), cornice=(0.55, 0.8, M('#f6f1ec')), roofmat=M('#2e3033', 0.45, 0.4))
+# the 1950s wing on the same footprint (west part of the north wing and the west wing): yellow render, three plain storeys, red sheet roof.
+# Which part is yellow is read from the yard photo and the roof seam in the aerial image (street-grid coordinate u < -486): an estimate.
+_lyy = dict(spec_for(1351)); _lyy['P'] = dict(_lyy['P'], wall=M('#e9c46a'), frame=M('#f4f2ea')); _lyy['roofmat'] = M('#a33b2e', 0.55, 0.2)
+_lyy['layout'] = lay(11, 'punched', gh=0, bw=3.4, fh=3.5, P=dict(ww=1.7, wh=1.7, nx=2)); _lyy.pop('fit', None); _lyy.pop('yard', None)
+_ly['alt'] = lambda x, y: _lyy if x * 0.9744 - y * 0.225 < -486.6 else None
 SPECK[1351] = classic_spec(1351, **_ly); SPECK[1353] = classic_spec(1353, **dict(_ly, lay=dict(gh=4.6, fh=4.2)))
 SPECK[1284] = classic_spec(1284, wall='#e7dcc3', trim='#f3eee2', hood='cornice')                                      # Keski-Porin seurakuntatoimisto
 SPECK[1513] = classic_spec(1513, wall='#9b4b36', trim='#b9654c', rust=False, garch=True, hood=None, pil=True, bw=4.6, cornice=(0.3, 0.7, M('#7f3d2c')))   # brewery remnant
@@ -91,12 +96,12 @@ SPECK[1513] = classic_spec(1513, wall='#9b4b36', trim='#b9654c', rust=False, gar
 # Karhukortteli: five apartment buildings (2016-2020) where the Porin Oluttehdas stood. The LoD2 shells and the aerial image still show
 # the brewery, so these are built from the OSM footprints and heights: business premises at street level, large windows,
 # balconies, dark pitched metal roofs. Wall colours are estimates.
-KARHU = {1450: ('#7a4535', 'brick'), 1451: ('#d9d6cf', 'render'), 1511: ('#e8e6e0', 'render'), 1512: ('#8a5a44', 'brick'), 1515: ('#cfc6b6', 'render')}
+KARHU = {1450: ('#7a4535', 'brick'), 1451: ('#d9d6cf', 'render'), 1511: ('#e8e6e0', 'render'), 1512: ('#8a5a44', 'brick'), 1515: ('#cfc6b6', 'render')}   # as approved by the owner: brown-red brick and light render, dark roofs (do not re-colour from the old oblique photos, the block was built 2016-2020)
 for i, (wc, kind) in KARHU.items():
     W_ = MT(wc, 'brick', 0.8) if kind == 'brick' else M(wc); rise = 3.2
     SPECK[i] = dict(h=B[i]['h'] - rise, P=dict(wall=W_, sign=SIGNS, gwall=M('#3b3f44', 0.4), fascia=M('#2d3135'), frame=M('#2f3337', 0.5), rail=M('#c9ced2', 0.3, 0.5), slab=M('#e9e9e6')),
                     layout=lay(B[i]['h'] - rise, 'punched', gh=4.4, bw=3.6, fh=3.05, cols=lambda c, nb: 'B' if c % 3 == 1 else 'W', P=dict(ww=2.1, wh=1.9, sill=0.55, nx=2)),
-                    roof=dict(kind='gable', rise=rise, mat=M('#34393d', 0.5, 0.3), ov=0.35), footprint=True)
+                    roof=dict(kind='hip', rise=rise, inset=4.2, mat=M('#34393d', 0.5, 0.3), ov=0.35), footprint=True)   # hip ring on the footprint: an OBB gable overhung the L-shaped plans
 
 def kspec(i):
     if i in SPECK: return SPECK[i]

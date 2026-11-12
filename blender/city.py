@@ -72,8 +72,8 @@ def house_spec(i):
         return wood[0][0]
     wall = e['w'] if e else '#8f3a2c' if shed and r < 0.7 else wpick(kivi.h01(i, 5)) if wood else HOUSEC[int(kivi.h01(i, 5) * len(HOUSEC))]
     W = MT(wall, 'wood', 0.9); dark = M(tuple(c * 0.62 for c in hexlin(wall)), 0.9)
-    h = b['h']; nf = 1 if h < 5.2 else 2
-    rowP = {'G': dict(plinth_h=0.45, ww=1.15, wh=1.35, nx=2), 'U': dict(ww=1.0, wh=1.15, nx=2, frieze=True)}
+    h = b['h']; nf = 1 if h < 6.8 else 2          # Kuukkari / Päärnäinen houses are mostly 1.5 storeys: one window row on the eave sides, taller plinth
+    rowP = {'G': dict(plinth_h=0.7, ww=1.15, wh=1.35, nx=2), 'U': dict(ww=1.0, wh=1.15, nx=2, frieze=True)}
     def cols(c, nb):
         if nb == 1: return 'E' if not shed else 'e'
         k = 'L' if c == 0 else 'R' if c == nb - 1 else 'W'
