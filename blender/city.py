@@ -6,6 +6,7 @@ Buildings already in a hand-made block (ZB in index.html), landmarks, photo faca
 import sys, os, json, math, re, pickle
 sys.path.insert(0, '/home/claude')
 GAME = os.environ.get('PORI_GAME', '/home/claude/pori')
+LIFT_ = set()
 MAN = os.path.join(GAME, 'city_zones.json')
 MAXN = 20; CELL = 400.0; G = math.radians(13)
 
@@ -18,6 +19,9 @@ def split(houses=False):
     LM = [tuple(map(float, v)) for v in re.findall(r'\[(-?[\d.]+), (-?[\d.]+)\]', re.search(r'const LMAT = \{([^}]*)\}', html).group(1))]
     own = {int(x) for x in re.findall(r'\d{6,}', re.search(r'OWNROOF = new Set\(\[([^\]]*)\]', html).group(1))} | {1504508728, 1196441531}
     srw = {int(x) for x in re.findall(r'(\d{6,}):', re.search(r'const SRW = \{([^}]*)\}', html).group(1))}
+    global LIFT_
+    try: LIFT_ = {k for k, v in json.load(open(os.path.join(GAME, 'styles.json')))['b'].items() if v.get('lift')}
+    except Exception: LIFT_ = set()
     phs = {int(k) for k in re.findall(r'(\d+): \[\{ t:', re.search(r'let PHS = \{(.*?)\};', html).group(1))}
     pj = os.path.join(GAME, 'phs.json')
     if os.path.exists(pj): phs |= {int(k) for k in json.load(open(pj))}
@@ -27,6 +31,7 @@ def split(houses=False):
     cand = []
     for i, b in enumerate(C['b']):
         if (b.get('k') in (1, 2)) != houses or i in ZB or i in phs or b.get('w') in own or b.get('w') in srw: continue
+        if (LIFT_ and str(i) in LIFT_): continue                   # canopies / footbridges: the game draws them in the air
         pts = [(b['p'][k] / 10, b['p'][k + 1] / 10) for k in range(0, len(b['p']), 2)]
         pg = Polygon(pts).buffer(0)
         if pg.area < 25 or any(pg.contains(Point(*p)) for p in LM): continue

@@ -423,6 +423,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const L2Z = new Set(['p1', 'kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1', ...CZN].map(n => KN.indexOf(n)));   // Kivi-Pori and p1: facades on the LoD2 shells
   const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2, 100026585: 3 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
   const col = new THREE.Color(), col2 = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
+  const liftParts = [];
   const wpick = (L, r) => { let t = 0; for (const e of L) t += e[1]; let k = r * t; for (const e of L) { k -= e[1]; if (k <= 0) return e[0]; } return L.length ? L[0][0] : '#e6dcc2'; };
   const ROOFZ = new Set(['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1'].map(n => KN.indexOf(n)));   // blocks whose roofs are in the Blender model
   for (const b of CITY.b) {
@@ -437,6 +438,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     let isLm = false; for (const k in LMAT) if (!LMB[k] && pip(LMAT[k][0], LMAT[k][1], pts)) isLm = true;
     const L2c = isLm ? null : L2;                    // landmarks are Blender models with their own height
     const lk_ = LOOK.b[bIdx];
+    if (lk_ && lk_.lift) { liftParts.push([b, lk_]); continue; }   // canopies and footbridges: drawn in the air below
     let h = L2c ? L2c.h : b.h;
     if (!L2c && !isLm && ZB[bIdx] === undefined && h > 15) h = lk_ && lk_.f ? lk_.f * 3 + 1 : h * 0.76;   // level-count heights in the map data run about a third too tall (checked against the oblique photos)
     const rec = { pts, h, minx: 1e9, maxx: -1e9, miny: 1e9, maxy: -1e9 };
@@ -465,7 +467,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     let bcx = 0, bcy = 0; for (const q of pts) { bcx += q[0]; bcy += q[1]; } bcx /= pts.length; bcy /= pts.length;
     const coreB = inCore(bcx, bcy), RP = coreB ? rp : rp2, RU = coreB ? ru : ru2, ruv = q => coreB ? [(q[0] + HW) / (2 * HW), (q[1] - YS) / YSPAN] : [(q[0] - OX0) / OXS, (q[1] - OY0) / OYS];
     if (house || shed) col.setHex(WOODPAL[(b.i + (shed ? 3 : 0)) % WOODPAL.length]).multiplyScalar(1.02 + (b.i % 5) * 0.03);
-    const shops = !T && h >= 8 && Math.abs(bcx) < 520 && bcy > -560 && bcy < 330 && r2 < 0.65;   // shop fronts on the ground floor in the grid centre
+    const shops = !T && h >= 7 && !!(lk_ && lk_.shop);   // shop fronts only on the commercial streets of the centre (styles.json 'shop', from the street names)   // shop fronts on the ground floor in the grid centre
     // wall colour: palette tinted a little by the roof colour seen in the aerial image
     if (LOOK.pal.length) { col.set(lcol); { const hs = {}; col.getHSL(hs); if (hs.h > 0.085 && hs.h < 0.17 && hs.s > 0.4) col.setHSL(hs.h + 0.012, hs.s * 0.7, Math.min(0.8, hs.l * 1.1 + 0.04)); }   // ochre read as mustard: paler, cleaner yellow
     col.multiplyScalar(lk_ ? 1 : 0.94 + (b.i % 5) * 0.02); }
@@ -604,6 +606,14 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   wallMat.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <map_fragment>',   // stand-in timber houses: plinth, one window row, a second only in the gable ends
     'vec4 sampledDiffuseColor = texture2D( map, vMapUv ); if ( vMapUv.x > 3000.0 ) { if ( vMapUv.y < 0.0 ) sampledDiffuseColor = vec4( vec3( 0.5 ), 1.0 ); else { float gx = vMapUv.x - ( vMapUv.x > 6100.0 ? 6200.0 : 6000.0 ), gn = vMapUv.x > 6100.0 ? 2.0 : 1.0; if ( vMapUv.y > 1.0 && ! ( vMapUv.x > 5000.0 && vMapUv.y < 2.0 && gx >= 0.0 && gx < gn ) ) sampledDiffuseColor = vec4( 1.0 ); } } diffuseColor *= sampledDiffuseColor;'); };
   scene.add(new THREE.Mesh(wg, wallMat));
+  for (const [b, lk] of liftParts) {   // a slab or glazed tube between lift and the top, posts down to the ground for canopies
+    const pts = []; for (let k = 0; k < b.p.length; k += 2) pts.push(new THREE.Vector2(b.p[k] / 10, b.p[k + 1] / 10));
+    const bridge = lk.lift >= 4.5, top = bridge ? Math.max(lk.lift + 3.2, b.h) : Math.max(lk.lift + 0.4, b.h), sh = new THREE.Shape(pts);
+    const g = new THREE.ExtrudeGeometry(sh, { depth: bridge ? top - lk.lift : 0.45, bevelEnabled: false }); g.rotateX(-Math.PI / 2);
+    const m = new THREE.Mesh(g, new THREE.MeshLambertMaterial({ color: new THREE.Color(lk.w || '#c9ccd0') })); m.position.y = bridge ? lk.lift : top - 0.45; scene.add(m);
+    if (!bridge) { const pm = new THREE.MeshLambertMaterial({ color: 0x6b6f73 }); const pg = new THREE.CylinderGeometry(0.12, 0.12, top - 0.45, 6);
+      for (let k = 0; k < pts.length; k++) { const q = pts[k], pq = pts[(k + 1) % pts.length]; if (q.distanceTo(pq) < 1.5) continue; const c = new THREE.Mesh(pg, pm); c.position.set(q.x, (top - 0.45) / 2, -q.y); scene.add(c); } }
+  }
   const tl = new THREE.TextureLoader();
   STY.forEach((st, si) => { const B = SB[si]; if (!B.p.length) return;
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(B.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(B.n, 3));

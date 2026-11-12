@@ -175,7 +175,7 @@ def bepop_extra(Z, pts, h, P):
         add_solid(Z, [G(u1, v1, z0), G(u0, v1, z0), G(u0, v1, z1), G(u1, v1, z1)], m, dn); add_solid(Z, [G(u0, v1, z0), G(u0, v0, z0), G(u0, v0, z1), G(u0, v1, z1)], m, dn)
     box(-7.5, -6.5, 7.5, 6.5, 14.2, 15.1, wh_); box(-7.62, -6.62, 7.62, 6.62, 14.45, 14.8, red, 0.4)
     for u, v in ((-6.6, 5.6), (-6.6, -0.5), (0.5, 5.6)): box(u - 0.35, v - 0.35, u + 0.35, v + 0.35, 0, 14.2, wh_, 0.6)
-_bpP = dict(wall=M('#a3b8c6'), frame=M('#1f4a4f'), joints=M('#7f95a3'), spandrel=M('#a3b8c6'), gwall=M('#8ea5b4'), plinth=M('#4d5f6b', 0.4), fascia=M('#6f8a9c'), gframe=M('#1f4a4f'), sign=SIGNS, rail=M('#c23a2e'))
+_bpP = dict(wall=M('#9cb6cb'), frame=M('#1f4a4f'), joints=M('#7f95a3'), spandrel=M('#a3b8c6'), gwall=M('#8ea5b4'), plinth=M('#4d5f6b', 0.4), fascia=M('#6f8a9c'), gframe=M('#1f4a4f'), sign=SIGNS, rail=M('#c23a2e'))
 _bpat = 'WWRRRWNWTTWRRWWNWWRRRRWTWNW'
 SPEC[BEPOP] = dict(h=BP_H, P=_bpP, layout=lay(BP_H, 'punched', gh=4.6, bw=3.0, fh=4.1, cols=lambda c, nb: _bpat[(c + nb) % len(_bpat)],
                    P=dict(colmod={'R': 'ribbon', 'N': 'plain'}, ww=1.5, wh=1.5, nx=2, sill=1.1, wh2=1), rowP={}), cornice=(0.18, 0.55, M('#5f7f93')), extra=[bepop_extra])
@@ -199,6 +199,170 @@ SPEC[UIMA] = dict(h=11.5, P=_uP, layout=lay(11.5, 'ribbon', bw=4.2, fh=3.8, P=di
                   dirs={'W': (lay(11.5, 'ribbon', bw=4.0, fh=5.75, P=dict(sill=0.5, wh=4.6, nx=3, pier=0.25)), 14), 'S': (lay(11.5, 'ribbon', bw=4.0, fh=5.75, P=dict(sill=0.5, wh=4.6, nx=3, pier=0.25)), 14)},
                   cornice=(0.2, 0.8, M('#4f5a62')), extra=[uima_extra])
 
+# ---------------------------------------------------------------- Yrjönkadun eteläpää (Itsenäisyydenkadun kulma) and Keskuskartano
+# Sources: Y-pakki / Satakunnan Museo inventory texts (2018), Porin ruutukaavakeskustan inventointi 2019, MML LoD2 heights, user photos.
+def _clip_south(pts, a, b):
+    """part of a footprint on the right-hand side of the line a->b (the street side of an L-shaped plan)"""
+    from shapely.geometry import Polygon as _P
+    dx, dy = b[0] - a[0], b[1] - a[1]; L = math.hypot(dx, dy); nx, ny = dy / L, -dx / L; F = 400
+    half = _P([(a[0] - dx / L * F, a[1] - dy / L * F), (b[0] + dx / L * F, b[1] + dy / L * F), (b[0] + dx / L * F + nx * F, b[1] + dy / L * F + ny * F), (a[0] - dx / L * F + nx * F, a[1] - dy / L * F + ny * F)])
+    g = _P(pts).buffer(0).intersection(half)
+    g = max(getattr(g, 'geoms', [g]), key=lambda q: q.area)
+    c = list(g.exterior.coords)[:-1]
+    if _P(c).exterior.is_ccw != _P(pts).exterior.is_ccw: c = c[::-1]
+    return c
+
+def _upper_block(line, H, lay_by_dir, P, cap):
+    """taller street-side part of an L-shaped building: walls from the wing's eave up to H on the street-side strip, flat roof on top"""
+    def extra(Z, pts, h, P_):
+        part = _clip_south(pts, *line); n = len(part); Lz = lambda x, y, z: (x - Z.cx, y - Z.cy, z)
+        for k in range(n):
+            p, q = part[k], part[(k + 1) % n]; dx, dy = q[0] - p[0], q[1] - p[1]; L = math.hypot(dx, dy)
+            if L < 0.3: continue
+            d = gdir((dy / L, -dx / L)); build_wall(Z, p, q, h, H, lay_by_dir.get(d) or lay_by_dir['*'], P, 977 + k, 0)
+        Z.hi.append(([Lz(x, y, H - 0.01) for x, y in part], P['wall']))
+        add_solid(Z, [Lz(x, y, H + 0.03) for x, y in part], cap, 0.25)
+        po = offset(part, 0.25)                                            # coping round the roof edge
+        for k in range(n):
+            a, b = part[k], part[(k + 1) % n]; c, d = po[(k + 1) % n], po[k]
+            if math.hypot(b[0] - a[0], b[1] - a[1]) < 0.3: continue
+            add_solid(Z, [Lz(d[0], d[1], H - 0.35), Lz(c[0], c[1], H - 0.35), Lz(c[0], c[1], H + 0.12), Lz(d[0], d[1], H + 0.12)], P.get('coping', DARK), 0.4)
+    return extra
+
+# Itsenäisyydenkatu 37, Hotelli Bepop (ent. Cumulus; Matti Salmivalli 1974): 6-storey part on Itsenäisyydenkatu, 3+1-storey wing on Yrjönkatu
+# (extra storey 1982); light brown clinker tiles, dark ribbon windows on floors 2-3, recessed glazed balconies on 4-6, shopfronts under
+# the projecting upper floors.  Its footprint lay under the LoD2 model of BePOP and was never drawn: it is built here, in the bepop block.
+HOTBP = _bid(10.0, -430.0); MAAKL = _bid(80.0, -462.0)
+_klink = MT('#bfae86', 'brick', 0.8)
+_hbP = dict(wall=_klink, spandrel=_klink, frame=M('#2b2d30', 0.5), gwall=M('#2e3134', 0.4), plinth=M('#2c2e31'), fascia=_klink, gframe=M('#2b2d30', 0.5),
+            sign=SIGNS, rail=M('#9fb0b8', 0.15), linner=M('#d9d2bf'), coping=M('#6d6a62', 0.5, 0.3))
+_hbRib = dict(sill=0.95, wh=1.45, pier=0.0, nx=3)
+_hbLog = dict(colmod={'L': 'loggia'}, ldepth=1.2, lpier=0.2)
+def _hb_lay(rows, cols=None, P=None): return dict(bw=3.2, rows=rows, cols=cols or (lambda c, nb: 'W'), P=P or _hbRib, rowP={'L': dict(_hbLog, colmod={'W': 'loggia'})})
+_HB_WING = 14.4; _HB_TOP = 21.2
+SPEC[HOTBP] = dict(h=_HB_WING, P=_hbP,
+                   layout=_hb_lay([(4.2, 'shop', 'G'), (3.4, 'ribbon', 'F'), (3.4, 'ribbon', 'F'), (3.4, 'ribbon', 'F')]),
+                   dirs={'S': _hb_lay([(4.2, 'shop', 'G'), (3.4, 'ribbon', 'F'), (3.4, 'ribbon', 'F'), (3.4, 'ribbon', 'L')]),
+                         'E': (_hb_lay([(4.2, 'shop', 'G'), (10.2, 'plain', 'P')]), 0)},
+                   roof=dict(kind='flat', mat=M('#4a4d50', 0.6)),
+                   extra=[_upper_block(((20.5, -440.7), (52.5, -448.3)), _HB_TOP,
+                                       {'S': _hb_lay([(3.4, 'ribbon', 'L'), (3.4, 'ribbon', 'L')]), 'E': dict(bw=3, rows=[(6.8, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True),
+                                        'W': _hb_lay([(3.4, 'ribbon', 'L'), (3.4, 'ribbon', 'F')]), '*': _hb_lay([(3.4, 'ribbon', 'F'), (3.4, 'ribbon', 'F')])},
+                                       _hbP, M('#4a4d50', 0.6))])
+# Itsenäisyydenkatu 35, Maakuntalinna (Veikko Malmio 1959): 6 storeys with a tall shop floor on Itsenäisyydenkatu, 2-storey wing towards
+# Isolinnankatu; clad in white sheet metal since 1981 / 2000
+_mlP = dict(wall=M('#e6e7e3', 0.5, 0.15), frame=M('#3a3d40', 0.5), gwall=M('#2e3134', 0.4), plinth=M('#2c2e31'), fascia=M('#d9dbd8', 0.5, 0.15), gframe=ALU, sign=SIGNS,
+            joints=M('#b9bcbc', 0.5, 0.2), coping=M('#b9bcbc', 0.5, 0.3))
+_ML_WING = 8.6; _ML_TOP = 22.2
+_mlL = lambda rows: dict(bw=3.0, rows=rows, cols=lambda c, nb: 'W', P=dict(ww=1.6, wh=1.45, sill=0.85, nx=2), rowP={})
+SPEC[MAAKL] = dict(h=_ML_WING, P=_mlP, layout=_mlL([(5.0, 'shop', 'G'), (3.6, 'punched', 'F')]), roof=dict(kind='flat', mat=M('#55585b', 0.6)),
+                   extra=[_upper_block(((52.2, -449.3), (71.9, -453.7)), _ML_TOP, {'*': _mlL([(3.4, 'punched', 'F')] * 4)}, _mlP, M('#55585b', 0.6))])
+
+# Yrjönkatu 23, Palojoenkulma (Mikael Küttner 1988): yellowish brown brick, ribbon windows on floors 2-6, shopfronts on Itsenäisyydenkatu,
+# 6-storey part on Itsenäisyydenkatu, 3-storey wing on Yrjönkatu (heights from the LoD2 shell)
+PALO = _bid(-30.0, -430.0)
+_paW = MT('#c89f62', 'brick', 0.8)
+_paP = dict(wall=_paW, spandrel=_paW, frame=M('#33312d', 0.5), gwall=M('#2f3134', 0.4), plinth=M('#3a3a38'), fascia=_paW, gframe=M('#33312d', 0.5), sign=SIGNS)
+def _pa_fit(lay_, H, street, L, zb):
+    gh = 4.0 if zb < 1.5 and H > 6 else 0.0; n = max(1, round((H - gh) / 3.35)); fh = (H - gh) / n
+    rows = ([(gh, 'shop' if street else 'ribbon', 'G')] if gh else []) + [(fh, 'ribbon', 'F')] * n
+    return dict(bw=3.0, rows=rows, cols=lambda c, nb: 'W', P=dict(sill=0.95, wh=1.45, pier=0.0, nx=3), rowP={})
+SPEC[PALO] = dict(P=_paP, layout=_pa_fit(None, 21.4, True, 30, 0), fitw=_pa_fit)
+
+# Keskusaukio 2, Keskuskartano (Charles Hagan 1962; Pori's first high-rise, Hotel Amado in the 3-storey annexe): 101 m slab, 11 storeys over
+# a shop floor; white slab bands, a window and a dark grey panel in turn between them, grey sheet-metal gable ends; top floor rebuilt after
+# the 2019 fire with a darker window band.  Heights from the LoD2 shell: slab 34.5 m, annexe 10.8 m, single-storey shops 4.3 m.
+KKART = _bid(10.0, -590.0)
+_kkP = dict(wall=M('#6a6f74', 0.6), spandrel=M('#f2f2ee'), frame=M('#e6e6e1'), gwall=M('#34373a', 0.4), plinth=M('#2c2e31'), fascia=M('#3d4044'), gframe=ALU, sign=SIGNS)
+_kkGable = M('#9a9ea1', 0.45, 0.35)
+def _kk_fit(lay_, H, street, L, zb):
+    if H > 20 and L < 18 and zb < 1.5:                                      # gable end: sheet metal, no windows
+        return dict(bw=3.0, rows=[(H, 'plain', 'P')], cols=lambda c, nb: 'W', P=dict(wall=_kkGable), rowP={}, plain=True)
+    if H > 20 or zb > 3:                                                     # the slab
+        gh = 3.9 if zb < 1.5 else 0.0; n = max(1, round((H - gh) / 2.85)); fh = (H - gh) / n
+        rows = ([(gh, 'shop', 'G')] if gh else []) + [(fh, 'ribbon', 'F')] * (n - 1) + [(fh, 'ribbon', 'T')]
+        return dict(bw=2.6, rows=rows, cols=lambda c, nb: 'W', P=dict(sill=1.1, wh=fh - 1.18, pier=0.5, nx=1),
+                    rowP={'T': dict(spandrel=M('#d9dadb'), frame=M('#2c2e31'), pier=0.15, nx=3)})
+    if H > 7:                                                                # annexe: shops, Hotel Amado above
+        n = max(1, round((H - 4.3) / 3.25)); fh = (H - 4.3) / n
+        return dict(bw=3.2, rows=[(4.3, 'shop', 'G')] + [(fh, 'ribbon', 'F')] * n, cols=lambda c, nb: 'W',
+                    P=dict(wall=M('#d6d3cb'), spandrel=M('#d6d3cb'), frame=M('#2f3235', 0.5), sill=0.9, wh=1.4, pier=0.3, nx=2), rowP={})
+    return dict(bw=3.6, rows=[(H, 'shop', 'G')], cols=lambda c, nb: 'W', P={}, rowP={})
+SPEC[KKART] = dict(P=_kkP, layout=_kk_fit(None, 34.5, True, 100, 0), fitw=_kk_fit)
+
+
+# ---------------------------------------------------------------- BePOP on its measured LoD2 shell (MML Rakennukset 3D)
+# The LoD2 model of the block (one building in MML) holds BePOP, the 4-storey parking hall, Hotelli Bepop and Maakuntalinna with their real
+# heights and roofs (glass vault 15-23 m, tower 27 m, entrance canopy 24-25 m).  Walls take the spec of the building they belong to;
+# the vault faces are glass, the canopy white, the round tower is drawn by hand where the scan has a square one.
+# Looks: Y-pakki photos and text (Satakunnan Museo 2018), finnisharchitecture.fi / DOCOMOMO: pale blue mosaic concrete, triangular and
+# trapezoid openings, white canopy on slender columns at the Yrjönkatu entrance, green-framed glazed entrance, round tower through the vault.
+from shapely.geometry import Polygon as _SP, Point as _SPt
+_BP_CAN = _SP([(27.5, -348.4), (37.3, -350.7), (35.0, -360.6), (25.2, -358.3)])
+_BP_TW = (52.0, -375.9); _BP_TWR = 5.6
+_BP_HOT = _SP(poly(HOTBP)[0]).buffer(0.8); _BP_ML = _SP(poly(MAAKL)[0]).buffer(0.8)
+_bpG = M('#cfe3d8', 0.08)                              # vault glass, light green-blue tint as in the aerial image
+_bpGlz = dict(P=dict(wall=M('#3d7f5c', 0.4, 0.3), frame=M('#3d7f5c', 0.4, 0.3), panel=M((0.05, 0.16, 0.12), 0.08), gwall=M('#3d7f5c', 0.4, 0.3)))
+def _bp_fit(lay_, H, street, L, zb):
+    gh = 4.6 if zb < 1.5 and H > 7 else 0.0; n = max(1, round((H - gh) / 4.0)); fh = (H - gh) / n
+    return dict(bw=3.0, rows=([(gh, 'shop', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n, cols=lambda c, nb: _bpat[(c + nb) % len(_bpat)],
+                P=dict(colmod={'R': 'ribbon', 'N': 'plain'}, ww=1.5, wh=1.5, nx=2, sill=1.1, wh2=1), rowP={})
+def _bp_glz_fit(lay_, H, street, L, zb):
+    n = max(1, round(H / 3.0)); return dict(bw=2.2, rows=[(H / n, 'vraster', 'F')] * n, cols=lambda c, nb: 'W', P=dict(fin=0.25, nx=2, frame=M('#3d7f5c', 0.4, 0.3)), rowP={})
+def _hb_fit(lay_, H, street, L, zb):
+    gh = 4.2 if zb < 1.5 and H > 7 else 0.0; n = max(1, round((H - gh) / 3.4)); fh = (H - gh) / n
+    rows = ([(gh, 'shop', 'G')] if gh else []) + [(fh, 'ribbon', 'L' if (street and (k >= 2 or zb > 1.5)) else 'F') for k in range(n)]
+    return _hb_lay(rows) if L > 2.6 else dict(bw=3, rows=[(H, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True)
+def _ml_fit(lay_, H, street, L, zb):
+    gh = 5.0 if zb < 1.5 and H > 7 else 0.0; n = max(1, round((H - gh) / 3.4)); fh = (H - gh) / n
+    return _mlL(([(gh, 'shop', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n)
+_SPEC_HB = dict(roofmat_fn=lambda r: _bp_roof(r), P=_hbP, layout=_hb_fit(None, 21, True, 20, 0), fitw=_hb_fit, cornice=(0.25, 0.4, M('#6d6a62', 0.5, 0.3)))
+_SPEC_ML = dict(roofmat_fn=lambda r: _bp_roof(r), P=_mlP, layout=_ml_fit(None, 22, True, 20, 0), fitw=_ml_fit)
+_SPEC_GLZ = dict(roofmat_fn=lambda r: _bp_roof(r), P=dict(wall=M('#3d7f5c', 0.4, 0.3), frame=M('#3d7f5c', 0.4, 0.3), panel=M((0.05, 0.16, 0.12), 0.08)), layout=_bp_glz_fit(None, 20, True, 10, 0), fitw=_bp_glz_fit)
+def _bp_alt(x, y):
+    p = _SPt(x, y)
+    if _BP_CAN.buffer(0.6).contains(p): return _SPEC_GLZ
+    if _BP_HOT.contains(p): return _SPEC_HB
+    if _BP_ML.contains(p): return _SPEC_ML
+    return None
+def _bp_skip(r, k):                                     # the scan's square tower: replaced by the round one
+    return all(math.hypot(q[0] - _BP_TW[0], q[1] - _BP_TW[1]) < _BP_TWR + 2.2 for q in r) and max(q[2] for q in r) > 16.5
+def _bp_roof(r):
+    zs = [q[2] for q in r]; cx = sum(q[0] for q in r) / len(r); cy = sum(q[1] for q in r) / len(r)
+    if _BP_CAN.buffer(0.6).contains(_SPt(cx, cy)) and min(zs) > 22: return M('#f2f4f4')
+    if max(zs) - min(zs) > 2.5: return _bpG
+    if _BP_HOT.contains(_SPt(cx, cy)) or _BP_ML.contains(_SPt(cx, cy)): return M('#5a5c5e', 0.7)
+    return M('#8e8681', 0.8) if min(zs) > 20.5 or min(zs) < 18.5 else M('#a9a69f', 0.85)     # felt roofs; the parking deck is concrete
+def _bp_extra(Z, pts, h, P):
+    L = lambda x, y, z: (x - Z.cx, y - Z.cy, z); wh_ = M('#f2f4f4')
+    # round tower through the vault, offices fanning round it; white with dark-framed windows, light cap
+    tw = dict(wall=M('#e8edf0'), frame=M('#1f4a4f'), joints=M('#8f9ea8')); ring = _ring(_BP_TW[0], _BP_TW[1], _BP_TWR, 20); z0, z1 = 16.0, 26.9
+    for k in range(20): build_wall(Z, ring[k], ring[(k + 1) % 20], z0, z1, dict(bw=1.75, rows=[(3.6, 'punched', 'F')] * 3, cols=lambda c, nb: 'W', P=dict(ww=1.0, wh=1.6, nx=1, sill=0.9), rowP={}), tw, 900 + k, 0)
+    add_solid(Z, [L(x, y, z1) for x, y in ring], M('#5d6d78', 0.5), 0.3)
+    hat = _ring(_BP_TW[0], _BP_TW[1], _BP_TWR + 1.1, 20)
+    add_solid(Z, [L(x, y, z1 + 0.35) for x, y in hat], wh_, 0.3); add_solid(Z, [L(x, y, z1) for x, y in hat][::-1], wh_, 0.3)
+    for k in range(20):
+        a, b = hat[k], hat[(k + 1) % 20]; add_solid(Z, [L(a[0], a[1], z1), L(b[0], b[1], z1), L(b[0], b[1], z1 + 0.35), L(a[0], a[1], z1 + 0.35)], wh_, 0.4)
+    # entrance canopy: slender white columns with ring joints under the scanned roof (soffit and fascia added below the LoD2 plate)
+    cs = list(_BP_CAN.exterior.coords)[:-1]; cx = sum(c[0] for c in cs) / 4; cy = sum(c[1] for c in cs) / 4
+    big = [(cx + (x - cx) * 1.12, cy + (y - cy) * 1.12) for x, y in cs]; zc = 23.4
+    if _SP(big).exterior.is_ccw is False: big = big[::-1]                 # counter-clockwise: tops face up, fascias outwards (one face each: two coincident faces bake black)
+    add_solid(Z, [L(x, y, 19.0) for x, y in cs], M((0.08, 0.2, 0.15), 0.1), 0.4)        # glass roof of the entrance hall under the canopy
+    for k in range(4):
+        a, b = big[k], big[(k + 1) % 4]; fq = [L(a[0], a[1], zc), L(b[0], b[1], zc), L(b[0], b[1], zc + 0.9), L(a[0], a[1], zc + 0.9)]
+        add_solid(Z, fq, wh_, 0.4)
+    add_solid(Z, [L(x, y, zc) for x, y in big][::-1], wh_, 0.4)
+    add_solid(Z, [L(x, y, zc + 0.9) for x, y in big], M('#e4e7e8'), 0.3)
+    for x, y in big:
+        px_, py_ = cx + (x - cx) * 0.9, cy + (y - cy) * 0.9; col = _ring(px_, py_, 0.38, 10)
+        for k in range(10):
+            a, b = col[k], col[(k + 1) % 10]; add_solid(Z, [L(a[0], a[1], 0), L(b[0], b[1], 0), L(b[0], b[1], zc), L(a[0], a[1], zc)], wh_, 0.5)
+        for zr in (4.0, 4.4, 17.6, 18.0):                                           # ring joints
+            rr = _ring(px_, py_, 0.5, 10)
+            for k in range(10):
+                a, b = rr[k], rr[(k + 1) % 10]; add_solid(Z, [L(a[0], a[1], zr), L(b[0], b[1], zr), L(b[0], b[1], zr + 0.2), L(a[0], a[1], zr + 0.2)], M('#c9ced1'), 0.3)
+SPEC[BEPOP] = dict(lod2=True, runalt=lambda x, y: _SPEC_GLZ if _BP_CAN.buffer(0.3).contains(_SPt(x, y)) else _SPEC_ML if _BP_ML.contains(_SPt(x, y)) else _SPEC_HB if _BP_HOT.contains(_SPt(x, y)) else None, zcap=lambda x, y: 19.0 if _BP_CAN.buffer(0.3).contains(_SPt(x, y)) else None, P=_bpP, layout=_bp_fit(None, 18, True, 20, 0), fitw=_bp_fit, alt=_bp_alt, skip=_bp_skip, roofmat_fn=_bp_roof, extra=[_bp_extra])
+
 ZONES = {
     'tori0': [1725, 1727, 1728, 1729, 1730, 1731, 1732, 1600, 1621],
     'tori1': [1315, 1490, 1491, 1492, 1493, 1494, 1495, 1496, 1361, 1363, 1367, 1488, 1489, 1362, 1364, 1365, 1366, 1372],
@@ -208,7 +372,7 @@ ZONES = {
     'tori5': [1601, 1623, 1624, 1720, 1721, 1722],
     'bepop': [BEPOP], 'uima': [UIMA],
 }
-NOROOF = {'bepop'}
+NOROOF = set()
 
 
 # buildings with an approved photo facade (phs.json from the review tool) are drawn by the game itself: leave them out of the blocks

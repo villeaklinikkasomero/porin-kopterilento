@@ -141,6 +141,7 @@ def build_lod2(Z, i, spec, upper=None):
             mid2 = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2); street = STREET is None or STREET(mid2, (n.x, n.y))
             lay_ = (spec_['layout'] if street or 'yard' not in spec_ else spec_['yard']) if zb < 1.5 else (spec_.get('upper') or upper or lay(ze - zb, 'punched', bw=3.3, fh=3.0))
             if spec_.get('fit'): lay_ = spec_['fit'](lay_, ze - zb, street)
+            if spec_.get('fitw'): lay_ = spec_['fitw'](lay_, ze - zb, street, u1r - u0r, zb)   # also by wall length and base height (gable ends, walls above a lower roof)
             build_wall(Z, p, q, zb, ze, lay_, spec_.get('Pyard', P_) if not street else P_, i * 31 + seed, i)
             if spec_.get('cornice') and zb < 1.5 and (street or spec_.get('cornice_all')):
                 cw, ch, cm = spec_['cornice']; nn = Vector((n.x, n.y)).normalized()
@@ -200,6 +201,8 @@ def spec_for(i):
     sp = auto(i); sp['P'] = dict(sp['P']); sp['P']['wall'] = look_mat(i) or M(PALP[(i * 7 + 3) % len(PALP)])
     f = (LOOK['b'].get(str(i)) or {}).get('f')                 # storeys from the building register (Ryhti): one window row per storey
     L_ = sp.get('layout')
+    if L_ and L_.get('rows') and not (LOOK['b'].get(str(i)) or {}).get('shop'):   # shop fronts only on the commercial streets of the centre
+        sp['layout'] = L_ = dict(L_, rows=[(r[0], 'punched', 'F') if r[2] == 'G' and r[1] == 'shop' else r for r in L_['rows']])
     if f and L_ and not L_.get('plain') and L_.get('rows'):
         rows = L_['rows']; g = [r for r in rows if r[2] == 'G']; up = [r for r in rows if r[2] != 'G']
         n = max(1, int(f) - len(g)); gh_ = sum(r[0] for r in g); H = float(B[i]['h'])
