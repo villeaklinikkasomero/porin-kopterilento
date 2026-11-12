@@ -115,6 +115,13 @@ def enqueue(kind: str, body: str):
     k = jobs.enqueue(kind, json.loads(body)); vol.commit(); worker.spawn(); return k
 
 
+# block bakes use only public map data (no city photos): like the city blocks they may run on any free RTX-class GPU in any region;
+# pinned to L4 in the EU a single 'bake bepop' waited over half an hour for a GPU
+@app.function(gpu=['L4', 'A10', 'L40S'], volumes={'/vol': vol}, timeout=3 * 3600, retries=modal.Retries(max_retries=1, initial_delay=10.0))
+def task_any(cmd: str):
+    return task.local(cmd)
+
+
 @app.local_entrypoint()
 def main(cmd: str = '', queue: str = '', body: str = '{}'):
     print('porikit command:', repr(cmd), repr(queue), flush=True)
@@ -127,5 +134,6 @@ def main(cmd: str = '', queue: str = '', body: str = '{}'):
             if isinstance(out, tuple) and len(out) == 3: n_all += 1; n_ok += bool(out[1])
         print('city blocks ok:', (n_ok, n_all), flush=True)
     elif queue: print('queued, the GPU worker is starting:', enqueue.remote(queue, body))
+    elif cmd and cmd.split()[0] == 'bake': print('exit code', task_any.remote(cmd))   # any region, first free GPU
     elif cmd: print('exit code', task.remote(cmd))
     else: print(__doc__)
