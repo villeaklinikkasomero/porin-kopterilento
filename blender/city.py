@@ -118,7 +118,7 @@ def house_spec(i):
             kivi.add_solid(Z, [L(p0[0], p0[1], hh - 0.02), L(p1[0], p1[1], hh - 0.02), L(p1[0], p1[1], hh + 0.2), L(p0[0], p0[1], hh + 0.2)], P['trim'], 0.3)
             if attic and rise > 2.3 and bb * (1 - 1.65 / rise) > 0.62:
                 gable_window(Z, lambda u, z, d, su=su, pt=pt: L(pt[0] + vx * u + ux * su * d, pt[1] + vy * u + uy * su * d, hh + 0.2 + z), P)
-    return dict(P=dict(wall=W, trim=trim, frame=M('#f2f0ea')), layout=layout, extra=[gable_ends], footprint=not l2, attic=attic, upper_mat=gwall)
+    return dict(P=dict(wall=W, trim=trim, frame=M('#f2f0ea')), layout=layout, extra=[gable_ends], footprint=not l2, attic=attic, upper_mat=gwall, autofit=True)
 
 
 if __name__ == '__main__':

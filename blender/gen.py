@@ -266,17 +266,37 @@ def m_erker(mb, col, P):
     mb.s3q([(e, 0, 0), (bw - e, 0, 0), (bw - e, 0, dp), (e, 0, dp)], EW, 0.4)
     mb.s3q([(e, fh, dp), (bw - e, fh, dp), (bw - e, fh, 0), (e, fh, 0)], EW, 0.4)
 
+def shop_keys(cols):
+    """shopfront bays in pairs: a pier only on the outer side of each pair, so the glass runs across two bays (about four of the
+    old pier-and-mullion spacings); 'S<pier left><pier right>'.  Blank ('N') and door ('D') bays stay as they are and end a pair."""
+    out = []; run = 0
+    for c, ck in enumerate(cols):
+        if ck in ('N', 'D'): out.append(ck); run = 0; continue
+        nxt = c + 1 < len(cols) and cols[c + 1] not in ('N', 'D')
+        out.append('S%d%d' % (run % 2 == 0, run % 2 == 1 or not nxt)); run += 1
+    return out
+
 def m_shop(mb, col, P):
-    """ground floor: plinth, big glazing, fascia"""
+    """ground floor: low plinth, wide glazing, fascia.  col: 'N' blank, 'D' door, 'S11' / 'S10' / 'S01' / 'S00' glazing with a pier on
+    the left / right side or running on into the next bay (shop_keys); anything else: a single bay between two piers"""
     bw, fh = mb.bw, mb.fh; W = P.get('gwall', P['wall']); pl = P.get('plinth', DARK); fas = P.get('fascia', W); fh0 = fh - P.get('fasc_h', 0.7)
-    e = P.get('gpier', 0.3)
+    e = P.get('gpier', 0.3); fm = P.get('gframe', DARK); ph = 0.25
     if col == 'N': mb.wall([], W); mb.q(0, 0, bw, 0.35, 0.01, pl); return
     if col == 'D':
-        h = mb.window(e, 0.05, bw - e, fh0, W, r=0.25, nx=2, fmat=P.get('gframe', DARK), glass=GLASS, curt=0)
+        h = mb.window(e, 0.05, bw - e, fh0, W, r=0.25, nx=2, fmat=fm, glass=GLASS, curt=0)
+        mb.wall([h, (0, fh0, bw, fh)], W)
     else:
-        h = mb.window(e, 0.45, bw - e, fh0, W, r=0.12, nx=P.get('gnx', 2), fmat=P.get('gframe', DARK), glass=P.get('gglass'), curt=0)
-    mb.wall([h, (0, fh0, bw, fh), (0, 0, bw, 0.4)] if col != 'D' else [h, (0, fh0, bw, fh)], W)
-    if col != 'D': mb.q(0, 0, bw, 0.4, 0.01, pl)
+        pL, pR = (col[1] == '1', col[2] == '1') if len(col) == 3 and col[0] == 'S' else (True, True)
+        u0 = e if pL else 0.0; u1 = bw - e if pR else bw; r = 0.12; fr = 0.06; jt = 0.015; gl = P.get('gglass') or GLASS
+        mb.q(u0, ph, u1, fh0, -r, gl)                                                            # one sheet of glass, no mullion
+        mb.q(u0, ph, u1, ph + fr, -r + 0.02, fm); mb.q(u0, fh0 - fr, u1, fh0, -r + 0.02, fm)     # bottom and head frame
+        for side, u in ((pL, u0), (pR, u1)):                                                     # frame at a pier, a thin glazing joint where the glass runs on
+            wdt = fr if side else jt; a_, b_ = (u, u + wdt) if u == u0 else (u - wdt, u)
+            mb.q(a_, ph + fr, b_, fh0 - fr, -r + 0.02, fm)
+            if side: mb.hq([(u, ph, 0), (u, ph, -r), (u, fh0, -r), (u, fh0, 0)], W)              # reveal of the pier
+        mb.hq([(u0, ph, 0), (u1, ph, 0), (u1, ph, -r), (u0, ph, -r)], W); mb.hq([(u0, fh0, 0), (u1, fh0, 0), (u1, fh0, -r), (u0, fh0, -r)], W)
+        mb.wall([(u0, ph, u1, fh0), (0, fh0, bw, fh), (0, 0, bw, ph)], W)
+        mb.q(0, 0, bw, ph, 0.01, pl)
     mb.q(0, fh0, bw, fh, 0.0, fas)
     if P.get('sign') and mb.rnd.random() < 0.7:
         sc = mb.rnd.choice(P['sign']); mb.prot(0.5, fh0 + 0.12, bw - 0.5, fh - 0.12, 0.05, sc)
@@ -537,8 +557,8 @@ def build_wall(Z, p, q, z0, z1, layout, P, seed, bid):
     v = 0
     for ri, (rh, mod, rkey) in enumerate(rows):
         fh = rh * sc
-        groups = {}
-        for c, ck in enumerate(cols): groups.setdefault(ck if mod != 'plain' else 'W', []).append(c)
+        groups = {}; rk = shop_keys(cols) if mod == 'shop' else cols
+        for c, ck in enumerate(rk): groups.setdefault(ck if mod != 'plain' else 'W', []).append(c)
         for ck, cs in groups.items():
             rep = min(cs, key=lambda c: abs(c - (nb - 1) / 2) + (0.01 * c))
             Pm = dict(P); Pm.update(layout.get('P', {})); Pm.update(layout.get('rowP', {}).get(rkey, {}))

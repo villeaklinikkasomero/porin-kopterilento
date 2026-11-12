@@ -202,9 +202,13 @@ def spec_for(i):
     L_ = sp.get('layout')
     if f and L_ and not L_.get('plain') and L_.get('rows'):
         rows = L_['rows']; g = [r for r in rows if r[2] == 'G']; up = [r for r in rows if r[2] != 'G']
-        n = max(1, int(f) - len(g)); fh = up[0][0] if up else 3.0
-        body = [up[0]] if up and up[0][2] == 'S' else []; top = [up[-1]] if up and up[-1][2] == 'T' else []
-        mid = [r for r in up if r[2] == 'F'][:1] or [(fh, 'punched', 'F')]
-        new = body + mid * max(0, n - len(body) - len(top)) + top
-        sp['layout'] = dict(L_, rows=g + (new[:n] if len(new) > n else new))
+        n = max(1, int(f) - len(g)); gh_ = sum(r[0] for r in g); H = float(B[i]['h'])
+        fh = (H - gh_) / n                                   # the rows are stretched to the wall: give them the real storey height,
+        if 2.6 <= fh <= 4.6:                                 # or the ground-floor shop row grows with them (7-8 m shop fronts)
+            body = [up[0]] if up and up[0][2] == 'S' else []; top = [up[-1]] if up and up[-1][2] == 'T' else []
+            mid = [r for r in up if r[2] == 'F'][:1] or [(fh, 'punched', 'F')]
+            new = body + mid * max(0, n - len(body) - len(top)) + top
+            new = [(fh,) + tuple(r[1:]) for r in (new[:n] if len(new) > n else new)]
+            sp['layout'] = dict(L_, rows=g + new)
+        # else: the register count does not fit this height (wrong building matched) - keep the height-based rows
     return sp

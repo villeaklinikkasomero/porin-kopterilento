@@ -402,7 +402,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   })();
   const wp = [], wn = [], wu = [], wc = [], rp = [], ru = [];
   // facade modules rendered in Blender (one bay x one storey); alpha marks the wall area that takes the building's own colour
-  const STY = ['classic', 'arch', 'apart', 'ribbon', 'shop', 'brick', 'wood'], BAYW = [3.2, 3.2, 3.6, 3.0, 4.0, 3.2, 2.8], FLH = [3.4, 3.4, 3.0, 3.4, 3.8, 3.4, 3.0];
+  const STY = ['classic', 'arch', 'apart', 'ribbon', 'shop', 'brick', 'wood'], BAYW = [3.2, 3.2, 3.6, 3.0, 8.0, 3.2, 2.8], FLH = [3.4, 3.4, 3.0, 3.4, 3.8, 3.4, 3.0];
   const WOODPAL = [0xd9b45f, 0x9c3d2e, 0xe8e2d0, 0xc9d2bd, 0xb9c4cc, 0xd8c08a, 0xa8563f, 0xe6d9a8, 0x9aa585, 0xd2a878, 0xefe6c4, 0x8c4a3a];   // painted timber houses
   const rp2 = [], ru2 = [];
   const obbOf = pts => { let best = null;      // smallest enclosing rectangle, long axis first
@@ -415,7 +415,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const SB = STY.map(() => ({ p: [], n: [], u: [], c: [] }));
   // photo facades from Porin kaupunki street photos: one bay-wide strip from street to eave per building (photos/build_ph.py)
   // building index -> styles; 'west' picks the second style for walls west of that x (one footprint, two facades)
-  let PHS = { 603: [{ t: 'ph_603', bw: 10.16 }], 604: [{ t: 'ph_604y', bw: 4.81 }, { t: 'ph_604b', bw: 4.59, cut: 10.4 }], 1726: [{ t: 'ph_1726', bw: 8.12 }], 1599: [{ t: 'ph_1599', bw: 12.11 }], 602: [{ t: 'ph_602', bw: 2.23 }] };
+  let PHS = { 603: [{ t: 'ph_603', bw: 10.16 }], 604: [{ t: 'ph_604y', bw: 4.81 }, { t: 'ph_604b', bw: 4.59, cut: 10.4 }], 1726: [{ t: 'ph_1726', bw: 8.12 }], 1599: [{ t: 'ph_1599', bw: 12.11 }], 602: [{ t: 'ph_602', bw: 2.23, g: 0.224, n: 5, wide: 4, shop: 3 }] };   // g, n: the photo shows the ground floor (share g of its height) and n upper storeys; wide, shop: the strip is laid out 'wide' bays side by side and its ground floor redrawn as 'shop' wide shop windows between piers
   Object.assign(PHS, PHSJ);
   const PB = {};
   const hsh = (i, k) => { let x = (i * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
@@ -475,12 +475,30 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const win = house ? true : shed ? false : h >= 5;
     if (L2 && PHS[bIdx]) {   // photo-textured walls
       const ox = L2.o[0], oy = L2.o[1], W = L2.w, E = Math.max(2.4, L2.e || L2.h), st = PHS[bIdx];
+      // the photo strip was fitted to the median eave E; parts of the building with a higher eave (Yrjönkatu 10 towards the square: 23 m against 19.8 m)
+      // were left blank under the roof.  With g and n the strip is extended by whole storeys of the same height up to the highest flat-topped wall.
+      let Ev = E; const S0 = st[0];
+      if (S0.g && S0.n) { const gh = S0.g * E, sh = (1 - S0.g) * E / S0.n, bins = new Map(); let tot = 0;
+        for (let k = 0; k < W.length; k += 12) { const ax = W[k] / 10, ay = W[k + 1] / 10, az = W[k + 2] / 10, bx = W[k + 4] / 10 - ax, by = W[k + 5] / 10 - ay, bz = W[k + 6] / 10 - az, cx = W[k + 8] / 10 - ax, cy = W[k + 9] / 10 - ay, cz = W[k + 10] / 10 - az;
+          const ar = 0.5 * Math.hypot(by * cz - bz * cy, bz * cx - bx * cz, bx * cy - by * cx), zt = Math.round(Math.max(az, az + bz, az + cz)); bins.set(zt, (bins.get(zt) || 0) + ar); tot += ar; }
+        let T = E; for (const [zt, ar] of bins) if (ar > 0.03 * tot && zt > T) T = zt;                 // gables and small roof structures do not count
+        S0.rows = Math.max(S0.n, Math.round((T - gh) / sh)); Ev = gh + S0.rows * sh; }
+      // upper walls carry no bay position (u = -1) and stayed blank.  Where such a wall stands in the plane of a facade below it, it takes that
+      // facade's bay position, so the extra storey lines up with the windows underneath.
+      const planes = new Map(), pkey = (x, y, z, vx, vy, vz, wx, wy, wz) => { let nx = vy * wz - vz * wy, ny = vz * wx - vx * wz; const nl = Math.hypot(nx, ny); if (nl < 1e-6) return null; nx /= nl; ny /= nl;
+        if (nx < -1e-6 || (Math.abs(nx) <= 1e-6 && ny < 0)) { nx = -nx; ny = -ny; } return { k: Math.round(nx * 30) + ',' + Math.round(ny * 30) + ',' + Math.round((x * nx + y * ny) * 2), tx: -ny, ty: nx }; };
+      if (S0.g && S0.n) for (let k = 0; k < W.length; k += 12) { const q = [0, 1, 2].map(j => [(W[k + j * 4] + ox) / 10, (W[k + j * 4 + 1] + oy) / 10, W[k + j * 4 + 2] / 10, W[k + j * 4 + 3] / 10]);
+        if (q.some(v => v[3] < 0)) continue; const pk = pkey(q[0][0], q[0][1], q[0][2], q[1][0] - q[0][0], q[1][1] - q[0][1], q[1][2] - q[0][2], q[2][0] - q[0][0], q[2][1] - q[0][1], q[2][2] - q[0][2]); if (!pk || planes.has(pk.k)) continue;
+        const pr = q.map(v => v[0] * pk.tx + v[1] * pk.ty); let a = 0, b = 1; if (Math.abs(pr[2] - pr[0]) > Math.abs(pr[1] - pr[0])) b = 2; if (Math.abs(pr[b] - pr[a]) < 0.2) continue;
+        const sg = (q[b][3] - q[a][3]) / (pr[b] - pr[a]) > 0 ? 1 : -1; planes.set(pk.k, { tx: pk.tx, ty: pk.ty, sg, off: q[a][3] - sg * pr[a] }); }
       for (let k = 0; k < W.length; k += 12) {
         const ax = (W[k] + ox) / 10, ay = (W[k + 1] + oy) / 10, bx = (W[k + 4] + ox) / 10, by = (W[k + 5] + oy) / 10, cx = (W[k + 8] + ox) / 10, cy = (W[k + 9] + oy) / 10;
         const az = W[k + 2] / 10, bz = W[k + 6] / 10, cz = W[k + 10] / 10;
         let nx = (by - ay) * (cz - az) - (bz - az) * (cy - ay), nz = -((bz - az) * (cx - ax) - (bx - ax) * (cz - az)); const nl = Math.hypot(nx, nz) || 1; nx /= nl; nz /= nl;
         // two photo facades on one footprint meet at a party wall: cut the triangles there (choosing by triangle centre gave a diagonal seam)
         const V = [0, 1, 2].map(j => [(W[k + j * 4] + ox) / 10, (W[k + j * 4 + 1] + oy) / 10, W[k + j * 4 + 2] / 10, W[k + j * 4 + 3] / 10]);
+        if (planes.size && V.some(q => q[3] < 0)) { const pk = pkey(V[0][0], V[0][1], V[0][2], V[1][0] - V[0][0], V[1][1] - V[0][1], V[1][2] - V[0][2], V[2][0] - V[0][0], V[2][1] - V[0][1], V[2][2] - V[0][2]), pl = pk && planes.get(pk.k);
+          if (pl) for (const q of V) q[3] = Math.max(0, pl.off + pl.sg * (q[0] * pl.tx + q[1] * pl.ty)); }
         const side = st.length > 1 ? (st[1].cut !== undefined ? q => q[0] * 0.9744 - q[1] * 0.225 - st[1].cut : q => q[0] - st[1].west) : null;
         const parts = [[], []];   // [east / default, west]
         if (!side) parts[0] = V; else for (let j = 0; j < 3; j++) { const p = V[j], q = V[(j + 1) % 3], dp = side(p), dq = side(q);
@@ -490,7 +508,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
           const S = st[pi], B = PB[S.t] || (PB[S.t] = { s: S, p: [], n: [], u: [], c: [] });
           for (let f = 1; f + 1 < P.length; f++) for (const v of [P[0], P[f], P[f + 1]]) { const [x, y, z, u] = v;
             B.p.push(x, z, -y); B.n.push(nx, 0, nz);
-            if (u >= 0) B.u.push(u / S.bw, Math.min(0.995, z / E)); else B.u.push(0.5, 0.997);
+            if (u >= 0) B.u.push(u / (S.bw * (S.wide || 1)), Math.min(0.995, z / (S === S0 ? Ev : E))); else B.u.push(0.5, 0.997);
             const ao = 0.8 + 0.2 * Math.min(1, z / 3); B.c.push(ao, ao, ao); } }
       }
       const R = L2.r;
@@ -608,8 +626,21 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   Object.values(PB).forEach(B => {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(B.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(B.n, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(B.u, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(B.c, 3));
-    const t = tl.load(`./${B.s.t}.jpg`); t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.ClampToEdgeWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
-    scene.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ map: t, vertexColors: true }))); });
+    const setup = t => { t.wrapS = THREE.RepeatWrapping; t.wrapT = THREE.ClampToEdgeWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+    const pm = new THREE.MeshLambertMaterial({ vertexColors: true });
+    if (B.s.rows > B.s.n) {   // extended strip: ground floor, the photo's storeys, repeats of its second-highest storey, its top storey last
+      const img = new Image();
+      img.onload = () => { const cv = document.createElement('canvas'), w = img.width, h = img.height, gp = Math.round(B.s.g * h), rp = (h - gp) / B.s.n, R = B.s.rows, Wd = B.s.wide || 1; cv.width = w * Wd; cv.height = Math.round(gp + R * rp); const c = cv.getContext('2d');
+        for (let q = 0; q < Wd; q++) { c.drawImage(img, 0, h - gp, w, gp, q * w, cv.height - gp, w, gp);
+          for (let k = 0; k < R; k++) { const src = k < B.s.n - 1 ? k : k === R - 1 ? B.s.n - 1 : B.s.n - 2; c.drawImage(img, 0, h - gp - (src + 1) * rp, w, rp, q * w, cv.height - gp - (k + 1) * rp, w, rp + 0.5); } }
+        if (B.s.shop) {   // shop windows: the photo's ground floor has a pier every 0.75 m; redraw it as wide sheets of glass (its own pier and glass colours, column by column) with a pier between them
+          const y0 = h - gp, Y0 = cv.height - gp, uw = cv.width / B.s.shop, pw = Math.max(2, Math.round(0.34 / (B.s.bw * Wd) * cv.width));
+          c.drawImage(img, 1, y0, 1, gp, 0, Y0, cv.width, gp);                                   // pier / fascia column across the whole width
+          for (let q = 0; q < B.s.shop; q++) c.drawImage(img, Math.round(w * 0.26), y0, 1, gp, q * uw + pw / 2, Y0, uw - pw, gp); }   // glass column stretched over each opening
+        pm.map = setup(new THREE.CanvasTexture(cv)); pm.needsUpdate = true; };
+      img.src = `./${B.s.t}.jpg`;
+    } else pm.map = setup(tl.load(`./${B.s.t}.jpg`));
+    scene.add(new THREE.Mesh(g, pm)); });
   const kwMesh = (k, mat) => { if (!k.p.length) return null; const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(k.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(k.n, 3));
     g.setAttribute('uv', new THREE.Float32BufferAttribute(k.u, 2)); g.setAttribute('color', new THREE.Float32BufferAttribute(k.c, 3)); const me = new THREE.Mesh(g, mat); scene.add(me); return me; };
   KW.forEach((k, ci) => { if (!k.p.length && !KWP[ci].p.length) return;
