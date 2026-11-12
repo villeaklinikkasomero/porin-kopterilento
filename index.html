@@ -272,6 +272,21 @@ const outerMat = new THREE.MeshBasicMaterial({ map: outerTex }), roofMat2 = new 
     for (let i = 0; i < A.length; i += 6) { const cx = (A[i] + A[i + 2] + A[i + 4]) / 3, cy = (A[i + 1] + A[i + 3] + A[i + 5]) / 3; (inCore(cx, cy) ? pc : po).push(...A.slice(i, i + 6)); }
     scene.add(noT(new THREE.Mesh(tris(pc, cuv, TER.wl), waterify(new THREE.MeshBasicMaterial({ map: orto })))));
     scene.add(noT(new THREE.Mesh(tris(po, ouv, TER.wl), waterify(new THREE.MeshBasicMaterial({ map: outerTex }))))); }
+  // road and railway bridges over land (blender/bridges_fix.py, TER.bd): the ground keeps its cutting with the road or track underneath; the deck is
+  // drawn at its own height with the aerial photo on it (the bridge is in the photo), concrete edge beams under it and a low parapet on both sides
+  if (TER.bd && TER.bd.length) { const dc = [[], []], du = [[], []], cp = [], cm = new THREE.MeshLambertMaterial({ color: 0x9d9b94, side: THREE.DoubleSide });
+    const quad = (A, B, C, D, arr) => arr.push(...A, ...B, ...C, ...A, ...C, ...D);
+    for (const r of TER.bd) { const hw = r[0], P = []; for (let k = 1; k + 2 < r.length; k += 3) P.push([r[k], r[k + 1], r[k + 2]]);
+      const off = P.map((p, k) => { const a = P[Math.max(0, k - 1)], b = P[Math.min(P.length - 1, k + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [dy / l * hw, -dx / l * hw]; });
+      for (let k = 0; k + 1 < P.length; k++) { const [ax, ay, az] = P[k], [bx, by, bz] = P[k + 1], [ox, oy] = off[k], [px, py] = off[k + 1], zt = 0.12;
+        const L1 = [ax + ox, ay + oy], R1 = [ax - ox, ay - oy], L2 = [bx + px, by + py], R2 = [bx - px, by - py], core = inCore((ax + bx) / 2, (ay + by) / 2) ? 0 : 1, uvf = core ? ouv : cuv;
+        for (const [x, y, z] of [[...L1, az], [...L2, bz], [...R2, bz], [...L1, az], [...R2, bz], [...R1, az]]) { dc[core].push(x, z + zt, -y); du[core].push(...uvf(x, y)); }
+        for (const [S1, S2] of [[L1, L2], [R1, R2]]) {
+          quad([S1[0], az - 0.95, -S1[1]], [S2[0], bz - 0.95, -S2[1]], [S2[0], bz + zt, -S2[1]], [S1[0], az + zt, -S1[1]], cp);          // edge beam
+          quad([S1[0], az + zt, -S1[1]], [S2[0], bz + zt, -S2[1]], [S2[0], bz + 1.0, -S2[1]], [S1[0], az + 1.0, -S1[1]], cp); }        // parapet
+        quad([L1[0], az - 0.95, -L1[1]], [L2[0], bz - 0.95, -L2[1]], [R2[0], bz - 0.95, -R2[1]], [R1[0], az - 0.95, -R1[1]], cp); } }   // underside
+    for (let c = 0; c < 2; c++) if (dc[c].length) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(dc[c], 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(du[c], 2)); scene.add(noT(new THREE.Mesh(g, c ? outerMat : groundMat))); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(cp, 3)); g.computeVertexNormals(); scene.add(noT(new THREE.Mesh(g, cm))); }
   const o = new THREE.PlaneGeometry(14000, 14000); o.rotateX(-Math.PI / 2);
   const om = noT(new THREE.Mesh(o, new THREE.MeshBasicMaterial({ color: 0x74836f }))); om.position.y = -12; scene.add(om);
 }
@@ -1094,41 +1109,55 @@ function loadModel(name, done) {
     new GLTFLoader().parse(buf.buffer, '', gl => done(gl.scene, K), () => {}); }).catch(() => {});
 }
 // ---------- trees ----------
+// OpenStreetMap trees + trees found in the aerial photo (trees_extra.js: crown cover where OSM has none; parks, woods, railway verges, gardens).
+// Leaf-card models near the helicopter, cheap crowns (icosahedron / cone) further out; the visible sets are refreshed as the helicopter moves.
 {
-  const n = CITY.t.length / 2;
-  const crown = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshLambertMaterial({ flatShading: true }), n);
-  const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.25, 0.35, 1, 5), new THREE.MeshLambertMaterial({ color: 0x4f4034 }), n);
-  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color();
-  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < n; i++) {
-    const x = CITY.t[i * 2], z = -CITY.t[i * 2 + 1], r = 2.6 + rnd() * 2.4, th = 3 + rnd() * 4;
-    p.set(x, th + r * 0.9, z); s.set(r, r * (1.1 + rnd() * 0.5), r); q.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, rnd() * 6.28);
-    crown.setMatrixAt(i, m.compose(p, q, s));
-    c.setHSL(0.24 + rnd() * 0.09, 0.42 + rnd() * 0.18, 0.24 + rnd() * 0.12); crown.setColorAt(i, c);
-    p.set(x, th / 2, z); s.set(1, th + 1, 1); trunk.setMatrixAt(i, m.compose(p, q, s));
-  }
-  scene.add(crown, trunk);
-  // leaf-card trees (blender/trees2.py: linden, birch, spruce; alpha-cut leaf atlas, bent normals, self-shadowing in vertex colours).
-  // Only trees within 900 m are drawn (the haze hides the rest); the visible set is refreshed once a second.
+  const NEAR = 320, FAR = 1500, LIST = [];   // leaf cards within 320 m: about 2700 trees at most (1.2 M triangles), the rest as cheap crowns
+  let sd = 23; const r2 = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  const addTree = (x, y, k, wood) => { const sc = (wood ? 0.9 : 0.8) + r2() * 0.55, t = r2();
+    LIST.push({ x, y, k, sc, sy: sc * (0.9 + r2() * 0.25), rot: r2() * 6.28, c: [0.84 + 0.16 * t, 0.88 + 0.12 * r2(), 0.8 + 0.16 * t], fc: 0.85 + r2() * 0.3 }); };
+  for (let i = 0; i < CITY.t.length / 2; i++) { const v = r2(); addTree(CITY.t[i * 2], CITY.t[i * 2 + 1], v < 0.1 ? 2 : v < 0.38 ? 1 : 0, false); }
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), UPV = THREE.Object3D.DEFAULT_UP;
+  // far crowns: deciduous = squashed icosahedron on a short trunk, spruce = two stacked cones (about 30 triangles each)
+  const BG = (() => { const g = new THREE.IcosahedronGeometry(1, 0); g.scale(3.2, 3.4, 3.2); g.translate(0, 6.6, 0); const t = new THREE.CylinderGeometry(0.22, 0.3, 3.6, 5); t.translate(0, 1.8, 0);
+    const cols = (geo, r, gg, b) => { const n = geo.attributes.position.count, a = new Float32Array(n * 3); for (let i = 0; i < n; i++) a.set([r, gg, b], i * 3); geo.setAttribute('color', new THREE.BufferAttribute(a, 3)); return geo; };
+    const merge = (A, B) => { const g = new THREE.BufferGeometry(), pa = [], na = [], ca = []; for (const x of [A.toNonIndexed(), B.toNonIndexed()]) { pa.push(...x.attributes.position.array); na.push(...x.attributes.normal.array); ca.push(...x.attributes.color.array); }
+      g.setAttribute('position', new THREE.Float32BufferAttribute(pa, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(na, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(ca, 3)); return g; };
+    const dec = merge(cols(g, 1, 1, 1), cols(t, 0.45, 0.36, 0.3));
+    const c1 = new THREE.ConeGeometry(3.6, 8.5, 7); c1.translate(0, 6.2, 0); const c2 = new THREE.ConeGeometry(2.4, 6, 7); c2.translate(0, 10.8, 0);
+    const spr = merge(cols(c1, 1, 1, 1), cols(c2, 1, 1, 1));
+    return [dec, dec, spr]; })();
+  const fm = new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true });
+  const FARC = [[0.25, 0.4, 0.2], [0.23, 0.36, 0.24], [0.36, 0.3, 0.14]];      // HSL of the crowns in the photo: linden, birch (lighter), spruce (dark)
+  let farMs = [], nearMs = null, cap = 0;
+  const alloc = () => { if (LIST.length <= cap) return; cap = LIST.length;
+    for (const x of farMs) { scene.remove(x); x.dispose(); }
+    farMs = BG.map(g => { const im = new THREE.InstancedMesh(g, fm, cap); im.count = 0; im.frustumCulled = false; scene.add(im); return im; });
+    if (nearMs) nearMs.forEach((im, k) => { const n2 = new THREE.InstancedMesh(im.geometry, im.material, cap); n2.count = 0; n2.frustumCulled = false; scene.remove(im); scene.add(n2); nearMs[k] = n2; }); };
+  let last = { x: 1e9, y: 1e9 };
+  TREES.update = (x, y) => {
+    if (Math.hypot(x - last.x, y - last.y) < 60) return; last = { x, y }; alloc();
+    const nf = [0, 0, 0], nn = [0, 0, 0];
+    for (const t of LIST) { const dx = t.x - x, dy = t.y - y; if (Math.abs(dx) > FAR || Math.abs(dy) > FAR) continue;
+      const near = nearMs && dx * dx + dy * dy < NEAR * NEAR, im = near ? nearMs[t.k] : farMs[t.k], j = near ? nn[t.k]++ : nf[t.k]++;
+      p.set(t.x, 0, -t.y); s.set(t.sc, t.sy, t.sc); q.setFromAxisAngle(UPV, t.rot); im.setMatrixAt(j, m.compose(p, q, s));
+      if (near) c.setRGB(...t.c); else { const h = FARC[t.k]; c.setHSL(h[0] + (t.fc - 1) * 0.08, h[1], h[2] * t.fc); }
+      im.setColorAt(j, c); }
+    const fin = (arr, cnt) => arr.forEach((im, k) => { im.count = cnt[k]; im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; });
+    fin(farMs, nf); if (nearMs) fin(nearMs, nn);
+  };
+  window.__treesAt = (x, y) => { last = { x: 1e9, y: 1e9 }; TREES.update(x, y); };
+  TREES.update(70, 45);
+  import('./trees_extra.js').then(K => { const dec = b => { const s_ = atob(b), a = new Uint8Array(s_.length); for (let i = 0; i < s_.length; i++) a[i] = s_.charCodeAt(i); return a; };
+    const P = new Int16Array(dec(K.default.p).buffer), Kk = dec(K.default.k); for (let i = 0; i < Kk.length; i++) addTree(P[i * 2] / 10, P[i * 2 + 1] / 10, Kk[i], true);
+    window.__treesExtra = Kk.length; const l = last; last = { x: 1e9, y: 1e9 }; TREES.update(l.x < 1e8 ? l.x : 70, l.x < 1e8 ? l.y : 45); }).catch(() => {});
+  // leaf-card trees (blender/trees2.py: linden, birch, spruce; alpha-cut leaf atlas, bent normals, self-shadowing in vertex colours)
   loadModel('trees', root => {
     const src = ['tree0', 'tree1', 'tree2'].map(k => root.getObjectByName(k)), map = src[0].material.map;
     if (map) { map.anisotropy = 8; }
     const tm = new THREE.MeshLambertMaterial({ map, vertexColors: true, alphaTest: 0.5, side: THREE.DoubleSide }); tm.color.setScalar(1.22);
-    let sd = 23; const r2 = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
-    const all = [[], [], []];
-    for (let i = 0; i < n; i++) { const v = r2(), k = v < 0.1 ? 2 : v < 0.38 ? 1 : 0, sc = 0.8 + r2() * 0.55, t = r2();
-      all[k].push({ x: CITY.t[i * 2], y: CITY.t[i * 2 + 1], sc, sy: sc * (0.9 + r2() * 0.25), rot: r2() * 6.28, c: [0.84 + 0.16 * t, 0.88 + 0.12 * r2(), 0.8 + 0.16 * t] }); }
-    const ims = all.map((list, k) => { const im = new THREE.InstancedMesh(src[k].geometry, tm, list.length); im.count = 0; im.frustumCulled = false; scene.add(im); return im; });
-    let last = { x: 1e9, y: 1e9 };
-    TREES.update = (x, y) => {
-      if (Math.hypot(x - last.x, y - last.y) < 60) return; last = { x, y };
-      all.forEach((list, k) => { const im = ims[k]; let j = 0;
-        for (const t of list) { if (Math.abs(t.x - x) > 900 || Math.abs(t.y - y) > 900) continue;
-          p.set(t.x, 0, -t.y); s.set(t.sc, t.sy, t.sc); q.setFromAxisAngle(THREE.Object3D.DEFAULT_UP, t.rot); im.setMatrixAt(j, m.compose(p, q, s)); c.setRGB(...t.c); im.setColorAt(j, c); j++; }
-        im.count = j; im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; });
-    };
-    TREES.update(70, 45);
-    scene.remove(crown, trunk); window.__trees = true;
+    nearMs = src.map(o => { const im = new THREE.InstancedMesh(o.geometry, tm, Math.max(1, cap)); im.count = 0; im.frustumCulled = false; scene.add(im); return im; });
+    const l = last; last = { x: 1e9, y: 1e9 }; TREES.update(l.x < 1e8 ? l.x : 70, l.x < 1e8 ? l.y : 45); window.__trees = true;
   });
 }
 

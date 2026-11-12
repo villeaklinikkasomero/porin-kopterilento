@@ -40,6 +40,10 @@ Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
 ## Katujen läpikäynti (käyttäjän toive: kadut yksitellen keskustasta Karjarantaan päin)
 - Työkalu: `python3 audit/street.py '<kadun nimi>' 12` listaa kadun talot: tekotapa (käsilohko, kaupunkilohko, maamerkki, LoD2-kuori), korkeus vs LoD2,
   kerrokset (Ryhti / Y-pakki), väri ja sen lähde. Sen jälkeen pelikuvat kadun molemmin puolin, Y-pakin tekstit ja kuvat, verkko.
+- **Jokainen rakennus tarkastetaan Google Street View'tä vasten** (sovittu käyttäjän kanssa): pelikuva ja Street View -kuva samasta suunnasta rinnakkain,
+  tarkistetaan väri, materiaali, kerrosluku, kattomuoto, parvekkeet ja liiketilat. Street View -kuvia ei tallenneta repoon eikä peliin; niistä luetaan vain
+  ominaisuudet (kuten kaupungin ja Y-pakin kuvista). Näkymä: `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=LAT,LON&heading=H&pitch=10&fov=80`
+  (katupiste lähimmältä kadulta, suunta rakennukseen).
 - Tehty: Yrjönkatu, Antinkatu, Pohjois- ja Eteläpuisto. Seuraavaksi länteen: Luotsinmäenpuistokatu/Teatterikatu, Otavankatu, Annankatu,
   Katariinankatu, Vapaudenkatu, Ratakatu … kohti Karjarantaa.
 - Antinkadulta korjattu: Y-pakin "puu"-materiaali oli tarttunut kerrostaloihin (Antinkatu 25, Liisankatu 8, Antinkatu 27 A:n väärä kohdistus),
@@ -71,6 +75,12 @@ Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
 - Promenadikeskuksen julkisivu on arvio (tumma metalli, lasiaula); tarkista katukuvasta.
 - Asemanseutu puuttuu Y-pakista: tehdään ilmakuvista. Riihikedon ja Tiilimäen loput talot vinokuvista.
 - Pienet: IsoKarhun kattokannen autot/LoD2-möhkäleet, BePOPin kyltit ja katon "purjeet".
+
+## Tehty 13.11.2026
+- Kasvillisuus: `trees_extra.js` (noin 53 500 puuta ilmakuvan latvustosta, `blender/veg_trees.py`); lähellä lehtikorttipuut 320 m, kauempana kevyet latvukset 1,5 km.
+- Alikulut: `blender/bridges_fix.py` + `blender/osm_extract.json` → `terrain.js` saa `bd`-listan (27 maasiltaa); peli piirtää kannen ilmakuvalla,
+  reunapalkit ja kaiteet, alla oleva tie/rata jää leikkaukseen. Aja aina dem_buildin tuottamaa terrain.js:ää vasten.
+- Kaupunginsairaala (8388, 4758 kellanruskea tiili) ja Käppärän koulu (4139) styles.jsoniin; Riihikedon 1950-luvun talot 3 krs (7, 117).
 
 ## Tärkeät huomiot
 - Koordinaatit pelimetreinä: x = (lon − 21.796) · 53278, y = (lat − 61.486) · 111437. Three.js-paikka (x, korkeus, −y). city.js-polygonit desimetreinä.
