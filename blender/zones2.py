@@ -10,6 +10,51 @@ from zones import *
 RAW = pickle.load(open('/home/claude/mmlproc/raw.pkl', 'rb'))
 STREET = None        # optional fn(mid_xy, normal_xy) -> True when the wall faces a street
 ROOFOCC = M('#4f5459', 0.7)
+ROOFBAKE = False     # True: the LoD2 roofs are baked into the block (Kivi-Pori); False: shadow casters only, the game shows the aerial photo
+try: LOOK = json.load(open('/home/claude/pori/styles.json'))
+except Exception: LOOK = dict(pal=[], b={})
+def _h01(i, k): x = (i * 2654435761 + k * 40503) & 0xffffffff; x ^= x >> 15; x = (x * 2246822519) & 0xffffffff; x ^= x >> 13; return (x & 0xffffff) / 0xffffff
+def look_wall(i):
+    """locked wall colour: (hex, 'brick' | 'render'); listed buildings first, otherwise the weighted centre palette"""
+    e = LOOK['b'].get(str(i))
+    if e: return e['w'], e.get('k', 'render')
+    if not LOOK['pal']: return None, None
+    t = sum(w for _, w in LOOK['pal']); k = _h01(i, 5) * t
+    for hx, w in LOOK['pal']:
+        k -= w
+        if k <= 0: return hx, 'brick' if hx in ('#a85a42', '#c4683f') else 'render'
+    return LOOK['pal'][0][0], 'render'
+def look_mat(i):
+    hx, kind = look_wall(i)
+    if hx is None: return None
+    return MT(hx, 'brick', 0.8) if kind == 'brick' else M(hx)
+_ORTO = None
+def roof_mat(i):
+    """roof material: locked colour, else classified from the aerial image (red sheet / tile, green, dark felt, light grey)"""
+    e = LOOK['b'].get(str(i)) or {}
+    if e.get('r'): return M(e['r'], 0.55, 0.2)
+    global _ORTO
+    try:
+        if _ORTO is None:
+            from PIL import Image
+            src = open('/home/claude/pori/city.js').read(); C = json.loads(src[src.index('{'):src.rindex('}') + 1])
+            _ORTO = (Image.open('/home/claude/pori/orto.jpg').convert('RGB'), C['hw'], C['ys'], C['yn'])
+        im, hw, ys, yn = _ORTO; W, H = im.size; pts, _ = poly(i); cs = []
+        cx = sum(p[0] for p in pts) / len(pts); cy = sum(p[1] for p in pts) / len(pts)
+        for p in pts + [(cx, cy)]:
+            for f in (0.35, 0.7):
+                x = cx + (p[0] - cx) * f; y = cy + (p[1] - cy) * f
+                u = int((x + hw) / (2 * hw) * W); v = int((1 - (y - ys) / (yn - ys)) * H)
+                if 0 <= u < W and 0 <= v < H: cs.append(im.getpixel((u, v)))
+        cs.sort(key=lambda c: sum(c)); r, g, b = cs[len(cs) // 2]
+    except Exception:
+        return M('#3f4246', 0.6)
+    lum = (r + g + b) / 3
+    if r > 1.3 * g and r > 90: return M('#b5553a' if g > 0.52 * r else '#b8302a', 0.6)
+    if g > 1.12 * r and g > 1.05 * b and lum > 70: return M('#3f9a5a', 0.55, 0.2)
+    if lum < 105: return M('#3f4246', 0.6)
+    if lum < 165: return M('#74787b', 0.6)
+    return M('#b9bbb9', 0.6)
 
 def newell(r):
     n = Vector((0, 0, 0))
@@ -43,7 +88,9 @@ def build_lod2(Z, i, spec, upper=None):
     for k, r, holes in RAW[i]:
         if k == 'G' or len(r) < 3: continue
         if k == 'R':
-            Z.hi.append(([L(*p) for p in r], ROOFOCC)); continue
+            if ROOFBAKE or spec.get('roofmat'): add_solid(Z, [L(*p) for p in r], spec.get('roofmat') or roof_mat(i), 0.45)
+            else: Z.hi.append(([L(*p) for p in r], ROOFOCC))
+            continue
         n = newell(r)
         if n is None or abs(n.z) > 0.3: continue
         mx = sum(p[0] for p in r) / len(r); my = sum(p[1] for p in r) / len(r); nh = Vector((n.x, n.y)).normalized()
@@ -120,5 +167,5 @@ PALP = ['#d9c9a3', '#cdb487', '#e2d6bb', '#c9cbbd', '#d8b9a0', '#cfcac0', '#e6df
 def spec_for(i):
     sp = SPEC.get(i)
     if sp: return sp
-    sp = auto(i); sp['P'] = dict(sp['P']); sp['P']['wall'] = M(PALP[(i * 7 + 3) % len(PALP)])
+    sp = auto(i); sp['P'] = dict(sp['P']); sp['P']['wall'] = look_mat(i) or M(PALP[(i * 7 + 3) % len(PALP)])
     return sp

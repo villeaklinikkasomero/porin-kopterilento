@@ -141,6 +141,7 @@ import RIV from './river.js';
 import TER from './terrain.js';
 // photo facades approved in the review tool (porikit export): building index -> [{ t: texture name, bw: bay width m }]
 const CZ = await fetch('./city_zones.json').then(r => r.ok ? r.json() : { zones: {} }).catch(() => ({ zones: {} })), CZN = Object.keys(CZ.zones);   // whole-city blocks (blender/city.py), streamed by distance
+const LOOK = await fetch('./styles.json').then(r => r.ok ? r.json() : null).catch(() => null) || { pal: [], wood: [], b: {} };   // locked wall colours and styles from the oblique aerial photos and street photos
 const PHSJ = await fetch('./phs.json').then(r => r.ok ? r.json() : {}).catch(() => ({}));   // ground heights: Maanmittauslaitos 2 m elevation model (CC BY 4.0)   // Kokemäenjoki below street level (OpenStreetMap river area)   // measured LoD2 building models (Maanmittauslaitos Rakennukset 3D)
 import PARKED from './parked.js';
 import { GLTFLoader } from './GLTFLoader.js';
@@ -406,6 +407,8 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const L2Z = new Set(['p1', 'kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1', ...CZN].map(n => KN.indexOf(n)));   // Kivi-Pori and p1: facades on the LoD2 shells
   const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2, 100026585: 3 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
   const col = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
+  const wpick = (L, r) => { let t = 0; for (const e of L) t += e[1]; let k = r * t; for (const e of L) { k -= e[1]; if (k <= 0) return e[0]; } return L.length ? L[0][0] : '#e6dcc2'; };
+  const ROOFZ = new Set(['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1'].map(n => KN.indexOf(n)));   // blocks whose roofs are in the Blender model
   for (const b of CITY.b) {
     bIdx++;
     if (b.w === 1196441531) continue;   // Barco: the moored ship is a Blender model (below), not a building
@@ -417,7 +420,9 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const L2 = L2raw && !OWNROOF.has(b.w) && (ZB[bIdx] === undefined || L2Z.has(ZB[bIdx])) ? L2raw : null;   // blocks built on the LoD2 shells keep the measured roofs
     let isLm = false; for (const k in LMAT) if (!LMB[k] && pip(LMAT[k][0], LMAT[k][1], pts)) isLm = true;
     const L2c = isLm ? null : L2;                    // landmarks are Blender models with their own height
+    const lk_ = LOOK.b[bIdx];
     let h = L2c ? L2c.h : b.h;
+    if (!L2c && !isLm && ZB[bIdx] === undefined && h > 15) h = lk_ && lk_.f ? lk_.f * 3 + 1 : h * 0.76;   // level-count heights in the map data run about a third too tall (checked against the oblique photos)
     const rec = { pts, h, minx: 1e9, maxx: -1e9, miny: 1e9, maxy: -1e9 };
     if (L2c) {   // collide with the measured roof surfaces, not the tallest point over the whole footprint (Sokos: 56 m tower part)
       const R = L2c.r, ox = L2c.o[0], oy = L2c.o[1], T = new Float32Array(R.length);
@@ -438,15 +443,16 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const tp = T ? T.p : wp, tn = T ? T.n : wn, tu = T ? T.u : wu, tc = T ? T.c : wc;
     // facade style from height, colour and position (no building-type data in the map for most houses)
     const srk = SRW[b.w];   // Sampo-Rosenlew works: 1800s red brick halls, one blue press hall
-    const house = b.k === 1 && !srk, shed = b.k === 2 && !srk, brickish = !house && !shed && [4, 5, 12].includes(b.i % PAL.length), r1 = hsh(b.w || bIdx, 1), r2 = hsh(b.w || bIdx, 2);
+    const lcol = lk_ ? lk_.w : (b.k === 1 || b.k === 2) && !srk ? wpick(LOOK.wood, hsh(b.w || bIdx, 5)) : wpick(LOOK.pal, hsh(b.w || bIdx, 5)), lbrick = lk_ ? lk_.k === 'brick' : ['#a85a42', '#c4683f'].includes(lcol);
+    const house = b.k === 1 && !srk, shed = b.k === 2 && !srk, brickish = !house && !shed && (LOOK.pal.length ? lbrick : [4, 5, 12].includes(b.i % PAL.length)), r1 = hsh(b.w || bIdx, 1), r2 = hsh(b.w || bIdx, 2);
     const sty = srk >= 2 ? 3 : srk ? 5 : house || shed ? 6 : h < 5 ? 0 : brickish ? 5 : h >= 14 ? (r1 < 0.72 ? 2 : 3) : (r1 < 0.48 ? 0 : r1 < 0.62 ? 1 : 2);
     let bcx = 0, bcy = 0; for (const q of pts) { bcx += q[0]; bcy += q[1]; } bcx /= pts.length; bcy /= pts.length;
     const coreB = inCore(bcx, bcy), RP = coreB ? rp : rp2, RU = coreB ? ru : ru2, ruv = q => coreB ? [(q[0] + HW) / (2 * HW), (q[1] - YS) / YSPAN] : [(q[0] - OX0) / OXS, (q[1] - OY0) / OYS];
     if (house || shed) col.setHex(WOODPAL[(b.i + (shed ? 3 : 0)) % WOODPAL.length]).multiplyScalar(1.02 + (b.i % 5) * 0.03);
     const shops = !T && h >= 8 && Math.abs(bcx) < 520 && bcy > -560 && bcy < 330 && r2 < 0.65;   // shop fronts on the ground floor in the grid centre
     // wall colour: palette tinted a little by the roof colour seen in the aerial image
-    col.setHex(PAL[b.i % PAL.length]); rc.setRGB(b.c[0] / 255, b.c[1] / 255, b.c[2] / 255, THREE.SRGBColorSpace);
-    col.lerp(rc, 0.18); const shade = 0.86 + (b.i % 7) * 0.025; col.multiplyScalar(shade);
+    if (LOOK.pal.length) { col.set(lcol); col.multiplyScalar(lk_ ? 1 : 0.94 + (b.i % 5) * 0.02); }
+    else { col.setHex(PAL[b.i % PAL.length]); rc.setRGB(b.c[0] / 255, b.c[1] / 255, b.c[2] / 255, THREE.SRGBColorSpace); col.lerp(rc, 0.18); col.multiplyScalar(0.86 + (b.i % 7) * 0.025); }
     if (srk === 1) col.setHex(SRBRICK[b.i % SRBRICK.length]); else if (srk === 2) col.setHex(0x2f63a6); else if (srk === 3) col.setHex(0x2b4f86);
     const win = house ? true : shed ? false : h >= 5;
     if (L2 && PHS[bIdx]) {   // photo-textured walls
@@ -478,7 +484,8 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
           const ao = 0.74 + 0.26 * Math.min(1, z / 3); Bw.c.push(col.r * ao, col.g * ao, col.b * ao); }
       }
       const R = L2.r;
-      for (let k = 0; k < R.length; k += 3) { const q = [(R[k] + ox) / 10, (R[k + 1] + oy) / 10]; RP.push(q[0], R[k + 2] / 10 + 0.03, -q[1]); const uv = ruv(q); RU.push(uv[0], uv[1]); }
+      if (T && ROOFZ.has(ZB[bIdx])) for (let k = 0; k < R.length; k += 3) { T.p.push((R[k] + ox) / 10, R[k + 2] / 10 + 0.03, -(R[k + 1] + oy) / 10); T.n.push(0, 1, 0); T.u.push(0.015, 0.015); T.c.push(0.3, 0.31, 0.33); }
+      else for (let k = 0; k < R.length; k += 3) { const q = [(R[k] + ox) / 10, (R[k + 1] + oy) / 10]; RP.push(q[0], R[k + 2] / 10 + 0.03, -q[1]); const uv = ruv(q); RU.push(uv[0], uv[1]); }
       continue;
     }
     for (let i = 0; i < pts.length; i++) {

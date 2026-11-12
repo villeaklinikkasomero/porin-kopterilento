@@ -62,7 +62,15 @@ def house_spec(i):
     import kivi
     from gen import M, MT, hexlin, offset
     b = kivi.B[i]; r = kivi.h01(i, 3); shed = b.get('k') == 2
-    wall = '#8f3a2c' if shed and r < 0.7 else HOUSEC[int(kivi.h01(i, 5) * len(HOUSEC))]
+    import zones2
+    lk = zones2.LOOK; e = lk['b'].get(str(i)); wood = lk.get('wood') or []
+    def wpick(r_):                                       # locked timber-house palette (oblique photos of Päärnäinen / Kuukkari)
+        t = sum(w for _, w in wood); k = r_ * t
+        for hx, w in wood:
+            k -= w
+            if k <= 0: return hx
+        return wood[0][0]
+    wall = e['w'] if e else '#8f3a2c' if shed and r < 0.7 else wpick(kivi.h01(i, 5)) if wood else HOUSEC[int(kivi.h01(i, 5) * len(HOUSEC))]
     W = MT(wall, 'wood', 0.9); dark = M(tuple(c * 0.62 for c in hexlin(wall)), 0.9)
     h = b['h']; nf = 1 if h < 5.2 else 2
     rowP = {'G': dict(plinth_h=0.45, ww=1.15, wh=1.35, nx=2), 'U': dict(ww=1.0, wh=1.15, nx=2, frieze=True)}

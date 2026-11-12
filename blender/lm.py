@@ -22,6 +22,9 @@ def mat(name, hexs, rough=0.85, metal=0.0, tex=None, col2=None):
     m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree
     b = nt.nodes['Principled BSDF']; rgb = lin(hexs)
     b.inputs['Base Color'].default_value = (*rgb, 1); b.inputs['Roughness'].default_value = rough; b.inputs['Metallic'].default_value = metal
+    if tex == 'brick' and KEY in ('tehdas', 'kehraamo', 'puuvilla'):
+        # same surface as Keski-Porin kirkko: one even brick red, the light comes from the bake (the procedural brick pattern read as noise from the air)
+        rgb = lin('#803d2e' if name == 'btrim' else '#994a36'); b.inputs['Base Color'].default_value = (*rgb, 1); tex = None
     if tex == 'brick':
         t = nt.nodes.new('ShaderNodeTexBrick'); t.inputs['Scale'].default_value = 2.2; t.inputs['Mortar Size'].default_value = 0.012
         t.inputs['Color1'].default_value = (*rgb, 1); t.inputs['Color2'].default_value = (*[c * 0.72 for c in rgb], 1); t.inputs['Mortar'].default_value = (*[c * 0.5 + 0.08 for c in rgb], 1)

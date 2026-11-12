@@ -75,7 +75,16 @@ SPECK[1551] = classic_spec(1551, wall='#b5705a', trim=_sig, rust=True, garch=Tru
                            ground=dict(plinth_h=1.6, basement=True, rustc=M('#8c5444'), rust_step=0.36, sband=0.45, wh=2.2),
                            first=dict(apron=True, apron_mat=M(_sig), sband=0.0, wh=2.3, ww=1.25), upper_mat=M('#4e5358', 0.6),
                            top=dict(blank=True, dentils=True, panels=True, panel_mat=M('#c8875f')), lay=dict(gh=6.0, fh=5.6, frieze=2.2), cornice=(0.5, 0.6, M(_sig)))
-SPECK[1249] = classic_spec(1249, wall='#e4d09d', trim='#f3eee2', rust=True, garch=True, hood='pediment', pil=False)   # Hotelli Otava
+# Hotelli Otava (von Heideken 1857, third storey and neo-renaissance dress 1891): salmon render, light dressings, dark sheet roof
+SPECK[1249] = classic_spec(1249, wall='#d9967c', trim='#f1e6d6', rust=True, garch=True, hood='cornice', pil=True, bw=3.3,
+                           lay=dict(gh=4.2, fh=3.8), roofmat=M('#3f4246', 0.5, 0.3))
+# Porin Lyseo (street photos 2026): pink render on a grey granite plinth, white dressings, round-arched windows with white
+# surrounds on both floors, moulded cornice, black sheet-metal hip roof
+_ly = dict(wall='#ecc3cb', trim='#f6f1ec', rust=False, garch=True, hood='cornice', pil=True, bw=3.6, yard_same=True,
+           ground=dict(plinth_h=1.5, plinth=M('#77777a', 0.8), basement=True, arch=True, ww=1.35, wh=2.4, sband=0.35),
+           first=dict(arch=True, ww=1.35, wh=2.5, sband=0.25), top=dict(arch=True, ww=1.3, wh=2.2),
+           lay=dict(gh=5.2, fh=4.8), cornice=(0.55, 0.8, M('#f6f1ec')), roofmat=M('#2e3033', 0.45, 0.4))
+SPECK[1351] = classic_spec(1351, **_ly); SPECK[1353] = classic_spec(1353, **dict(_ly, lay=dict(gh=4.6, fh=4.2)))
 SPECK[1284] = classic_spec(1284, wall='#e7dcc3', trim='#f3eee2', hood='cornice')                                      # Keski-Porin seurakuntatoimisto
 SPECK[1513] = classic_spec(1513, wall='#9b4b36', trim='#b9654c', rust=False, garch=True, hood=None, pil=True, bw=4.6, cornice=(0.3, 0.7, M('#7f3d2c')))   # brewery remnant
 
@@ -84,7 +93,7 @@ SPECK[1513] = classic_spec(1513, wall='#9b4b36', trim='#b9654c', rust=False, gar
 # balconies, dark pitched metal roofs. Wall colours are estimates.
 KARHU = {1450: ('#7a4535', 'brick'), 1451: ('#d9d6cf', 'render'), 1511: ('#e8e6e0', 'render'), 1512: ('#8a5a44', 'brick'), 1515: ('#cfc6b6', 'render')}
 for i, (wc, kind) in KARHU.items():
-    W_ = MT(wc, 'brick' if kind == 'brick' else 'plaster', 0.8); rise = 3.2
+    W_ = MT(wc, 'brick', 0.8) if kind == 'brick' else M(wc); rise = 3.2
     SPECK[i] = dict(h=B[i]['h'] - rise, P=dict(wall=W_, sign=SIGNS, gwall=M('#3b3f44', 0.4), fascia=M('#2d3135'), frame=M('#2f3337', 0.5), rail=M('#c9ced2', 0.3, 0.5), slab=M('#e9e9e6')),
                     layout=lay(B[i]['h'] - rise, 'punched', gh=4.4, bw=3.6, fh=3.05, cols=lambda c, nb: 'B' if c % 3 == 1 else 'W', P=dict(ww=2.1, wh=1.9, sill=0.55, nx=2)),
                     roof=dict(kind='gable', rise=rise, mat=M('#34393d', 0.5, 0.3), ov=0.35), footprint=True)
@@ -101,6 +110,7 @@ def build_and_bake(name, ids, samples=16, spec=None):
     t = time.time()
     for i in ids:
         if RAW.get(i) and not spec(i).get('footprint'): B[i]['h'] = eave_of(i)
+    zones2.ROOFBAKE = name in ZONESK and name != 'karhu'
     Z = Zone(name, ids); Z.roofflag = any(spec(i).get('roof') for i in ids)
     for i in ids:
         sp = spec(i)
