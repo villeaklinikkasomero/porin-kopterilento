@@ -1,60 +1,55 @@
-# Porin kopterilento – siirto toiselle Claude-tilille (11.11.2026 klo 13.35)
+# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 12.11.2026 klo 21)
 
-Liitä tämä tiedosto uuden keskustelun alkuun ja pyydä Claudea lukemaan myös repon `SIIRTO.md` ja `pipeline/README.md`.
-
-## Mikä projekti on
-Selaimessa toimiva 3D-helikopteripeli Porin keskustan yllä (three.js r160). Realistisuus tulee avoimesta datasta:
-MML:n 3D-rakennukset (LoD2) ja korkeusmalli, OSM, Porin kaupungin ilmakuva (WMS) ja kaupungin valokuvat, sekä Blender-mallit.
+Liitä tämä tiedosto uuden keskustelun alkuun. Pyydä Claudea lukemaan myös repon `SIIRTO.md`, `pipeline/README.md` ja `HANDOFF_Y-PAKKI.md` (jos repossa).
+Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
 
 ## Missä kaikki on
-- **GitHub:** `villeaklinikkasomero/porin-kopterilento`. Paikallinen kansio on `C:\Users\ville.somero\Documents\GitHub\porin-kopterilento`, ja muutokset viedään GitHub Desktopilla.
-  Kaikki pelin muutokset klo 12 asti ovat GitHubissa: kauppatorin valokuvajulkisivut, päivän kierros ja top-10.
-- **Claude-artifakti** "Porin kopterilento", slug `b9ac93cd-98e1-4f31-9f51-c80da5b7706a`. **Artifakti kuuluu vanhalle tilille: uusi tili ei voi päivittää sitä.**
-  Uudella tilillä julkaistaan uusi artifakti repon tiedostoista (kaikki repon juuren tiedostot + `ot/`-kansio, yhteensä noin 150 Mt).
-  Top-10-tulostaulu käyttää artifaktin tietokantaa (`db`), joten se pitää ottaa uudessa artifaktissa käyttöön uudelleen:
-  säännöt `runs` read view / write owner ja `runs/{self}` write interact, lisäksi `user`-kyky.
-- **Kaupungin valokuvat:** SharePoint-kansio Kuvat_kopterilento (268 kuvaa, 17 aluetta). Kreditointi "Porin kaupunki".
-  Alkuperäisiä kuvia ei viedä GitHubiin.
-- **Kesken, ei vielä GitHubissa:**
-  1. Repon kansiossa `pipeline/` on AWS-versio grafiikkaputkesta (lisätty tiedostoina, ei commitoitu).
-  2. Uusin **Modal-versio** on paketissa `porikit_pipeline.zip`, joka puretaan repon juureen vanhan `pipeline/`-kansion päälle.
-     Lisäksi repoon tulevat `blender/gpu_hook.py`, sekä muutetut `blender/gen.py`, `blender/zones.py` ja `blender/lm.py`, `index.html` (lukee `phs.json`) ja `phs.json` (`{}`).
-     Nämä on jo kopioitu repo-kansioon, mutta niitä ei ole commitoitu.
-  3. `porikit_data.tgz` on Blender-ajojen datapaketti (MML-pickle-tiedostot, joki), joka viedään Modal Volumeen.
+- **GitHub:** `villeaklinikkasomero/porin-kopterilento`. Paikallinen kansio `C:\Users\ville.somero\Documents\GitHub\porin-kopterilento`; käyttäjä pushaa itse GitHub Desktopilla.
+  Claude kirjoittaa tiedostot käyttäjän kansioon (Claude-sovelluksen laiteyhteys) ja tarkistaa ne lukemalla takaisin. Push vain käyttäjän pyynnöstä.
+- **Render:** https://porin-kopterilento.onrender.com/ (päivittyy GitHubista).
+- **Claude-artifakti** "Porikopteri", slug `b9ac93cd-98e1-4f31-9f51-c80da5b7706a`, kuuluu vanhalle tilille. Uudella tilillä julkaistaan oma artifakti repon tiedostoista.
+- **Kaupungin valokuvat** (SharePoint Kuvat_kopterilento, kreditointi "Porin kaupunki") ja **Y-pakki** (Satakunnan Museo, kreditointi "Satakunnan Museo, Y-pakki"):
+  kuvia ei viedä GitHubiin eikä peliin, niistä luetaan vain värit, materiaalit ja muodot.
 
-## Pelin tila
-- Koko alueella tarkka ilmakuva: 88 tiiltä 512 m, ladataan kopterin lähellä. Pehmeät joenrannat korkeusmallista. Eteläranta uudistettu Taavisiltaan asti. Barco-laiva Blender-mallina.
-- Kauppatorilla viisi julkisivua kaupungin valokuvista (`ph_*.jpg`, `PHS` index.html:ssä) ja tiilikiveys. Talot 603, 604, 1726, 1599 ja 602 on poistettu Blender-kortteleista tori0, tori3 ja tori4.
-- **Päivän kierros:** 36 maamerkin pooli, Suomen päivämäärällä arvotaan 10. Top-10 viisimerkkisellä nimimerkillä.
-- Autot ovat vielä vanhat laatikot ja Blender-autot (`cars.js`, 3 tyyppiä). Käyttäjä haluaa realistiset eurooppalaiset autot (viistoperä, farmari, katumaasturi, pakettiauto, kuorma-auto) hillityissä väreissä, Blenderissä itse mallinnettuina.
+## Grafiikkaputki (Modal)
+- GitHub Actions → **porikit run**, kenttään esim. `bake bepop --samples 64` (nimetyt lohkot: `tori0..5`, `bepop`, `uima`, `isokarhu`, `promenadi`, ja nyt myös `kivi0..5`, `kl0`, `kl1`, `karhu`).
+  `bake`-komennot ajetaan millä tahansa vapaalla GPU:lla (L4/A10/L40S) missä tahansa, muut komennot EU:n L4:llä (kaupungin kuvat pysyvät EU:ssa).
+- Kaupunkilohkot: **porikit run** `city 64 c064,c067` (lista pilkuin) tai `city 64 c` / `city 64 h`.
+- Tulokset menevät Modal-levylle `results/<päivä>/game`; peliin ne tulevat vasta **porikit collect** -ajon pull requestista.
+- Säästä rahaa: aja vain muuttuneet lohkot. Paikallisesti voi koepolttaa 8 näytteellä (`python3 run.py <lohko> 8`, `python3 city.py c064 8`).
 
-## Grafiikkaputki porikit (`pipeline/`)
-- `porikit/facade.py`: julkisivun oikaisu katoamispisteillä, kerros- ja jaksorytmi, peittävien kohteiden hylkäys, talon korkuinen nauha. Toimii hyvin, kun ihminen antaa talon neljä kulmaa. Täysautomaattinen tila sekoittaa samassa tasossa olevat talot.
-- `porikit review`: selaimessa toimiva tarkistustyökalu (localhost:8800). Käytössä kuva, neljä klikkausta, talo kartalta, ÷2/×2 ja hyväksyntä. Komento `porikit export` vie tulokset peliin (`ph_<id>.jpg` + `phs.json`).
-- `modal_app.py`: GPU-työt Modalissa. Työ lähtee heti jonoon lisäämisestä, kerrallaan ajetaan yksi L4-kone EU-alueella, ja tunnin välein tarkistetaan jono. Tulokset menevät Volumeen `pori-data/results/<päivä>`, ja GitHub Action tekee niistä päivän pull requestin.
-- AWS-vaihtoehto (`Dockerfile`, `infra/`) on olemassa, mutta käyttäjän AWS-tilissä oli ongelmia. **Valittu: Modal.**
-- **Testaamatta:** ensimmäinen `modal deploy` ja GPU-renderöinti.
+## Rakennusten mallinnus (blender/)
+- `zones.py`: käsin tehdyt rakennukset (`SPEC[i]`) ja nimetyt lohkot (`ZONES`). `zones2.py`: julkisivut MML:n LoD2-kuoren päälle (`build_lod2`).
+  `kivi.py`: Kivi-Pori- ja Karhu-lohkot. `city.py`: automaattiset kaupunkilohkot `c###` (kerrostalot) ja `h###` (pientalot), lista `city_zones.json`.
+- `build_lod2`-koukut specissä: `fit`/`fitw(layout, korkeus, katu, seinän pituus, alakorkeus)` kerrosrivit seinäkohtaisesti, `alt(x,y)` seinäpolygonin
+  keskipisteen mukaan toinen spec, `runalt(x,y)` seinän pätkä toisena talona (kun MML:n yksi rakennus sisältää useita taloja), `zcap(x,y)` seinien yläraja
+  (avoin tila katoksen alla), `skip(r, k)` LoD2-osien pois jättäminen, `roofmat_fn(r)` kattojen materiaali.
+- `run.py`: spec `lod2=True` → nimetty lohko rakennetaan LoD2-kuoren päälle ja katot leivotaan malliin (BePOP, IsoKarhu, Promenadikeskus).
+- `styles.json` (`b[i]`: w väri, k render/brick/wood, f kerrokset Ryhdistä, r katto, note, shop, lift): peli ja Blender lukevat saman tiedoston.
+  Merkinnät ilman `m` ovat käyttäjän hyväksymiä tai lähteestä lukittuja: Lyseo 1351/1353, Otava 1249, Karhukortteli 1450–1515, Cafe Anton 563.
+- Liiketilat (`shop:1`) vain keskustan kaupallisilla kaduilla. Katos 1202 ja kävelysilta 1243 piirretään ilmaan (`lift`).
 
-## Seuraavat askeleet (käyttäjän toiveet)
-1. Pura `porikit_pipeline.zip` repoon, commitoi ja vie GitHubiin.
-2. Modal-käyttöönotto käyttäjän kanssa (`pipeline/README.md`): tili, `modal setup`, `modal deploy`, data Volumeen, GitHub-avaimet. Korjaa mahdolliset virheet.
-3. **Kuvatyönkulun täysi automatisointi:**
-   - kameran paikannus kuvasta (kadunnimi → renderöidyt näkymät pelin 3D-mallista → LightGlue-tyyppinen täsmäys tai kattolinjojen vertailu → PnP)
-   - LoD2-seinät heijastetaan kuvaan, jolloin klikkauksia ei tarvita ja talot erottuvat toisistaan
-   - segmentointi (puut, autot, ihmiset) ja paikkaus
-   - mittakaava 3D-mallista
-   - automaattinen laaduntarkistus
-   - kasvojen ja rekisterikilpien sumennus.
-   
-   Testaa ensin kauppatorin kuvilla, joiden oikeat vastaukset ovat `ph_*.jpg`.
-4. Keskustan kadut valokuvista: Gallen-Kallelankatu, Annankatu/Lyseo, Länsipuisto, Mikonkatu, Katariinankatu (puutalot).
-5. Torin kellopaviljonki, veistokset ja istutuspuut. Pohjoissivun valkoinen talo 1728.
-6. Realistiset eurooppalaiset autot Blenderissä.
+## Tehty 12.11.2026 (koepoltettu paikallisesti, Modal-ajot käyttäjällä)
+- BePOP LoD2-kuoren päälle: lasiholvi, pyöreä torni avoimine kruunuineen, Yrjönkadun katos 8 pylväällä (uurretut suppilokapiteelit),
+  vinoruutuinen lasihalli, ylimmän kerroksen kolmioikkunat. Samaan kuoreen Hotelli Bepop (klinkkeri, parvekenauhat) ja Maakuntalinna (valkoinen pelti).
+- Palojoenkulma (tiili, nauhaikkunat), Yrjönkatu 21 sen kuoren pohjoispäässä (vaalea okra rappaus), Keskuskartano (valkoiset nauhat, harmaat paneelit, peltipäädyt).
+- IsoKarhu ja Promenadikeskus LoD2-kuoren päälle (korkeudet ja kattomuodot skannauksesta; Promenadin kaareva salikatto).
+- Sokos (vaaleanharmaat levyt, pystyikkunat), Porin Talo (sininen levy, nauhaikkunat) ja Linnainmaankulman torni samasta kuoresta.
+- Valtakatu 3 ja Yrjönkatu 2 b (vaalea tiililaatta, lasitetut parvekkeet) kivi5-lohkossa. Y-pakin virhekohdistus Yrjönkatu 7 → 1582 korjattu.
+
+## Ajettavat (jos eivät vielä ajettu)
+1. `bake bepop isokarhu promenadi kivi5 --samples 64`
+2. `city 64 c064,c065,c067` (ja tarvittaessa aiempi 57 lohkon liiketilalista)
+3. **porikit collect** → PR → merge.
+
+## Avoinna
+- Promenadikeskuksen julkisivu on arvio (tumma metalli, lasiaula); tarkista katukuvasta.
+- Asemanseutu puuttuu Y-pakista: tehdään ilmakuvista. Riihikedon ja Tiilimäen loput talot vinokuvista.
+- Pienet: IsoKarhun kattokannen autot/LoD2-möhkäleet, BePOPin kyltit ja katon "purjeet".
 
 ## Tärkeät huomiot
-- Koordinaatit ovat pelimetrejä: x = (lon − 21.796) · 53278, y = (lat − 61.486) · 111437. Three.js-paikka on (x, korkeus, −y).
-- Rakennusindeksit viittaavat `city.js`:n järjestykseen, joten `city.js`:ää ei saa generoida uudelleen tarkistamatta indeksejä.
-- Työtilan komentorivi ei pääse MML:ään, OSM:ään tai kaupungin palveluihin. Haku tehdään käyttäjän Claude-selaimella → Lataukset-kansioon → `device_stage_files`. XML-sivulla latauslinkki tehdään `createElementNS(xhtml)`-kutsulla.
-- Lisenssiehtojen hyväksynnät (esim. MML-tilaukset) tekee käyttäjä itse.
-- GitHub-push vain käyttäjän pyynnöstä. Tiedostojen poisto käyttäjän koneelta vain luvalla.
-- Käyttäjä haluaa vastaukset suomeksi, lyhyesti, ja kuvat tai kuvakaappaukset todisteeksi muutoksista.
+- Koordinaatit pelimetreinä: x = (lon − 21.796) · 53278, y = (lat − 61.486) · 111437. Three.js-paikka (x, korkeus, −y). city.js-polygonit desimetreinä.
+- Rakennusindeksit viittaavat `city.js`:n järjestykseen: älä generoi city.js:ää uudelleen tarkistamatta indeksejä.
+- three.js-shadereissa `gl_`-etuliite on varattu. Kahta päällekkäistä pintaa ei saa leipoa (tulee mustaa).
+- Lataukset vain luvalla, tiedostojen poisto käyttäjän koneelta vain luvalla. API-avaimia tai GitHub-salaisuuksia ei käsitellä.
+- Käyttäjä ei halua käyttää omaa rahaa turhaan: aja Modalissa vain tarvittavat lohkot.

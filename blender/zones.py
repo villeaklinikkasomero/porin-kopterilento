@@ -404,6 +404,87 @@ def _bp_extra(Z, pts, h, P):
             za = zc - 2.6 + k * 0.52; ra = 0.3 + 0.12 * k; cyl(px_, py_, ra, ra + 0.12, za, za + 0.4, wh_, dn=0.4); cyl(px_, py_, ra + 0.12, ra + 0.1, za + 0.4, za + 0.52, grey, dn=0.3)
 SPEC[BEPOP] = dict(lod2=True, runalt=lambda x, y: _SPEC_GLZ if _BP_CAN.buffer(0.3).contains(_SPt(x, y)) else _SPEC_ML if _BP_ML.contains(_SPt(x, y)) else _SPEC_HB if _BP_HOT.contains(_SPt(x, y)) else None, zcap=lambda x, y: 19.0 if _BP_CAN.buffer(0.3).contains(_SPt(x, y)) else None, P=_bpP, layout=_bp_fit(None, 18, True, 20, 0), fitw=_bp_fit, alt=_bp_alt, skip=_bp_skip, roofmat_fn=_bp_roof, extra=[_bp_extra])
 
+# ---------------------------------------------------------------- IsoKarhu, Promenadikeskus, Sokos on their LoD2 shells (MML Rakennukset 3D)
+def _flat_roof(light='#a9a69f', dark='#5f6265', glass=None):
+    def f(r):
+        zs = [q[2] for q in r]
+        if glass and max(zs) - min(zs) > 1.2: return glass
+        return M(light, 0.85) if min(zs) < 12.5 else M(dark, 0.75)          # low decks (roof parking) concrete, high roofs dark felt
+    return f
+def _shop_fit(gh, fh, upper, top=None, plain_short=4.0):
+    """ground floor shops of height gh, storeys of about fh as the 'upper' module; walls above a lower roof get storeys only"""
+    def fit(lay_, H, street, L, zb):
+        g = gh if zb < 1.5 and H > gh + 1.5 else 0.0
+        if H - g < 1.6: g = 0.0
+        n = max(1, round((H - g) / fh)); f = (H - g) / n
+        rows = ([(g, 'shop', 'G')] if g else []) + [(f, upper[0], 'F')] * n
+        if top and n >= 2: rows[-1] = (f, top, 'T')
+        return dict(bw=upper[1], rows=rows if L > plain_short else [(H, 'plain', 'P')], cols=upper[2], P=upper[3], rowP=upper[4] if len(upper) > 4 else {}, plain=L <= plain_short)
+    return fit
+
+# Yrjönkatu 14-16, IsoKarhu (Heikkilä & Kauppinen 1991, extensions Asmala 2001 / 2003, facade Sergej von Bagh 2014; Y-pakki 2018):
+# 3- and 2-storey parts over the whole block, roof terrace and parking deck; dark panel cladding with logo bands on the upper floor,
+# large unbroken shop windows at street level, light glass bands at the north-west and south-west corner entrances (Y-pakki photo).
+ISOK = _bid(110.0, -169.0)
+_ikP = dict(wall=M('#3e4045', 0.55, 0.25), spandrel=M('#3e4045', 0.55, 0.25), frame=M('#2a2c30', 0.4, 0.4), gwall=M('#2b2d31', 0.4), plinth=M('#26282b'),
+            fascia=M('#3e4045', 0.55, 0.25), gframe=M('#2a2c30', 0.4, 0.4), sign=SIGNS + [M('#e6007e'), M('#e6007e')], joints=M('#55585e', 0.5, 0.3))
+_ikUp = ('ribbon', 3.6, lambda c, nb: 'N' if (c % 5 in (1, 2) and nb > 6) else 'W', dict(sill=0.8, wh=2.0, pier=0.15, nx=2, colmod={'N': 'plain'}))
+SPEC[ISOK] = dict(lod2=True, P=_ikP, layout=_shop_fit(4.6, 4.2, _ikUp)(None, 13, True, 20, 0), fitw=_shop_fit(4.6, 4.2, _ikUp), roofmat_fn=_flat_roof('#a8a59e', '#55585b'))
+
+# Yrjönkatu 17, Promenadikeskus (1999): culture house with a concert hall (676 seats) and five cinemas; the hall rises to 17 m, the lobby
+# and foyers lower round it.  Dark grey metal cladding with horizontal bands, glazed lobby at street level (no inventory text: the look
+# follows the existing model and the oblique aerial photos; to be checked against a street photo).
+PROME = _bid(9.2, -238.7)
+_prP = dict(wall=M('#454a51', 0.5, 0.3), spandrel=M('#454a51', 0.5, 0.3), frame=M('#2b2e33', 0.4, 0.4), gwall=M('#30343a', 0.4), plinth=M('#26282b'),
+            fascia=M('#5a6068', 0.5, 0.3), gframe=M('#2b2e33', 0.4, 0.4), sign=SIGNS, band=M('#7d848c', 0.5, 0.3))
+_prUp = ('ribbon', 3.2, lambda c, nb: 'N' if (c % 4 == 3) else 'W', dict(sill=1.4, wh=1.2, pier=0.2, nx=2, band=M('#7d848c', 0.5, 0.3), colmod={'N': 'plain'}))
+SPEC[PROME] = dict(lod2=True, P=_prP, layout=_shop_fit(5.0, 4.0, _prUp)(None, 12, True, 20, 0), fitw=_shop_fit(5.0, 4.0, _prUp), roofmat_fn=_flat_roof('#8f9396', '#4f5357'))
+
+# Liisankatu 2-4, Sokos (Paul Autere / SOK 1973, facade Kaj Nordman 2003): shop windows at street level, light grey panels with storey-high
+# vertical windows above.  The same LoD2 shell holds Yrjönkatu 20, Porin Talo (Reijo Kunnas 1978, facade 2015: blue-grey panel cladding,
+# ribbon windows on floors 2-4) and the 16-storey Linnainmaankulma tower (2013, 53 m; grey-green glazed balcony faces in the oblique photos).
+SOKOS = _bid(100.0, -260.0); PTALO = 582; LINNA = 1208
+_soP = dict(wall=M('#c9ccce', 0.6, 0.15), spandrel=M('#c9ccce', 0.6, 0.15), frame=M('#3a3d40', 0.4, 0.4), gwall=M('#2e3134', 0.4), plinth=M('#2a2c2f'),
+            fascia=M('#2e7d4f', 0.5), gframe=ALU, sign=SIGNS, joints=M('#aeb2b5', 0.5, 0.2))
+_soUp = ('punched', 2.6, lambda c, nb: 'W' if c % 3 == 1 else 'N', dict(ww=1.2, wh=3.4, sill=0.3, nx=1, colmod={'N': 'plain'}))
+_ptP = dict(wall=M('#8fa3b5', 0.5, 0.25), spandrel=M('#8fa3b5', 0.5, 0.25), frame=M('#2d3134', 0.4, 0.4), gwall=M('#2e3134', 0.4), plinth=M('#2a2c2f'),
+            fascia=M('#6d8193'), gframe=ALU, sign=SIGNS)
+_ptUp = ('ribbon', 3.0, lambda c, nb: 'W', dict(sill=0.9, wh=1.5, pier=0.0, nx=3))
+_liP = dict(wall=M('#d9dcd8'), spandrel=M('#d9dcd8'), frame=M('#2f3337', 0.4, 0.4), rail=M('#7f9a94', 0.12), linner=M('#cfd2ce'), gwall=M('#2e3134', 0.4),
+            plinth=M('#2a2c2f'), fascia=M('#5d6f78'), gframe=ALU, sign=SIGNS)
+_liUp = ('punched', 3.0, lambda c, nb: 'L' if c % 3 != 1 else 'W', dict(ww=1.4, wh=1.5, nx=2, colmod={'L': 'loggia'}, ldepth=1.2))
+_SPEC_PT = dict(P=_ptP, layout=_shop_fit(4.2, 3.4, _ptUp)(None, 14, True, 20, 0), fitw=_shop_fit(4.2, 3.4, _ptUp))
+_SPEC_LI = dict(P=_liP, layout=_shop_fit(4.6, 3.1, _liUp)(None, 53, True, 20, 0), fitw=_shop_fit(4.6, 3.1, _liUp))
+_SO_PT = _SP(poly(PTALO)[0]).buffer(0.8); _SO_LI = _SP(poly(LINNA)[0]).buffer(1.0)
+def _so_part(x, y):
+    p = _SPt(x, y)
+    if _SO_LI.contains(p): return _SPEC_LI
+    if _SO_PT.contains(p): return _SPEC_PT
+    return None
+SPEC[SOKOS] = dict(lod2=True, P=_soP, layout=_shop_fit(4.6, 4.0, _soUp)(None, 9, True, 20, 0), fitw=_shop_fit(4.6, 4.0, _soUp), runalt=_so_part,
+                   skip=lambda r, k: k == 'W' and min(q[2] for q in r) > 6 and max(q[2] for q in r) - min(q[2] for q in r) < 2.2)   # cars / vents on the parking deck; c067 block: roofs stay the aerial photo on the LoD2 shell
+
+# ---------------------------------------------------------------- Yrjönkatu: parts of a neighbour's LoD2 shell that are other houses
+# Yrjönkatu 21 (north end of the Palojoenkulma shell, Mikonkatu corner): 2-3 storeys, light ochre render with shops and awnings
+# (Y-pakki photo of Palojoenkulma looking north along Yrjönkatu)
+_y21P = dict(wall=M('#e2c98a'), spandrel=M('#e2c98a'), frame=M('#f1efe8'), gwall=M('#3a3d40', 0.4), plinth=M('#4a4744'), fascia=M('#e2c98a'),
+             gframe=M('#3a3d40', 0.4), sign=SIGNS, canopy=0.9, canopy_mat=M('#d2691e', 0.7))
+_y21Up = ('punched', 3.2, lambda c, nb: 'W', dict(ww=1.3, wh=1.5, nx=2))
+_SPEC_Y21 = dict(P=_y21P, layout=_shop_fit(4.0, 3.2, _y21Up)(None, 10, True, 20, 0), fitw=_shop_fit(4.0, 3.2, _y21Up))
+SPEC[PALO]['runalt'] = lambda x, y: _SPEC_Y21 if y > -388.0 else None
+# Valtakatu 3 (1960, 6 storeys) and, in the same shell, Yrjönkatu 2 b (Reijo Louhimo 1985): light brick-tile cladding with element joints,
+# partly recessed glazed balconies at the north and south ends, shopfronts under the projecting upper floors (Y-pakki text)
+VALT3 = 1620; Y2B = 1618
+_v3P = dict(wall=M('#c4b08a'), spandrel=M('#c4b08a'), frame=M('#f1efe8'), gwall=M('#34373a', 0.4), plinth=M('#4a4744'), fascia=M('#c4b08a'), gframe=ALU, sign=SIGNS)
+_v3Up = ('punched', 3.2, lambda c, nb: 'W', dict(ww=1.5, wh=1.45, nx=2))
+_y2bP = dict(wall=MT('#d8cdbb', 'brick', 0.8), spandrel=MT('#d8cdbb', 'brick', 0.8), frame=M('#5b5148', 0.5), rail=M('#9fb0b8', 0.15), linner=M('#e6dfd2'),
+             gwall=M('#34373a', 0.4), plinth=M('#6e6a64'), fascia=M('#d8cdbb'), gframe=ALU, sign=SIGNS, joints=M('#b9ad99'))
+_y2bUp = ('punched', 3.0, lambda c, nb: 'L' if c in (0, nb - 1) else 'W', dict(ww=1.4, wh=1.45, nx=2, colmod={'L': 'loggia'}, ldepth=1.2))
+_SPEC_Y2B = dict(P=_y2bP, layout=_shop_fit(3.8, 2.9, _y2bUp)(None, 19, True, 20, 0), fitw=_shop_fit(3.8, 2.9, _y2bUp))
+_Y2B_PG = _SP(poly(Y2B)[0]).buffer(0.8)
+SPEC[VALT3] = dict(P=_v3P, layout=_shop_fit(4.0, 3.2, _v3Up)(None, 21, True, 20, 0), fitw=_shop_fit(4.0, 3.2, _v3Up),
+                   runalt=lambda x, y: _SPEC_Y2B if _Y2B_PG.contains(_SPt(x, y)) else None)
+
 ZONES = {
     'tori0': [1725, 1727, 1728, 1729, 1730, 1731, 1732, 1600, 1621],
     'tori1': [1315, 1490, 1491, 1492, 1493, 1494, 1495, 1496, 1361, 1363, 1367, 1488, 1489, 1362, 1364, 1365, 1366, 1372],
@@ -411,7 +492,7 @@ ZONES = {
     'tori3': [563, 564, 637, 638, 639, 641, 642, 1216],   # 603, 604: photo facades (Porin kaupunki photos) in the game
     'tori4': [1220, 640, 1723, 1724, 1734, 1217, 1218, 1219, 1192],
     'tori5': [1601, 1623, 1624, 1720, 1721, 1722],
-    'bepop': [BEPOP], 'uima': [UIMA],
+    'bepop': [BEPOP], 'uima': [UIMA], 'isokarhu': [ISOK], 'promenadi': [PROME],
 }
 NOROOF = set()
 

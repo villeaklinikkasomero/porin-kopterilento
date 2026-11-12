@@ -697,7 +697,7 @@
 "k": "render",
 "f": 4,
 "st": "classic",
-"note": "Y-pakki: Rautatienpuistokatu 3, 1926",
+"note": "Y-pakki: Yrjönkatu 27 (Strömmer 1936, 3 krs) = sama city.js-rakennus kuin Rautatienpuistokatu 3; Ryhti 4 krs koskee jälkimmäistä",
 "y": 1926,
 "shop": 1
 },
@@ -5211,10 +5211,7 @@
 "shop": 1
 },
 "1582": {
-"f": 3,
-"w": "#dcb76e",
-"k": "render",
-"note": "Y-pakki: Yrjönkatu 7, 1940",
+"note": "Y-pakki-rivi Yrjönkatu 7 (Juseliuksenkulma) kohdistui väärin; oikea talo on 1729/1730 (tori0). Väri ja kerrosluku poistettu.",
 "shop": 1
 },
 "1583": {
@@ -5383,12 +5380,11 @@
 "shop": 1
 },
 "1618": {
-"w": "#d8ccc2",
-"m": 1,
-"k": "render",
+"w": "#d8cdbb",
+"k": "brick",
 "r": "#74787b",
 "f": 6,
-"note": "Y-pakki: Yrjönkatu 2 b, 1985",
+"note": "Y-pakki: Yrjönkatu 2 b, 1985 (vaalea tiililaattaverhoilu; piirretään Valtakatu 3:n LoD2-kuoressa, kivi5)",
 "y": 1985,
 "shop": 1
 },
@@ -5398,7 +5394,7 @@
 },
 "1620": {
 "w": "#c4b08a",
-"k": "wood",
+"k": "render",
 "f": 6,
 "r": "#74787b",
 "shop": 1

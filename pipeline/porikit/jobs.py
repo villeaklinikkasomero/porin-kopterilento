@@ -108,7 +108,10 @@ def bake(zones: list[str], samples: int = 48, parallel: int = 1):
     for z, rc, t in done:
         src = HOME / 'out' / f'bl_{z}.js'
         if rc == 0 and src.exists(): shutil.copy(src, REPO / f'bl_{z}.js')
-        print(f'{z}: {"ok" if rc == 0 else "FAILED"} {t}s')
+        print(f'{z}: {"ok" if rc == 0 and src.exists() else "FAILED"} {t}s')
+        if rc != 0 or not src.exists():                         # show why in the Actions log (the log file stays in the container)
+            try: print(''.join(open(HOME / 'out' / f'{z}.log', errors='replace').readlines()[-40:]))
+            except Exception as e: print('no log:', e)
     return done
 
 
