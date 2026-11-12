@@ -438,7 +438,8 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2, 100026585: 3 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
   const col = new THREE.Color(), col2 = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
   const liftParts = [];
-  const L2OLD = new Set([572]);   // Kulturhuset Fiini (2025) stands where the scanned 1880/1900 houses were
+  const L2OLD = new Set([572, 70]);   // Kulturhuset Fiini (2025) stands where the scanned 1880/1900 houses were; Eteläpuisto 13: the scan set back the top storey, the house has one flat roof
+  const HFIX = { 70: 24.0 };   // roof height of the L2OLD houses built on their footprint in Blender
   const wpick = (L, r) => { let t = 0; for (const e of L) t += e[1]; let k = r * t; for (const e of L) { k -= e[1]; if (k <= 0) return e[0]; } return L.length ? L[0][0] : '#e6dcc2'; };
   const ROOFZ = new Set(['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1'].map(n => KN.indexOf(n)));   // blocks whose roofs are in the Blender model
   for (const b of CITY.b) {
@@ -456,6 +457,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     if (lk_ && lk_.lift) { liftParts.push([b, lk_]); continue; }   // canopies and footbridges: drawn in the air below
     let h = L2c ? L2c.h : b.h;
     if (!L2c && !isLm && ZB[bIdx] === undefined && h > 15) h = lk_ && lk_.f ? lk_.f * 3 + 1 : h * 0.76;   // level-count heights in the map data run about a third too tall (checked against the oblique photos)
+    if (HFIX[bIdx]) h = HFIX[bIdx];
     const rec = { pts, h, minx: 1e9, maxx: -1e9, miny: 1e9, maxy: -1e9 };
     if (L2c) {   // collide with the measured roof surfaces, not the tallest point over the whole footprint (Sokos: 56 m tower part)
       const R = L2c.r, ox = L2c.o[0], oy = L2c.o[1], T = new Float32Array(R.length);

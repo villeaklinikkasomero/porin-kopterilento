@@ -505,6 +505,141 @@ SPEC[572] = dict(h=10.5, footprint=True, P=_fiP,
                  layout=dict(bw=2.4, rows=[(4.6, 'shop', 'G'), (5.9, 'punched', 'U')], cols=_fi_cols, P={},
                              rowP={'U': dict(colmod={'G': 'vraster', 'F': 'fins', 'N': 'plain'}, fin=0.2, nx=1, panel=M('#3a2a20', 0.5, 0.3))}),
                  roof=dict(kind='flat', mat=M('#6d6a66', 0.7)), cornice=(0.15, 0.35, M('#d9d9d4', 0.4, 0.4)))
+# Fiini - Eteläpuisto 13 gap (user, street view 4/2026): not open ground but Fiini's service entrance, about 8 m high: copper-coloured
+# vertical slats over dark openings at street level, glazing and slats above, flat roof.  Built on the gap between the two OSM outlines.
+_FI_GAP = None
+def _fi_gap():
+    global _FI_GAP
+    if _FI_GAP is None:
+        from shapely.geometry import Polygon as _P, LineString as _LS
+        a = (-278.0, -208.5); b = (-276.2, -196.7); c = (-289.2, -193.4)              # 572 NE corner, 70 SE and SW corners
+        ax = (b[0] - a[0], b[1] - a[1]); l = math.hypot(*ax); ax = (ax[0] / l, ax[1] / l)
+        nl = _LS([(-278.0, -208.5), (-305.8, -201.7)]); r = _LS([(c[0] + ax[0] * 2, c[1] + ax[1] * 2), (c[0] - ax[0] * 30, c[1] - ax[1] * 30)])
+        d = nl.intersection(r); d = (d.x, d.y)
+        pts = [a, b, c, d]
+        if _P(pts).exterior.is_ccw != _P(poly(572)[0]).exterior.is_ccw: pts = pts[::-1]
+        _FI_GAP = pts
+    return _FI_GAP
+_fiCu = M('#a8693c', 0.45, 0.6)
+def m_slats(mb, col, P):
+    """copper-coloured vertical slats in front of a dark recess (Fiini service entrance)"""
+    bw, fh = mb.bw, mb.fh; cu = P.get('slat', _fiCu)
+    mb.q(0, 0, bw, fh, -0.25, M('#2a2522', 0.7)); mb.wall([(0, 0, bw, fh)], P['wall'])
+    mb.q(0, fh - 0.25, bw, fh, 0.02, cu)
+    n = max(3, int(bw / 0.26))
+    for k in range(n): u = bw * (k + 0.5) / n; mb.prot(u - 0.06, 0.05, u + 0.06, fh - 0.25, 0.12, cu)
+MODS['slats'] = m_slats
+_fiGapLay = dict(bw=2.4, rows=[(3.6, 'slats', 'L'), (4.4, 'slats', 'U')], cols=lambda c, nb: 'G' if c in (0, nb - 1) and nb > 2 else 'F', P={},
+                 rowP={'U': dict(colmod={'G': 'vraster', 'F': 'slats'}, fin=0.15, nx=2, frame=_fiCu, panel=M('#3a2a20', 0.5, 0.3))})
+def _fi_gap_extra(Z, pts_, h_, P):
+    g = _fi_gap(); n = len(g); H = 8.0; Lz = lambda x, y, z: (x - Z.cx, y - Z.cy, z)
+    for k in range(n):
+        p, q = g[k], g[(k + 1) % n]
+        if math.hypot(q[0] - p[0], q[1] - p[1]) < 0.3: continue
+        build_wall(Z, p, q, 0, H, _fiGapLay, dict(P, wall=_fiCu), 5720 + k, 572)
+    Z.hi.append(([Lz(x, y, H - 0.01) for x, y in g], _fiCu))
+    add_solid(Z, [Lz(x, y, H + 0.02) for x, y in g], M('#6d6a66', 0.7), 0.25)
+SPEC[572]['extra'] = [_fi_gap_extra]
+# Eteläpuisto 13 (1962, white, 8 storeys; user street view 4/2026): shops at street level, the Eteläpuisto front is wall-to-wall
+# recessed balconies glazed in greyish glass (also the railing), white slab edges, slim dark frames.  Gable ends white.
+def m_gloggia(mb, col, P):
+    bw, fh, W = mb.bw, mb.fh, P['wall']; dp = 1.5; e = 0.03 if col != 'E' else 0.45; hole = (e, 0.3, bw - e, fh)
+    mb.wall([hole], W); mb.sides(hole[0], hole[1], hole[2], hole[3], 0, -dp, P.get('linner', W))
+    saved = mb.hi; mb.hi = []
+    h1 = mb.window(hole[0] + 0.4, hole[1], hole[0] + 1.2, hole[1] + 2.1, W, r=0.08, curt=0, fmat=P.get('frame', WHITE))
+    h2 = mb.window(hole[0] + 1.5, hole[1] + 0.8, hole[2] - 0.4, hole[1] + 2.1, W, r=0.08, nx=2, fmat=P.get('frame', WHITE))
+    mb.wall([h1, h2], P.get('linner', W), u0=hole[0], u1=hole[2], v0=hole[1], v1=hole[3])
+    back = [([(q[0], q[1], q[2] - dp) for q in pts], m) for pts, m in mb.hi]; mb.hi = saved + back
+    gl = M('#9ea6a6', 0.15); glr = P.get('grail', M('#b3b5ad', 0.25)); fr = P.get('lframe', M('#4a3f38', 0.5))
+    mb.q(hole[0], hole[1], hole[2], hole[1] + 1.0, -0.06, glr); mb.q(hole[0], hole[1] + 1.0, hole[2], hole[3], -0.06, gl)
+    mb.q(hole[0], hole[1] + 0.97, hole[2], hole[1] + 1.05, -0.04, fr)
+    nm = max(2, int((hole[2] - hole[0]) / 1.4))
+    for k in range(nm + 1): u = hole[0] + (hole[2] - hole[0]) * k / nm; mb.q(max(hole[0], u - 0.03), hole[1], min(hole[2], u + 0.03), hole[3], -0.04, fr)
+    mb.prot(0, 0, bw, 0.3, 0.06, W)                                                      # white slab edge
+MODS['gloggia'] = m_gloggia
+# Eteläpuisto 13 yard side and gables (user photo 12.11.2026): white vertical-ribbed sheet cladding, wide windows each with a yellow panel
+# beside it, a stack of open loggias with yellow insides, grey concrete plinth; gables with one small window per storey.
+_e13Y = M('#d9a63c', 0.6)
+def m_rib(mb, col, P):
+    bw, fh, W = mb.bw, mb.fh, P['wall']; rib = M('#d9dad6', 0.5); holes = []
+    if col == 'L':
+        m_loggia(mb, col, dict(P, linner=_e13Y, rail=W, lpier=0.35)); return
+    if col == 'g':
+        u = bw * 0.38; holes.append(mb.window(u - 0.45, 0.95, u + 0.45, 2.25, W, fmat=WHITE, nx=1))
+    else:
+        sill = 0.85; wh = min(1.4, fh - 1.25); holes.append(mb.window(0.3, sill, 0.3 + 1.75, sill + wh, W, fmat=WHITE, nx=2))
+        y0, y1 = sill - 0.15, sill + wh + 0.15; u1 = min(bw - 0.1, 2.75); holes.append((2.12, y0, u1, y1)); mb.q(2.12, y0, u1, y1, -0.02, _e13Y)
+    mb.wall(holes, W)
+    k = 0.15
+    while k < bw - 0.05:                                                          # sheet ribs, not over the openings
+        hit = [h for h in holes if h[0] - 0.05 < k < h[2] + 0.05]
+        if not hit: mb.q(k, 0, k + 0.035, fh, 0.012, rib)
+        else:
+            for h in hit: mb.q(k, 0, k + 0.035, h[1], 0.012, rib); mb.q(k, h[3], k + 0.035, fh, 0.012, rib)
+        k += 0.3
+    if P.get('rplinth'): mb.prot(0, 0, bw, P['rplinth'], 0.04, M('#8f8d88', 0.8))
+MODS['rib'] = m_rib
+_e13P = dict(wall=M('#eeeeea'), frame=M('#f4f4f1'), linner=M('#e8e7e2'), gwall=M('#e9e9e5'), plinth=M('#4a4744'), fascia=M('#eeeeea'), gframe=M('#f2f2ef'), sign=SIGNS)
+def _e13_fit(lay_, H, street, L, zb):
+    gh = 4.0 if zb < 1.5 else 0.0; n = max(1, round((H - gh) / 2.85)); fh = (H - gh) / n; g = [(gh, 'shop', 'G')] if gh else []
+    if L < 16: n = max(1, round(H / 2.95)); return dict(bw=L, rows=[(H / n, 'rib', 'F')] * n, cols=lambda c, nb: 'g', P={}, rowP={})
+    if street: return dict(bw=3.2, rows=g + [(fh, 'gloggia', 'F')] * n, cols=lambda c, nb: 'E' if c in (0, nb - 1) else 'W', P={}, rowP={'G': dict(grecess=1.5)})
+    n = max(1, round(H / 2.95)); fh = H / n                                  # yard: white ribbed sheet, yellow panels, one stack of loggias
+    return dict(bw=2.9, rows=[(fh, 'rib', 'G' if zb < 1.5 else 'F')] + [(fh, 'rib', 'F')] * (n - 1), cols=lambda c, nb: 'L' if c == int(nb * 0.7) else 'W', P={}, rowP={'G': dict(rplinth=1.1)})
+# Eteläpuisto 13 and 17 (user 12.11.2026): the street-level shops sit back by a balcony depth under the upper floors.  'shop' row with
+# P['grecess']: the whole bay (tile and details) moved back, a soffit under the overhang as real geometry.
+_m_shop0 = MODS['shop']
+def _m_shop_rec(mb, col, P):
+    _m_shop0(mb, col, P); dp = P.get('grecess')
+    if not dp: return
+    bw, fh = mb.bw, mb.fh
+    mb.hi = [([(u, v, d - dp) for u, v, d in pts], m) for pts, m in mb.hi]
+    mb.s3 = [([(u, v, d - dp) for u, v, d in pts], m, dn) for pts, m, dn in mb.s3]
+    mb.tiles = [(a, b, c, e, d - dp) for a, b, c, e, d in mb.tiles] if mb.tiles else [(0, 0, bw, fh, -dp)]
+    mb.s3q([(0, fh, -dp), (bw, fh, -dp), (bw, fh, 0), (0, fh, 0)], P.get('soffit', P['wall']), 0.5)
+MODS['shop'] = _m_shop_rec
+# Roof (user photo 12.11.2026): one flat roof over the whole slab at the top of the balcony stacks, thin light edge, a few small stacks.
+# The LoD2 shell has the outer strips at 21 m and the middle at 24 m (it set back the top storey), so the house is built on its OSM
+# footprint at 24 m; index.html keeps the game roof at the same height (L2OLD / HFIX).
+def _e13_roofbits(Z, pts, h, P):
+    c = cen(pts); ux, uy = -math.sin(GRID), math.cos(GRID); Lz = lambda x, y, z: (x - Z.cx, y - Z.cy, z); m = M('#c9c8c3', 0.7)
+    for s, w, d, hh in ((-9.0, 1.2, 1.6, 1.4), (4.0, 0.9, 0.9, 1.1), (12.5, 2.4, 2.0, 1.8)):
+        x, y = c[0] + ux * s, c[1] + uy * s; r = [(x - w, y - d), (x + w, y - d), (x + w, y + d), (x - w, y + d)]
+        for k in range(4):
+            a, b = r[k], r[(k + 1) % 4]; add_solid(Z, [Lz(a[0], a[1], h), Lz(b[0], b[1], h), Lz(b[0], b[1], h + hh), Lz(a[0], a[1], h + hh)], m, 0.3)
+        add_solid(Z, [Lz(a, b, h + hh) for a, b in r], m, 0.2)
+SPEC[70] = dict(h=24.0, footprint=True, P=_e13P, layout=_e13_fit(None, 24.0, False, 43, 0),
+                dirs={'E': _e13_fit(None, 24.0, True, 43, 0), 'W': _e13_fit(None, 24.0, False, 43, 0), 'N': _e13_fit(None, 24.0, False, 13, 0), 'S': _e13_fit(None, 24.0, False, 13, 0)},
+                roof=dict(kind='flat', mat=M('#5c5f62', 0.7)), cornice=(0.12, 0.35, M('#e4e4e0', 0.4)), extra=[_e13_roofbits])
+# Eteläpuisto 11 (65, user photo 12.11.2026): like Eteläpuisto 13 next door - shops set back under the slab, wall-to-wall glazed balcony
+# bands with grey parapets, the three bays at the south end plain white wall with windows, set-back glazed top storey, white gables
+# with one small window per storey.  User 12.11.2026: glazed balconies right to the south end as well; the set-back top storey white.
+def _e11_fit(lay_, H, street, L, zb):
+    gh = 4.0 if zb < 1.5 else 0.0; n = max(1, round((H - gh) / 2.85)); fh = (H - gh) / n; g = [(gh, 'shop', 'G')] if gh else []
+    if L < 16: return dict(bw=L, rows=g + [(fh, 'punched', 'F')] * n, cols=lambda c, nb: 'W', P=dict(ww=0.8, wh=1.2, nx=1), rowP={'G': dict(grecess=1.5)} if street else {})
+    if zb >= 1.5:                                  # set-back top storey: white wall with windows (user 12.11.2026)
+        return dict(bw=3.1, rows=[(H, 'punched', 'F')], cols=lambda c, nb: 'W', P=dict(ww=1.8, wh=1.4, nx=3), rowP={})
+    if street: return dict(bw=3.1, rows=g + [(fh, 'gloggia', 'F')] * n, cols=lambda c, nb: 'E' if c in (0, nb - 1) else 'W',
+                           P=dict(ww=1.5, wh=1.35, nx=2, grail=M('#8d908f', 0.4)), rowP={'G': dict(grecess=1.5), 'F': dict(colmod={'P': 'punched'})})
+    return dict(bw=3.0, rows=g + [(fh, 'punched', 'F')] * n, cols=lambda c, nb: 'B' if c % 3 == 1 else 'W', P=dict(ww=1.5, wh=1.4, nx=2), rowP={})
+def _e11_alt(x, y):                     # the LoD2 shell runs on north over 537 (another house, OSM y > -76): that part keeps its own spec
+    if y > -76.5 + (x + 255.0) * 0.23: 
+        return _SPEC_E9
+    return None
+# Eteläpuisto 9 (537, corner of Pohjoispuisto; user street view 7/2023): 1930s functionalism, ochre render, stacks of cream-coloured
+# rectangular bay windows from the first floor to the top with dark brown frames, pairs of plain windows between, shop windows at street
+# level behind a dark stone base and a green copper fascia, thin cornice, flat roof.
+def _e9_fit(lay_, H, street, L, zb):
+    gh = 4.0 if zb < 1.5 else 0.0; n = max(1, round((H - gh) / 3.4)); fh = (H - gh) / n
+    rows = ([(gh, 'shop' if street else 'punched', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n
+    if L < 9: return dict(bw=L, rows=rows, cols=lambda c, nb: 'W', P=dict(ww=1.0, wh=1.4, nx=2), rowP={})
+    if not street: return dict(bw=3.0, rows=rows, cols=lambda c, nb: 'S' if c == nb // 2 and nb > 4 else 'W', P=dict(ww=1.4, wh=1.4, nx=2), rowP={})
+    return dict(bw=3.0, rows=rows, cols=lambda c, nb: 'E' if c % 3 == 1 else 'W', P=dict(ww=1.2, wh=1.45, nx=2),
+                rowP={'F': dict(colmod={'E': 'erker'}, enx=3, edepth=0.7, epier=0.3)})
+_SPEC_E9 = dict(P=dict(wall=M('#c9b484'), ewall=M('#e6dfc7'), frame=M('#5a3a2a'), sign=SIGNS, gwall=M('#2c2b2a', 0.35), plinth=M('#1f1e1d', 0.3),
+                       fascia=M('#5f8c76', 0.5, 0.4), gframe=DARK),
+                layout=_e9_fit(None, 20, True, 30, 0), fitw=_e9_fit, cornice=(0.2, 0.3, M('#d8ccab')))
+SPEC[65] = dict(P=dict(_e13P), layout=_e11_fit(None, 27, True, 40, 0), fitw=_e11_fit, runalt=_e11_alt)
 # Eteläpuisto 17 (1968, white) holds Eteläpuisto 19 (1891, 3 storeys, white render) in its LoD2 shell: low walls get the old house.
 # Street view (user, 4/2026): shop windows at street level, white facade with storey bands, stacks of recessed glazed balconies,
 # gable ends in grey tile with a column of small windows.
@@ -517,7 +652,7 @@ def _e17_fit(lay_, H, street, L, zb):
     gh = 4.0 if zb < 1.5 else 0.0; n = max(1, round((H - gh) / 2.85)); fh = (H - gh) / n
     if L < 16:                                                               # gable: grey tile, one column of small windows
         return dict(bw=L, rows=([(gh, 'shop', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n, cols=lambda c, nb: 'W', P=dict(wall=_e17Gab, ww=0.7, wh=1.2, nx=1), rowP={})
-    return dict(bw=3.0, rows=([(gh, 'shop', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n, cols=lambda c, nb: 'B' if c % 4 == 2 else 'W', P=dict(ww=1.7, wh=1.35, nx=2, band=M('#f6f6f3'), band2=False), rowP={})
+    return dict(bw=3.0, rows=([(gh, 'shop', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n, cols=lambda c, nb: 'B' if c % 4 == 2 else 'W', P=dict(ww=1.7, wh=1.35, nx=2, band=M('#f6f6f3'), band2=False), rowP={'G': dict(grecess=1.5)} if street else {})
 SPEC[142] = dict(P=_e17P, layout=_e17_fit(None, 27, True, 20, 0), fitw=_e17_fit)
 # 1312 (Gallen-Kallelankatu / Pohjoispuisto, tori2 block): the LoD2 scan has eaves at about 7 m and pitched roofs up to 14 m; the block built
 # it as a 4.7 m flat box.  Two storeys under a hipped roof until the house is identified from a photo.

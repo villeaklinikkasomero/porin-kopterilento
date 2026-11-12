@@ -137,6 +137,16 @@ def build_lod2(Z, i, spec, upper=None):
             if merged and (r_[1] - r_[0] < 2.6 or merged[-1][1] - merged[-1][0] < 2.6): merged[-1] = (merged[-1][0], r_[1], min(merged[-1][2], r_[2]))
             else: merged.append(r_)
         runs = merged; seed += 1; boxes = []
+        if spec.get('splitruns') and spec.get('runalt'):             # one LoD2 shell over two houses: cut the runs where runalt changes
+            ra_ = spec['runalt']; rs2 = []
+            for a_, b_, ze_ in runs:
+                m_ = max(1, int((b_ - a_) / 0.5)); s0 = a_; prev = None
+                for k in range(m_ + 1):
+                    u_ = a_ + (b_ - a_) * k / m_; lab = id(ra_(o.x + t.x * u_, o.y + t.y * u_))
+                    if prev is not None and lab != prev and u_ - s0 > 1.0 and b_ - u_ > 1.0: rs2.append((s0, u_, ze_)); s0 = u_
+                    prev = lab
+                rs2.append((s0, b_, ze_))
+            runs = rs2
         W3 = lambda u, z: L(o.x + t.x * u, o.y + t.y * u, z)
         zcap = spec.get('zcap')
         if zcap:                                                # open space under a canopy: walls end lower, loose fragments go
