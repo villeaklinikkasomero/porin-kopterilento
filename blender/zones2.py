@@ -194,4 +194,13 @@ def spec_for(i):
     sp = SPEC.get(i)
     if sp: return sp
     sp = auto(i); sp['P'] = dict(sp['P']); sp['P']['wall'] = look_mat(i) or M(PALP[(i * 7 + 3) % len(PALP)])
+    f = (LOOK['b'].get(str(i)) or {}).get('f')                 # storeys from the building register (Ryhti): one window row per storey
+    L_ = sp.get('layout')
+    if f and L_ and not L_.get('plain') and L_.get('rows'):
+        rows = L_['rows']; g = [r for r in rows if r[2] == 'G']; up = [r for r in rows if r[2] != 'G']
+        n = max(1, int(f) - len(g)); fh = up[0][0] if up else 3.0
+        body = [up[0]] if up and up[0][2] == 'S' else []; top = [up[-1]] if up and up[-1][2] == 'T' else []
+        mid = [r for r in up if r[2] == 'F'][:1] or [(fh, 'punched', 'F')]
+        new = body + mid * max(0, n - len(body) - len(top)) + top
+        sp['layout'] = dict(L_, rows=g + (new[:n] if len(new) > n else new))
     return sp

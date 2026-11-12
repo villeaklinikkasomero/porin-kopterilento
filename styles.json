@@ -2457,9 +2457,12 @@
 "r": "#b5553a"
 },
 "563": {
-"w": "#b9b9b4",
+"w": "#e9cf8c",
 "k": "render",
-"f": 7
+"f": 2,
+"r": "#3f4246",
+"st": "classic",
+"note": "Antinkatu 11, Cafe Anton: yellow neo-renaissance, two storeys"
 },
 "564": {
 "w": "#b3abac",
