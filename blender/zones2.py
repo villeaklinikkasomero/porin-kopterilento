@@ -98,7 +98,9 @@ def build_lod2(Z, i, spec, upper=None):
         P_ = spec_['P']
         if k == 'R':
             rmf = spec_.get('roofmat_fn') and spec_['roofmat_fn'](r)
-            if ROOFBAKE or spec_.get('roofmat') or rmf: add_solid(Z, [L(*p) for p in r], rmf or spec_.get('roofmat') or roof_mat(i), 0.45)
+            if ROOFBAKE or spec_.get('roofmat') or rmf:
+                nr = newell(r)
+                add_solid(Z, [L(*p) for p in (r if nr is None or nr.z >= 0 else r[::-1])], rmf or spec_.get('roofmat') or roof_mat(i), 0.45)   # face up: a downward roof baked black
             else: Z.hi.append(([L(*p) for p in r], ROOFOCC))
             continue
         n = newell(r)
@@ -212,9 +214,13 @@ def context2(Z, margin=70):
 
 # Pori render colours of the 1920-60s stone centre: buff, ochre, sand, pale grey-green, salmon, light grey
 PALP = ['#d9c9a3', '#cdb487', '#e2d6bb', '#c9cbbd', '#d8b9a0', '#cfcac0', '#e6dfcc', '#bfc4b8', '#d6c08e', '#c7b8a6', '#e0cfb0', '#b9b2a4']
+def _bal(sp, i):
+    """styles.json b[i].bal = 'proj': projecting balconies from the street photos (the default in gen.py is recessed and glazed)"""
+    if (LOOK['b'].get(str(i)) or {}).get('bal') == 'proj': sp = dict(sp, P=dict(sp['P'], proj_balcony=True))
+    return sp
 def spec_for(i):
     sp = SPEC.get(i)
-    if sp: return sp
+    if sp: return _bal(sp, i)
     sp = auto(i); sp['P'] = dict(sp['P']); sp['P']['wall'] = look_mat(i) or M(PALP[(i * 7 + 3) % len(PALP)])
     f = (LOOK['b'].get(str(i)) or {}).get('f')                 # storeys from the building register (Ryhti): one window row per storey
     L_ = sp.get('layout')
@@ -231,4 +237,4 @@ def spec_for(i):
             new = [(fh,) + tuple(r[1:]) for r in (new[:n] if len(new) > n else new)]
             sp['layout'] = dict(L_, rows=g + new)
         # else: the register count does not fit this height (wrong building matched) - keep the height-based rows
-    return sp
+    return _bal(sp, i)

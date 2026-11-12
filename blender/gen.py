@@ -182,6 +182,24 @@ def m_punched(mb, col, P):
     if col == 'N': mb.wall([], W); return
     if col == 'S':
         holes.append(mb.window(bw / 2 - 0.6, 0.2, bw / 2 + 0.6, fh - 0.25, W, nx=1, ny=3, fmat=P.get('frame', WHITE), curt=0))
+    elif col == 'B' and not P.get('proj_balcony'):
+        # Pori: balconies are as a rule recessed into the facade (loggias), mostly glazed: a hole the width of the window and its door,
+        # side walls in the facade colour, the back wall with a door and a window, a railing panel and slim glazing frames in front
+        b0, b1 = max(0.2, bw / 2 - ww / 2 - 0.45), min(bw - 0.2, bw / 2 + ww / 2 + 0.45); dp = P.get('ldepth', 1.3); hole = (b0, 0.12, b1, fh - 0.22)
+        mb.wall([hole], W)
+        mb.sides(hole[0], hole[1], hole[2], hole[3], 0, -dp, P.get('linner', W))
+        saved = mb.hi; mb.hi = []
+        h1 = mb.window(hole[0] + 0.25, hole[1], hole[0] + 1.05, hole[1] + 2.1, W, r=0.08, curt=0, fmat=P.get('frame', WHITE))
+        h2 = mb.window(hole[0] + 1.25, hole[1] + 0.8, hole[2] - 0.25, hole[1] + 2.1, W, r=0.08, nx=2, fmat=P.get('frame', WHITE)) if hole[2] - hole[0] > 2.3 else None
+        mb.wall([h for h in (h1, h2) if h], P.get('linner', W), u0=hole[0], u1=hole[2], v0=hole[1], v1=hole[3])
+        back = [([(q[0], q[1], q[2] - dp) for q in pts], m) for pts, m in mb.hi]; mb.hi = saved + back
+        rail = P.get('rail', WHITE); mb.q(hole[0], hole[1], hole[2], hole[1] + 1.0, -0.05, rail)              # railing panel
+        if P.get('glazed', True):                                                                         # balcony glazing: frames over the opening
+            gl = M((0.55, 0.62, 0.66), 0.1); mb.q(hole[0], hole[1] + 1.0, hole[2], hole[3], -0.04, gl)
+            nm = max(2, int((hole[2] - hole[0]) / 0.7))
+            for k in range(1, nm): u = hole[0] + (hole[2] - hole[0]) * k / nm; mb.q(u - 0.02, hole[1] + 1.0, u + 0.02, hole[3], -0.03, P.get('frame', WHITE))
+            mb.q(hole[0], hole[1] + 0.98, hole[2], hole[1] + 1.04, -0.03, P.get('frame', WHITE))
+        return
     elif col == 'B':
         holes.append(mb.window(bw / 2 - ww / 2, sill, bw / 2 + ww / 2 - 0.75, sill + wh, W, nx=P.get('nx', 2) - 1 or 1, fmat=P.get('frame', WHITE)))
         holes.append(mb.window(bw / 2 + ww / 2 - 0.7, 0.12, bw / 2 + ww / 2, sill + wh, W, fmat=P.get('frame', WHITE), curt=0))
@@ -612,7 +630,8 @@ def build_roof(Z, pts, h, R, P):
     kind = R.get('kind'); L = lambda x, y, z: (x - Z.cx, y - Z.cy, z)
     rm = R.get('mat', M('#5a5f63', 0.6))
     if kind == 'flat':
-        add_solid(Z, [L(x, y, h + 0.02) for x, y in pts], rm, 0.25)
+        sa = sum(pts[k][0] * pts[(k + 1) % len(pts)][1] - pts[(k + 1) % len(pts)][0] * pts[k][1] for k in range(len(pts)))
+        add_solid(Z, [L(x, y, h + 0.02) for x, y in (pts if sa > 0 else pts[::-1])], rm, 0.25)     # face up (a clockwise outline baked black)
     elif kind == 'hip':
         ov = R.get('ov', 0.4); ins = R['inset']; rise = R['rise']
         o = offset(pts, ov); i_ = offset(pts, -ins); n = len(pts)
@@ -634,7 +653,8 @@ def build_roof(Z, pts, h, R, P):
             a, b = i_[k], i_[(k + 1) % n]
             if math.hypot(b[0] - a[0], b[1] - a[1]) < 0.05: continue
             add_solid(Z, [L(a[0], a[1], h), L(b[0], b[1], h), L(b[0], b[1], h + ph), L(a[0], a[1], h + ph)], pm, 0.4)
-        add_solid(Z, [L(x, y, h + ph) for x, y in i_], rm, 0.2)
+        sa = sum(i_[k][0] * i_[(k + 1) % n][1] - i_[(k + 1) % n][0] * i_[k][1] for k in range(n))
+        add_solid(Z, [L(x, y, h + ph) for x, y in (i_ if sa > 0 else i_[::-1])], rm, 0.2)
 
 def build_building(Z, i, spec):
     pts, area = poly(i); h = spec.get('h', B[i]['h']); P = spec['P']

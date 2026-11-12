@@ -485,6 +485,45 @@ _Y2B_PG = _SP(poly(Y2B)[0]).buffer(0.8)
 SPEC[VALT3] = dict(P=_v3P, layout=_shop_fit(4.0, 3.2, _v3Up)(None, 21, True, 20, 0), fitw=_shop_fit(4.0, 3.2, _v3Up),
                    runalt=lambda x, y: _SPEC_Y2B if _Y2B_PG.contains(_SPt(x, y)) else None)
 
+# ---------------------------------------------------------------- Pohjois- ja Eteläpuisto
+# Eteläpuisto 15 / Mikonkatu 13: Kulturhuset Fiini (JKMM, 2025), the new part of the SKiB campus; the blue timber house and the old
+# buildings on the plot were pulled down for it, so the LoD2 shell (older survey, pitched roofs) is not used.  Street view (user, 4/2026)
+# and finnisharchitecture.fi / Arkkitehtuuri-Finlandia: two tall storeys, red brick walls, large glass bays with bronze-coloured vertical fins,
+# bronze-framed glazing at street level, flat roof with a light metal edge.
+_fiBr = MT('#9a4a36', 'brick', 0.85); _fiBz = M('#8a5a3a', 0.45, 0.55)
+_fiP = dict(wall=_fiBr, frame=_fiBz, gwall=_fiBr, plinth=M('#5b3a2c'), fascia=_fiBz, gframe=_fiBz, gpier=0.18, fasc_h=0.35, panel=_fiBz, sign=[])
+def m_fins(mb, col, P):
+    """Fiini: bronze-coloured vertical fins over a dark bronze panel"""
+    bw, fh = mb.bw, mb.fh; bz = P.get('fin_mat', M('#8a5a3a', 0.45, 0.55)); mb.q(0, 0, bw, fh, 0, M('#4a3326', 0.6, 0.3))
+    n = max(3, int(bw / 0.32))
+    for k in range(n): u = bw * (k + 0.5) / n; mb.prot(u - 0.05, 0.1, u + 0.05, fh - 0.1, 0.22, bz)
+MODS['fins'] = m_fins
+def _fi_cols(c, nb):
+    k = c % 7
+    return 'N' if k in (0, 6) else 'G' if k in (1, 3, 5) else 'F'
+SPEC[572] = dict(h=10.5, footprint=True, P=_fiP,
+                 layout=dict(bw=2.4, rows=[(4.6, 'shop', 'G'), (5.9, 'punched', 'U')], cols=_fi_cols, P={},
+                             rowP={'U': dict(colmod={'G': 'vraster', 'F': 'fins', 'N': 'plain'}, fin=0.2, nx=1, panel=M('#3a2a20', 0.5, 0.3))}),
+                 roof=dict(kind='flat', mat=M('#6d6a66', 0.7)), cornice=(0.15, 0.35, M('#d9d9d4', 0.4, 0.4)))
+# Eteläpuisto 17 (1968, white) holds Eteläpuisto 19 (1891, 3 storeys, white render) in its LoD2 shell: low walls get the old house.
+# Street view (user, 4/2026): shop windows at street level, white facade with storey bands, stacks of recessed glazed balconies,
+# gable ends in grey tile with a column of small windows.
+_e17P = dict(wall=M('#eeeeea'), spandrel=M('#eeeeea'), frame=M('#f4f4f1'), rail=M('#e6e6e2'), linner=M('#e4e3de'), gwall=M('#34373a', 0.4), plinth=M('#4a4744'),
+             fascia=M('#eeeeea'), gframe=ALU, sign=SIGNS, band=M('#f6f6f3'))
+_e17Gab = MT('#8e9194', 'brick', 0.75)
+def _e17_fit(lay_, H, street, L, zb):
+    if H < 15 and zb < 1.5:
+        n = max(1, round(H / 3.6)); return dict(bw=3.1, rows=[(H / n, 'classic', 'F')] * n, cols=lambda c, nb: 'W', P=dict(wall=M('#efece4'), frame=M('#f7f6f2'), trim=M('#f7f6f2'), ww=1.1, wh=1.7), rowP={})
+    gh = 4.0 if zb < 1.5 else 0.0; n = max(1, round((H - gh) / 2.85)); fh = (H - gh) / n
+    if L < 16:                                                               # gable: grey tile, one column of small windows
+        return dict(bw=L, rows=([(gh, 'shop', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n, cols=lambda c, nb: 'W', P=dict(wall=_e17Gab, ww=0.7, wh=1.2, nx=1), rowP={})
+    return dict(bw=3.0, rows=([(gh, 'shop', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n, cols=lambda c, nb: 'B' if c % 4 == 2 else 'W', P=dict(ww=1.7, wh=1.35, nx=2, band=M('#f6f6f3'), band2=False), rowP={})
+SPEC[142] = dict(P=_e17P, layout=_e17_fit(None, 27, True, 20, 0), fitw=_e17_fit)
+# 1312 (Gallen-Kallelankatu / Pohjoispuisto, tori2 block): the LoD2 scan has eaves at about 7 m and pitched roofs up to 14 m; the block built
+# it as a 4.7 m flat box.  Two storeys under a hipped roof until the house is identified from a photo.
+SPEC[1312] = dict(h=7.0, P=dict(wall=M('#cdbfa8'), frame=M('#f2f0ea'), sign=SIGNS, gwall=M('#3a3d40', 0.4)),
+                  layout=lay(7.0, 'punched', gh=3.6, bw=3.2, fh=3.4, P=dict(ww=1.2, wh=1.5)), roof=dict(kind='hip', rise=4.0, inset=4.5, mat=M('#8a4a3a', 0.7), ov=0.3))
+
 ZONES = {
     'tori0': [1725, 1727, 1728, 1729, 1730, 1731, 1732, 1600, 1621],
     'tori1': [1315, 1490, 1491, 1492, 1493, 1494, 1495, 1496, 1361, 1363, 1367, 1488, 1489, 1362, 1364, 1365, 1366, 1372],

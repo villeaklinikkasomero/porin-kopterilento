@@ -122,6 +122,7 @@ def build_and_bake(name, ids, samples=16, spec=None):
         if RAW.get(i) and not sp.get('footprint'): build_lod2(Z, i, sp)
         else:
             sp2 = dict(sp); sp2['layout'] = sp['fit'](sp['layout'], B[i]['h'], True) if 'fit' in sp else sp['layout']
+            if zones2.ROOFBAKE and not sp2.get('roof'): sp2['roof'] = dict(kind='flat', mat=roof_mat(i))   # no LoD2 shell: the game shows no roof here, the block must
             build_building(Z, i, sp2)
     context2(Z); pack(Z)
     print('hi', len(Z.hi), 'lo', len(Z.lo), 'exp', len(Z.exp))

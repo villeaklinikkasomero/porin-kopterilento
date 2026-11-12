@@ -131,4 +131,8 @@ if __name__ == '__main__':
     if sys.argv[1] == 'split-houses': split(houses=True); sys.exit()
     import kivi
     zones = json.load(open(MAN))['zones']; name = sys.argv[1]
-    kivi.build_and_bake(name, zones[name]['ids'], int(sys.argv[2]) if len(sys.argv) > 2 else 32, spec=house_spec if name.startswith('h') else kivi.spec_for)
+    L2B = json.loads(open(os.path.join(GAME, 'lod2.js')).read()[len('export default '):-2])['b']
+    def hspec(i):                                        # OSM tags some blocks of flats as houses: an eave over 9.5 m in the scan is not a house
+        l = L2B.get(str(i))
+        return kivi.spec_for(i) if l and l.get('e', 0) > 9.5 else house_spec(i)
+    kivi.build_and_bake(name, zones[name]['ids'], int(sys.argv[2]) if len(sys.argv) > 2 else 32, spec=hspec if name.startswith('h') else kivi.spec_for)

@@ -782,10 +782,10 @@
 },
 "125": {
 "w": "#eeece6",
-"k": "wood",
+"k": "render",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 25, 1983",
+"note": "Y-pakki: Antinkatu 25 (Lukander & Vahtera 1983), 6 krs + 2 krs siipi, vaalea laattaverhous",
 "y": 1983,
 "shop": 1
 },
@@ -840,16 +840,16 @@
 "w": "#eeece6",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 21a, 1979",
+"note": "Y-pakki: Antinkatu 21a, 1979 (2 krs)",
 "y": 1979
 },
 "137": {
-"w": "#a7a1a5",
-"m": 1,
+"w": "#d8c79c",
 "k": "render",
 "r": "#b9bbb9",
 "f": 7,
-"shop": 1
+"shop": 1,
+"note": "Y-pakki: Antinkatu 21b (Alvar Rahikka 1970), 7 krs, nauhajulkisivu, hiekanvärinen"
 },
 "138": {
 "w": "#9898a3",
@@ -1581,10 +1581,10 @@
 },
 "274": {
 "w": "#e3d6b6",
-"k": "wood",
+"k": "render",
 "f": 7,
 "r": "#3f9a5a",
-"note": "Y-pakki: Antinkatu 18, 1962",
+"note": "Y-pakki: Liisankatu 8 / Antinkatu 18 (Esko Suhonen 1962), 6 krs, puolinauhajulkisivu",
 "y": 1962,
 "shop": 1
 },
@@ -2770,10 +2770,9 @@
 },
 "569": {
 "w": "#e3d6b6",
-"k": "wood",
 "r": "#b9bbb9",
 "f": 5,
-"note": "Y-pakki: Antinkatu 27 A, Tontti 3 (ent. 139), 1862",
+"note": "Y-pakki-rivi Antinkatu 27 A (1862, puutalo) kohdistui 20 m rakennukseen: materiaali poistettu",
 "shop": 1
 },
 "570": {
@@ -2786,11 +2785,11 @@
 "shop": 1
 },
 "572": {
-"w": "#eeece6",
-"k": "wood",
-"f": 1,
-"note": "Y-pakki: Eteläpuisto 15a, 1900",
-"y": 1880
+"w": "#9a4a36",
+"k": "brick",
+"f": 2,
+"note": "Kulturhuset Fiini (JKMM 2025), Eteläpuisto 15 / Mikonkatu 13; Y-pakin 15a/15b-talot purettu (sininen puutalo), zones.py SPEC[572]",
+"y": 2025
 },
 "573": {
 "w": "#7d8aa8",
@@ -4383,13 +4382,14 @@
 },
 "1371": {
 "w": "#c4683f",
-"k": "brick",
+"k": "render",
 "f": 7,
 "b": 1,
 "r": "#74787b",
 "w2": "#b7999b",
 "s2": 0.45,
-"shop": 1
+"shop": 1,
+"note": "Y-pakki: Pohjoispuisto 3 (1960, 5½ krs, rappaus); väri tarkistamatta"
 },
 "1375": {
 "w": "#78777f",
@@ -5018,32 +5018,32 @@
 "k": "render"
 },
 "1543": {
-"w": "#9790a1",
-"m": 1,
-"k": "render",
+"w": "#9a4a36",
+"k": "brick",
 "r": "#74787b",
-"f": 3
+"f": 3,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1544": {
-"w": "#a99ba9",
-"m": 1,
-"k": "render",
+"w": "#9a4a36",
+"k": "brick",
 "r": "#b9bbb9",
-"f": 3
+"f": 3,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1545": {
-"w": "#bdb3bb",
-"m": 1,
-"k": "render",
+"w": "#9a4a36",
+"k": "brick",
 "r": "#74787b",
-"f": 3
+"f": 3,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1546": {
-"w": "#9897a8",
-"m": 1,
-"k": "render",
+"w": "#9a4a36",
+"k": "brick",
 "r": "#b9bbb9",
-"f": 3
+"f": 3,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1547": {
 "w": "#bcb9c2",
@@ -5203,12 +5203,12 @@
 "k": "render"
 },
 "1581": {
-"w": "#abafba",
-"m": 1,
+"w": "#bdb2a2",
 "k": "render",
 "r": "#74787b",
 "f": 7,
-"shop": 1
+"shop": 1,
+"note": "Y-pakki: Valtakatu 7, Valtakulma (Pekka Ilveskoski 1974), 7 krs: pesubetoni, betoni ja klinkkerilevyt"
 },
 "1582": {
 "note": "Y-pakki-rivi Yrjönkatu 7 (Juseliuksenkulma) kohdistui väärin; oikea talo on 1729/1730 (tori0). Väri ja kerrosluku poistettu.",
@@ -5253,10 +5253,10 @@
 "f": 3
 },
 "1591": {
-"w": "#817c91",
-"m": 1,
-"k": "render",
-"f": 2
+"w": "#94452f",
+"k": "brick",
+"f": 2,
+"note": "Rosenlew-museo, punatiili (käyttäjä 12.11.2026)"
 },
 "1592": {
 "w": "#73768e",
@@ -5478,22 +5478,22 @@
 "r": "#74787b"
 },
 "1645": {
-"w": "#a397a0",
-"m": 1,
-"k": "render",
-"f": 7
+"w": "#9a4a36",
+"k": "brick",
+"f": 7,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1646": {
-"w": "#baafbb",
-"m": 1,
-"k": "render",
-"f": 7
+"w": "#9a4a36",
+"k": "brick",
+"f": 7,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1647": {
-"w": "#afa9b6",
-"m": 1,
-"k": "render",
-"f": 8
+"w": "#9a4a36",
+"k": "brick",
+"f": 8,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1648": {
 "w": "#aea3ae",
@@ -5502,16 +5502,16 @@
 "f": 7
 },
 "1649": {
-"w": "#ada0ae",
-"m": 1,
-"k": "render",
-"f": 7
+"w": "#9a4a36",
+"k": "brick",
+"f": 7,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1650": {
-"w": "#b4a4af",
-"m": 1,
-"k": "render",
-"f": 7
+"w": "#9a4a36",
+"k": "brick",
+"f": 7,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1652": {
 "w": "#7a8097",
@@ -5697,7 +5697,7 @@
 },
 "1745": {
 "w": "#9c3d2e",
-"k": "render",
+"k": "brick",
 "r": "#74787b",
 "f": 2,
 "note": "Y-pakki: Isosannan entinen saha, 1920"
@@ -7251,10 +7251,10 @@
 "r": "#74787b"
 },
 "6289": {
-"w": "#838aa1",
-"m": 1,
-"k": "render",
-"r": "#74787b"
+"w": "#8e4634",
+"k": "brick",
+"r": "#74787b",
+"note": "Pori Energia, Aittaluodon voimalaitos (1937), punatiili"
 },
 "6291": {
 "w": "#a1a0af",
