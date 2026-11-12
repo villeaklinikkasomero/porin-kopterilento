@@ -1256,8 +1256,10 @@ const cars = [];
   // car models car0..car6 (hatchback, saloon, SUV, van, box lorry, flatbed lorry, refuse lorry); types missing from cars.js are skipped
   loadModel('cars', root => {
     const geo = ['car0', 'car1', 'car2', 'car3', 'car4', 'car5', 'car6'].map((k, i) => (root.getObjectByName(k) || root.getObjectByName('car' + (i % 3))).geometry), has = k => !!root.getObjectByName('car' + k), cm = new THREE.MeshLambertMaterial({ vertexColors: true }), tc = new THREE.Color();
+    // vertex-colour alpha says what the paint colour may tint: 1 = bodywork, 0 = glass, tyres, lamps, grille (blender/cars.py); older models have alpha 1 everywhere
+    if (geo[0].attributes.color && geo[0].attributes.color.itemSize === 4) cm.onBeforeCompile = sh => { sh.vertexShader = sh.vertexShader.replace('#include <color_vertex>', THREE.ShaderChunk.color_vertex.replace('vColor.xyz *= instanceColor.xyz;', 'vColor.xyz *= mix( vec3( 1.0 ), instanceColor.xyz, color.a );')); };
     const pick = (v, w) => { let a = 0; for (let k = 0; k < w.length; k++) { a += w[k]; if (v < a) return k; } return 0; };
-    const TW = [0.27, 0.22, 0.16, 0.17, 0.08, 0.06, 0.04].map((w, k) => has(k) ? w : 0), tws = TW.reduce((a, b) => a + b, 0); TW.forEach((w, k) => TW[k] = w / tws), LORRY = [0xf4f4f2, 0xf4f4f2, 0xd9dcdf, 0x2f5f9e, 0xb52a22, 0x2e6b45, 0xe9c33a];
+    const TW = [0.27, 0.22, 0.16, 0.17, 0.08, 0.06, 0.04].map((w, k) => has(k) ? w : 0), tws = TW.reduce((a, b) => a + b, 0); TW.forEach((w, k) => TW[k] = w / tws); const LORRY = [0xf4f4f2, 0xf4f4f2, 0xd9dcdf, 0x2f5f9e, 0xb52a22, 0x2e6b45, 0xe9c33a];
     const cnt = [0, 0, 0, 0, 0, 0, 0]; for (const c of cars) { c.k = pick(rnd(), TW); c.j = cnt[c.k]++; }
     const tms = geo.map((g, k) => new THREE.InstancedMesh(g, cm, Math.max(1, cnt[k])));
     cars.forEach((c, i) => { if (c.k >= 4) tc.setHex(LORRY[Math.floor(rnd() * LORRY.length)]); else body.getColorAt(i, tc); tms[c.k].setColorAt(c.j, tc); });
