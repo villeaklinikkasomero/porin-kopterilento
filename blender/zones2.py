@@ -17,7 +17,7 @@ def _h01(i, k): x = (i * 2654435761 + k * 40503) & 0xffffffff; x ^= x >> 15; x =
 def look_wall(i):
     """locked wall colour: (hex, 'brick' | 'render'); listed buildings first, otherwise the weighted centre palette"""
     e = LOOK['b'].get(str(i))
-    if e: return e['w'], e.get('k', 'render')
+    if e and e.get('w'): return e['w'], e.get('k', 'render')      # entries with only a storey count fall through to the palette
     if not LOOK['pal']: return None, None
     t = sum(w for _, w in LOOK['pal']); k = _h01(i, 5) * t
     for hx, w in LOOK['pal']:
@@ -161,8 +161,12 @@ def build_lod2(Z, i, spec, upper=None):
             if len(ring) < 3: continue
             pts3 = [W3(u, z) for u, z in ring]
             if newell(pts3) is not None and newell(pts3).dot(Vector((n.x, n.y, 0))) < 0: pts3.reverse()
-            hi_ = min(z for u, z in ring) >= ze - 0.2 and spec_.get('upper_mat')
+            top_ = min(z for u, z in ring) >= ze - 0.2; hi_ = top_ and spec_.get('upper_mat')
             add_solid(Z, pts3, spec_['upper_mat'] if hi_ else P_['wall'], 0.5)
+            if top_ and spec_.get('attic'):                             # 1.5-storey house: a window in each gable that has room for one
+                pu0, pz0, pu1, pz1 = part.bounds; cu = max(ring, key=lambda q_: q_[1])[0]
+                if pz1 - pz0 > 2.0 and part.contains(box(cu - 0.6, pz0 + 0.25, cu + 0.6, pz0 + 1.65)):
+                    gable_window(Z, lambda u, z_, d, cu=cu, pz0=pz0: L(o.x + t.x * (cu + u) + n.x * d, o.y + t.y * (cu + u) + n.y * d, pz0 + z_), P_)
 
 HIDE = set(json.loads(open('/home/claude/pori/lod2.js').read()[len('export default '):-2])['hide']) if True else set()
 def context2(Z, margin=70):

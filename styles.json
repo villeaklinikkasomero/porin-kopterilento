@@ -96,11 +96,13 @@
 "f": 2
 },
 "4": {
+"w": "#b6aca2",
+"m": 1,
 "k": "render",
+"r": "#74787b",
 "f": 3,
-"r": "#3f4246",
-"st": "classic",
-"note": "Y-pakki: Karhulinna, Tasavallankatu 2, 1928"
+"note": "Y-pakki: Karhulinna, Tasavallankatu 2, 1928",
+"y": 1928
 },
 "5": {
 "w": "#bdbbb7",
@@ -122,7 +124,8 @@
 "w": "#e3d6b6",
 "k": "render",
 "f": 4,
-"note": "Y-pakki: Itsenäisyydenkatu 54, 1956"
+"note": "Y-pakki: Itsenäisyydenkatu 54, 1956",
+"y": 1956
 },
 "8": {
 "f": 3
@@ -192,7 +195,8 @@
 "k": "render",
 "f": 4,
 "r": "#3f4246",
-"note": "Y-pakki: Mikonkatu 26, 1939"
+"note": "Y-pakki: Mikonkatu 26, 1939",
+"y": 1939
 },
 "23": {
 "f": 3
@@ -234,7 +238,8 @@
 "k": "render",
 "f": 4,
 "r": "#3f4246",
-"note": "Y-pakki: Mikonkatu 28b, 1951"
+"note": "Y-pakki: Mikonkatu 28b, 1951",
+"y": 1951
 },
 "33": {
 "f": 3
@@ -246,7 +251,8 @@
 "w": "#eeece6",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Itsenäisyydenkatu 62 (tontti 13), 1925"
+"note": "Y-pakki: Itsenäisyydenkatu 62 (tontti 13), 1925",
+"y": 1925
 },
 "36": {
 "f": 3
@@ -315,7 +321,9 @@
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Riihikatu 5 (tontit 258 ja 260), 1916"
+"note": "Y-pakki: Riihikatu 5 (tontit 258 ja 260), 1916",
+"y": 1916,
+"u": 1
 },
 "53": {
 "w": "#eeeeea",
@@ -341,7 +349,9 @@
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Lännenkulma 2, 1927"
+"note": "Y-pakki: Lännenkulma 2, 1927",
+"y": 1927,
+"u": 1
 },
 "57": {
 "w": "#cdba99",
@@ -416,14 +426,16 @@
 "w": "#eeece6",
 "f": 8,
 "r": "#3f4246",
-"note": "Y-pakki: Eteläpuisto 13, 1962"
+"note": "Y-pakki: Eteläpuisto 13, 1962",
+"y": 1962
 },
 "71": {
 "w": "#e9cf8c",
 "k": "render",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Mikonkatu 18, 1976"
+"note": "Y-pakki: Mikonkatu 18, 1976",
+"y": 1976
 },
 "72": {
 "w": "#949a9f",
@@ -459,7 +471,9 @@
 "k": "render",
 "f": 1,
 "st": "classic",
-"note": "Y-pakki: Äestäjänkatu 10, Satakunnan Auto Oy (ent. Metallitehdas Kalske), 1925"
+"note": "Y-pakki: Äestäjänkatu 10, Satakunnan Auto Oy (ent. Metallitehdas Kalske), 1925",
+"y": 1925,
+"u": 1
 },
 "78": {
 "w": "#a7a3a2",
@@ -473,7 +487,9 @@
 "k": "render",
 "f": 1,
 "st": "classic",
-"note": "Y-pakki: Katariinankatu 32, 1925"
+"note": "Y-pakki: Katariinankatu 32, 1925",
+"y": 1925,
+"u": 1
 },
 "80": {
 "w": "#d6bd9e",
@@ -534,13 +550,16 @@
 "w": "#7a4535",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 12 (tontti 254), 1922"
+"note": "Y-pakki: Tuomarinkatu 12 (tontti 254), 1922",
+"y": 1922,
+"u": 1
 },
 "93": {
 "w": "#eeece6",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Neuvosmiehenkatu 5 (tontti 259), 1902"
+"note": "Y-pakki: Neuvosmiehenkatu 5 (tontti 259), 1902",
+"y": 1902
 },
 "95": {
 "w": "#6c6e74",
@@ -558,14 +577,16 @@
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 3 (Nummi) (tontit 221, 222, 223 ja 224), 1901"
+"note": "Y-pakki: Laamanninkatu 3 (Nummi) (tontit 221, 222, 223 ja 224), 1901",
+"y": 1901
 },
 "98": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Tuomarinkatu 2 (tontit 261,262, 263 ja 264), 1922"
+"note": "Y-pakki: Tuomarinkatu 2 (tontit 261,262, 263 ja 264), 1922",
+"y": 1922
 },
 "99": {
 "w": "#ecc3cb",
@@ -573,13 +594,16 @@
 "f": 2,
 "r": "#b8302a",
 "st": "classic",
-"note": "Y-pakki: Neuvosmiehenkatu 7 (tontti 257), 1920"
+"note": "Y-pakki: Neuvosmiehenkatu 7 (tontti 257), 1920",
+"y": 1920
 },
 "101": {
 "w": "#e3d6b6",
 "k": "render",
 "f": 1,
-"note": "Y-pakki: Väinönkatu 4 (tontti 271), 1959"
+"note": "Y-pakki: Väinönkatu 4 (tontti 271), 1959",
+"y": 1959,
+"u": 1
 },
 "102": {
 "w": "#c5b092",
@@ -592,7 +616,8 @@
 "k": "brick",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Malminkatu 1 (270), 1902"
+"note": "Y-pakki: Malminkatu 1 (270), 1902",
+"y": 1902
 },
 "104": {
 "w": "#97676c",
@@ -617,14 +642,16 @@
 "f": 2,
 "r": "#b5553a",
 "st": "classic",
-"note": "Y-pakki: Yrjönkatu 25, 1927"
+"note": "Y-pakki: Yrjönkatu 25, 1927",
+"y": 1927
 },
 "109": {
 "w": "#e3d6b6",
 "k": "render",
 "f": 4,
 "st": "classic",
-"note": "Y-pakki: Rautatienpuistokatu 3, 1926"
+"note": "Y-pakki: Rautatienpuistokatu 3, 1926",
+"y": 1926
 },
 "110": {
 "w": "#786c6c",
@@ -643,7 +670,8 @@
 "k": "wood",
 "f": 2,
 "r": "#3f9a5a",
-"note": "Y-pakki: Antinkatu 28, 1900"
+"note": "Y-pakki: Antinkatu 28, 1900",
+"y": 1900
 },
 "113": {
 "f": 2
@@ -653,19 +681,22 @@
 "k": "render",
 "f": 4,
 "st": "classic",
-"note": "Y-pakki: Antinlinna, Antinkatu 26, 1929"
+"note": "Y-pakki: Antinlinna, Antinkatu 26, 1929",
+"y": 1929
 },
 "117": {
 "w": "#c9c7c2",
 "k": "render",
 "f": 4,
-"note": "Y-pakki: Koulukatu 13, 1959"
+"note": "Y-pakki: Koulukatu 13, 1959",
+"y": 1959
 },
 "118": {
 "w": "#eeece6",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 24, 1991"
+"note": "Y-pakki: Antinkatu 24, 1991",
+"y": 1991
 },
 "119": {
 "w": "#c7c8cd",
@@ -676,35 +707,40 @@
 "w": "#e9cf8c",
 "k": "render",
 "f": 2,
-"note": "Y-pakki: Mikonkatu 6, 1954"
+"note": "Y-pakki: Mikonkatu 6, 1954",
+"y": 1954
 },
 "121": {
 "w": "#dcb76e",
 "k": "brick",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 23, Palojoenkulma, 1988"
+"note": "Y-pakki: Yrjönkatu 23, Palojoenkulma, 1988",
+"y": 1988
 },
 "124": {
 "w": "#efe0a8",
 "k": "render",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Rautatienpuistokatu 5, ent. Teljän ammattikoulu, 1938"
+"note": "Y-pakki: Rautatienpuistokatu 5, ent. Teljän ammattikoulu, 1938",
+"y": 1938
 },
 "125": {
 "w": "#eeece6",
 "k": "wood",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 25, 1983"
+"note": "Y-pakki: Antinkatu 25, 1983",
+"y": 1983
 },
 "126": {
 "w": "#eeece6",
 "k": "render",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 23b, 1964"
+"note": "Y-pakki: Antinkatu 23b, 1964",
+"y": 1964
 },
 "127": {
 "w": "#c0a9a2",
@@ -740,13 +776,15 @@
 "k": "brick",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 23a, 1964"
+"note": "Y-pakki: Antinkatu 23a, 1964",
+"y": 1964
 },
 "136": {
 "w": "#eeece6",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 21a, 1979"
+"note": "Y-pakki: Antinkatu 21a, 1979",
+"y": 1979
 },
 "137": {
 "w": "#a7a1a5",
@@ -781,7 +819,8 @@
 "w": "#eeece6",
 "f": 9,
 "r": "#3f4246",
-"note": "Y-pakki: Eteläpuisto 17, 1968"
+"note": "Y-pakki: Eteläpuisto 17, 1968",
+"y": 1968
 },
 "143": {
 "w": "#6a696e",
@@ -793,7 +832,8 @@
 "w": "#e9cf8c",
 "k": "render",
 "f": 4,
-"note": "Y-pakki: Itsenäisyydenkatu 57, 1954"
+"note": "Y-pakki: Itsenäisyydenkatu 57, 1954",
+"y": 1954
 },
 "146": {
 "w": "#757880",
@@ -861,21 +901,24 @@
 "w": "#e9cf8c",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Otavankatu 12, 1981"
+"note": "Y-pakki: Otavankatu 12, 1981",
+"y": 1981
 },
 "158": {
 "w": "#eeece6",
 "k": "brick",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Liisankatu 14, 1963"
+"note": "Y-pakki: Liisankatu 14, 1963",
+"y": 1963
 },
 "160": {
 "w": "#eeece6",
 "k": "brick",
 "f": 6,
 "r": "#3f4246",
-"note": "Y-pakki: Eteläpuisto 14b, 1967"
+"note": "Y-pakki: Eteläpuisto 14b, 1967",
+"y": 1967
 },
 "161": {
 "w": "#e7dfc8",
@@ -1043,7 +1086,8 @@
 "k": "render",
 "f": 5,
 "r": "#3f4246",
-"note": "Y-pakki: Katariinankatu 22, 1970"
+"note": "Y-pakki: Katariinankatu 22, 1970",
+"y": 1970
 },
 "192": {
 "w": "#e6dcc2",
@@ -1096,7 +1140,8 @@
 "k": "wood",
 "f": 2,
 "r": "#b8302a",
-"note": "Y-pakki: Itsenäisyydenkatu 70, 1923"
+"note": "Y-pakki: Itsenäisyydenkatu 70, 1923",
+"y": 1923
 },
 "203": {
 "w": "#ecebe6",
@@ -1110,13 +1155,16 @@
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Riihikatu 1 (tontti 266), 1917"
+"note": "Y-pakki: Riihikatu 1 (tontti 266), 1917",
+"y": 1917,
+"u": 1
 },
 "208": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: VPK:n talo, Itäpuisto 13 - Pohjoispuisto 8, 1894"
+"note": "Y-pakki: VPK:n talo, Itäpuisto 13 - Pohjoispuisto 8, 1894",
+"y": 1894
 },
 "209": {
 "w": "#ecebe6",
@@ -1148,13 +1196,15 @@
 "k": "render",
 "f": 6,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 14, Kansankulma, 1954"
+"note": "Y-pakki: Antinkatu 14, Kansankulma, 1954",
+"y": 1954
 },
 "216": {
 "w": "#eeece6",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 15, Teljäntori, 1972"
+"note": "Y-pakki: Yrjönkatu 15, Teljäntori, 1972",
+"y": 1972
 },
 "217": {
 "w": "#525668",
@@ -1174,21 +1224,24 @@
 "w": "#e3d6b6",
 "f": 8,
 "r": "#3f4246",
-"note": "Y-pakki: Länsipuisto 18, 1972"
+"note": "Y-pakki: Länsipuisto 18, 1972",
+"y": 1972
 },
 "220": {
 "w": "#7a4535",
 "k": "brick",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Asemapäällikön talo, 1895"
+"note": "Y-pakki: Asemapäällikön talo, 1895",
+"y": 1895
 },
 "221": {
 "w": "#9c3d2e",
 "k": "render",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 17, Ratsula, 1971"
+"note": "Y-pakki: Antinkatu 17, Ratsula, 1971",
+"y": 1971
 },
 "222": {
 "w": "#e2c26a",
@@ -1201,14 +1254,17 @@
 "k": "render",
 "f": 3,
 "st": "classic",
-"note": "Y-pakki: Itsenäisyydenkatu 66, 1925"
+"note": "Y-pakki: Itsenäisyydenkatu 66, 1925",
+"y": 1925
 },
 "224": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Katariinankatu 28, asoy Porin Asuntola, 1925"
+"note": "Y-pakki: Katariinankatu 28, asoy Porin Asuntola, 1925",
+"y": 1925,
+"u": 1
 },
 "225": {
 "w": "#ae9884",
@@ -1256,7 +1312,8 @@
 "w": "#eeece6",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 13, Sampotalo, 1961"
+"note": "Y-pakki: Yrjönkatu 13, Sampotalo, 1961",
+"y": 1961
 },
 "239": {
 "w": "#9c979b",
@@ -1267,7 +1324,8 @@
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Annankatu 27, 1920"
+"note": "Y-pakki: Annankatu 27, 1920",
+"y": 1920
 },
 "244": {
 "w": "#505047",
@@ -1279,7 +1337,9 @@
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Itsenäisyydenkatu 64, 1924"
+"note": "Y-pakki: Itsenäisyydenkatu 64, 1924",
+"y": 1924,
+"u": 1
 },
 "246": {
 "w": "#858083",
@@ -1290,13 +1350,15 @@
 "w": "#e3d6b6",
 "f": 6,
 "r": "#3f4246",
-"note": "Y-pakki: Annankatu 18, 1990"
+"note": "Y-pakki: Annankatu 18, 1990",
+"y": 1990
 },
 "248": {
 "w": "#dcb76e",
 "f": 5,
 "r": "#3f4246",
-"note": "Y-pakki: Annankatu 20, 1969"
+"note": "Y-pakki: Annankatu 20, 1969",
+"y": 1969
 },
 "250": {
 "w": "#e6dcc2",
@@ -1315,7 +1377,8 @@
 "k": "render",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Eteläpuisto 12a, As. Oy Puistopilari, 1971"
+"note": "Y-pakki: Eteläpuisto 12a, As. Oy Puistopilari, 1971",
+"y": 1971
 },
 "254": {
 "w": "#e2ddd6",
@@ -1338,7 +1401,8 @@
 "k": "render",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Liisankatu 11, 1989"
+"note": "Y-pakki: Liisankatu 11, 1989",
+"y": 1989
 },
 "259": {
 "w": "#dce2ea",
@@ -1382,7 +1446,9 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Itsenäisyydenkatu 74, 1924"
+"note": "Y-pakki: Itsenäisyydenkatu 74, 1924",
+"y": 1924,
+"u": 1
 },
 "266": {
 "w": "#aaa59f",
@@ -1401,7 +1467,8 @@
 "k": "render",
 "f": 4,
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 19b, SYP:n Kuparikonttori, 1985"
+"note": "Y-pakki: Yrjönkatu 19b, SYP:n Kuparikonttori, 1985",
+"y": 1985
 },
 "270": {
 "w": "#a39daf",
@@ -1429,7 +1496,8 @@
 "k": "wood",
 "f": 7,
 "r": "#3f9a5a",
-"note": "Y-pakki: Antinkatu 18, 1962"
+"note": "Y-pakki: Antinkatu 18, 1962",
+"y": 1962
 },
 "275": {
 "w": "#99928b",
@@ -1517,14 +1585,17 @@
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Kalevanpuisto 1 (tontti 183), 1917"
+"note": "Y-pakki: Kalevanpuisto 1 (tontti 183), 1917",
+"y": 1917,
+"u": 1
 },
 "294": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Kalevanpuisto 5 (tontti 179), 1919"
+"note": "Y-pakki: Kalevanpuisto 5 (tontti 179), 1919",
+"y": 1919
 },
 "295": {
 "w": "#3f3b45",
@@ -1536,20 +1607,24 @@
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kalevanpuisto 3 (tontti 181), 1920"
+"note": "Y-pakki: Kalevanpuisto 3 (tontti 181), 1920",
+"y": 1920
 },
 "298": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kalevanpuisto 7 (tontti 177), 1920"
+"note": "Y-pakki: Kalevanpuisto 7 (tontti 177), 1920",
+"y": 1920
 },
 "299": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Kalevanpuisto 9 (tontti 175), 1938"
+"note": "Y-pakki: Kalevanpuisto 9 (tontti 175), 1938",
+"y": 1938,
+"u": 1
 },
 "301": {
 "w": "#595251",
@@ -1567,26 +1642,33 @@
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Esivallankatu 12 (tontti 214), 1928"
+"note": "Y-pakki: Esivallankatu 12 (tontti 214), 1928",
+"y": 1928,
+"u": 1
 },
 "307": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 7 (tontti 217), 1920"
+"note": "Y-pakki: Laamanninkatu 7 (tontti 217), 1920",
+"y": 1920,
+"u": 1
 },
 "308": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Ratakatu 15 (tontti 185), 1922"
+"note": "Y-pakki: Ratakatu 15 (tontti 185), 1922",
+"y": 1922,
+"u": 1
 },
 "309": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Esivallankatu 9 (tontti 233), 1921"
+"note": "Y-pakki: Esivallankatu 9 (tontti 233), 1921",
+"y": 1921
 },
 "310": {
 "w": "#949398",
@@ -1600,26 +1682,32 @@
 "f": 2,
 "r": "#b5553a",
 "st": "classic",
-"note": "Y-pakki: Laamanninkatu 6 (tontti 190), 1906"
+"note": "Y-pakki: Laamanninkatu 6 (tontti 190), 1906",
+"y": 1906
 },
 "312": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Raatimiehenkatu 9 (tontti 193), 1901"
+"note": "Y-pakki: Raatimiehenkatu 9 (tontti 193), 1901",
+"y": 1901
 },
 "313": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 8 (tontti 232), 1900"
+"note": "Y-pakki: Neuvosmiehenkatu 8 (tontti 232), 1900",
+"y": 1900,
+"u": 1
 },
 "314": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Neuvosmiehenkatu 2 (tontti 226), 1924"
+"note": "Y-pakki: Neuvosmiehenkatu 2 (tontti 226), 1924",
+"y": 1924,
+"u": 1
 },
 "315": {
 "w": "#504e58",
@@ -1644,7 +1732,9 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Väinönkatu 3 (tontti 273), 1903"
+"note": "Y-pakki: Väinönkatu 3 (tontti 273), 1903",
+"y": 1903,
+"u": 1
 },
 "319": {
 "w": "#4f494a",
@@ -1657,7 +1747,8 @@
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Esivallankatu 11 (tontti 235), 1921"
+"note": "Y-pakki: Esivallankatu 11 (tontti 235), 1921",
+"y": 1921
 },
 "321": {
 "w": "#494345",
@@ -1676,13 +1767,16 @@
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Neuvosmiehenkatu 12 (tontti 236), 1904"
+"note": "Y-pakki: Neuvosmiehenkatu 12 (tontti 236), 1904",
+"y": 1904,
+"u": 1
 },
 "326": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 11 (tontti 213), 1920"
+"note": "Y-pakki: Laamanninkatu 11 (tontti 213), 1920",
+"y": 1920
 },
 "332": {
 "w": "#776362",
@@ -1695,14 +1789,18 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Ratakatu 13 (tontti 186), 1924"
+"note": "Y-pakki: Ratakatu 13 (tontti 186), 1924",
+"y": 1924,
+"u": 1
 },
 "336": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Esivallankatu 1 (tontti 225), 1920"
+"note": "Y-pakki: Esivallankatu 1 (tontti 225), 1920",
+"y": 1920,
+"u": 1
 },
 "338": {
 "w": "#545254",
@@ -1931,7 +2029,8 @@
 "k": "render",
 "f": 6,
 "r": "#3f4246",
-"note": "Y-pakki: Länsipuisto 16, Puistokulma, 1939"
+"note": "Y-pakki: Länsipuisto 16, Puistokulma, 1939",
+"y": 1939
 },
 "391": {
 "f": 5
@@ -1965,7 +2064,8 @@
 "k": "render",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Väinönkatu 2 (tontti 272) ent. Bäckmanin panimo, 1902"
+"note": "Y-pakki: Väinönkatu 2 (tontti 272) ent. Bäckmanin panimo, 1902",
+"y": 1902
 },
 "404": {
 "w": "#9a9c99",
@@ -1976,7 +2076,9 @@
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Malminkatu 4 (tontti 267), 1903"
+"note": "Y-pakki: Malminkatu 4 (tontti 267), 1903",
+"y": 1903,
+"u": 1
 },
 "406": {
 "f": 7
@@ -2001,7 +2103,8 @@
 "w": "#ecc3cb",
 "k": "render",
 "f": 3,
-"note": "Y-pakki: Antinkatu 29, 1953"
+"note": "Y-pakki: Antinkatu 29, 1953",
+"y": 1953
 },
 "415": {
 "w": "#959ba7",
@@ -2039,7 +2142,8 @@
 "w": "#c9c7c2",
 "f": 8,
 "r": "#3f4246",
-"note": "Y-pakki: Katariinankatu 13, 1984"
+"note": "Y-pakki: Katariinankatu 13, 1984",
+"y": 1984
 },
 "426": {
 "w": "#535046",
@@ -2099,7 +2203,8 @@
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Riihikatu 21 (tontti 180), 1920"
+"note": "Y-pakki: Riihikatu 21 (tontti 180), 1920",
+"y": 1920
 },
 "443": {
 "w": "#7a4535",
@@ -2107,14 +2212,18 @@
 "f": 1,
 "w2": "#e9cf8c",
 "s2": 0.5,
-"note": "Y-pakki: Raatimiehenkatu 4 (tontti 182), 1919"
+"note": "Y-pakki: Raatimiehenkatu 4 (tontti 182), 1919",
+"y": 1919,
+"u": 1
 },
 "444": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Raatimiehenkatu 10 (tontti 176), 1936"
+"note": "Y-pakki: Raatimiehenkatu 10 (tontti 176), 1936",
+"y": 1936,
+"u": 1
 },
 "445": {
 "w": "#685d5a",
@@ -2126,7 +2235,9 @@
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 8 (tontti 178), 1922"
+"note": "Y-pakki: Raatimiehenkatu 8 (tontti 178), 1922",
+"y": 1922,
+"u": 1
 },
 "448": {
 "w": "#7c4243",
@@ -2151,13 +2262,17 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Laamanninkatu 4 (tontti 188), 1918"
+"note": "Y-pakki: Laamanninkatu 4 (tontti 188), 1918",
+"y": 1918,
+"u": 1
 },
 "456": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 4 (tontti 228), 1920"
+"note": "Y-pakki: Neuvosmiehenkatu 4 (tontti 228), 1920",
+"y": 1920,
+"u": 1
 },
 "457": {
 "w": "#454047",
@@ -2182,13 +2297,17 @@
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Esivallankatu 3 (tontti 227), 1920"
+"note": "Y-pakki: Esivallankatu 3 (tontti 227), 1920",
+"y": 1920,
+"u": 1,
+"c": "v"
 },
 "464": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Malminkatu 5 (tontti 256), 2000"
+"note": "Y-pakki: Malminkatu 5 (tontti 256), 2000",
+"y": 2000
 },
 "466": {
 "r": "#74787b"
@@ -2204,14 +2323,16 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Laamanninkatu 10 (tontti 194), 1923"
+"note": "Y-pakki: Laamanninkatu 10 (tontti 194), 1923",
+"y": 1923
 },
 "472": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Malminkatu 7 (255), 1920"
+"note": "Y-pakki: Malminkatu 7 (255), 1920",
+"y": 1920
 },
 "473": {
 "w": "#e3d6b6",
@@ -2219,7 +2340,8 @@
 "f": 2,
 "w2": "#9c3d2e",
 "s2": 0.5,
-"note": "Y-pakki: Laamanninkatu 9 (tontti 215), 1920"
+"note": "Y-pakki: Laamanninkatu 9 (tontti 215), 1920",
+"y": 1920
 },
 "475": {
 "w": "#706969",
@@ -2236,7 +2358,9 @@
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Neuvosmiehenkatu 10 (tontti 234), 1900"
+"note": "Y-pakki: Neuvosmiehenkatu 10 (tontti 234), 1900",
+"y": 1900,
+"u": 1
 },
 "478": {
 "w": "#743e3d",
@@ -2249,7 +2373,8 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Esivallankatu 10 (tontti 216), 1922"
+"note": "Y-pakki: Esivallankatu 10 (tontti 216), 1922",
+"y": 1922
 },
 "482": {
 "w": "#7a7673",
@@ -2261,46 +2386,58 @@
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 7 (tontti 191), 1922"
+"note": "Y-pakki: Raatimiehenkatu 7 (tontti 191), 1922",
+"y": 1922,
+"u": 1
 },
 "488": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Riihikatu 9 (tontti 2, vanha 230), 1901"
+"note": "Y-pakki: Riihikatu 9 (tontti 2, vanha 230), 1901",
+"y": 1901
 },
 "489": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Raatimiehenkatu 5 (tontti 189), 1917"
+"note": "Y-pakki: Raatimiehenkatu 5 (tontti 189), 1917",
+"y": 1917,
+"u": 1
 },
 "490": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Esivallankatu 8 (tontti 218), 1917"
+"note": "Y-pakki: Esivallankatu 8 (tontti 218), 1917",
+"y": 1917
 },
 "491": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 5 (tontti 1, vanha 229), 1901"
+"note": "Y-pakki: Esivallankatu 5 (tontti 1, vanha 229), 1901",
+"y": 1901,
+"u": 1
 },
 "492": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 7 (tontti 231), 1920"
+"note": "Y-pakki: Esivallankatu 7 (tontti 231), 1920",
+"y": 1920,
+"u": 1
 },
 "493": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 5 (tontti 219), 1920"
+"note": "Y-pakki: Laamanninkatu 5 (tontti 219), 1920",
+"y": 1920,
+"u": 1
 },
 "496": {
 "w": "#46464f",
@@ -2319,7 +2456,9 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Pori, Esivallankatu 6 (tontti 220), 1903"
+"note": "Y-pakki: Pori, Esivallankatu 6 (tontti 220), 1903",
+"y": 1903,
+"u": 1
 },
 "499": {
 "w": "#897c77",
@@ -2342,7 +2481,8 @@
 "k": "render",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Itäpuisto 10, elokuvateatteri Kino, 1936"
+"note": "Y-pakki: Itäpuisto 10, elokuvateatteri Kino, 1936",
+"y": 1936
 },
 "509": {
 "w": "#8a817f",
@@ -2469,7 +2609,8 @@
 "k": "brick",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Porin kauppaoppilaitos, 1959"
+"note": "Y-pakki: Porin kauppaoppilaitos, 1959",
+"y": 1959
 },
 "561": {
 "w": "#f2f2ee",
@@ -2496,7 +2637,8 @@
 "564": {
 "w": "#eeece6",
 "f": 6,
-"note": "Y-pakki: Itäpuisto 7 / Eteläkauppatori 4b, 1979"
+"note": "Y-pakki: Itäpuisto 7 / Eteläkauppatori 4b, 1979",
+"y": 1979
 },
 "565": {
 "f": 5
@@ -2525,7 +2667,8 @@
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Eteläpuisto 15b, 1880"
+"note": "Y-pakki: Eteläpuisto 15b, 1880",
+"y": 1880
 },
 "573": {
 "w": "#7d8aa8",
@@ -2543,20 +2686,23 @@
 "k": "render",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 14-16, Isokarhu, 1973"
+"note": "Y-pakki: Yrjönkatu 14-16, Isokarhu, 1973",
+"y": 1973
 },
 "581": {
 "w": "#eeece6",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Liisankatu 2-4, Sokos, 1973"
+"note": "Y-pakki: Liisankatu 2-4, Sokos, 1973",
+"y": 1973
 },
 "582": {
 "w": "#b7c6d6",
 "k": "render",
 "f": 4,
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 20, Porin Talo, 1978"
+"note": "Y-pakki: Yrjönkatu 20, Porin Talo, 1978",
+"y": 1978
 },
 "583": {
 "f": 2
@@ -2569,7 +2715,8 @@
 "k": "render",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Porin entinen linja-autoasema, 1955"
+"note": "Y-pakki: Porin entinen linja-autoasema, 1955",
+"y": 1955
 },
 "586": {
 "w": "#8991a9",
@@ -2585,7 +2732,8 @@
 "k": "render",
 "f": 4,
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 22, Bepop, 1989"
+"note": "Y-pakki: Yrjönkatu 22, Bepop, 1989",
+"y": 1989
 },
 "589": {
 "w": "#6c7184",
@@ -2627,13 +2775,15 @@
 "w": "#e3d6b6",
 "f": 6,
 "r": "#3f4246",
-"note": "Y-pakki: Itsenäisyydenkatu 37, Hotelli Bepop, 1974"
+"note": "Y-pakki: Itsenäisyydenkatu 37, Hotelli Bepop, 1974",
+"y": 1974
 },
 "601": {
 "w": "#eeece6",
 "f": 6,
 "r": "#3f4246",
-"note": "Y-pakki: Itsenäisyydenkatu 35, 1959"
+"note": "Y-pakki: Itsenäisyydenkatu 35, 1959",
+"y": 1959
 },
 "602": {
 "w": "#cfc7b2",
@@ -2659,7 +2809,8 @@
 "k": "render",
 "f": 5,
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 19a, 1961"
+"note": "Y-pakki: Yrjönkatu 19a, 1961",
+"y": 1961
 },
 "606": {
 "w": "#929097",
@@ -2673,7 +2824,8 @@
 "k": "render",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Isolinnankatu 18, 1988"
+"note": "Y-pakki: Isolinnankatu 18, 1988",
+"y": 1988
 },
 "608": {
 "w": "#aeaaac",
@@ -2686,7 +2838,8 @@
 "k": "render",
 "f": 8,
 "r": "#3f4246",
-"note": "Y-pakki: Isolinnankatu 28, 1979"
+"note": "Y-pakki: Isolinnankatu 28, 1979",
+"y": 1979
 },
 "611": {
 "w": "#7d7a86",
@@ -2769,7 +2922,8 @@
 "k": "brick",
 "f": 7,
 "r": "#b5553a",
-"note": "Y-pakki: Itäpuisto 5, 1955"
+"note": "Y-pakki: Itäpuisto 5, 1955",
+"y": 1955
 },
 "640": {
 "w": "#afa9ac",
@@ -2894,7 +3048,8 @@
 "k": "render",
 "f": 5,
 "r": "#b8302a",
-"note": "Y-pakki: Varvinkatu 15, Heikinlinna, 1942"
+"note": "Y-pakki: Varvinkatu 15, Heikinlinna, 1942",
+"y": 1942
 },
 "688": {
 "f": 2
@@ -2965,13 +3120,16 @@
 "k": "render",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Vähälinnankatu 30 (rakennus 2), Tontti 301, 1950"
+"note": "Y-pakki: Vähälinnankatu 30 (rakennus 2), Tontti 301, 1950",
+"y": 1950
 },
 "708": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vähälinnankatu 28 (rakennukset 1 ja 2), Tontti 296, 1925"
+"note": "Y-pakki: Vähälinnankatu 28 (rakennukset 1 ja 2), Tontti 296, 1925",
+"y": 1925,
+"u": 1
 },
 "710": {
 "w": "#6a6c7c",
@@ -3076,20 +3234,26 @@
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Tähtik. 11 (rakennukset 1 ja 2), Tontti 265, 1847"
+"note": "Y-pakki: Tähtik. 11 (rakennukset 1 ja 2), Tontti 265, 1847",
+"y": 1847,
+"u": 1
 },
 "925": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Juhana Herttuank. 14 (rakennukset 3, 4 ja 5), Tontti 263, 1935"
+"note": "Y-pakki: Juhana Herttuank. 14 (rakennukset 3, 4 ja 5), Tontti 263, 1935",
+"y": 1935
 },
 "945": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Säveltäjänk.3 / Maanmittarink.4 (rakennus 1), Tontti 235, 1940"
+"note": "Y-pakki: Säveltäjänk.3 / Maanmittarink.4 (rakennus 1), Tontti 235, 1940",
+"y": 1940,
+"u": 1,
+"c": "v"
 },
 "949": {
 "f": 3
@@ -3098,13 +3262,15 @@
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vähäuusikatu 1, Tontti 218, 1898"
+"note": "Y-pakki: Vähäuusikatu 1, Tontti 218, 1898",
+"y": 1898
 },
 "953": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Säveltäjänk.4 / Herralahdenk. 3 (rakennus 1), Tontti 238, 1900"
+"note": "Y-pakki: Säveltäjänk.4 / Herralahdenk. 3 (rakennus 1), Tontti 238, 1900",
+"y": 1900
 },
 "956": {
 "f": 2
@@ -3170,7 +3336,8 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Maaherrankatu 21 (rakennus 1), Tontti 274, 1854"
+"note": "Y-pakki: Maaherrankatu 21 (rakennus 1), Tontti 274, 1854",
+"y": 1854
 },
 "1114": {
 "w": "#908f91",
@@ -3192,7 +3359,9 @@
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Varvinkatu 25 (rakennukset 2 ja 5), Tontti 295, 1860"
+"note": "Y-pakki: Varvinkatu 25 (rakennukset 2 ja 5), Tontti 295, 1860",
+"y": 1860,
+"u": 1
 },
 "1128": {
 "w": "#b29999",
@@ -3210,7 +3379,8 @@
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vähäuusik.10/Tähtikatu 9. (rakennus 5), Tontti 232, 1938"
+"note": "Y-pakki: Vähäuusik.10/Tähtikatu 9. (rakennus 5), Tontti 232, 1938",
+"y": 1938
 },
 "1136": {
 "w": "#b2aaa6",
@@ -3231,14 +3401,17 @@
 "f": 1,
 "r": "#b8302a",
 "st": "classic",
-"note": "Y-pakki: Tähtikatu 13a (rakennus 4), Tontti 276, 1892"
+"note": "Y-pakki: Tähtikatu 13a (rakennus 4), Tontti 276, 1892",
+"y": 1892,
+"u": 1
 },
 "1149": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Tähtikatu 13 b (rakennus 1), Tontti 276, 1858"
+"note": "Y-pakki: Tähtikatu 13 b (rakennus 1), Tontti 276, 1858",
+"y": 1858
 },
 "1157": {
 "w": "#9a8781",
@@ -3290,7 +3463,8 @@
 "w": "#e9cf8c",
 "k": "render",
 "f": 8,
-"note": "Y-pakki: Itäpuisto 1, ent. hotelli Juhana Herttua, 1955"
+"note": "Y-pakki: Itäpuisto 1, ent. hotelli Juhana Herttua, 1955",
+"y": 1955
 },
 "1222": {
 "f": 2
@@ -3302,7 +3476,8 @@
 "w": "#eeece6",
 "f": 6,
 "r": "#3f4246",
-"note": "Y-pakki: Isolinnankatu 22, 1972"
+"note": "Y-pakki: Isolinnankatu 22, 1972",
+"y": 1972
 },
 "1228": {
 "w": "#c2cbd5",
@@ -3314,7 +3489,8 @@
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itätullinkatu 34, 1852"
+"note": "Y-pakki: Itätullinkatu 34, 1852",
+"y": 1852
 },
 "1231": {
 "w": "#6f7184",
@@ -3365,26 +3541,30 @@
 "k": "render",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Gallen-Kallelankatu 18, 1985"
+"note": "Y-pakki: Gallen-Kallelankatu 18, 1985",
+"y": 1985
 },
 "1253": {
 "w": "#dcb76e",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Länsipuisto 19, 1985"
+"note": "Y-pakki: Länsipuisto 19, 1985",
+"y": 1985
 },
 "1257": {
 "w": "#c9c7c2",
 "f": 8,
 "r": "#3f4246",
-"note": "Y-pakki: Liisankatu 21, 1983"
+"note": "Y-pakki: Liisankatu 21, 1983",
+"y": 1983
 },
 "1258": {
 "w": "#eeece6",
 "k": "render",
 "f": 5,
 "r": "#3f4246",
-"note": "Y-pakki: Otavankatu 5, 1979"
+"note": "Y-pakki: Otavankatu 5, 1979",
+"y": 1979
 },
 "1260": {
 "w": "#62616d",
@@ -3500,7 +3680,8 @@
 "k": "render",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Satakunnan Museo, Hallituskatu 11, 1973"
+"note": "Y-pakki: Satakunnan Museo, Hallituskatu 11, 1973",
+"y": 1973
 },
 "1281": {
 "w": "#9da1a1",
@@ -3520,14 +3701,16 @@
 "w": "#e9cf8c",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Porin raatihuone, 1839"
+"note": "Y-pakki: Porin raatihuone, 1839",
+"y": 1839
 },
 "1284": {
 "w": "#eeece6",
 "k": "render",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Heinen kaupunkitalo, Hallituskatu 9 - Teatterikatu 6, 1892"
+"note": "Y-pakki: Heinen kaupunkitalo, Hallituskatu 9 - Teatterikatu 6, 1892",
+"y": 1892
 },
 "1285": {
 "w": "#8791a1",
@@ -3568,7 +3751,8 @@
 "k": "brick",
 "f": 3,
 "st": "classic",
-"note": "Y-pakki: Kaupungintalo, Hallituskatu 12 (Junneliuksen palatsi), 1894"
+"note": "Y-pakki: Kaupungintalo, Hallituskatu 12 (Junneliuksen palatsi), 1894",
+"y": 1894
 },
 "1292": {
 "w": "#998e8d",
@@ -3636,7 +3820,9 @@
 "w": "#ecc3cb",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Työväen asunnot, 1800"
+"note": "Y-pakki: Työväen asunnot, 1800",
+"y": 1800,
+"u": 1
 },
 "1305": {
 "w": "#e2c26a",
@@ -3649,7 +3835,8 @@
 "k": "brick",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Isosannan sähköasema, 1939"
+"note": "Y-pakki: Isosannan sähköasema, 1939",
+"y": 1939
 },
 "1308": {
 "w": "#928a8f",
@@ -3966,14 +4153,16 @@
 "k": "render",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Länsipuisto 23, 1981"
+"note": "Y-pakki: Länsipuisto 23, 1981",
+"y": 1981
 },
 "1385": {
 "w": "#eeece6",
 "k": "render",
 "f": 5,
 "r": "#3f4246",
-"note": "Y-pakki: Gallen-Kallelankatu 24, 1968"
+"note": "Y-pakki: Gallen-Kallelankatu 24, 1968",
+"y": 1968
 },
 "1386": {
 "f": 4
@@ -4000,14 +4189,16 @@
 "k": "render",
 "f": 5,
 "r": "#3f4246",
-"note": "Y-pakki: Gallen-Kallelankatu 23, 1967"
+"note": "Y-pakki: Gallen-Kallelankatu 23, 1967",
+"y": 1967
 },
 "1400": {
 "w": "#e3d6b6",
 "k": "render",
 "f": 8,
 "r": "#3f4246",
-"note": "Y-pakki: Länsipuisto 25, 1987"
+"note": "Y-pakki: Länsipuisto 25, 1987",
+"y": 1987
 },
 "1401": {
 "w": "#c5b8b1",
@@ -4021,7 +4212,8 @@
 "k": "render",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Katariinankatu 9a, 1982"
+"note": "Y-pakki: Katariinankatu 9a, 1982",
+"y": 1982
 },
 "1404": {
 "w": "#d5d4d4",
@@ -4294,7 +4486,8 @@
 "k": "render",
 "f": 1,
 "st": "classic",
-"note": "Y-pakki: Gallen-Kallelankatu 20a, 1800"
+"note": "Y-pakki: Gallen-Kallelankatu 20a, 1800",
+"y": 1800
 },
 "1473": {
 "w": "#8c91a2",
@@ -4320,7 +4513,8 @@
 "w": "#e3d6b6",
 "k": "brick",
 "f": 3,
-"note": "Y-pakki: Annankatu 12a, 1961"
+"note": "Y-pakki: Annankatu 12a, 1961",
+"y": 1961
 },
 "1484": {
 "w": "#c7c0b7",
@@ -4336,7 +4530,8 @@
 "k": "render",
 "f": 8,
 "r": "#3f4246",
-"note": "Y-pakki: Länsipuisto 28, 1984"
+"note": "Y-pakki: Länsipuisto 28, 1984",
+"y": 1984
 },
 "1486": {
 "w": "#a48e8d",
@@ -4571,7 +4766,8 @@
 "w": "#e9cf8c",
 "f": 8,
 "r": "#3f4246",
-"note": "Y-pakki: Valtakatu 1, 1965"
+"note": "Y-pakki: Valtakatu 1, 1965",
+"y": 1965
 },
 "1551": {
 "w": "#868087",
@@ -4642,7 +4838,8 @@
 "k": "render",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Eteläranta 4 / Antinkatu 2, 1854"
+"note": "Y-pakki: Eteläranta 4 / Antinkatu 2, 1854",
+"y": 1854
 },
 "1567": {
 "w": "#b1aea7",
@@ -4705,7 +4902,8 @@
 "w": "#eeece6",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Hallituskatu 6, 1963"
+"note": "Y-pakki: Hallituskatu 6, 1963",
+"y": 1963
 },
 "1580": {
 "w": "#5a6275",
@@ -4878,12 +5076,17 @@
 "k": "brick",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Isolinnankatu 12, Nuorisotalo, 1984"
+"note": "Y-pakki: Isolinnankatu 12, Nuorisotalo, 1984",
+"y": 1984
 },
 "1618": {
-"k": "wood",
+"w": "#d8ccc2",
+"m": 1,
+"k": "render",
+"r": "#74787b",
 "f": 6,
-"note": "Y-pakki: Yrjönkatu 2 b, 1985"
+"note": "Y-pakki: Yrjönkatu 2 b, 1985",
+"y": 1985
 },
 "1619": {
 "f": 2
@@ -4904,14 +5107,16 @@
 "1623": {
 "w": "#c9c7c2",
 "f": 8,
-"note": "Y-pakki: Valtakatu 2, 1959"
+"note": "Y-pakki: Valtakatu 2, 1959",
+"y": 1959
 },
 "1628": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Siltapuistokatu 7 a, 1902"
+"note": "Y-pakki: Siltapuistokatu 7 a, 1902",
+"y": 1902
 },
 "1629": {
 "w": "#66718a",
@@ -4948,7 +5153,8 @@
 "w": "#e9cf8c",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Siltapuistokatu 1 / Pohjoisranta 3, 1900"
+"note": "Y-pakki: Siltapuistokatu 1 / Pohjoisranta 3, 1900",
+"y": 1900
 },
 "1641": {
 "w": "#747384",
@@ -5255,7 +5461,8 @@
 "k": "brick",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Componentan valimo, 1948"
+"note": "Y-pakki: Componentan valimo, 1948",
+"y": 1948
 },
 "1827": {
 "w": "#9e9aa0",
@@ -5266,20 +5473,24 @@
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Siltapuistokatu 19, 1901"
+"note": "Y-pakki: Siltapuistokatu 19, 1901",
+"y": 1901,
+"u": 1
 },
 "1833": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Siltapuistokatu 13 / Työmiehenkatu 3, 1800"
+"note": "Y-pakki: Siltapuistokatu 13 / Työmiehenkatu 3, 1800",
+"y": 1800
 },
 "1837": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Valajankatu 20, 1900"
+"note": "Y-pakki: Valajankatu 20, 1900",
+"y": 1900
 },
 "1838": {
 "w": "#9089a3",
@@ -5310,7 +5521,9 @@
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Siltapuistokatu 23 / Isosannanpuistokatu 4, 1915"
+"note": "Y-pakki: Siltapuistokatu 23 / Isosannanpuistokatu 4, 1915",
+"y": 1915,
+"c": "v"
 },
 "1863": {
 "w": "#988096",
@@ -5889,7 +6102,8 @@
 "w": "#a85a42",
 "k": "brick",
 "f": 3,
-"note": "Y-pakki: Tuomarinkatu 11 (tontti 275), 1950"
+"note": "Y-pakki: Tuomarinkatu 11 (tontti 275), 1950",
+"y": 1950
 },
 "4700": {
 "w": "#3e404e",
@@ -5975,7 +6189,8 @@
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 14 (tontti 198), 1900"
+"note": "Y-pakki: Laamanninkatu 14 (tontti 198), 1900",
+"y": 1900
 },
 "4933": {
 "w": "#66564b",
@@ -6005,7 +6220,9 @@
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 14 (tontti 172), 1900"
+"note": "Y-pakki: Raatimiehenkatu 14 (tontti 172), 1900",
+"y": 1900,
+"u": 1
 },
 "4969": {
 "f": 2
@@ -6037,7 +6254,8 @@
 "k": "brick",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Laamanninkatu 17 / Päärnäistenkatu 15 (tontti 207), 1960"
+"note": "Y-pakki: Laamanninkatu 17 / Päärnäistenkatu 15 (tontti 207), 1960",
+"y": 1960
 },
 "5050": {
 "w": "#715e70",
@@ -6049,14 +6267,17 @@
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 15 (tontti 239), 1900"
+"note": "Y-pakki: Esivallankatu 15 (tontti 239), 1900",
+"y": 1900
 },
 "5055": {
 "w": "#ecc3cb",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Kalevanpuisto 11 (tontti 173), 1904"
+"note": "Y-pakki: Kalevanpuisto 11 (tontti 173), 1904",
+"y": 1904,
+"u": 1
 },
 "5105": {
 "w": "#99685b",
@@ -6075,13 +6296,16 @@
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Päärnäistenkatu 3 (tontti 277), 1920"
+"note": "Y-pakki: Päärnäistenkatu 3 (tontti 277), 1920",
+"y": 1920
 },
 "5109": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 14 (tontti 252), 1920"
+"note": "Y-pakki: Tuomarinkatu 14 (tontti 252), 1920",
+"y": 1920,
+"u": 1
 },
 "5110": {
 "w": "#7c6e68",
@@ -6109,13 +6333,17 @@
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Esivallankatu 13 (tontti 237), 1900"
+"note": "Y-pakki: Esivallankatu 13 (tontti 237), 1900",
+"y": 1900,
+"u": 1
 },
 "5116": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 12 (tontti 196), 1921"
+"note": "Y-pakki: Laamanninkatu 12 (tontti 196), 1921",
+"y": 1921,
+"u": 1
 },
 "5117": {
 "w": "#d5d2bf",
@@ -6133,7 +6361,9 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Laamanninkatu 13 (tontti 211), 1900"
+"note": "Y-pakki: Laamanninkatu 13 (tontti 211), 1900",
+"y": 1900,
+"u": 1
 },
 "5121": {
 "w": "#bbc8d3",
@@ -6145,7 +6375,9 @@
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 14 (tontti 238), 1906"
+"note": "Y-pakki: Neuvosmiehenkatu 14 (tontti 238), 1906",
+"y": 1906,
+"u": 1
 },
 "5123": {
 "w": "#b09288",
@@ -6161,28 +6393,33 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Raatimiehenkatu 13 (tontti 197), 1900"
+"note": "Y-pakki: Raatimiehenkatu 13 (tontti 197), 1900",
+"y": 1900
 },
 "5126": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Raatimiehenkatu 11 (tontti 195), 2002"
+"note": "Y-pakki: Raatimiehenkatu 11 (tontti 195), 2002",
+"y": 2002
 },
 "5128": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Raatimiehenkatu 12 (tontti 174), 1936"
+"note": "Y-pakki: Raatimiehenkatu 12 (tontti 174), 1936",
+"y": 1936,
+"u": 1
 },
 "5133": {
 "w": "#7a4535",
 "k": "brick",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Neuvosmiehenkatu 20 (tontti 244), 1890"
+"note": "Y-pakki: Neuvosmiehenkatu 20 (tontti 244), 1890",
+"y": 1890
 },
 "5136": {
 "w": "#9c8884",
@@ -6198,13 +6435,16 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Esivallankatu 19 (tontti 243), 1890"
+"note": "Y-pakki: Esivallankatu 19 (tontti 243), 1890",
+"y": 1890,
+"u": 1
 },
 "5152": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 20 (tontti 206), 1890"
+"note": "Y-pakki: Esivallankatu 20 (tontti 206), 1890",
+"y": 1890
 },
 "5153": {
 "w": "#6d7789",
@@ -6221,14 +6461,18 @@
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 19 (tontti 205), 1900"
+"note": "Y-pakki: Laamanninkatu 19 (tontti 205), 1900",
+"y": 1900,
+"u": 1
 },
 "5156": {
 "w": "#ecc3cb",
 "k": "render",
 "f": 1,
 "st": "classic",
-"note": "Y-pakki: Esivallankatu 22 (tontti 81), 1881"
+"note": "Y-pakki: Esivallankatu 22 (tontti 81), 1881",
+"y": 1881,
+"u": 1
 },
 "5161": {
 "w": "#2d2e3b",
@@ -6247,13 +6491,17 @@
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Päärnäistenkatu 17 (tontti 202), 1901"
+"note": "Y-pakki: Päärnäistenkatu 17 (tontti 202), 1901",
+"y": 1901,
+"u": 1
 },
 "5218": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Päärnäistenkatu 1 (tontti 278), 1890"
+"note": "Y-pakki: Päärnäistenkatu 1 (tontti 278), 1890",
+"y": 1890,
+"u": 1
 },
 "5260": {
 "w": "#2c262d",
@@ -6284,7 +6532,8 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Raatimiehenkatu 16 (tontti 170), 1902"
+"note": "Y-pakki: Raatimiehenkatu 16 (tontti 170), 1902",
+"y": 1902
 },
 "5271": {
 "r": "#74787b"
@@ -6305,7 +6554,8 @@
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 18 (tontti 208), 1900"
+"note": "Y-pakki: Esivallankatu 18 (tontti 208), 1900",
+"y": 1900
 },
 "5341": {
 "w": "#868580",
@@ -6317,7 +6567,9 @@
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Esivallankatu 16 (tontti 210), 1920"
+"note": "Y-pakki: Esivallankatu 16 (tontti 210), 1920",
+"y": 1920,
+"u": 1
 },
 "5344": {
 "w": "#f0f0db",
@@ -6328,13 +6580,17 @@
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 18 (tontti 242), 1890"
+"note": "Y-pakki: Neuvosmiehenkatu 18 (tontti 242), 1890",
+"y": 1890,
+"u": 1
 },
 "5347": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 15 (tontti 199), 1901"
+"note": "Y-pakki: Raatimiehenkatu 15 (tontti 199), 1901",
+"y": 1901,
+"u": 1
 },
 "5348": {
 "w": "#95504f",
@@ -6358,14 +6614,18 @@
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 16 (tontti 200), 1900"
+"note": "Y-pakki: Laamanninkatu 16 (tontti 200), 1900",
+"y": 1900,
+"u": 1
 },
 "5352": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Esivallankatu 17 (tontti 241), 1890"
+"note": "Y-pakki: Esivallankatu 17 (tontti 241), 1890",
+"y": 1890,
+"u": 1
 },
 "5353": {
 "w": "#855850",
@@ -6378,13 +6638,17 @@
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Laamanninkatu 15 (tontti 209), 1900"
+"note": "Y-pakki: Laamanninkatu 15 (tontti 209), 1900",
+"y": 1900,
+"u": 1
 },
 "5355": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 16 (tontti 240), 1901"
+"note": "Y-pakki: Neuvosmiehenkatu 16 (tontti 240), 1901",
+"y": 1901,
+"u": 1
 },
 "5356": {
 "r": "#3f4246"
@@ -7655,9 +7919,12 @@
 "f": 2
 },
 "8386": {
-"k": "wood",
+"w": "#6a7b9b",
+"m": 1,
+"k": "render",
 "f": 1,
-"note": "Y-pakki: Rantamakasiini (Cafe Jazz), Eteläranta 5, 1896"
+"note": "Y-pakki: Rantamakasiini (Cafe Jazz), Eteläranta 5, 1896",
+"y": 1896
 },
 "8387": {
 "w": "#7f7b81",
@@ -7708,417 +7975,500 @@
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Siltapuistokatu 29, 1935"
+"note": "Y-pakki: Siltapuistokatu 29, 1935",
+"y": 1935
 },
 "1848": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Siltapuistokatu 31, 1900"
+"note": "Y-pakki: Siltapuistokatu 31, 1900",
+"y": 1900
 },
 "1630": {
 "w": "#eeece6",
 "k": "brick",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Siltapuistokatu 5, 1900"
+"note": "Y-pakki: Siltapuistokatu 5, 1900",
+"y": 1900
 },
 "1698": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 2,
 "r": "#b8302a",
-"note": "Y-pakki: Siltapuistokatu 7 b, 1900"
+"note": "Y-pakki: Siltapuistokatu 7 b, 1900",
+"y": 1900
 },
 "1842": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Valajankatu 26 / Isosannanpuistokatu 1, 1901"
+"note": "Y-pakki: Valajankatu 26 / Isosannanpuistokatu 1, 1901",
+"y": 1901,
+"u": 1
 },
 "1627": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Valajankatu 6, 1900"
-},
-"1047": {
-"k": "render",
-"f": 1,
-"note": "Y-pakki: Herralahdenk.10 (rakennus 5), Tontti 288, 1962"
+"note": "Y-pakki: Valajankatu 6, 1900",
+"y": 1900,
+"c": "v"
 },
 "1035": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Herralahdenk.11 (rakennus 1), Tontti 3, 1920"
+"note": "Y-pakki: Herralahdenk.11 (rakennus 1), Tontti 3, 1920",
+"y": 1920
 },
 "1025": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Herralahdenk.11 / Maaherrank.16a (rakennus 2), Tontti 3, 1899"
+"note": "Y-pakki: Herralahdenk.11 / Maaherrank.16a (rakennus 2), Tontti 3, 1899",
+"y": 1899,
+"u": 1
 },
 "1033": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Herralahdenk.13 / Itätullink.11a (rakennus 1), Tontti 4, 1894"
+"note": "Y-pakki: Herralahdenk.13 / Itätullink.11a (rakennus 1), Tontti 4, 1894",
+"y": 1894,
+"u": 1
 },
 "884": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Herralahdenk.12 (rakennus 2),Tontti 309, 1890"
+"note": "Y-pakki: Herralahdenk.12 (rakennus 2),Tontti 309, 1890",
+"y": 1890,
+"c": "v"
 },
 "939": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Herralahdenk.2 (rakennus 1), Tontti 237, 1939"
+"note": "Y-pakki: Herralahdenk.2 (rakennus 1), Tontti 237, 1939",
+"y": 1939
 },
 "1247": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Herralahdenk.2 / Säveltäjänk. 2 (rakennus 2), Tontti 237, 1920"
+"note": "Y-pakki: Herralahdenk.2 / Säveltäjänk. 2 (rakennus 2), Tontti 237, 1920",
+"y": 1920,
+"u": 1
 },
 "1085": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Herralahdenk.4 (rakennus 3),Tontti 254, 1950"
+"note": "Y-pakki: Herralahdenk.4 (rakennus 3),Tontti 254, 1950",
+"y": 1950,
+"u": 1
 },
 "1064": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Herralahdenk.6 (rakennus 2), Tontti 260, 1888"
+"note": "Y-pakki: Herralahdenk.6 (rakennus 2), Tontti 260, 1888",
+"y": 1888
 },
 "1006": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Herralahdenk.7 (rakennus 2), Tontti 261, 1928"
+"note": "Y-pakki: Herralahdenk.7 (rakennus 2), Tontti 261, 1928",
+"y": 1928
 },
 "912": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Herralahdenk.8a (rakennus 4), Tontti 281, 1939"
+"note": "Y-pakki: Herralahdenk.8a (rakennus 4), Tontti 281, 1939",
+"y": 1939
 },
 "1060": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Herralahdenk.8b (rakennus 2), Tontti 281, 1930"
+"note": "Y-pakki: Herralahdenk.8b (rakennus 2), Tontti 281, 1930",
+"y": 1930,
+"u": 1
 },
 "1012": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
 "r": "#74787b",
-"note": "Y-pakki: Herralahdenk.9a, tontti 1,  (rakennus 1), 1902"
+"note": "Y-pakki: Herralahdenk.9a, tontti 1,  (rakennus 1), 1902",
+"y": 1902
 },
 "1015": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Herralahdenk.9b / Maaherrank.9 (rakennus 1), Tontti 280, 1921"
+"note": "Y-pakki: Herralahdenk.9b / Maaherrank.9 (rakennus 1), Tontti 280, 1921",
+"y": 1921,
+"u": 1,
+"c": "v"
 },
 "804": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itsenäisyydenk.11 (rakennus 2), Tontti 2, 1930"
+"note": "Y-pakki: Itsenäisyydenk.11 (rakennus 2), Tontti 2, 1930",
+"y": 1930
 },
 "791": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Itsenäisyydenk.13 (rakennus 1),Tontti 316, 1937"
+"note": "Y-pakki: Itsenäisyydenk.13 (rakennus 1),Tontti 316, 1937",
+"y": 1937,
+"u": 1
 },
 "806": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Itsenäisyydenk.13 / Herralahdenk.14 (rakennus 4), Tontti 316, 1850"
+"note": "Y-pakki: Itsenäisyydenk.13 / Herralahdenk.14 (rakennus 4), Tontti 316, 1850",
+"y": 1850,
+"u": 1
 },
 "801": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#74787b",
-"note": "Y-pakki: Itsenäisyydenk.19 (rakennus 3),Tontti 319, 1856"
+"note": "Y-pakki: Itsenäisyydenk.19 (rakennus 3),Tontti 319, 1856",
+"y": 1856
 },
 "858": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Itsenäisyydenk.15 (rakennukset 1 ja 2), Tontti 9, 1850"
+"note": "Y-pakki: Itsenäisyydenk.15 (rakennukset 1 ja 2), Tontti 9, 1850",
+"y": 1850
 },
 "797": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#74787b",
-"note": "Y-pakki: Itsenäisyydenk.21b / Tähtik.22 (rakennus 1), Tontti 2320, 1865"
+"note": "Y-pakki: Itsenäisyydenk.21b / Tähtik.22 (rakennus 1), Tontti 2320, 1865",
+"y": 1865
 },
 "788": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itsenäisyydenk.7b, tontti 1  (rakennukset 1 ja 4), 1901"
+"note": "Y-pakki: Itsenäisyydenk.7b, tontti 1  (rakennukset 1 ja 4), 1901",
+"y": 1901
 },
 "734": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Itälinjak.1 / Paanakedonk.23 (rakennukset 1 ja 3), Tontti 257, 1950"
+"note": "Y-pakki: Itälinjak.1 / Paanakedonk.23 (rakennukset 1 ja 3), Tontti 257, 1950",
+"y": 1950,
+"c": "v"
 },
 "741": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Itälinjak.1 / Paanakedonk.23 (rakennus 2), Tontti 257, 1957"
+"note": "Y-pakki: Itälinjak.1 / Paanakedonk.23 (rakennus 2), Tontti 257, 1957",
+"y": 1957,
+"c": "v"
 },
 "746": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Itälinjak.5a / Maaherrank.8 (rakennus 1), Tontti 2285, 1862"
+"note": "Y-pakki: Itälinjak.5a / Maaherrank.8 (rakennus 1), Tontti 2285, 1862",
+"y": 1862,
+"u": 1
 },
 "772": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Itälinjak.7 (rakennukset 4 ja 5),Tontti 312, 1902"
+"note": "Y-pakki: Itälinjak.7 (rakennukset 4 ja 5),Tontti 312, 1902",
+"y": 1902,
+"u": 1
 },
 "904": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Itätullink.11b (rakennus 1), Tontti 308, 1950"
+"note": "Y-pakki: Itätullink.11b (rakennus 1), Tontti 308, 1950",
+"y": 1950
 },
 "899": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#74787b",
-"note": "Y-pakki: Itätullink.11b (rakennus 2),Tontti 308, 1939"
+"note": "Y-pakki: Itätullink.11b (rakennus 2),Tontti 308, 1939",
+"y": 1939
 },
 "842": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Itätullink.12 / Poikkik.11, tontti 1,  (rakennus 1), 1957"
+"note": "Y-pakki: Itätullink.12 / Poikkik.11, tontti 1,  (rakennus 1), 1957",
+"y": 1957,
+"u": 1
 },
 "888": {
 "w": "#ecc3cb",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itätullink.13b / Maanmittarink.16 (rakennus 2), Tontti 7, 1920"
+"note": "Y-pakki: Itätullink.13b / Maanmittarink.16 (rakennus 2), Tontti 7, 1920",
+"y": 1920,
+"u": 1
 },
 "844": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itätullink.14 (rakennus 2), Tontti 316, 1885"
+"note": "Y-pakki: Itätullink.14 (rakennus 2), Tontti 316, 1885",
+"y": 1885
 },
 "833": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Itätullink.14 / Herralahdenk.14 (rakennukset 5 ja 6), Tontti 316, 1850"
+"note": "Y-pakki: Itätullink.14 / Herralahdenk.14 (rakennukset 5 ja 6), Tontti 316, 1850",
+"y": 1850
 },
 "851": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itätullink.16b (rakennus 1), Tontti 8, 1850"
+"note": "Y-pakki: Itätullink.16b (rakennus 1), Tontti 8, 1850",
+"y": 1850,
+"u": 1,
+"c": "v"
 },
 "860": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Itätullink.16 / Herralahdenk.15 (rakennus 1), Tontti 7, 1910"
+"note": "Y-pakki: Itätullink.16 / Herralahdenk.15 (rakennus 1), Tontti 7, 1910",
+"y": 1910,
+"u": 1
 },
 "849": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Itätullink.18a (rakennus 1), Tontti 5, 1827"
+"note": "Y-pakki: Itätullink.18a (rakennus 1), Tontti 5, 1827",
+"y": 1827
 },
 "852": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itätullink.20 (rakennus 5), Tontti 319, 1865"
+"note": "Y-pakki: Itätullink.20 (rakennus 5), Tontti 319, 1865",
+"y": 1865
 },
 "867": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itätullink.22b / Tähtik.22 (rakennukset 2 ja 3), Tontti 2320, 1887"
+"note": "Y-pakki: Itätullink.22b / Tähtik.22 (rakennukset 2 ja 3), Tontti 2320, 1887",
+"y": 1887,
+"u": 1
 },
 "882": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itätullink.24a / Tähtik.19 (rakennus 1), Tontti 1321, 1880"
+"note": "Y-pakki: Itätullink.24a / Tähtik.19 (rakennus 1), Tontti 1321, 1880",
+"y": 1880
 },
 "870": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Itätullink.26 (rakennus 2), Tontti 322, 1899"
+"note": "Y-pakki: Itätullink.26 (rakennus 2), Tontti 322, 1899",
+"y": 1899
 },
 "773": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itätullink.3 (rakennus 2), Tontti 312, 1925"
+"note": "Y-pakki: Itätullink.3 (rakennus 2), Tontti 312, 1925",
+"y": 1925,
+"u": 1,
+"c": "v"
 },
 "779": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Itätullink.3 / Itälinjak.7 (rakennus 1), Tontti 312, 1928"
+"note": "Y-pakki: Itätullink.3 / Itälinjak.7 (rakennus 1), Tontti 312, 1928",
+"y": 1928,
+"u": 1
 },
 "1050": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Itätullink.7a / Poikkik.9b (rakennus 1), Tontti 2, 1908"
+"note": "Y-pakki: Itätullink.7a / Poikkik.9b (rakennus 1), Tontti 2, 1908",
+"y": 1908,
+"u": 1
 },
 "781": {
 "w": "#c9c7c2",
 "k": "render",
 "f": 2,
-"note": "Y-pakki: Itätullink.8a / Itälinjak.9 (rakennus 2), Tontti 2, 1951"
+"note": "Y-pakki: Itätullink.8a / Itälinjak.9 (rakennus 2), Tontti 2, 1951",
+"y": 1951
 },
 "787": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Itätullink.8b, tontti 1  (rakennus 3), 1848"
+"note": "Y-pakki: Itätullink.8b, tontti 1  (rakennus 3), 1848",
+"y": 1848
 },
 "906": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Itätullink.9 / Herralahdenk.12 (rakennus 3), Tontti 309, 1953"
-},
-"886": {
-"k": "wood",
-"f": 1,
-"note": "Y-pakki: Itätullink.9 (rakennus 4),Tontti 309, 1902"
+"note": "Y-pakki: Itätullink.9 / Herralahdenk.12 (rakennus 3), Tontti 309, 1953",
+"y": 1953,
+"u": 1
 },
 "989": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Itätullinkatu 15 A (rakennus 2), Tontti 306, 1936"
+"note": "Y-pakki: Itätullinkatu 15 A (rakennus 2), Tontti 306, 1936",
+"y": 1936
 },
 "1000": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itätullinkatu 15 B  (rakennus 1),Tontti 306, 1908"
+"note": "Y-pakki: Itätullinkatu 15 B  (rakennus 1),Tontti 306, 1908",
+"y": 1908
 },
 "1167": {
 "w": "#7a4535",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Itätullinkatu 21 (rakennus 1), Tontti 2303, 1850"
+"note": "Y-pakki: Itätullinkatu 21 (rakennus 1), Tontti 2303, 1850",
+"y": 1850
 },
 "1096": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Juhana Herttuank. 22 B (rakennus 3), Tontti 267, 1853"
+"note": "Y-pakki: Juhana Herttuank. 22 B (rakennus 3), Tontti 267, 1853",
+"y": 1853
 },
 "813": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Juhana Herttuank. 22 A (rakennukset 1 ja 2), Tontti 267, 1887"
+"note": "Y-pakki: Juhana Herttuank. 22 A (rakennukset 1 ja 2), Tontti 267, 1887",
+"y": 1887,
+"u": 1
 },
 "1017": {
 "w": "#e3d6b6",
 "k": "render",
 "f": 2,
-"note": "Y-pakki: Juhana Herttuank.10 (rakennus 3), Tontti 261, 1958"
+"note": "Y-pakki: Juhana Herttuank.10 (rakennus 3), Tontti 261, 1958",
+"y": 1958
 },
 "1024": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Juhana Herttuank.10 (rakennus 4), Tontti 261, 1855"
+"note": "Y-pakki: Juhana Herttuank.10 (rakennus 4), Tontti 261, 1855",
+"y": 1855
 },
 "1011": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Juhana Herttuank.10 / Herralahdenk.7 (rakennus 1), Tontti 261, 1855"
+"note": "Y-pakki: Juhana Herttuank.10 / Herralahdenk.7 (rakennus 1), Tontti 261, 1855",
+"y": 1855
 },
 "1010": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Juhana Herttuank.12 (rakennukset 3 ja 1), Tontti 262, 1936"
+"note": "Y-pakki: Juhana Herttuank.12 (rakennukset 3 ja 1), Tontti 262, 1936",
+"y": 1936
 },
 "928": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Juhana Herttuank.3 / Poikkikatu 1 (rakennus 3), Tontti 255, 1928"
+"note": "Y-pakki: Juhana Herttuank.3 / Poikkikatu 1 (rakennus 3), Tontti 255, 1928",
+"y": 1928,
+"u": 1
 },
 "1067": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Juhana Herttuank.6 / Poikkik.3a, Tontti 1 (259), (rakennus 1), 1955"
+"note": "Y-pakki: Juhana Herttuank.6 / Poikkik.3a, Tontti 1 (259), (rakennus 1), 1955",
+"y": 1955
 },
 "1065": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Juhana Herttuank.8 (rakennus 3), Tontti 260, 1926"
+"note": "Y-pakki: Juhana Herttuank.8 (rakennus 3), Tontti 260, 1926",
+"y": 1926,
+"u": 1
 },
 "1002": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Juhana Herttuank.9 (rakennus 3), Tontti 252, 1855"
+"note": "Y-pakki: Juhana Herttuank.9 (rakennus 3), Tontti 252, 1855",
+"y": 1855,
+"c": "v"
 },
 "1101": {
 "w": "#9c3d2e",
@@ -8126,252 +8476,309 @@
 "f": 1,
 "w2": "#e9cf8c",
 "s2": 0.5,
-"note": "Y-pakki: Juhana Herttuankatu 24 A (rakennus 1), Tontti 268, 1834"
+"note": "Y-pakki: Juhana Herttuankatu 24 A (rakennus 1), Tontti 268, 1834",
+"y": 1834
 },
 "992": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Juhana Herttuank.9 / Maanmittarink. 8 (rakennus 1), Tontti 252, 1930"
+"note": "Y-pakki: Juhana Herttuank.9 / Maanmittarink. 8 (rakennus 1), Tontti 252, 1930",
+"y": 1930,
+"u": 1
 },
 "941": {
 "w": "#7a4535",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Juhana Herttuankatu 5 (rakennus 5), Tontti 254, 1963"
+"note": "Y-pakki: Juhana Herttuankatu 5 (rakennus 5), Tontti 254, 1963",
+"y": 1963
 },
 "1056": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Maaherrank. 12 / Poikkik.7 (rakennus 4),Tontti 287, 1861"
+"note": "Y-pakki: Maaherrank. 12 / Poikkik.7 (rakennus 4),Tontti 287, 1861",
+"y": 1861
 },
 "826": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Maaherrank.11 / Maanmittarink.12 (rakennus 1), Tontti 279, 1936"
+"note": "Y-pakki: Maaherrank.11 / Maanmittarink.12 (rakennus 1), Tontti 279, 1936",
+"y": 1936
 },
 "1053": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maaherrank.12 (rakennus 2), Tontti 287, 1865"
+"note": "Y-pakki: Maaherrank.12 (rakennus 2), Tontti 287, 1865",
+"y": 1865
 },
 "1052": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Maaherrank.14 / Herralahdenk.10 (rakennus 3), Tontti 288, 1853"
+"note": "Y-pakki: Maaherrank.14 / Herralahdenk.10 (rakennus 3), Tontti 288, 1853",
+"y": 1853
 },
 "1031": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maaherrank.16b (rakennus 1), Tontti 2, 1889"
+"note": "Y-pakki: Maaherrank.16b (rakennus 1), Tontti 2, 1889",
+"y": 1889,
+"u": 1
 },
 "1034": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maaherrank.18a (rakennus 3), Tontti 290, 1889"
+"note": "Y-pakki: Maaherrank.18a (rakennus 3), Tontti 290, 1889",
+"y": 1889
 },
 "1038": {
 "w": "#ecc3cb",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maaherrank.18b / Maanmittarink.14, tontti 1 (rakennus 1), 1855"
+"note": "Y-pakki: Maaherrank.18b / Maanmittarink.14, tontti 1 (rakennus 1), 1855",
+"y": 1855
 },
 "748": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 2,
 "r": "#3f9a5a",
-"note": "Y-pakki: Maaherrank.3 / Poikkik.6, tontti 1  (rakennus 1), 1920"
+"note": "Y-pakki: Maaherrank.3 / Poikkik.6, tontti 1  (rakennus 1), 1920",
+"y": 1920
 },
 "1062": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Maaherrank.5b (rakennus 1),Tontti 6, 1930"
+"note": "Y-pakki: Maaherrank.5b (rakennus 1),Tontti 6, 1930",
+"y": 1930
 },
 "1070": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Maaherrank.7a (rakennus 1), Tontti 281, 1920"
+"note": "Y-pakki: Maaherrank.7a (rakennus 1), Tontti 281, 1920",
+"y": 1920,
+"u": 1
 },
 "1021": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Maaherrank.9b (rakennus 4), Tontti 280, 1854"
+"note": "Y-pakki: Maaherrank.9b (rakennus 4), Tontti 280, 1854",
+"y": 1854
 },
 "831": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Maaherrank.9b (rakennus 3), Tontti 280, 1930"
+"note": "Y-pakki: Maaherrank.9b (rakennus 3), Tontti 280, 1930",
+"y": 1930,
+"c": "v"
 },
 "979": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maaherrankatu 15 (rakennus 1), Tontti 277, 1913"
+"note": "Y-pakki: Maaherrankatu 15 (rakennus 1), Tontti 277, 1913",
+"y": 1913,
+"u": 1
 },
 "1152": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Maaherrankatu 17 (rakennukset 2 ja 3), Tontti 276, 1852"
+"note": "Y-pakki: Maaherrankatu 17 (rakennukset 2 ja 3), Tontti 276, 1852",
+"y": 1852,
+"u": 1
 },
 "1150": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Maaherrankatu 19 (rakennus 1), Tontti 275, 1939"
+"note": "Y-pakki: Maaherrankatu 19 (rakennus 1), Tontti 275, 1939",
+"y": 1939,
+"u": 1
 },
 "730": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Maaherrankatu 20 a (rakennus 2), Tontti 291, 1949"
+"note": "Y-pakki: Maaherrankatu 20 a (rakennus 2), Tontti 291, 1949",
+"y": 1949,
+"u": 1
 },
 "732": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 2,
 "r": "#b8302a",
-"note": "Y-pakki: Maaherrankatu 20 b (rakennus 1), Tontti 291, 1956"
+"note": "Y-pakki: Maaherrankatu 20 b (rakennus 1), Tontti 291, 1956",
+"y": 1956
 },
 "1122": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maaherrankatu 28 as 2 (rakennus 4),Tontti 295, 1860"
+"note": "Y-pakki: Maaherrankatu 28 as 2 (rakennus 4),Tontti 295, 1860",
+"y": 1860,
+"u": 1
 },
 "707": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maaherrankatu 30 (rakennukset 3 ja 4),Tontti 296, 1810"
+"note": "Y-pakki: Maaherrankatu 30 (rakennukset 3 ja 4),Tontti 296, 1810",
+"y": 1810
 },
 "1022": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maanmittarink.10 / Juhana herttuank.12 (rakennus 5), Tontti 262, 1956"
+"note": "Y-pakki: Maanmittarink.10 / Juhana herttuank.12 (rakennus 5), Tontti 262, 1956",
+"y": 1956,
+"u": 1
 },
 "1036": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Maanmittarink.16a (rakennukset 1 ja 4), Tontti 7, 1909"
+"note": "Y-pakki: Maanmittarink.16a (rakennukset 1 ja 4), Tontti 7, 1909",
+"y": 1909
 },
 "865": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maanmittarink.19 / Itsenäisyydenk.19 (rakennukset 1 ja 6), Tontti 319, 1857"
+"note": "Y-pakki: Maanmittarink.19 / Itsenäisyydenk.19 (rakennukset 1 ja 6), Tontti 319, 1857",
+"y": 1857
 },
 "994": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maanmittarink.8 (rakennus 4), Tontti 252, 1920"
+"note": "Y-pakki: Maanmittarink.8 (rakennus 4), Tontti 252, 1920",
+"y": 1920,
+"u": 1
 },
 "997": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Maanmittarinkatu 17 (rakennus 3), Tontti 306, 1938"
+"note": "Y-pakki: Maanmittarinkatu 17 (rakennus 3), Tontti 306, 1938",
+"y": 1938
 },
 "927": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Paanakedonk. 17 (rakennus 3), Tontti 237, 1920"
+"note": "Y-pakki: Paanakedonk. 17 (rakennus 3), Tontti 237, 1920",
+"y": 1920,
+"u": 1
 },
 "731": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Paanakedonk. 17 (rakennus 4), Tontti 237, 1893"
+"note": "Y-pakki: Paanakedonk. 17 (rakennus 4), Tontti 237, 1893",
+"y": 1893
 },
 "944": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Paanakedonk.19 / Poikkik. 1 (rakennus 1), Tontti 255, 1920"
+"note": "Y-pakki: Paanakedonk.19 / Poikkik. 1 (rakennus 1), Tontti 255, 1920",
+"y": 1920
 },
 "837": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Poikkik.11b (rakennus 1), Tontti 2, 1930"
+"note": "Y-pakki: Poikkik.11b (rakennus 1), Tontti 2, 1930",
+"y": 1930,
+"u": 1
 },
 "827": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 2,
 "r": "#b8302a",
-"note": "Y-pakki: Poikkik.3b (rakennus 3), Tontti 259, 1947"
+"note": "Y-pakki: Poikkik.3b (rakennus 3), Tontti 259, 1947",
+"y": 1947,
+"c": "v"
 },
 "829": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Poikkik.5a (rakennus 1),Tontti 4, 1920"
+"note": "Y-pakki: Poikkik.5a (rakennus 1),Tontti 4, 1920",
+"y": 1920
 },
 "1044": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Poikkik.7 (rakennus 5),Tontti 287, 1910"
+"note": "Y-pakki: Poikkik.7 (rakennus 5),Tontti 287, 1910",
+"y": 1910,
+"u": 1,
+"c": "v"
 },
 "1049": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Poikkik.9a, Tontti 1 (301), (rakennus 1), 1855"
+"note": "Y-pakki: Poikkik.9a, Tontti 1 (301), (rakennus 1), 1855",
+"y": 1855
 },
 "1748": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Saukkosen talo, Isolinnankatu 6, 1890"
+"note": "Y-pakki: Saukkosen talo, Isolinnankatu 6, 1890",
+"y": 1890
 },
 "947": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 2,
 "r": "#b8302a",
-"note": "Y-pakki: Säveltäjänk. 1 / Herralahdenk. 1 (rakennus 2), Tontti 236, 1920"
+"note": "Y-pakki: Säveltäjänk. 1 / Herralahdenk. 1 (rakennus 2), Tontti 236, 1920",
+"y": 1920
 },
 "936": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Säveltäjänk.1 (rakennus 1), Tontti 236, 1920"
+"note": "Y-pakki: Säveltäjänk.1 (rakennus 1), Tontti 236, 1920",
+"y": 1920,
+"u": 1
 },
 "942": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Säveltäjänk.3a (rakennus 1), Tontti 235, 1940"
+"note": "Y-pakki: Säveltäjänk.3a (rakennus 1), Tontti 235, 1940",
+"y": 1940,
+"u": 1
 },
 "817": {
 "w": "#9c3d2e",
@@ -8380,160 +8787,184 @@
 "r": "#b5553a",
 "w2": "#e9cf8c",
 "s2": 0.5,
-"note": "Y-pakki: Säveltäjänk.9 / Tähtikatu 9. (rakennus 3), Tontti 232, 1930"
+"note": "Y-pakki: Säveltäjänk.9 / Tähtikatu 9. (rakennus 3), Tontti 232, 1930",
+"y": 1930
 },
 "822": {
 "w": "#eeece6",
 "k": "render",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Säveltäjänkatu 9, Tontti 232, 1953"
+"note": "Y-pakki: Säveltäjänkatu 9, Tontti 232, 1953",
+"y": 1953
 },
 "818": {
 "w": "#7a4535",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Tähtik. 8 / Vähäuusik. 8 / Säveltäjänk. 7 (rakennus 1), Tontti 233, 1902"
+"note": "Y-pakki: Tähtik. 8 / Vähäuusik. 8 / Säveltäjänk. 7 (rakennus 1), Tontti 233, 1902",
+"y": 1902
 },
 "807": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tähtik.19 / Itsenäisyydenk.23 a (rakennus 2), Tontti 1321, 1888"
+"note": "Y-pakki: Tähtik.19 / Itsenäisyydenk.23 a (rakennus 2), Tontti 1321, 1888",
+"y": 1888
 },
 "981": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tähtikatu 14 (rakennukset 1 ja 2), Tontti 2264, 1887"
+"note": "Y-pakki: Tähtikatu 14 (rakennukset 1 ja 2), Tontti 2264, 1887",
+"y": 1887
 },
 "1148": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tähtikatu 15 (Lindqvist)/Maaherrankatu 24A (Salonen) (rakennukset 1 ja 2), Tontti 1293, 1928"
+"note": "Y-pakki: Tähtikatu 15 (Lindqvist)/Maaherrankatu 24A (Salonen) (rakennukset 1 ja 2), Tontti 1293, 1928",
+"y": 1928,
+"u": 1
 },
 "978": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Tähtikatu 16 (rakennus 6), Tontti 277, 1852"
+"note": "Y-pakki: Tähtikatu 16 (rakennus 6), Tontti 277, 1852",
+"y": 1852,
+"u": 1
 },
 "1166": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tähtikatu 17 (rakennukset 1 ja 2),Tontti 3, 1875"
+"note": "Y-pakki: Tähtikatu 17 (rakennukset 1 ja 2),Tontti 3, 1875",
+"y": 1875
 },
 "908": {
 "w": "#e9cf8c",
 "k": "render",
 "f": 3,
-"note": "Y-pakki: Tähtikatu 17 (rakennukset 1 ja 2), Tontti 5, 1952"
+"note": "Y-pakki: Tähtikatu 17 (rakennukset 1 ja 2), Tontti 5, 1952",
+"y": 1952
 },
 "1145": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Varvinkatu 18 a ja b (rakennukset 2,3,4 ja 5), Tontti 275, 1852"
+"note": "Y-pakki: Varvinkatu 18 a ja b (rakennukset 2,3,4 ja 5), Tontti 275, 1852",
+"y": 1852,
+"c": "v"
 },
 "901": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Varvinkatu 20, tontti 1 (rakennus 1), 1897"
+"note": "Y-pakki: Varvinkatu 20, tontti 1 (rakennus 1), 1897",
+"y": 1897
 },
 "1098": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Varvinkatu 21 (rakennukset 4 ja 5), Tontti 267, 1898"
+"note": "Y-pakki: Varvinkatu 21 (rakennukset 4 ja 5), Tontti 267, 1898",
+"y": 1898
 },
 "1170": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Varvinkatu 22b  (rakennus 2), Tontti 2303, 1863"
+"note": "Y-pakki: Varvinkatu 22b  (rakennus 2), Tontti 2303, 1863",
+"y": 1863
 },
 "810": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Varvinkatu 23 A (rakennukset 3 ja 4), Tontti 274, 1855"
+"note": "Y-pakki: Varvinkatu 23 A (rakennukset 3 ja 4), Tontti 274, 1855",
+"y": 1855
 },
 "1116": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Varvinkatu 25 / Maaherrank. 28 (rakennus 1), Tontti 295, 1942"
+"note": "Y-pakki: Varvinkatu 25 / Maaherrank. 28 (rakennus 1), Tontti 295, 1942",
+"y": 1942
 },
 "704": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Vähälinnankatu 24, tontti 1268 (rakennukset 1 ja 2), 1880"
+"note": "Y-pakki: Vähälinnankatu 24, tontti 1268 (rakennukset 1 ja 2), 1880",
+"y": 1880
 },
 "963": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vähäuusikatu 10 (rakennus 2), Tontti 232, 1894"
+"note": "Y-pakki: Vähäuusikatu 10 (rakennus 2), Tontti 232, 1894",
+"y": 1894
 },
 "726": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vähäuusikatu 8 (rakennus 3),Tontti 233, 1880"
+"note": "Y-pakki: Vähäuusikatu 8 (rakennus 3),Tontti 233, 1880",
+"y": 1880,
+"u": 1
 },
 "961": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vähäuusikatu 10 (rakennus 4), Tontti 232, 1938"
+"note": "Y-pakki: Vähäuusikatu 10 (rakennus 4), Tontti 232, 1938",
+"y": 1938,
+"u": 1
 },
 "133": {
 "w": "#eeece6",
 "k": "render",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Mikonkatu 7, Hacklinin kulma, 1920"
+"note": "Y-pakki: Mikonkatu 7, Hacklinin kulma, 1920",
+"y": 1920
 },
 "422": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Pohjoispuisto 10, Nurmen kukkakioski, 1954"
-},
-"6168": {
-"k": "render",
-"f": 2,
-"note": "Y-pakki: Lestikatu 1 (Karjarannantie 15), 1952"
+"note": "Y-pakki: Pohjoispuisto 10, Nurmen kukkakioski, 1954",
+"y": 1954
 },
 "6173": {
 "w": "#7a4535",
 "k": "brick",
 "f": 2,
-"note": "Y-pakki: Lestikatu 10, 1940"
+"note": "Y-pakki: Lestikatu 10, 1940",
+"y": 1940
 },
 "6179": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Lestikatu 3, 1945"
+"note": "Y-pakki: Lestikatu 3, 1945",
+"y": 1945
 },
 "6176": {
 "w": "#b7c6d6",
 "k": "render",
 "f": 1,
-"note": "Y-pakki: Lestikatu 8, 2005"
+"note": "Y-pakki: Lestikatu 8, 2005",
+"y": 2005
 },
 "6287": {
 "w": "#eeece6",
@@ -8547,94 +8978,115 @@
 "k": "render",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Puunaulakatu 4, 1964"
+"note": "Y-pakki: Puunaulakatu 4, 1964",
+"y": 1964
 },
 "5951": {
 "w": "#eeece6",
 "k": "render",
 "f": 3,
 "r": "#b8302a",
-"note": "Y-pakki: Vanhat Porin kaupungin kiinteistöt Karjarannassa, 1940"
+"note": "Y-pakki: Vanhat Porin kaupungin kiinteistöt Karjarannassa, 1940",
+"y": 1940
 },
 "6158": {
 "w": "#a85a42",
 "k": "brick",
 "f": 2,
-"note": "Y-pakki: Vanha levypaja, 1947"
+"note": "Y-pakki: Vanha levypaja, 1947",
+"y": 1947
 },
 "1743": {
 "w": "#eeece6",
 "k": "render",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 10c, Kauppatorin kioski- ja käymälärakennus, 1956"
+"note": "Y-pakki: Antinkatu 10c, Kauppatorin kioski- ja käymälärakennus, 1956",
+"y": 1956
 },
 "7995": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Mutkapub, 1927"
+"note": "Y-pakki: Mutkapub, 1927",
+"y": 1927
 },
 "7988": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Palokärjentie 5, 1920"
+"note": "Y-pakki: Palokärjentie 5, 1920",
+"y": 1920,
+"u": 1
 },
 "7811": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Ruosniementie 78, 1950"
+"note": "Y-pakki: Ruosniementie 78, 1950",
+"y": 1950,
+"u": 1
 },
 "8366": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Ruosniementie 88, 1900"
+"note": "Y-pakki: Ruosniementie 88, 1900",
+"y": 1900
 },
 "7816": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Ruosniementie 90, 1900"
+"note": "Y-pakki: Ruosniementie 90, 1900",
+"y": 1900,
+"u": 1
 },
 "7812": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Viiriäisentie 3, 1920"
+"note": "Y-pakki: Viiriäisentie 3, 1920",
+"y": 1920,
+"u": 1
 },
 "6541": {
 "w": "#7a4535",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodonkuja 1, 1961"
+"note": "Y-pakki: Hanhiluodonkuja 1, 1961",
+"y": 1961
 },
 "6544": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Hanhiluodonkuja 2, 1950"
+"note": "Y-pakki: Hanhiluodonkuja 2, 1950",
+"y": 1950,
+"c": "v"
 },
 "6550": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodonkuja 6, 1946"
+"note": "Y-pakki: Hanhiluodonkuja 6, 1946",
+"y": 1946
 },
 "6551": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodonkuja 7, 2008"
+"note": "Y-pakki: Hanhiluodonkuja 7, 2008",
+"y": 2008
 },
 "6540": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 1, 1940"
+"note": "Y-pakki: Hanhiluodontie 1, 1940",
+"y": 1940,
+"c": "v"
 },
 "6516": {
 "w": "#e9cf8c",
@@ -8647,25 +9099,29 @@
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Hanhiluodontie 14, 1950"
+"note": "Y-pakki: Hanhiluodontie 14, 1950",
+"y": 1950
 },
 "6509": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 15, Hanhisto, 1992"
+"note": "Y-pakki: Hanhiluodontie 15, Hanhisto, 1992",
+"y": 1992
 },
 "6560": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 23, 1940"
+"note": "Y-pakki: Hanhiluodontie 23, 1940",
+"y": 1940
 },
 "6496": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 24, 1940"
+"note": "Y-pakki: Hanhiluodontie 24, 1940",
+"y": 1940
 },
 "6492": {
 "w": "#e9cf8c",
@@ -8677,62 +9133,74 @@
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 26, 1949"
+"note": "Y-pakki: Hanhiluodontie 26, 1949",
+"y": 1949
 },
 "6487": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 27, 1950"
+"note": "Y-pakki: Hanhiluodontie 27, 1950",
+"y": 1950
 },
 "6558": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 28, 1951"
+"note": "Y-pakki: Hanhiluodontie 28, 1951",
+"y": 1951,
+"c": "v"
 },
 "6484": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 29, Hanhis, 1951"
+"note": "Y-pakki: Hanhiluodontie 29, Hanhis, 1951",
+"y": 1951
 },
 "6470": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 31, 1957"
+"note": "Y-pakki: Hanhiluodontie 31, 1957",
+"y": 1957
 },
 "6532": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Hanhiluodontie 5, Laitinen, 1950"
+"note": "Y-pakki: Hanhiluodontie 5, Laitinen, 1950",
+"y": 1950
 },
 "6529": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 7, 2000"
+"note": "Y-pakki: Hanhiluodontie 7, 2000",
+"y": 2000
 },
 "6523": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hanhiluodontie 9, 1965"
+"note": "Y-pakki: Hanhiluodontie 9, 1965",
+"y": 1965
 },
 "6576": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kvistiluodontie 1, 1900"
+"note": "Y-pakki: Kvistiluodontie 1, 1900",
+"y": 1900
 },
 "6562": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kvistiluodontie 11, 1933"
+"note": "Y-pakki: Kvistiluodontie 11, 1933",
+"y": 1933,
+"u": 1
 },
 "6561": {
 "w": "#b7c6d6",
@@ -8744,303 +9212,372 @@
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kvistiluodontie 13, Luoto, Häntälä, 1907"
+"note": "Y-pakki: Kvistiluodontie 13, Luoto, Häntälä, 1907",
+"y": 1907
 },
 "6472": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kvistiluodontie 17, 1940"
+"note": "Y-pakki: Kvistiluodontie 17, 1940",
+"y": 1940,
+"u": 1
 },
 "6471": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Kvistiluodontie 18, 1950"
+"note": "Y-pakki: Kvistiluodontie 18, 1950",
+"y": 1950
 },
 "6575": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kvistiluodontie 2, Tamminiemi, 1900"
+"note": "Y-pakki: Kvistiluodontie 2, Tamminiemi, 1900",
+"y": 1900
 },
 "6573": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Kvistiluodontie 3, 1930"
+"note": "Y-pakki: Kvistiluodontie 3, 1930",
+"y": 1930,
+"u": 1
 },
 "6572": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kvistiluodontie 4, Lampiaho, 1911"
+"note": "Y-pakki: Kvistiluodontie 4, Lampiaho, 1911",
+"y": 1911,
+"u": 1
 },
 "6570": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Kvistiluodontie 5, Concordia, 1910"
+"note": "Y-pakki: Kvistiluodontie 5, Concordia, 1910",
+"y": 1910
 },
 "6568": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kvistiluodontie 6, 1935"
+"note": "Y-pakki: Kvistiluodontie 6, 1935",
+"y": 1935
 },
 "6566": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kvistiluodontie 8, (ent.) Ahtola, 1910"
+"note": "Y-pakki: Kvistiluodontie 8, (ent.) Ahtola, 1910",
+"y": 1910,
+"u": 1
 },
 "6564": {
 "w": "#7a4535",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kvistiluodontie 9 a, 1977"
+"note": "Y-pakki: Kvistiluodontie 9 a, 1977",
+"y": 1977
 },
 "5494": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Esivallankatu 25 (tontti 78), 1871"
+"note": "Y-pakki: Esivallankatu 25 (tontti 78), 1871",
+"y": 1871,
+"u": 1
 },
 "5495": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 26 (tontti 83), 1886"
+"note": "Y-pakki: Esivallankatu 26 (tontti 83), 1886",
+"y": 1886,
+"u": 1
 },
 "5498": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 27 (tontti 77), 1890"
+"note": "Y-pakki: Esivallankatu 27 (tontti 77), 1890",
+"y": 1890
 },
 "4992": {
 "w": "#a85a42",
 "k": "brick",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Esivallankatu 28 (tontti 84), 1912"
+"note": "Y-pakki: Esivallankatu 28 (tontti 84), 1912",
+"y": 1912
 },
 "5515": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Esivallankatu 29 (tontti 76), 1870"
+"note": "Y-pakki: Esivallankatu 29 (tontti 76), 1870",
+"y": 1870
 },
 "5496": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Esivallankatu 30 (tontti 85), 1880"
+"note": "Y-pakki: Esivallankatu 30 (tontti 85), 1880",
+"y": 1880
 },
 "5529": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Esivallankatu 31 (tontti 75), 1920"
+"note": "Y-pakki: Esivallankatu 31 (tontti 75), 1920",
+"y": 1920
 },
 "5497": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 32 (tontti 86), 1880"
+"note": "Y-pakki: Esivallankatu 32 (tontti 86), 1880",
+"y": 1880,
+"u": 1
 },
 "5416": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Esivallankatu 33 (tontti 74), 1880"
+"note": "Y-pakki: Esivallankatu 33 (tontti 74), 1880",
+"y": 1880
 },
 "5084": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Esivallankatu 37 (tontti 72), 1871"
+"note": "Y-pakki: Esivallankatu 37 (tontti 72), 1871",
+"y": 1871,
+"u": 1
 },
 "5460": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 39 (tontti 71), 1870"
+"note": "Y-pakki: Esivallankatu 39 (tontti 71), 1870",
+"y": 1870
 },
 "5461": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Esivallankatu 40 (tontti 90), 1881"
+"note": "Y-pakki: Esivallankatu 40 (tontti 90), 1881",
+"y": 1881
 },
 "5443": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Esivallankatu 42 (tontti 91), 1890"
+"note": "Y-pakki: Esivallankatu 42 (tontti 91), 1890",
+"y": 1890
 },
 "5038": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 44 (tontti 92), 1890"
+"note": "Y-pakki: Esivallankatu 44 (tontti 92), 1890",
+"y": 1890
 },
 "4974": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 46 (tontti 93), 1890"
+"note": "Y-pakki: Esivallankatu 46 (tontti 93), 1890",
+"y": 1890,
+"u": 1
 },
 "4964": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Esivallankatu 48 (tontti 94), 1890"
+"note": "Y-pakki: Esivallankatu 48 (tontti 94), 1890",
+"y": 1890,
+"u": 1
 },
 "5235": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hakkisenkatu 1 (tontti 9), 1911"
+"note": "Y-pakki: Hakkisenkatu 1 (tontti 9), 1911",
+"y": 1911,
+"u": 1
 },
 "5425": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hakkisenkatu 11 (tontti 70), 1880"
+"note": "Y-pakki: Hakkisenkatu 11 (tontti 70), 1880",
+"y": 1880,
+"u": 1
 },
 "5469": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hakkisenkatu 17 (tontti 102), 1890"
+"note": "Y-pakki: Hakkisenkatu 17 (tontti 102), 1890",
+"y": 1890
 },
 "5041": {
 "w": "#7a4535",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Hakkisenkatu 3 (tontti 19), 1920"
+"note": "Y-pakki: Hakkisenkatu 3 (tontti 19), 1920",
+"y": 1920
 },
 "5440": {
 "w": "#ecc3cb",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Hakkisenkatu 5 (tontti 20), 1880"
+"note": "Y-pakki: Hakkisenkatu 5 (tontti 20), 1880",
+"y": 1880,
+"u": 1
 },
 "5052": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Ignatiuksenkatu 11 (tontti 109), 1955"
+"note": "Y-pakki: Ignatiuksenkatu 11 (tontti 109), 1955",
+"y": 1955,
+"u": 1
 },
 "4692": {
 "w": "#a85a42",
 "k": "brick",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Ignatiuksenkatu 3 (tontti 51), 1968"
+"note": "Y-pakki: Ignatiuksenkatu 3 (tontti 51), 1968",
+"y": 1968
 },
 "5418": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Ignatiuksenkatu 9 (tontti 87), 1890"
+"note": "Y-pakki: Ignatiuksenkatu 9 (tontti 87), 1890",
+"y": 1890
 },
 "4989": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Ilkankatu 1 (tontti 5), 1870"
+"note": "Y-pakki: Ilkankatu 1 (tontti 5), 1870",
+"y": 1870
 },
 "4995": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Ilkankatu 18 (tontti 116), 1887"
+"note": "Y-pakki: Ilkankatu 18 (tontti 116), 1887",
+"y": 1887,
+"u": 1
 },
 "5104": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Ilkankatu 2 (tontti 4), 1936"
+"note": "Y-pakki: Ilkankatu 2 (tontti 4), 1936",
+"y": 1936
 },
 "5246": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Ilkankatu 4 (tontti 31), 1870"
+"note": "Y-pakki: Ilkankatu 4 (tontti 31), 1870",
+"y": 1870,
+"u": 1
 },
 "4951": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kalevanpuisto 17 (tontti 167), 1900"
+"note": "Y-pakki: Kalevanpuisto 17 (tontti 167), 1900",
+"y": 1900,
+"u": 1
 },
 "4952": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kalevanpuisto 19 (tontti 165), 1890"
+"note": "Y-pakki: Kalevanpuisto 19 (tontti 165), 1890",
+"y": 1890
 },
 "5062": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kalevanpuisto 25 (tontti 162), 1880"
+"note": "Y-pakki: Kalevanpuisto 25 (tontti 162), 1880",
+"y": 1880,
+"u": 1
 },
 "5058": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kalevanpuisto 27 (tontti 161), 1884"
+"note": "Y-pakki: Kalevanpuisto 27 (tontti 161), 1884",
+"y": 1884
 },
 "4947": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kalevanpuisto 31 (tontti 159), 1880"
+"note": "Y-pakki: Kalevanpuisto 31 (tontti 159), 1880",
+"y": 1880
 },
 "4946": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Kalevanpuisto 35 (tontti 157), 1920"
+"note": "Y-pakki: Kalevanpuisto 35 (tontti 157), 1920",
+"y": 1920
 },
 "5072": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kalevanpuisto 37 (tontti 156), 1890"
+"note": "Y-pakki: Kalevanpuisto 37 (tontti 156), 1890",
+"y": 1890,
+"u": 1
 },
 "5026": {
 "w": "#c9c7c2",
 "k": "render",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Kalevanpuisto 39 (tontti 155), 1950"
+"note": "Y-pakki: Kalevanpuisto 39 (tontti 155), 1950",
+"y": 1950
 },
 "5024": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Kalevanpuisto 41(tontti 154), 1890"
+"note": "Y-pakki: Kalevanpuisto 41(tontti 154), 1890",
+"y": 1890,
+"u": 1
 },
 "5064": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kalevanpuisto 45 (tontti 152), 1890"
+"note": "Y-pakki: Kalevanpuisto 45 (tontti 152), 1890",
+"y": 1890,
+"u": 1
 },
 "5074": {
 "w": "#7a4535",
@@ -9052,98 +9589,119 @@
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Kalevanpuisto 49a (tontti 2, ent. 292), 1923"
+"note": "Y-pakki: Kalevanpuisto 49a (tontti 2, ent. 292), 1923",
+"y": 1923,
+"u": 1
 },
 "4122": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Kalevanpuisto 49b (tontti 1, ent. 292), 1923"
+"note": "Y-pakki: Kalevanpuisto 49b (tontti 1, ent. 292), 1923",
+"y": 1923
 },
 "4957": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Käpylänkatu 12 (tontti 67), 1890"
+"note": "Y-pakki: Käpylänkatu 12 (tontti 67), 1890",
+"y": 1890,
+"u": 1
 },
 "5185": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Käpylänkatu 13 (tontti 293), 1920"
+"note": "Y-pakki: Käpylänkatu 13 (tontti 293), 1920",
+"y": 1920
 },
 "5181": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Käpylänkatu 15 (tontti 295), 1920"
+"note": "Y-pakki: Käpylänkatu 15 (tontti 295), 1920",
+"y": 1920,
+"u": 1
 },
 "5197": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Käpylänkatu 3 (tontti 283), 1920"
+"note": "Y-pakki: Käpylänkatu 3 (tontti 283), 1920",
+"y": 1920
 },
 "5196": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Käpylänkatu 5 (tontti 285), 1920"
+"note": "Y-pakki: Käpylänkatu 5 (tontti 285), 1920",
+"y": 1920,
+"u": 1
 },
 "5207": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Käpylänkatu 7 (tontti 287), 1920"
+"note": "Y-pakki: Käpylänkatu 7 (tontti 287), 1920",
+"y": 1920,
+"u": 1
 },
 "5170": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 22 (tontti 122), 1896"
+"note": "Y-pakki: Laamanninkatu 22 (tontti 122), 1896",
+"y": 1896
 },
 "5368": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Laamanninkatu 23 (tontti 119), 1880"
+"note": "Y-pakki: Laamanninkatu 23 (tontti 119), 1880",
+"y": 1880
 },
 "5371": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 24 (tontti 120), 1902"
+"note": "Y-pakki: Laamanninkatu 24 (tontti 120), 1902",
+"y": 1902,
+"u": 1
 },
 "5501": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 25 (tontti 117), 1889"
+"note": "Y-pakki: Laamanninkatu 25 (tontti 117), 1889",
+"y": 1889
 },
 "5481": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 26 (tontti 118), 1880"
+"note": "Y-pakki: Laamanninkatu 26 (tontti 118), 1880",
+"y": 1880
 },
 "5509": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 27 (tontti 115), 1886"
+"note": "Y-pakki: Laamanninkatu 27 (tontti 115), 1886",
+"y": 1886
 },
 "5505": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Laamanninkatu 29 (tontti 113), 1887"
+"note": "Y-pakki: Laamanninkatu 29 (tontti 113), 1887",
+"y": 1887
 },
 "5488": {
 "w": "#e3d6b6",
@@ -9151,502 +9709,608 @@
 "f": 1,
 "r": "#3f4246",
 "st": "classic",
-"note": "Y-pakki: Laamanninkatu 30 (tontti 114), 1884"
+"note": "Y-pakki: Laamanninkatu 30 (tontti 114), 1884",
+"y": 1884,
+"u": 1
 },
 "5049": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 31 (tontti 111), 1883"
+"note": "Y-pakki: Laamanninkatu 31 (tontti 111), 1883",
+"y": 1883
 },
 "5028": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Laamanninkatu 34 (tontti 110), 1885"
+"note": "Y-pakki: Laamanninkatu 34 (tontti 110), 1885",
+"y": 1885,
+"u": 1
 },
 "5087": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Laamanninkatu 36 (tontti 108), 1899"
+"note": "Y-pakki: Laamanninkatu 36 (tontti 108), 1899",
+"y": 1899,
+"u": 1
 },
 "5089": {
 "w": "#ecc3cb",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 38 (tontti 106), 1883"
+"note": "Y-pakki: Laamanninkatu 38 (tontti 106), 1883",
+"y": 1883
 },
 "5450": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 39 (tontti 103), 1880"
+"note": "Y-pakki: Laamanninkatu 39 (tontti 103), 1880",
+"y": 1880
 },
 "5456": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 41 (tontti 101), 1891"
+"note": "Y-pakki: Laamanninkatu 41 (tontti 101), 1891",
+"y": 1891
 },
 "5467": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Laamanninkatu 40 (tontti 104), 1880"
+"note": "Y-pakki: Laamanninkatu 40 (tontti 104), 1880",
+"y": 1880
 },
 "5022": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 44 (tontti 100), 1890"
+"note": "Y-pakki: Laamanninkatu 44 (tontti 100), 1890",
+"y": 1890,
+"u": 1
 },
 "5389": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 45 (tontti 97), 1895"
+"note": "Y-pakki: Laamanninkatu 45 (tontti 97), 1895",
+"y": 1895
 },
 "5398": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 46 (tontti 98), 1893"
+"note": "Y-pakki: Laamanninkatu 46 (tontti 98), 1893",
+"y": 1893
 },
 "5394": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Laamanninkatu 48 (tontti 96), 1800"
+"note": "Y-pakki: Laamanninkatu 48 (tontti 96), 1800",
+"y": 1800,
+"u": 1
 },
 "5234": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maantiekatu 36 (tontti 10), 1882"
+"note": "Y-pakki: Maantiekatu 36 (tontti 10), 1882",
+"y": 1882
 },
 "5230": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Maantiekatu 40 (tontti 12), 1895"
+"note": "Y-pakki: Maantiekatu 40 (tontti 12), 1895",
+"y": 1895
 },
 "5361": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 24 (tontti 42), 1910"
+"note": "Y-pakki: Neuvosmiehenkatu 24 (tontti 42), 1910",
+"y": 1910
 },
 "5048": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Neuvosmiehenkatu 26 (tontti 44), 1880"
+"note": "Y-pakki: Neuvosmiehenkatu 26 (tontti 44), 1880",
+"y": 1880
 },
 "5099": {
 "w": "#e3d6b6",
 "k": "render",
 "f": 1,
 "st": "classic",
-"note": "Y-pakki: Neuvosmiehenkatu 27 (tontti 45), 1870"
+"note": "Y-pakki: Neuvosmiehenkatu 27 (tontti 45), 1870",
+"y": 1870
 },
 "5492": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 28 (tontti 46), 1872"
+"note": "Y-pakki: Neuvosmiehenkatu 28 (tontti 46), 1872",
+"y": 1872,
+"u": 1
 },
 "4988": {
 "w": "#ecc3cb",
 "k": "render",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 29 (tontti 47), 1956"
+"note": "Y-pakki: Neuvosmiehenkatu 29 (tontti 47), 1956",
+"y": 1956,
+"u": 1
 },
 "5039": {
 "w": "#7a4535",
 "k": "wood",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Neuvosmiehenkatu 30 (tontti 48), 1880"
+"note": "Y-pakki: Neuvosmiehenkatu 30 (tontti 48), 1880",
+"y": 1880
 },
 "4981": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Neuvosmiehenkatu 31 (tontti 49), 1866"
+"note": "Y-pakki: Neuvosmiehenkatu 31 (tontti 49), 1866",
+"y": 1866
 },
 "5519": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 32 (tontti 50), 1800"
+"note": "Y-pakki: Neuvosmiehenkatu 32 (tontti 50), 1800",
+"y": 1800
 },
 "5410": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 34 (tontti 52), 1883"
+"note": "Y-pakki: Neuvosmiehenkatu 34 (tontti 52), 1883",
+"y": 1883
 },
 "4976": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Neuvosmiehenkatu 35 (tontti 53), 1865"
+"note": "Y-pakki: Neuvosmiehenkatu 35 (tontti 53), 1865",
+"y": 1865
 },
 "5097": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 36 (tontti 54), 1876"
+"note": "Y-pakki: Neuvosmiehenkatu 36 (tontti 54), 1876",
+"y": 1876
 },
 "5215": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Neuvosmiehenkatu 37 (tontti 55), 1860"
+"note": "Y-pakki: Neuvosmiehenkatu 37 (tontti 55), 1860",
+"y": 1860
 },
 "5209": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 39 (tontti 57), 1880"
+"note": "Y-pakki: Neuvosmiehenkatu 39 (tontti 57), 1880",
+"y": 1880
 },
 "5428": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Neuvosmiehenkatu 44 (tontti 62), 1800"
+"note": "Y-pakki: Neuvosmiehenkatu 44 (tontti 62), 1800",
+"y": 1800,
+"u": 1
 },
 "5459": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 40 (tontti 58), 1880"
+"note": "Y-pakki: Neuvosmiehenkatu 40 (tontti 58), 1880",
+"y": 1880
 },
 "5378": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 45 (tontti 63), 1885"
+"note": "Y-pakki: Neuvosmiehenkatu 45 (tontti 63), 1885",
+"y": 1885,
+"u": 1
 },
 "5397": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Neuvosmiehenkatu 46 (tontti 64), 1880"
+"note": "Y-pakki: Neuvosmiehenkatu 46 (tontti 64), 1880",
+"y": 1880,
+"u": 1
 },
 "5373": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 47 (tontti 65), 1880"
+"note": "Y-pakki: Neuvosmiehenkatu 47 (tontti 65), 1880",
+"y": 1880
 },
 "5399": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Neuvosmiehenkatu 48 (tontti 66), 1880"
+"note": "Y-pakki: Neuvosmiehenkatu 48 (tontti 66), 1880",
+"y": 1880,
+"u": 1
 },
 "5421": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Peltomiehenkatu 12 (tontti 69), 1880"
+"note": "Y-pakki: Peltomiehenkatu 12 (tontti 69), 1880",
+"y": 1880,
+"u": 1
 },
 "5237": {
 "w": "#7a4535",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Peltomiehenkatu 4 (tontti 17), 1880"
+"note": "Y-pakki: Peltomiehenkatu 4 (tontti 17), 1880",
+"y": 1880
 },
 "5071": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Peltomiehenkatu 24 (tontti 153), 1890"
+"note": "Y-pakki: Peltomiehenkatu 24 (tontti 153), 1890",
+"y": 1890
 },
 "5384": {
 "w": "#e3d6b6",
 "k": "render",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Peltomiehenkatu 5 (tontti 16), 1958"
+"note": "Y-pakki: Peltomiehenkatu 5 (tontti 16), 1958",
+"y": 1958
 },
 "5424": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Peltomiehenkatu 6 (tontti 18), 1800"
+"note": "Y-pakki: Peltomiehenkatu 6 (tontti 18), 1800",
+"y": 1800,
+"u": 1
 },
 "5042": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Peltomiehenkatu 8 (tontti 61), 1870"
+"note": "Y-pakki: Peltomiehenkatu 8 (tontti 61), 1870",
+"y": 1870
 },
 "5169": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 19 (tontti 203), 1899"
+"note": "Y-pakki: Raatimiehenkatu 19 (tontti 203), 1899",
+"y": 1899,
+"u": 1
 },
 "5172": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 20 (tontti 166), 1920"
+"note": "Y-pakki: Raatimiehenkatu 20 (tontti 166), 1920",
+"y": 1920,
+"u": 1
 },
 "5171": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Raatimiehenkatu 21 (tontti 123), 1886"
+"note": "Y-pakki: Raatimiehenkatu 21 (tontti 123), 1886",
+"y": 1886,
+"u": 1
 },
 "4695": {
 "w": "#7a4535",
 "k": "brick",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Raatimiehenkatu 22 (tontti 124), 1969"
+"note": "Y-pakki: Raatimiehenkatu 22 (tontti 124), 1969",
+"y": 1969
 },
 "5053": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 23 (tontti 125), 1939"
+"note": "Y-pakki: Raatimiehenkatu 23 (tontti 125), 1939",
+"y": 1939,
+"u": 1
 },
 "5272": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 24 (tontti 126), 1926"
+"note": "Y-pakki: Raatimiehenkatu 24 (tontti 126), 1926",
+"y": 1926
 },
 "5282": {
 "w": "#eeece6",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Raatimiehenkatu 26 (tontti 128), 1953"
+"note": "Y-pakki: Raatimiehenkatu 26 (tontti 128), 1953",
+"y": 1953
 },
 "4769": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 27 (tontti 129), 1883"
+"note": "Y-pakki: Raatimiehenkatu 27 (tontti 129), 1883",
+"y": 1883
 },
 "4993": {
 "w": "#eeece6",
 "k": "wood",
 "f": 2,
 "r": "#b8302a",
-"note": "Y-pakki: Raatimiehenkatu 28 (tontti 130), 1955"
+"note": "Y-pakki: Raatimiehenkatu 28 (tontti 130), 1955",
+"y": 1955
 },
 "5487": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 29 (tontti 131), 1880"
+"note": "Y-pakki: Raatimiehenkatu 29 (tontti 131), 1880",
+"y": 1880,
+"u": 1
 },
 "5294": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 30 (tontti 132), 1888"
+"note": "Y-pakki: Raatimiehenkatu 30 (tontti 132), 1888",
+"y": 1888
 },
 "4943": {
 "w": "#c9c7c2",
 "k": "render",
 "f": 2,
 "r": "#b8302a",
-"note": "Y-pakki: Raatimiehenkatu 31 (tontti 133), 1952"
+"note": "Y-pakki: Raatimiehenkatu 31 (tontti 133), 1952",
+"y": 1952
 },
 "4948": {
 "w": "#ecc3cb",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 32 (tontti 134), 1890"
+"note": "Y-pakki: Raatimiehenkatu 32 (tontti 134), 1890",
+"y": 1890
 },
 "5407": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Raatimiehenkatu 33 (tontti 135), 1900"
+"note": "Y-pakki: Raatimiehenkatu 33 (tontti 135), 1900",
+"y": 1900
 },
 "5094": {
 "w": "#eeece6",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Raatimiehenkatu 35 (tontti 137), 2002"
+"note": "Y-pakki: Raatimiehenkatu 35 (tontti 137), 2002",
+"y": 2002
 },
 "4991": {
 "w": "#eeece6",
 "k": "render",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Raatimiehenkatu 34 (tontti 136), 1954"
+"note": "Y-pakki: Raatimiehenkatu 34 (tontti 136), 1954",
+"y": 1954
 },
 "5086": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Raatimiehenkatu 36 (tontti 138), 1890"
+"note": "Y-pakki: Raatimiehenkatu 36 (tontti 138), 1890",
+"y": 1890
 },
 "5031": {
 "w": "#7a4535",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 37 (tontti 139), 1969"
+"note": "Y-pakki: Raatimiehenkatu 37 (tontti 139), 1969",
+"y": 1969,
+"u": 1
 },
 "5473": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Raatimiehenkatu 39 (tontti 141), 1882"
+"note": "Y-pakki: Raatimiehenkatu 39 (tontti 141), 1882",
+"y": 1882
 },
 "5021": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 41 (tontti 143), 1898"
+"note": "Y-pakki: Raatimiehenkatu 41 (tontti 143), 1898",
+"y": 1898,
+"u": 1
 },
 "5281": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 40 (tontti 142), 1885"
+"note": "Y-pakki: Raatimiehenkatu 40 (tontti 142), 1885",
+"y": 1885,
+"u": 1
 },
 "5291": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Raatimiehenkatu 42 (tontti 144), 1930"
+"note": "Y-pakki: Raatimiehenkatu 42 (tontti 144), 1930",
+"y": 1930
 },
 "5448": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 43 (tontti 145), 1890"
+"note": "Y-pakki: Raatimiehenkatu 43 (tontti 145), 1890",
+"y": 1890
 },
 "5284": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 44 (tontti 146), 1890"
+"note": "Y-pakki: Raatimiehenkatu 44 (tontti 146), 1890",
+"y": 1890,
+"u": 1
 },
 "5276": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Raatimiehenkatu 46 (tontti 148), 1890"
+"note": "Y-pakki: Raatimiehenkatu 46 (tontti 148), 1890",
+"y": 1890
 },
 "5029": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Raatimiehenkatu 47 (tontti 149), 1800"
+"note": "Y-pakki: Raatimiehenkatu 47 (tontti 149), 1800",
+"y": 1800
 },
 "5287": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Raatimiehenkatu 48 (tontti 150), ?"
+"note": "Y-pakki: Raatimiehenkatu 48 (tontti 150), ?",
+"u": 1
 },
 "4954": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Rauhanpuisto 10 (tontti 288), 1923"
+"note": "Y-pakki: Rauhanpuisto 10 (tontti 288), 1923",
+"y": 1923,
+"u": 1
 },
 "4228": {
 "w": "#ecc3cb",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Rauhanpuisto 12 (tontti 290), 1924"
+"note": "Y-pakki: Rauhanpuisto 12 (tontti 290), 1924",
+"y": 1924,
+"u": 1
 },
 "4281": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Rauhanpuisto 14 (tontti 294), 1925"
+"note": "Y-pakki: Rauhanpuisto 14 (tontti 294), 1925",
+"y": 1925,
+"u": 1
 },
 "4121": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Rauhanpuisto 16 (tontti 296), 1934"
+"note": "Y-pakki: Rauhanpuisto 16 (tontti 296), 1934",
+"y": 1934
 },
 "5188": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Rauhanpuisto 4 (tontti 282), 1925"
+"note": "Y-pakki: Rauhanpuisto 4 (tontti 282), 1925",
+"y": 1925
 },
 "5199": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Rauhanpuisto 8 (tontti 286), 1924"
+"note": "Y-pakki: Rauhanpuisto 8 (tontti 286), 1924",
+"y": 1924
 },
 "5204": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Rauhanpuisto 6 (tontti 284), 1923"
+"note": "Y-pakki: Rauhanpuisto 6 (tontti 284), 1923",
+"y": 1923
 },
 "5222": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Sackleninkatu 1 (tontti 3), 1877"
+"note": "Y-pakki: Sackleninkatu 1 (tontti 3), 1877",
+"y": 1877
 },
 "5221": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Sackleninkatu 2 (tontti 2), 1905"
+"note": "Y-pakki: Sackleninkatu 2 (tontti 2), 1905",
+"y": 1905
 },
 "5061": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Sackleninkatu 24 (tontti 163), 1913"
+"note": "Y-pakki: Sackleninkatu 24 (tontti 163), 1913",
+"y": 1913,
+"u": 1
 },
 "5247": {
 "w": "#e3d6b6",
 "k": "render",
 "f": 1,
 "st": "classic",
-"note": "Y-pakki: Sackleninkatu 3 (tontti 33), 1887"
+"note": "Y-pakki: Sackleninkatu 3 (tontti 33), 1887",
+"y": 1887,
+"u": 1
 },
 "5100": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Sackleninkatu 8 (tontti 41), 1890"
+"note": "Y-pakki: Sackleninkatu 8 (tontti 41), 1890",
+"y": 1890
 },
 "5088": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tapionkatu 10 (tontti 88), 1880"
+"note": "Y-pakki: Tapionkatu 10 (tontti 88), 1880",
+"y": 1880
 },
 "5082": {
 "w": "#e3d6b6",
@@ -9654,369 +10318,461 @@
 "f": 1,
 "w2": "#7a4535",
 "s2": 0.5,
-"note": "Y-pakki: Tapionkatu 12 (tontti 107), 1880"
+"note": "Y-pakki: Tapionkatu 12 (tontti 107), 1880",
+"y": 1880,
+"u": 1
 },
 "4945": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Tapionkatu 21 (tontti 140), 1883"
+"note": "Y-pakki: Tapionkatu 21 (tontti 140), 1883",
+"y": 1883
 },
 "5083": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tapionkatu 8 (tontti 73), 1800"
+"note": "Y-pakki: Tapionkatu 8 (tontti 73), 1800",
+"y": 1800,
+"u": 1
 },
 "5044": {
 "w": "#e3d6b6",
 "k": "render",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Tapionkatu 9 (Tontti 56), 1994"
+"note": "Y-pakki: Tapionkatu 9 (Tontti 56), 1994",
+"y": 1994
 },
 "5142": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Tiilitehtaanpuistokatu 1 (tontti 1), 1892"
+"note": "Y-pakki: Tiilitehtaanpuistokatu 1 (tontti 1), 1892",
+"y": 1892
 },
 "5101": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Tiilitehtaanpuistokatu 7 (tontti 39), 1868"
+"note": "Y-pakki: Tiilitehtaanpuistokatu 7 (tontti 39), 1868",
+"y": 1868,
+"u": 1
 },
 "5137": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tiilitehtaanpuistokatu 9 (tontti 40), 1865"
+"note": "Y-pakki: Tiilitehtaanpuistokatu 9 (tontti 40), 1865",
+"y": 1865,
+"u": 1
 },
 "5134": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 17 (tontti 37), 1800"
+"note": "Y-pakki: Tuomarinkatu 17 (tontti 37), 1800",
+"y": 1800,
+"u": 1
 },
 "5103": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 19 (tontti 35), 1984"
+"note": "Y-pakki: Tuomarinkatu 19 (tontti 35), 1984",
+"y": 1984,
+"u": 1
 },
 "5138": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 22 (tontti 38), 1865"
+"note": "Y-pakki: Tuomarinkatu 22 (tontti 38), 1865",
+"y": 1865
 },
 "5359": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Tuomarinkatu 24 (tontti 36), 1899"
+"note": "Y-pakki: Tuomarinkatu 24 (tontti 36), 1899",
+"y": 1899
 },
 "4982": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Tuomarinkatu 25 (tontti 29), 1865"
+"note": "Y-pakki: Tuomarinkatu 25 (tontti 29), 1865",
+"y": 1865
 },
 "5523": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 26 (tontti 34), 1933"
+"note": "Y-pakki: Tuomarinkatu 26 (tontti 34), 1933",
+"y": 1933,
+"u": 1
 },
 "4689": {
 "w": "#eeece6",
 "k": "render",
 "f": 2,
 "r": "#3f4246",
-"note": "Y-pakki: Tuomarinkatu 27 (tontti 27), 1962"
+"note": "Y-pakki: Tuomarinkatu 27 (tontti 27), 1962",
+"y": 1962
 },
 "4973": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Tuomarinkatu 29 (tontti 23), 1870"
+"note": "Y-pakki: Tuomarinkatu 29 (tontti 23), 1870",
+"y": 1870
 },
 "5526": {
 "w": "#ecc3cb",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 28 (tontti 32), 1887"
+"note": "Y-pakki: Tuomarinkatu 28 (tontti 32), 1887",
+"y": 1887,
+"u": 1
 },
 "4971": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 31 (tontti 21), 1916"
+"note": "Y-pakki: Tuomarinkatu 31 (tontti 21), 1916",
+"y": 1916,
+"u": 1
 },
 "5532": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 30 (tontti 30), 1870"
+"note": "Y-pakki: Tuomarinkatu 30 (tontti 30), 1870",
+"y": 1870,
+"u": 1
 },
 "4691": {
 "w": "#7a4535",
 "k": "brick",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Tuomarinkatu 34 (tontti 26), 1967"
+"note": "Y-pakki: Tuomarinkatu 34 (tontti 26), 1967",
+"y": 1967
 },
 "5239": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 37 / Peltomiehenkatu 3 (tontti 15), 1880"
+"note": "Y-pakki: Tuomarinkatu 37 / Peltomiehenkatu 3 (tontti 15), 1880",
+"y": 1880,
+"u": 1
 },
 "4975": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 36 (tontti 25), 1870"
+"note": "Y-pakki: Tuomarinkatu 36 (tontti 25), 1870",
+"y": 1870
 },
 "5208": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 38 (tontti 24), 1870"
+"note": "Y-pakki: Tuomarinkatu 38 (tontti 24), 1870",
+"y": 1870,
+"u": 1
 },
 "4770": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Tuomarinkatu 39 (tontti 13), 1989"
+"note": "Y-pakki: Tuomarinkatu 39 (tontti 13), 1989",
+"y": 1989,
+"u": 1
 },
 "5036": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#3f9a5a",
-"note": "Y-pakki: Tuomarinkatu 48 (tontti 14), 1962"
+"note": "Y-pakki: Tuomarinkatu 48 (tontti 14), 1962",
+"y": 1962
 },
 "242": {
 "w": "#eeece6",
 "k": "render",
 "f": 3,
-"note": "Y-pakki: Äestäjänkatu 3, 1939"
+"note": "Y-pakki: Äestäjänkatu 3, 1939",
+"y": 1939
 },
 "7819": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Ruosniementie 74, 1925"
+"note": "Y-pakki: Ruosniementie 74, 1925",
+"y": 1925,
+"u": 1
 },
 "2238": {
 "w": "#efe0a8",
 "k": "render",
 "f": 1,
-"note": "Y-pakki: Jaakontie 14 ja 16, 1959"
+"note": "Y-pakki: Jaakontie 14 ja 16, 1959",
+"y": 1959
 },
 "2241": {
 "w": "#efe0a8",
 "k": "render",
 "f": 1,
-"note": "Y-pakki: Jaakontie 2, 4 ja 8 (Piisin talot), 1958"
+"note": "Y-pakki: Jaakontie 2, 4 ja 8 (Piisin talot), 1958",
+"y": 1958
 },
 "2268": {
 "w": "#a85a42",
 "k": "brick",
 "f": 2,
-"note": "Y-pakki: Jaakontie 7, 10 ja 12, Vapuntie 2, 1954"
+"note": "Y-pakki: Jaakontie 7, 10 ja 12, Vapuntie 2, 1954",
+"y": 1954
 },
 "2273": {
 "w": "#ecc3cb",
 "k": "render",
 "f": 2,
-"note": "Y-pakki: Vapuntie 1, 4 ja 6, Sairaalantie 10 (ykköstalo), 1954"
+"note": "Y-pakki: Vapuntie 1, 4 ja 6, Sairaalantie 10 (ykköstalo), 1954",
+"y": 1954
 },
 "3083": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Puutarhakatu 19, Moisalon kauppa, 1900"
+"note": "Y-pakki: Puutarhakatu 19, Moisalon kauppa, 1900",
+"y": 1900
 },
 "3303": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Puutarhakatu 26A, 1800"
+"note": "Y-pakki: Puutarhakatu 26A, 1800",
+"y": 1800
 },
 "4011": {
 "w": "#eeece6",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Entinen Osuusliike Kansan myymälärakennus, 1930"
+"note": "Y-pakki: Entinen Osuusliike Kansan myymälärakennus, 1930",
+"y": 1930
 },
 "3975": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Joutsenontie 17, 1920"
+"note": "Y-pakki: Joutsenontie 17, 1920",
+"y": 1920,
+"u": 1
 },
 "4051": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Joutsenontie 2, 1927"
+"note": "Y-pakki: Joutsenontie 2, 1927",
+"y": 1927,
+"u": 1
 },
 "4054": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Joutsenontie 4, 1900"
+"note": "Y-pakki: Joutsenontie 4, 1900",
+"y": 1900
 },
 "4048": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Joutsenontie 8, 1900"
+"note": "Y-pakki: Joutsenontie 8, 1900",
+"y": 1900,
+"u": 1
 },
 "3991": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Juholantie 7, 1920"
+"note": "Y-pakki: Juholantie 7, 1920",
+"y": 1920,
+"u": 1,
+"c": "v"
 },
 "4088": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Köyrintie 14, 1930"
+"note": "Y-pakki: Köyrintie 14, 1930",
+"y": 1930,
+"u": 1
 },
 "4055": {
 "w": "#c9c7c2",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Köyrintie 17, 1900"
+"note": "Y-pakki: Köyrintie 17, 1900",
+"y": 1900,
+"u": 1
 },
 "4079": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Köyrintie 8, 1920"
+"note": "Y-pakki: Köyrintie 8, 1920",
+"y": 1920,
+"u": 1
 },
 "3921": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Palokunnantie 19, 1923"
+"note": "Y-pakki: Palokunnantie 19, 1923",
+"y": 1923,
+"u": 1
 },
 "4041": {
 "w": "#e3d6b6",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Toukolantie 13, 1930"
+"note": "Y-pakki: Toukolantie 13, 1930",
+"y": 1930
 },
 "4076": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Toukolantie 5, 1930"
+"note": "Y-pakki: Toukolantie 5, 1930",
+"y": 1930,
+"u": 1
 },
 "4038": {
 "w": "#b7c6d6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Toukolantie 17, 1930"
+"note": "Y-pakki: Toukolantie 17, 1930",
+"y": 1930,
+"u": 1
 },
 "4099": {
 "w": "#e3d6b6",
 "k": "render",
 "f": 1,
-"note": "Y-pakki: Vanhakoiviston entinen paloasema, 1930"
+"note": "Y-pakki: Vanhakoiviston entinen paloasema, 1930",
+"y": 1930
 },
 "4030": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vanhakoivistontie 23, 1920"
+"note": "Y-pakki: Vanhakoivistontie 23, 1920",
+"y": 1920,
+"u": 1
 },
 "4007": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vanhakoivistontie 25, 1933"
+"note": "Y-pakki: Vanhakoivistontie 25, 1933",
+"y": 1933,
+"u": 1
 },
 "3958": {
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vanhakoivistontie 26b, 1930"
+"note": "Y-pakki: Vanhakoivistontie 26b, 1930",
+"y": 1930,
+"u": 1
 },
 "4009": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Vanhakoivistontie 27, 1930"
+"note": "Y-pakki: Vanhakoivistontie 27, 1930",
+"y": 1930
 },
 "3945": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vanhakoivistontie 28, 1930"
+"note": "Y-pakki: Vanhakoivistontie 28, 1930",
+"y": 1930,
+"u": 1
 },
 "3978": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vanhakoivistontie 35, 1930"
+"note": "Y-pakki: Vanhakoivistontie 35, 1930",
+"y": 1930,
+"u": 1
 },
 "3968": {
 "w": "#b9cbb0",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
-"note": "Y-pakki: Vanhakoivistontie 38, 1920"
+"note": "Y-pakki: Vanhakoivistontie 38, 1920",
+"y": 1920,
+"u": 1
 },
 "3977": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vanhakoivistontie 45, 1920"
+"note": "Y-pakki: Vanhakoivistontie 45, 1920",
+"y": 1920,
+"u": 1
 },
 "4012": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Vanhakoivistontie 43, 1800"
+"note": "Y-pakki: Vanhakoivistontie 43, 1800",
+"y": 1800,
+"c": "v"
 },
 "3897": {
 "w": "#9c3d2e",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Vanhakoivistontie 56, 1920"
+"note": "Y-pakki: Vanhakoivistontie 56, 1920",
+"y": 1920,
+"u": 1
 },
 "4101": {
 "w": "#eeece6",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Vanhakoivistontie 57, 1930"
+"note": "Y-pakki: Vanhakoivistontie 57, 1930",
+"y": 1930
 },
 "3901": {
 "w": "#e3d6b6",
 "k": "render",
 "f": 1,
 "st": "classic",
-"note": "Y-pakki: Vanhakoivistontie 58, 1880"
+"note": "Y-pakki: Vanhakoivistontie 58, 1880",
+"y": 1880
 }
 }
 }

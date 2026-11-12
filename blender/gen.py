@@ -50,14 +50,48 @@ def detail_kind(k):
     if lum > 0.12: return 'plaster'
     return None
 
+WOODK = ('wood', 'woodv', 'woodl')      # painted boards: weatherboard, board and batten, weatherboard drawn on a flat polygon (gables)
+WEATHER = float(os.environ.get('PORI_WEATHER', '0.12'))    # splash zone: walls darken towards the ground (0 = off)
+def tint(k, f):
+    """the same material a shade lighter / darker (keeps its surface pattern)"""
+    k2 = M((k[0] * f, k[1] * f, k[2] * f), k[3], k[4])
+    if k in DETAIL: DETAIL[k2] = DETAIL[k]
+    return k2
 _texcache = {}
 def bmat(k):
     if _mats[k] is None:
         m = bpy.data.materials.new('m%d' % len(bpy.data.materials)); m.use_nodes = True
         nt = m.node_tree; b = nt.nodes['Principled BSDF']
         b.inputs['Base Color'].default_value = (k[0], k[1], k[2], 1); b.inputs['Roughness'].default_value = k[3]; b.inputs['Metallic'].default_value = k[4]
-        kind = detail_kind(k) if TEXDIR else None
-        if kind:
+        kind = detail_kind(k)
+        if kind and not TEXDIR and kind not in WOODK: kind = None
+        col = None
+        if kind in WOODK:
+            # painted boards: no photo (the old cladding photo read as brickwork); fine streaks along the board and soft paint patches
+            tc = nt.nodes.new('ShaderNodeTexCoord'); mp = nt.nodes.new('ShaderNodeMapping')
+            mp.inputs['Scale'].default_value = (38.0, 38.0, 1.1) if kind == 'woodv' else (1.3, 1.3, 55.0)
+            nz = nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 1.0; nz.inputs['Detail'].default_value = 3.0
+            nt.links.new(tc.outputs['Object'], mp.inputs['Vector']); nt.links.new(mp.outputs['Vector'], nz.inputs['Vector'])
+            r1 = nt.nodes.new('ShaderNodeMapRange'); r1.inputs[1].default_value = 0.3; r1.inputs[2].default_value = 0.7; r1.inputs[3].default_value = 0.9; r1.inputs[4].default_value = 1.06
+            nt.links.new(nz.outputs[0], r1.inputs[0])
+            n2 = nt.nodes.new('ShaderNodeTexNoise'); n2.inputs['Scale'].default_value = 0.9; n2.inputs['Detail'].default_value = 2.0
+            nt.links.new(tc.outputs['Object'], n2.inputs['Vector'])
+            r2 = nt.nodes.new('ShaderNodeMapRange'); r2.inputs[1].default_value = 0.3; r2.inputs[2].default_value = 0.7; r2.inputs[3].default_value = 0.95; r2.inputs[4].default_value = 1.04
+            nt.links.new(n2.outputs[0], r2.inputs[0])
+            mu = nt.nodes.new('ShaderNodeMath'); mu.operation = 'MULTIPLY'; nt.links.new(r1.outputs[0], mu.inputs[0]); nt.links.new(r2.outputs[0], mu.inputs[1])
+            val = mu.outputs[0]
+            if kind == 'woodl':                         # gables are flat polygons: the weatherboards are drawn (a shade ramp per board, a dark line under it)
+                sz = nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(tc.outputs['Object'], sz.inputs[0])
+                fr = nt.nodes.new('ShaderNodeMath'); fr.operation = 'FRACT'; dv = nt.nodes.new('ShaderNodeMath'); dv.operation = 'DIVIDE'; dv.inputs[1].default_value = 0.15
+                nt.links.new(sz.outputs['Z'], dv.inputs[0]); nt.links.new(dv.outputs[0], fr.inputs[0])
+                cr = nt.nodes.new('ShaderNodeValToRGB'); e_ = cr.color_ramp.elements
+                e_[0].position = 0.0; e_[0].color = (0.5, 0.5, 0.5, 1); e_[1].position = 0.1; e_[1].color = (1.03, 1.03, 1.03, 1)
+                e2 = e_.new(1.0); e2.color = (0.94, 0.94, 0.94, 1); cr.color_ramp.interpolation = 'LINEAR'
+                nt.links.new(fr.outputs[0], cr.inputs[0])
+                m3 = nt.nodes.new('ShaderNodeMath'); m3.operation = 'MULTIPLY'; nt.links.new(val, m3.inputs[0]); nt.links.new(cr.outputs['Color'], m3.inputs[1]); val = m3.outputs[0]
+            mx = nt.nodes.new('ShaderNodeMix'); mx.data_type = 'RGBA'; mx.blend_type = 'MULTIPLY'; mx.inputs['Factor'].default_value = 1.0
+            mx.inputs[6].default_value = (k[0], k[1], k[2], 1); nt.links.new(val, mx.inputs[7]); col = mx.outputs[2]
+        elif kind:
             fn, size, strength, mean = TEXF[kind]
             if SURF and kind == SURF: strength = SURF_K
             if fn not in _texcache: _texcache[fn] = bpy.data.images.load(os.path.join(TEXDIR, fn))
@@ -67,8 +101,18 @@ def bmat(k):
             sc = nt.nodes.new('ShaderNodeVectorMath'); sc.operation = 'MULTIPLY'; sc.inputs[1].default_value = tuple(1 / max(c, 1e-3) for c in mean)
             nt.links.new(tx.outputs['Color'], sc.inputs[0])
             mx = nt.nodes.new('ShaderNodeMix'); mx.data_type = 'RGBA'; mx.blend_type = 'MULTIPLY'; mx.inputs['Factor'].default_value = strength
-            mx.inputs[6].default_value = (k[0], k[1], k[2], 1); nt.links.new(sc.outputs['Vector'], mx.inputs[7])
-            nt.links.new(mx.outputs[2], b.inputs['Base Color'])
+            mx.inputs[6].default_value = (k[0], k[1], k[2], 1); nt.links.new(sc.outputs['Vector'], mx.inputs[7]); col = mx.outputs[2]
+        if kind and WEATHER > 0:
+            # rain splash and dust: the wall is a little darker just above the ground, fading out by 1.7 m (height only, so bays still tile)
+            tc2 = nt.nodes.new('ShaderNodeTexCoord'); sp = nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(tc2.outputs['Object'], sp.inputs[0])
+            rz = nt.nodes.new('ShaderNodeMapRange'); rz.interpolation_type = 'SMOOTHSTEP'
+            rz.inputs[1].default_value = 0.25; rz.inputs[2].default_value = 1.7; rz.inputs[3].default_value = 1.0 - WEATHER; rz.inputs[4].default_value = 1.0
+            nt.links.new(sp.outputs['Z'], rz.inputs[0])
+            mw = nt.nodes.new('ShaderNodeMix'); mw.data_type = 'RGBA'; mw.blend_type = 'MULTIPLY'; mw.inputs['Factor'].default_value = 1.0
+            if col is not None: nt.links.new(col, mw.inputs[6])
+            else: mw.inputs[6].default_value = (k[0], k[1], k[2], 1)
+            nt.links.new(rz.outputs[0], mw.inputs[7]); col = mw.outputs[2]
+        if col is not None: nt.links.new(col, b.inputs['Base Color'])
         _mats[k] = m
     return _mats[k]
 
@@ -342,34 +386,76 @@ def m_classic(mb, col, P):
             for u0, u1 in wins: bh.append(mb.window(u0 + 0.1, 0.12, u1 - 0.1, ph - 0.12, pl, r=0.12, nx=2, fmat=fr, glass=GLASS2, d=0.07, curt=0))
         mb.wall(bh, pl, d=0.07, v1=ph); mb.sides(0, 0, bw, ph, 0, 0.07, pl, bottom=False)
 
+def _spans(holes, v, x0, x1, pad=0.0):
+    """solid stretches of a horizontal line at height v, outside the holes"""
+    out = []; u = x0
+    for h in sorted(hh for hh in holes if hh[1] - pad < v < hh[3] + pad):
+        if h[0] - pad > u: out.append((u, h[0] - pad))
+        u = max(u, h[2] + pad)
+    if u < x1: out.append((u, x1))
+    return [s for s in out if s[1] - s[0] > 1e-3]
+
+def _lap(mb, holes, W, v0, v1, step, lap=0.02):
+    """horizontal weatherboards as geometry: every board leans out at its lower edge and throws a thin shadow on the one below;
+    boards differ slightly in tone, as repainted cladding does"""
+    tones = [tint(W, f) for f in (0.955, 0.985, 1.0, 1.0, 1.03)]; under = tint(W, 0.5); v = v0
+    while v < v1 - 1e-4:
+        t = min(v + step, v1); mat = mb.rnd.choice(tones)
+        cuts = sorted({v, t} | {h[k] for h in holes for k in (1, 3) if v < h[k] < t})
+        for a, b in zip(cuts, cuts[1:]):
+            da = lap * (1 - (a - v) / step); db = lap * (1 - (b - v) / step)
+            for s0, s1 in _spans(holes, (a + b) / 2, 0, mb.bw): mb.hq([(s0, a, da), (s1, a, da), (s1, b, db), (s0, b, db)], mat)
+        for s0, s1 in _spans(holes, v + 1e-3, 0, mb.bw): mb.hq([(s0, v, 0), (s1, v, 0), (s1, v, lap), (s0, v, lap)], under)
+        v = t
+
+def _batten(mb, holes, W, v0, v1, pitch=0.16, bwid=0.045, dep=0.018):
+    """vertical boarding with cover battens (pystyrimalaudoitus)"""
+    mb.wall(holes + ([(0, 0, mb.bw, v0)] if v0 else []), W)
+    n = max(1, round(mb.bw / pitch)); sp = mb.bw / n; hi = tint(W, 1.02)
+    for j in range(n):
+        u = (j + 0.5) * sp; v = v0
+        for h in sorted((hh for hh in holes if hh[0] - 0.02 < u < hh[2] + 0.02), key=lambda hh: hh[1]):
+            if h[1] > v: mb.prot(u - bwid / 2, v, u + bwid / 2, h[1], dep, hi)
+            v = max(v, h[3])
+        if v < v1: mb.prot(u - bwid / 2, v, u + bwid / 2, v1, dep, hi)
+
 def m_wood(mb, col, P):
-    """Finnish wooden house bay: horizontal board cladding, white corner boards and frieze, framed windows with mullions,
-    grey concrete plinth.  col: 'W' window, 'N' blank, 'L' / 'R' / 'E' corner board left / right / both (with a window), 'l' / 'r' / 'e' the same without"""
-    bw, fh, W = mb.bw, mb.fh, P['wall']; T = P.get('trim', WHITE); ph = P.get('plinth_h', 0)
+    """Finnish wooden house bay: board cladding (P['clad']: 'h' weatherboards, 'v' board and batten, 'none' render or brick), corner
+    boards and frieze, framed windows with mullions, plinth.
+    col: 'W' window, 'N' blank, 'L' / 'R' / 'E' corner board left / right / both (with a window), 'l' / 'r' / 'e' the same without"""
+    bw, fh, W = mb.bw, mb.fh, P['wall']; T = P.get('trim', WHITE); ph = P.get('plinth_h', 0); clad = P.get('clad', 'h')
     holes = []
     win = col in ('W', 'L', 'R', 'E') and bw > 1.6
+    s_ = P.get('surround', 0.11)
     if win:
         ww = min(P.get('ww', 1.1), bw - 0.8); wh = min(P.get('wh', 1.3), fh - ph - 1.1); sill = max(ph + 0.35, (fh - wh) * 0.5 + 0.05)
         u0 = bw / 2 - ww / 2; u1 = bw / 2 + ww / 2
-        holes.append(mb.window(u0, sill, u1, sill + wh, W, r=0.1, fr=0.07, nx=P.get('nx', 2), ny=2 if wh > 1.2 else 1, fmat=T))
-        s_ = 0.11
-        mb.prot(u0 - s_, sill, u0, sill + wh, 0.025, T); mb.prot(u1, sill, u1 + s_, sill + wh, 0.025, T)
-        mb.prot(u0 - s_ - 0.04, sill + wh, u1 + s_ + 0.04, sill + wh + 0.16, 0.05, T); mb.prot(u0 - s_, sill - 0.09, u1 + s_, sill, 0.07, T)
-    mb.wall(holes + ([(0, 0, bw, ph)] if ph else []), W)
-    dark = P.get('board', M('#000000')); step = P.get('board_step', 0.17); v = ph + step       # board shadow lines
-    while v < fh - 0.05:
-        cuts = sorted((h[0], h[2]) for h in holes if h[1] - 0.02 <= v <= h[3] + 0.18)
-        u = 0
-        for a, b in cuts + [(bw, bw)]:
-            if a - 0.13 > u: mb.q(u, v - 0.012, a - 0.13, v + 0.012, 0.003, dark)
-            u = max(u, b + 0.13)
-        v += step
+        holes.append(mb.window(u0, sill, u1, sill + wh, W, r=0.1, fr=0.07, nx=P.get('nx', 2), ny=P.get('ny', 2 if wh > 1.2 else 1), fmat=P.get('frame', T)))
+        if s_ > 0:
+            mb.prot(u0 - s_, sill, u0, sill + wh, 0.03, T); mb.prot(u1, sill, u1 + s_, sill + wh, 0.03, T)
+            mb.prot(u0 - s_ - 0.04, sill + wh, u1 + s_ + 0.04, sill + wh + 0.16, 0.055, T)
+        mb.prot(u0 - s_, sill - 0.09, u1 + s_, sill, 0.07, T)
+    top = fh - (0.22 if P.get('frieze') else 0)
+    if clad == 'h':
+        _lap(mb, holes, W, ph, top, P.get('board_step', 0.15))
+        if top < fh: mb.wall([], W, v0=top)
+    elif clad == 'v': _batten(mb, holes, W, ph, fh)
+    else: mb.wall(holes + ([(0, 0, bw, ph)] if ph else []), W)
     cw = 0.14
-    if col in ('L', 'E', 'l', 'e'): mb.prot(0, ph, cw, fh, 0.04, T)
-    if col in ('R', 'E', 'r', 'e'): mb.prot(bw - cw, ph, bw, fh, 0.04, T)
+    if clad != 'none':
+        if col in ('L', 'E', 'l', 'e'): mb.prot(0, ph, cw, fh, 0.045, T)
+        if col in ('R', 'E', 'r', 'e'): mb.prot(bw - cw, ph, bw, fh, 0.045, T)
     if P.get('frieze'): mb.prot(0, fh - 0.22, bw, fh, 0.05, T)
+    if P.get('wband'): mb.prot(0, 0, bw, 0.12, 0.04, T)                                       # board between the storeys
     if ph:
         pl = P.get('plinth', M('#8d8d88', 0.9)); mb.wall([], pl, d=0.03, v1=ph); mb.sides(0, 0, bw, ph, 0, 0.03, pl, bottom=False)
+
+def gable_window(Z, F, P, ww=0.85, wh=1.0):
+    """attic window on a gable (1.5-storey houses): F(u, z, d) -> local 3D point, u from the middle of the gable, z from its foot, d outwards"""
+    T = P.get('trim', WHITE); z0 = 0.4; e = 0.1
+    add_solid(Z, [F(-ww / 2 - e, z0 - e, 0.04), F(ww / 2 + e, z0 - e, 0.04), F(ww / 2 + e, z0 + wh + e + 0.05, 0.04), F(-ww / 2 - e, z0 + wh + e + 0.05, 0.04)], T, 1.0)
+    for a, b in ((-ww / 2, -0.03), (0.03, ww / 2)):
+        add_solid(Z, [F(a, z0, 0.06), F(b, z0, 0.06), F(b, z0 + wh, 0.06), F(a, z0 + wh, 0.06)], GLASS, 1.0)
 
 MODS = dict(wood=m_wood, classic=m_classic, plain=m_plain, punched=m_punched, ribbon=m_ribbon, raster=m_raster, vraster=m_vraster, loggia=m_loggia, erker=m_erker, shop=m_shop)
 
@@ -642,7 +728,7 @@ def recompress_glb(data, q):
 def bake_zone(Z, outdir, samples=24, sun_az=118, sun_el=38):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     for k in list(_mats): _mats[k] = None
-    sc = bpy.context.scene; sc.render.engine = 'CYCLES'; sc.cycles.samples = samples; sc.cycles.use_denoising = False
+    sc = bpy.context.scene; sc.render.engine = 'CYCLES'; sc.cycles.samples = samples; sc.cycles.use_denoising = os.environ.get('PORI_DENOISE', '1') == '1'   # denoised bake: no grain at 64 samples
     import gpu_hook; gpu_hook.enable(sc)                                        # GPU on AWS (PORI_GPU=1)
     sc.cycles.max_bounces = 3; sc.cycles.diffuse_bounces = 2; sc.cycles.glossy_bounces = 2; sc.cycles.use_adaptive_sampling = False
     try: sc.cycles.sample_clamp_indirect = 3.0

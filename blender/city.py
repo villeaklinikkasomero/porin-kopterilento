@@ -58,30 +58,53 @@ def split(houses=False):
 
 # ---------------------------------------------------------------- detached houses and sheds (OSM building=house / shed ...)
 HOUSEC = ['#e8d58a', '#f1efe8', '#9b3b2c', '#cfd8c4', '#b9c7cf', '#e3c9a0', '#d6b35e', '#f1efe8', '#a8463a', '#e9e2cf', '#c7cbbf', '#e8d58a']
+def _jit(hx, i):
+    """the same paint is never quite the same on two houses: a small shift in tone per building (stable per index)"""
+    import colorsys, kivi
+    r, g, b = (int(hx[k:k + 2], 16) / 255 for k in (1, 3, 5)); h, l, s = colorsys.rgb_to_hls(r, g, b)
+    h = (h + (kivi.h01(i, 11) - 0.5) * 0.02) % 1; l = min(0.95, max(0.05, l * (1 + (kivi.h01(i, 12) - 0.5) * 0.09))); s = min(1, s * (1 + (kivi.h01(i, 13) - 0.5) * 0.16))
+    return '#%02x%02x%02x' % tuple(int(round(v * 255)) for v in colorsys.hls_to_rgb(h, l, s))
+
 def house_spec(i):
-    import kivi
-    from gen import M, MT, hexlin, offset
+    import kivi, colorsys
+    from gen import M, MT, hexlin, offset, gable_window
     b = kivi.B[i]; r = kivi.h01(i, 3); shed = b.get('k') == 2
     import zones2
-    lk = zones2.LOOK; e = lk['b'].get(str(i)); wood = lk.get('wood') or []
+    lk = zones2.LOOK; e = lk['b'].get(str(i)) or {}; wood = lk.get('wood') or []
+    yp = str(e.get('note', '')).startswith('Y-pakki')         # read from the building inventory (street photo): year, storeys, cladding
     def wpick(r_):                                       # locked timber-house palette (oblique photos of Päärnäinen / Kuukkari)
         t = sum(w for _, w in wood); k = r_ * t
         for hx, w in wood:
             k -= w
             if k <= 0: return hx
         return wood[0][0]
-    wall = e['w'] if e else '#8f3a2c' if shed and r < 0.7 else wpick(kivi.h01(i, 5)) if wood else HOUSEC[int(kivi.h01(i, 5) * len(HOUSEC))]
-    W = MT(wall, 'wood', 0.9); dark = M(tuple(c * 0.62 for c in hexlin(wall)), 0.9)
-    h = b['h']; nf = 1 if h < 6.8 else 2          # Kuukkari / Päärnäinen houses are mostly 1.5 storeys: one window row on the eave sides, taller plinth
-    rowP = {'G': dict(plinth_h=0.7, ww=1.15, wh=1.35, nx=2), 'U': dict(ww=1.0, wh=1.15, nx=2, frieze=True)}
+    wall = e.get('w') or ('#8f3a2c' if shed and r < 0.7 else wpick(kivi.h01(i, 5)) if wood else HOUSEC[int(kivi.h01(i, 5) * len(HOUSEC))])
+    if yp or not e.get('w'): wall = _jit(wall, i)        # hand-approved and measured colours stay exactly as they are
+    kind = e.get('k') if e.get('k') in ('render', 'brick') else 'wood'
+    clad = 'none' if kind != 'wood' else 'v' if e.get('c') == 'v' or (shed and r > 0.35) else 'h'
+    W = MT(wall, {'render': 'plaster', 'brick': 'brick'}.get(kind, 'woodv' if clad == 'v' else 'wood'), 0.9)
+    hl, ll, sl = colorsys.rgb_to_hls(*(int(wall[k:k + 2], 16) / 255 for k in (1, 3, 5)))
+    # trim: white on coloured walls; on white and pale grey walls a soft grey, so the corner boards and window frames still read
+    trim = M('#f2f0ea', 0.8) if not (ll > 0.8 and sl < 0.25) else M('#c4c6c2' if kivi.h01(i, 7) < 0.6 else '#f2f0ea', 0.8)
+    y = e.get('y') or (1900 if kivi.h01(i, 9) < 0.6 else 1950)        # no inventory year: the usual mix of the timber-house quarters
+    h = b['h']; f = e.get('f') if yp else None
+    nf = (2 if f >= 2 and h >= 4.6 else 1) if f else (1 if h < 6.8 else 2)   # Kuukkari / Päärnäinen houses are mostly 1.5 storeys: one window row on the eave sides
+    old = y < 1930
+    win = dict(ww=1.05, wh=1.45, nx=2, ny=3) if old else dict(ww=1.2, wh=1.25, nx=2, ny=1) if y < 1962 else dict(ww=1.5, wh=1.1, nx=2, ny=1, surround=0.07)
+    plinth = M('#77746e', 0.9) if old else M('#9a9a95', 0.9)           # natural stone under the old houses, cast concrete later
+    rowP = {'G': dict(plinth_h=0.7 if old else 0.55, plinth=plinth, clad=clad, **win), 'U': dict(clad=clad, **dict(win, wh=min(win['wh'], 1.25)), frieze=old, wband=True)}
+    if e.get('w2') and yp and nf == 2: rowP['U']['wall'] = MT(e['w2'], 'wood', 0.9)
     def cols(c, nb):
         if nb == 1: return 'E' if not shed else 'e'
         k = 'L' if c == 0 else 'R' if c == nb - 1 else 'W'
         return k.lower() if shed or (k == 'W' and c % 3 == 2 and nb > 3) else k
     rows = [(1, 'wood', 'G')] if nf == 1 else [(1.15, 'wood', 'G'), (1, 'wood', 'U')]
-    if nf == 1: rowP['G']['frieze'] = True
+    if nf == 1: rowP['G']['frieze'] = old
     layout = dict(bw=2.9 if not shed else 3.5, rows=rows, cols=cols, P={}, rowP=rowP, plain=False)
     l2 = bool(kivi.RAW.get(i))                         # measured LoD2 shell: walls and gables follow it, the game draws its measured roof
+    attic = not shed and (bool(e.get('u')) if yp else nf == 1 and kivi.h01(i, 8) < 0.7)
+    gcol = e['w2'] if e.get('w2') and yp else wall                      # two-tone houses: the gable carries the second colour
+    gwall = MT(tuple(c_ * 1.001 for c_ in hexlin(gcol)), 'woodl', 0.9) if clad == 'h' else W if gcol == wall else MT(gcol, 'woodv' if clad == 'v' else 'plaster', 0.9)
     def gable_ends(Z, pts, hh, P):                      # same pitched roof the game draws for houses: ridge along the long side
         import math
         if len(pts) > 14 or shed or l2: return
@@ -91,9 +114,11 @@ def house_spec(i):
         for su in (-1, 1):
             p0 = (cx + ux * su * a - vx * bb, cy + uy * su * a - vy * bb); p1 = (cx + ux * su * a + vx * bb, cy + uy * su * a + vy * bb); pt = (cx + ux * su * a, cy + uy * su * a)
             tri = [L(p0[0], p0[1], hh), L(p1[0], p1[1], hh), L(pt[0], pt[1], hh + rise - 0.15)]
-            kivi.add_solid(Z, tri if su > 0 else tri[::-1], P['wall'], 0.5)
+            kivi.add_solid(Z, tri if su > 0 else tri[::-1], gwall, 0.5)
             kivi.add_solid(Z, [L(p0[0], p0[1], hh - 0.02), L(p1[0], p1[1], hh - 0.02), L(p1[0], p1[1], hh + 0.2), L(p0[0], p0[1], hh + 0.2)], P['trim'], 0.3)
-    return dict(P=dict(wall=W, trim=M('#f2f0ea', 0.8), board=dark, frame=M('#f2f0ea')), layout=layout, extra=[gable_ends], footprint=not l2)
+            if attic and rise > 2.3 and bb * (1 - 1.65 / rise) > 0.62:
+                gable_window(Z, lambda u, z, d, su=su, pt=pt: L(pt[0] + vx * u + ux * su * d, pt[1] + vy * u + uy * su * d, hh + 0.2 + z), P)
+    return dict(P=dict(wall=W, trim=trim, frame=M('#f2f0ea')), layout=layout, extra=[gable_ends], footprint=not l2, attic=attic, upper_mat=gwall)
 
 
 if __name__ == '__main__':
