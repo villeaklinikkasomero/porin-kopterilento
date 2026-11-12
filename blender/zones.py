@@ -175,7 +175,7 @@ def bepop_extra(Z, pts, h, P):
         add_solid(Z, [G(u1, v1, z0), G(u0, v1, z0), G(u0, v1, z1), G(u1, v1, z1)], m, dn); add_solid(Z, [G(u0, v1, z0), G(u0, v0, z0), G(u0, v0, z1), G(u0, v1, z1)], m, dn)
     box(-7.5, -6.5, 7.5, 6.5, 14.2, 15.1, wh_); box(-7.62, -6.62, 7.62, 6.62, 14.45, 14.8, red, 0.4)
     for u, v in ((-6.6, 5.6), (-6.6, -0.5), (0.5, 5.6)): box(u - 0.35, v - 0.35, u + 0.35, v + 0.35, 0, 14.2, wh_, 0.6)
-_bpP = dict(wall=M('#9cb6cb'), frame=M('#1f4a4f'), joints=M('#7f95a3'), spandrel=M('#a3b8c6'), gwall=M('#8ea5b4'), plinth=M('#4d5f6b', 0.4), fascia=M('#6f8a9c'), gframe=M('#1f4a4f'), sign=SIGNS, rail=M('#c23a2e'))
+_bpP = dict(wall=M('#b6c8d6'), frame=M('#1f4a4f'), joints=M('#7f95a3'), spandrel=M('#a3b8c6'), gwall=M('#8ea5b4'), plinth=M('#4d5f6b', 0.4), fascia=M('#6f8a9c'), gframe=M('#1f4a4f'), sign=SIGNS, rail=M('#c23a2e'))
 _bpat = 'WWRRRWNWTTWRRWWNWWRRRRWTWNW'
 SPEC[BEPOP] = dict(h=BP_H, P=_bpP, layout=lay(BP_H, 'punched', gh=4.6, bw=3.0, fh=4.1, cols=lambda c, nb: _bpat[(c + nb) % len(_bpat)],
                    P=dict(colmod={'R': 'ribbon', 'N': 'plain'}, ww=1.5, wh=1.5, nx=2, sill=1.1, wh2=1), rowP={}), cornice=(0.18, 0.55, M('#5f7f93')), extra=[bepop_extra])
@@ -303,12 +303,37 @@ _BP_TW = (52.0, -375.9); _BP_TWR = 5.6
 _BP_HOT = _SP(poly(HOTBP)[0]).buffer(0.8); _BP_ML = _SP(poly(MAAKL)[0]).buffer(0.8)
 _bpG = M('#cfe3d8', 0.08)                              # vault glass, light green-blue tint as in the aerial image
 _bpGlz = dict(P=dict(wall=M('#3d7f5c', 0.4, 0.3), frame=M('#3d7f5c', 0.4, 0.3), panel=M((0.05, 0.16, 0.12), 0.08), gwall=M('#3d7f5c', 0.4, 0.3)))
+
+def _strip(mb, a, b, w, d, mat):
+    """flat bar from a to b (u, v) in the facade tile, CCW"""
+    du, dv = b[0] - a[0], b[1] - a[1]; L = math.hypot(du, dv) or 1; nu, nv = -dv / L * w / 2, du / L * w / 2
+    mb.hq([(a[0] - nu, a[1] - nv, d), (b[0] - nu, b[1] - nv, d), (b[0] + nu, b[1] + nv, d), (a[0] + nu, a[1] + nv, d)], mat)
+def m_tri(mb, col, P):
+    """BePOP: inverted triangular window under the eaves (white tile wall, dark frame, green-tinted glass)"""
+    bw, fh, W = mb.bw, mb.fh, P['wall']; mb.wall([], W)
+    if col == 'N': return
+    m, top, tip = 0.3, fh - 0.35, max(0.3, fh * 0.12)
+    mb.hq([(bw / 2, tip, 0.01), (bw - m, top, 0.01), (m, top, 0.01)], P.get('frame', DARK))
+    mb.hq([(bw / 2, tip + 0.22, 0.02), (bw - m - 0.17, top - 0.1, 0.02), (m + 0.17, top - 0.1, 0.02)], M((0.12, 0.3, 0.24), 0.1))
+def m_diamond(mb, col, P):
+    """BePOP entrance hall: glass behind a diagonal (diamond) lattice of light green bars"""
+    bw, fh = mb.bw, mb.fh; fr = P.get('frame', M('#cfe0d6', 0.4, 0.3)); gl = P.get('panel', M((0.06, 0.16, 0.13), 0.08))
+    mb.q(0, 0, bw, fh, -0.2, gl)
+    mb.sides(0, 0, bw, fh, 0, -0.2, fr)
+    _strip(mb, (0, 0), (bw, fh), 0.09, -0.12, fr); _strip(mb, (bw, 0), (0, fh), 0.09, -0.12, fr)
+    _strip(mb, (0, fh / 2), (bw / 2, fh), 0.06, -0.13, fr); _strip(mb, (bw / 2, 0), (bw, fh / 2), 0.06, -0.13, fr)
+    _strip(mb, (bw, fh / 2), (bw / 2, fh), 0.06, -0.13, fr); _strip(mb, (bw / 2, 0), (0, fh / 2), 0.06, -0.13, fr)
+    mb.q(0, 0, 0.12, fh, -0.1, fr); mb.q(bw - 0.12, 0, bw, fh, -0.1, fr); mb.q(0, fh - 0.1, bw, fh, -0.1, fr)
+MODS['tri'] = m_tri; MODS['diamond'] = m_diamond
 def _bp_fit(lay_, H, street, L, zb):
     gh = 4.6 if zb < 1.5 and H > 7 else 0.0; n = max(1, round((H - gh) / 4.0)); fh = (H - gh) / n
-    return dict(bw=3.0, rows=([(gh, 'shop', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n, cols=lambda c, nb: _bpat[(c + nb) % len(_bpat)],
-                P=dict(colmod={'R': 'ribbon', 'N': 'plain'}, ww=1.5, wh=1.5, nx=2, sill=1.1, wh2=1), rowP={})
+    rows = ([(gh, 'shop', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n
+    if H > 10 and n >= 2: rows[-1] = (fh, 'punched', 'T')                   # top storey: the inverted triangles of the photos
+    return dict(bw=3.0, rows=rows, cols=lambda c, nb: _bpat[(c + nb) % len(_bpat)],
+                P=dict(colmod={'R': 'ribbon', 'N': 'plain'}, ww=1.5, wh=1.5, nx=2, sill=1.1, wh2=1),
+                rowP={'T': dict(colmod={'W': 'tri', 'R': 'tri', 'T': 'tri', 'N': 'plain'})})
 def _bp_glz_fit(lay_, H, street, L, zb):
-    n = max(1, round(H / 3.0)); return dict(bw=2.2, rows=[(H / n, 'vraster', 'F')] * n, cols=lambda c, nb: 'W', P=dict(fin=0.25, nx=2, frame=M('#3d7f5c', 0.4, 0.3)), rowP={})
+    n = max(1, round(H / 2.6)); return dict(bw=2.6, rows=[(H / n, 'diamond', 'F')] * n, cols=lambda c, nb: 'W', P=dict(frame=M('#cfe0d6', 0.4, 0.3)), rowP={})
 def _hb_fit(lay_, H, street, L, zb):
     gh = 4.2 if zb < 1.5 and H > 7 else 0.0; n = max(1, round((H - gh) / 3.4)); fh = (H - gh) / n
     rows = ([(gh, 'shop', 'G')] if gh else []) + [(fh, 'ribbon', 'L' if (street and (k >= 2 or zb > 1.5)) else 'F') for k in range(n)]
@@ -337,15 +362,25 @@ def _bp_extra(Z, pts, h, P):
     L = lambda x, y, z: (x - Z.cx, y - Z.cy, z); wh_ = M('#f2f4f4')
     # round tower through the vault, offices fanning round it; white with dark-framed windows, light cap
     tw = dict(wall=M('#e8edf0'), frame=M('#1f4a4f'), joints=M('#8f9ea8')); ring = _ring(_BP_TW[0], _BP_TW[1], _BP_TWR, 20); z0, z1 = 16.0, 26.9
-    for k in range(20): build_wall(Z, ring[k], ring[(k + 1) % 20], z0, z1, dict(bw=1.75, rows=[(3.6, 'punched', 'F')] * 3, cols=lambda c, nb: 'W', P=dict(ww=1.0, wh=1.6, nx=1, sill=0.9), rowP={}), tw, 900 + k, 0)
-    add_solid(Z, [L(x, y, z1) for x, y in ring], M('#5d6d78', 0.5), 0.3)
+    zf = z1 - 3.4                                                            # open crown of white fins above the office floors
+    for k in range(20): build_wall(Z, ring[k], ring[(k + 1) % 20], z0, zf, dict(bw=1.75, rows=[(3.7, 'punched', 'F')] * 2, cols=lambda c, nb: 'W', P=dict(ww=1.0, wh=1.6, nx=1, sill=0.9), rowP={}), tw, 900 + k, 0)
+    add_solid(Z, [L(x, y, zf) for x, y in _ring(_BP_TW[0], _BP_TW[1], _BP_TWR - 0.6, 20)], M('#5d6d78', 0.5), 0.3)
+    for k in range(20):
+        a = 2 * math.pi * (k + 0.5) / 20; ca, sa = math.cos(a), math.sin(a); tx_, ty_ = -sa, ca
+        for (r0, r1) in ((_BP_TWR - 0.9, _BP_TWR + 0.15),):
+            pA = (_BP_TW[0] + ca * r0, _BP_TW[1] + sa * r0); pB = (_BP_TW[0] + ca * r1, _BP_TW[1] + sa * r1); w = 0.13
+            for sgn in (1, -1):
+                q0 = (pA[0] + tx_ * w * sgn, pA[1] + ty_ * w * sgn); q1 = (pB[0] + tx_ * w * sgn, pB[1] + ty_ * w * sgn)
+                f = [L(q0[0], q0[1], zf), L(q1[0], q1[1], zf), L(q1[0], q1[1], z1), L(q0[0], q0[1], z1)]
+                add_solid(Z, f if sgn < 0 else f[::-1], wh_, 0.4)
+            add_solid(Z, [L(pB[0] - tx_ * w, pB[1] - ty_ * w, zf), L(pB[0] + tx_ * w, pB[1] + ty_ * w, zf), L(pB[0] + tx_ * w, pB[1] + ty_ * w, z1), L(pB[0] - tx_ * w, pB[1] - ty_ * w, z1)], wh_, 0.4)
     hat = _ring(_BP_TW[0], _BP_TW[1], _BP_TWR + 1.1, 20)
     add_solid(Z, [L(x, y, z1 + 0.35) for x, y in hat], wh_, 0.3); add_solid(Z, [L(x, y, z1) for x, y in hat][::-1], wh_, 0.3)
     for k in range(20):
         a, b = hat[k], hat[(k + 1) % 20]; add_solid(Z, [L(a[0], a[1], z1), L(b[0], b[1], z1), L(b[0], b[1], z1 + 0.35), L(a[0], a[1], z1 + 0.35)], wh_, 0.4)
     # entrance canopy: slender white columns with ring joints under the scanned roof (soffit and fascia added below the LoD2 plate)
     cs = list(_BP_CAN.exterior.coords)[:-1]; cx = sum(c[0] for c in cs) / 4; cy = sum(c[1] for c in cs) / 4
-    big = [(cx + (x - cx) * 1.12, cy + (y - cy) * 1.12) for x, y in cs]; zc = 23.4
+    big = [(cx + (x - cx) * 1.38, cy + (y - cy) * 1.38) for x, y in cs]; zc = 23.4      # the plate reaches well past the glass hall (photos)
     if _SP(big).exterior.is_ccw is False: big = big[::-1]                 # counter-clockwise: tops face up, fascias outwards (one face each: two coincident faces bake black)
     add_solid(Z, [L(x, y, 19.0) for x, y in cs], M((0.08, 0.2, 0.15), 0.1), 0.4)        # glass roof of the entrance hall under the canopy
     for k in range(4):
@@ -353,14 +388,20 @@ def _bp_extra(Z, pts, h, P):
         add_solid(Z, fq, wh_, 0.4)
     add_solid(Z, [L(x, y, zc) for x, y in big][::-1], wh_, 0.4)
     add_solid(Z, [L(x, y, zc + 0.9) for x, y in big], M('#e4e7e8'), 0.3)
-    for x, y in big:
-        px_, py_ = cx + (x - cx) * 0.9, cy + (y - cy) * 0.9; col = _ring(px_, py_, 0.38, 10)
-        for k in range(10):
-            a, b = col[k], col[(k + 1) % 10]; add_solid(Z, [L(a[0], a[1], 0), L(b[0], b[1], 0), L(b[0], b[1], zc), L(a[0], a[1], zc)], wh_, 0.5)
-        for zr in (4.0, 4.4, 17.6, 18.0):                                           # ring joints
-            rr = _ring(px_, py_, 0.5, 10)
-            for k in range(10):
-                a, b = rr[k], rr[(k + 1) % 10]; add_solid(Z, [L(a[0], a[1], zr), L(b[0], b[1], zr), L(b[0], b[1], zr + 0.2), L(a[0], a[1], zr + 0.2)], M('#c9ced1'), 0.3)
+    pos = []
+    for k in range(4):
+        a, b = big[k], big[(k + 1) % 4]; pos += [a, ((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)]
+    def cyl(px_, py_, r0, r1, z0_, z1_, mat, n=12, dn=0.5):
+        A = _ring(px_, py_, r0, n); Bq = _ring(px_, py_, r1, n)
+        for k in range(n): add_solid(Z, [L(A[k][0], A[k][1], z0_), L(A[(k + 1) % n][0], A[(k + 1) % n][1], z0_), L(Bq[(k + 1) % n][0], Bq[(k + 1) % n][1], z1_), L(Bq[k][0], Bq[k][1], z1_)], mat, dn)
+    grey = M('#8e989d', 0.5, 0.3)
+    for x, y in pos:
+        px_, py_ = cx + (x - cx) * 0.92, cy + (y - cy) * 0.92
+        cyl(px_, py_, 0.5, 0.5, 0, 2.8, grey)                                   # lit base
+        for zr in (0.7, 1.4, 2.1): cyl(px_, py_, 0.56, 0.56, zr, zr + 0.12, M('#c9ced1'), dn=0.3)
+        cyl(px_, py_, 0.3, 0.3, 2.8, zc - 2.6, wh_)                             # slender shaft
+        for k in range(5):                                                       # ribbed capital, an inverted cone
+            za = zc - 2.6 + k * 0.52; ra = 0.3 + 0.12 * k; cyl(px_, py_, ra, ra + 0.12, za, za + 0.4, wh_, dn=0.4); cyl(px_, py_, ra + 0.12, ra + 0.1, za + 0.4, za + 0.52, grey, dn=0.3)
 SPEC[BEPOP] = dict(lod2=True, runalt=lambda x, y: _SPEC_GLZ if _BP_CAN.buffer(0.3).contains(_SPt(x, y)) else _SPEC_ML if _BP_ML.contains(_SPt(x, y)) else _SPEC_HB if _BP_HOT.contains(_SPt(x, y)) else None, zcap=lambda x, y: 19.0 if _BP_CAN.buffer(0.3).contains(_SPt(x, y)) else None, P=_bpP, layout=_bp_fit(None, 18, True, 20, 0), fitw=_bp_fit, alt=_bp_alt, skip=_bp_skip, roofmat_fn=_bp_roof, extra=[_bp_extra])
 
 ZONES = {

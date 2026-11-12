@@ -91,12 +91,14 @@ def build_lod2(Z, i, spec, upper=None):
     FP = unary_union([Polygon([(p[0], p[1]) for p in r]).buffer(0) for k, r, _ in RAW[i] if k == 'G' and len(r) >= 3])
     for k, r, holes in RAW[i]:
         if k == 'G' or len(r) < 3: continue
+        if spec.get('skip') and spec['skip'](r, k): continue          # parts replaced by hand-built geometry (BePOP tower)
         spec_ = spec
         if spec.get('alt'):                                    # part of the shell is another building (Lyseo: 1950s wing on the same footprint)
             spec_ = spec['alt'](sum(p[0] for p in r) / len(r), sum(p[1] for p in r) / len(r)) or spec
         P_ = spec_['P']
         if k == 'R':
-            if ROOFBAKE or spec_.get('roofmat'): add_solid(Z, [L(*p) for p in r], spec_.get('roofmat') or roof_mat(i), 0.45)
+            rmf = spec_.get('roofmat_fn') and spec_['roofmat_fn'](r)
+            if ROOFBAKE or spec_.get('roofmat') or rmf: add_solid(Z, [L(*p) for p in r], rmf or spec_.get('roofmat') or roof_mat(i), 0.45)
             else: Z.hi.append(([L(*p) for p in r], ROOFOCC))
             continue
         n = newell(r)
@@ -134,15 +136,27 @@ def build_lod2(Z, i, spec, upper=None):
             else: merged.append(r_)
         runs = merged; seed += 1; boxes = []
         W3 = lambda u, z: L(o.x + t.x * u, o.y + t.y * u, z)
+        zcap = spec.get('zcap')
+        if zcap:                                                # open space under a canopy: walls end lower, loose fragments go
+            runs2 = []
+            for u0r, u1r, ze in runs:
+                um = (u0r + u1r) / 2; cap = zcap(o.x + t.x * um, o.y + t.y * um)
+                if cap is None: runs2.append((u0r, u1r, ze)); continue
+                if zb < cap: runs2.append((u0r, u1r, min(ze, cap)))
+                elif zb > 23.0: runs2.append((u0r, u1r, ze))
+            if not runs2: continue
+            capped = runs2 != runs; runs = runs2
+        else: capped = False
         for u0r, u1r, ze in runs:
             if not (ze - zb > 1.2 and u1r - u0r > 0.4): continue
             seed += 1
             p = (o.x + t.x * u0r, o.y + t.y * u0r); q = (o.x + t.x * u1r, o.y + t.y * u1r)
             mid2 = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2); street = STREET is None or STREET(mid2, (n.x, n.y))
-            lay_ = (spec_['layout'] if street or 'yard' not in spec_ else spec_['yard']) if zb < 1.5 else (spec_.get('upper') or upper or lay(ze - zb, 'punched', bw=3.3, fh=3.0))
-            if spec_.get('fit'): lay_ = spec_['fit'](lay_, ze - zb, street)
-            if spec_.get('fitw'): lay_ = spec_['fitw'](lay_, ze - zb, street, u1r - u0r, zb)   # also by wall length and base height (gable ends, walls above a lower roof)
-            build_wall(Z, p, q, zb, ze, lay_, spec_.get('Pyard', P_) if not street else P_, i * 31 + seed, i)
+            ra = spec.get('runalt') and spec['runalt'](*mid2); s_ = ra or spec_; Pr = ra['P'] if ra else P_      # one stretch of a wall as another building part
+            lay_ = (s_['layout'] if street or 'yard' not in s_ else s_['yard']) if zb < 1.5 else (s_.get('upper') or upper or lay(ze - zb, 'punched', bw=3.3, fh=3.0))
+            if s_.get('fit'): lay_ = s_['fit'](lay_, ze - zb, street)
+            if s_.get('fitw'): lay_ = s_['fitw'](lay_, ze - zb, street, u1r - u0r, zb)   # also by wall length and base height (gable ends, walls above a lower roof)
+            build_wall(Z, p, q, zb, ze, lay_, s_.get('Pyard', Pr) if not street else Pr, i * 31 + seed, i)
             if spec_.get('cornice') and zb < 1.5 and (street or spec_.get('cornice_all')):
                 cw, ch, cm = spec_['cornice']; nn = Vector((n.x, n.y)).normalized()
                 for (dd, z0_, z1_) in ((cw * 0.45, ze - ch, ze - ch * 0.55), (cw, ze - ch * 0.55, ze)):
@@ -158,6 +172,9 @@ def build_lod2(Z, i, spec, upper=None):
         ze = min(r_[2] for r_ in runs)
         for part in getattr(rest, 'geoms', [rest]):
             if part.is_empty or part.area < 0.05 or part.geom_type != 'Polygon': continue
+            if zcap:
+                pc = part.centroid; cap = zcap(o.x + t.x * pc.x, o.y + t.y * pc.y)
+                if cap is not None and part.bounds[1] < 23.0: continue
             ring = list(part.exterior.coords)[:-1]
             if len(ring) < 3: continue
             pts3 = [W3(u, z) for u, z in ring]
