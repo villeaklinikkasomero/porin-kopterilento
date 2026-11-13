@@ -2818,7 +2818,13 @@
 "sv": 1
 },
 "584": {
-"f": 2
+"f": 2,
+"w": "#c3c7c9",
+"w2": "#4c5257",
+"s2": 0.3,
+"k": "metal",
+"note": "Street View 13.11.2026: harmaa peltihalli, tumma alaosa",
+"sv": 1
 },
 "585": {
 "w": "#eadfc6",
@@ -2852,9 +2858,11 @@
 "y": 1989
 },
 "589": {
-"w": "#6c7184",
-"m": 1,
-"k": "render"
+"w": "#e6d9bd",
+"k": "render",
+"f": 2,
+"note": "Street View 13.11.2026: pitkä vaalea 2 krs liike-/toimistorakennus, kyltti katolla",
+"sv": 1
 },
 "590": {
 "w": "#46557a",
@@ -2870,11 +2878,14 @@
 "f": 2
 },
 "597": {
-"w": "#6e7694",
-"m": 1,
+"w": "#2f5fae",
 "k": "render",
 "r": "#3f4246",
-"f": 2
+"f": 2,
+"w2": "#c8ccd0",
+"s2": 0.45,
+"note": "Street View 13.11.2026: liikehalli, kadun puoli kirkkaan sininen julkisivu, sivut harmaat",
+"sv": 1
 },
 "598": {
 "w": "#6b6c7f",
@@ -3305,26 +3316,37 @@
 "s2": 0.42
 },
 "716": {
-"f": 5
+"f": 5,
+"w": "#a2563f",
+"k": "brick",
+"note": "Street View 13.11.2026: punatiilinen kerrostalo",
+"sv": 1
 },
 "718": {
-"w": "#847e8a",
-"m": 1,
-"k": "render",
+"w": "#9e563f",
+"k": "brick",
 "r": "#3f4246",
-"f": 3
+"f": 3,
+"note": "Street View 13.11.2026 (Paanakedonkatu): punatiilinen 3 krs, lasinen porrashuone",
+"sv": 1
 },
 "725": {
 "f": 2
 },
 "727": {
-"w": "#a4a1a9",
-"m": 1,
-"k": "render",
-"f": 4
+"w": "#b9573c",
+"k": "brick",
+"f": 4,
+"w2": "#ecebe6",
+"s2": 0.3,
+"note": "Street View 13.11.2026: oranssinpunainen tiili + valkoiset paneelit",
+"sv": 1
 },
 "749": {
-"f": 5
+"f": 5,
+"w": "#a2563f",
+"k": "brick",
+"sv": 1
 },
 "768": {
 "f": 2,
@@ -3411,14 +3433,21 @@
 "c": "v"
 },
 "949": {
-"f": 3
+"f": 3,
+"w": "#a0573f",
+"k": "brick",
+"note": "Street View 13.11.2026: punatiilinen 3 krs",
+"sv": 1
 },
 "950": {
-"w": "#c9c7c2",
+"w": "#c7a593",
 "k": "wood",
-"f": 1,
-"note": "Y-pakki: Vähäuusikatu 1, Tontti 218, 1898",
-"y": 1898
+"f": 2,
+"note": "Street View 13.11.2026: vaaleanpunertava 2 krs puutalo, valkoiset listat",
+"y": 1898,
+"r": "#5a4a40",
+"sv": 1,
+"wb": 3.5
 },
 "953": {
 "w": "#efe0a8",
@@ -5519,11 +5548,12 @@
 "f": 4
 },
 "1663": {
-"w": "#737688",
-"m": 1,
+"w": "#e6e6e2",
 "k": "render",
 "r": "#74787b",
-"f": 4
+"f": 4,
+"note": "Street View 13.11.2026: vaalea 4 krs kerrostalo",
+"sv": 1
 },
 "1665": {
 "w": "#b0a9ac",
@@ -5543,9 +5573,11 @@
 "k": "render"
 },
 "1674": {
-"w": "#545d77",
-"m": 1,
-"k": "render"
+"w": "#d9b65e",
+"k": "wood",
+"f": 1,
+"note": "Street View 13.11.2026 (Paanakedonkatu): okrankeltainen puutalo",
+"sv": 1
 },
 "1676": {
 "w": "#8d8694",
@@ -5555,14 +5587,19 @@
 "f": 5
 },
 "1678": {
-"w": "#777688",
-"m": 1,
-"k": "render"
+"w": "#9e5a43",
+"k": "brick",
+"note": "Street View 13.11.2026: punatiilinen",
+"sv": 1
 },
 "1679": {
-"w": "#929095",
-"m": 1,
-"k": "render"
+"w": "#e6dcc0",
+"k": "wood",
+"f": 1,
+"r": "#7b7f82",
+"note": "Street View 13.11.2026: pitkä vaalea puutalo, harmaa katto, savupiiput",
+"sv": 1,
+"wb": 2.6
 },
 "1682": {
 "w": "#958f9d",
@@ -5571,9 +5608,12 @@
 "r": "#74787b"
 },
 "1684": {
-"w": "#6a6b7d",
-"m": 1,
-"k": "render"
+"w": "#e4e4e0",
+"k": "wood",
+"f": 1,
+"r": "#55585b",
+"note": "Street View 13.11.2026: valkoinen puutalo, tumma katto",
+"sv": 1
 },
 "1686": {
 "w": "#7d7a8d",
@@ -5581,9 +5621,11 @@
 "k": "render"
 },
 "1687": {
-"w": "#727287",
-"m": 1,
-"k": "render"
+"w": "#8c3b2e",
+"k": "wood",
+"f": 2,
+"sv": 1,
+"note": "Street View 13.11.2026 + pelivertailu P01B: punamullattu 2 krs puurakennus"
 },
 "1690": {
 "w": "#8e848f",
@@ -8353,12 +8395,13 @@
 "y": 1939
 },
 "1247": {
-"w": "#e3d6b6",
+"w": "#eceae4",
 "k": "wood",
 "f": 1,
 "note": "Y-pakki: Herralahdenk.2 / Säveltäjänk. 2 (rakennus 2), Tontti 237, 1920",
 "y": 1920,
-"u": 1
+"u": 1,
+"sv": 1
 },
 "1085": {
 "w": "#eeece6",
@@ -8484,7 +8527,8 @@
 "r": "#b8302a",
 "note": "Y-pakki: Itälinjak.1 / Paanakedonk.23 (rakennukset 1 ja 3), Tontti 257, 1950",
 "y": 1950,
-"c": "v"
+"c": "v",
+"sv": 1
 },
 "741": {
 "w": "#b7c6d6",
@@ -8493,7 +8537,8 @@
 "r": "#b8302a",
 "note": "Y-pakki: Itälinjak.1 / Paanakedonk.23 (rakennus 2), Tontti 257, 1957",
 "y": 1957,
-"c": "v"
+"c": "v",
+"sv": 1
 },
 "746": {
 "w": "#e9cf8c",
@@ -8737,19 +8782,24 @@
 "y": 1936
 },
 "928": {
-"w": "#e9cf8c",
+"w": "#ecebe6",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Juhana Herttuank.3 / Poikkikatu 1 (rakennus 3), Tontti 255, 1928",
+"note": "Street View 13.11.2026: valkoinen 1,5 krs puutalo, harmaa katto",
 "y": 1928,
-"u": 1
+"u": 1,
+"r": "#5a5d60",
+"sv": 1,
+"wb": 3.7
 },
 "1067": {
-"w": "#e3d6b6",
+"w": "#efeeea",
 "k": "wood",
 "f": 1,
 "note": "Y-pakki: Juhana Herttuank.6 / Poikkik.3a, Tontti 1 (259), (rakennus 1), 1955",
-"y": 1955
+"y": 1955,
+"r": "#4f5356",
+"sv": 1
 },
 "1065": {
 "w": "#b7c6d6",
@@ -9056,9 +9106,10 @@
 "w": "#e9cf8c",
 "k": "wood",
 "f": 2,
-"r": "#b8302a",
+"r": "#5a4f48",
 "note": "Y-pakki: Säveltäjänk. 1 / Herralahdenk. 1 (rakennus 2), Tontti 236, 1920",
-"y": 1920
+"y": 1920,
+"sv": 1
 },
 "936": {
 "w": "#e3d6b6",
@@ -11270,6 +11321,111 @@
 "f": 2,
 "k": "render",
 "r": "#4a4d50",
+"sv": 1
+},
+"1659": {
+"w": "#d3c09e",
+"k": "wood",
+"f": 1,
+"r": "#7a3e30",
+"note": "Street View 13.11.2026 (Paanakedonkatu): pitkä matala beige puurakennus, punaruskea katto",
+"sv": 1,
+"wb": 3.4
+},
+"1683": {
+"w": "#dcbb62",
+"k": "wood",
+"f": 1,
+"r": "#5a5d60",
+"sv": 1,
+"wb": 3.7
+},
+"715": {
+"w": "#e3d6b4",
+"k": "wood",
+"f": 1,
+"r": "#6d5a4a",
+"sv": 1,
+"wb": 3.8
+},
+"594": {
+"w": "#d8d8d4",
+"k": "render",
+"f": 1,
+"sv": 1
+},
+"934": {
+"w": "#dcc074",
+"k": "wood",
+"f": 2,
+"r": "#5a4a40",
+"note": "Street View 13.11.2026: keltainen 2 krs puutalo, tumma katto",
+"sv": 1,
+"wb": 3.8
+},
+"935": {
+"w": "#c7cdc2",
+"k": "wood",
+"f": 2,
+"r": "#4f5356",
+"note": "Street View 13.11.2026: harmaanvihreä 2 krs puutalo",
+"sv": 1
+},
+"592": {
+"w": "#e9e9e6",
+"k": "render",
+"f": 1,
+"sv": 1
+},
+"724": {
+"w": "#e3e3de",
+"k": "wood",
+"f": 1,
+"sv": 1
+},
+"940": {
+"w": "#8e3a2e",
+"k": "wood",
+"f": 1,
+"sv": 1
+},
+"595": {
+"w": "#d9dbdc",
+"w2": "#2e3134",
+"s2": 0.3,
+"k": "render",
+"f": 1,
+"note": "Street View 13.11.2026: vaalea liikehalli (Stadium), tumma nauha",
+"sv": 1
+},
+"938": {
+"w": "#9a3b2e",
+"k": "wood",
+"f": 1,
+"sv": 1,
+"note": "Street View 13.11.2026: punainen puuvaja (6 m päästä)"
+},
+"591": {
+"w": "#e6e4df",
+"w2": "#9a2a28",
+"s2": 0.4,
+"k": "render",
+"f": 1,
+"note": "Street View 13.11.2026: liikehalli, valkoinen osa + tummanpunainen julkisivuosa",
+"sv": 1
+},
+"758": {
+"w": "#a2563f",
+"k": "brick",
+"f": 4,
+"sv": 1
+},
+"756": {
+"w": "#b8c2cc",
+"k": "wood",
+"f": 2,
+"r": "#5a5d60",
+"note": "Street View 13.11.2026 (Juhana Herttuan katu 2): pitkä siniharmaa 2 krs puurakennus, yläkerrassa ikkunanauha",
 "sv": 1
 }
 }

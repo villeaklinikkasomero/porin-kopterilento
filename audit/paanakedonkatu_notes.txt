@@ -1,0 +1,40 @@
+P00A kaukana (Aittaluodon tornit 1646/1648 punatiili ok)
+P00B 1659 pitkä matala beige puurakennus punaruskea katto -> lisätty; 1747 valkoinen toimisto
+P01A puistoa
+P01B 1684 valkoinen puutalo tumma katto (oli tumma mitattu); 1687 punamullattu 2 krs puurakennus
+P02A puistoa
+P01B/P02B 1687 EPÄVARMA (P01B punainen 2 krs, P02B valkoinen puutalo) -> palautettu, uusintakierros; 1663 valkoinen 4 krs ok (taustalla)
+P03B 1674 okrankeltainen puutalo -> lisätty
+P04B 1679 pitkä vaalea puutalo harmaa katto -> lisätty
+P05B 1683 okra puutalo; 1678 punatiili -> lisätty
+P06B 715 vaalea beige pitkä puutalo; 716 punatiilinen kerrostalo 5 krs -> lisätty
+P07B/P08B 716 punatiili 5 krs ok; 718 punatiili 3 krs lasiporrashuone (oli harmaa mitattu) -> korjattu
+P09B 949 punatiili 3 krs -> lisätty
+P09A/P10A 589 pitkä vaalea 2 krs liikerakennus (oli tumma mitattu) -> korjattu
+P10B 727 oranssinpunainen tiili + valkoiset paneelit (oli harmaa mitattu)
+P11A 594 matala vaalea; 586 siniharmaa varasto ok
+P11B 950 Vähäuusikatu 1 (1898): vaaleanpunertava 2 krs puutalo (oli harmaa 1 krs)
+P12B 934 keltainen 2 krs puutalo tumma katto -> lisätty; 930 epävarma
+P13B 947 katto tumma (ei punainen)
+P14B 935 harmaanvihreä 2 krs puutalo -> lisätty; 1247 valkoinen
+P15A/P16A 592 matala valkoinen liikerakennus; 597 vaalea liikehalli sininen nauha (oli tumma mitattu)
+P15B 731 okra pitkä puutalo ok; 927 ok
+P16B 724 matala vaalea puutalo -> lisätty
+P17A 597 KORJATTU: kadun puoli kirkkaan sininen liikehalli, sivut harmaat (P16A:n "valkoinen" oli sivuseinä)
+P17B 940 punamullattu pieni puutalo; 724 vaalea ok
+P18A/P19A 595 vaalea liikehalli tumma nauha (Stadium); 590 tumma kaukana ok
+P18B 938 matala vaalea; 741/734 vaaleat (ei siniharmaat)
+P19B/P20B 741/734 PALAUTETTU siniharmaa puutalo punainen katto (P18B:n "valkoinen" oli vastavalossa)
+P20A/P21A 591 liikehalli: valkoinen + tummanpunainen osa
+P20B 749 punatiili 5 krs; P21B 758 punatiili 4 krs, 752 keltainen puutalo puiden takana (ei muutettu)
+P22A 591 valkoinen+punainen osa vahvistui
+P23A 756 pitkä siniharmaa 2 krs puurakennus, ikkunanauha yläkerrassa -> lisätty
+P23B 938 KORJATTU punaiseksi puuvajaksi (6 m:n etäisyys luotettavampi kuin P18B 32 m)
+P24A 1067 valkoinen puutalo tumma katto
+P24B 928 valkoinen 1,5 krs puutalo (oli keltainen)
+P25B/P26B/P29B 584 harmaa peltihalli tumma alaosa -> metal
+P30B 583 kaukana vaalea ok
+P34B/P39B/P40B Ulvilantien puolta, puita; ei muutoksia
+PELIVERTAILU (paikallinen bake): P01B 1687 = vasemman reunan pitkä 2 krs, SV:ssä punamullattu -> punainen; P03B 1663 pelissä violetinharmaa, SV vaalea -> #e6e6e2; P04B/P05B/P08B/P11B/P12B/P14B vastaavat
+IKKUNAMÄÄRÄT (styles 'wb' = ikkunaväli m, laskettu SV:stä): 1679 6 kpl/27 m -> 4.5; 1683 4/14.8 -> 3.7; 715 6/23 -> 3.8; 950 7/24.8 -> 3.5; 934 5/18.8 -> 3.8; 1659 7/24 -> 3.4; 928 5/18.6 -> 3.7
+Tarkistuskierros: 1679 wb 2.6 (joka 3. väli umpinainen -> ~7 ikkunaa); 1683 ja 928 nyt 1 krs (city.py: sv-tarkistettu f käytössä); hallit 597/591/595/592/584 SPEC umpihalleiksi

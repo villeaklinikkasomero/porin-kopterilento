@@ -92,7 +92,7 @@ def house_spec(i):
     # trim: white on coloured walls; on white and pale grey walls a soft grey, so the corner boards and window frames still read
     trim = M('#f2f0ea', 0.8) if not (ll > 0.8 and sl < 0.25) else M('#c4c6c2' if kivi.h01(i, 7) < 0.6 else '#f2f0ea', 0.8)
     y = e.get('y') or (1900 if kivi.h01(i, 9) < 0.6 else 1950)        # no inventory year: the usual mix of the timber-house quarters
-    h = b['h']; f = e.get('f') if yp else None
+    h = b['h']; f = e.get('f') if (yp or e.get('sv')) else None   # Street View checked storeys count too (13.11.2026)
     nf = (2 if f >= 2 and h >= 4.6 else 1) if f else (1 if h < 6.8 else 2)   # Kuukkari / Päärnäinen houses are mostly 1.5 storeys: one window row on the eave sides
     old = y < 1930
     win = dict(ww=1.05, wh=1.45, nx=2, ny=3) if old else dict(ww=1.2, wh=1.25, nx=2, ny=1) if y < 1962 else dict(ww=1.5, wh=1.1, nx=2, ny=1, surround=0.07)
@@ -105,7 +105,7 @@ def house_spec(i):
         return k.lower() if shed or (k == 'W' and c % 3 == 2 and nb > 3) else k
     rows = [(1, 'wood', 'G')] if nf == 1 else [(1.15, 'wood', 'G'), (1, 'wood', 'U')]
     if nf == 1: rowP['G']['frieze'] = old
-    layout = dict(bw=2.9 if not shed else 3.5, rows=rows, cols=cols, P={}, rowP=rowP, plain=False)
+    layout = dict(bw=float(e.get('wb', 2.9)) if not shed else 3.5, rows=rows, cols=cols, P={}, rowP=rowP, plain=False)   # styles 'wb': window spacing in metres (Street View count, 13.11.2026)
     l2 = bool(kivi.RAW.get(i))                         # measured LoD2 shell: walls and gables follow it, the game draws its measured roof
     attic = not shed and (bool(e.get('u')) if yp else nf == 1 and kivi.h01(i, 8) < 0.7)
     gcol = e['w2'] if e.get('w2') and yp else wall                      # two-tone houses: the gable carries the second colour

@@ -867,3 +867,10 @@ SPEC[199]['layout'] = _199lay(12.0, True); SPEC[199]['fit'] = lambda lay_, H, st
 # 265  Itsenäisyydenkatu 74 (Street View I13B): low white rendered workshop with a flat roof, a row of windows and a sign board
 SPEC[265] = dict(P=dict(wall=M('#eeede8'), frame=WHITE, sign=SIGNS), layout=dict(bw=3.0, rows=[(4.0, 'punched', 'F')], cols=lambda c, nb: 'W', P=dict(ww=1.8, wh=1.0, nx=3, sill=1.6), rowP={}),
                  fit=lambda lay_, H, street: dict(bw=3.0, rows=[(H, 'punched', 'F')], cols=lambda c, nb: 'W', P=dict(ww=1.8, wh=1.0, nx=3, sill=min(1.6, H - 1.4)), rowP={}))
+# ---------------------------------------------------------------- Paanakedonkatu retail halls (Street View 13.11.2026): big windowless sheds, not blocks of flats
+_hall = lambda wall, **kw: dict(P=dict(wall=wall, **kw), layout=lay(8.0, plain=True), fit=lambda lay_, H, street: lay(H, plain=True), roof=dict(kind='flat', mat=SHEET))
+SPEC[597] = _hall(M('#3a72d0', 0.6))          # Leo's Leikkimaa: bright blue cladding
+SPEC[591] = _hall(M('#f2f1ec', 0.7))          # white hall (the red front part is a separate wing in reality)
+SPEC[595] = _hall(M('#d9dbdc', 0.6))          # Stadium: light grey sheet
+SPEC[592] = _hall(M('#e9e9e6', 0.7))
+SPEC[584] = _hall(MT('#8a9094', None, 0.45, 0.35))   # dark grey sheet-metal hall
