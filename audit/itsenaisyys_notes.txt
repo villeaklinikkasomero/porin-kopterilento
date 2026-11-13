@@ -1,0 +1,69 @@
+I00A 167/165: todellisuudessa vaalea 8 krs, lasitetut parvekepinot, katutasossa liikkeitä -> pelissä pelkät reikäikkunat
+I00B puisto/aukio
+I01A 166 pelissä vaaleanpunainen, SV vaalean okrankeltainen 3 krs jugend, valkoiset ikkunanpuitteet -> w #d8c58e
+I01B vastapäinen pitkä vaalea klassismi 3-4 krs (tarkistetaan seur. pisteestä)
+I02A SV ei latautunut (valkoinen) -> uusinta myöhemmin
+I02B 7 (Itsenäisyydenk. 54) SV okrankeltainen 4 krs: styles jo #dcc06a f4 (live-peli vielä vanhalla bakella). 4 Karhulinna SV vaalea kerma 4 krs harjakatto -> w #e2d6bc (oli harmaa #b6aca2)
+I03A 569 vastaa (valkoinen, lasitetut parvekkeet, liiketila). ok
+I03B 415 SV valkoinen 5 krs parvekkeet ok; oik. 7 okra ok
+I04A 118 Antinkatu 24: SV vaaleanharmaa, sinertävät nauhaikkunat, lasitettu katutaso -> pelissä parvekkeet+reikäikkunat => zones SPEC[118] ribbon. Tehty, paikallinen bake c048 ok
+I00A 167 => zones SPEC[167] gloggia-pinot + liiketilat. Tehty, bake c048 ok
+I04B 116 Antinlinna okra klassismi: styles ok (live vanha bake)
+I05A 119 SV vaalea kerma 3 krs (pelissä harmaa #c7c8cd mitattu) -> #e2d8c2 f3
+I05B 116 ok
+I06A 121 Palojoenkulma SV ruskeanbeige tiili, liiketilat katutasossa; styles #dcb76e liian keltainen -> #c4a274
+I06B 115 matala kioskipaviljonki (punainen/valkoinen) -> w #e8e4dc f1 r #b8312c; 107 ok
+I07A 600 Bepop: vaalea harmaanbeige, vaakaikkunanauhat (tarkista renderistä)
+I07B 107 harmaanbeige 2 krs liiketiloja ok
+I08A/I09A 600 Bepop ja 601 (It.k 35): valkoiset, vaakasuorat nauhaikkunat, lasiset liiketilat -> eivät c-lohkoissa (landmark bepop / lm.py) -> toiselle tilille
+I08B/I09B puisto; taustalla sininen pitkä lamelli (2?) kaukana
+I10A 1228 valkoinen 6 krs + sinivihreä raita, liiketila -> korjattu (oli sinertävän harmaa)
+I10B/I11B 585 ent. linja-autoasema beige ok
+I11A 1229 ok (aiemmin)
+I12A 512 matala vaaleankeltainen -> korjattu (oli tumma harmaa); taustalla 190 ok
+I13A 511 ok; 510 SV vaalea (oli tummanharmaa mitattu) -> #e6e6e2
+I13B 199 ok; 265 SV valkoinen matala (korjaamo) -> w #ecebe6
+I14A 203 valkoinen, lasitetut parvekkeet ok
+I14B 202 harmaanbeige 2 krs puutalo harjakatto -> #d9d4c8
+I15A 192 ok
+I15B 225 SV lämmin oranssinruskea, parvekkeet -> #cf9f66 (oli vaalea)
+I16B 223 keltainen klassismi 2 krs aumakatto -> f 2 (oli 3); 222 ok
+(I16A/I17A epätarkat -> uusittu pidemmällä odotuksella)
+I16A 192 SV 8 krs (h 23 m), punaruskeat parvekeraidat -> f 8
+I17A 144 edessä 1 krs liikepaviljonki (ravintola), ok
+I17B 245 keltainen puutalo harjakatto ok
+I18A 30 vaalea 4 krs parvekkeet -> f 4
+I18B 12 keltainen puutalo, katto tumma -> r #4a4d50
+I19A 30 harmaanbeige pitkä lamelli ok
+I19B 555 matala vaalea (oli tumma mitattu) -> #e6e4de; 35 harmaa puutalo ok
+I20A 44/148 vaaleat 7 krs ok
+I20B 5 valkoinen 3 krs aumakatto; HUOM h 5.2 m vs 3 krs (LoD2-korkeus?) -> ei muutettu
+I21A 143 = lasitettu 1 krs liikeosa katoksineen (oli tumma) -> #cfd6d8 shop
+I22A 141 torni vaalea harmaanbeige -> #d9d6ce; 146 vaalea (oli tumma) -> #e8e8e4
+I24A 693 valkoinen 3 krs lamelli, tumma katto; I25A 694 sama
+I24B 785 vaaleankeltainen puutalo ruskeat puitteet -> lisätty
+I25B 786 vaaleankeltainen puutalo -> lisätty; taustalla lasipaviljonki 768
+I26A/I27A 691, I28A 692: harmaanbeiget 3 krs lamellit, tumma katto. HUOM I26A:ssa taustalla punatiilinen 4 krs (ei tunnistettu id:tä)
+I26B 768 matala valkoinen lasijulkisivuinen -> f 2
+I27B 837/804 valkoiset puutalot, aita ok
+I28B 791 vaaleankeltainen puutalo punainen katto ok
+I29A/I37A 587 valkoharmaa halli, turkoosi lasiosa -> w2 #3f8f95
+I29B 806 valkoinen puutalo punainen katto -> #efede6
+I37B 794 vaaleankeltainen puutalo, punainen katto -> r
+I38A 664 ruskeanharmaa 5 krs + valkoiset osat (h 14 m, f6 väärin) -> f 5
+I38B 800 siniharmaa puutalo punainen katto -> r
+I39A 665 valkoinen+tummanharmaa, lasiparvekkeet ok; I39B 805 ok; I40A 1204 oranssinruskea tiili + tumma pohja ok
+I40B 792 vaaleansininen puutalo punainen katto -> lisätty
+I46A/I47A 803, 808, 799 ruskeanbeiget matalat puurakennukset, 795 valkoinen puutalo -> lisätty
+I46B/I47B 634 okra 5 krs liiketilat ok; 633 1 krs lasitettu liikeosa -> lisätty
+I48A 807 beige pitkä puutalo ruskeanharmaa katto (oli keltainen) -> #d3c09b
+I48B 1206 punatiili 5 krs ok
+I49A 797 vaaleanharmaa puutalo -> #d2d2cd
+I49B 1207 tummanruskea tiili 5 krs, tumma pohja -> lisätty (ei c-lohkossa)
+I50A 1229/1230 ok
+I51A 1231 ok
+I52A 798 kermanbeige 2 krs -> lisätty
+I55A 1241 valkoinen 6 krs parvekkeet -> lisätty
+I56B 583 valkoinen matala -> lisätty
+I57A 1242 punaruskea tiili + beige yläosa 6 krs -> lisätty
+I57B/I65B 583 vaalea teollisuusmainen pelti, ok. ITSENÄISYYDENKATU VALMIS (90 näkymää, kaukaiset puistonäkymät ohitettu)

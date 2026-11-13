@@ -303,3 +303,22 @@ Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex
      punaruskea matala "talo" vaalealla katolla). Etsi id:t (`audit/shot.js` + tarrat tai city.js-jalanjäljet), tee niistä katoksia:
      katto ~2,5–3 m pilareiden varassa, ei umpiseiniä (esim. SPEC kind 'canopy' / layout plain + open_ends, tai hide + oma katosmalli).
   3. Ratsula (221) näkyi vielä tiilenä klo 13.22 – todennäköisesti Render/välimuisti; tarkista uudesta c052:sta.
+
+## 14.11.2026: Itsenäisyydenkatu Street View'ta vasten (toinen tili)
+- Tarkastettu 19 taloa, korjattu styles.json (`sv: 1`): 1229/1230 Terveystalo (valkoinen + tummansininen nauha), 192, 796/794/805/800 puutalot
+  (Itsenäisyydenkatu 15–19: vaaleankeltainen, valkoinen, siniharmaa), 1231 kerma 3 krs, 35 puutalo 1,5 krs, 223 okra, 199, 415 valkoinen+keltaiset
+  paneelit, 7 keltainen, 665/1204/1206 uudisrakennukset (valkoinen/oranssi tiili/punatiili, tumma sokkeli), 634 vaalea tiili, 116 Antinlinna okra, 113 matala.
+- Tarkastamatta: 585 (vanha linja-autoasema), 1207 (kuoressa).
+- Leivottavat: city 64 c035,c036,c048,c063,c064,c076,c077,h085,h125.
+- Teljäntorin läpinäkyvä seinä ja maahan jääneet katokset: ei vielä paikannettu (käyttäjältä odotetaan kuvakaappausta).
+- Seuraavaksi: Mikonkatu, Liisankatu, Pohjoisranta/Eteläranta, Länsipuisto, Itäpuisto.
+
+
+## 13.11.2026 ilta: Itsenäisyydenkatu tarkalla menetelmällä (kuvaparit 40 m välein, ±55°)
+- Käyty I00–I12A (26/90 näkymää), muistiinpanot audit/itsenaisyys_notes.txt (pilvityötilassa; kopio keskustelussa).
+- zones.py: SPEC[167] (lasitetut parvekepinot + liiketilat), SPEC[118] (Antinkatu 24, nauhaikkunat, lasitettu katutaso).
+- styles.json: 4, 119, 121, 166, 167, 512, 1228, 115 (uusi).
+- Paikallisesti bakettu ja tarkistettu: c048, c063, c064, h074 → Modal: `city 64 c048,c063,c064,h074`.
+- 600 Bepop ja 601 (It.k 35): valkoiset nauhaikkunat, lasiset liiketilat, ei c-lohkoissa (landmark) → kesken.
+- Live-peli näyttää vanhaa bakea: vertaa SV:tä styles.jsoniin / paikalliseen bakeen.
+- Jatko: I12B → I44, sitten Isolinnankatu jne.

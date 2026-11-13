@@ -762,3 +762,11 @@ import os as _os, json as _json
 if _os.environ.get('PORI_PHS') and _os.path.exists(_os.environ['PORI_PHS']):
     _ex = {int(k) for k in _json.load(open(_os.environ['PORI_PHS']))}
     ZONES = {k: [i for i in v if i not in _ex] for k, v in ZONES.items()}
+# ---------------------------------------------------------------- Itsenäisyydenkatu, Street View pairs 13.11.2026 (game render vs SV at 40 m)
+# 167  Itsenäisyydenkatu/Antinkatu corner, 8 storeys: light grey render, stacks of glazed balconies, shops at street level
+SPEC[167] = dict(P=dict(wall=M('#e6e6e1'), linner=M('#dcdcd6'), sign=SIGNS, gwall=M('#3a3d40', 0.3), fascia=M('#e6e6e1'), gframe=ALU),
+                 layout=lay(28.5, 'punched', gh=4.0, bw=3.3, fh=3.05, cols=lambda c, nb: 'L' if c % 3 == 1 else 'W', P=dict(colmod={'L': 'gloggia'}, ww=1.5, wh=1.4, nx=2)),
+                 roof=dict(kind='flat', mat=SHEET))
+# 118  Antinkatu 24 (1991) office: light grey, bluish window bands, no balconies, glazed street level with the entrance on the corner
+SPEC[118] = dict(P=dict(wall=M('#e4e3dd'), spandrel=M('#e4e3dd'), glass=M('#5f7a92', 0.15), sign=SIGNS, gwall=M('#30353a', 0.3), fascia=M('#e4e3dd'), gframe=ALU),
+                 layout=lay(18.0, 'ribbon', gh=4.2, bw=3.4, fh=3.45, P=dict(wh=1.6, sill=0.9)), roof=dict(kind='flat', mat=SHEET))

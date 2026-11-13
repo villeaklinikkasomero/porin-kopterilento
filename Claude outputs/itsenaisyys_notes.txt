@@ -1,0 +1,23 @@
+I00A 167/165: todellisuudessa vaalea 8 krs, lasitetut parvekepinot, katutasossa liikkeitä -> pelissä pelkät reikäikkunat
+I00B puisto/aukio
+I01A 166 pelissä vaaleanpunainen, SV vaalean okrankeltainen 3 krs jugend, valkoiset ikkunanpuitteet -> w #d8c58e
+I01B vastapäinen pitkä vaalea klassismi 3-4 krs (tarkistetaan seur. pisteestä)
+I02A SV ei latautunut (valkoinen) -> uusinta myöhemmin
+I02B 7 (Itsenäisyydenk. 54) SV okrankeltainen 4 krs: styles jo #dcc06a f4 (live-peli vielä vanhalla bakella). 4 Karhulinna SV vaalea kerma 4 krs harjakatto -> w #e2d6bc (oli harmaa #b6aca2)
+I03A 569 vastaa (valkoinen, lasitetut parvekkeet, liiketila). ok
+I03B 415 SV valkoinen 5 krs parvekkeet ok; oik. 7 okra ok
+I04A 118 Antinkatu 24: SV vaaleanharmaa, sinertävät nauhaikkunat, lasitettu katutaso -> pelissä parvekkeet+reikäikkunat => zones SPEC[118] ribbon. Tehty, paikallinen bake c048 ok
+I00A 167 => zones SPEC[167] gloggia-pinot + liiketilat. Tehty, bake c048 ok
+I04B 116 Antinlinna okra klassismi: styles ok (live vanha bake)
+I05A 119 SV vaalea kerma 3 krs (pelissä harmaa #c7c8cd mitattu) -> #e2d8c2 f3
+I05B 116 ok
+I06A 121 Palojoenkulma SV ruskeanbeige tiili, liiketilat katutasossa; styles #dcb76e liian keltainen -> #c4a274
+I06B 115 matala kioskipaviljonki (punainen/valkoinen) -> w #e8e4dc f1 r #b8312c; 107 ok
+I07A 600 Bepop: vaalea harmaanbeige, vaakaikkunanauhat (tarkista renderistä)
+I07B 107 harmaanbeige 2 krs liiketiloja ok
+I08A/I09A 600 Bepop ja 601 (It.k 35): valkoiset, vaakasuorat nauhaikkunat, lasiset liiketilat -> eivät c-lohkoissa (landmark bepop / lm.py) -> toiselle tilille
+I08B/I09B puisto; taustalla sininen pitkä lamelli (2?) kaukana
+I10A 1228 valkoinen 6 krs + sinivihreä raita, liiketila -> korjattu (oli sinertävän harmaa)
+I10B/I11B 585 ent. linja-autoasema beige ok
+I11A 1229 ok (aiemmin)
+I12A 512 matala vaaleankeltainen -> korjattu (oli tumma harmaa); taustalla 190 ok

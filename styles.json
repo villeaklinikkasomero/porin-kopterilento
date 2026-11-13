@@ -100,12 +100,13 @@
 "f": 2
 },
 "4": {
-"w": "#b6aca2",
+"w": "#e2d6bc",
 "m": 1,
 "k": "render",
 "r": "#74787b",
 "note": "Y-pakki: Karhulinna, Tasavallankatu 2, 1928",
-"y": 1928
+"y": 1928,
+"sv": 1
 },
 "5": {
 "w": "#ecebe5",
@@ -124,11 +125,12 @@
 "sv": 1
 },
 "7": {
-"w": "#e3d6b6",
+"w": "#dcc06a",
 "k": "render",
-"f": 3,
+"f": 4,
 "note": "Y-pakki: Itsenäisyydenkatu 54, 1956",
-"y": 1956
+"y": 1956,
+"sv": 1
 },
 "8": {
 "f": 3
@@ -153,7 +155,7 @@
 "12": {
 "w": "#ddbd5e",
 "k": "wood",
-"r": "#b8302a",
+"r": "#4a4d50",
 "f": 1,
 "u": 1,
 "sv": 1
@@ -235,7 +237,7 @@
 "30": {
 "w": "#e6e1d2",
 "k": "render",
-"f": 3,
+"f": 4,
 "r": "#3f9a5a",
 "w2": "#9397a4",
 "s2": 0.45,
@@ -262,11 +264,13 @@
 "f": 3
 },
 "35": {
-"w": "#eeece6",
+"w": "#d9d5c6",
 "k": "wood",
-"f": 2,
+"f": 1,
 "note": "Y-pakki: Itsenäisyydenkatu 62 (tontti 13), 1925",
-"y": 1925
+"y": 1925,
+"u": 1,
+"sv": 1
 },
 "36": {
 "f": 3
@@ -693,15 +697,19 @@
 "y": 1900
 },
 "113": {
-"f": 2
+"f": 1,
+"w": "#d9be7a",
+"k": "render",
+"sv": 1
 },
 "116": {
-"w": "#e3d6b6",
+"w": "#d9b866",
 "k": "render",
 "f": 4,
 "st": "classic",
 "note": "Y-pakki: Antinlinna, Antinkatu 26, 1929",
-"y": 1929
+"y": 1929,
+"sv": 1
 },
 "117": {
 "w": "#c9c7c2",
@@ -714,14 +722,16 @@
 "w": "#eeece6",
 "f": 7,
 "r": "#3f4246",
-"note": "Street View 13.11.2026: Antinkatu 24 (1991): toimistotalo, vaaleanharmaa, sinertävät nauhaikkunat, ei parvekkeita",
+"note": "Street View 13.11.2026: Antinkatu 24 (1991): toimistotalo, vaaleanharmaa, sinertävät nauhaikkunat, ei parvekkeita; SPEC nauhaikkunat",
 "y": 1991,
 "sv": 1
 },
 "119": {
-"w": "#c7c8cd",
-"m": 1,
-"k": "render"
+"w": "#e2d8c2",
+"k": "render",
+"f": 3,
+"note": "Street View 13.11.2026: vaalea kerma 3 krs",
+"sv": 1
 },
 "120": {
 "w": "#e9cf8c",
@@ -731,7 +741,7 @@
 "y": 1954
 },
 "121": {
-"w": "#dcb76e",
+"w": "#c4a274",
 "k": "brick",
 "f": 7,
 "r": "#3f4246",
@@ -832,11 +842,12 @@
 "f": 3
 },
 "141": {
-"w": "#eeeeea",
+"w": "#d9d6ce",
 "k": "render",
 "f": 10,
 "b": 1,
-"r": "#74787b"
+"r": "#74787b",
+"sv": 1
 },
 "142": {
 "w": "#eeece6",
@@ -845,10 +856,13 @@
 "y": 1968
 },
 "143": {
-"w": "#6a696e",
-"m": 1,
+"w": "#cfd6d8",
 "k": "render",
-"r": "#b9bbb9"
+"r": "#b9bbb9",
+"f": 1,
+"shop": 1,
+"note": "Street View 13.11.2026: lasitettu 1 krs liikeosa katoksineen tornin 141 edessä",
+"sv": 1
 },
 "144": {
 "w": "#ebe4cf",
@@ -859,9 +873,9 @@
 "sv": 1
 },
 "146": {
-"w": "#757880",
-"m": 1,
-"k": "render"
+"w": "#e8e8e4",
+"k": "render",
+"sv": 1
 },
 "148": {
 "w": "#e6dcc2",
@@ -983,10 +997,12 @@
 "f": 6
 },
 "166": {
-"w": "#baa8a8",
+"w": "#d8c58e",
 "m": 1,
 "k": "render",
-"f": 3
+"f": 3,
+"sv": 1,
+"note": "Street View 13.11.2026: vaalea okrankeltainen 3 krs, valkoiset ikkunanpuitteet"
 },
 "167": {
 "w": "#eeeeea",
@@ -995,7 +1011,9 @@
 "b": 1,
 "r": "#3f4246",
 "w2": "#8c8b8d",
-"s2": 0.42
+"s2": 0.42,
+"sv": 1,
+"note": "Street View 13.11.2026: vaaleanharmaa 8 krs, lasitetut parvekepinot, liiketilat katutasossa (zones.py SPEC)"
 },
 "168": {
 "w": "#90979e",
@@ -1132,10 +1150,13 @@
 "sv": 1
 },
 "192": {
-"w": "#e6dcc2",
+"w": "#cfc8b8",
 "k": "render",
-"f": 6,
-"r": "#b5553a"
+"f": 8,
+"r": "#b5553a",
+"w2": "#b5655a",
+"s2": 0.12,
+"sv": 1
 },
 "194": {
 "w": "#3d444a",
@@ -1166,10 +1187,13 @@
 "s2": 0.5
 },
 "199": {
-"w": "#ecebe6",
+"w": "#e2d6b4",
 "k": "render",
-"f": 3,
-"r": "#3f4246"
+"f": 4,
+"r": "#3f4246",
+"w2": "#8e9196",
+"s2": 0.12,
+"sv": 1
 },
 "201": {
 "w": "#9aa3a8",
@@ -1179,7 +1203,7 @@
 "sv": 1
 },
 "202": {
-"w": "#eeece6",
+"w": "#d9d4c8",
 "k": "wood",
 "f": 2,
 "r": "#b8302a",
@@ -1297,12 +1321,13 @@
 "r": "#b8302a"
 },
 "223": {
-"w": "#e3d6b6",
+"w": "#dcbc6a",
 "k": "render",
-"f": 3,
+"f": 2,
 "st": "classic",
 "note": "Y-pakki: Itsenäisyydenkatu 66, 1925",
-"y": 1925
+"y": 1925,
+"sv": 1
 },
 "224": {
 "w": "#efe0a8",
@@ -1315,7 +1340,7 @@
 "sv": 1
 },
 "225": {
-"w": "#e5d6a6",
+"w": "#cf9f66",
 "k": "render",
 "r": "#3f4246",
 "f": 4,
@@ -1496,13 +1521,14 @@
 "b": 1
 },
 "265": {
-"w": "#c9c7c2",
+"w": "#ecebe6",
 "k": "wood",
 "f": 1,
 "r": "#b8302a",
 "note": "Y-pakki: Itsenäisyydenkatu 74, 1924",
 "y": 1924,
-"u": 1
+"u": 1,
+"sv": 1
 },
 "266": {
 "w": "#aaa59f",
@@ -2166,10 +2192,12 @@
 "y": 1953
 },
 "415": {
-"w": "#959ba7",
-"m": 1,
+"w": "#ecebe6",
 "k": "render",
-"f": 3
+"f": 5,
+"w2": "#e0c45c",
+"s2": 0.1,
+"sv": 1
 },
 "416": {
 "w": "#6e6c72",
@@ -2550,9 +2578,10 @@
 "k": "render"
 },
 "510": {
-"w": "#6e717b",
-"m": 1,
-"k": "render"
+"w": "#e6e6e2",
+"k": "render",
+"note": "Street View 13.11.2026: vaalea 4 krs, parvekkeet",
+"sv": 1
 },
 "511": {
 "w": "#eeeeea",
@@ -2562,10 +2591,12 @@
 "b": 1
 },
 "512": {
-"w": "#948d8a",
-"m": 1,
+"w": "#dccb98",
 "k": "render",
-"r": "#74787b"
+"r": "#74787b",
+"f": 1,
+"note": "Street View 13.11.2026: matala vaaleankeltainen",
+"sv": 1
 },
 "513": {
 "w": "#989883",
@@ -2653,9 +2684,9 @@
 "r": "#b9bbb9"
 },
 "555": {
-"w": "#6c6a72",
-"m": 1,
-"k": "render"
+"w": "#e6e4de",
+"k": "render",
+"sv": 1
 },
 "557": {
 "w": "#cdb58f",
@@ -2779,7 +2810,10 @@
 "sv": 1
 },
 "583": {
-"f": 2
+"f": 2,
+"w": "#ebeae6",
+"k": "render",
+"sv": 1
 },
 "584": {
 "f": 2
@@ -2799,7 +2833,13 @@
 "r": "#74787b"
 },
 "587": {
-"f": 2
+"f": 2,
+"w": "#e4e5e3",
+"w2": "#3f8f95",
+"s2": 0.15,
+"k": "render",
+"note": "Street View 13.11.2026: valkoharmaa halli, tummanharmaa alaosa, turkoosi lasinen sisäänkäynti",
+"sv": 1
 },
 "588": {
 "w": "#b7c6d6",
@@ -2985,7 +3025,10 @@
 "f": 3
 },
 "634": {
-"f": 4
+"f": 4,
+"w": "#d9c9a2",
+"k": "brick",
+"sv": 1
 },
 "635": {
 "f": 5
@@ -3066,10 +3109,20 @@
 "f": 2
 },
 "664": {
-"f": 6
+"f": 5,
+"w": "#8a7a6c",
+"w2": "#e6e6e2",
+"s2": 0.4,
+"k": "render",
+"sv": 1
 },
 "665": {
-"f": 6
+"f": 6,
+"w": "#e6e6e2",
+"w2": "#3d3f44",
+"s2": 0.2,
+"k": "render",
+"sv": 1
 },
 "666": {
 "f": 8
@@ -3140,16 +3193,32 @@
 "f": 2
 },
 "691": {
-"f": 3
+"f": 3,
+"w": "#d6cfc0",
+"k": "render",
+"r": "#4a4d50",
+"sv": 1
 },
 "692": {
-"f": 3
+"f": 3,
+"w": "#d9d3c6",
+"k": "render",
+"r": "#4a4d50",
+"sv": 1
 },
 "693": {
-"f": 3
+"f": 3,
+"w": "#ecebe6",
+"r": "#4a4d50",
+"k": "render",
+"sv": 1
 },
 "694": {
-"f": 3
+"f": 3,
+"w": "#ecebe6",
+"r": "#4a4d50",
+"k": "render",
+"sv": 1
 },
 "697": {
 "w": "#967d85",
@@ -3255,7 +3324,11 @@
 "f": 5
 },
 "768": {
-"f": 3
+"f": 2,
+"w": "#e9e8e4",
+"k": "render",
+"note": "Street View 13.11.2026: matala valkoinen, laajat lasijulkisivut",
+"sv": 1
 },
 "815": {
 "w": "#c3b9b1",
@@ -3501,13 +3574,23 @@
 "f": 6
 },
 "1204": {
-"f": 6
+"f": 6,
+"w": "#c98e5a",
+"k": "brick",
+"w2": "#3d3f44",
+"s2": 0.2,
+"sv": 1
 },
 "1205": {
 "f": 5
 },
 "1206": {
-"f": 6
+"f": 6,
+"w": "#a5523e",
+"k": "brick",
+"w2": "#e6e6e2",
+"s2": 0.35,
+"sv": 1
 },
 "1208": {
 "w": "#5f6f88",
@@ -3560,22 +3643,30 @@
 "y": 1972
 },
 "1228": {
-"w": "#c2cbd5",
-"m": 1,
+"w": "#e9e8e3",
 "k": "render",
-"f": 6
+"f": 6,
+"w2": "#4f8fb8",
+"s2": 0.08,
+"shop": 1,
+"note": "Street View 13.11.2026: valkoinen 6 krs, sinivihreä pystyraita, liiketila katutasossa",
+"sv": 1
 },
 "1229": {
-"w": "#c9c7c2",
-"k": "wood",
-"f": 1,
+"w": "#e8e9ea",
+"k": "render",
+"f": 4,
 "note": "Y-pakki: Itätullinkatu 34, 1852",
-"y": 1852
+"y": 1852,
+"w2": "#2a3f6e",
+"s2": 0.3,
+"sv": 1
 },
 "1231": {
-"w": "#6f7184",
-"m": 1,
-"k": "render"
+"w": "#e8dcae",
+"k": "render",
+"f": 3,
+"sv": 1
 },
 "1232": {
 "w": "#928f93",
@@ -3596,10 +3687,21 @@
 "f": 6
 },
 "1241": {
-"f": 6
+"f": 6,
+"w": "#ecebe6",
+"k": "render",
+"b": 1,
+"sv": 1
 },
 "1242": {
-"f": 6
+"f": 6,
+"w": "#b5704f",
+"k": "brick",
+"w2": "#d8cdb8",
+"s2": 0.4,
+"b": 1,
+"note": "Street View 13.11.2026: punaruskea tiili alaosa, beige yläkerrokset, parvekkeet",
+"sv": 1
 },
 "1246": {
 "f": 3
@@ -8332,13 +8434,14 @@
 "u": 1
 },
 "806": {
-"w": "#e3d6b6",
+"w": "#efede6",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
 "note": "Y-pakki: Itsenäisyydenk.13 / Herralahdenk.14 (rakennus 4), Tontti 316, 1850",
 "y": 1850,
-"u": 1
+"u": 1,
+"sv": 1
 },
 "801": {
 "w": "#eeece6",
@@ -8357,12 +8460,13 @@
 "y": 1850
 },
 "797": {
-"w": "#eeece6",
+"w": "#d2d2cd",
 "k": "wood",
 "f": 1,
 "r": "#74787b",
 "note": "Y-pakki: Itsenäisyydenk.21b / Tähtik.22 (rakennus 1), Tontti 2320, 1865",
-"y": 1865
+"y": 1865,
+"sv": 1
 },
 "788": {
 "w": "#e3d6b6",
@@ -8998,11 +9102,13 @@
 "y": 1902
 },
 "807": {
-"w": "#dcb76e",
+"w": "#d3c09b",
 "k": "wood",
 "f": 1,
 "note": "Y-pakki: Tähtik.19 / Itsenäisyydenk.23 a (rakennus 2), Tontti 1321, 1888",
-"y": 1888
+"y": 1888,
+"r": "#6b5f55",
+"sv": 1
 },
 "981": {
 "w": "#9c3d2e",
@@ -11014,13 +11120,25 @@
 "sv": 1
 },
 "1207": {
-"shop": 1
+"shop": 1,
+"w": "#7a4a3a",
+"k": "brick",
+"f": 5,
+"w2": "#3d3f44",
+"s2": 0.2,
+"note": "Street View 13.11.2026: tummanruskea tiili 5 krs, tummanharmaa pohjakerros",
+"sv": 1
 },
 "1217": {
 "shop": 1
 },
 "1230": {
-"shop": 1
+"shop": 1,
+"w": "#e3e4e4",
+"w2": "#2a3f6e",
+"s2": 0.2,
+"k": "render",
+"sv": 1
 },
 "1493": {
 "shop": 1,
@@ -11054,6 +11172,103 @@
 "f": 1,
 "sv": 1,
 "note": "Street View 13.11.2026: matala keltainen rappaustalo Antinkadun varrella (Eteläranta 4:n kuoressa)"
+},
+"796": {
+"w": "#ece3b8",
+"k": "wood",
+"f": 1,
+"sv": 1
+},
+"794": {
+"w": "#e9dca2",
+"k": "wood",
+"f": 1,
+"sv": 1,
+"r": "#b8302a"
+},
+"805": {
+"w": "#e4e4de",
+"k": "wood",
+"f": 1,
+"sv": 1
+},
+"800": {
+"w": "#c4cdd6",
+"k": "wood",
+"f": 1,
+"sv": 1,
+"r": "#b8302a"
+},
+"115": {
+"w": "#e8e4dc",
+"f": 1,
+"r": "#b8312c",
+"k": "render",
+"note": "Street View 13.11.2026: matala kioskipaviljonki, punainen katto",
+"sv": 1
+},
+"785": {
+"w": "#ead9a8",
+"k": "wood",
+"f": 1,
+"r": "#6b6e70",
+"note": "Street View 13.11.2026: vaaleankeltainen puutalo, ruskeat ikkunanpuitteet, savupiiput",
+"sv": 1
+},
+"786": {
+"w": "#ead9a8",
+"k": "wood",
+"f": 1,
+"r": "#6b6e70",
+"sv": 1,
+"note": "Street View 13.11.2026: vaaleankeltainen puutalo, ruskeat puitteet"
+},
+"792": {
+"w": "#a9c3d8",
+"k": "wood",
+"f": 1,
+"r": "#b8302a",
+"note": "Street View 13.11.2026: vaaleansininen puutalo, punainen katto",
+"sv": 1
+},
+"803": {
+"w": "#c9b08c",
+"k": "wood",
+"f": 1,
+"sv": 1
+},
+"808": {
+"w": "#b89a78",
+"k": "wood",
+"f": 1,
+"sv": 1
+},
+"799": {
+"w": "#c8b597",
+"k": "wood",
+"f": 1,
+"sv": 1
+},
+"795": {
+"w": "#ebe9e2",
+"k": "wood",
+"f": 1,
+"sv": 1
+},
+"633": {
+"w": "#e4e4e0",
+"f": 1,
+"shop": 1,
+"k": "render",
+"note": "Street View 13.11.2026: 1 krs lasitettu liikerakennus/katos",
+"sv": 1
+},
+"798": {
+"w": "#e3d3ae",
+"f": 2,
+"k": "render",
+"r": "#4a4d50",
+"sv": 1
 }
 }
 }
