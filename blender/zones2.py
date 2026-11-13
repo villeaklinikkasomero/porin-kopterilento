@@ -15,6 +15,8 @@ try: LOOK = json.load(open('/home/claude/pori/styles.json'))
 except Exception: LOOK = dict(pal=[], b={})
 for _k, _v in LOOK['b'].items():                     # styles 'hh': wall height when OSM / city.js has a wrong one and there is no LoD2 (13.11.2026)
     if 'hh' in _v and int(_k) < len(B): B[int(_k)]['h'] = float(_v['hh'])
+import os as _os, sys as _sys
+_sys.path.append(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'blender'))   # Modal: jobs.py copies only a fixed list next to zones2.py, the rest is in ./blender
 import chamfer                                       # cut corners (OSM diagonals / styles 'ch') clipped into the LoD2 shells, 13.11.2026
 CHAMFERED = chamfer.apply(RAW, B, LOOK)
 def _h01(i, k): x = (i * 2654435761 + k * 40503) & 0xffffffff; x ^= x >> 15; x = (x * 2246822519) & 0xffffffff; x ^= x >> 13; return (x & 0xffffff) / 0xffffff
