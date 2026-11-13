@@ -225,7 +225,7 @@ def m_ribbon(mb, col, P):
     bw, fh, W = mb.bw, mb.fh, P['wall']; sill = P.get('sill', 0.9); wh = P.get('wh', 1.5); sp = P.get('spandrel', W)
     if col == 'N': mb.wall([], W); return
     e = P.get('pier', 0.0); sp_w = P.get('sidepanel', 0)
-    h = mb.window(e + sp_w, sill, bw - e, sill + wh, W, r=0.1, nx=P.get('nx', 2), fmat=P.get('frame', WHITE))
+    h = mb.window(e + sp_w, sill, bw - e, sill + wh, W, r=0.1, nx=P.get('nx', 2), fmat=P.get('frame', WHITE), glass=P.get('wglass'))
     if sp_w: mb.q(e, sill, e + sp_w, sill + wh, -0.03, P.get('sidemat', DARK)); h = (e, sill, bw - e, sill + wh)
     mb.wall([h, (0, 0, bw, sill)] if sp != W else [h], W)
     if sp != W: mb.q(0, 0, bw, sill, -0.02, sp); mb.q(0, sill - 0.05, bw, sill, 0.0, W)
@@ -294,6 +294,22 @@ def shop_keys(cols):
         out.append('S%d%d' % (run % 2 == 0, run % 2 == 1 or not nxt)); run += 1
     return out
 
+SHOP_LO = M('#363e44', 0.1); SHOP_HI = M('#75828b', 0.1)                       # shop glass: darker below, the street and sky reflected above
+SHOP_IN = [M('#d9d2c2'), M('#b79c78'), M('#8f969b'), M('#e9e4da'), M('#6d5a4a'), M('#a8b3b6')]   # lit shelves, displays, posters behind the glass
+def shop_glass(mb, u0, u1, v0, v1, r):
+    """a shop window that reads as glass in daylight: the old single dark sheet looked like a closed garage door (Street View, 13.11.2026).
+    The upper third mirrors the bright street, the lower part shows the lit interior: a few pale displays standing behind the glass."""
+    vs = v0 + (v1 - v0) * 0.64
+    mb.q(u0, v0, u1, vs, -r, SHOP_LO); mb.q(u0, vs, u1, v1, -r, SHOP_HI)
+    w = u1 - u0; k = mb.rnd.randrange(9973)
+    n = 1 + (k % 3); x = u0 + 0.25
+    for j in range(n):
+        dw = min(w / n - 0.3, 0.8 + ((k >> (2 * j)) % 5) * 0.2)
+        if dw < 0.3: break
+        top = v0 + 1.3 + ((k >> (3 + j)) % 4) * 0.3
+        mb.q(x, v0 + 0.15, x + dw, min(top, vs - 0.05), -r + 0.004, SHOP_IN[(k + j * 5) % len(SHOP_IN)])
+        x += w / n
+
 def m_shop(mb, col, P):
     """ground floor: low plinth, wide glazing, fascia.  col: 'N' blank, 'D' door, 'S11' / 'S10' / 'S01' / 'S00' glazing with a pier on
     the left / right side or running on into the next bay (shop_keys); anything else: a single bay between two piers"""
@@ -306,7 +322,8 @@ def m_shop(mb, col, P):
     else:
         pL, pR = (col[1] == '1', col[2] == '1') if len(col) == 3 and col[0] == 'S' else (True, True)
         u0 = e if pL else 0.0; u1 = bw - e if pR else bw; r = 0.12; fr = 0.06; jt = 0.015; gl = P.get('gglass') or GLASS
-        mb.q(u0, ph, u1, fh0, -r, gl)                                                            # one sheet of glass, no mullion
+        if P.get('gglass'): mb.q(u0, ph, u1, fh0, -r, gl)                                       # one sheet of glass, no mullion
+        else: shop_glass(mb, u0, u1, ph, fh0, r)
         mb.q(u0, ph, u1, ph + fr, -r + 0.02, fm); mb.q(u0, fh0 - fr, u1, fh0, -r + 0.02, fm)     # bottom and head frame
         for side, u in ((pL, u0), (pR, u1)):                                                     # frame at a pier, a thin glazing joint where the glass runs on
             wdt = fr if side else jt; a_, b_ = (u, u + wdt) if u == u0 else (u - wdt, u)
@@ -572,8 +589,28 @@ def build_wall(Z, p, q, z0, z1, layout, P, seed, bid):
         rows = [(tot, 'plain', 'P')]; nb = 1; bw = L
     cols = [layout['cols'](c, nb) if not (L < 2.6 or layout.get('plain')) else 'W' for c in range(nb)]
     v = 0
+    # set-back rows (rowP 'setback', metres behind the wall line): a recessed shop floor behind piers, a recessed attic storey.
+    # The row's whole facade (its baked tiles too) moves back; a soffit / ledge and end returns close the step (user 13.11.2026:
+    # recesses were drawn flush with the main face).
+    def _rp(rkey): Pm = dict(P); Pm.update(layout.get('P', {})); Pm.update(layout.get('rowP', {}).get(rkey, {})); return Pm
+    sbs = [(_rp(rk_).get('setback', 0) if len(rows) > 1 else 0) for _, _, rk_ in rows]
     for ri, (rh, mod, rkey) in enumerate(rows):
-        fh = rh * sc
+        fh = rh * sc; sb = sbs[ri]
+        if sb > 0:
+            Pr = _rp(rkey); smat = Pr.get('soffit', P['wall']); rmat = Pr.get('returnmat', P['wall'])
+            nxt = sbs[ri + 1] if ri + 1 < len(rows) else None; prv = sbs[ri - 1] if ri > 0 else None
+            if nxt is not None and sb > nxt:                                         # soffit: the underside of the face above
+                add_solid(Z, [W(0, fh, -sb, 0, v), W(L, fh, -sb, 0, v), W(L, fh, -nxt, 0, v), W(0, fh, -nxt, 0, v)], smat, 0.3)
+            if prv is not None and sb > prv:                                         # ledge in front of a set-back upper storey
+                add_solid(Z, [W(0, 0, -prv, 0, v), W(L, 0, -prv, 0, v), W(L, 0, -sb, 0, v), W(0, 0, -sb, 0, v)], smat, 0.3)
+            kk, pw = Pr.get('piers', (0, max(0.4, min(1.0, sb * 0.5)))); pm = Pr.get('piermat', rmat)
+            pos = [] if Pr.get('open_ends') else [(0, pw), (L - pw, L)]                # end piers: at an outside corner their outer faces
+            if kk: pos += [(c * bw - pw / 2, c * bw + pw / 2) for c in range(kk, nb, kk)]   # meet and close it (a plain return faced inwards: black)
+            if True:
+                for a_, b_ in pos:
+                    add_solid(Z, [W(a_, 0, 0, 0, v), W(b_, 0, 0, 0, v), W(b_, fh, 0, 0, v), W(a_, fh, 0, 0, v)], pm, 0.4)
+                    add_solid(Z, [W(a_, 0, -sb, 0, v), W(a_, 0, 0, 0, v), W(a_, fh, 0, 0, v), W(a_, fh, -sb, 0, v)], pm, 0.3)
+                    add_solid(Z, [W(b_, 0, 0, 0, v), W(b_, 0, -sb, 0, v), W(b_, fh, -sb, 0, v), W(b_, fh, 0, 0, v)], pm, 0.3)
         groups = {}; rk = shop_keys(cols) if mod == 'shop' else cols
         for c, ck in enumerate(rk): groups.setdefault(ck if mod != 'plain' else 'W', []).append(c)
         for ck, cs in groups.items():
@@ -583,6 +620,10 @@ def build_wall(Z, p, q, z0, z1, layout, P, seed, bid):
             mb = MB(bw, fh, seed * 131 + ri * 17 + hash(ck) % 97)
             MODS[mname](mb, ck, Pm)
             tiles = mb.tiles or [(0, 0, bw, fh, 0)]
+            if sb > 0:
+                tiles = [(a, b, c_, d_, e - sb) for a, b, c_, d_, e in tiles]
+                mb.hi = [([(a, b, d - sb) for a, b, d in pts], mat) for pts, mat in mb.hi]
+                mb.s3 = [([(a, b, d - sb) for a, b, d in pts], mat, dn) for pts, mat, dn in mb.s3]
             dens = 0.25 if mname == 'plain' else 1.0
             trects = [Z.rect(tl[2] - tl[0], tl[3] - tl[1], dens if mname != 'plain' else min(1, 6 / max(bw, fh))) for tl in tiles]
             srects = []
@@ -602,7 +643,7 @@ def build_wall(Z, p, q, z0, z1, layout, P, seed, bid):
                 if c == rep:
                     for pts, mat in mb.hi: Z.hi.append(([W(a, b, d, uo, v) for a, b, d in pts], mat))
                 else:
-                    Z.hi.append(([W(0, 0, 0, uo, v), W(bw, 0, 0, uo, v), W(bw, fh, 0, uo, v), W(0, fh, 0, uo, v)], P['wall']))
+                    Z.hi.append(([W(0, 0, -sb, uo, v), W(bw, 0, -sb, uo, v), W(bw, fh, -sb, uo, v), W(0, fh, -sb, uo, v)], P['wall']))
         v += fh
 
 def gdir(n):

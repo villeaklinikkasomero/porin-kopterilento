@@ -13,6 +13,8 @@ ROOFOCC = M('#4f5459', 0.7)
 ROOFBAKE = False     # True: the LoD2 roofs are baked into the block (Kivi-Pori); False: shadow casters only, the game shows the aerial photo
 try: LOOK = json.load(open('/home/claude/pori/styles.json'))
 except Exception: LOOK = dict(pal=[], b={})
+import chamfer                                       # cut corners (OSM diagonals / styles 'ch') clipped into the LoD2 shells, 13.11.2026
+CHAMFERED = chamfer.apply(RAW, B, LOOK)
 def _h01(i, k): x = (i * 2654435761 + k * 40503) & 0xffffffff; x ^= x >> 15; x = (x * 2246822519) & 0xffffffff; x ^= x >> 13; return (x & 0xffffff) / 0xffffff
 def look_wall(i):
     """locked wall colour: (hex, 'brick' | 'render'); listed buildings first, otherwise the weighted centre palette"""
@@ -31,6 +33,7 @@ def look_mat(i):
     r, g, b = (int(hx[k:k + 2], 16) / 255 for k in (1, 3, 5)); h, l, s_ = colorsys.rgb_to_hls(r, g, b)
     if 0.085 < h < 0.17 and s_ > 0.4:
         r, g, b = colorsys.hls_to_rgb(h + 0.012, min(0.8, l * 1.1 + 0.04), s_ * 0.7); hx = '#%02x%02x%02x' % (int(r * 255), int(g * 255), int(b * 255))
+    if kind == 'metal': return MT(hx, None, 0.45, 0.35)   # sheet metal (Ratsula, Kuparikonttori): red walls must not turn into brick (detail_kind)
     return MT(hx, 'brick', 0.8) if kind == 'brick' else M(hx)
 _ORTO = None
 def roof_mat(i):

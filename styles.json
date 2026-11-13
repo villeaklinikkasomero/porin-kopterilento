@@ -668,7 +668,7 @@
 "k": "render",
 "f": 4,
 "st": "classic",
-"note": "Y-pakki: Yrjönkatu 27, 1936. Street View 13.11.2026: valkoinen funkis, kulmassa parvekepino",
+"note": "Y-pakki: Rautatienpuistokatu 3, 1926 (Yrjönkatu 27 kulma). Street View 13.11.2026: valkoinen funkis, kulmassa parvekepino",
 "y": 1926,
 "sv": 1
 },
@@ -1284,10 +1284,11 @@
 },
 "221": {
 "w": "#9c3d2e",
-"k": "render",
+"k": "metal",
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 17, Ratsula, 1971",
-"y": 1971
+"note": "Y-pakki: Antinkatu 17, Ratsula, 1971. Käyttäjä 13.11.2026: punainen peltiverhous (ei tiiltä)",
+"y": 1971,
+"sv": 1
 },
 "222": {
 "w": "#e2c26a",
@@ -1517,10 +1518,11 @@
 },
 "269": {
 "w": "#7a4535",
-"k": "render",
+"k": "metal",
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 19b, SYP:n Kuparikonttori, 1985",
-"y": 1985
+"note": "Y-pakki: Yrjönkatu 19b, SYP:n Kuparikonttori, 1985. Street View 13.11.2026: tummanruskea levyverhous",
+"y": 1985,
+"sv": 1
 },
 "270": {
 "w": "#a39daf",
@@ -2868,7 +2870,8 @@
 "k": "render",
 "f": 8,
 "b": 1,
-"r": "#b5553a"
+"r": "#b5553a",
+"sv": 1
 },
 "604": {
 "w": "#d8c8a8",
@@ -5161,13 +5164,12 @@
 "s2": 0.34
 },
 "1601": {
-"w": "#d7d4cc",
+"w": "#eeede8",
 "k": "render",
 "r": "#b9bbb9",
 "f": 8,
-"w2": "#adb2bb",
-"s2": 0.62,
-"sv": 1
+"sv": 1,
+"note": "Porin Leijona (ent. Postitalo), Yrjönkatu 6, remontoitu 2025: valkoinen, vaaleanharmaanvihreät ikkunanauhat"
 },
 "1603": {
 "w": "#e2dfd5",
@@ -5349,10 +5351,11 @@
 "note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1648": {
-"w": "#aea3ae",
-"m": 1,
-"k": "render",
-"f": 7
+"w": "#9a4a36",
+"k": "brick",
+"f": 7,
+"sv": 1,
+"note": "Aittaluoto: punatiilinen kuten naapuritornit 1645-1650 (käyttäjä 13.11.2026)"
 },
 "1649": {
 "w": "#9a4a36",

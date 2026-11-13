@@ -115,6 +115,16 @@ SPEC[604] = dict(P=_tl, layout=dict(bw=3.2, rows=[(4.0, 'shop', 'G')] + [(3.4, '
                                     rowP={'T': dict(ww=1.5, wh=1.2, nx=2, sill=0.9, wall=M('#e6e2d8'))}), roof=dict(kind='flat', mat=SHEET))
 # 603  Eteläkauppatori 2 (1961)
 SPEC[603] = dict(P=dict(wall=M('#e2dfd6'), spandrel=M('#5f6f7a', 0.5), sign=SIGNS, gwall=M('#35383b', 0.3), fascia=M('#e2dfd6'), gframe=ALU), layout=lay(30, 'ribbon', gh=4.2, bw=3.3, fh=3.2, cols=every(4, 'F', 1)), roof=dict(kind='flat', mat=SHEET, pent=(3.0, 2.4)))
+# 221  Ratsula, Antinkatu 17 (1971; Street View 13.11.2026, user: sheet metal): red sheet-metal cladding, long window bands, glazed shop floor
+_RAT = MT('#a2402f', None, 0.45, 0.35)
+# Street View: a glazed shop floor between red piers under a red fascia, one storey-high band of grey glass all round, a tall closed red band above
+SPEC[221] = dict(P=dict(wall=_RAT, spandrel=_RAT, frame=M('#4a4f52', 0.4, 0.3), wglass=M('#76838a', 0.08), sign=SIGNS, gwall=_RAT, gpier=0.45, fascia=_RAT, gframe=DARK),
+                 layout=lay(B[221]['h'], 'ribbon', gh=4.4, bw=3.0, fh=3.8, P=dict(sill=0.25, wh=3.2, nx=2), top=('plain', {}),
+                            rowP={'G': dict(setback=1.6, piers=(2, 0.7), piermat=_RAT, soffit=M('#3a3d40'), gpier=0.05)}))   # shop floor 1.6 m behind red piers (Street View corner view)
+# 1601  Porin Leijona (the old Postitalo, Yrjönkatu 6 / Valtakatu 4; renovated 2025): white spandrels, light grey-green glass in long window
+# bands, glazed ground floor (Street View 2026, user 13.11.2026)
+SPEC[1601] = dict(P=dict(wall=M('#eeede8'), frame=M('#d6dad8'), wglass=M('#7f9592', 0.08), nx=3, sign=SIGNS, gwall=M('#2f3436', 0.3), fascia=M('#eeede8'), gframe=ALU),
+                  layout=lay(B[1601]['h'], 'ribbon', gh=4.5, bw=3.0, fh=3.25, P=dict(sill=0.85, wh=1.65, nx=3)))
 # 564  Kansankulma, Antinkatu 14 (Karhulahti 1954): terasti, band of large windows on the first floor, small two-pane windows above, stone-clad street level
 SPEC[564] = dict(P=dict(wall=TERASTI2, gwall=M('#9c9a92', 0.4), plinth=M('#6d6b66', 0.4), sign=SIGNS),
                  layout=lay(23, 'punched', gh=4.0, bw=2.9, fh=3.15, second=('ribbon', dict(wh=1.7, sill=0.8, nx=3, pier=0.15)), P=dict(ww=1.25, wh=1.35, nx=2)), roof=dict(kind='hip', inset=3.2, rise=1.5, mat=SHEET))

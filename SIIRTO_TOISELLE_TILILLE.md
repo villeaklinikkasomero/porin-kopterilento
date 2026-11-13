@@ -188,3 +188,35 @@ Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex
   (tummanruskea levy → pelin brickify tekee tiiltä, sama kuin Ratsula), Yrjönkatu 25 (107) aumakatto puuttuu, Yrjönkatu 27 (109) kulmaparvekkeet.
   BePOP, IsoKarhu, Promenadi, Sokos ja Porin Talo tarkistetaan vasta, kun 12.–13.11. leivonnat ovat pelissä.
 - Seuraava katu: Valtakatu.
+
+## 13.11.2026 klo 10–10.30: käyttäjän tarkennukset
+- **Airionkulma 603:** käyttäjän mukaan nykyinen valokuvajulkisivu on hyvä → ei muutettu (kokeiltu lasiverhousta, peruttu).
+- **Porin Leijona 1601** (ent. Postitalo, Yrjönkatu 6, remontoitu 2025): SPEC[1601] valkoinen + vaaleanharmaanvihreät ikkunanauhat, lasitettu katutaso (tori5).
+- **Ratsula 221:** punainen peltiverhous. Uusi styles-materiaali `k: 'metal'` (zones2.look_mat → MT(..., None)): punainen seinä ei enää muutu
+  tiileksi (gen.detail_kind teki tummanpunaisista tiiltä). SPEC[221] nauhaikkunat + liiketilakerros (c052). Kuparikonttori 269 myös `metal` (c065).
+- **Aittaluoto 1648:** vaaleanvioletti torni → punatiili kuten 1645–1650 (c081).
+- **gen.py:** m_ribbon hyväksyy `wglass` (ikkunalasin väri).
+- **Ehdotus odottaa päätöstä:** liiketilojen lasit (gen.py `shop_glass`, versio tallessa istunnossa work/gen_shop.py): yläosa heijastaa, alaosassa
+  vaaleita esillepanoja → ei enää näytä suljetuilta ovilta. Koskee kaikkia lohkoja → vaatii koko keskustan uudelleenleivonnan.
+- **Ajettava:** `bake kivi3 kivi4 kivi5 tori5 --samples 64` ja `city 64 c023,c033,c037,c038,c039,c047,c048,c049,c050,c051,c052,c063,c064,c065,c067,c068,c081,c110`.
+- **10.40 Näyteikkunat hyväksytty (käyttäjä):** gen.py `shop_glass` käytössä kaikissa liiketiloissa (paitsi joissa SPEC antaa oman `gglass`):
+  alaosa #363e44, yläosa heijastus #75828b, 1–3 vaaleaa esillepanoa. Vaatii kaikkien lohkojen uudelleenleivonnan.
+- **Ratsula tarkistettu Street View'sta (3 suuntaa):** lasitettu liiketilakerros punaisten pilarien välissä, kerroksen korkuinen harmaa
+  lasinauha, ylhäällä umpinainen punainen peltinauha (SPEC[221], top=plain).
+- **Ajettava (korvaa aiemmat listat):** `bake kivi0 kivi1 kivi2 kivi3 kivi4 kivi5 kl0 kl1 tori0 tori1 tori2 tori3 tori4 tori5 p1 bepop isokarhu promenadi uima karhu --samples 64`
+  ja `city 64 c` → collect. (h-lohkoissa ei liiketiloja muutamaa poikkeusta lukuun ottamatta; ne voi ajaa myöhemmin.)
+
+## 13.11.2026 klo 10.45–11.30: syvennykset ja viistetyt kulmat (käyttäjä: "syvennykset jäävät samaan tasoon", "45 asteen kulmat")
+- **gen.py build_wall: kerroskohtainen syvennys** `rowP[row]['setback'] = m`: rivin julkisivu (myös leivottavat laatat) siirtyy taaksepäin,
+  yläpuolelle tulee alapinta (soffit), sisäänvedetyn ylimmän kerroksen eteen tasanne, päihin pilarit (sisäänpäin käännetty päätyseinä
+  leivottiin mustaksi). Lisäksi `piers=(joka k:s väli, leveys)`, `piermat`, `soffit`, `open_ends`. Käytössä: Ratsula (liiketilakerros 1,6 m
+  punaisten pilarien takana).
+- **chamfer.py (uusi):** OSM:n 1,5–6 m vinot kulmasivut (≈45°) leikataan LoD2-kuoriin: kaikki pinnat (G/R/W) leikataan pystytasolla ja
+  viisteelle lisätään oma seinä → build_lod2 tekee sille julkisivun. zones2 kutsuu `chamfer.apply(RAW, B, LOOK)` latauksessa.
+  styles.json `ch: [[x, y, w], ...]` lisää kulman, jota OSM:ssä ei ole (lähin LoD2-kulma, viisteen leveys w).
+  Leikattu nyt 24 kuorta, mm. 1560, 1563, 8385, 1572, 1574, 1559, 1285, 1287.
+- **chamfer_lod2.py (uusi):** samat leikkaukset pelin lod2.js-kattoihin (vain lohkojen taloille, koska peli piirtää niiden mitatut katot).
+  Ajettu kerran → lod2.js päivitetty. Ajetaan uudelleen, jos chamfer.py:n tai ch-merkintöjen lista muuttuu (toisto on harmiton).
+- **Puuttuu vielä:** viisteen oma julkisivu (kulmaovi, parveke/erkkeri) – nyt viiste saa tavallisen 1 ikkunavälin tai umpiseinän.
+- **Sovittu jatko (käyttäjä 10.41):** keskusta katu kadulta loppuun (Valtakatu seuraavaksi), sitten uusintakierros, sitten Riihiketo ja Isosanta.
+- **Ajettava:** sama kuin edellä (kaikki nimetyt lohkot + `city 64 c`), koska gen.py ja zones2.py muuttuivat.
