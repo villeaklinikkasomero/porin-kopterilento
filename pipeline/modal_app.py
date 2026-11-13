@@ -88,6 +88,10 @@ def city_zone(name: str, samples: int = 64, day: str = ''):
     if ok:
         dst = Path('/vol/results') / day / 'game' / f'bl_{name}.js'; dst.parent.mkdir(parents=True, exist_ok=True); dst.write_bytes(src.read_bytes())
     else: print(r.stdout[-3000:], r.stderr[-3000:])
+    if named:                                   # 13.11.2026 diagnostics: named blocks came back "ok" in 18 s but never changed the game file
+        import hashlib; h = lambda f: hashlib.md5(f.read_bytes()).hexdigest()[:10] if f.exists() else '-'
+        print(f'[{name}] rc {r.returncode}, new {src.stat().st_size if src.exists() else 0} B md5 {h(src)}, game file md5 {h(Path("/repo") / f"bl_{name}.js")}', flush=True)
+        print(f'[{name}] log tail:', r.stdout[-2500:], r.stderr[-1500:], flush=True)
     vol.commit()
     return name, ok, round(time.time() - t0)
 
