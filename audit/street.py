@@ -13,15 +13,20 @@ PHS=set(int(k) for k in re.findall(r'(\d+): \[\{ t:', re.search(r'let PHS = \{(.
 L=json.load(open('/home/claude/pori/styles.json'))['b']
 Z=json.load(open('/home/claude/pori/city_zones.json'))['zones']; zof={i:z for z,v in Z.items() for i in v['ids']}
 L2=json.loads(open('/home/claude/pori/lod2.js').read()[len('export default '):-2]); HIDE=set(L2['hide'])
-RAW=pickle.load(open('/home/claude/mmlproc/raw.pkl','rb'))
-shells=[(i,Polygon([(p[0],p[1]) for p in r]).buffer(0)) for i,parts in RAW.items() for k,r,_ in parts if k=='G' and len(r)>=3]
+RAW=None
+from shapely.geometry import MultiPolygon
+shells=[]
+for i,v in L2['b'].items():
+    o=v['o']; r=v['r']; tr=[Polygon([((o[0]+r[k+3*j])/10,(o[1]+r[k+3*j+1])/10) for j in range(3)]) for k in range(0,len(r)-8,9)]
+    tr=[t for t in tr if t.area>0.01]
+    if tr: shells.append((int(i),unary_union(tr).buffer(0.2)))
 src=open('/home/claude/zones.py').read()
 ZONES=eval(re.search(r"ZONES = (\{.*?\n\})", src, re.S).group(1).replace('BEPOP','588').replace('UIMA','-1').replace('ISOK','580').replace('PROME','270'))
 zn={i:k for k,v in ZONES.items() for i in v}
 sys.path.insert(0,'/home/claude'); 
 KS=open('/home/claude/kivi.py').read(); ZK=eval(re.search(r"ZONESK = (\{.*?\n\})", KS, re.S).group(1))
 zk={i:k for k,v in ZK.items() for i in v}
-t=subprocess.check_output(['git','-C','/tmp/pk','show','origin/main:ypakki_keskusta.csv']).decode('utf-8-sig')
+t=open('/home/claude/pori/ypakki_keskusta.csv',encoding='utf-8-sig').read()
 YP={r['i']:r for r in csv.DictReader(io.StringIO(t)) if r['i']}
 def how(i, pg):
     lm=[k for k,(x,y) in LMAT.items() if pg.contains(Point(x,y))]

@@ -1,0 +1,27 @@
+V00A 1336 Valtakatu 25: real light grey-white 5 storey, yellow balcony recesses at corner; game beige -> #d9d8d2
+V00B 1368 tower 8 floors: real beige-brown tower; game light grey -> check colour
+V01A 1338/park: wooden house in park, beige 4-storey; ok
+V01B 1376: backlit, 5 storey; ok-ish
+V02A 1338: real cream, no street balconies visible (balconies on game street side?) 1535 dark brick ok
+V02B 1376: real taupe/grey-beige 5 storey with darker ground band; game near white -> #cdc6b6?
+V03A 1535/1517 Valtakatu 26: game LOW BLANK WALL (h 3.8/7.5 wrong) -> styles hh 19.5/25.5 (fixed, zones2 'hh')
+V03B 1351: was lyseo pink -> real 4 krs ochre-beige plain (fixed); 1353 stays Lyseo
+V04A 1535 blank wall again (fixed by hh); real dark brick + glazed balconies
+V05A 1451 Valtakatu 24: real rust-red/grey panels, glazed balconies -> w #b0583a
+V05B 1353 Lyseo pink ok
+V06A 1514 dark grey band facade -> #6b737a; shops ok
+V06B 1311 long 2-krs pale yellow, plain windows -> SPECK no arches
+V07A 1511 ok, 1249 Otava ok; V07B 1308 pale yellow 1-krs puutalo -> #e6d49e
+V08A Otava ok; V08B 1310 ok
+V09A park ok; V09B open lot ok
+V10A park ok; V10B 1398 greyer -> #d3cdbf; V11A park ok
+V11B Pohjoispuisto corner backlit, ok-ish
+V12A ok; V12B 1362/1364 roughly ok
+V13A ok (wooden 1292, Jugend); V13B Satarauta 1361 yellow – fixed earlier pending bake
+V14A UNSURE: real 1-krs ochre long house on Valtakatu (Kaupungintalo block, 1294/1577?), game 2-krs yellow arched -> uusintakierros; V14B Satarauta pending
+V15A 1574 (not 1716) Valtakatu 9 1-krs beige, no arches (fixed); V15B Satarauta ok
+V16A 1581 tower white + orange bands; V16B ok
+V17A tower bands ok after fix; V17B 1731 Valtakatu 6 orange brick (SPEC rewritten)
+V18A 1603 Valtakatu 5 beige ribbons (SPEC); V18B 1729 grey-brown concrete
+V19A 1620 ok; V19B Porin Leijona white pending bake
+V20A Valtakatu 1 ok-ish; V20B 1720 pavilion blank -> SPEC shop glass green fascia

@@ -230,3 +230,31 @@ Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex
   harmaansiniset ikkunanauhat ja pyöreä porrastorni. Lisätty zones.py SPEC[216] (nauhaikkunat, fit). Paikallinen c067 OK.
   Live-pelissä 215:n (Kansankulma) itäpääty kannen yllä musta – paikallisessa c052-leivonnassa ei mustaa → korjautuu `city 64 c`:llä.
   Kesken: Sampotalon (238) pihasivun pyöreä porrastorni ja ruskea ylin kerros; kannen korkeus (LoD2 ~6,8 m) vs roofAt 3,1 m.
+- **12.00 Yrjönkatu 20, Porin Talo (582):** SV:n tarkempi kuva → 2015 "pikseli"-kasettiverhous (lila-/sinharmaat ja valkoiset kasetit eri
+  syvyyksillä, kapeat kerroskorkeat ikkunat epäsäännöllisesti), turkoosi liikeotsa. zones.py `m_pixel` + `_ptUp`. Testileivottu c067.
+- **Valtakatu (kesken, V00–V11 / 22 pistettä):** styles: 1336?, 1351 (ei Lyseo vaan okra 4 krs), 1308, 1311 (SPECK, ei kaaria), 1398, 1451
+  (Valtakatu 24 ruosteenpunainen), 1514, 1535/1517 (Valtakatu 26: city.js-korkeus 3,8/7,5 m väärin → uusi styles-avain `hh` = 19,5/25,5 m,
+  zones2.py lukee sen; kl0 testileivottu, nyt 6 krs tiilitalo lasiparvekkein).
+- **Ajettava lisäksi:** `bake kl0 kl1 kivi0 karhu`, `city 64 c` (c067 Porin Talo + Teljäntori).
+- **12.35 Valtakatu läpi (V00–V20):** lisäksi SPEC: 1581 Valtakatu 7 torni (valkoinen + oranssinpunaiset ikkunavälinauhat, kivi3 testileivottu),
+  1603 Valtakatu 5 (hiekanbeige, ikkunanauhat), 1731 Valtakatu 6 (oranssinpunainen tiili, vaalea katutaso), 1729 harmaanruskea betoni,
+  1720 kulmapaviljonki (lasi + tummanvihreä otsa; oli umpiseinä). SPECK 1574 Valtakatu 9 (1-krs, ei kaaria; kivi1 testileivottu).
+  1451 (Karhukortteli, Valtakatu 24): SV näyttää ruosteenpunaiset/harmaat levyt, mutta KARHU-värit ovat omistajan hyväksymät → ei muutettu, kysytty.
+  Uusintakierrokselle: Kaupungintalon korttelin Valtakadun puoli (1294: SV:ssä 1-krs okra?), Kauppahalli/Y07–08, Sampotalon pihasivu.
+- **Ajettava:** `bake kivi0 kivi1 kivi3 kl0 kl1 karhu tori0 tori1 tori5 --samples 64` + `city 64 c`.
+
+## SEURAAVA ISTUNTO – ALOITA TÄSTÄ (handoff 13.11.2026 klo 12.10)
+- **Tila:** Antinkatu ✔, Yrjönkatu ✔ (paitsi uusintakierroksen kohdat), Valtakatu ✔ (V00–V20; V21 = Kauppatorin pää, aiemmin katsottu).
+  Seuraavaksi **Itsenäisyydenkatu**, sitten Isolinnankatu, Pohjoisranta/Eteläranta, Hallituskatu, Gallen-Kallelankatu, Mikonkatu, Liisankatu,
+  Otavankatu/Annankatu/Katariinankatu, Länsipuisto, Itäpuisto → uusintakierros → Riihiketo ja Isosanta → seinämaalaukset viimeisenä.
+- **Avoin kysymys käyttäjälle:** Valtakatu 24 (1451, Karhukortteli) – SV:ssä ruosteenpunaiset/harmaat levyt, KARHU-värit omistajan hyväksymät. Muutetaanko?
+- **Uusintakierroksen lista:** 1294 Kaupungintalon kortteli Valtakadun puoli (SV 1-krs okra?), Kauppahalli Y07–Y08, Sampotalo 238 pihasivu
+  (pyöreä porrastorni, tumma ylin kerros; kansi LoD2 ~6,8 m vs roofAt 3,1 m), 107 aumakatto, 109 kulmaparvekkeet, Eteläranta 4 alaikkunat,
+  116 erkkerit, 163/1726 värit, viisteiden kulmaovet.
+- **Työkalut** ovat nyt repossa `audit/`-kansiossa (aiemmin vain työtilassa): `street.py <Katu>` (katujen talolista), `nb.py a b`
+  (selainerä views.jsonista: peli `window.__shot(x,y,h)` + Street View), `rshot.py` (leivotun glb:n renderöinti Blenderillä),
+  `diag3.py <lohko>` (mustat laatat), `valta_notes.txt` (Valtakadun havainnot). Polut olettavat työtilan /home/claude-rakenteen.
+- **Huom. selaimesta:** max 2 näkymää / erä (50 s raja), aloita erä `resize_window 1280x720`:lla (emulointi nollautuu virheiden jälkeen).
+  Pelin `__shot` määritellään välilehteen uudelleen, jos sivu ladataan uudestaan (koodi: kesäkuun siirtotiedoston kohta "__shot").
+- **Ajamatta (käyttäjä):** commit+push, sitten `bake kivi0 kivi1 kivi3 kl0 kl1 karhu tori0 tori1 tori5 kivi2 kivi4 kivi5 tori2 tori3 tori4 p1
+  bepop isokarhu promenadi uima karhu --samples 64` ja `city 64 c`, collect → PR → merge.

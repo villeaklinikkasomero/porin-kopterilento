@@ -58,9 +58,12 @@ SPEC[1725] = dict(P=dict(_hopP), layout=lay(10, 'punched', gh=4.4, bw=3.3, fh=2.
 SPEC[1727] = dict(P=dict(wall=M('#d8d0bd')), layout=lay(4.7, plain=True))                                           # banking hall in the yard
 # 1729/1730  Juseliuksenkulma, Yrjönkatu 7: 3-storey rendered house (Finnilä 1940) + 6-storey block (1961)
 SPEC[1730] = dict(P=dict(wall=M('#e9e3d2'), sign=SIGNS, band=M('#f4f1e8')), layout=lay(10, 'punched', gh=3.6, bw=3.2, fh=3.2, P=dict(ww=1.7, wh=1.4, nx=3)))
-SPEC[1729] = dict(P=dict(wall=M('#ddd9cd'), sign=SIGNS, spandrel=M('#7d8a8f')), layout=lay(23, 'ribbon', gh=3.9, bw=3.3, fh=3.15, cols=every(4, 'F', 1)), roof=dict(kind='flat', mat=SHEET))
+SPEC[1729] = dict(P=dict(wall=M('#aaa397', 0.8), sign=SIGNS, spandrel=M('#a39c90', 0.8)), layout=lay(23, 'ribbon', gh=3.9, bw=3.3, fh=3.15, cols=every(4, 'F', 1)), roof=dict(kind='flat', mat=SHEET))
 SPEC[1621] = dict(P=dict(wall=M('#d2cdbf'), sign=SIGNS, rail=M('#e4e2da')), layout=lay(20, 'punched', gh=3.9, bw=3.5, fh=3.2, cols=every(3, 'B'), P=dict(ww=1.7)))
-SPEC[1731] = dict(P=dict(wall=M('#c9c6bd'), sign=SIGNS, spandrel=M('#5d666c')), layout=lay(12, 'ribbon', gh=4.0, bw=3.6, fh=4.0, P=dict(wh=1.8, sill=1.1)))
+# Valtakatu 6 (1987; Street View 13.11.2026 from Valtakatu 7): orange-red brick upper floors with small balconies, light grey ground floor
+_v6B = MT('#b8653f', 'brick', 0.8)
+_v6fit = lambda lay_, H, street: lay(H, 'punched', gh=3.6 if H > 6 else 0, bw=3.4, fh=3.0, cols=every(3, 'B'), P=dict(ww=1.5, wh=1.5))
+SPEC[1731] = dict(P=dict(wall=_v6B, sign=SIGNS, gwall=M('#d9d8d3'), fascia=M('#d9d8d3'), rail=M('#c9ced2', 0.3, 0.5), gframe=ALU), layout=_v6fit(None, 12, True), fit=_v6fit)
 
 
 # ---------------------------------------------------------------- west of the square, north block (Gallen-Kallelankatu north side ... Valtakatu)
@@ -128,6 +131,19 @@ def _tel_fit(lay_, H, street):
     return lay(H, 'ribbon', gh=4.2 if street and H > 6 else 0, bw=3.0, fh=3.3, P=_TELP)
 SPEC[216] = dict(P=dict(wall=M('#e9e8e3'), spandrel=M('#e9e8e3'), sign=SIGNS, gwall=M('#3a3f42', 0.3), fascia=M('#e9e8e3'), gframe=ALU),
                  layout=lay(10, 'ribbon', gh=4.2, bw=3.0, fh=3.3, P=_TELP), fit=_tel_fit)
+# 1581  Valtakatu 7 tower (Street View 13.11.2026): white walls, orange-red panels under the windows in horizontal bands, shops below
+_V7P = dict(sill=0.9, wh=1.45, nx=2, frame=M('#3a3d40', 0.4, 0.4))
+SPEC[1581] = dict(P=dict(wall=M('#e6e4de'), spandrel=M('#c4623f', 0.6), sign=SIGNS, gwall=M('#34373a', 0.4), fascia=M('#e6e4de'), gframe=ALU),
+                  layout=lay(25, 'ribbon', gh=4.2, bw=3.0, fh=3.0, P=_V7P),
+                  fit=lambda lay_, H, street: lay(H, 'ribbon', gh=4.2 if H > 6 else 0, bw=3.0, fh=3.0, P=_V7P))
+# 1603  Valtakatu 5 (Street View 13.11.2026): sandy beige, long window bands on every floor, dark shop floor
+_V5P = dict(sill=0.95, wh=1.35, nx=3, frame=M('#3a3d40', 0.4, 0.4))
+SPEC[1603] = dict(P=dict(wall=M('#cfbd93'), spandrel=M('#cfbd93'), sign=SIGNS, gwall=M('#34373a', 0.4), fascia=M('#3a3d40'), gframe=ALU),
+                  layout=lay(22, 'ribbon', gh=4.0, bw=3.0, fh=3.0, P=_V5P),
+                  fit=lambda lay_, H, street: lay(H, 'ribbon', gh=4.0 if H > 6 else 0, bw=3.0, fh=3.0, P=_V5P))
+# 1720  Valtakatu 2 / Isolinnankatu corner (Street View 13.11.2026): one-storey shop pavilion, glass all round under a dark green fascia
+SPEC[1720] = dict(P=dict(wall=M('#d9d8d3'), sign=SIGNS, gwall=M('#34373a', 0.4), fascia=M('#2f5e45', 0.6), plinth=M('#3a3d40'), gframe=ALU),
+                  layout=dict(bw=3.2, rows=[(4.7, 'shop', 'G')], cols=lambda c, nb: 'W', P={}))
 # 1601  Porin Leijona (the old Postitalo, Yrjönkatu 6 / Valtakatu 4; renovated 2025): white spandrels, light grey-green glass in long window
 # bands, glazed ground floor (Street View 2026, user 13.11.2026)
 SPEC[1601] = dict(P=dict(wall=M('#eeede8'), frame=M('#d6dad8'), wglass=M('#7f9592', 0.08), nx=3, sign=SIGNS, gwall=M('#2f3436', 0.3), fascia=M('#eeede8'), gframe=ALU),
@@ -501,8 +517,24 @@ _soP = dict(wall=M('#c9ccce', 0.6, 0.15), spandrel=M('#c9ccce', 0.6, 0.15), fram
             fascia=M('#2e7d4f', 0.5), gframe=ALU, sign=SIGNS, joints=M('#aeb2b5', 0.5, 0.2))
 _soUp = ('punched', 2.6, lambda c, nb: 'W' if c % 3 == 1 else 'N', dict(ww=1.2, wh=3.4, sill=0.3, nx=1, colmod={'N': 'plain'}))
 _ptP = dict(wall=M('#8fa3b5', 0.5, 0.25), spandrel=M('#8fa3b5', 0.5, 0.25), frame=M('#2d3134', 0.4, 0.4), gwall=M('#2e3134', 0.4), plinth=M('#2a2c2f'),
-            fascia=M('#6d8193'), gframe=ALU, sign=SIGNS)
-_ptUp = ('ribbon', 3.0, lambda c, nb: 'W', dict(sill=0.9, wh=1.5, pier=0.0, nx=3))
+            fascia=M('#2f7f80', 0.5), gframe=ALU, sign=SIGNS)
+# Street View 13.11.2026 (Yrjönkatu 20, pedestrian street): the 2015 facade is a "pixel" cladding of metal cassettes in light lilac-grey,
+# blue-grey and white, set at slightly different depths, with storey-high narrow windows placed irregularly; teal shop fascia below
+_PXC = [M('#a9b2c6', 0.35, 0.45), M('#c3c8d6', 0.35, 0.45), M('#8796ad', 0.35, 0.45), M('#d6d9e1', 0.35, 0.45), M('#9aa6bb', 0.35, 0.45)]
+def m_pixel(mb, col, P):
+    bw, fh = mb.bw, mb.fh; nu, nv = 2, 3; cw, ch = bw / nu, fh / nv; r = mb.rnd
+    wu = r.randrange(nu) if r.random() < 0.55 else -1; gl = P.get('glass', M('#2c3338', 0.08)); fr = P.get('frame', M('#2d3134', 0.4, 0.4))
+    for a in range(nu):
+        for b in range(nv):
+            if a == wu: continue
+            mb.prot(a * cw + 0.01, b * ch + 0.01, (a + 1) * cw - 0.01, (b + 1) * ch - 0.01, r.choice((0.02, 0.06, 0.1)), r.choice(_PXC))
+    if wu < 0: return
+    u0 = wu * cw; ww = 0.7; ua = u0 + (cw - ww) * r.random()
+    for (a_, b_) in ((u0, ua), (ua + ww, u0 + cw)):
+        if b_ - a_ > 0.05: mb.prot(a_ + 0.01, 0.01, b_ - 0.01, fh - 0.01, 0.04, r.choice(_PXC))
+    mb.q(ua, 0.1, ua + ww, fh - 0.1, -0.12, fr); mb.q(ua + 0.06, 0.2, ua + ww - 0.06, fh - 0.2, -0.1, gl)
+MODS['pixel'] = m_pixel
+_ptUp = ('pixel', 3.0, lambda c, nb: 'W', dict(nx=3))
 _liP = dict(wall=M('#d9dcd8'), spandrel=M('#d9dcd8'), frame=M('#2f3337', 0.4, 0.4), rail=M('#7f9a94', 0.12), linner=M('#cfd2ce'), gwall=M('#2e3134', 0.4),
             plinth=M('#2a2c2f'), fascia=M('#5d6f78'), gframe=ALU, sign=SIGNS)
 _liUp = ('punched', 3.0, lambda c, nb: 'L' if c % 3 != 1 else 'W', dict(ww=1.4, wh=1.5, nx=2, colmod={'L': 'loggia'}, ldepth=1.2))

@@ -2774,8 +2774,9 @@
 "k": "render",
 "f": 4,
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 20, Porin Talo, 1978",
-"y": 1978
+"note": "Y-pakki: Yrjönkatu 20, Porin Talo, 1978; SV 13.11.2026: pixel-kasettiverhous (lila-/sinharmaa), kapeat kerroskorkeat ikkunat, turkoosi liikeotsa",
+"y": 1978,
+"sv": 1
 },
 "583": {
 "f": 2
@@ -3608,7 +3609,8 @@
 "k": "render",
 "f": 3,
 "r": "#3f4246",
-"s": "otava"
+"s": "otava",
+"sv": 1
 },
 "1251": {
 "w": "#8d8f95",
@@ -3929,7 +3931,7 @@
 "y": 1939
 },
 "1308": {
-"w": "#d8d6cf",
+"w": "#e6d49e",
 "k": "wood",
 "r": "#74787b",
 "f": 1,
@@ -3951,7 +3953,7 @@
 "sv": 1
 },
 "1311": {
-"w": "#d3cfbd",
+"w": "#e3d8b4",
 "k": "render",
 "r": "#b9bbb9",
 "f": 2,
@@ -4085,11 +4087,12 @@
 "k": "render"
 },
 "1351": {
-"w": "#ecc3cb",
+"w": "#d8c69c",
 "k": "render",
-"f": 3,
+"f": 4,
 "r": "#2e3033",
-"s": "lyseo"
+"sv": 1,
+"note": "Valtakatu (Lyseon kortteli), 4 krs vaalea okra rappaus, tasaiset ikkunat (SV 13.11.2026); vaaleanpunainen Lyseo on 1353"
 },
 "1352": {
 "w": "#b26a4c",
@@ -4106,7 +4109,8 @@
 "k": "render",
 "f": 3,
 "r": "#2e3033",
-"s": "lyseo"
+"s": "lyseo",
+"sv": 1
 },
 "1354": {
 "w": "#e2d6b6",
@@ -4295,10 +4299,11 @@
 "k": "render"
 },
 "1398": {
-"w": "#e0d4b6",
+"w": "#d3cdbf",
 "k": "render",
 "f": 7,
-"r": "#74787b"
+"r": "#74787b",
+"sv": 1
 },
 "1399": {
 "w": "#e7e5de",
@@ -4799,9 +4804,10 @@
 "f": 4
 },
 "1514": {
-"w": "#ded2d7",
+"w": "#6b737a",
 "m": 1,
-"k": "render"
+"k": "render",
+"sv": 1
 },
 "1516": {
 "w": "#5a5d60",
@@ -4814,7 +4820,9 @@
 "k": "brick",
 "r": "#74787b",
 "f": 8,
-"sv": 1
+"sv": 1,
+"hh": 25.5,
+"note": "Valtakatu 26 b, tiili, 8 krs (city.js h 7.5 väärin)"
 },
 "1528": {
 "w": "#ede7f0",
@@ -4837,7 +4845,9 @@
 "k": "brick",
 "r": "#b9bbb9",
 "f": 6,
-"sv": 1
+"sv": 1,
+"hh": 19.5,
+"note": "Valtakatu 26, uusi tiilitalo, 6 krs + lasitetut parvekkeet (SV 13.11.2026; city.js h 3.8 väärin)"
 },
 "1536": {
 "w": "#e9e8e4",
@@ -8129,14 +8139,17 @@
 "r": "#34393d"
 },
 "1451": {
-"w": "#d9d6cf",
+"w": "#b0583a",
 "k": "render",
-"r": "#34393d"
+"r": "#34393d",
+"sv": 1,
+"note": "Valtakatu 24, moderni: ruosteenpunaiset ja harmaat levyt, lasitetut parvekkeet (SV 13.11.2026)"
 },
 "1511": {
 "w": "#e8e6e0",
 "k": "render",
-"r": "#34393d"
+"r": "#34393d",
+"sv": 1
 },
 "1512": {
 "w": "#8a5a44",
