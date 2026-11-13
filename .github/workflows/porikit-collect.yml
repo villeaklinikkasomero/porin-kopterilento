@@ -15,12 +15,12 @@ jobs:
       - name: fetch results
         id: fetch
         run: |
-          pip install modal
+           pip install modal
           D=$(TZ=Europe/Helsinki date -d yesterday +%F); T=$(TZ=Europe/Helsinki date +%F); mkdir -p night
           for d in $D $T; do modal volume get pori-data "results/$d" night/ --force 2>/dev/null || true; done
-          if [ -d night ]; then for f in $(find night -path '*/game/*' -name 'bl_*.js' | sort); do n=$(basename "$f"); if [[ "$n" =~ ^bl_[ch][0-9]{3}\.js$ ]] || [ ! -e "$n" ]; then cp "$f" .; fi; done; fi
+          if [ -d night ]; then for f in $(find night -path '*/game/*' -name 'bl_*.js' | sort); do cp "$f" .; done; fi
           echo "day=$T" >> $GITHUB_OUTPUT
-          { echo "## Valmistuneet työt $T"; for f in $(find night -name '*.status.json'); do python3 -c "import json,sys; d=json.load(open(sys.argv[1])); t=d['task']; print('-', t.get('kind'), t.get('cmd') or t.get('zones') or t.get('names') or '', '→', d['status'], str(d['seconds'])+' s')" "$f"; done; } > summary.md
+           { echo "## Valmistuneet työt $T"; for f in $(find night -name '*.status.json'); do python3 -c "import json,sys; d=json.load(open(sys.argv[1])); t=d['task']; print('-', t.get('kind'), t.get('cmd') or t.get('zones') or t.get('names') or '', '→', d['status'], str(d['seconds'])+' s')" "$f"; done; } > summary.md
           find night -path '*/game/*' -delete || true
       - uses: peter-evans/create-pull-request@v6
         with:
