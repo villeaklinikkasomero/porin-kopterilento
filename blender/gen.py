@@ -366,6 +366,12 @@ def m_classic(mb, col, P):
     bw, fh, W = mb.bw, mb.fh, P['wall']; T = P.get('trim', WHITE); fr = P.get('frame', WHITE)
     ph = P.get('plinth_h', 0)                     # granite plinth at the foot of the row (ground floor)
     ww = min(P.get('ww', 1.2), bw - 0.9); wh = P.get('wh', 2.0); sill = P.get('sill', 0.95) + ph
+    if not P.get('wh_fixed'):                     # windows grow with the storey: a high ground floor or piano nobile has tall windows
+        top = 0.95 if P.get('hood') else 0.6      # (user 13.11.2026: the taller lower windows were drawn the same as the upper ones)
+        g_ = P.get('ground'); free = fh - sill - top
+        wh = min(max(wh, free * (0.8 if g_ else 0.8)), 2.9 if g_ else 2.5)
+        if g_ and free - wh > 1.0: sill += (free - wh) * 0.6     # a ground floor raised on its plinth: the extra height goes under the sill
+        if wh > 2.3: ww = min(bw - 0.9, ww * min(1.2, (wh / 2.0) ** 0.5))
     wh = min(wh, fh - sill - (0.75 if P.get('hood') else 0.35))
     if col in ('D', 'S') and not P.get('ground'): col = 'W'
     if P.get('blank'): col = 'N'
@@ -599,8 +605,9 @@ def build_wall(Z, p, q, z0, z1, layout, P, seed, bid):
         if sb > 0:
             Pr = _rp(rkey); smat = Pr.get('soffit', P['wall']); rmat = Pr.get('returnmat', P['wall'])
             nxt = sbs[ri + 1] if ri + 1 < len(rows) else None; prv = sbs[ri - 1] if ri > 0 else None
-            if nxt is not None and sb > nxt:                                         # soffit: the underside of the face above
-                add_solid(Z, [W(0, fh, -sb, 0, v), W(L, fh, -sb, 0, v), W(L, fh, -nxt, 0, v), W(0, fh, -nxt, 0, v)], smat, 0.3)
+            nxt_ = nxt if nxt is not None else 0          # top row set back: the eave / roof edge stays on the wall line, so its underside
+            if sb > nxt_:                                 # closes the step too (otherwise the roof would hang over a gap)
+                add_solid(Z, [W(0, fh, -sb, 0, v), W(L, fh, -sb, 0, v), W(L, fh, -nxt_, 0, v), W(0, fh, -nxt_, 0, v)], smat, 0.3)
             if prv is not None and sb > prv:                                         # ledge in front of a set-back upper storey
                 add_solid(Z, [W(0, 0, -prv, 0, v), W(L, 0, -prv, 0, v), W(L, 0, -sb, 0, v), W(0, 0, -sb, 0, v)], smat, 0.3)
             kk, pw = Pr.get('piers', (0, max(0.4, min(1.0, sb * 0.5)))); pm = Pr.get('piermat', rmat)

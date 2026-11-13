@@ -220,3 +220,13 @@ Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex
 - **Puuttuu vielä:** viisteen oma julkisivu (kulmaovi, parveke/erkkeri) – nyt viiste saa tavallisen 1 ikkunavälin tai umpiseinän.
 - **Sovittu jatko (käyttäjä 10.41):** keskusta katu kadulta loppuun (Valtakatu seuraavaksi), sitten uusintakierros, sitten Riihiketo ja Isosanta.
 - **Ajettava:** sama kuin edellä (kaikki nimetyt lohkot + `city 64 c`), koska gen.py ja zones2.py muuttuivat.
+- **11.15 Korkeammat alakerran ikkunat (käyttäjä):** gen.py m_classic: ikkunan korkeus kasvaa kerroskorkeuden mukana (80 % vapaasta
+  korkeudesta; katutaso ≤ 2,9 m, ylemmät ≤ 2,5 m, leveys kasvaa ≤ 20 %). Jos katutaso on vielä korkeampi, ylijäämä menee ikkunan alle
+  (sokkelille korotettu katutaso). Kiinteä korkeus: rowP `wh_fixed=True`. Koskee kaikkia klassisia julkisivuja.
+- **11.20 Kelluvat katot (käyttäjä):** sisäänvedetyn ylimmän kerroksen yläreunaan lisätään alapinta räystäslinjalta syvennykseen (muuten katto jäi raon päälle). Seinät skaalautuvat aina maasta räystääseen (build_wall: sc = seinän korkeus / rivien summa), joten kerrosluku, ikkunakorkeus ja syvennykset eivät muuta seinän korkeutta.
+- **11.35 Yrjönkatu-tila + Teljäntorin sisäpiha:** Yrjönkadun katujulkisivut tarkistettu, EI vielä valmis: Sokos (Y12E, epätarkka SV-kuva),
+  Kauppahalli (Y07E/Y08E), 107 aumakatto, 109 kulmaparvekkeet. Teljäntori 216: katusivut (Yrjönkatu, Antinkatu) vastaavat hyvin.
+  Sisäpiha: SV:ssä vain käyttäjän 360-kuva pysäköintikannelta (sijainti/suunta epävarma) – siinä valkoiset toimistosiivet, pitkät
+  harmaansiniset ikkunanauhat ja pyöreä porrastorni. Lisätty zones.py SPEC[216] (nauhaikkunat, fit). Paikallinen c067 OK.
+  Live-pelissä 215:n (Kansankulma) itäpääty kannen yllä musta – paikallisessa c052-leivonnassa ei mustaa → korjautuu `city 64 c`:llä.
+  Kesken: Sampotalon (238) pihasivun pyöreä porrastorni ja ruskea ylin kerros; kannen korkeus (LoD2 ~6,8 m) vs roofAt 3,1 m.

@@ -121,6 +121,13 @@ _RAT = MT('#a2402f', None, 0.45, 0.35)
 SPEC[221] = dict(P=dict(wall=_RAT, spandrel=_RAT, frame=M('#4a4f52', 0.4, 0.3), wglass=M('#76838a', 0.08), sign=SIGNS, gwall=_RAT, gpier=0.45, fascia=_RAT, gframe=DARK),
                  layout=lay(B[221]['h'], 'ribbon', gh=4.4, bw=3.0, fh=3.8, P=dict(sill=0.25, wh=3.2, nx=2), top=('plain', {}),
                             rowP={'G': dict(setback=1.6, piers=(2, 0.7), piermat=_RAT, soffit=M('#3a3d40'), gpier=0.05)}))   # shop floor 1.6 m behind red piers (Street View corner view)
+# 216  Teljäntori, Yrjönkatu 15 (1972; Street View 13.11.2026, the deck photosphere): shops at street level, the parking deck on the roof of the
+# low part, white office wings round it with long grey-blue window bands, a round white stair tower
+_TELP = dict(sill=0.95, wh=1.45, nx=3, wglass=M('#5d6b73', 0.08), frame=M('#5c6266'))
+def _tel_fit(lay_, H, street):
+    return lay(H, 'ribbon', gh=4.2 if street and H > 6 else 0, bw=3.0, fh=3.3, P=_TELP)
+SPEC[216] = dict(P=dict(wall=M('#e9e8e3'), spandrel=M('#e9e8e3'), sign=SIGNS, gwall=M('#3a3f42', 0.3), fascia=M('#e9e8e3'), gframe=ALU),
+                 layout=lay(10, 'ribbon', gh=4.2, bw=3.0, fh=3.3, P=_TELP), fit=_tel_fit)
 # 1601  Porin Leijona (the old Postitalo, Yrjönkatu 6 / Valtakatu 4; renovated 2025): white spandrels, light grey-green glass in long window
 # bands, glazed ground floor (Street View 2026, user 13.11.2026)
 SPEC[1601] = dict(P=dict(wall=M('#eeede8'), frame=M('#d6dad8'), wglass=M('#7f9592', 0.08), nx=3, sign=SIGNS, gwall=M('#2f3436', 0.3), fascia=M('#eeede8'), gframe=ALU),
