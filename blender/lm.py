@@ -22,6 +22,19 @@ def mat(name, hexs, rough=0.85, metal=0.0, tex=None, col2=None):
     m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree
     b = nt.nodes['Principled BSDF']; rgb = lin(hexs)
     b.inputs['Base Color'].default_value = (*rgb, 1); b.inputs['Roughness'].default_value = rough; b.inputs['Metallic'].default_value = metal
+    if tex == 'brick' and KEY == 'tehdas':
+        # 13.11.2026 (user): the same brick as Kulturhuset Fiini - the Poly Haven red_brick_03 photo (CC0) box-projected and tinted to #9a4a36
+        import os as _os
+        td = next((d for d in (_os.environ.get('PORI_TEX', ''), '/home/claude/tex', '/repo/blender/tex', _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'tex')) if d and _os.path.isdir(d)), None)
+        if td:
+            rgb = lin('#7d3a2c' if name == 'btrim' else '#9a4a36'); tc = nt.nodes.new('ShaderNodeTexCoord'); mp = nt.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (1 / 2.2,) * 3
+            tx = nt.nodes.new('ShaderNodeTexImage'); tx.image = bpy.data.images.load(_os.path.join(td, 'red_brick_03_diff_2k.jpg'), check_existing=True); tx.projection = 'BOX'; tx.projection_blend = 0.25
+            nt.links.new(tc.outputs['Object'], mp.inputs['Vector']); nt.links.new(mp.outputs['Vector'], tx.inputs['Vector'])
+            sc = nt.nodes.new('ShaderNodeVectorMath'); sc.operation = 'MULTIPLY'; sc.inputs[1].default_value = (1 / 0.157, 1 / 0.102, 1 / 0.085)
+            nt.links.new(tx.outputs['Color'], sc.inputs[0])
+            mx = nt.nodes.new('ShaderNodeMix'); mx.data_type = 'RGBA'; mx.blend_type = 'MULTIPLY'; mx.inputs['Factor'].default_value = 0.9
+            mx.inputs[6].default_value = (*rgb, 1); nt.links.new(sc.outputs['Vector'], mx.inputs[7]); nt.links.new(mx.outputs[2], b.inputs['Base Color'])
+            return m
     if tex == 'brick' and KEY in ('tehdas', 'kehraamo', 'puuvilla'):
         # same surface as Keski-Porin kirkko: one even brick red, the light comes from the bake (the procedural brick pattern read as noise from the air)
         rgb = lin('#803d2e' if name == 'btrim' else '#994a36'); b.inputs['Base Color'].default_value = (*rgb, 1); tex = None
@@ -37,6 +50,14 @@ def mat(name, hexs, rough=0.85, metal=0.0, tex=None, col2=None):
         cb = nt.nodes.new('ShaderNodeCombineXYZ'); nt.links.new(a.outputs[0], cb.inputs['X']); nt.links.new(d.outputs[0], cb.inputs['Y'])
         ck = nt.nodes.new('ShaderNodeTexChecker'); ck.inputs['Scale'].default_value = 1.15; ck.inputs['Color1'].default_value = (*rgb, 1); ck.inputs['Color2'].default_value = (*lin(col2), 1)
         nt.links.new(cb.outputs[0], ck.inputs['Vector']); nt.links.new(ck.outputs['Color'], b.inputs['Base Color'])
+    if tex == 'ribs':                                      # vertical trapezoidal sheet-metal ribs (every 0.27 m) on walls of any direction
+        tc = nt.nodes.new('ShaderNodeTexCoord'); sx = nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(tc.outputs['Object'], sx.inputs[0])
+        s = nt.nodes.new('ShaderNodeMath'); s.operation = 'ADD'; nt.links.new(sx.outputs['X'], s.inputs[0]); nt.links.new(sx.outputs['Y'], s.inputs[1])
+        cb = nt.nodes.new('ShaderNodeCombineXYZ'); nt.links.new(s.outputs[0], cb.inputs['X'])
+        w = nt.nodes.new('ShaderNodeTexWave'); w.bands_direction = 'X'; w.inputs['Scale'].default_value = 0.53; w.inputs['Distortion'].default_value = 0
+        cr = nt.nodes.new('ShaderNodeValToRGB'); cr.color_ramp.elements[0].position = 0.0; cr.color_ramp.elements[0].color = (*[c * 0.62 for c in rgb], 1)
+        cr.color_ramp.elements[1].position = 0.35; cr.color_ramp.elements[1].color = (*rgb, 1)
+        nt.links.new(cb.outputs[0], w.inputs['Vector']); nt.links.new(w.outputs['Fac'], cr.inputs['Fac']); nt.links.new(cr.outputs['Color'], b.inputs['Base Color'])
     if tex == 'rust':                                      # horizontal rustication joints
         tc = nt.nodes.new('ShaderNodeTexCoord'); sx = nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(tc.outputs['Object'], sx.inputs[0])
         w = nt.nodes.new('ShaderNodeTexWave'); w.bands_direction = 'Z'; w.inputs['Scale'].default_value = 0.42; w.inputs['Distortion'].default_value = 0
@@ -513,9 +534,18 @@ elif KEY == 'vesitorni':
     for z in (8, 15.5, 23, 30.5, 38, 45.5): frustum((tc.x, tc.y), 2.56, 2.56, z, z + 0.35, 20, 'band')
     frustum((tc.x, tc.y), 2.7, 2.7, h + 4, h + 4.5, 20, 'roofdark')
 elif KEY == 'puuvilla':
-    M('brick', '#a8473a', tex='brick'); M('red', '#d2232a'); M('glassd', '#2b3540'); h = 14.0
-    walls(P, 0, 5, 'glassd'); walls(P, 5, h, 'brick'); ribbons(P, 0, 5, 1, hgt=4.0, sill=0.4, mull=3.0, glass='glass')
-    ribbons(P, 5, 3.9, 2, hgt=1.5, sill=1.2, mull=3.0); ledge(P, 0.8, h - 1.2, h, 'red'); ledge(P, 0.8, 4.8, 5.4, 'red')
+    # Kauppakeskus Puuvilla (Street View 13.11.2026, Siltapuistokatu): a long hall clad in dark red-brown ribbed sheet metal, the old
+    # factory's brick wall kept as the street-level plinth, a few white-framed window boxes, the main entrance a bright red box canopy
+    # on concrete columns under the parking deck, whose edge is clad in red brick-pattern perforated metal
+    M('sheet', '#6e302b', tex='ribs', rough=0.55, metal=0.2); M('sheetd', '#4a2622', rough=0.6); M('red', '#d2232a'); M('glassd', '#2b3540')
+    M('oldbrick', '#8f4532', tex='brick'); M('perf', '#9c4433', tex='rust'); M('conc', '#b9b7b1', rough=0.9); h = 14.0
+    walls(P, 0, 3.0, 'oldbrick'); walls(P, 3.0, h - 2.6, 'sheet'); walls(P, h - 2.6, h, 'perf')
+    windows(P, 3.0, 4.0, 1, 17.0, 2.6, 1.5, sill=1.6, frame='white', glass='glassd')
+    ledge(P, 0.25, h - 0.3, h, 'sheetd'); ledge(P, 0.12, 2.9, 3.1, 'conc')
+    # main entrance on Siltapuistokatu: red box canopy and two concrete columns
+    ex, ey = 312.0 - AX, 983.0 - AY; uu = (-0.24, 0.97)
+    obox((ex + 3.2, ey), uu, 3.6, 3.0, 2.9, 5.6, 'red'); obox((ex + 6.0, ey + 2.4), uu, 0.25, 0.25, 0, 2.9, 'conc'); obox((ex + 6.0, ey - 2.4), uu, 0.25, 0.25, 0, 2.9, 'conc')
+    obox((ex + 5.4, ey), uu, 3.4, 0.4, 5.6, 6.2, 'white')
 elif KEY == 'promenadi':
     TEX = 1024; M("wall", "#41464c", tex="rust"); modern('wall', 12.5, 2)
 elif KEY == 'bepop':

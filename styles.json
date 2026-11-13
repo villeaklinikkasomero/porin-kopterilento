@@ -801,11 +801,12 @@
 "y": 1979
 },
 "137": {
-"w": "#a7a1a5",
-"m": 1,
+"w": "#d8c79c",
 "k": "render",
 "r": "#b9bbb9",
-"f": 7
+"f": 7,
+"shop": 1,
+"note": "Y-pakki: Antinkatu 21b (Alvar Rahikka 1970), 7 krs, nauhajulkisivu, hiekanvärinen"
 },
 "138": {
 "w": "#9898a3",
@@ -2698,11 +2699,11 @@
 "k": "render"
 },
 "569": {
-"w": "#bdc3cd",
-"m": 1,
-"k": "render",
+"w": "#e3d6b6",
 "r": "#b9bbb9",
-"f": 5
+"f": 5,
+"note": "Y-pakki-rivi Antinkatu 27 A (1862, puutalo) kohdistui 20 m rakennukseen: materiaali poistettu",
+"shop": 1
 },
 "570": {
 "w": "#ccc9cd",
@@ -3152,9 +3153,9 @@
 "k": "render"
 },
 "701": {
-"w": "#87757c",
-"m": 1,
-"k": "render"
+"w": "#e3d6b6",
+"k": "wood",
+"note": "Y-pakki: Maaherrankatu 32, 1923"
 },
 "702": {
 "w": "#9d949a",
@@ -4835,32 +4836,32 @@
 "k": "render"
 },
 "1543": {
-"w": "#9790a1",
-"m": 1,
-"k": "render",
+"w": "#9a4a36",
+"k": "brick",
 "r": "#74787b",
-"f": 3
+"f": 3,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1544": {
-"w": "#a99ba9",
-"m": 1,
-"k": "render",
+"w": "#9a4a36",
+"k": "brick",
 "r": "#b9bbb9",
-"f": 3
+"f": 3,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1545": {
-"w": "#bdb3bb",
-"m": 1,
-"k": "render",
+"w": "#9a4a36",
+"k": "brick",
 "r": "#74787b",
-"f": 3
+"f": 3,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1546": {
-"w": "#9897a8",
-"m": 1,
-"k": "render",
+"w": "#9a4a36",
+"k": "brick",
 "r": "#b9bbb9",
-"f": 3
+"f": 3,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1547": {
 "w": "#bcb9c2",
@@ -4893,17 +4894,17 @@
 "r": "#b9bbb9"
 },
 "1555": {
-"w": "#8a7d8c",
-"m": 1,
+"w": "#b9bcbe",
 "k": "render",
 "r": "#b5553a",
-"f": 3
+"f": 3,
+"note": "Kauppakeskus Puuvilla: peltihalli (käyttäjä 13.11.2026), rakennetaan uudelleen MML:n ortokuvan jälkeen"
 },
 "1556": {
-"w": "#6c6a7e",
-"m": 1,
-"k": "render",
-"f": 2
+"w": "#9a4a36",
+"k": "brick",
+"f": 2,
+"note": "Porin Puuvillan sisäpihan punatiilirakennus (käyttäjä 13.11.2026)"
 },
 "1557": {
 "w": "#837893",
@@ -5071,10 +5072,10 @@
 "f": 3
 },
 "1591": {
-"w": "#817c91",
-"m": 1,
-"k": "render",
-"f": 2
+"w": "#94452f",
+"k": "brick",
+"f": 2,
+"note": "Rosenlew-museo, punatiili (käyttäjä 12.11.2026)"
 },
 "1592": {
 "w": "#73768e",
@@ -5196,13 +5197,13 @@
 "sv": 1
 },
 "1618": {
-"w": "#d8ccc2",
-"m": 1,
-"k": "render",
+"w": "#d8cdbb",
+"k": "brick",
 "r": "#74787b",
 "f": 6,
-"note": "Y-pakki: Yrjönkatu 2 b, 1985",
-"y": 1985
+"note": "Y-pakki: Yrjönkatu 2 b, 1985 (vaalea tiililaattaverhoilu; piirretään Valtakatu 3:n LoD2-kuoressa, kivi5)",
+"y": 1985,
+"shop": 1
 },
 "1619": {
 "f": 2,
@@ -5295,22 +5296,22 @@
 "r": "#74787b"
 },
 "1645": {
-"w": "#a397a0",
-"m": 1,
-"k": "render",
-"f": 7
+"w": "#9a4a36",
+"k": "brick",
+"f": 7,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1646": {
-"w": "#baafbb",
-"m": 1,
-"k": "render",
-"f": 7
+"w": "#9a4a36",
+"k": "brick",
+"f": 7,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1647": {
-"w": "#afa9b6",
-"m": 1,
-"k": "render",
-"f": 8
+"w": "#9a4a36",
+"k": "brick",
+"f": 8,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1648": {
 "w": "#aea3ae",
@@ -5319,16 +5320,16 @@
 "f": 7
 },
 "1649": {
-"w": "#ada0ae",
-"m": 1,
-"k": "render",
-"f": 7
+"w": "#9a4a36",
+"k": "brick",
+"f": 7,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1650": {
-"w": "#b4a4af",
-"m": 1,
-"k": "render",
-"f": 7
+"w": "#9a4a36",
+"k": "brick",
+"f": 7,
+"note": "Aittaluodon punatiiliset kerrostalot (käyttäjä 12.11.2026)"
 },
 "1652": {
 "w": "#7a8097",
@@ -5439,9 +5440,9 @@
 "r": "#74787b"
 },
 "1693": {
-"w": "#776e79",
-"m": 1,
-"k": "render"
+"w": "#9a4a36",
+"k": "brick",
+"note": "Porin Puuvillan sisäpihan punatiilirakennus (käyttäjä 13.11.2026)"
 },
 "1697": {
 "w": "#697696",
@@ -5509,11 +5510,11 @@
 "r": "#74787b"
 },
 "1745": {
-"w": "#848195",
-"m": 1,
-"k": "render",
+"w": "#9c3d2e",
+"k": "brick",
 "r": "#74787b",
-"f": 2
+"f": 2,
+"note": "Y-pakki: Isosannan entinen saha, 1920"
 },
 "1747": {
 "w": "#55565a",
@@ -7026,10 +7027,10 @@
 "r": "#74787b"
 },
 "6289": {
-"w": "#838aa1",
-"m": 1,
-"k": "render",
-"r": "#74787b"
+"w": "#8e4634",
+"k": "brick",
+"r": "#74787b",
+"note": "Pori Energia, Aittaluodon voimalaitos (1937), punatiili"
 },
 "6291": {
 "w": "#a1a0af",
@@ -10973,6 +10974,11 @@
 },
 "1730": {
 "shop": 1
+},
+"1736": {
+"w": "#9a4a36",
+"k": "brick",
+"note": "Porin Puuvillan sisäpihan punatiilirakennus (käyttäjä 13.11.2026)"
 }
 }
 }

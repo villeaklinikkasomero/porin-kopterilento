@@ -426,19 +426,43 @@ def _shop_fit(gh, fh, upper, top=None, plain_short=4.0):
 # 3- and 2-storey parts over the whole block, roof terrace and parking deck; dark panel cladding with logo bands on the upper floor,
 # large unbroken shop windows at street level, light glass bands at the north-west and south-west corner entrances (Y-pakki photo).
 ISOK = _bid(110.0, -169.0)
-_ikP = dict(wall=M('#3e4045', 0.55, 0.25), spandrel=M('#3e4045', 0.55, 0.25), frame=M('#2a2c30', 0.4, 0.4), gwall=M('#2b2d31', 0.4), plinth=M('#26282b'),
-            fascia=M('#3e4045', 0.55, 0.25), gframe=M('#2a2c30', 0.4, 0.4), sign=SIGNS + [M('#e6007e'), M('#e6007e')], joints=M('#55585e', 0.5, 0.3))
-_ikUp = ('ribbon', 3.6, lambda c, nb: 'N' if (c % 5 in (1, 2) and nb > 6) else 'W', dict(sill=0.8, wh=2.0, pier=0.15, nx=2, colmod={'N': 'plain'}))
+# Street View check 13.11.2026 (Isolinnankatu 13): ground floor shop glazing between light beige pilasters; the upper floor clad in grey
+# metal panels in two shades laid in a staggered band pattern, a few narrow upright windows; a glazed stair tower; rooftop parking.
+_ikP = dict(wall=M('#9a9da1', 0.55, 0.2), spandrel=M('#9a9da1', 0.55, 0.2), frame=M('#3a3d41', 0.4, 0.4), gwall=M('#d9d1bf', 0.7), plinth=M('#8d8a84'),
+            fascia=M('#c9c6bf', 0.6), gframe=M('#3a3d41', 0.4, 0.4), joints=M('#7d8085', 0.5, 0.3))
+def m_ikpanel(mb, col, P):
+    """IsoKarhu upper floor: two-tone grey panels in staggered bands, now and then a narrow upright window"""
+    bw, fh, W = mb.bw, mb.fh, P['wall']; dk = M('#6c6f74', 0.55, 0.2); holes = []
+    if col == 'W':
+        u = bw * (0.3 + 0.4 * mb.rnd.random()); holes.append(mb.window(u - 0.3, 0.9, u + 0.3, min(fh - 0.5, 2.7), W, r=0.06, nx=1, fmat=P['frame']))
+    mb.wall(holes, W)
+    ph = fh / 3.0
+    for k in range(3):
+        if (k + col_i(mb)) % 2: continue
+        for (a, b_) in ((0.0, bw * 0.55), (bw * 0.7, bw)) if k % 2 else ((bw * 0.25, bw * 0.95),):
+            v0, v1 = k * ph + 0.04, (k + 1) * ph - 0.04
+            segs = [(a, b_)]
+            for h in holes:
+                segs = [s2 for (x0, x1) in segs for s2 in ((x0, min(x1, h[0])), (max(x0, h[2]), x1)) if s2[1] - s2[0] > 0.05] if (v0 < h[3] and v1 > h[1]) else segs
+            for x0, x1 in segs: mb.q(x0, v0, x1, v1, 0.01, dk)
+    mb.q(0, fh - 0.18, bw, fh, 0.02, M('#c9c6bf', 0.6))
+def col_i(mb):
+    return int(getattr(mb, 'u0', 0) / max(mb.bw, 0.1)) if hasattr(mb, 'u0') else mb.rnd.randint(0, 1)
+MODS['ikpanel'] = m_ikpanel
+_ikUp = ('ikpanel', 3.0, lambda c, nb: 'W' if c % 3 == 1 else 'N', dict())
 SPEC[ISOK] = dict(lod2=True, P=_ikP, layout=_shop_fit(4.6, 4.2, _ikUp)(None, 13, True, 20, 0), fitw=_shop_fit(4.6, 4.2, _ikUp), roofmat_fn=_flat_roof('#a8a59e', '#55585b'))
 
 # Yrjönkatu 17, Promenadikeskus (1999): culture house with a concert hall (676 seats) and five cinemas; the hall rises to 17 m, the lobby
 # and foyers lower round it.  Dark grey metal cladding with horizontal bands, glazed lobby at street level (no inventory text: the look
 # follows the existing model and the oblique aerial photos; to be checked against a street photo).
 PROME = _bid(9.2, -238.7)
-_prP = dict(wall=M('#454a51', 0.5, 0.3), spandrel=M('#454a51', 0.5, 0.3), frame=M('#2b2e33', 0.4, 0.4), gwall=M('#30343a', 0.4), plinth=M('#26282b'),
-            fascia=M('#5a6068', 0.5, 0.3), gframe=M('#2b2e33', 0.4, 0.4), sign=SIGNS, band=M('#7d848c', 0.5, 0.3))
-_prUp = ('ribbon', 3.2, lambda c, nb: 'N' if (c % 4 == 3) else 'W', dict(sill=1.4, wh=1.2, pier=0.2, nx=2, band=M('#7d848c', 0.5, 0.3), colmod={'N': 'plain'}))
-SPEC[PROME] = dict(lod2=True, P=_prP, layout=_shop_fit(5.0, 4.0, _prUp)(None, 12, True, 20, 0), fitw=_shop_fit(5.0, 4.0, _prUp), roofmat_fn=_flat_roof('#8f9396', '#4f5357'))
+# Street View check 13.11.2026 (Yrjönkatu 17): glass curtain walls in dark teal-green frames over all storeys, solid parts in dark
+# teal-green metal with horizontal joints (the curved corner with the red "Promenadi" letters), wide eaves with a wooden soffit.
+_prP = dict(wall=M('#2f4a48', 0.5, 0.35), spandrel=M('#36524f', 0.5, 0.35), frame=M('#22383a', 0.4, 0.45), gwall=M('#2f4a48', 0.5, 0.35), plinth=M('#26302f'),
+            fascia=M('#2f4a48', 0.5, 0.35), gframe=M('#22383a', 0.4, 0.45), joints=M('#253c3a', 0.5, 0.35))
+_prUp = ('ribbon', 2.4, lambda c, nb: 'N' if (c % 7 == 3) else 'W', dict(sill=0.25, wh=2.75, pier=0.08, nx=2, spandrel=M('#36524f', 0.5, 0.35)))
+SPEC[PROME] = dict(lod2=True, P=_prP, layout=_shop_fit(4.2, 3.4, _prUp)(None, 12, True, 20, 0), fitw=_shop_fit(4.2, 3.4, _prUp), roofmat_fn=_flat_roof('#8f9396', '#4f5357'),
+                   cornice=(1.4, 0.45, M('#7a5c40', 0.7)))
 
 # Liisankatu 2-4, Sokos (Paul Autere / SOK 1973, facade Kaj Nordman 2003): shop windows at street level, light grey panels with storey-high
 # vertical windows above.  The same LoD2 shell holds Yrjönkatu 20, Porin Talo (Reijo Kunnas 1978, facade 2015: blue-grey panel cladding,
@@ -623,7 +647,7 @@ def _e11_fit(lay_, H, street, L, zb):
                            P=dict(ww=1.5, wh=1.35, nx=2, grail=M('#8d908f', 0.4)), rowP={'G': dict(grecess=1.5), 'F': dict(colmod={'P': 'punched'})})
     return dict(bw=3.0, rows=g + [(fh, 'punched', 'F')] * n, cols=lambda c, nb: 'B' if c % 3 == 1 else 'W', P=dict(ww=1.5, wh=1.4, nx=2), rowP={})
 def _e11_alt(x, y):                     # the LoD2 shell runs on north over 537 (another house, OSM y > -76): that part keeps its own spec
-    if y > -76.5 + (x + 255.0) * 0.23: 
+    if y > -78.1 - (x + 248.2) * 0.24:                   # north wall of 65 in OSM
         return _SPEC_E9
     return None
 # Eteläpuisto 9 (537, corner of Pohjoispuisto; user street view 7/2023): 1930s functionalism, ochre render, stacks of cream-coloured
@@ -634,12 +658,13 @@ def _e9_fit(lay_, H, street, L, zb):
     rows = ([(gh, 'shop' if street else 'punched', 'G')] if gh else []) + [(fh, 'punched', 'F')] * n
     if L < 9: return dict(bw=L, rows=rows, cols=lambda c, nb: 'W', P=dict(ww=1.0, wh=1.4, nx=2), rowP={})
     if not street: return dict(bw=3.0, rows=rows, cols=lambda c, nb: 'S' if c == nb // 2 and nb > 4 else 'W', P=dict(ww=1.4, wh=1.4, nx=2), rowP={})
-    return dict(bw=3.0, rows=rows, cols=lambda c, nb: 'E' if c % 3 == 1 else 'W', P=dict(ww=1.2, wh=1.45, nx=2),
-                rowP={'F': dict(colmod={'E': 'erker'}, enx=3, edepth=0.7, epier=0.3)})
+    # user 12.11.2026: three light bay-window stacks and 12-13 windows side by side on the Eteläpuisto front
+    return dict(bw=2.8, rows=rows, cols=lambda c, nb: 'E' if (c == 0 if nb <= 6 else (nb - 2 - c) % 5 == 0 and c >= 1) else 'W', P=dict(ww=1.2, wh=1.45, nx=2),
+                rowP={'F': dict(colmod={'E': 'erker'}, enx=3, edepth=1.0, epier=0.15)})
 _SPEC_E9 = dict(P=dict(wall=M('#c9b484'), ewall=M('#e6dfc7'), frame=M('#5a3a2a'), sign=SIGNS, gwall=M('#2c2b2a', 0.35), plinth=M('#1f1e1d', 0.3),
                        fascia=M('#5f8c76', 0.5, 0.4), gframe=DARK),
                 layout=_e9_fit(None, 20, True, 30, 0), fitw=_e9_fit, cornice=(0.2, 0.3, M('#d8ccab')))
-SPEC[65] = dict(P=dict(_e13P), layout=_e11_fit(None, 27, True, 40, 0), fitw=_e11_fit, runalt=_e11_alt)
+SPEC[65] = dict(P=dict(_e13P), layout=_e11_fit(None, 27, True, 40, 0), fitw=_e11_fit, runalt=_e11_alt, splitruns=True)
 # Eteläpuisto 17 (1968, white) holds Eteläpuisto 19 (1891, 3 storeys, white render) in its LoD2 shell: low walls get the old house.
 # Street view (user, 4/2026): shop windows at street level, white facade with storey bands, stacks of recessed glazed balconies,
 # gable ends in grey tile with a column of small windows.

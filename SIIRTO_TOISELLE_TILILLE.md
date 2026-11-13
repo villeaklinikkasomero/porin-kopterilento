@@ -131,3 +131,23 @@ Seuraavaksi: Luotsinmäenpuistokatu, Teatterikatu, Vapaudenkatu, Ratakatu.
   atlakset 1024 px:iin). Fiini näkyy pelissä vasta, kun c049 on ajettu Modalissa (pelin bl_c049.js on 12.11. illalta, ennen Fiiniä).
 - HUOM: pelin bl_bepop/isokarhu/promenadi/tori*/kivi*/kl* ovat 10.–12.11. aamulta -> BePOP, Cumulus, IsoKarhu, Promenadi, Sokos, Teljäntori, Keskuskartano/Amado
   näyttävät vanhoilta/rikki, kunnes bake-ajo (bepop isokarhu promenadi uima tori0-5 kivi0-5 kl0 kl1 --samples 64) + collect on tehty.
+
+
+## 13.11.2026 klo 03-04 (tämä istunto)
+- **Uusi ilmakuva:** MML ortokuva 2025, karttalehdet M3412C/D/E/F (tilaus 98100313634, latauslinkki käyttäjän sähköpostissa 30 pv). Alkuperäiset .jp2 kansiossa `mml_orto/` (.gitignore).
+  Lehtien SW-kulmat (TM35): C 218000/6822000, E 224000/6822000, D 218000/6828000, F 224000/6828000 (6 km, 0,5 m). Pelin orto.jpg (ydin) ja outer.jpg tehty niistä: työtilan `mmlwork/orto_build.py`
+  (pelikoordinaatit -> lon/lat -> EPSG:3067). Kohdistus vanhaan kuvaan tarkistettu ECC:llä (identiteetti). Lähdemaininta index.html #credit.
+- **collect-korjaus:** .github/workflows/porikit-collect.yml kopioi nyt kaikki bl_*.js (ennen nimetyt lohkot ohitettiin -> bepop/tori/kivi eivät koskaan päätyneet peliin). Suojattu tiedosto: käyttäjä muokkaa itse.
+- **modal_app.py:** `bake` kulkee city_zone-reitin kautta (run.py nimetyille lohkoille), lokiin [nimi] rc/md5/log tail.
+- **styles.json:** toisen istunnon automaattinen väriajo oli korvannut käsin tehtyjä merkintöjä liiloilla mitatuilla väreillä (m:1) ja poistanut lift-merkinnät (Promenadin katos 1202, Sokos-IsoKarhu silta 1243). Palautettu. ÄLÄ aja väriajoa niin, että se korvaa merkintöjä ilman 'm'.
+- Promenadi ja IsoKarhu uusittu Street View -kuvien mukaan (zones.py). Puuvillan tehdas: Fiinin tiili (lm.py, bl_tehdas.js poltettu paikallisesti). Kyltit poistettu liiketilojen päältä (gen.py).
+- Kauppakeskus Puuvilla (1555) on peltihalli -> rakennetaan uudelleen uuden ortokuvan mukaan (seuraava työ).
+- Odottaa Modal-ajoja: `bake promenadi isokarhu --samples 64`, `city 64 c048,c049,c050,c055,c064,c065,c081,h088`, sitten collect.
+
+## Seuraava työ: keskustan katujen systemaattinen Street View -läpikäynti (käyttäjä 13.11.2026)
+Järjestys: 1 Antinkatu, 2 Yrjönkatu, 3 Valtakatu, 4 Itsenäisyydenkatu, 5 Isolinnankatu, 6 Pohjoisranta + Eteläranta, 7 Hallituskatu,
+8 Gallen-Kallelankatu, 9 Mikonkatu, 10 Liisankatu, 11 Otavankatu + Annankatu + Katariinankatu, 12 Länsipuisto, 13 Itäpuisto.
+Joka kadulla: `python3 audit/street.py '<Katu>' 25` -> jokaisesta talosta Street View -pikkukuva (menetelmä tämän asiakirjan alussa) ->
+poikkeamalista (väri, kerrokset, ikkunat, parvekkeet sisäänvedetty/ulkoneva/lasitettu, kivijalka, katto, väli naapuriin, LoD2-kuoren useat talot)
+-> näytä käyttäjälle ENNEN korjauksia -> korjaa -> merkitse styles.json "sv": 1.
+Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex 'ribs').
