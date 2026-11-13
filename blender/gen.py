@@ -316,8 +316,7 @@ def m_shop(mb, col, P):
         mb.wall([(u0, ph, u1, fh0), (0, fh0, bw, fh), (0, 0, bw, ph)], W)
         mb.q(0, 0, bw, ph, 0.01, pl)
     mb.q(0, fh0, bw, fh, 0.0, fas)
-    if P.get('sign') and mb.rnd.random() < 0.7:
-        sc = mb.rnd.choice(P['sign']); mb.prot(0.5, fh0 + 0.12, bw - 0.5, fh - 0.12, 0.05, sc)
+    # coloured sign boards over the shop windows removed (user 13.11.2026: they did not look like Pori's shop fronts); P['sign'] is ignored
     if P.get('canopy'):
         mb.s3box(0, fh0 - 0.02, bw, fh0 + 0.14, 0, P['canopy'], P.get('canopy_mat', DARK), dens=0.5)
 

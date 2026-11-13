@@ -10939,6 +10939,40 @@
 "w": "#a9b9b0",
 "k": "render",
 "sv": 1
+},
+"1202": {
+"lift": 3.6,
+"w": "#c9ccd0",
+"note": "katos Promenadikeskuksen ja Teljäntorin välissä (ilmassa, pilareilla)"
+},
+"1243": {
+"lift": 5.0,
+"w": "#9fb3bf",
+"note": "kävelysilta IsoKarhun ja Sokoksen välissä (toisen kerroksen tasolla)"
+},
+"123": {
+"shop": 1
+},
+"276": {
+"shop": 1
+},
+"1207": {
+"shop": 1
+},
+"1217": {
+"shop": 1
+},
+"1230": {
+"shop": 1
+},
+"1493": {
+"shop": 1
+},
+"1725": {
+"shop": 1
+},
+"1730": {
+"shop": 1
 }
 }
 }
