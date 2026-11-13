@@ -896,3 +896,84 @@ def _591():
     sp['runalt'] = lambda x, y: red if x < x0 + (x1 - x0) * 0.3 and y0 + (y1 - y0) * 0.35 < y < y0 + (y1 - y0) * 0.75 else None
     return sp
 SPEC[591] = _591()
+# 597 front (user 13.11.2026): two-tone - the north part of the street front grey sheet, the south part (entrance block) bright blue
+def _597():
+    p = B[597]['p']; P_ = [(p[k] / 10, p[k + 1] / 10) for k in range(0, len(p), 2)]
+    xs = [x for x, y in P_]; ys = [y for x, y in P_]; x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+    blue = _hall(M('#3d82f0', 0.5)); sp = _hall(M('#cfd3d6', 0.6))
+    sp['runalt'] = lambda x, y: blue if x < x0 + (x1 - x0) * 0.35 and y < y0 + (y1 - y0) * 0.28 else None
+    return sp
+SPEC[597] = _597()
+# 597 (rotated footprint): the blue entrance block wraps the south corner (878,-297): south 40 % of the SW end face and the first
+# 30 % of the SE long face; everything else light grey sheet (Street View P16A/P17A, user 13.11.2026)
+def _597b():
+    S_, Wn, Ee = (873.0, -300.0), (852.0, -275.0), (960.0, -227.0)   # LoD2 shell corners
+    def on(pt, a, b, f):
+        ax, ay = b[0] - a[0], b[1] - a[1]; L2 = ax * ax + ay * ay; t = ((pt[0] - a[0]) * ax + (pt[1] - a[1]) * ay) / L2
+        d = abs((pt[0] - a[0]) * ay - (pt[1] - a[1]) * ax) / L2 ** 0.5
+        return d < 6.0 and -0.05 <= t <= f
+    blue = _hall(M('#3d82f0', 0.5)); sp = _hall(M('#cfd3d6', 0.6))
+    sp['runalt'] = lambda x, y: blue if on((x, y), S_, Wn, 0.4) or on((x, y), S_, Ee, 0.3) else None
+    return sp
+SPEC[597] = _597b()
+SPEC[597]['splitruns'] = True
+# ---------------------------------------------------------------- Satakunnankatu, Street View 13.11.2026
+# 53  blue-glass office block (S08B): full-height glass bands, dark blue spandrels, glazed street level
+_53P = dict(sill=0.3, wh=2.6, nx=3, pier=0.08, frame=M('#2c3644', 0.4, 0.4), wglass=M((0.10, 0.22, 0.38), 0.06))
+def _53fit(lay_, H, street):
+    n = max(1, round(H / 3.3)); return dict(bw=3.0, rows=[(H / n, 'ribbon', 'F')] * n, cols=lambda c, nb: 'W', P=_53P, rowP={})
+SPEC[53] = dict(P=dict(wall=M('#3a5878', 0.3), spandrel=M('#2a3b52', 0.3), sign=SIGNS, gframe=ALU), layout=_53fit(None, 16.0, True), fit=_53fit, roof=dict(kind='flat', mat=SHEET))
+# 55  red-brown brick, four storeys, flats also at street level (no shops), recessed entrance in the middle (S05B, 10 m)
+def _55fit(lay_, H, street):
+    n = max(1, round(H / 3.0)); fh = H / n
+    return dict(bw=3.3, rows=[(fh, 'classic', 'G')] + [(fh, 'classic', 'F')] * (n - 1),
+                cols=lambda c, nb: 'D' if street and c == nb // 2 else 'W', P=dict(ww=1.3, wh=1.5, surround=0, hood=None),
+                rowP={'G': dict(ground=True, wh=1.4, wh_fixed=True)})
+SPEC[55] = dict(P=dict(wall=MT('#8e4a38', 'brick', 0.8), trim=MT('#8e4a38', 'brick', 0.8), frame=M('#f2f0ea'), door=M('#3a3f45', 0.4)), layout=_55fit(None, 12.0, True), fit=_55fit)
+# 21  Satakunnankatu 23 (SV 13.11.2026): 6 storeys pale beige render, ~3 windows per bay, glazed balcony stacks every 3rd bay, flats + stair doors at street level (no shops)
+SPEC[21] = dict(P=_svP(M('#e0d2ad')), layout=_sv_lay(18.0, 0, 2.9, _stk(3), _GL), roof=dict(kind='flat', mat=SHEET))
+SPEC[21]['fit'] = lambda lay_, H, street: _sv_lay(H, 0, H / 6.0, _stk(3), _GL)   # exactly 6 window rows (SV)
+# --- Satakunnankatu south (SV 13.11.2026) ---
+# 2336  retail hall (Ulkomyymälä/market): white-grey ribbed sheet hall, dark green band at the base, no flat windows
+SPEC[2336] = _hall(M('#e2e4e3', 0.6), plinth=M('#2f5a3e', 0.6))
+# 2319  Satakunnankatu 35 business block: red-brown brick, 2 upper storeys of tight white-framed ribbon windows (~1.2 m panes, narrow piers),
+#       street level light grey render with business units, shop windows, garage doors and signs
+_2319P = dict(sill=0.9, wh=1.3, nx=3, frame=M('#eeeeea', 0.4))
+SPEC[2319] = dict(P=dict(wall=MT('#8e4436', 'brick', 0.8), spandrel=MT('#8e4436', 'brick', 0.8), sign=SIGNS, gwall=M('#c9c9c4', 0.6),
+                         fascia=M('#c9c9c4', 0.6), gframe=ALU),
+                  layout=lay(10.5, 'ribbon', gh=3.6, bw=3.0, fh=3.4, P=_2319P), roof=dict(kind='flat', mat=SHEET),
+                  fit=lambda lay_, H, street: lay(H, 'ribbon', gh=3.6 if H > 6 else 0, bw=3.0, fh=max(2.8, (H - 3.6) / 2), P=_2319P))   # exactly 2 upper storeys (SV)
+# 2328  low white sheet-metal workshop hall with garage doors (scrap/recycling yard)
+SPEC[2328] = _hall(M('#dcdfe0', 0.6))
+# 2327  Satakunnankatu 33-ish: 2 storeys dark charcoal brick, street level 7 shop units with orange sign bands, upper floor paired windows
+_2327P = dict(ww=1.3, wh=1.4, nx=2, sill=0.9, frame=M('#2d2f31', 0.4))
+SPEC[2327] = dict(P=dict(wall=MT('#3f3d3c', 'brick', 0.85), sign=[M('#e07a1f')], gwall=MT('#3f3d3c', 'brick', 0.85), fascia=M('#e07a1f', 0.6), gframe=M('#2d2f31', 0.4)),
+                  layout=lay(7.0, 'punched', gh=3.6, bw=2.8, fh=3.4, P=_2327P), roof=dict(kind='flat', mat=SHEET),
+                  fit=lambda lay_, H, street: lay(H, 'punched', gh=3.6 if H > 5 else 0, bw=2.8, fh=max(2.8, H - 3.6), P=_2327P))
+# 2321  1-storey red brick car-service hall: a row of big white-framed multi-pane windows (~15), sign band under a low dark roof
+_2321P = dict(ww=1.9, wh=2.0, nx=3, ny=2, sill=0.8, frame=M('#f1f0ec', 0.4))
+SPEC[2321] = dict(P=dict(wall=MT('#a65a46', 'brick', 0.85)), layout=lay(4.6, 'punched', bw=2.7, fh=4.6, P=_2321P),
+                  fit=lambda lay_, H, street: lay(H, 'punched', bw=2.7, fh=H, P=_2321P))
+# 2324  white 1-storey car dealership/service: white walls, a row of large windows and grey garage doors (SV pair: full shop glazing was too dark)
+_2324P = dict(ww=2.4, wh=2.6, nx=3, sill=0.6, frame=M('#8d9295', 0.4))
+SPEC[2324] = dict(P=dict(wall=M('#e8e8e4')), layout=lay(4.8, 'punched', bw=3.6, fh=4.8, P=_2324P),
+                  fit=lambda lay_, H, street: lay(H, 'punched', bw=3.6, fh=H, P=_2324P))
+# 3113  white ribbed sheet-metal retail/workshop hall with a long blue banner, a few glazed doors only
+SPEC[3113] = _hall(M('#e3e5e6', 0.6))
+# 2302  1-storey white retail box, white panel walls with a few big display windows, blue sign band (SV pair: shop glazing too dark)
+_2302P = dict(ww=2.6, wh=2.4, nx=3, sill=0.7, frame=M('#2c5aa0', 0.5))
+SPEC[2302] = dict(P=dict(wall=M('#e6e7e5')), layout=lay(4.5, 'punched', bw=4.2, fh=4.5, P=_2302P),
+                  fit=lambda lay_, H, street: lay(H, 'punched', bw=4.2, fh=H, P=_2302P))
+# 2255  large grey sheet-metal retail hall with a sign tower
+SPEC[2255] = _hall(M('#b5babd', 0.6))
+# 54  Satakunnan pelastuslaitos (fire station), Satakunnankatu (SV 13.11.2026): long white rendered wing, upper storeys with continuous
+#     dark ribbon windows, street level a recessed glazed / garage-door band; tower with the antenna at the east end
+_54P = dict(sill=0.8, wh=1.25, nx=3, frame=M('#3a3d40', 0.4))
+def _54fit(lay_, H, street):
+    gh = 4.0 if H > 7 else 0; n = max(1, round((H - gh) / 3.4))
+    return dict(bw=3.0, rows=([(gh, 'shop', 'G')] if gh else []) + [((H - gh) / n, 'ribbon', 'F')] * n, cols=lambda c, nb: 'W', P=_54P, rowP={})
+SPEC[54] = dict(P=dict(wall=M('#ebe8df'), spandrel=M('#ebe8df'), sign=SIGNS, gwall=M('#34373a', 0.4), fascia=M('#ebe8df'), gframe=ALU),
+                layout=_54fit(None, 10.8, True), fit=_54fit, roof=dict(kind='flat', mat=SHEET))
+# 2250  long low white business building under a red gable roof, ~2 rows of windows (SV 13.11.2026)
+SPEC[2250] = dict(P=dict(wall=M('#e6e2da')), layout=lay(7.0, 'punched', bw=3.2, fh=3.5, P=dict(ww=1.5, wh=1.3)),
+                  fit=lambda lay_, H, street: lay(H, 'punched', bw=3.2, fh=H / 2, P=dict(ww=1.5, wh=1.3)))

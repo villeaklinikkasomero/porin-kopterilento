@@ -247,6 +247,15 @@ def spec_for(i):
     L_ = sp.get('layout')
     if L_ and L_.get('rows') and not (LOOK['b'].get(str(i)) or {}).get('shop'):   # shop fronts only on the commercial streets of the centre
         sp['layout'] = L_ = dict(L_, rows=[(r[0], 'punched', 'F') if r[2] == 'G' and r[1] == 'shop' else r for r in L_['rows']])
+    if e_.get('shop') and L_ is not None and not any(r[2] == 'G' for r in (L_.get('rows') or [])):
+        # Street View 13.11.2026 (user): a shop front seen at street level must not be drawn as flat windows. auto() gives low
+        # buildings (h < 13) no ground row and single-storey ones a blank wall, so add the shop row here
+        H_ = float(B[i]['h']); sp['P'].setdefault('sign', SIGNS)
+        if L_.get('plain') or H_ < 5.5:
+            sp['layout'] = L_ = dict(bw=3.4, rows=[(H_, 'shop', 'G')], cols=lambda c, nb: 'W', P=L_.get('P', {}), rowP=L_.get('rowP', {}))
+        else:
+            ups = [r for r in L_['rows'] if r[2] != 'G']
+            sp['layout'] = L_ = dict(L_, rows=[(min(4.0, max(3.4, H_ * 0.3)), 'shop', 'G')] + ups[1:] if len(ups) > 1 else [(3.6, 'shop', 'G')] + ups)
     if f and L_ and not L_.get('plain') and L_.get('rows'):
         rows = L_['rows']; g = [r for r in rows if r[2] == 'G']; up = [r for r in rows if r[2] != 'G']
         n = max(1, int(f) - len(g)); gh_ = sum(r[0] for r in g); H = float(B[i]['h'])

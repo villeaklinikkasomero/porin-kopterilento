@@ -132,7 +132,10 @@
 "sv": 1
 },
 "8": {
-"f": 3
+"f": 3,
+"w": "#e8e6e0",
+"note": "Satakunnankatu, 3 krs valkoinen lamelli, nauhaikkunat, asunnot katutasossa (SV 13.11.2026)",
+"sv": 1
 },
 "9": {
 "w": "#cfc9bd",
@@ -163,11 +166,12 @@
 "f": 4
 },
 "14": {
-"w": "#7e8087",
-"m": 1,
+"w": "#ebe9e3",
 "k": "render",
 "r": "#74787b",
-"f": 3
+"f": 3,
+"note": "Street View 13.11.2026: pitkä valkoinen 3 krs, vaakasuorat ikkunarivit",
+"sv": 1
 },
 "15": {
 "f": 4
@@ -189,14 +193,20 @@
 "f": 3
 },
 "20": {
-"w": "#cdd4df",
-"m": 1,
+"w": "#e9e7e2",
 "k": "render",
 "r": "#b9bbb9",
-"f": 8
+"f": 8,
+"b": 1,
+"note": "Street View 13.11.2026: valkoinen 8 krs torni, parvekkeet",
+"sv": 1
 },
 "21": {
-"f": 6
+"f": 6,
+"w": "#e0d2ad",
+"k": "render",
+"sv": 1,
+"note": "Satakunnankatu 23, 6 krs beige lamelli, sisäänvedetyt parvekepinot valkoisin kaitein, katutasossa asunnot + porraskäytävät (SV 13.11.2026)"
 },
 "22": {
 "w": "#d5d4cf",
@@ -278,7 +288,10 @@
 "f": 3
 },
 "40": {
-"f": 3
+"f": 3,
+"w": "#e8e6e0",
+"note": "Satakunnankatu, 3 krs valkoinen lamelli, nauhaikkunat, asunnot katutasossa (SV 13.11.2026)",
+"sv": 1
 },
 "41": {
 "f": 3
@@ -344,33 +357,38 @@
 "u": 1
 },
 "53": {
-"w": "#eeeeea",
+"w": "#4a6b8e",
 "k": "render",
 "f": 5,
-"r": "#b9bbb9"
-},
-"54": {
-"w": "#eeeeea",
-"k": "render",
-"f": 6,
-"rib": 1,
-"r": "#74787b",
+"r": "#b9bbb9",
+"note": "Street View 13.11.2026 (S08B): sinilasinen toimistotalo, lasijulkisivu",
 "sv": 1
 },
-"55": {
-"w": "#817269",
-"m": 1,
+"54": {
+"w": "#ebe8df",
 "k": "render",
+"f": 3,
+"rib": 1,
 "r": "#74787b",
-"f": 4
+"sv": 1,
+"note": "Street View 13.11.2026: valkoinen kerrostalo, tasakatto"
+},
+"55": {
+"w": "#8e4a38",
+"k": "brick",
+"r": "#74787b",
+"f": 4,
+"note": "Street View 13.11.2026 (S05B, 10 m): punaruskea tiili 4 krs, sisäänvedetty sisäänkäynti, katutasossa asuntojen ikkunat",
+"sv": 1
 },
 "56": {
 "w": "#e9cf8c",
 "k": "wood",
-"f": 1,
-"note": "Y-pakki: Lännenkulma 2, 1927",
+"f": 2,
+"note": "Street View 13.11.2026: keltainen 2 krs puutalo (kaksi täyttä ikkunariviä), aumakatto",
 "y": 1927,
-"u": 1
+"u": 1,
+"sv": 1
 },
 "57": {
 "w": "#cdba99",
@@ -495,18 +513,18 @@
 "u": 1
 },
 "78": {
-"w": "#a7a3a2",
-"m": 1,
+"w": "#e8e4da",
 "k": "render",
 "r": "#74787b",
-"f": 4
+"f": 4,
+"sv": 1
 },
 "79": {
-"w": "#d8c49a",
+"w": "#d5cdb8",
 "k": "render",
-"f": 1,
+"f": 2,
 "st": "classic",
-"note": "Y-pakki: Katariinankatu 32, 1925",
+"note": "Street View 13.11.2026: beige 2 krs, tumma aumakatto",
 "y": 1925,
 "u": 1,
 "sv": 1
@@ -525,11 +543,12 @@
 "r": "#3f4246"
 },
 "84": {
-"w": "#adb0b8",
-"m": 1,
+"w": "#e6e3dc",
 "k": "render",
 "r": "#3f4246",
-"f": 6
+"f": 6,
+"note": "Street View 13.11.2026: vaalea 4-6 krs kerrostalo",
+"sv": 1
 },
 "86": {
 "w": "#a9979b",
@@ -745,9 +764,10 @@
 "k": "brick",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Yrjönkatu 23, Palojoenkulma, 1988",
+"note": "Y-pakki: Yrjönkatu 23, Palojoenkulma, 1988 | SV 13.11.2026: katutasossa liiketiloja (näyteikkunat, punaiset kyltit)",
 "y": 1988,
-"sv": 1
+"sv": 1,
+"shop": 1
 },
 "124": {
 "w": "#efede6",
@@ -1348,26 +1368,41 @@
 "shop": 1
 },
 "227": {
-"f": 8
+"f": 8,
+"w": "#dccf9e",
+"k": "render",
+"sv": 1,
+"note": "Satakunnankatu, ~8-9 krs vaaleankeltainen torni, kulmaparvekkeet, tumma sisäänvedetty katutaso (SV 13.11.2026)"
 },
 "228": {
-"f": 8
+"f": 8,
+"w": "#e6e4de",
+"k": "render",
+"note": "Satakunnankatu, 8 krs valkoinen torni parvekepinoin (SV 13.11.2026)",
+"sv": 1
 },
 "230": {
-"f": 8
+"f": 8,
+"w": "#dccf9e",
+"k": "render",
+"note": "Satakunnankatu, ~8-9 krs vaaleankeltainen torni, kulmaparvekkeet, tumma sisäänvedetty katutaso (SV 13.11.2026)",
+"sv": 1
 },
 "231": {
-"w": "#645856",
-"m": 1,
-"k": "render",
-"r": "#3f4246"
+"w": "#9a5440",
+"k": "brick",
+"r": "#3f4246",
+"note": "Street View 13.11.2026: punatiili 4 krs",
+"sv": 1
 },
 "233": {
-"w": "#893f48",
-"m": 1,
-"k": "brick",
+"w": "#e4ded2",
+"k": "render",
 "r": "#b8302a",
-"f": 8
+"f": 8,
+"b": 1,
+"note": "Street View 13.11.2026 (S09B/S10B, 34 m): vaalea rapattu 8 krs torni, parvekepinot (ei tiili)",
+"sv": 1
 },
 "234": {
 "w": "#574c4b",
@@ -1377,7 +1412,11 @@
 "f": 4
 },
 "235": {
-"f": 8
+"f": 8,
+"w": "#e2ded6",
+"k": "render",
+"note": "Satakunnankatu, 8 krs vaalea torni, rei'itetyt ikkunat (SV 13.11.2026)",
+"sv": 1
 },
 "236": {
 "f": 7
@@ -1496,10 +1535,11 @@
 "r": "#3f4246"
 },
 "261": {
-"w": "#e4e4e0",
-"k": "render",
+"w": "#dcbf72",
+"k": "wood",
 "r": "#b9bbb9",
-"sv": 1
+"sv": 1,
+"note": "Street View 13.11.2026 (Satakunnankatu S01A, 10 m): keltainen puutalo"
 },
 "262": {
 "w": "#756b62",
@@ -2098,7 +2138,8 @@
 "r": "#8a8d8f",
 "b": 1,
 "w2": "#707b8e",
-"s2": 0.5
+"s2": 0.2,
+"sv": 1
 },
 "387": {
 "w": "#e9e7e1",
@@ -3353,7 +3394,8 @@
 "w": "#e9e8e4",
 "k": "render",
 "note": "Street View 13.11.2026: matala valkoinen, laajat lasijulkisivut",
-"sv": 1
+"sv": 1,
+"shop": 1
 },
 "815": {
 "w": "#c3b9b1",
@@ -6074,7 +6116,11 @@
 "f": 2
 },
 "2250": {
-"f": 2
+"f": 1,
+"w": "#e6e2da",
+"r": "#9c3d2c",
+"note": "pitkä 1 krs valkoinen liikerakennus punaisella harjakatolla, tiilipiippu (SV 13.11.2026)",
+"sv": 1
 },
 "2252": {
 "f": 2
@@ -6147,20 +6193,39 @@
 "f": 13
 },
 "2319": {
-"f": 3
+"f": 3,
+"w": "#8e4436",
+"k": "brick",
+"note": "Satakunnankatu, 3 krs punaruskea tiilitoimisto, valkoiset nauhaikkunat (SV 13.11.2026)",
+"sv": 1
 },
 "2321": {
-"f": 2,
-"k": "wood"
+"f": 1,
+"k": "brick",
+"w": "#a65a46",
+"note": "1 krs punatiilinen autokorjaamo, ~15 isoa valkokehyksistä ruutuikkunaa, kylttinauha (SV 13.11.2026)",
+"sv": 1
 },
 "2327": {
-"f": 3
+"f": 2,
+"w": "#3f3d3c",
+"k": "brick",
+"note": "2 krs tumma hiilenharmaa tiili, katutasossa 7 liiketilaa oranssein kylttinauhoin, yläkerrassa pariikkunat (SV 13.11.2026)",
+"sv": 1
 },
 "2328": {
-"f": 2
+"f": 1,
+"w": "#dcdfe0",
+"k": "metal",
+"note": "Satakunnankatu 35 piha, matala valkoinen peltihalli nosto-ovin (SV 13.11.2026)",
+"sv": 1
 },
 "2329": {
-"f": 2
+"f": 2,
+"w": "#e6e1d3",
+"k": "render",
+"note": "vanha vaalea rapattu 2 krs verstas, harjakatto, puuovet (SV 13.11.2026)",
+"sv": 1
 },
 "2341": {
 "f": 3
@@ -6184,7 +6249,12 @@
 "f": 2
 },
 "2405": {
-"f": 3
+"f": 2,
+"w": "#ecebe6",
+"k": "render",
+"r": "#4a4d50",
+"note": "Satakunnankatu 37 tienoo, valkoinen 2 krs, tumma harjakatto, asunnot (SV 13.11.2026)",
+"sv": 1
 },
 "2438": {
 "f": 3
@@ -11358,11 +11428,12 @@
 "934": {
 "w": "#dcc074",
 "k": "wood",
-"f": 2,
+"f": 1,
 "r": "#5a4a40",
-"note": "Street View 13.11.2026: keltainen 2 krs puutalo, tumma katto",
+"note": "Street View 13.11.2026: keltainen 1,5 krs puutalo (ullakkokerroksessa pienet ikkunat), tumma katto",
 "sv": 1,
-"wb": 3.8
+"wb": 3.8,
+"u": 1
 },
 "935": {
 "w": "#c7cdc2",
@@ -11427,6 +11498,77 @@
 "f": 2,
 "r": "#5a5d60",
 "note": "Street View 13.11.2026 (Juhana Herttuan katu 2): pitkä siniharmaa 2 krs puurakennus, yläkerrassa ikkunanauha",
+"sv": 1
+},
+"58": {
+"w": "#ecebe6",
+"f": 1,
+"k": "render",
+"sv": 1
+},
+"2549": {
+"w": "#9b3a2e",
+"k": "wood",
+"f": 1,
+"u": 1,
+"note": "punainen puutalo valkoisin nurkkalaudoin, 1,5 krs (SV 13.11.2026)",
+"sv": 1
+},
+"2337": {
+"w": "#b9bec2",
+"k": "metal",
+"f": 1,
+"note": "vaaleanharmaa peltihalli (SV 13.11.2026)",
+"sv": 1
+},
+"2336": {
+"w": "#e2e4e3",
+"k": "metal",
+"f": 1,
+"note": "Satakunnankatu, valkoinen peltinen myymälähalli, vihreä sokkelinauha (SV 13.11.2026)",
+"sv": 1
+},
+"2555": {
+"w": "#eceae4",
+"note": "valkoinen omakotitalo, tumma katto (SV 13.11.2026)",
+"sv": 1
+},
+"2324": {
+"w": "#e8e8e4",
+"f": 1,
+"note": "valkoinen 1 krs autoliike/huolto, lasitettu toimistopää + nosto-ovet (SV 13.11.2026)",
+"sv": 1
+},
+"3113": {
+"w": "#e3e5e6",
+"k": "metal",
+"f": 1,
+"note": "valkoinen peltihalli, sininen mainosbanderolli (SV 13.11.2026)",
+"sv": 1
+},
+"2326": {
+"w": "#e3dcc6",
+"k": "render",
+"f": 2,
+"note": "vaalea kermanvärinen rapattu 2 krs vanha talo, harjakatto, valkoiset ikkunat (SV 13.11.2026)",
+"sv": 1
+},
+"2322": {
+"k": "render",
+"f": 2,
+"note": "EPÄVARMA: 25 m harmaa peltinen 1 krs lasiseinällä vs 60 m vaaleanpunainen 2 krs -> uusintakierros"
+},
+"2302": {
+"w": "#e6e7e5",
+"f": 1,
+"note": "1 krs valkoinen myymälä, sininen otsalauta, näyteikkunat (SV 13.11.2026)",
+"sv": 1
+},
+"2255": {
+"w": "#b5babd",
+"k": "metal",
+"f": 1,
+"note": "iso harmaa peltinen myymälähalli, mainostorni (SV 13.11.2026)",
 "sv": 1
 }
 }

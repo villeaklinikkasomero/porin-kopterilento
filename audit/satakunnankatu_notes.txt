@@ -1,0 +1,69 @@
+# Satakunnankatu, Street View + paikallinen pelivertailu 13.11.2026 (ikkunamäärät ja katutason käyttö merkitään)
+S00A 265 valkoinen korjaamo ok; 261 ks. S01A
+S01A 261 (10 m) keltainen puutalo -> korjattu (Itsenäisyydenkadun I12B:ssä 37 m:stä "vaalea" oli väärin); 386 punatiili 5 krs lasitetut parvekkeet
+S02A 386 ok, s2 0.2
+S02B 58 pieni valkoinen muuntamo
+S03A 385 UUSINTA (vasemmalla punatiili, mutta styles valkoinen 2 krs)
+S03B 56 keltainen puutalo ok; 55 kaukana
+S04A 385 vaalea matala (UUSINTA jatkuu); 387 punatiili ok
+S04B 56 (19 m) KAKSI täyttä ikkunariviä -> f 2 (ei ullakkokerros); ~3 ikkunaa/kerros kadun puolella
+S05A 79 beige 2 krs tumma aumakatto -> lisätty
+S05B 55 (10 m) punaruskea tiili 4 krs (oli tumma mitattu), sisäänvedetty ovi, katutasossa asuntojen ikkunat (EI liiketila); 54 valkoinen kerrostalo
+S06A 84 ja 78 vaaleat kerrostalot (olivat harmaansinertäviä mitattuja); 79 vaalea 2 krs
+S06B/S07B 54 pitkä valkoinen 2-3 krs + torni, nauhaikkunat, katutasossa sisäänvedetyt ovet/lasitus (EI muutettu kerroksia; SPEC myöhemmin)
+S08B 53 sinilasinen toimistotalo -> w #4a6b8e (SPEC lasijulkisivu tarvitaan)
+S09A 20 valkoinen 8 krs torni parvekkein (oli sinertävä mitattu)
+S09B/S10B 233 vaalea rapattu 8 krs torni parvekepinoin (oli tummanpunainen tiili mitattu!); 231 punatiili 4 krs
+S10A/S11A 14 pitkä valkoinen 3 krs, vaakasuorat ikkunarivit (oli harmaa)
+S11B 235 8 krs vaalea torni, ~6 ikkunasaraketta päädyssä, asunnot katutasossa -> w #e2ded6 (oli mitattu)
+S12A/S13A 40, 8 pitkät valkoiset 3 krs lamellit, nauhamaiset ikkunarivit, katutasossa asuntoja (ei liiketiloja) -> w #e8e6e0
+S12B/S13B 228 valkoinen 8 krs parvekepinoin; 230 beige 8 krs torni -> värit; 565 punatiili matala (83 m, epävarma) -> uusintakierros
+S14B/S15B 230, 227 vaaleankeltaiset 8-9 krs tornit, ~5 ikkunasaraketta päädyssä, kulmassa valkoiset parvekkeet, katutaso tumma (asunnot/varastot, ei liiketiloja) -> w #dccf9e (korjattu S13B:n beige)
+S14A/S15A/S16A 42, 27, 25 kaukana / puiden takana, ei varmaa -> uusintakierros
+S17A/S18A 21 Satakunnankatu 23: 6 krs beige rappaus (ikkunarivejä 6 sis. katutaso), päädyssä 3 ikkunaa/krs, pitkällä sivulla parvekepinot n. joka 3. akselilla, katutasossa asuntoja + ovet (EI liiketiloja) -> w #d8c8ab
+S17B 531 harmaa 5 krs toimistotalo nauhaikkunoin, lasinen aula (ei city-vyöhykkeissä -> ei muutettu, uusintakierros)
+S16B 3 kaukana, ei muutosta
+S19A 21 sama kuin yllä, porraskäytävien ovet katutasossa, ei liiketiloja (OK)
+S18B/S19B/S20A 531 = SAMK-kampus (lm.py 'samk' maamerkki). Todellisuudessa kadun varressa myös vanha keltaruskea tiilihalli aaltomaisella räystäällä, valkoinen ikkunanauha ylhäällä, katutasossa liiketiloja (APTEEKKI, kauppakeskusopasteet). Pelissä koko 531 tumma paneeli + valkoiset lamellit -> maamerkki, EI muutettu, uusintakierros (jaa tiiliosa runaltilla / lm deco)
+S20B/S21B 21 kadun puoli: vaalea kermanbeige, 6 krs, lasitetut parvekepinot (n. joka 3. akseli, 2-3 ikkunaa välissä), porraskäytävän ovet, asunnot katutasossa -> SPEC[21] _sv_lay + _stk(3) gloggia, w #e0d2ad
+S21A 531 tiilihalli aaltoräystäällä (ks. yllä)
+S22A risteys, ei rakennuksia lähellä
+S22B 531 takasivu: valkoinen betonielementtiseinä ruudukkokuviolla, ylhäällä ikkunanauha (maamerkki, ei muutettu)
+S23A 531/2304 punaruskea harjakattoinen matala + lasiporrastorni (kauppa), kaukana valkoinen 5 krs; ei muutettu
+S23B 2261/2263 puiden takana 60+ m, ei varmaa
+--- eteläosa (Satakunnankatu 37->) ---
+S30B/S31B 2405 valkoinen 2 krs (oli f3), tumma harjakatto, asuinkäyttö -> f2, w #ecebe6; oikealla matalat valkoiset 1 krs rivitalot (2544/2548, ei muutosta)
+S31B 2549 punainen puutalo, valkoiset nurkkalaudat, 1,5 krs -> k wood, w #9b3a2e, f1 u1
+S31A/S32A 2337 vaaleanharmaa peltihalli (ulkomyymälä), 2336 sininen katos kaukana -> 2337 k metal
+S33A/S34A 2336 valkoinen peltihalli, vihreä alaosa, yksi sisäänkäynti, EI asuntoikkunoita -> SPEC _hall; 2335 matala harmaa halli kaukana
+S34A 2319 3 krs punaruskea tiili, valkoiset nauhaikkunat joka kerroksessa (~12 ikkunaa/krs näkyvällä sivulla), toimisto -> SPEC ribbon tiili
+S32B/S33B 2553/2555 omakotitaloja puiden takana, valkoisia; 2555 väri
+S36A/S37A 2319 tarkennus: 3 krs, 2 ylintä krs punaruskeaa tiiltä + tiheät valkokehyksiset nauhaikkunat (~20 ikkunaa/krs kadun puolella), KATUTASO = liiketilat/verstaat (vaaleanharmaa rappaus, näyteikkunat, nosto-ovet, kyltit) -> SPEC ribbon + gh 3.6 shop
+S36B 2328/2329 kaukana puiden takana, 2 krs; ei muutosta
+S34B omakotitaloja puiden takana; ei muutosta
+S37B 2328 matala valkoinen peltihalli nosto-ovin (oli f2 asuntoikkunoin) -> SPEC _hall, f1
+S39A 2327 punaruskea tiili, valkokehysikkunat -> brick (50 m)
+S39B 2321 punaruskea tiili 2 krs harjakatolla (oli k wood!), ~8 ikkunaa/krs -> brick; 2329 vaalea rapattu vanha 2 krs verstas, puiset pariovet katutasossa -> w #e6e1d3
+S38B roska-auto peittää, ei arviota
+S40A/S41A 2327 TARKENNUS: 2 krs (oli f3) tumma hiilenharmaa tiili; KATUTASO 7 liiketilaa oranssein kylttinauhoin; yläkerta ~20 ikkunaa pareittain -> SPEC punched + gh 3.6 shop
+S40B 2321 TARKENNUS: 1 krs (oli f2) punatiilinen autokorjaamo, ~15 isoa valkokehyksistä ruutuikkunaa, kylttinauha -> SPEC yksi rivi isoja ikkunoita
+S41B 2324 valkoinen 1 krs autoliike, lasitettu pää + nosto-ovet -> SPEC shop-rivi
+S41A 3117/2326 valkoinen 2 krs kulmatalo (rapattu, harjakatto) 33 m -> uusintakierros
+S42A 2326 vaalea kerma rapattu 2 krs vanha talo, harjakatto, ~3 ikkunaa/krs päädyssä, asunto -> w #e3dcc6
+S42A/S43A 3113 valkoinen peltihalli, sininen banderolli, ei asuntoikkunoita -> SPEC _hall
+S42B 2324 (Tamrex/Leckner) valkoinen myymälä, näyteikkunat -> SPEC shop OK
+S43B 2322 vaaleanpunertava 2 krs liiketalo lasikatoksella -> w #d8b9a8
+S44A 2302 1 krs valkoinen myymälä, sininen otsalauta, näyteikkunat (LIIKETILA, ei asuntoikkunoita) -> SPEC shop
+S44B 2322 lähellä harmaa peltinen 1 krs lasiseinällä — ristiriidassa S43B:n kanssa -> väri poistettu, uusintakierros
+S45A 2255 iso harmaa peltihalli -> SPEC _hall
+S45B 2250 pitkä 1 krs valkoinen, punainen harjakatto (oli f2) -> f1, r punainen
+S46A/S47A 2255 harmaa peltihalli, vaaleampi yläosa (OK, SPEC _hall)
+S48B/S49B 2249 valkoinen 2 krs autoliike (Renault), katutasossa näyteikkunat/liiketilat — ei city-vyöhykkeissä, ei muutettu
+S06B/S07B 54 pelastuslaitos: SPEC ribbon + sisäänvedetty lasitettu/autohallinovikatutaso (oli reikäikkunat 6 krs), f3
+S18A/S21B pari: 21 pelissä 7-8 ikkunariviä -> pakotettu 6 riviä (fit H/6)
+S34A pari: 2319 pelissä 3 yläkerrosta -> pakotettu 2 (fh=(H-3.6)/2)
+S41B pari: 2324 shop-lasitus liian tumma -> valkoinen seinä + isot ikkunat rivissä
+S44A pari: 2302 shop-lasitus liian tumma -> valkoinen seinä + isot näyteikkunat sinisin kehyksin
+S45B pari: 2250 pelissä 3 riviä -> SPEC 2 ikkunariviä
+S42A/S43A pari: 2326 ja 3113 vastaavat (3113:sta puuttuu sininen banderolli, ei korjattu)
+S06B pari: katusiiven beige reikäikkunajulkisivu = rakennus 83, joka ei kuulu city-lohkoihin (kivi/muu) -> uusintakierros; 54 (S07B) nyt nauhaikkunat + sisäänvedetty katutaso OK

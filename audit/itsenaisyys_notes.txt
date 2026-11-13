@@ -73,3 +73,10 @@ I57B/I65B 583 vaalea teollisuusmainen pelti, ok. ITSENÄISYYDENKATU VALMIS (90 n
 2nd pass: 1229 = Terveystalo Lääkäritalo (käyttäjä: väärin) -> SPEC sinertävät nauhaikkunat, lasitettu katutaso; bake c064 tarkistettu
 2nd pass: I12B 261 vaalea (oli tumma); I13A 511 SPEC lasiparvekepinot, tummat puitteet; I13B 199 SPEC avoin parvekepino
 2nd pass: I14A 203 SPEC tummat lasiparvekkeet; I15A/I16A 192 SPEC avoimet parvekepinot punaruskein kaitein, ruskeanbeige; I15B 225 liiketilat (shop)
+3rd pass (13.11.2026, käyttäjä: katutasossa asuntoikkunoita liiketilan paikalla):
+ - Syy: auto() ei anna alle 13 m taloille katutason liikeriviä lainkaan, vaikka styles shop: 1 (esim. 107 Yrjönkatu 25, 2 krs).
+   Korjaus zones2.spec_for: shop: 1 -> lisätään 'shop'-katutasorivi (matala/yksikerroksinen: koko seinä liikeriviä).
+ - 121 Palojoenkulma: SV:ssä katutasossa liiketiloja (näyteikkunat, punaiset kyltit) -> shop: 1 (oli asuntoikkunat)
+ - 768 matala lasijulkisivuinen -> shop: 1
+ - Tarkistettu ilman muutosta (asunnot katutasossa): 7, 30, 44, 141, 166, 416, 691, 692, 693, 694; 144:n edessä erillinen liikepaviljonki (ok)
+ - 1231 (I51A, 2 krs keltainen/beige) katutaso epäselvä 60 m päästä -> uusintakierros
