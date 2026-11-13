@@ -81,7 +81,9 @@ def city_zone(name: str, samples: int = 64, day: str = ''):
     t0 = time.time(); jobs.layout()
     # 2048 atlas + JPEG 75 keeps a block around 1 MB (4096 made the game crawl); one even render on all walls
     env = dict(os.environ, PORI_ATLAS='2048', PORI_JPEGQ='75', PORI_SURF='plaster', PORI_SURF_STRENGTH='0.18', PORI_PHS='/repo/phs.json')
-    r = subprocess.run(['python3', '/home/claude/city.py', name, str(samples)], cwd='/home/claude', env=env, capture_output=True, text=True)
+    named = name not in json.loads((Path('/repo') / 'city_zones.json').read_text())['zones']   # named blocks (bepop, tori0, kivi5 ...) go through run.py
+    if named: env = dict(os.environ, PORI_PHS='/repo/phs.json')
+    r = subprocess.run(['python3', '/home/claude/run.py' if named else '/home/claude/city.py', name, str(samples)], cwd='/home/claude', env=env, capture_output=True, text=True)
     src = Path('/home/claude/out') / f'bl_{name}.js'; ok = r.returncode == 0 and src.exists()
     if ok:
         dst = Path('/vol/results') / day / 'game' / f'bl_{name}.js'; dst.parent.mkdir(parents=True, exist_ok=True); dst.write_bytes(src.read_bytes())
@@ -95,6 +97,7 @@ def city(samples: int = 64, only: str = ''):
     """Whole-city run: every block in city_zones.json (or only the listed ones, comma separated) on up to 10 GPUs at once."""
     zones = json.loads((Path('/repo') / 'city_zones.json').read_text())['zones']
     names = [n for n in zones if not only or n in only.split(',') or (only in ('c', 'h') and n.startswith(only))]   # 'c' = apartment / commercial blocks, 'h' = houses
+    if only not in ('', 'c', 'h'): names += [n for n in only.split(',') if n and n not in zones]   # named blocks: 'bake bepop tori0 ...'
     day = datetime.date.today().isoformat(); t0 = time.time(); res = []
     yield f'{len(names)} blocks to bake on up to 10 GPUs (L4 / A10 / L40S, any region); the first GPUs usually start within a few minutes'
     for out in city_zone.map(names, [samples] * len(names), [day] * len(names), return_exceptions=True, order_outputs=False):
@@ -134,6 +137,17 @@ def main(cmd: str = '', queue: str = '', body: str = '{}'):
             if isinstance(out, tuple) and len(out) == 3: n_all += 1; n_ok += bool(out[1])
         print('city blocks ok:', (n_ok, n_all), flush=True)
     elif queue: print('queued, the GPU worker is starting:', enqueue.remote(queue, body))
-    elif cmd and cmd.split()[0] == 'bake': print('exit code', task_any.remote(cmd))   # any region, first free GPU
+    elif cmd and cmd.split()[0] == 'bake':
+        # 13.11.2026: 'bake' through task/task_any ended "ok" in 10-20 s without new files; the city path works, so named blocks use it too
+        a = cmd.split()[1:]; samples = 64; names = []
+        for k, w in enumerate(a):
+            if w.startswith('--sample') and k + 1 < len(a): samples = int(a[k + 1])
+            elif not w.startswith('--') and not (k and a[k - 1].startswith('--sample')): names.append(w)
+        print(f'bake: {names}, samples {samples}; one line per finished block follows', flush=True)
+        n_ok = n_all = 0
+        for out in city.remote_gen(samples, ','.join(names)):
+            print(out, flush=True)
+            if isinstance(out, tuple) and len(out) == 3: n_all += 1; n_ok += bool(out[1])
+        print('blocks ok:', (n_ok, n_all), flush=True)
     elif cmd: print('exit code', task.remote(cmd))
     else: print(__doc__)
