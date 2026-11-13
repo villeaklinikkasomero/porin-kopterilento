@@ -3440,14 +3440,15 @@
 "sv": 1
 },
 "950": {
-"w": "#c7a593",
+"w": "#c9b49c",
 "k": "wood",
-"f": 2,
-"note": "Street View 13.11.2026: vaaleanpunertava 2 krs puutalo, valkoiset listat",
+"f": 1,
+"note": "Street View 13.11.2026: harmaanbeige 1,5 krs puutalo, ullakkokerroksen ikkunat päädyssä",
 "y": 1898,
 "r": "#5a4a40",
 "sv": 1,
-"wb": 3.5
+"wb": 3.5,
+"u": 1
 },
 "953": {
 "w": "#efe0a8",

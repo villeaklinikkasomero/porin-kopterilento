@@ -874,3 +874,25 @@ SPEC[591] = _hall(M('#f2f1ec', 0.7))          # white hall (the red front part i
 SPEC[595] = _hall(M('#d9dbdc', 0.6))          # Stadium: light grey sheet
 SPEC[592] = _hall(M('#e9e9e6', 0.7))
 SPEC[584] = _hall(MT('#8a9094', None, 0.45, 0.35))   # dark grey sheet-metal hall
+# hall facades by side (Street View 13.11.2026): the street front coloured, the other walls plain grey / white sheet.
+# runalt picks the front stretch by position: wall midpoints on the street-facing quarter of the footprint.
+def _hall2(i, side_wall, front_wall, side='W', frac=0.35):
+    p = B[i]['p']; P_ = [(p[k] / 10, p[k + 1] / 10) for k in range(0, len(p), 2)]
+    xs = [x for x, y in P_]; ys = [y for x, y in P_]; x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+    test = {'W': lambda x, y: x < x0 + (x1 - x0) * frac, 'E': lambda x, y: x > x1 - (x1 - x0) * frac,
+            'S': lambda x, y: y < y0 + (y1 - y0) * frac, 'N': lambda x, y: y > y1 - (y1 - y0) * frac}[side]
+    front = _hall(front_wall)
+    sp = _hall(side_wall); sp['runalt'] = lambda x, y: front if test(x, y) else None
+    return sp
+SPEC[597] = _hall2(597, M('#cfd3d6', 0.6), M('#2f6fd8', 0.5))     # Leo's Leikkimaa: bright blue front to Paanakedonkatu, light grey sides
+SPEC[591] = _hall2(591, M('#f2f1ec', 0.7), M('#a32a28', 0.6))     # white hall with the red front block
+SPEC[584] = _hall(M('#aab0b4', 0.5))                                # grey sheet hall, lighter than before (Street View P26B)
+SPEC[597] = _hall2(597, M('#cfd3d6', 0.6), M('#3d82f0', 0.5))      # brighter: the baked shade darkened the blue front
+# 591: white hall, only the middle part of the street front is the red block (Street View P21A)
+def _591():
+    p = B[591]['p']; P_ = [(p[k] / 10, p[k + 1] / 10) for k in range(0, len(p), 2)]
+    xs = [x for x, y in P_]; ys = [y for x, y in P_]; x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
+    red = _hall(MT('#a32a28', None, 0.6)); sp = _hall(M('#f2f1ec', 0.7))
+    sp['runalt'] = lambda x, y: red if x < x0 + (x1 - x0) * 0.3 and y0 + (y1 - y0) * 0.35 < y < y0 + (y1 - y0) * 0.75 else None
+    return sp
+SPEC[591] = _591()
