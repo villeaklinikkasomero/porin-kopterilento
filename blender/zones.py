@@ -977,3 +977,41 @@ SPEC[54] = dict(P=dict(wall=M('#ebe8df'), spandrel=M('#ebe8df'), sign=SIGNS, gwa
 # 2250  long low white business building under a red gable roof, ~2 rows of windows (SV 13.11.2026)
 SPEC[2250] = dict(P=dict(wall=M('#e6e2da')), layout=lay(7.0, 'punched', bw=3.2, fh=3.5, P=dict(ww=1.5, wh=1.3)),
                   fit=lambda lay_, H, street: lay(H, 'punched', bw=3.2, fh=H / 2, P=dict(ww=1.5, wh=1.3)))
+# --- Vanhakoivistontie (SV 13.11.2026) ---
+# 3131  retail hall (pet shop etc.): ochre-yellow brick, almost windowless (big posters), glazed entrance at the east end, low dark roof
+SPEC[3131] = _hall(MT('#c99a5e', 'brick', 0.85))
+# 3196  Säästäjänkatu tower at Vanhakoivistontie: white panels, punched windows (~4 per storey on the end), glazed balcony stack at the
+#       corner, pale blue-grey ground floor (flats/storage, no shops)
+_3196c = lambda c, nb: 'L' if c == nb - 1 and nb > 2 else 'W'
+SPEC[3196] = dict(P=_svP(M('#e9eaea')), layout=_sv_lay(25.0, 2.8, 2.8, _3196c, _GL, gP=dict(wall=M('#a9b4bd', 0.6), ww=1.4)),
+                  fit=lambda lay_, H, street: _sv_lay(H, 2.8, 2.8, _3196c, _GL, gP=dict(wall=M('#a9b4bd', 0.6), ww=1.4)), roof=dict(kind='flat', mat=SHEET))
+# 3406  supermarket hall: charcoal sheet-metal box with a white logo band, big blue wall mural, glazed entrance canopy; no windows
+SPEC[3406] = _hall(M('#d5d8da', 0.6))   # K11A: most of the hall is light ribbed sheet ("Aina halvat hinnat"), the dark box is only the entrance end
+# 3193  Vanhakoivistontie shopping pavilion (ostoskeskus): 1 storey, continuous row of shop windows, light panels, dark grey fascia, flat roof
+SPEC[3193] = dict(P=dict(wall=M('#d9d6cc'), sign=SIGNS, gwall=M('#d9d6cc'), fascia=M('#4a4d50', 0.6), gframe=ALU),
+                  layout=dict(bw=3.4, rows=[(4.2, 'shop', 'G')], cols=lambda c, nb: 'W', P={}),
+                  fit=lambda lay_, H, street: dict(bw=3.4, rows=[(H, 'shop', 'G')], cols=lambda c, nb: 'W', P={}))
+# 3173  2-storey business block at the shopping centre: white street level with wide shop/garage openings, upper floor grey-blue ribbon band
+_3173P = dict(sill=0.9, wh=1.3, nx=3, frame=M('#3a3d40', 0.4))
+SPEC[3173] = dict(P=dict(wall=M('#e4e4e0'), spandrel=M('#8b98a3', 0.6), sign=SIGNS, gwall=M('#e4e4e0'), fascia=M('#8b98a3', 0.6), gframe=ALU),
+                  layout=lay(7.4, 'ribbon', gh=3.8, bw=3.0, fh=3.6, P=_3173P), roof=dict(kind='flat', mat=SHEET),
+                  fit=lambda lay_, H, street: lay(H, 'ribbon', gh=3.8 if H > 5 else 0, bw=3.0, fh=max(2.8, H - 3.8), P=_3173P))
+# 3146  long white 1-storey retail hall with a blue sign band and an arched entrance
+SPEC[3146] = _hall(M('#e6e7e5', 0.6))
+# 3178  cream 7-storey tower: punched windows ~4 per storey on the end, glazed balcony stack at the corner, darker ground floor (flats)
+SPEC[3178] = dict(P=_svP(M('#d9cdb2')), layout=_sv_lay(21.0, 2.8, 2.8, _3196c, _GL, gP=dict(wall=M('#8a6a55', 0.7), ww=1.4)),
+                  fit=lambda lay_, H, street: _sv_lay(H, 2.8, 2.8, _3196c, _GL, gP=dict(wall=M('#8a6a55', 0.7), ww=1.4)), roof=dict(kind='flat', mat=SHEET))
+# 3177  beige 7-storey tower (K15B, 16 m): punched windows ~2 pairs per storey, glazed balcony stacks on the long side, flats at street level
+SPEC[3177] = dict(P=_svP(M('#d8cdb3')), layout=_sv_lay(21.0, 0, 2.9, _stk(3), _GL),
+                  fit=lambda lay_, H, street: _sv_lay(H, 0, 2.9, _stk(3), _GL), roof=dict(kind='flat', mat=SHEET))
+# 3202  long white 1-storey building (day-care/clinic type) under a low pitched roof, one continuous row of windows
+SPEC[3202] = dict(P=dict(wall=M('#ecebe6')), layout=lay(3.6, 'punched', bw=3.0, fh=3.6, P=dict(ww=1.6, wh=1.3, sill=0.9)),
+                  fit=lambda lay_, H, street: lay(H, 'punched', bw=3.0, fh=H, P=dict(ww=1.6, wh=1.3, sill=0.9)))
+# 3187  cream 7-storey tower like 3178 (K16B, 19 m): glazed balcony stack at the corner, red-brick ground floor, punched windows
+SPEC[3187] = dict(P=_svP(M('#d9cdb2')), layout=_sv_lay(21.0, 2.8, 2.8, _3196c, _GL, gP=dict(wall=MT('#8e4a38', 'brick', 0.8), ww=1.4)),
+                  fit=lambda lay_, H, street: _sv_lay(H, 2.8, 2.8, _3196c, _GL, gP=dict(wall=MT('#8e4a38', 'brick', 0.8), ww=1.4)), roof=dict(kind='flat', mat=SHEET))
+# 3174  low dark-brown brick building with a white fascia band, few windows (club house / storage)
+SPEC[3174] = _hall(MT('#6b3f30', 'brick', 0.85))
+# 3915  yellow 1-storey row houses (K26B): one row of windows, not two (the LoD2 shell is ~6.5 m with the roof)
+SPEC[3915] = dict(P=dict(wall=M('#d9a93e')), layout=lay(3.0, 'punched', bw=2.6, fh=3.0, P=dict(ww=1.4, wh=1.3, sill=0.9)),
+                  fit=lambda lay_, H, street: lay(H, 'punched', bw=2.6, fh=H, P=dict(ww=1.4, wh=1.3, sill=0.9)))

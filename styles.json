@@ -6279,7 +6279,11 @@
 "f": 8
 },
 "3131": {
-"f": 2
+"f": 1,
+"w": "#c99a5e",
+"k": "brick",
+"note": "Vanhakoivistontie, 1 krs okrankeltainen tiilinen myymälähalli, julisteet, lasitettu sisäänkäynti päädyssä (SV 13.11.2026)",
+"sv": 1
 },
 "3133": {
 "f": 8
@@ -6306,10 +6310,18 @@
 "f": 8
 },
 "3177": {
-"f": 7
+"f": 7,
+"w": "#d8cdb3",
+"k": "render",
+"note": "Vanhakoivistontie, beige 7 krs torni, lasitetut parvekepinot, asunnot katutasossa (SV 13.11.2026, 16 m)",
+"sv": 1
 },
 "3178": {
-"f": 7
+"f": 7,
+"w": "#d9cdb2",
+"k": "render",
+"note": "Vanhakoivistontie, kermanvärinen 7 krs torni, kulmassa lasitetut parvekkeet, tummempi pohjakerros (SV 13.11.2026)",
+"sv": 1
 },
 "3179": {
 "f": 8
@@ -6321,16 +6333,30 @@
 "f": 8
 },
 "3184": {
-"f": 2
+"f": 2,
+"w": "#e8e6df",
+"note": "valkoinen 2 krs (SV 13.11.2026, 36 m)",
+"sv": 1
 },
 "3187": {
-"f": 7
+"f": 7,
+"w": "#d9cdb2",
+"k": "render",
+"note": "Vanhakoivistontie, kerma 7 krs torni, kulmassa lasitetut parvekkeet, punatiilinen pohjakerros (SV 13.11.2026, 19 m)",
+"sv": 1
 },
 "3194": {
-"f": 2
+"f": 2,
+"w": "#ecebe6",
+"note": "valkoinen 2 krs, tumma katto (SV 13.11.2026, 45 m)",
+"sv": 1
 },
 "3196": {
-"f": 8
+"f": 8,
+"w": "#e9eaea",
+"k": "render",
+"note": "Säästäjänkatu/Vanhakoivistontie, valkoinen 8 krs torni, kulmassa lasitetut parvekkeet, vaalea siniharmaa pohjakerros (SV 13.11.2026)",
+"sv": 1
 },
 "3199": {
 "f": 8
@@ -10983,12 +11009,13 @@
 "y": 1800
 },
 "4011": {
-"w": "#eeece6",
+"w": "#cfcfca",
 "k": "wood",
 "f": 1,
 "r": "#3f4246",
-"note": "Y-pakki: Entinen Osuusliike Kansan myymälärakennus, 1930",
-"y": 1930
+"note": "Y-pakki: Entinen Osuusliike Kansan myymälärakennus, 1930 | SV 13.11.2026: vaaleanharmaa lautaverhoiltu 1,5 krs, tumma katto, nykyisin asunto",
+"y": 1930,
+"sv": 1
 },
 "3975": {
 "w": "#9c3d2e",
@@ -11091,19 +11118,21 @@
 "u": 1
 },
 "4099": {
-"w": "#e3d6b6",
+"w": "#ecebe6",
 "k": "render",
-"f": 1,
-"note": "Y-pakki: Vanhakoiviston entinen paloasema, 1930",
-"y": 1930
+"f": 2,
+"note": "Y-pakki: Vanhakoiviston entinen paloasema, 1930 | SV 13.11.2026: valkoinen rapattu, autotallin ovet katutasossa, korkea letkutorni ikkunoineen",
+"y": 1930,
+"sv": 1
 },
 "4030": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vanhakoivistontie 23, 1920",
+"note": "Y-pakki: Vanhakoivistontie 23, 1920 | SV 13.11.2026: keltainen 1,5 krs puutalo OK",
 "y": 1920,
-"u": 1
+"u": 1,
+"sv": 1
 },
 "4007": {
 "w": "#e9cf8c",
@@ -11117,16 +11146,18 @@
 "w": "#e9cf8c",
 "k": "wood",
 "f": 1,
-"note": "Y-pakki: Vanhakoivistontie 26b, 1930",
+"note": "Y-pakki: Vanhakoivistontie 26b, 1930 | SV 13.11.2026 (14 m): keltainen puutalo OK",
 "y": 1930,
-"u": 1
+"u": 1,
+"sv": 1
 },
 "4009": {
 "w": "#efe0a8",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Vanhakoivistontie 27, 1930",
-"y": 1930
+"note": "Y-pakki: Vanhakoivistontie 27, 1930 | SV 13.11.2026: vaaleankeltainen 2 krs (OK)",
+"y": 1930,
+"sv": 1
 },
 "3945": {
 "w": "#dcb76e",
@@ -11139,10 +11170,10 @@
 "3978": {
 "w": "#efe0a8",
 "k": "wood",
-"f": 1,
-"note": "Y-pakki: Vanhakoivistontie 35, 1930",
+"f": 2,
+"note": "Y-pakki: Vanhakoivistontie 35, 1930 | SV 13.11.2026: vaaleankeltainen, 2 täyttä ikkunariviä, tumma katto",
 "y": 1930,
-"u": 1
+"sv": 1
 },
 "3968": {
 "w": "#b9cbb0",
@@ -11154,37 +11185,39 @@
 "u": 1
 },
 "3977": {
-"w": "#efe0a8",
+"w": "#e8d9a0",
 "k": "wood",
-"f": 1,
-"note": "Y-pakki: Vanhakoivistontie 45, 1920",
+"f": 2,
+"note": "Y-pakki: Vanhakoivistontie 45, 1920 | SV 13.11.2026: vaaleankeltainen puutalo, 2 täyttä ikkunariviä räystään alla (päädyssä 2+2 ikkunaa)",
 "y": 1920,
-"u": 1
+"sv": 1
 },
 "4012": {
 "w": "#dcb76e",
 "k": "wood",
 "f": 1,
 "r": "#b5553a",
-"note": "Y-pakki: Vanhakoivistontie 43, 1800",
+"note": "Y-pakki: Vanhakoivistontie 43, 1800 | SV 13.11.2026: okrankeltainen 1 krs puutalo, tumma katto (OK)",
 "y": 1800,
-"c": "v"
+"c": "v",
+"sv": 1
 },
 "3897": {
 "w": "#9c3d2e",
 "k": "wood",
-"f": 1,
+"f": 2,
 "r": "#b5553a",
-"note": "Y-pakki: Vanhakoivistontie 56, 1920",
+"note": "Y-pakki: Vanhakoivistontie 56, 1920 | SV 13.11.2026: punainen 2 krs puutalo valkoisin ikkunanpielin (OK)",
 "y": 1920,
-"u": 1
+"sv": 1
 },
 "4101": {
 "w": "#eeece6",
 "k": "wood",
 "f": 2,
-"note": "Y-pakki: Vanhakoivistontie 57, 1930",
-"y": 1930
+"note": "Y-pakki: Vanhakoivistontie 57, 1930 | SV 13.11.2026: valkoinen puutalo, musta katto",
+"y": 1930,
+"sv": 1
 },
 "3901": {
 "w": "#e3d6b6",
@@ -11569,6 +11602,254 @@
 "k": "metal",
 "f": 1,
 "note": "iso harmaa peltinen myymälähalli, mainostorni (SV 13.11.2026)",
+"sv": 1
+},
+"3406": {
+"w": "#d5d8da",
+"k": "metal",
+"f": 1,
+"note": "Vanhakoivistontie, pitkä vaalea peltihalli (Aina halvat hinnat) + tumma market-sisäänkäyntiosa (SV 13.11.2026)",
+"sv": 1
+},
+"3193": {
+"w": "#d9d6cc",
+"f": 1,
+"shop": 1,
+"sv": 1,
+"note": "Vanhakoivistontien ostoskeskus, 1 krs liikerivi näyteikkunoin, tumma otsalauta (SV 13.11.2026)"
+},
+"3173": {
+"w": "#e4e4e0",
+"f": 2,
+"shop": 1,
+"note": "Vanhakoivistontie, 2 krs liikerakennus, katutasossa liiketilat/nosto-ovet, yläkerrassa siniharmaa nauhaikkuna (SV 13.11.2026)",
+"sv": 1
+},
+"3146": {
+"w": "#e6e7e5",
+"k": "metal",
+"f": 1,
+"note": "Vanhakoivistontie, pitkä valkoinen 1 krs liikehalli, sininen kylttinauha, kaari-sisäänkäynti (SV 13.11.2026)",
+"sv": 1
+},
+"3201": {
+"w": "#6b4a3a",
+"k": "wood",
+"f": 1,
+"note": "ruskea puinen autokatos-/varastorivi (SV 13.11.2026)",
+"sv": 1
+},
+"3202": {
+"w": "#ecebe6",
+"k": "render",
+"f": 1,
+"note": "pitkä valkoinen 1 krs rakennus loivalla harjakatolla, yhtenäinen ikkunarivi (SV 13.11.2026)",
+"sv": 1
+},
+"3174": {
+"w": "#6b3f30",
+"k": "brick",
+"f": 1,
+"note": "matala tummanruskea tiilirakennus, valkoinen otsanauha, vähän ikkunoita (SV 13.11.2026)",
+"sv": 1
+},
+"3415": {
+"w": "#e2d8c0",
+"k": "render",
+"f": 2,
+"shop": 1,
+"note": "Vanhakoivistontie 15, 2 krs beige, katutasossa liiketila (ravintola) lasijulkisivulla ja punaruskealla otsalla, yläkerrassa asunnot ~8 ikkunaa (SV 13.11.2026)",
+"sv": 1
+},
+"3915": {
+"w": "#d9a93e",
+"f": 1,
+"note": "keltainen 1 krs rivitalo, ruskea puuverhous päädyissä (SV 13.11.2026)",
+"sv": 1
+},
+"3930": {
+"w": "#9c3d2e",
+"k": "wood",
+"f": 1,
+"u": 1,
+"note": "punainen puutalo valkoisin listoin, 1,5 krs (SV 13.11.2026, 36 m)",
+"sv": 1
+},
+"4097": {
+"w": "#ecebe6",
+"f": 1,
+"r": "#6b3a2c",
+"note": "valkoinen 1 krs omakotitalo, ruskea aumakatto (SV 13.11.2026)",
+"sv": 1
+},
+"4100": {
+"w": "#4a4d50",
+"k": "wood",
+"f": 2,
+"note": "tummanharmaa lautaverhoiltu 2 krs talo (SV 13.11.2026, 11 m)",
+"sv": 1
+},
+"3932": {
+"w": "#ecebe6",
+"f": 1,
+"r": "#5a3a2e",
+"note": "valkoinen 1 krs omakotitalo, ruskea katto (SV 13.11.2026)",
+"sv": 1
+},
+"4104": {
+"w": "#ecebe6",
+"f": 1,
+"note": "valkoinen 1 krs omakotitalo, katettu kuisti, harmaa katto (SV 13.11.2026)",
+"sv": 1
+},
+"4105": {
+"w": "#ecebe6",
+"f": 1,
+"r": "#7a3a2c",
+"note": "valkoinen 1 krs, punaruskea aumakatto (SV 13.11.2026)",
+"sv": 1
+},
+"4102": {
+"w": "#4a4d50",
+"f": 1,
+"note": "matala tummanharmaa omakotitalo (SV 13.11.2026)",
+"sv": 1
+},
+"3931": {
+"w": "#ecebe6",
+"f": 1,
+"r": "#5a3a2e",
+"note": "valkoinen pitkä 1 krs, ruskea katto (SV 13.11.2026)",
+"sv": 1
+},
+"3900": {
+"w": "#d9d6cc",
+"f": 1,
+"note": "pitkä matala harmaanbeige 1 krs, tumma katto (SV 13.11.2026)",
+"sv": 1
+},
+"4021": {
+"w": "#e8e6df",
+"f": 1,
+"note": "vaalea 1 krs omakotitalo (SV 13.11.2026)",
+"sv": 1
+},
+"3981": {
+"w": "#9a9d9e",
+"k": "wood",
+"f": 1,
+"u": 1,
+"note": "harmaa lautaverhoiltu 1,5 krs puutalo, valkoiset listat, päädyssä ullakkoikkuna (SV 13.11.2026, 10 m)",
+"sv": 1
+},
+"4026": {
+"w": "#8e3a2c",
+"k": "wood",
+"f": 1,
+"note": "punainen 1 krs puutalo, ruskea katto (SV 13.11.2026)",
+"sv": 1
+},
+"3943": {
+"w": "#ecebe6",
+"f": 1,
+"note": "pitkä valkoinen 1 krs omakotitalo, harmaa katto, ~8 ikkunaa kadun puolella (SV 13.11.2026)",
+"sv": 1
+},
+"4004": {
+"w": "#ecebe6",
+"note": "valkoinen omakotitalo (SV 13.11.2026, 30 m)",
+"sv": 1
+},
+"3979": {
+"w": "#9b3a2e",
+"k": "wood",
+"f": 1,
+"note": "punainen 1 krs, valkoinen otsalauta (SV 13.11.2026)",
+"sv": 1
+},
+"3976": {
+"w": "#ecebe6",
+"f": 2,
+"note": "valkoinen 2 krs (SV 13.11.2026, 29 m)",
+"sv": 1
+},
+"3955": {
+"w": "#a8705a",
+"f": 2,
+"r": "#7a2e24",
+"note": "ruskeanpunertava 2 krs talo, tummanpunainen katto, ~3 ikkunaa/krs päädyssä (SV 13.11.2026)",
+"sv": 1
+},
+"3959": {
+"w": "#7a3a2e",
+"k": "wood",
+"f": 1,
+"note": "ruskea autotalli-/varastorivi (SV 13.11.2026)",
+"sv": 1
+},
+"4028": {
+"w": "#a9adaf",
+"f": 1,
+"note": "matala harmaa talo, tumma peltikatto (SV 13.11.2026, 7 m)",
+"sv": 1
+},
+"4024": {
+"w": "#e6e1d3",
+"f": 1,
+"note": "vaalea 1 krs (SV 13.11.2026)",
+"sv": 1
+},
+"3969": {
+"w": "#ecebe6",
+"k": "wood",
+"f": 1,
+"u": 1,
+"note": "valkoinen 1,5 krs puutalo, harmaa katto, päädyssä ullakkoikkunat (SV 13.11.2026)",
+"sv": 1
+},
+"3948": {
+"w": "#c9ccce",
+"f": 1,
+"note": "matala vaaleanharmaa talo/autotalli (SV 13.11.2026)",
+"sv": 1
+},
+"4018": {
+"w": "#ece3c4",
+"f": 2,
+"note": "kermanvaalea 2 krs, tumma katto, ~3 ikkunaa/krs päädyssä (SV 13.11.2026)",
+"sv": 1
+},
+"4001": {
+"w": "#ecebe6",
+"f": 1,
+"note": "pitkä valkoinen 1 krs (SV 13.11.2026, 17 m)",
+"sv": 1
+},
+"3947": {
+"w": "#ecebe6",
+"f": 2,
+"note": "valkoinen 2 krs, tumma katto (SV 13.11.2026)",
+"sv": 1
+},
+"3997": {
+"w": "#7a7d5a",
+"k": "wood",
+"f": 1,
+"note": "oliivinvihreä lautaverhottu varasto/talli (SV 13.11.2026, 11 m)",
+"sv": 1
+},
+"3444": {
+"w": "#d9c8a3",
+"k": "brick",
+"f": 1,
+"shop": 1,
+"r": "#4a3a30",
+"note": "Vanhakoivistontie 22, 1 krs beige tiilinen liikerakennus, lasitettu sisäänkäynti/näyteikkunat, tummanruskea aumakatto (SV 13.11.2026, 9 m)",
+"sv": 1
+},
+"3982": {
+"w": "#ecebe6",
+"note": "valkoinen 1,5 krs omakotitalo, tumma katto (SV 13.11.2026)",
 "sv": 1
 }
 }

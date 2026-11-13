@@ -1,0 +1,49 @@
+# Vanhakoivistontie (SV 13.11.2026)
+K02A/K03B/K06A 3131 1 krs okrankeltainen tiilihalli (myymälä: lemmikkikauppa ym.), lähes ikkunaton (isot julisteet), lasitettu sisäänkäynti itäpäädyssä, matala tumma katto; LIIKETILA -> SPEC _hall tiili, f1 (oli f2)
+K07B 3196 vaalea 8 krs torni 75 m (tarkistetaan lähempää); 3411 puiden takana
+K08B/K09B 3196 valkoinen 8 krs torni, päädyssä ~4 ikkunaa/krs, kulmassa lasitettu parvekepino, siniharmaa pohjakerros (asunnot/varastot, ei liiketiloja) -> SPEC
+K09A/K10A 3406 market-halli: tumma pelti, valkoinen logonauha, sininen seinämaalaus, lasikatos sisäänkäynnillä; LIIKETILA -> SPEC _hall tumma; vieressä harmaa-valkoinen peltihalli (3126, 80 m)
+K10B/K11B 3193 ostoskeskus: 1 krs, koko julkisivu näyteikkunoita (~10 liiketilaa), vaaleat paneelit, tumma otsalauta; LIIKETILAT -> SPEC shop-rivi
+K11A 3406 tarkennus: valtaosa vaaleaa peltiä (iso teksti "Aina halvat hinnat"), tumma laatikko vain sisäänkäyntipäässä -> vaalea _hall
+K12A 3146 valkoinen matala liikerakennus 60 m -> uusintakierros
+K12B 3173 2 krs liikerakennus: katutaso valkoinen, leveät liiketila-/nosto-oviaukot (LIIKETILA), yläkerta siniharmaa nauhaikkuna ~12 ikkunaa -> SPEC ribbon + shop
+K13A 3146 pitkä valkoinen 1 krs liikehalli, sininen kylttinauha, kaari-sisäänkäynti, lähes ikkunaton -> SPEC _hall
+K13B 3178 kerma 7 krs torni, päädyssä 4 ikkunaa/krs, kulmassa lasitettu parvekepino, tummempi pohjakerros (asunnot) -> SPEC
+K14B 3201 ruskea puinen autokatosrivi 1 krs -> wood f1; 3177 valkoinen 7 krs torni parvekkein -> väri
+K14A 3146 sama valkoinen halli (OK)
+K15B 3177 TARKENNUS: beige (ei valkoinen) 7 krs, pitkällä sivulla lasitetut parvekepinot, ~4 ikkunaa/krs akselien välissä, asunnot katutasossa -> SPEC; 3187 valkoinen torni 50 m -> väri
+K15A/K16A 3202 pitkä valkoinen 1 krs, loiva harjakatto, yhtenäinen ikkunarivi (pelissä auto() olisi umpiseinä) -> SPEC 1 ikkunarivi
+K16B 3187 TARKENNUS (19 m): kerma 7 krs, kulmassa lasitettu parvekepino, punatiilinen pohjakerros, ~3 ikkunaa/krs päädyssä, asunnot -> SPEC (sama kuin 3178)
+K17B 3174 matala tummanruskea tiilirakennus, valkoinen otsanauha, lähes ikkunaton -> SPEC _hall tiili
+K17A 3194 valkoinen 2 krs 45 m -> väri; K18B 3184 puiden takana
+K19B/K20B 3415 Vanhakoivistontie 15: 2 krs beige, KATUTASOSSA LIIKETILA (ravintola/pizzeria, iso lasijulkisivu, punaruskea otsanauha), yläkerrassa asunnot ~8 ikkunaa -> shop: 1 (zones2 lisää liikerivin)
+K26B 3915 keltaiset 1 krs rivitalot -> väri, f1
+zones2: sv-tarkistetut matalat (auto plain) talot saavat ikkunarivit f:n mukaan (ei metal/shop)
+K27B 3915 keltaiset 1 krs rivitalot, tummat ikkunat ~1 ikkuna/2,5 m, asunnot -> (zones2: ikkunarivi f1)
+K28B 3930 punainen puutalo valkoisin listoin 1,5 krs -> wood f1 u1
+K29A 4099 entinen paloasema: valkoinen, autotallinovet katutasossa, letkutorni (torni LoD2-kuoressa?) -> w valkoinen, f2; vasemmalla iso punainen 2 krs puutalo (ei osumaa < 60 m)
+K30A 4097 valkoinen 1 krs omakotitalo, ruskea aumakatto -> väri
+K31A 4100 tummanharmaa lautaverhoiltu 2 krs (11 m) -> wood #4a4d50 f2; 4101 valkoinen puutalo musta katto (Y-pakki OK)
+K30B/K31B 3897 punainen puutalo: 2 täyttä ikkunariviä (ei ullakko) -> f2; 3932 valkoinen 1 krs ruskea katto -> väri
+K32A 4104 valkoinen 1 krs + kuisti; 4105 valkoinen 1 krs punaruskea aumakatto; 4102 tummanharmaa matala -> värit, f1
+K32B 3931 valkoinen pitkä 1 krs ruskea katto; K33B 3900 harmaanbeige pitkä 1 krs; K33A 4021 vaalea 1 krs -> värit, f1 (omakotitaloalue, asunnot)
+K35A 3977 vaaleankeltainen puutalo: 2 täyttä ikkunariviä räystään alla (päädyssä 2+2) -> f2 (oli f1 u1); 4012 okra 1 krs (Y-pakki OK)
+K35B 4011 ent. Osuusliike Kansan myymälä: vaaleanharmaa lautaverhous, 1,5 krs, ei enää liiketilaa -> väri
+K34A/K34B 3998, 4015 pieniä rakennuksia puiden takana -> ei muutosta
+K37A 3981 harmaa lautaverhottu 1,5 krs puutalo, päädyssä 2 ikkunaa + ullakkoikkuna -> wood f1 u1; 4026 punainen 1 krs puutalo -> wood
+K37B 3943 pitkä valkoinen 1 krs, ~8 ikkunaa kadulle -> väri f1; K36A 4004 valkoinen -> väri
+K38A 3978 vaaleankeltainen 2 täyttä ikkunariviä -> f2 (oli f1 u1); 3979 punainen 1 krs; 3976 valkoinen 2 krs
+K38B 3955 ruskeanpunertava 2 krs, tummanpunainen katto, ~3 ikkunaa/krs; 3959 ruskea autotallirivi
+K39A 4028 matala harmaa (7 m); 4024 vaalea 1 krs
+K39B 3969 valkoinen 1,5 krs puutalo (ullakkoikkunat päädyssä) -> f1 u1; 3948 vaaleanharmaa matala
+K40A 4018 kerma 2 krs ~3 ikk/krs; 4001 valkoinen pitkä 1 krs -> värit
+K40B 3947 valkoinen 2 krs -> väri; 3958 (Y-pakki keltainen) SV:ssä 32 m päässä valkoinen punakattoinen? -> uusintakierros
+K41A 3997 oliivinvihreä lautavarasto -> wood; 4009 vaaleankeltainen 2 krs OK
+K42B 3958 lähempää (14 m) keltainen puutalo -> Y-pakin väri OK (K40B-epäily poistettu)
+K42A 3982 valkoinen 1,5 krs; 4007 keltainen OK; K43A 4030 keltainen 1,5 krs OK
+K43B 3444 Vanhakoivistontie 22: 1 krs beige tiilinen LIIKERAKENNUS, lasitettu sisäänkäynti + näyteikkunat, tumma aumakatto -> shop: 1, brick
+K44A 3443 beige matala liikerakennus 50+ m (Toukolantie) -> uusintakierros
+K26B pari: 3915 pelissä 2 ikkunariviä -> SPEC 1 rivi
+PARIT (paikallinen bake + render): 3131, 3196, 3193, 3173, 3178, 3177, 3187, 3174, 3406, 3415 (liikerivi), 3202 vastaavat nyt SV:tä.
+UUSINTAKIERROS: 3977/3978 pelissä yhä 1 ikkunarivi vaikka f2 (city.house_spec vaatii seinäkorkeuden >= 4,6 m; LoD2-räystäs matala);
+  4099 paloaseman letkutorni puuttuu LoD2-kuoresta; 3146 ja 3443 kaukaa; taivaalla toistuva vaaleansininen puolipallo (lasimateriaali, ei tämän kadun) -> selvitettävä.

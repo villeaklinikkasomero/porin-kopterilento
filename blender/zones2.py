@@ -247,6 +247,10 @@ def spec_for(i):
     L_ = sp.get('layout')
     if L_ and L_.get('rows') and not (LOOK['b'].get(str(i)) or {}).get('shop'):   # shop fronts only on the commercial streets of the centre
         sp['layout'] = L_ = dict(L_, rows=[(r[0], 'punched', 'F') if r[2] == 'G' and r[1] == 'shop' else r for r in L_['rows']])
+    if (L_ or {}).get('plain') and e_.get('sv') and e_.get('f') and not e_.get('shop') and e_.get('k') != 'metal':
+        # Street View checked low houses (rivitalot, 1-2 storey blocks) have windows: auto() would draw a blank wall under 6.5 m
+        H_ = float(B[i]['h']); n_ = max(1, int(e_['f']))
+        sp['layout'] = L_ = dict(bw=3.0, rows=[(H_ / n_, 'punched', 'F')] * n_, cols=lambda c, nb: 'W', P=dict(ww=1.5, wh=1.3, sill=0.9), rowP={})
     if e_.get('shop') and L_ is not None and not any(r[2] == 'G' for r in (L_.get('rows') or [])):
         # Street View 13.11.2026 (user): a shop front seen at street level must not be drawn as flat windows. auto() gives low
         # buildings (h < 13) no ground row and single-storey ones a blank wall, so add the shop row here
