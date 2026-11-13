@@ -295,3 +295,11 @@ Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex
 4. **Ikkunoiden sisustus:** verhot, valaistut/pimeät huoneet vaihtelevasti; yhdistyy yönäkymään (`night/`).
 5. **Kuluneisuus:** sadevanat, räystäsliat, sokkelit (osin jo WEATHER-asetuksella).
 6. **Katutason yksityiskohdat:** markiisit, kyltit, katukalusteet.
+- **Käyttäjän palaute 13.24 (uusien leivosten jälkeen) – EI korjattu, tee ensimmäisenä:**
+  1. **Teljäntorin läpinäkyvä seinä** (c067): seinä näkyy vain toiselta puolelta (yksipuolinen pinta / puuttuva seinä LoD2-kuoren ja
+     pysäköintikannen kohdalla). Tarkista rshot.py:llä kannen tasolta (LoD2-katto ~6,8 m) ja build_lod2:n runs/cap-logiikka (zones2.py
+     ~rivi 155–165: seinät katkaistaan cap-korkeuteen → kannen yläpuolinen seinä voi jäädä pois).
+  2. **Katos maassa, kaksi kohtaa:** (a) Teljäntorin ja Promenadin välissä, (b) IsoKarhun ja Sokoksen välissä (pysäköintialueita,
+     punaruskea matala "talo" vaalealla katolla). Etsi id:t (`audit/shot.js` + tarrat tai city.js-jalanjäljet), tee niistä katoksia:
+     katto ~2,5–3 m pilareiden varassa, ei umpiseiniä (esim. SPEC kind 'canopy' / layout plain + open_ends, tai hide + oma katosmalli).
+  3. Ratsula (221) näkyi vielä tiilenä klo 13.22 – todennäköisesti Render/välimuisti; tarkista uudesta c052:sta.
