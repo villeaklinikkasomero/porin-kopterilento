@@ -141,7 +141,20 @@ def shell_parts(ids, spec):
             G = [Polygon([(p[0], p[1]) for p in r]).buffer(0) for k, r, _ in RAW[i] if k == 'G' and len(r) >= 3]
             if G: shells[i] = unary_union(G)
     out = {}
-    for j in ids:
+    # also the OSM buildings the game hides under these shells (lod2.js 'hide'): Sampotalo 238 under Teljäntori 216 was drawn
+    # with Teljäntori's spec (a six-storey white wall on Yrjönkatu instead of the two-storey shop building)
+    extra = []
+    if shells:
+        from shapely.ops import unary_union as _uu
+        allsh = _uu(list(shells.values())).buffer(1.0); bx = allsh.bounds
+        for j in zones2.HIDE:
+            if j in ids or j >= len(B): continue
+            lk = LOOK['b'].get(str(j)) or {}
+            if lk.get('m') or not lk.get('w'): continue          # only hidden buildings whose look is known (street photos, sources)
+            p = B[j]['p']; xs = p[0::2]; ys = p[1::2]
+            if min(xs) / 10 > bx[2] or max(xs) / 10 < bx[0] or min(ys) / 10 > bx[3] or max(ys) / 10 < bx[1]: continue
+            extra.append(j)
+    for j in list(ids) + extra:
         if j in shells: continue
         f = _fp(j)
         if f.area < 1: continue
@@ -153,9 +166,11 @@ def shell_runalt(sp, subs, spec):
     zone = [(spec(j), _fp(j).buffer(1.2)) for j in sorted(subs, key=lambda j: _fp(j).area)]   # smallest first: a low wing in front of a tower;
     base = sp.get('runalt')                                                                      # one spec object per part (splitruns compares by id)
     def ra(x, y):
+        r = base(x, y) if base else None                   # a hand-made runalt (Eteläpuisto 9 in 11's shell) wins
+        if r: return r
         for sj, g in zone:
             if g.contains(_Pt(x, y)): return sj
-        return base(x, y) if base else None
+        return None
     return dict(sp, runalt=ra, splitruns=True)
 
 def build_and_bake(name, ids, samples=16, spec=None):

@@ -93,7 +93,8 @@
 "sv": 1
 },
 "2": {
-"f": 10
+"f": 10,
+"sv": 1
 },
 "3": {
 "f": 2
@@ -659,15 +660,17 @@
 "r": "#b5553a",
 "st": "classic",
 "note": "Y-pakki: Yrjönkatu 25, 1927",
-"y": 1927
+"y": 1927,
+"sv": 1
 },
 "109": {
-"w": "#e3d6b6",
+"w": "#eeece6",
 "k": "render",
 "f": 4,
 "st": "classic",
-"note": "Y-pakki: Rautatienpuistokatu 3, 1926",
-"y": 1926
+"note": "Y-pakki: Yrjönkatu 27, 1936. Street View 13.11.2026: valkoinen funkis, kulmassa parvekepino",
+"y": 1926,
+"sv": 1
 },
 "110": {
 "w": "#786c6c",
@@ -733,7 +736,8 @@
 "f": 7,
 "r": "#3f4246",
 "note": "Y-pakki: Yrjönkatu 23, Palojoenkulma, 1988",
-"y": 1988
+"y": 1988,
+"sv": 1
 },
 "124": {
 "w": "#efede6",
@@ -2856,7 +2860,8 @@
 "w": "#cfc7b2",
 "k": "render",
 "f": 6,
-"r": "#b8302a"
+"r": "#b8302a",
+"sv": 1
 },
 "603": {
 "w": "#ece0a0",
@@ -2878,7 +2883,8 @@
 "f": 5,
 "r": "#3f4246",
 "note": "Y-pakki: Yrjönkatu 19a, 1961",
-"y": 1961
+"y": 1961,
+"sv": 1
 },
 "606": {
 "w": "#e6e6e2",
@@ -4974,18 +4980,20 @@
 "sv": 1
 },
 "1567": {
-"w": "#b1aea7",
-"m": 1,
+"w": "#dcbf7a",
 "k": "render",
 "r": "#74787b",
-"f": 3
+"f": 2,
+"note": "Street View 13.11.2026: Yrjönkatu/Eteläranta kulma: okrankeltainen 2-kerroksinen, liiketilat",
+"sv": 1
 },
 "1568": {
-"w": "#9799a0",
-"m": 1,
+"w": "#dcbf7a",
 "k": "render",
 "r": "#3f4246",
-"f": 3
+"f": 2,
+"note": "Street View 13.11.2026: okrankeltainen 2-kerroksinen (1567:n jatke)",
+"sv": 1
 },
 "1569": {
 "w": "#9da4b6",
@@ -5052,7 +5060,11 @@
 "sv": 1
 },
 "1582": {
-"f": 3
+"f": 6,
+"w": "#d6b16a",
+"k": "render",
+"note": "Y-pakki: Yrjönkatu 7, 1940. Street View 13.11.2026: okrankeltainen, tummanvihreät liiketilat (piirretään 1579:n LoD2-kuoren osana)",
+"sv": 1
 },
 "1583": {
 "w": "#b9ada5",

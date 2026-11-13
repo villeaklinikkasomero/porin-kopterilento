@@ -87,6 +87,10 @@ SPEC[1493] = dict(P=dict(wall=M('#e6d6a6'), trim=_a9T, frame=M('#f4f2ea')),
                               rowP={'G': dict(ground=True, arch=True, plinth_h=0.4, plinth=M('#5b5752', 0.8), ww=1.7, wh=3.4, sill=0.4, pil=True),
                                     'F': dict(hood='cornice', pil=True, ww=1.2, wh=2.2, sill=0.9)}, plain=False),
                   cornice=(0.45, 0.7, _a9T))
+# 238  Sampotalo, Yrjönkatu 13 (1961; Street View 13.11.2026): two storeys of shops in front of Teljäntori, glazed shop fronts under a
+# green fascia, the upper storey clad in light grey-green ribbed sheet with a high window band (drawn as a stretch of Teljäntori's LoD2 shell)
+SPEC[238] = dict(P=dict(wall=M('#c5cbc6', 0.5, 0.3), spandrel=M('#aeb5b1', 0.5, 0.3), sign=SIGNS, fascia=M('#3f6e5c'), gwall=M('#3a3f42', 0.3), gframe=ALU),
+                 layout=lay(8.3, 'ribbon', gh=4.2, bw=3.6, fh=4.1, P=dict(wh=1.0, sill=2.6)))
 SPEC[1367] = dict(P=dict(wall=M('#d8d4c8'), sign=SIGNS, rail=M('#6f777c'), corr=True), layout=lay(23, 'punched', gh=4.0, bw=3.5, fh=3.15, cols=every(2, 'L'), P=dict(colmod={'L': 'loggia'}, ww=1.6)))   # 1961 part (Valli)
 
 # ---------------------------------------------------------------- west of the square, south block (Antinkatu 13-15)

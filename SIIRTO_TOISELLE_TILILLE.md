@@ -174,3 +174,17 @@ Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex
   epävarmoja (pilvinen kuva / kaupungin kuva); seinämaalaukset (564, Liikekulman 1497 päätyreliefi) tehdään lopuksi, kun muuten ollaan tyytyväisiä.
   Pieniä jäännös-mustia ruutuja: 1361 sisäpiha, 1286/1290 (kivi2), 135 (p1).
 - Seuraava katu: Yrjönkatu (järjestyslistan 2).
+
+## 13.11.2026 klo 8–9: Yrjönkatu Street View'ta vasten
+- **kivi.py, laajennus:** `shell_parts` ottaa nyt mukaan myös pelin piilottamat talot (lod2.js `hide`), joiden ulkoasu on lukittu styles.json:iin
+  (w ilman m). Ne piirretään kuoren omistajan LoD2-seinille omalla specillään; käsin tehty runalt (Eteläpuisto 9) voittaa. Koskee myös
+  kaupunkilohkoja, koska city.py kutsuu kivi.build_and_bake:a: c023, c033, c037, c038, c039, c047, c048, c049, c050, c051, c064, c065, c067, c068, c110.
+- **zones.py:** SPEC[238] Sampotalo (Yrjönkatu 13): 2-kerroksinen liiketalo Teljäntorin edessä, vihreä otsalista, harmaa poimulevy + ikkunanauha.
+- **styles.json:** 1567/1568 okrankeltainen 2 krs (Yrjönkatu/Eteläranta kulma), 1582 Yrjönkatu 7 okra 6 krs (1579:n kuoressa), 109 Yrjönkatu 27 valkoinen.
+- **Ajettava:** `bake kivi3 kivi4 kivi5 --samples 64` ja `city 64 c023,c033,c037,c038,c039,c047,c048,c049,c050,c051,c064,c065,c067,c068,c110`
+  (sisältää aamun Antinkatu-ajot c047/c048/c051/c052/c063: lisää c052,c063 jos niitä ei ole vielä ajettu) → collect.
+- **Avoinna Yrjönkadulta:** Airionkulma 603 (pelin valokuvajulkisivu keltainen, Street View'ssa harmaa-valkoinen raitajulkisivu – tarkista),
+  Postitalo 1601 (pelissä ruskeat raidat, todellisuudessa valkoinen + harmaanvihreät nauhat; pelin tori5 on 03:10 leivottu), Kuparikonttori 269
+  (tummanruskea levy → pelin brickify tekee tiiltä, sama kuin Ratsula), Yrjönkatu 25 (107) aumakatto puuttuu, Yrjönkatu 27 (109) kulmaparvekkeet.
+  BePOP, IsoKarhu, Promenadi, Sokos ja Porin Talo tarkistetaan vasta, kun 12.–13.11. leivonnat ovat pelissä.
+- Seuraava katu: Valtakatu.
