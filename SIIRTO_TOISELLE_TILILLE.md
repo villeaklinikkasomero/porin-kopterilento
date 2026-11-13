@@ -274,3 +274,24 @@ Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex
    Muista: KARHU-värit (kivi.py) omistajan hyväksymät, Airionkulma 603 valokuvajulkisivu pidetään.
 5. **Tarkistus:** leivo lohko paikallisesti (`python3 kivi.py <lohko> 4` tai city-lohkolle build_and_bake) ja renderöi sama kuvakulma
    `rshot.py`:llä (absoluuttinen tulostuspolku!) ennen kuin kirjoitat tiedostot kansioon. Live-peli näyttää korjaukset vasta Modal-ajon jälkeen.
+- **Käyttäjän palaute 12.42 (kuva Liisankadun yltä, live-peli):** (1) 45° viisteet puuttuvat → live-leivonnat ovat ennen chamfer.py:tä
+  (bl_c*.js 09.46, bl_kivi* 05.30) – korjautuu Modal-ajolla; tarkista sen jälkeen. (2) **Katos maassa** Teljäntorin/IsoKarhun välisellä
+  pysäköintialueella (punaruskea matala "talo" vaalealla katolla) – EI vielä korjattu: etsi id (`street.py Liisankatu` / tarrat),
+  tee siitä katos (katto pilareilla, ei umpiseiniä maahan). (3) Teljäntorin sisäpiha rikki → SPEC[216] tehty mutta c067 leipomatta Modalissa;
+  lisäksi Sampotalon pihasivu ja kannen korkeus (LoD2 ~6,8 m vs roofAt 3,1) yhä korjaamatta – ensimmäinen tehtävä seuraavassa istunnossa.
+- **13.11 chamfer-korjaus:** Modal-ajo kaatui 0/127 (`No module named 'chamfer'`): pipeline/porikit/jobs.py kopioi kiinteän listan
+  HOMEen, muut blender/*.py menevät HOME/blender/. zones2.py lisää nyt `./blender` sys.pathiin. Uusia blender-moduuleja lisättäessä
+  muista tämä (tai lisää ne jobs.py:n listaan rivillä 62). Tarkista aina lokin lopusta `done: N/N ok`.
+- **Huom. tiedostojen kirjoitus kansioon:** device_commit_files kirjoitti kerran vanhan sisällön (outputs-kansion välimuisti) →
+  käytä aina uutta tiedostonimeä outputsissa ja tarkista koko device_list_dirillä kirjoituksen jälkeen.
+
+## JATKOSUUNNITELMA: realistisuus (kun talojen muoto ja värit ovat kunnossa; käyttäjä hyväksyi 13.11.2026)
+1. **Ikkunaheijastukset (tärkein):** leivonnassa lohkoille lasimaski (gen.py tietää ikkunoiden paikat; erillinen kanava/tekstuuri
+   samaan atlakseen). Pelissä lasikohtiin taivaan ympäristöheijastus Fresnel-painotuksella (vinosti katsottuna vahvempi) + auringon
+   välähdys; kevyt shader, toimii selaimessa. Raskaampaa SSR:ää (toisten talojen heijastus) ei todennäköisesti kannata.
+   Lasimaskin voi lisätä leivontaan jo aiemmin, jotta se on valmiina kaikissa lohkoissa.
+2. **Värisävytys + ilmaperspektiivi:** ACES-tyyppinen sävykartoitus, hieno usva (kaukaiset talot sinertävät). Nopea.
+3. **Normal mapit:** tiilen saumat, rappauksen karheus, peltikattojen saumat valossa 3D:nä (nykyisistä det_*.jpg-tekstuureista).
+4. **Ikkunoiden sisustus:** verhot, valaistut/pimeät huoneet vaihtelevasti; yhdistyy yönäkymään (`night/`).
+5. **Kuluneisuus:** sadevanat, räystäsliat, sokkelit (osin jo WEATHER-asetuksella).
+6. **Katutason yksityiskohdat:** markiisit, kyltit, katukalusteet.
