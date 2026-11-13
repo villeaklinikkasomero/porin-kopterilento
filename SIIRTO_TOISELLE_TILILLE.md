@@ -255,6 +255,22 @@ Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex
   (selainerä views.jsonista: peli `window.__shot(x,y,h)` + Street View), `rshot.py` (leivotun glb:n renderöinti Blenderillä),
   `diag3.py <lohko>` (mustat laatat), `valta_notes.txt` (Valtakadun havainnot). Polut olettavat työtilan /home/claude-rakenteen.
 - **Huom. selaimesta:** max 2 näkymää / erä (50 s raja), aloita erä `resize_window 1280x720`:lla (emulointi nollautuu virheiden jälkeen).
-  Pelin `__shot` määritellään välilehteen uudelleen, jos sivu ladataan uudestaan (koodi: kesäkuun siirtotiedoston kohta "__shot").
+  Pelin `__shot` määritellään välilehteen uudelleen, jos sivu ladataan uudestaan (koodi: `audit/shot.js` – liitä se pelin välilehteen javascript_toolilla; peli: https://porin-kopterilento.onrender.com/?r=1).
 - **Ajamatta (käyttäjä):** commit+push, sitten `bake kivi0 kivi1 kivi3 kl0 kl1 karhu tori0 tori1 tori5 kivi2 kivi4 kivi5 tori2 tori3 tori4 p1
   bepop isokarhu promenadi uima karhu --samples 64` ja `city 64 c`, collect → PR → merge.
+
+### Street View -vertailun menetelmä (sama kuin Antin-, Yrjön- ja Valtakadulla)
+1. **Pisteet:** `audit/`-tyyliin – kadun keskilinja city.js:n `r`-teistä (`n` = kadun nimi, koordinaatit jo metreinä), piste 40 m välein
+   (ensimmäinen 8 m alusta). Jokaisesta pisteestä kaksi näkymää: kadun suunta −55° (A) ja +55° (B) → näkee molempien puolten julkisivut viistosti.
+   lat = y/111437 + 61.486, lon = x/53278 + 21.796. Tulos `views.json` ({k,x,y,h,lat,lon}); Valtakadun generointi oli tämä (ks. views.json).
+2. **Kuvaparit:** `python3 audit/nb.py a b` tulostaa browser_batch-listan (peli: `__shot` + kuvakaappaus 0,4; Street View:
+   `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=LAT,LON&heading=H&pitch=12&fov=90`, odotus 5 s, kuvakaappaus 0,4).
+   Aloita erä `resize_window seed 1280×720`. Max 2 näkymää/erä. Peli välilehdellä `tab-2`, Street View `seed`.
+3. **Vertailu:** jokaisesta parista: väri, kerrosluku/korkeus, ikkunatyyppi (punched/ribbon/kaaret), katutaso (näyteikkunat), parvekkeet,
+   materiaali (tiili/rappaus/levy/puu). Tunnista talo tarran id:stä + `street.py`:n listasta; epävarmassa tapauksessa katso jalanjälki
+   (city.js p/10) suhteessa kameraan. Muistiinpano `audit/<katu>_notes.txt`.
+4. **Korjaus:** pelkkä väri/kerrosluku/materiaali → `styles.json` (w, f, k, hh = korkeus jos city.js väärin ja ei LoD2:ta); klassinen talo
+   ilman kaaria tms. → `kivi.py SPECK[id] = classic_spec(...)`; moderni julkisivu → `zones.py SPEC[id]` (lay + fit). Merkitse `"sv": 1`.
+   Muista: KARHU-värit (kivi.py) omistajan hyväksymät, Airionkulma 603 valokuvajulkisivu pidetään.
+5. **Tarkistus:** leivo lohko paikallisesti (`python3 kivi.py <lohko> 4` tai city-lohkolle build_and_bake) ja renderöi sama kuvakulma
+   `rshot.py`:llä (absoluuttinen tulostuspolku!) ennen kuin kirjoitat tiedostot kansioon. Live-peli näyttää korjaukset vasta Modal-ajon jälkeen.
