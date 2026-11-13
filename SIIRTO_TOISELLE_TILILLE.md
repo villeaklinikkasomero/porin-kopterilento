@@ -107,3 +107,27 @@ Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
 - Eteläpuisto 11: käyttäjän korjaus - lasiparvekkeet myös eteläpäähän, sisäänvedetty ylin kerros valkoinen.
 - Eteläpuisto 9 (537, Pohjoispuiston kulma, LoD2-kuoressa 65): 1930-luvun funkis kuvasta 7/2023 - okra rappaus, kermanväriset erkkeripinot ruskein karmein, kivijalassa tumma kivi + vihreä kuparilista (_SPEC_E9, 65:n runalt).
 - Eteläpuisto 9: 13 ikkunaa + 3 kermanväristä erkkeripinoa Eteläpuiston puolella, 1 erkkeri Pohjoispuiston puolella kulmassa (1 m ulos). zones2.build_lod2: spec splitruns=True katkaisee seinäjakson kohdasta, jossa runalt vaihtuu (65/537 yhteinen LoD2-kuori).
+
+## Katutarkastus Street View'ta vasten (13.11.2026)
+Sääntö: jokainen rakennus tarkastetaan Google Street View'ta vasten. Tarkastetut on merkitty styles.json:iin `"sv": 1` (ja `m` poistettu, jotta automaattiset ajot eivät ylikirjoita).
+- Otavankatu (23 rak.), Annankatu (30), Katariinankatu (36) tehty. Isoimmat korjaukset: Otavankatu 3 vaalea rappaus (ei punatiili), Otavankatu 14 valkoinen 3 krs + ullakko, Annankatu 19/25 ja Katariinankatu 15/18/19/20 puutaloja (olivat rappaus/kivi), Katariinankatu 10 6 krs (oli 2), useita värejä.
+- Avoimet: kuori 5 (Otavankatu 17+19 samassa 20 m kuoressa → iso ikkunaton seinä, h085). Katariinankatu 4 uudisrakennus (1517, 1535: tumma tiili ~6 krs) on city.js:ssä 4–8 m korkea. Äestäjänkatu 10 (77) on purettu, tontti tyhjä.
+- Uudelleenleivonta (Modal, vain käyttäjän luvalla). HUOM: lohkolista pilkuilla ilman välilyöntejä, ja kivi-lohkot (kl0, kl1, kivi0) ajetaan bake-komennolla, ei city-komennolla:
+  - `city 64 c035,c036,c037,c038,c039,c047,c048,c049,c050,c053,h074,h075,h077,h085`
+  - `bake kl0 kl1 kivi0 --samples 64`
+Seuraavaksi: Luotsinmäenpuistokatu, Teatterikatu, Vapaudenkatu, Ratakatu.
+
+
+## Seuraava iso työ (13.11.2026 klo 02, käyttäjän ehdotus): kaupungin kuvat oikeisiin taloihin Street View'n avulla
+- Kaupungin kuvat (SharePoint Kuvat_kopterilento, haettu 11.11.) ovat työtilassa `/home/claude/photos/img/<kaupunginosa>/` – 268 kuvaa, ei GPS-tietoa,
+  tiedostonimessä usein kadun nimi. Kuvat EIVÄT mene GitHubiin eikä peliin; kaupungin kuvat käsitellään EU:ssa (Modal EU tai käyttäjän kone).
+  Jos uusi tili/työtila: kuvat pitää hakea SharePointista uudelleen.
+- Aiemmin 43 kuvaa on jo kohdistettu ja oikaistu (`/home/claude/phw/jobs.json`: kuva -> rakennus b, seinä, kerrokset, ikkunaväli; `p*_rect.jpg`).
+  Kohdistukset tehtiin ILMAN Street View'ta -> osa voi olla väärin (esim. "Keskusta 31 Eteläpuisto" -> b130?). Tarkista kaikki.
+- Työnkulku: 1) tunnista kuvan talo ja kuvaussuunta vertaamalla Street View'hun (vain katsominen, Google-kuvista ei siirretä pikseleitä mihinkään –
+  Googlen ehdot kieltävät johdetun aineiston), 2) 4 kulmaa -> oikaistu julkisivu (porikit review / phw), 3) luetaan ikkunarivit, ikkunaväli, kerroskorkeudet,
+  parvekkeet, värit -> SPEC/styles.json, 4) kuva ja heijaste poistetaan, talo rakennetaan luvuista. Aloitus: Eteläpuiston kuvat (Keskusta 31, 32, 37).
+- index.html 13.11.: brickify() koskee nyt kaikkia Blender-lohkoja (tiilikuvio punaisille ja rappausrae vaaleille seinille, koska peli pienentää
+  atlakset 1024 px:iin). Fiini näkyy pelissä vasta, kun c049 on ajettu Modalissa (pelin bl_c049.js on 12.11. illalta, ennen Fiiniä).
+- HUOM: pelin bl_bepop/isokarhu/promenadi/tori*/kivi*/kl* ovat 10.–12.11. aamulta -> BePOP, Cumulus, IsoKarhu, Promenadi, Sokos, Teljäntori, Keskuskartano/Amado
+  näyttävät vanhoilta/rikki, kunnes bake-ajo (bepop isokarhu promenadi uima tori0-5 kivi0-5 kl0 kl1 --samples 64) + collect on tehty.

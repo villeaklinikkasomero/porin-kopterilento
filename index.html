@@ -227,13 +227,19 @@ function glassify(m) { return m; }
 // brick bond (Poly Haven red_brick_03, CC0; luminance only) on the brick-red surfaces of the old brick landmarks: world-space, so no UVs needed,
 // and only where the surface is brick red and vertical (the building's own colour and the baked light stay)
 const DETB = new THREE.TextureLoader().load('./det_brick.jpg'); DETB.wrapS = DETB.wrapT = THREE.RepeatWrapping; DETB.anisotropy = 4;
+// render grain (det_plaster.jpg) on light, unsaturated walls; brick bond on brick-red walls.  Used on every Blender block (the baked atlases are
+// shrunk to 1024 px in the game, which washes the brick and render texture out) - 13.11.2026, user: brick missing on Fiini
+const DETP = new THREE.TextureLoader().load('./det_plaster.jpg'); DETP.wrapS = DETP.wrapT = THREE.RepeatWrapping; DETP.anisotropy = 4;
 function brickify(m) {
-  m.onBeforeCompile = sh => { sh.uniforms.detB = { value: DETB };
+  m.onBeforeCompile = sh => { sh.uniforms.detB = { value: DETB }; sh.uniforms.detP = { value: DETP };
     sh.vertexShader = 'varying vec3 vBW;\nvarying vec3 vBN;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvBW = ( modelMatrix * vec4( position, 1.0 ) ).xyz; vBN = normalize( mat3( modelMatrix ) * normal );');
-    sh.fragmentShader = 'uniform sampler2D detB;\nvarying vec3 vBW;\nvarying vec3 vBN;\n' + sh.fragmentShader.replace('#include <alphamap_fragment>',
+    sh.fragmentShader = 'uniform sampler2D detB;\nuniform sampler2D detP;\nvarying vec3 vBW;\nvarying vec3 vBN;\n' + sh.fragmentShader.replace('#include <alphamap_fragment>',
       '{ vec3 bc = diffuseColor.rgb; float red = clamp( ( bc.r / ( max( bc.g, bc.b ) + 0.015 ) - 1.3 ) * 2.0, 0.0, 1.0 ) * ( 1.0 - abs( vBN.y ) );\n' +
       '  vec2 buv = abs( vBN.x ) > abs( vBN.z ) ? vBW.zy : vBW.xy; float bd = texture2D( detB, buv / 2.2 ).r;\n' +
-      '  diffuseColor.rgb *= 1.0 + ( bd - 0.5 ) * 1.1 * red; }\n#include <alphamap_fragment>'); };
+      '  diffuseColor.rgb *= 1.0 + ( bd - 0.5 ) * 1.1 * red;\n' +
+      '  float mx = max( bc.r, max( bc.g, bc.b ) ), mn = min( bc.r, min( bc.g, bc.b ) ), sat = ( mx - mn ) / ( mx + 0.02 );\n' +
+      '  float pl = smoothstep( 0.42, 0.68, mx ) * ( 1.0 - smoothstep( 0.12, 0.3, sat ) ) * ( 1.0 - abs( vBN.y ) ) * ( 1.0 - red );\n' +
+      '  diffuseColor.rgb *= 1.0 + ( texture2D( detP, buv / 3.0 ).r - 0.5 ) * 0.4 * pl; }\n#include <alphamap_fragment>'); };
   m.customProgramCacheKey = () => 'brickify' + (m.map ? 'm' : '') + m.type;
   return m;
 }
@@ -804,7 +810,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     import(`./bl_${key}.js`).then(K => {
       const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
       new GLTFLoader().parse(buf.buffer, '', gl => {
-        gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { map.anisotropy = 8; TEXLOD.add(map, K.x, K.y); } q.material = glassify(new THREE.MeshBasicMaterial({ map })); if (BRICKLM.has(key)) brickify(q.material); } });
+        gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { map.anisotropy = 8; TEXLOD.add(map, K.x, K.y); } q.material = brickify(glassify(new THREE.MeshBasicMaterial({ map }))); } });
         const g = new THREE.Group(); g.position.set(K.x, 0, -K.y); g.add(gl.scene); scene.add(g);
         for (const q of proc) if (K.roof || q.material !== roofMat) scene.remove(q);
         (window.__bl = window.__bl || []).push(key);
@@ -1095,7 +1101,7 @@ function streamUpdate(x, y) {
         const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
         new GLTFLoader().parse(buf.buffer, '', gl => {
           if (e.st !== 1) return;
-          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { shrinkMap(map, isTouch ? 512 : 1024); map.anisotropy = 4; } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
+          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { shrinkMap(map, isTouch ? 512 : 1024); map.anisotropy = 4; } q.material = brickify(glassify(new THREE.MeshBasicMaterial({ map }))); } });
           const gr = new THREE.Group(); gr.position.set(ax, 0, -ay); gr.add(gl.scene); scene.add(gr); e.me.visible = false; e.gr = gr; e.st = 2; }, () => { e.st = 0; });
       }).catch(() => { e.st = 3; });   // not baked yet: keep the plain walls
     } else if (d > 850 && e.st === 2) {
@@ -1148,9 +1154,7 @@ function loadModel(name, done) {
   };
   window.__treesAt = (x, y) => { last = { x: 1e9, y: 1e9 }; TREES.update(x, y); };
   TREES.update(70, 45);
-  import('./trees_extra.js').then(K => { const dec = b => { const s_ = atob(b), a = new Uint8Array(s_.length); for (let i = 0; i < s_.length; i++) a[i] = s_.charCodeAt(i); return a; };
-    const P = new Int16Array(dec(K.default.p).buffer), Kk = dec(K.default.k); for (let i = 0; i < Kk.length; i++) addTree(P[i * 2] / 10, P[i * 2 + 1] / 10, Kk[i], true);
-    window.__treesExtra = Kk.length; const l = last; last = { x: 1e9, y: 1e9 }; TREES.update(l.x < 1e8 ? l.x : 70, l.x < 1e8 ? l.y : 45); }).catch(() => {});
+  // trees_extra.js (aerial-photo guesses) removed 13.11.2026: wrong places; to be replaced by trees from MML laser scanning
   // leaf-card trees (blender/trees2.py: linden, birch, spruce; alpha-cut leaf atlas, bent normals, self-shadowing in vertex colours)
   loadModel('trees', root => {
     const src = ['tree0', 'tree1', 'tree2'].map(k => root.getObjectByName(k)), map = src[0].material.map;
