@@ -770,3 +770,100 @@ SPEC[167] = dict(P=dict(wall=M('#e6e6e1'), linner=M('#dcdcd6'), sign=SIGNS, gwal
 # 118  Antinkatu 24 (1991) office: light grey, bluish window bands, no balconies, glazed street level with the entrance on the corner
 SPEC[118] = dict(P=dict(wall=M('#e4e3dd'), spandrel=M('#e4e3dd'), glass=M('#5f7a92', 0.15), sign=SIGNS, gwall=M('#30353a', 0.3), fascia=M('#e4e3dd'), gframe=ALU),
                  layout=lay(18.0, 'ribbon', gh=4.2, bw=3.4, fh=3.45, P=dict(wh=1.6, sill=0.9)), roof=dict(kind='flat', mat=SHEET))
+# ---------------------------------------------------------------- Itsenäisyydenkatu, second pass 13.11.2026: facades from the Street View pairs
+def _sv_lay(H, gh, fh, cols, upP, gmod='punched', gP=None, bw=3.3):
+    n = max(1, round((H - gh) / fh)); rows = ([(gh, gmod, 'G')] if gh else []) + [((H - gh) / n, 'punched', 'F')] * n
+    return dict(bw=bw, rows=rows, cols=cols, P=upP, rowP={'G': gP or {}})
+_stk = lambda k, off=1: (lambda c, nb: 'L' if c % k == off and nb > 2 else 'W')
+_GL = dict(colmod={'L': 'gloggia'}, ww=1.5, wh=1.45, nx=2)
+_DK = M('#3d3f44', 0.6)
+def _svP(wall, **kw): d = dict(wall=wall, linner=kw.pop('linner', wall), sign=SIGNS, gwall=M('#34383b', 0.3), fascia=wall, gframe=ALU); d.update(kw); return d
+# 569  Antinkatu 27 A (new): white/light grey panels, the street face wall-to-wall glazed balconies, yellow panel at the entrance, shops
+SPEC[569] = dict(P=_svP(M('#e9eae6')), layout=_sv_lay(20.0, 4.0, 3.0, _stk(2, 0), _GL, gmod='shop'), roof=dict(kind='flat', mat=SHEET))
+# 415  It.k./Antinkatu corner: white 5 storeys, stacks of glazed balconies
+SPEC[415] = dict(P=_svP(M('#ecebe6')), layout=_sv_lay(17.6, 0, 3.0, _stk(3), _GL), roof=dict(kind='flat', mat=SHEET))
+# 665  new block (c077): white and dark grey panels, glazed balcony stacks, dark grey ground floor
+SPEC[665] = dict(P=_svP(M('#e6e6e2')), layout=_sv_lay(23.0, 3.6, 3.1, _stk(3), _GL, gP=dict(wall=_DK, ww=1.6)), roof=dict(kind='flat', mat=SHEET))
+# 1204 / 1206  new blocks: orange-brown / red brick upper floors, dark grey ground floor, glass balcony stacks
+SPEC[1204] = dict(P=_svP(MT('#c98e5a', 'brick', 0.8)), layout=_sv_lay(15.0, 3.4, 2.9, _stk(3), _GL, gP=dict(wall=_DK, ww=1.6)), roof=dict(kind='flat', mat=SHEET))
+SPEC[1206] = dict(P=_svP(MT('#a5523e', 'brick', 0.8)), layout=_sv_lay(17.0, 3.4, 2.9, _stk(3), _GL, gP=dict(wall=_DK, ww=1.6)), roof=dict(kind='flat', mat=SHEET))
+# 1242  red-brown brick lower floors, beige upper floors, balconies;  1241  white with glazed balconies
+SPEC[1242] = dict(P=_svP(M('#d8cdb8')), layout=_sv_lay(17.6, 5.6, 3.0, _stk(3), _GL, gP=dict(wall=MT('#b5704f', 'brick', 0.8))), roof=dict(kind='flat', mat=SHEET))
+SPEC[1241] = dict(P=_svP(M('#ecebe6')), layout=_sv_lay(20.7, 0, 3.0, _stk(3), _GL), roof=dict(kind='flat', mat=SHEET))
+# 143  glazed single-storey shop wing with a canopy in front of the tower 141
+SPEC[143] = dict(P=_svP(M('#d9dcdc')), layout=dict(bw=3.4, rows=[(4.7, 'shop', 'G')], cols=lambda c, nb: 'W', P={}, rowP={}), roof=dict(kind='flat', mat=SHEET))
+# 116  Antinlinna, Antinkatu 26 (1929): ochre render, dark brown window frames and door, classicist
+SPEC[116] = dict(P=dict(wall=M('#d9b866'), frame=M('#4a3426'), trim=M('#e8d9a8'), sign=SIGNS), layout=lay(14.0, 'classic', bw=3.2, fh=3.3, P=dict(ww=1.2, wh=1.6)))
+# 119  small cream two-storey house with a gable roof (Street View I05A), plain punched windows in white frames
+SPEC[119] = dict(P=dict(wall=M('#e2d8c2'), frame=WHITE), layout=lay(6.6, 'punched', bw=3.0, fh=3.2, P=dict(ww=1.2, wh=1.4, nx=2)))
+# 4  Karhulinna, Tasavallankatu 2 (1928; user photo 13.11.2026): monumental classicism, ivory render, three storeys under a strong
+#    cornice and a panelled frieze; low ground floor with small windows and a central door, tall main-floor windows with cornice hoods,
+#    smaller top-floor windows; pilaster strips at the corners; dark grey frames
+_khP = dict(wall=M('#ecdcb6'), trim=M('#efe7d2'), frame=M('#3c4248'), sign=SIGNS, surround=0.12)
+SPEC[4] = dict(P=_khP, layout=dict(bw=3.0,
+    rows=[(3.4, 'classic', 'G'), (4.5, 'classic', 'S'), (3.1, 'classic', 'F'), (0.9, 'classic', 'T')],
+    cols=lambda c, nb: 'D' if c == nb // 2 else 'W',
+    P=dict(ww=1.05),
+    rowP={'G': dict(ground=True, wh=1.35, wh_fixed=True, sill=1.1, plinth_h=0.5, plinth=M('#b9b2a2')),
+          'S': dict(wh=2.6, wh_fixed=True, sill=0.9, hood='cornice', ww=1.15),
+          'F': dict(wh=1.55, wh_fixed=True, sill=0.85),
+          'T': dict(blank=True, panels=True, dentils=True, dentil_mat=M('#efe7d2'))}),
+    cornice=(0.2, 0.55, M('#efe7d2', 0.6)))
+# corner pilaster strips (Karhulinna): the classic bay with pilasters, used through colmod on the end bays only
+def _m_classic_pil(mb, col, P): MODS['classic'](mb, 'W' if col == 'E' else col, dict(P, pil=True, pil_w=0.45))
+MODS['classic_pil'] = _m_classic_pil
+def _scale_fit(L0):
+    tot = sum(r[0] for r in L0['rows'])
+    return lambda lay_, H, street: dict(L0, rows=[(r[0] * H / tot,) + tuple(r[1:]) for r in L0['rows']])
+_k4 = SPEC[4]['layout']; _k4['cols'] = lambda c, nb: 'E' if c in (0, nb - 1) else ('D' if c == nb // 2 else 'W')
+_k4['P'] = dict(_k4['P'], colmod={'E': 'classic_pil'})
+SPEC[4]['fit'] = _scale_fit(_k4)
+SPEC[4]['cornice_all'] = True; SPEC[4]['cornice'] = (0.35, 0.7, M('#efe7d2', 0.6))
+_k4['rowP']['S'] = dict(_k4['rowP']['S'], wh=2.9, ww=1.2)
+# 115  low kiosk / fast-food pavilion at Itsenäisyydenkatu - Yrjönkatu: glazed front, red fascia
+SPEC[115] = dict(P=dict(wall=M('#ece8e0'), sign=SIGNS, gwall=M('#34383b', 0.3), fascia=M('#b8312c', 0.6), fasc_h=0.8, plinth=DARK, gframe=ALU),
+                 layout=dict(bw=3.2, rows=[(3.8, 'shop', 'G')], cols=lambda c, nb: 'W', P={}, rowP={}))
+# 585  former bus station (1955): two storeys, beige render, continuous window band upstairs, glazed shop fronts below
+_bsP = dict(wall=M('#eadfc6'), spandrel=M('#eadfc6'), sign=SIGNS, gwall=M('#34383b', 0.3), fascia=M('#eadfc6'), gframe=ALU)
+SPEC[585] = dict(P=_bsP, layout=dict(bw=3.2, rows=[(3.3, 'shop', 'G'), (3.0, 'ribbon', 'F')], cols=lambda c, nb: 'W', P=dict(wh=1.4, sill=0.9), rowP={}),
+                 fit=lambda lay_, H, street: dict(bw=3.2, rows=[(min(3.6, H * 0.53), 'shop', 'G'), (H - min(3.6, H * 0.53), 'ribbon', 'F')], cols=lambda c, nb: 'W', P=dict(wh=1.4, sill=0.9), rowP={}))
+# 1229  Itätullinkatu 34 corner (Street View I11A): light grey, three floors of blue-glass window bands, glazed street level
+_1229P = dict(sill=0.85, wh=1.6, nx=3, frame=M('#3a4048', 0.4, 0.4))
+def _1229fit(lay_, H, street):
+    gh = 3.8 if H > 7 else 0; n = max(1, round((H - gh) / 3.3))
+    return dict(bw=3.2, rows=([(gh, 'shop', 'G')] if gh else []) + [((H - gh) / n, 'ribbon', 'F')] * n, cols=lambda c, nb: 'W', P=_1229P, rowP={})
+SPEC[1229] = dict(P=dict(wall=M('#e3e5e6'), spandrel=M('#e3e5e6'), sign=SIGNS, gwall=M('#2f3e5a', 0.3), fascia=M('#e3e5e6'), gframe=ALU),
+                  layout=_1229fit(None, 12.0, True), fit=_1229fit, roof=dict(kind='flat', mat=SHEET))
+# Lääkäritalo 1229: blue-tinted glass in the bands, slim white piers between the window groups (Street View I11A)
+_1229P.update(wglass=M((0.10, 0.20, 0.34), 0.08), pier=0.18)
+# 511  Itsenäisyydenkatu 72 corner (Street View I13A): light grey panels, dark blue-grey window frames, stacks of glazed balconies, dark plinth
+SPEC[511] = dict(P=_svP(M('#e4e5e3'), frame=M('#3c4a5c')), layout=_sv_lay(20.0, 0, 3.0, _stk(3), dict(_GL, ww=1.6, wh=1.45)), roof=dict(kind='flat', mat=SHEET))
+SPEC[511]['fit'] = lambda lay_, H, street: _sv_lay(H, 0, 3.0, _stk(3), dict(_GL, ww=1.6, wh=1.45))
+# 199  Itsenäisyydenkatu 68 (Street View I13B): cream render, four storeys, one stack of open balconies with white railings
+SPEC[199] = dict(P=_svP(M('#e2d6b4'), rail=M('#eeeeea'), linner=M('#d8cba8')), layout=_sv_lay(13.0, 0, 3.0, lambda c, nb: 'L' if c == nb - 2 and nb > 3 else 'W', dict(colmod={'L': 'loggia'}, ww=1.4, wh=1.4, nx=2)))
+SPEC[199]['fit'] = lambda lay_, H, street: _sv_lay(H, 0, 3.0, lambda c, nb: 'L' if c == nb - 2 and nb > 3 and street else 'W', dict(colmod={'L': 'loggia'}, ww=1.4, wh=1.4, nx=2))
+# 203  Itsenäisyydenkatu 64 (Street View I14A): new block, white walls and dark-glass balcony stacks, glazed corner
+_GLd = dict(_GL); 
+SPEC[203] = dict(P=_svP(M('#ecebe6'), grail=M('#2f3439', 0.2), linner=M('#3a3f44')), layout=_sv_lay(20.0, 0, 3.0, _stk(2, 0), _GLd), roof=dict(kind='flat', mat=SHEET))
+SPEC[203]['fit'] = lambda lay_, H, street: _sv_lay(H, 0, 3.0, _stk(2, 0) if street else (lambda c, nb: 'W'), _GLd)
+# 192  Itsenäisyydenkatu 61 (Street View I15A/I16A): tan render, eight storeys, stacks of open balconies with red-brown fronts
+SPEC[192] = dict(P=_svP(M('#d4c4a4'), rail=M('#9c5a48'), corr=True, linner=M('#cbb999')), layout=_sv_lay(23.0, 0, 2.9, _stk(3), dict(colmod={'L': 'loggia'}, ww=1.4, wh=1.4, nx=2)))
+SPEC[192]['fit'] = lambda lay_, H, street: _sv_lay(H, 0, 2.9, _stk(3), dict(colmod={'L': 'loggia'}, ww=1.4, wh=1.4, nx=2))
+# 223  Itsenäisyydenkatu 66 (1925; Street View I16B): two-storey ochre render house with a hip roof, white window frames
+SPEC[223] = dict(P=dict(wall=M('#dcbc6a'), trim=M('#f2ede1'), frame=WHITE, sign=SIGNS), layout=lay(7.0, 'classic', bw=3.2, fh=3.4, P=dict(ww=1.15, wh=1.6, surround=0.1)),
+                 fit=lambda lay_, H, street: lay(min(H, 7.2), 'classic', bw=3.2, fh=min(H, 7.2) / 2, P=dict(ww=1.15, wh=1.6, surround=0.1)))
+# gateway passage through the ground floor (porttikäytävä): a deep dark recess the height of the ground storey
+def m_passage(mb, col, P):
+    bw, fh, W = mb.bw, mb.fh, P['wall']; u0, u1 = 0.25, bw - 0.25; top = min(fh - 0.3, 3.2); dp = 4.0
+    mb.wall([(u0, 0, u1, top)], W); mb.sides(u0, 0, u1, top, 0, -dp, P.get('linner', W), bottom=False)
+    mb.q(u0, 0, u1, top, -dp, M('#2a2b2d', 0.9))
+MODS['passage'] = m_passage
+def _199lay(H, street):
+    n = max(1, round(H / 3.0)); fh = H / n; cols = lambda c, nb: 'L' if c == nb - 2 and nb > 3 and street else 'W'
+    gcols = lambda c, nb: 'P' if c == nb - 1 and nb > 3 and street else ('L' if c == nb - 2 and nb > 3 and street else 'W')
+    return dict(bw=3.3, rows=[(fh, 'punched', 'G')] + [(fh, 'punched', 'F')] * (n - 1), cols=gcols,
+                P=dict(colmod={'L': 'loggia', 'P': 'passage'}, ww=1.4, wh=1.4, nx=2), rowP={})
+SPEC[199]['layout'] = _199lay(12.0, True); SPEC[199]['fit'] = lambda lay_, H, street: _199lay(H, street)
+# 265  Itsenäisyydenkatu 74 (Street View I13B): low white rendered workshop with a flat roof, a row of windows and a sign board
+SPEC[265] = dict(P=dict(wall=M('#eeede8'), frame=WHITE, sign=SIGNS), layout=dict(bw=3.0, rows=[(4.0, 'punched', 'F')], cols=lambda c, nb: 'W', P=dict(ww=1.8, wh=1.0, nx=3, sill=1.6), rowP={}),
+                 fit=lambda lay_, H, street: dict(bw=3.0, rows=[(H, 'punched', 'F')], cols=lambda c, nb: 'W', P=dict(ww=1.8, wh=1.0, nx=3, sill=min(1.6, H - 1.4)), rowP={}))

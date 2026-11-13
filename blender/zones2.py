@@ -238,6 +238,10 @@ def _bal(sp, i):
 def spec_for(i):
     sp = SPEC.get(i)
     if sp: return _bal(sp, i)
+    e_ = LOOK['b'].get(str(i)) or {}
+    if e_.get('k') == 'wood' and e_.get('sv'):           # Street View 13.11.2026: timber houses inside the city blocks get the house facade
+        import city                                      # (weatherboards, corner boards, gable ends), not a block of flats
+        return city.house_spec(i)
     sp = auto(i); sp['P'] = dict(sp['P']); sp['P']['wall'] = look_mat(i) or M(PALP[(i * 7 + 3) % len(PALP)])
     f = (LOOK['b'].get(str(i)) or {}).get('f')                 # storeys from the building register (Ryhti): one window row per storey
     L_ = sp.get('layout')

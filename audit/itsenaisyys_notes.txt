@@ -67,3 +67,9 @@ I55A 1241 valkoinen 6 krs parvekkeet -> lisätty
 I56B 583 valkoinen matala -> lisätty
 I57A 1242 punaruskea tiili + beige yläosa 6 krs -> lisätty
 I57B/I65B 583 vaalea teollisuusmainen pelti, ok. ITSENÄISYYDENKATU VALMIS (90 näkymää, kaukaiset puistonäkymät ohitettu)
+2nd pass: I06B 115 SPEC kioski (punainen otsa, lasitus); I07B 107 harmaanbeige + liiketilat; I07A BePOP-landmark näyttää tiileltä, SV:ssä vaalea nauhaikkunainen -> toiselle tilille (ei muutettu)
+2nd pass: I08A 600/BePOP tiili+sininen nauha OK; I09A 601 SV valkoinen sinisin nauhaikkunoin, pelissä reikäikkunat -> kuuluu bepop-landmarkin runalt-osiin, toiselle tilille; I10A 1228 OK
+2nd pass: I10B 585 SPEC (nauhaikkunat ylhäällä, liiketilat alhaalla); I11A 1229 SPEC sininen nauhaikkuna 3 krs + lasitettu katutaso; 510 hh 12 (city.js h 3 väärin)
+2nd pass: 1229 = Terveystalo Lääkäritalo (käyttäjä: väärin) -> SPEC sinertävät nauhaikkunat, lasitettu katutaso; bake c064 tarkistettu
+2nd pass: I12B 261 vaalea (oli tumma); I13A 511 SPEC lasiparvekepinot, tummat puitteet; I13B 199 SPEC avoin parvekepino
+2nd pass: I14A 203 SPEC tummat lasiparvekkeet; I15A/I16A 192 SPEC avoimet parvekepinot punaruskein kaitein, ruskeanbeige; I15B 225 liiketilat (shop)
