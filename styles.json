@@ -711,8 +711,9 @@
 "w": "#eeece6",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 24, 1991",
-"y": 1991
+"note": "Street View 13.11.2026: Antinkatu 24 (1991): toimistotalo, vaaleanharmaa, sinertävät nauhaikkunat, ei parvekkeita",
+"y": 1991,
+"sv": 1
 },
 "119": {
 "w": "#c7c8cd",
@@ -735,19 +736,22 @@
 "y": 1988
 },
 "124": {
-"w": "#efe0a8",
+"w": "#efede6",
 "k": "render",
 "r": "#3f4246",
-"note": "Y-pakki: Rautatienpuistokatu 5, ent. Teljän ammattikoulu, 1938",
-"y": 1938
+"note": "Y-pakki: Rautatienpuistokatu 5, ent. Teljän ammattikoulu 1938. Street View 13.11.2026: valkoinen 3-kerroksinen",
+"y": 1938,
+"f": 3,
+"sv": 1
 },
 "125": {
-"w": "#eeece6",
-"k": "wood",
+"w": "#c4b29a",
+"k": "render",
 "f": 7,
 "r": "#3f4246",
-"note": "Y-pakki: Antinkatu 25, 1983",
-"y": 1983
+"note": "Street View 13.11.2026: Antinkatu 25 (1983): ruskeanbeige, sisäänvedetyt parvekkeet punaisin paneelein, pylväskäytävä",
+"y": 1983,
+"sv": 1
 },
 "126": {
 "w": "#eeece6",
@@ -948,7 +952,8 @@
 "w": "#e7dfc8",
 "k": "render",
 "f": 5,
-"r": "#74787b"
+"r": "#74787b",
+"sv": 1
 },
 "162": {
 "w": "#8e8a94",
@@ -1232,7 +1237,8 @@
 "k": "render",
 "r": "#3f4246",
 "note": "Y-pakki: Antinkatu 14, Kansankulma, 1954",
-"y": 1954
+"y": 1954,
+"sv": 1
 },
 "216": {
 "w": "#eeece6",
@@ -1402,10 +1408,12 @@
 "sv": 1
 },
 "250": {
-"w": "#e6dcc2",
+"w": "#ece8dc",
 "k": "render",
-"f": 3,
-"r": "#b8302a"
+"f": 4,
+"r": "#b8302a",
+"note": "Antinkatu 33 ja 35, Pirtulinna 1938. Street View 13.11.2026: valkoinen funkis, 4 krs",
+"sv": 1
 },
 "251": {
 "w": "#e6dcc2",
@@ -1428,13 +1436,14 @@
 "f": 5
 },
 "255": {
-"w": "#c5c5c8",
-"m": 1,
+"w": "#dcdddb",
 "k": "render",
 "r": "#74787b",
-"f": 6,
+"f": 7,
 "w2": "#e1ebff",
-"s2": 0.42
+"s2": 0.42,
+"note": "Street View 13.11.2026: Antinkatu 19: uusi vaaleanharmaa kerrostalo, lasitetut parvekkeet, tumma katutaso",
+"sv": 1
 },
 "258": {
 "w": "#efe0a8",
@@ -1532,11 +1541,12 @@
 },
 "274": {
 "w": "#e3d6b6",
-"k": "wood",
+"k": "render",
 "f": 7,
 "r": "#3f9a5a",
-"note": "Y-pakki: Antinkatu 18, 1962",
-"y": 1962
+"note": "Street View 13.11.2026: Liisankatu 8: valkoinen, keltaiset parvekenauhat (ei puuta)",
+"y": 1962,
+"sv": 1
 },
 "275": {
 "w": "#99928b",
@@ -1602,12 +1612,13 @@
 "sv": 1
 },
 "290": {
-"w": "#e8d2ca",
-"m": 1,
+"w": "#e6e5e1",
 "k": "render",
 "f": 6,
 "w2": "#abafb9",
-"s2": 0.34
+"s2": 0.34,
+"note": "Street View 13.11.2026: Antinkatu 20: valkoinen/harmaa, lasitetut parvekkeet, tumma tiilisokkeli",
+"sv": 1
 },
 "291": {
 "w": "#959596",
@@ -2688,7 +2699,8 @@
 "w": "#eeece6",
 "f": 6,
 "note": "Y-pakki: Itäpuisto 7 / Eteläkauppatori 4b, 1979",
-"y": 1979
+"y": 1979,
+"sv": 1
 },
 "565": {
 "f": 5
@@ -2699,11 +2711,13 @@
 "k": "render"
 },
 "569": {
-"w": "#e3d6b6",
+"w": "#efefeb",
 "r": "#b9bbb9",
 "f": 5,
-"note": "Y-pakki-rivi Antinkatu 27 A (1862, puutalo) kohdistui 20 m rakennukseen: materiaali poistettu",
-"shop": 1
+"note": "Street View 13.11.2026: Antinkatu 27 A: uusi valkoinen kerrostalo, lasitetut parvekkeet, kivisokkeli (Y-pakin puutalo purettu)",
+"shop": 1,
+"k": "render",
+"sv": 1
 },
 "570": {
 "w": "#ccc9cd",
@@ -2855,7 +2869,8 @@
 "w": "#d8c8a8",
 "k": "render",
 "f": 7,
-"r": "#74787b"
+"r": "#74787b",
+"sv": 1
 },
 "605": {
 "w": "#eeece6",
@@ -4135,7 +4150,8 @@
 "r": "#74787b",
 "w2": "#e2d1b3",
 "s2": 0.75,
-"sv": 1
+"sv": 1,
+"note": "Street View 13.11.2026: okrankeltainen, punaiset markiisit"
 },
 "1362": {
 "w": "#e8e6e0",
@@ -4668,7 +4684,8 @@
 "1490": {
 "w": "#efede6",
 "k": "render",
-"f": 7
+"f": 7,
+"sv": 1
 },
 "1491": {
 "w": "#eeeeea",
@@ -4700,7 +4717,8 @@
 "b": 1,
 "r": "#b9bbb9",
 "w2": "#d9d5d6",
-"s2": 0.36
+"s2": 0.36,
+"sv": 1
 },
 "1499": {
 "w": "#c7baba",
@@ -4926,17 +4944,19 @@
 "f": 3
 },
 "1560": {
-"w": "#d6deed",
-"m": 1,
+"w": "#e3ad92",
 "k": "render",
 "r": "#b9bbb9",
-"f": 2
+"f": 3,
+"note": "Street View 13.11.2026: Antinkatu 1 / Eteläranta, lohenpunainen rappaus, valkoiset listat, koristeellinen kulmapääty",
+"sv": 1
 },
 "1563": {
-"w": "#e6c05c",
+"w": "#ebe8df",
 "k": "render",
 "f": 2,
-"sv": 1
+"sv": 1,
+"note": "Street View 13.11.2026: valkoinen 2-kerroksinen rappaustalo (ei keltainen)"
 },
 "1565": {
 "w": "#c9cbd8",
@@ -4949,8 +4969,9 @@
 "k": "render",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Eteläranta 4 / Antinkatu 2, 1854",
-"y": 1854
+"note": "Y-pakki: Eteläranta 4 / Antinkatu 2, 1854. Street View 13.11.2026: vaaleankeltainen, 2 kerrosta korkealla sokkelilla",
+"y": 1854,
+"sv": 1
 },
 "1567": {
 "w": "#b1aea7",
@@ -5146,10 +5167,12 @@
 "sv": 1
 },
 "1604": {
-"w": "#d7ccba",
-"m": 1,
+"w": "#e2c878",
 "k": "render",
-"r": "#b9bbb9"
+"r": "#b9bbb9",
+"f": 4,
+"note": "Street View 13.11.2026: keltainen jugendtalo, 4 krs, kolme päätyä Antinkadulle",
+"sv": 1
 },
 "1607": {
 "w": "#b1b3b0",
@@ -10955,7 +10978,12 @@
 "shop": 1
 },
 "276": {
-"shop": 1
+"shop": 1,
+"w": "#e2c06a",
+"k": "wood",
+"f": 1,
+"note": "Street View 13.11.2026: keltainen yksikerroksinen puutalo, valkoiset listat",
+"sv": 1
 },
 "1207": {
 "shop": 1
@@ -10967,7 +10995,12 @@
 "shop": 1
 },
 "1493": {
-"shop": 1
+"shop": 1,
+"w": "#e6d6a6",
+"k": "render",
+"f": 2,
+"note": "Street View 13.11.2026: Antinkatu 9: koristeellinen 2-kerroksinen uusrenessanssitalo, keltaiset pilasterit, vihreät markiisit, kaarevat katutason aukot",
+"sv": 1
 },
 "1725": {
 "shop": 1
@@ -10979,6 +11012,20 @@
 "w": "#9a4a36",
 "k": "brick",
 "note": "Porin Puuvillan sisäpihan punatiilirakennus (käyttäjä 13.11.2026)"
+},
+"114": {
+"w": "#ddb860",
+"k": "wood",
+"f": 2,
+"note": "Street View 13.11.2026: Antinkatu 28: keltainen puutalo, valkoiset listat, punainen sokkeli",
+"sv": 1
+},
+"1573": {
+"w": "#e3cd8e",
+"k": "render",
+"f": 1,
+"sv": 1,
+"note": "Street View 13.11.2026: matala keltainen rappaustalo Antinkadun varrella (Eteläranta 4:n kuoressa)"
 }
 }
 }

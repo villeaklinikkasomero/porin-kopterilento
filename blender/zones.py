@@ -77,8 +77,16 @@ SPEC[1494] = dict(P=dict(wall=M('#eee8d8'), rail=M('#e2dccb'), gwall=M('#d9d3c4'
 SPEC[1366] = dict(P=dict(wall=M('#e4dac3'), rail=M('#d7d9d6'), sign=SIGNS), layout=lay(23, 'punched', gh=4.0, bw=3.3, fh=3.1, cols=every(3, 'B'), P=dict(ww=1.5)), roof=dict(kind='hip', inset=3.2, rise=1.6, mat=SHEET))
 SPEC[1364] = dict(P=dict(wall=M('#dcd8cc'), spandrel=M('#8b8f8c'), sign=SIGNS), layout=lay(27, 'ribbon', gh=3.9, bw=3.4, fh=3.2, cols=every(3, 'F', 1)))   # Pohjoispuisto 4 (1962)
 # 1361  Sataraudan talo / Vidbominkulma, Valtakatu 10 (Laaksovirta 1940): 5 storeys, render, storey bands along the window rows, bay windows at the corners
-SPEC[1361] = dict(P=dict(wall=M('#e3d6b4'), band=M('#f3eedf'), sign=SIGNS, ewall=M('#f0ead9'), gwall=M('#d2c7a8')),
+SPEC[1361] = dict(P=dict(wall=M('#dcb86c'), band=M('#f3eedf'), sign=SIGNS, ewall=M('#e6c57c'), gwall=M('#cfae66')),   # ochre yellow (Street View 13.11.2026; was beige)
                   layout=lay(23, 'punched', gh=4.2, bw=3.2, fh=3.7, cols=ends('E'), P=dict(colmod={'E': 'erker'}, ww=2.0, wh=1.5, nx=3)), roof=dict(kind='hip', inset=3.5, rise=1.4, mat=SHEET))
+# 1493  Antinkatu 9 (Street View 13.11.2026): two-storey neo-renaissance front, cream render with yellow pilasters and dressings,
+# round-arched ground-floor openings (green awnings); the 23 m block 1492 stands behind it
+_a9T = M('#d8b04f')
+SPEC[1493] = dict(P=dict(wall=M('#e6d6a6'), trim=_a9T, frame=M('#f4f2ea')),
+                  layout=dict(bw=3.3, rows=[(5.2, 'classic', 'G'), (4.8, 'classic', 'F')], cols=lambda c, nb: 'W', P={},
+                              rowP={'G': dict(ground=True, arch=True, plinth_h=0.4, plinth=M('#5b5752', 0.8), ww=1.7, wh=3.4, sill=0.4, pil=True),
+                                    'F': dict(hood='cornice', pil=True, ww=1.2, wh=2.2, sill=0.9)}, plain=False),
+                  cornice=(0.45, 0.7, _a9T))
 SPEC[1367] = dict(P=dict(wall=M('#d8d4c8'), sign=SIGNS, rail=M('#6f777c'), corr=True), layout=lay(23, 'punched', gh=4.0, bw=3.5, fh=3.15, cols=every(2, 'L'), P=dict(colmod={'L': 'loggia'}, ww=1.6)))   # 1961 part (Valli)
 
 # ---------------------------------------------------------------- west of the square, south block (Antinkatu 13-15)

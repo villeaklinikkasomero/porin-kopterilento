@@ -151,3 +151,26 @@ Joka kadulla: `python3 audit/street.py '<Katu>' 25` -> jokaisesta talosta Street
 poikkeamalista (väri, kerrokset, ikkunat, parvekkeet sisäänvedetty/ulkoneva/lasitettu, kivijalka, katto, väli naapuriin, LoD2-kuoren useat talot)
 -> näytä käyttäjälle ENNEN korjauksia -> korjaa -> merkitse styles.json "sv": 1.
 Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex 'ribs').
+
+## 13.11.2026 aamu: Antinkatu Street View'ta vasten (uusi työtapa)
+- **Vertailukuvat:** pelin Render-versio sisäänrakennetussa selaimessa, kamera katutasolle JS:llä (`window.__game`, cockpit-kamera, S.x/S.y/S.yaw,
+  alt = roofAt + 1,6, fov 58,7° pystyyn = Street View fov 90 vaakaan 1280×720). Selainpaneeli on usein piilossa → rAF ei pyöri: kutsu `G.step()`
+  itse ja tee näkymä `renderer.render`illä (funktio `__shot(x, y, suunta)` tämän istunnon muistiinpanoissa). Rakennusten id:t tarroina kuvaan
+  projisoimalla city.js-keskipisteet kameralla. Kuvaparit 60 m välein kadun molemmille puolille.
+- **Paikallinen koepoltto toimii:** `pip install bpy==5.2.4` (blender/bpyurl.txt), raw.pkl yms. `pipeline/data/porikit_data.tgz` → /home/claude/mmlproc,
+  blender/*.py → /home/claude, pelin tiedostot → /home/claude/pori. `python3 -c "import kivi; kivi.build_and_bake('kivi3', kivi.ZONESK['kivi3'], 4)"`
+  ~100 s CPU:lla. Mustien seinien tarkistus: atlaksen lo-ruudut, joiden keskiarvo < 25 ja joiden edessä ei ole toista rakennusta.
+- **Korjattu kivi.py:** (1) Kivi-Porin klassiset talot arpoivat seinävärin KIVIP-paletista eivätkä lukeneet styles.json:ia → nyt käytetään
+  lukittua väriä, materiaalia (brick) ja kerroslukua `f` (merkinnät ilman `m`). (2) Yksi MML-LoD2-kuori voi sisältää useita OSM-taloja
+  (1579 Hallituskatu 6 ⊃ Valtakatu 7:n torni 1581, 1603, 1583, 1716; 1566 ⊃ 1573, 1607). Talot rakennettiin kahdesti → päällekkäiset seinät →
+  musta torni. Nyt `shell_parts` + `shell_runalt`: kuoren seinät talon kohdalla saavat sen talon specin. (3) 1604 keltainen jugendtalo ja 1573
+  matala keltainen talo klassisiksi. (4) Uusi lohko `p1` (Antinkatu 21–25 / Mikonkatu; vanhalla bl_p1.js:llä ei ollut generaattoria).
+- **zones.py:** Satarauta 1361 okrankeltaiseksi, uusi SPEC[1493] Antinkatu 9 (koristeellinen 2-kerroksinen, keltaiset pilasterit).
+- **styles.json:** Antinkadun talot korjattu ja merkitty `sv: 1` (1560 lohenpunainen, 1563 valkoinen, 1566, 1604, 1573, 1361, 1493, 274, 125, 276,
+  114, 255, 124, 250, 569, 118, 290 + tarkastetut 215, 604, 161, 1490, 1497, 564).
+- **Ajettava Modalissa:** `bake kivi2 kivi3 kivi4 tori1 p1 --samples 64` ja `city 64 c047,c048,c051,c052,c063` → collect.
+- **Avoinna Antinkadulta:** liiketilat näyttävät koko kaupungissa suljetuilta ovilta (gen.py shop-moduuli, oma työ); pelin `brickify` tekee
+  punaisesta levyseinästä tiiltä (Ratsula 221); Antinlinnan (116) erkkerit; Säästöpankin (163) ja Pohjoiskauppatori 3:n (1726) värit
+  epävarmoja (pilvinen kuva / kaupungin kuva); seinämaalaukset (564, Liikekulman 1497 päätyreliefi) tehdään lopuksi, kun muuten ollaan tyytyväisiä.
+  Pieniä jäännös-mustia ruutuja: 1361 sisäpiha, 1286/1290 (kivi2), 135 (p1).
+- Seuraava katu: Yrjönkatu (järjestyslistan 2).
