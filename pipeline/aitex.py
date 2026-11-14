@@ -72,8 +72,8 @@ def tiles(names: list[str], variants: int = 2) -> dict:
 
 
 @app.function(gpu=['L4', 'A10', 'L40S'], timeout=1800)   # any region: inputs are our own renders, no photos
-def facades(items: list[tuple[str, bytes, str]], strength: float = 0.55, control: float = 0.65) -> dict:
-    """items: (name, png bytes of our orthographic render, prompt) -> {name_ai.png: bytes, name_canny.png: bytes}"""
+def facades(items: list, strength: float = 0.55, control: float = 0.65) -> dict:
+    """items: (name, png bytes of our orthographic render, prompt[, extra negative prompt, ControlNet weight]) -> {name_aiNN.png, name_canny.png}"""
     import io, numpy as np, cv2, torch
     from PIL import Image
     from diffusers import StableDiffusionXLControlNetImg2ImgPipeline, ControlNetModel, AutoencoderKL
@@ -81,29 +81,48 @@ def facades(items: list[tuple[str, bytes, str]], strength: float = 0.55, control
     vae = AutoencoderKL.from_pretrained(VAE, torch_dtype=torch.float16)
     pipe = StableDiffusionXLControlNetImg2ImgPipeline.from_pretrained(MODEL, controlnet=cn, vae=vae, torch_dtype=torch.float16, variant='fp16', use_safetensors=True).to('cuda')
     out = {}
-    for name, data, prompt in items:
+    for it in items:
+        name, data, prompt = it[:3]; neg = it[3] if len(it) > 3 and it[3] else ''; ctl = it[4] if len(it) > 4 and it[4] else control
         src = Image.open(io.BytesIO(data)).convert('RGB')
         w, h = (src.width // 8) * 8, (src.height // 8) * 8; src = src.crop((0, 0, w, h))
         e = cv2.Canny(cv2.cvtColor(np.asarray(src), cv2.COLOR_RGB2GRAY), 60, 160)
         canny = Image.fromarray(np.stack([e] * 3, -1))
         g = torch.Generator('cuda').manual_seed(7)
-        im = pipe(prompt=f'{prompt}, {FACADE_STYLE}', negative_prompt=FACADE_NEG, image=src, control_image=canny, strength=strength,
-                  controlnet_conditioning_scale=control, width=w, height=h, num_inference_steps=36, guidance_scale=6.0, generator=g).images[0]
+        im = pipe(prompt=f'{prompt}, {FACADE_STYLE}', negative_prompt=FACADE_NEG + (', ' + neg if neg else ''), image=src, control_image=canny, strength=strength,
+                  controlnet_conditioning_scale=ctl, width=w, height=h, num_inference_steps=36, guidance_scale=6.0, generator=g).images[0]
         out[f'{name}_ai{int(round(strength * 100))}.png'] = _png(im); out[f'{name}_canny.png'] = _png(canny); print('done', name, flush=True)
     return out
 
 
+def json_prompt(j: dict) -> tuple[str, str, float | None]:
+    """English, machine-readable facade spec (tex/ai_in/<x>.json) -> prompt, negative prompt, ControlNet weight.
+    Only the 'words' go to the model (it does not understand hex codes); the hex colours are for the colour lock after the AI step.
+    SDXL reads only ~75 tokens, so the materials come first and the generic style words last."""
+    m = j.get('materials', {})
+    parts = [m[k]['words'] for k in ('wall', 'trim', 'plinth', 'window', 'roof') if m.get(k, {}).get('words')]
+    prompt = ', '.join(['photo of a real building facade'] + parts + [j.get('style', ''), j.get('building', '')])
+    neg = ', '.join(j.get('avoid', []))
+    return prompt, neg, j.get('control')
+
+
 @app.local_entrypoint()
-def main(mode: str = 'tiles', only: str = '', variants: int = 2, strength: float = 0.55, control: float = 0.65):
+def main(mode: str = 'tiles', only: str = '', variants: int = 2, strength: str = '0.55', control: float = 0.65):
+    """strength: one value or several separated by commas, e.g. '0.8,0.9,0.95' (one image per value)"""
+    import json as _json
     d = ROOT / 'tex' / 'ai'; d.mkdir(parents=True, exist_ok=True)
+    strengths = [float(x) for x in str(strength).split(',') if x.strip()]
     if mode == 'facade':
         src = ROOT / 'tex' / 'ai_in'; items = []
         for p in sorted(src.glob('*.png')):
             if only and not p.stem.startswith(only): continue      # prefix: 'raati' = all four sides
-            t = p.with_suffix('.txt'); prompt = t.read_text(encoding='utf-8').strip() if t.exists() else 'apartment block facade'
-            items.append((p.stem, p.read_bytes(), prompt))
-        print('facades:', [i[0] for i in items], flush=True)
-        res = facades.remote(items, strength, control)
+            jf, t = p.with_suffix('.json'), p.with_suffix('.txt'); neg, ctl = '', None
+            if jf.exists(): prompt, neg, ctl = json_prompt(_json.loads(jf.read_text(encoding='utf-8')))
+            elif t.exists(): prompt = t.read_text(encoding='utf-8').strip()
+            else: prompt = 'apartment block facade'
+            items.append((p.stem, p.read_bytes(), prompt, neg, ctl))
+        print('facades:', [i[0] for i in items], 'strengths:', strengths, flush=True)
+        res = {}
+        for st in strengths: res.update(facades.remote(items, st, control))
     else:
         res = tiles.remote([only] if only else list(PROMPTS), variants)
     for k, v in res.items():
