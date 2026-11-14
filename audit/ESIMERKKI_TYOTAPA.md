@@ -205,6 +205,15 @@ Joka muistiinpanoriville kirjataan kaksi asiaa, vaikka väri olisi jo oikein:
 4. Kaukaa (> 50 m) tehty tunnistus on epävarma: sama id voi osua eri rakennukseen lähempää katsottuna (2322). Ristiriita →
    poista muutos ja merkitse uusintakierrokselle.
 
+### 8h. Vanhojen talojen koristeet (Kivi-Pori ja muut ennen 1950 rakennetut, käyttäjä 14.11.2026)
+Kirjaa ja tarkista jokaisesta vanhasta kivitalosta erikseen (pelkkä väri ei riitä):
+- **Ikkunapielet:** ikkunalistat ja -kehykset (`hood`: suora lista / päätykolmio / kaari), ikkunapenkit, korvakkeet.
+- **Reunapielet ja nurkat:** nurkkapilasterit tai -rustiikka (`pil`, `classic_pil` = vain nurkkiin, `rust` = katutason rustiikka).
+- **Vaakalistat:** räystäslista (`cornice`, hammaslista `dentils`), kerroslistat, sokkeli (`plinth_h`, väri).
+- **Muut koristeet:** peilit eli upotetut paneelit ikkunoiden alla tai välissä (`panels`), kaari-ikkunat ja -ovet (`garch`), erkkerit, parvekkeiden konsolit.
+Korjaus `kivi.py` `SPECK` (`classic_spec(...)`). Jos talossa ei ole jotain koristetta, se otetaan pois (`hood=None`, `pil=False`, `rust=False`):
+väärä koriste on yhtä paha kuin puuttuva. Muistiinpanoon esim. "1574: suorat ikkunalistat, ei pilastereita, räystäslista + hammaslista, harmaa graniittisokkeli 0,6 m".
+
 ### 8e. Värit
 - `m: 1` (ilmakuvasta mitattu) poistetaan, kun väri tarkistetaan Street Viewsta.
 - Vaaleat ja kylläiset värit tummuvat bakessa varjon puolella: sininen 597 piti kirkastaa (`#3d82f0`) ja harmaa halli vaalentaa.
