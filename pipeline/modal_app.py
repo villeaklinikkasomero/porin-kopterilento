@@ -96,6 +96,26 @@ def city_zone(name: str, samples: int = 64, day: str = ''):
     return name, ok, round(time.time() - t0)
 
 
+# landmarks (blender/lm.py) are built from public map data only, like the city blocks: any region, first free RTX-class GPU.
+# 14.11.2026: 'landmarks raati' went through task() (EU-only L4, long waits) and lm.py writes out/bl_<name>.glb + .json, never the
+# game file bl_<name>.js, so nothing came back. Now the glb is packed into bl_<name>.js here and saved to results/<day>/game like a block.
+@app.function(gpu=CITY_GPU, volumes={'/vol': vol}, timeout=3600, max_containers=10, retries=modal.Retries(max_retries=1, initial_delay=10.0))
+def landmark(name: str, day: str = ''):
+    import base64
+    from porikit import jobs
+    t0 = time.time(); jobs.layout()
+    r = subprocess.run(['python3', '/home/claude/blender/lm.py', name], cwd='/home/claude', env=dict(os.environ, PORI_GPU='1'), capture_output=True, text=True)
+    out = Path('/home/claude/blender/out'); glb, meta = out / f'bl_{name}.glb', out / f'bl_{name}.json'
+    ok = r.returncode == 0 and glb.exists() and meta.exists()
+    if ok:
+        m = json.loads(meta.read_text())
+        js = 'export const x = %s, y = %s, roof = %s;\nexport default "%s";\n' % (m['x'], m['y'], 'true' if m.get('roof') else 'false', base64.b64encode(glb.read_bytes()).decode())
+        dst = Path('/vol/results') / (day or datetime.date.today().isoformat()) / 'game' / f'bl_{name}.js'; dst.parent.mkdir(parents=True, exist_ok=True); dst.write_text(js)
+    else: print(r.stdout[-3000:], r.stderr[-3000:], flush=True)
+    vol.commit()
+    return name, ok, round(time.time() - t0)
+
+
 @app.function(volumes={'/vol': vol}, timeout=6 * 3600, is_generator=True)
 def city(samples: int = 64, only: str = ''):
     """Whole-city run: every block in city_zones.json (or only the listed ones, comma separated) on up to 10 GPUs at once."""
@@ -153,5 +173,11 @@ def main(cmd: str = '', queue: str = '', body: str = '{}'):
             print(out, flush=True)
             if isinstance(out, tuple) and len(out) == 3: n_all += 1; n_ok += bool(out[1])
         print('blocks ok:', (n_ok, n_all), flush=True)
+    elif cmd and cmd.split()[0] == 'landmarks':
+        names = cmd.split()[1:]; day = datetime.date.today().isoformat()
+        print(f'landmarks: {names}; one line per finished landmark follows', flush=True)
+        res = list(landmark.map(names, [day] * len(names), return_exceptions=True, order_outputs=False))
+        for x in res: print(x, flush=True)
+        print('landmarks ok:', sum(1 for x in res if isinstance(x, tuple) and x[1]), '/', len(names), flush=True)
     elif cmd: print('exit code', task.remote(cmd))
     else: print(__doc__)
