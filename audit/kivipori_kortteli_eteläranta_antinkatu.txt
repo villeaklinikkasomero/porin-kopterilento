@@ -1,0 +1,20 @@
+KORTTELIN LÄPIKÄYNTI 14.11.2026: Eteläranta – Antinkatu – Hallituskatu – S. Palmgreninkatu (+ Antinkadun itäpuoli, Hallituskadun alku)
+Tunnistus: jokaisesta julkisivusta oma SV-kuva suoraan edestä (work/views_blk.json, svmap_blk.txt) + sama näkymä pelistä.
+ID   | osoite (SV)                        | todellisuus (SV / omistajan kuvat)                                              | malli nyt
+1287 | 12 Hallituskatu / S.Palmgreninkatu | vaalea kerma, 2 krs, harjakatto, vaakarustiikka maantasossa, otsalistat         | korjattu
+1288 | S.Palmgreninkatu                   | kaksi taloa: etelässä punainen matala 1½ krs, pohjoisessa vaaleankelt. 2 krs     | korjattu (kuori leikattu)
+1285 | 8 Eteläranta / S.Palmgreninkatu    | vaaleankeltainen 2 krs, kaari-ikkunat maantasossa, VIISTO KULMA ovi+parveke     | väri, krs ok; viisto kulma + parveke PUUTTUU
+1286 | 7 Hallituskatu                     | lohenpunainen 3 krs (ylin matala), frontonit 1. krs, keskirisaliitti pilasterein | ok (risaliitti puuttuu)
+1565 | 5 Hallituskatu                     | vaalea liilanharmaa 2 krs + pienet ullakkoikkunat                                | väri, krs ok; ullakkoikkunat eivät näy
+1559 | 6 Eteläranta                       | kapea, harmaa rustikoitu maantaso 3 kaariaukolla, terrakotta yläkerta, 2 krs     | 2 krs + kaaret ok; maantaso vielä terrakotta (pitää olla harmaa)
+1560 | 1 Eteläranta / 2 Antinkatu         | kulma: lohenpunainen 3 krs viisto kulma ovella + parveke; Etelär. harmaanvihreä  | korjattu; kulmaparveke PUUTTUU
+1561 | 2 Antinkatu                        | valkoinen matala 1 krs (osa 1560:n kuorta)                                       | korjattu
+1562 | 4 Antinkatu                        | valkoinen matala 1 krs, korkea katto                                             | korjattu
+1563 | 3 Antinkatu / 10 Hallituskatu      | Antinkatu valkoinen 2 krs ruskea sokkeli; Hallituskatu keltainen 2 krs           | korjattu
+1572 | 8 Hallituskatu / 3 Antinkatu       | okrankeltainen jugend, kaarevat päädyt, erkkeri, kaariportti                      | väri ok
+1573 | 4 Antinkatu (itä)                  | keltainen matala 1 krs + pylväin kehystetty kaariportti                          | 1 krs; portti PUUTTUU, osa 1566:n kuorta
+1569 | Antinkatu (itä)                    | 1900-l. puoliväli: vaaleanharmaa, kaksi nauhaikkunaa, tumma räystäsotsa          | korjattu
+1566 | 4 Eteläranta / 2 Antinkatu         | vaalea kerma 2 krs, kvaaderirustiikka, otsalistat, ullakkoikkunat, portti        | korjattu (portti puuttuu)
+1567 | 2 Eteläranta                       | okrankeltainen 3 krs, valkoiset pilasterit                                       | korjattu
+8385 | 2 Yrjönkatu / 1 Hallituskatu       | okrankeltainen jugend, liiketilat punaisin karmein, vihreänharmaa porrastorni    | ei vielä korjattu
+1619 | 4 Hallituskatu / 5 Yrjönkatu       | vaaleankelt. sileä rappaus, kaari-ikkunat yläkerrassa, maantaso suorakaide       | korjattu (oli voimakas keltainen, frontonit, vaakaurat)

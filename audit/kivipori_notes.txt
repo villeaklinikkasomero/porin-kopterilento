@@ -62,3 +62,7 @@ RAATIHUONE (lm raati): kellotorni keltaiseksi, kellomainen kuparikatto + lyhty (
   pienet ullakkoikkunat, harmaa sokkeli. Antinkadun portti ei mallissa.
 - 1569 Antinkatu: 1900-luvun puolivälin uudisrakennus (omistajan kuva): vaaleanharmaa, kaksi nauhaikkunaa ruskein karmein, tumma räystäsotsa.
 OPPI: jokainen talo tunnistetaan SV-kuvasta talonumerolla ennen korjausta; säteen osuma yksin ei riitä (1563, 1566 menivät väärin).
+== Korttelin läpikäynti 14.11 (ks. kivipori_kortteli_eteläranta_antinkatu.txt) ==
+Uudet: cut_walls 1288 (punainen/keltainen), 1560 (Antinkadun matala valkoinen 1561 kuoren sisällä), 1563 alt (Antinkatu valkoinen / Hallituskatu keltainen),
+1287, 1565, 1559, 1567, 1562 f1, 1619 (Hallituskadun alku). Avoimet: 1285 viisto kulma + parveke, 1560 kulmaparveke, 1559 harmaa maantaso,
+1573 pylväsportti, 8385 liiketilat + porrastorni, 1565 ullakkoikkunat, 1286 keskirisaliitti.

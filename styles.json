@@ -3983,7 +3983,7 @@
 "sv": 1
 },
 "1285": {
-"w": "#ece6d2",
+"w": "#e8ddb6",
 "k": "render",
 "r": "#74787b",
 "f": 2,
@@ -3999,14 +3999,14 @@
 "note": "lohenpunainen 3 krs (SV HA09B 14.11.2026)"
 },
 "1287": {
-"w": "#e3ddc8",
+"w": "#e9e4d2",
 "k": "render",
 "r": "#b9bbb9",
 "f": 2,
 "sv": 1
 },
 "1288": {
-"w": "#d4877a",
+"w": "#c9675f",
 "k": "render",
 "r": "#b9bbb9",
 "f": 2,
@@ -5143,10 +5143,10 @@
 "f": 3
 },
 "1559": {
-"w": "#989da8",
-"m": 1,
+"w": "#c8764e",
 "k": "render",
-"f": 3
+"f": 2,
+"sv": 1
 },
 "1560": {
 "w": "#e3ad92",
@@ -5165,7 +5165,7 @@
 "pl": "#c9b27a"
 },
 "1565": {
-"w": "#dcdbe1",
+"w": "#dcdbe2",
 "k": "render",
 "f": 2,
 "sv": 1,
@@ -5181,10 +5181,10 @@
 "sv": 1
 },
 "1567": {
-"w": "#dcbf7a",
+"w": "#dcc27e",
 "k": "render",
 "r": "#74787b",
-"f": 2,
+"f": 3,
 "note": "Street View 13.11.2026: Yrjönkatu/Eteläranta kulma: okrankeltainen 2-kerroksinen, liiketilat",
 "sv": 1
 },
@@ -5446,9 +5446,10 @@
 },
 "1619": {
 "f": 2,
-"w": "#e8d79a",
+"w": "#ece0b4",
 "k": "render",
-"sv": 1
+"sv": 1,
+"note": "4 Hallituskatu / 5 Yrjönkatu: vaaleankeltainen, sileä rappaus, yläkerrassa kaari-ikkunat, maantaso suorakaide, valkoiset nurkkapilasterit (SV 14.11.2026)"
 },
 "1620": {
 "w": "#d6c6a0",
@@ -11879,7 +11880,7 @@
 "1562": {
 "w": "#efece4",
 "k": "render",
-"f": 2,
+"f": 1,
 "note": "valkoinen 2-krs (SV AN04A 14.11.2026)",
 "sv": 1
 }
