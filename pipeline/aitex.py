@@ -90,7 +90,7 @@ def facades(items: list, strength: float = 0.55, control: float = 0.65) -> dict:
         g = torch.Generator('cuda').manual_seed(7)
         im = pipe(prompt=f'{prompt}, {FACADE_STYLE}', negative_prompt=FACADE_NEG + (', ' + neg if neg else ''), image=src, control_image=canny, strength=strength,
                   controlnet_conditioning_scale=ctl, width=w, height=h, num_inference_steps=36, guidance_scale=6.0, generator=g).images[0]
-        out[f'{name}_ai{int(round(strength * 100))}.png'] = _png(im); out[f'{name}_canny.png'] = _png(canny); print('done', name, flush=True)
+        out[f'{name}_ai{int(round(strength * 100))}' + (f'_c{int(round(ctl * 100))}' if ctl != 0.8 else '') + '.png'] = _png(im)   # _cNN: ControlNet weight other than 0.8; out[f'{name}_canny.png'] = _png(canny); print('done', name, flush=True)
     return out
 
 
