@@ -1,6 +1,7 @@
 """Orthographic elevation straight from a bl_*.js glb (exact game colours, no Blender colour management).
 usage: elev2.py in.js out.png Ax Ay Bx By ppm ztop zbot   (world m; A->B = image left->right, camera on the right-hand side of A->B... normal = (u.y,-u.x))"""
-import base64, re, io, sys
+import base64, re, io, os, sys
+MAXD = float(os.environ.get('ELEV_MAXD', '1e9'))   # skip geometry more than this far in front of the facade line (buildings across the street)
 import numpy as np, pygltflib
 from PIL import Image
 src, dst = sys.argv[1:3]; Ax, Ay, Bx, By, ppm, ztop, zbot = map(float, sys.argv[3:10])
@@ -30,9 +31,9 @@ for pr in g.meshes[0].primitives:
         b0 = ((y[1] - y[2]) * (xs - x[2]) + (x[2] - x[1]) * (ys - y[2])) / den; b1 = ((y[2] - y[0]) * (xs - x[2]) + (x[0] - x[2]) * (ys - y[2])) / den; b2 = 1 - b0 - b1
         m = (b0 >= 0) & (b1 >= 0) & (b2 >= 0)
         if not m.any(): continue
-        dd = b0 * d[0] + b1 * d[1] + b2 * d[2]; sub = zb[y0:y1 + 1, x0:x1 + 1]; m &= dd > sub
+        dd = b0 * d[0] + b1 * d[1] + b2 * d[2]; sub = zb[y0:y1 + 1, x0:x1 + 1]; m &= (dd > sub) & (dd < MAXD)
         if not m.any(): continue
         uv = UV[t]; uu = b0 * uv[0, 0] + b1 * uv[1, 0] + b2 * uv[2, 0]; vv = b0 * uv[0, 1] + b1 * uv[1, 1] + b2 * uv[2, 1]
         tx = np.clip((uu % 1) * tw, 0, tw - 1).astype(int); ty = np.clip((vv % 1) * th, 0, th - 1).astype(int)
         sub[m] = dd[m]; img[y0:y1 + 1, x0:x1 + 1][m] = T[ty[m], tx[m]]
-Image.fromarray(img.astype(np.uint8)).save(dst); print(dst, Wd, Hd)
+Image.fromarray(img.astype(np.uint8)).save(dst); np.save(dst.replace('.png', '_d.npy'), zb.astype(np.float32)); print(dst, Wd, Hd)   # depth: towards the camera from the A-B line (m), -1e9 = sky
