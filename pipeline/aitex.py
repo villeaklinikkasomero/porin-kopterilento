@@ -1,7 +1,7 @@
 """AI textures on Modal (GPU), two modes.
 
   modal run pipeline/aitex.py                         # tiles: seamless material textures from PROMPTS -> tex/ai/<name>_<n>.png
-  modal run pipeline/aitex.py --mode facade           # facade: every tex/ai_in/<x>.png (+ optional <x>.txt prompt) -> tex/ai/<x>_ai.png
+  modal run pipeline/aitex.py --mode facade           # facade: every tex/ai_in/<x>.png (+ optional <x>.txt prompt) -> tex/ai/<x>_ai<strength%>.png
   modal run pipeline/aitex.py --only keltalaatta      # one tile texture / one facade
 
 Model: Stable Diffusion XL base 1.0 (CreativeML OpenRAIL++-M, commercial use allowed); facade mode adds the SDXL canny ControlNet
@@ -89,7 +89,7 @@ def facades(items: list[tuple[str, bytes, str]], strength: float = 0.55, control
         g = torch.Generator('cuda').manual_seed(7)
         im = pipe(prompt=f'{prompt}, {FACADE_STYLE}', negative_prompt=FACADE_NEG, image=src, control_image=canny, strength=strength,
                   controlnet_conditioning_scale=control, width=w, height=h, num_inference_steps=36, guidance_scale=6.0, generator=g).images[0]
-        out[f'{name}_ai.png'] = _png(im); out[f'{name}_canny.png'] = _png(canny); print('done', name, flush=True)
+        out[f'{name}_ai{int(round(strength * 100))}.png'] = _png(im); out[f'{name}_canny.png'] = _png(canny); print('done', name, flush=True)
     return out
 
 
