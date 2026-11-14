@@ -166,14 +166,18 @@ function terrainize(mat) {
   const prev = mat.onBeforeCompile;
   mat.onBeforeCompile = (sh, r) => { if (prev) prev.call(mat, sh, r);
     sh.uniforms.tHeight = { value: terrainTex }; sh.uniforms.tGrid = { value: new THREE.Vector4(TER.x0, TER.y0, TER.g, 0) }; sh.uniforms.tSize = { value: new THREE.Vector2(TER.nx, TER.ny) };
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform sampler2D tHeight; uniform vec4 tGrid; uniform vec2 tSize;').replace('#include <project_vertex>', `
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nuniform sampler2D tHeight; uniform vec4 tGrid; uniform vec2 tSize;\n#ifdef T_LIFT\nattribute float tLift;\n#endif').replace('#include <project_vertex>', `
       vec4 mvPosition = vec4( transformed, 1.0 );
       #ifdef USE_INSTANCING
         mvPosition = instanceMatrix * mvPosition;
       #endif
       vec4 tWp = modelMatrix * mvPosition;
       vec2 tUv = vec2(((tWp.x - tGrid.x) / tGrid.z + 0.5) / tSize.x, ((-tWp.z - tGrid.y) / tGrid.z + 0.5) / tSize.y);
-      tWp.y += texture2D(tHeight, tUv).r;
+      #ifdef T_LIFT
+        tWp.y += tLift;
+      #else
+        tWp.y += texture2D(tHeight, tUv).r;
+      #endif
       mvPosition = viewMatrix * tWp;
       gl_Position = projectionMatrix * mvPosition;`);
   };
@@ -695,7 +699,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const me0 = kwMesh(k, wallMat), me1 = kwMesh(KWP[ci], wallMat2), me = new THREE.Group(); for (const q of [me0, me1]) if (q) { scene.remove(q); me.add(q); } scene.add(me);
     if (CZ.zones[KN[ci]]) { const z = CZ.zones[KN[ci]]; STREAM.push({ name: KN[ci], me, x: z.x, y: z.y, st: 0, gr: null }); return; }
     loadModel('bl_' + KN[ci], (root, K) => { root.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { map.anisotropy = 8; TEXLOD.add(map, K.x, K.y); } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
-      const gr = new THREE.Group(); gr.position.set(K.x, 0, -K.y); gr.add(root); scene.add(gr); scene.remove(me); (window.__bl = window.__bl || []).push(KN[ci]); });
+      const gr = new THREE.Group(); gr.position.set(K.x, 0, -K.y); gr.add(root); if (K.shells) liftBlock(gr, K.shells); scene.add(gr); scene.remove(me); (window.__bl = window.__bl || []).push(KN[ci]); });
   });
   // roofs are cut along the 512 m aerial tiles: each piece shows the sharp 0.25 m tile once it is loaded, the coarse image until then
   for (const [P, U, fb] of [[rp, ru, roofMat], [rp2, ru2, roofMat2]]) {
@@ -1094,6 +1098,40 @@ function shrinkMap(map, max) {   // the city atlases are 4096 px: downscale befo
   const im = map && map.image; if (!im || !(im.width > max)) return;
   const c = document.createElement('canvas'); c.width = c.height = max; c.getContext('2d').drawImage(im, 0, 0, max, max);
   if (im.close) im.close(); map.image = c; map.flipY = false; map.needsUpdate = true;
+}
+// One ground height per house for the baked blocks that list their houses (bl_*.js "shells", baked with a plinth skirt; owner 14.11.2026): the terrain shader lifted every vertex by the ground under it,
+// so on the slopes down to the river whole houses leaned. Each vertex now takes the highest ground under its own building (OSM
+// footprint, or the nearest one within 2 m); the baked plinth skirt below z = 0 fills the gap downhill, so only the plinth follows the slope.
+function bldAt(x, y) {
+  const L = grid.get(gkey(Math.floor(x / GRID) + 100, Math.floor(y / GRID) + 100)); if (!L) return null; let best = null, bd = 2.0;
+  for (const bi of L) { const r = blds[bi]; if (x < r.minx - 2 || x > r.maxx + 2 || y < r.miny - 2 || y > r.maxy + 2) continue;
+    if (pip(x, y, r.pts)) return r;
+    for (let i = 0, j = r.pts.length - 1; i < r.pts.length; j = i++) { const a = r.pts[j], b = r.pts[i], dx = b[0] - a[0], dy = b[1] - a[1];
+      const t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / (dx * dx + dy * dy || 1))), d = Math.hypot(a[0] + dx * t - x, a[1] + dy * t - y);
+      if (d < bd) { bd = d; best = r; } } }
+  return best;
+}
+function bLift(r) { if (r.lift === undefined) { let m = -1e9; for (const q of r.pts) m = Math.max(m, TZs(q[0], q[1])); r.lift = m; } return r.lift; }
+function shellAt(S, x, y) {   // S: houses from the bake (bl_*.js 'shells'), each a list of rings: the one containing (x, y), else the nearest within 2 m
+  let best = null, bd = 2.0;
+  for (const h of S) { if (x < h.bb[0] - 2 || x > h.bb[2] + 2 || y < h.bb[1] - 2 || y > h.bb[3] + 2) continue;
+    for (const R of h.pts) { if (pip(x, y, R)) return h;
+      for (let i = 0, j = R.length - 1; i < R.length; j = i++) { const a = R[j], b = R[i], dx = b[0] - a[0], dy = b[1] - a[1];
+        const t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / (dx * dx + dy * dy || 1))), d = Math.hypot(a[0] + dx * t - x, a[1] + dy * t - y);
+        if (d < bd) { bd = d; best = h; } } } }
+  return best;
+}
+function liftBlock(gr, shells) {
+  gr.updateMatrixWorld(true); const v = new THREE.Vector3();
+  const S = (shells || []).map(rs => { const pts = rs.map(r => { const o = []; for (let i = 0; i < r.length; i += 2) o.push([r[i], r[i + 1]]); return o; });
+    let m = -1e9; const bb = [1e9, 1e9, -1e9, -1e9]; for (const R of pts) for (const q of R) { m = Math.max(m, TZs(q[0], q[1])); bb[0] = Math.min(bb[0], q[0]); bb[1] = Math.min(bb[1], q[1]); bb[2] = Math.max(bb[2], q[0]); bb[3] = Math.max(bb[3], q[1]); }
+    return { pts, bb, lift: m }; });
+  gr.traverse(q => { if (!q.isMesh) return;
+    if (q.geometry.index) q.geometry = q.geometry.toNonIndexed();   // one lift per triangle (its centre decides the house): a wall on a house's edge never shears
+    const P = q.geometry.attributes.position, A = new Float32Array(P.count), w = new THREE.Vector3();
+    for (let i = 0; i + 2 < P.count; i += 3) { v.set(0, 0, 0); for (let k = 0; k < 3; k++) v.add(w.fromBufferAttribute(P, i + k)); v.multiplyScalar(1 / 3).applyMatrix4(q.matrixWorld);
+      const h = S.length ? shellAt(S, v.x, -v.z) : null; const r = h ? null : bldAt(v.x, -v.z); A[i] = A[i + 1] = A[i + 2] = h ? h.lift : r ? bLift(r) : TZs(v.x, -v.z); }
+    q.geometry.setAttribute('tLift', new THREE.BufferAttribute(A, 1)); q.material.defines = Object.assign(q.material.defines || {}, { T_LIFT: '' }); });
 }
 function streamUpdate(x, y) {
   if (!CITY_ON) return;

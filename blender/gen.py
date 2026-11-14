@@ -1,7 +1,7 @@
 """Pori centre blocks -> Blender -> baked GLB.
 One bay x one storey of every facade is modelled in detail and baked (selected-to-active) onto a flat tile;
 the tile is repeated along the wall. Balconies, bay windows and roofs are real geometry baked directly."""
-import bpy, math, sys, os, random, base64
+import bpy, math, sys, os, random, base64, json
 from mathutils import Vector
 from mathutils.geometry import tessellate_polygon
 sys.path.insert(0, '/home/claude')
@@ -376,6 +376,7 @@ def m_classic(mb, col, P):
     wh = min(wh, fh - sill - (0.75 if P.get('hood') else 0.35))
     balc = col == 'D' and not P.get('ground') and P.get('balcony')   # door onto a projecting balcony with an iron railing (corner chamfers)
     if col == 'G' and not P.get('ground'): col = 'W'
+    if col == 'X': col = 'N' if P.get('ground') else 'W'   # blank bay on the ground floor, window (attic vent) above
     if col in ('D', 'S') and not P.get('ground'): col = 'W'
     if balc: sill = 0.12; wh = min(fh - 0.12 - (0.75 if P.get('hood') else 0.35), 2.7)
     if P.get('blank'): col = 'N'
@@ -384,7 +385,7 @@ def m_classic(mb, col, P):
     if col == 'P' and bw > 2 * ww + 0.9: wins = [(uc - ww - 0.15, uc - 0.15), (uc + 0.15, uc + ww + 0.15)]
     elif col in ('W', 'P'): wins = [(uc - ww / 2, uc + ww / 2)]
     if col == 'D':
-        dw = min(1.7, bw - 0.8); dh = min(fh - ph - 0.6, 3.2) if not arch else min(fh - ph - 0.4 - dw / 2, 2.6)
+        dw = min(P.get('dw', 1.7), bw - 0.8); dh = min(fh - ph - 0.6, 3.2) if not arch else min(fh - ph - 0.4 - dw / 2, 2.6)
         u0, u1 = uc - dw / 2, uc + dw / 2
         mb.sides(u0, ph, u1, ph + dh, 0, -0.35, W)
         mb.q(u0, ph, u1, ph + dh, -0.35, P.get('door', M('#4a3323', 0.6)))
@@ -891,5 +892,7 @@ def bake_zone(Z, outdir, samples=24, sun_az=118, sun_el=38):
     data = open(glb, 'rb').read()
     if os.environ.get('PORI_JPEGQ'): data = recompress_glb(data, int(os.environ['PORI_JPEGQ']))
     b64 = base64.b64encode(data).decode()
-    open(os.path.join(outdir, 'bl_' + Z.name + '.js'), 'w').write('export const x = %s, y = %s, roof = %s;\nexport default "%s";\n' % (Z.cx, Z.cy, 'true' if getattr(Z, 'roofflag', True) else 'false', b64))
+    sh = getattr(Z, 'shells', None)      # house outlines (game metres): the game lifts each one by a single ground height (sloped plinths)
+    open(os.path.join(outdir, 'bl_' + Z.name + '.js'), 'w').write('export const x = %s, y = %s, roof = %s;\n' % (Z.cx, Z.cy, 'true' if getattr(Z, 'roofflag', True) else 'false')
+        + ('export const shells = %s;\n' % json.dumps(sh, separators=(',', ':')) if sh else '') + 'export default "%s";\n' % b64)
     print('DONE', Z.name, 'verts', len(ex.data.vertices), 'glb MB', round(os.path.getsize(glb) / 1e6, 2))
