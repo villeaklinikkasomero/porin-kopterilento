@@ -5152,7 +5152,7 @@
 "w": "#e3ad92",
 "k": "render",
 "r": "#b9bbb9",
-"f": 4,
+"f": 3,
 "note": "Street View 13.11.2026: Antinkatu 1 / Eteläranta, lohenpunainen rappaus, valkoiset listat, koristeellinen kulmapääty",
 "sv": 1
 },
@@ -5172,11 +5172,11 @@
 "note": "valkoinen 2-krs rappaus (SV HA08B 14.11.2026)"
 },
 "1566": {
-"w": "#cdd8de",
+"w": "#e3dfcf",
 "k": "render",
 "f": 2,
 "st": "classic",
-"note": "Y-pakki: Eteläranta 4 / Antinkatu 2, 1854. Street View 13.11.2026: vaaleankeltainen, 2 kerrosta korkealla sokkelilla",
+"note": "Eteläranta 4/Antinkatu 2: vaalea kerma, maantaso kvaaderirustiikka, suorat otsalistat kaikissa ikkunoissa, pienet ullakkoikkunat friisissä, harmaa sokkeli (omistajan kuva 14.11.2026)",
 "y": 1854,
 "sv": 1
 },
@@ -5197,11 +5197,11 @@
 "sv": 1
 },
 "1569": {
-"w": "#e4d9bd",
+"w": "#dedcd5",
 "k": "render",
 "r": "#b9bbb9",
 "f": 2,
-"note": "1960-70-l. beige 2-krs, nauhaikkunat ruskein karmein (SV AN04B 14.11.2026)",
+"note": "1900-luvun puolivälin uudisrakennus: vaaleanharmaa rappaus, kaksi nauhaikkunaa ruskein puukarmein, tumma räystäsotsa (omistajan kuva 14.11.2026)",
 "sv": 1
 },
 "1571": {

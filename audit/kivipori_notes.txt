@@ -55,3 +55,10 @@ RAATIHUONE (lm raati): kellotorni keltaiseksi, kellomainen kuparikatto + lyhty (
   Etelärannan puoli vaalean harmaanvihreä (sama LoD2-kuori -> jako sijainnin mukaan, SPECK alt). Viisto 45 asteen kulma, ovi ja parveke
   eivät ole LoD2-kuoressa -> uusintakierros. Huom: kuoren Etelärannan seinä on yksi polygoni, joten lohenpunainen ei jatku kulman yli.
 - 1286 Hallituskatu: pelissä 3 kerrosta kuten SV:ssä (AI-testikuvan 4 riviä tuli AI:n piirtämistä ikkunoista)
+- 1560: 3 korkeaa kerrosta + pienet ullakkoikkunat friisissä; lohenpunainen kulmatalo = viisto kulma ovella + 3 ikka-akselia Etelärannalle
+  (Etelärannan seinä leikattu x=52 kohdalta, cut_walls), loput Etelärannasta vaalea harmaanvihreä talo.
+- 1286: ylimmän kerroksen ikkunat pieniksi.
+- 1566 Eteläranta 4 / Antinkatu 2 (omistajan kuva): vaalea kerma (EI sininen), 2 krs, kvaaderirustiikka maantasossa, suorat otsalistat,
+  pienet ullakkoikkunat, harmaa sokkeli. Antinkadun portti ei mallissa.
+- 1569 Antinkatu: 1900-luvun puolivälin uudisrakennus (omistajan kuva): vaaleanharmaa, kaksi nauhaikkunaa ruskein karmein, tumma räystäsotsa.
+OPPI: jokainen talo tunnistetaan SV-kuvasta talonumerolla ennen korjausta; säteen osuma yksin ei riitä (1563, 1566 menivät väärin).
