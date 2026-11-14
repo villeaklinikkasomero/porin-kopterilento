@@ -1,10 +1,10 @@
 {
- "building": "Eteläranta riverside house, side facade, three storeys",
+ "building": "Eteläranta riverside house, side facade, two storeys",
  "style": "Finnish 19th-century neoclassical stone town house in Pori, lime-plastered brick, round-arched ground-floor windows",
  "materials": {
   "wall": {
-   "color": "#E3D8AE",
-   "words": "pale yellow ochre lime render, slightly weathered"
+   "color": "#ECE6D2",
+   "words": "very light cream lime render, slightly weathered"
   },
   "trim": {
    "color": "#F4F1E8",

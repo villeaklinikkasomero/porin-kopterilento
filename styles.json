@@ -3983,10 +3983,10 @@
 "sv": 1
 },
 "1285": {
-"w": "#e3d8ae",
+"w": "#ece6d2",
 "k": "render",
 "r": "#74787b",
-"f": 3,
+"f": 2,
 "note": "Eteläranta: vaalea keltainen 3-krs, kaari-ikkunat maantasossa, valkoiset pielet, kulmaparveke (SV ER13B/14B 14.11.2026)",
 "sv": 1
 },
@@ -5152,7 +5152,7 @@
 "w": "#e3ad92",
 "k": "render",
 "r": "#b9bbb9",
-"f": 3,
+"f": 4,
 "note": "Street View 13.11.2026: Antinkatu 1 / Eteläranta, lohenpunainen rappaus, valkoiset listat, koristeellinen kulmapääty",
 "sv": 1
 },
@@ -5172,7 +5172,7 @@
 "note": "valkoinen 2-krs rappaus (SV HA08B 14.11.2026)"
 },
 "1566": {
-"w": "#efe0a8",
+"w": "#cdd8de",
 "k": "render",
 "f": 2,
 "st": "classic",

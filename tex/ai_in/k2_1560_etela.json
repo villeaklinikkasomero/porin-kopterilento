@@ -1,10 +1,10 @@
 {
- "building": "Eteläranta / Antinkatu corner house, three storeys",
+ "building": "Eteläranta house, four storeys, grey rusticated ground floor",
  "style": "Finnish 19th-century neoclassical stone town house in Pori, lime-plastered brick, horizontally rusticated ground floor with round-arched windows",
  "materials": {
   "wall": {
-   "color": "#E3AD92",
-   "words": "salmon pink lime render, slightly weathered"
+   "color": "#C9CFC6",
+   "words": "pale grey-green lime render, slightly weathered"
   },
   "trim": {
    "color": "#F4F1E8",

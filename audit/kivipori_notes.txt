@@ -48,3 +48,10 @@ RAATIHUONE (lm raati): kellotorni keltaiseksi, kellomainen kuparikatto + lyhty (
 - 1284 Heinen talo: kulmatorni puuttui -> kivi.py corner_tower (pyöreä torni, tumma sipulimainen ogee-kupoli + huippu) Hallituskatu/Teatterikatu-kulmaan
 - kivijalka: uusi styles-avain 'pl' (maalattu sokkeli); asetettu 1563 (keltainen), 1575 (tiilenpunainen), 1574 (harmaa). Muut vielä graniitinharmaa -> käydään läpi
 - 1566 (Eteläranta 4/Antinkatu 2): kaari-ikkunat poistettu (suorakaide + otsalistat). 1573 matala talo on 1566:n LoD2-kuoren sisällä -> kuori piirtää sen 2-kerroksisena; korjaus vaatii kuoren leikkaamisen (uusintakierros)
+== Omistajan palaute 14.11 (AI-testikuvat) ==
+- 1285 Eteläranta/S.Palmgreninkatu: 2 kerrosta (ei 3), hyvin vaalea kerma #ece6d2. Viistetty kulma + parveke puuttuu yhä.
+- 1566 Eteläranta 4/Antinkatu 2: vaaleansininen #cdd8de (omistaja).
+- 1560 Eteläranta/Antinkatu-kulma: 4 kerrosta. Antinkadun puoli + kulma lohenpunainen, valkoiset pielet, harmaa rustikoitu maantaso;
+  Etelärannan puoli vaalean harmaanvihreä (sama LoD2-kuori -> jako sijainnin mukaan, SPECK alt). Viisto 45 asteen kulma, ovi ja parveke
+  eivät ole LoD2-kuoressa -> uusintakierros. Huom: kuoren Etelärannan seinä on yksi polygoni, joten lohenpunainen ei jatku kulman yli.
+- 1286 Hallituskatu: pelissä 3 kerrosta kuten SV:ssä (AI-testikuvan 4 riviä tuli AI:n piirtämistä ikkunoista)

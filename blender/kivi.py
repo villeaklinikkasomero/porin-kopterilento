@@ -132,13 +132,20 @@ _ly['alt'] = lambda x, y: _lyy if x * 0.9744 - y * 0.225 < -486.6 else None
 SPECK[1351] = classic_spec(1351, **_ly); SPECK[1353] = classic_spec(1353, **dict(_ly, lay=dict(gh=4.6, fh=4.2)))
 SPECK[1311] = classic_spec(1311, wall='#e3d8b4', trim='#f4f1ea', rust=False, garch=False, hood=None, pil=False)   # Valtakatu 17-19 side: long 2-storey pale yellow house, plain windows (Street View 13.11.2026)
 SPECK[1574] = classic_spec(1574, wall='#e3d7b9', trim='#f4f1ea', rust=False, garch=False, hood=None, pil=False)   # Valtakatu 9: small 1-storey stucco house with a gable, plain windows (Street View 13.11.2026)
-SPECK[1560] = classic_spec(1560, trim='#f4f1ea', rust=True, garch=True, hood='cornice', pil=True)   # Antinkatu 1 / Eteläranta: salmon render, white dressings (Street View 13.11.2026)
+# Eteläranta / Antinkatu corner (Street View 14.11.2026, owner): four storeys. The corner bay with the 45-degree chamfer (door and a
+# balcony above it) and the Antinkatu side are salmon red with white dressings over a grey rusticated ground floor; west of the corner
+# bay the Eteläranta front is a pale grey-green house with a balcony. One LoD2 shell holds both, so the walls are split by position.
+_e1560 = classic_spec(1560, wall='#c9cfc6', trim='#f2f1ec', rust=True, garch=False, hood='cornice', pil=True, lay=dict(nf=4),
+                      ground=dict(rustc=M('#a9aca7')))
+SPECK[1560] = classic_spec(1560, wall='#d98a6c', trim='#f4f1ea', rust=True, garch=True, hood='cornice', pil=True, lay=dict(nf=4),
+                           ground=dict(rustc=M('#9fa29e')))
+SPECK[1560]['alt'] = lambda x, y: _e1560 if x < 53.0 and y > 430.0 else None
 SPECK[1604] = classic_spec(1604, trim='#b0603f', rust=False, garch=False, hood='cornice', pil=False, top=dict(hood='cornice'))  # yellow Jugend house on Antinkatu: brick-red arched lintels with keystones over the windows on every floor (Street View 14.11.2026); gables from the LoD2 shell
 SPECK[1284] = classic_spec(1284, wall='#e4dcc6', trim='#f3eee2', rust=True, garch=True, hood='pediment', pil=False,
                            extra=[corner_tower(-172.4, 404.9, 2.1, 9.2, 13.4, M('#e4dcc6'), M('#f3eee2'), M('#3a3f45', 0.5, 0.3))])   # Heinen talo / seurakuntatoimisto: banded rustication on the ground floor, arched ground-floor windows, pedimented upper windows (Street View 14.11.2026)
 SPECK[1513] = classic_spec(1513, wall='#9b4b36', trim='#b9654c', rust=False, garch=True, hood=None, pil=True, bw=4.6, cornice=(0.3, 0.7, M('#7f3d2c')))   # brewery remnant
 SPECK[1281] = classic_spec(1281, wall='#e2dcbc', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=True)   # Eteläranta 10: pale yellow render, white pilasters, window surrounds and cornice (Street View 14.11.2026)
-SPECK[1285] = classic_spec(1285, trim='#f4f1e8', rust=False, garch=True, hood='cornice', pil=True)   # Eteläranta: pale yellow, arched ground-floor windows, white surrounds (Street View 14.11.2026)
+SPECK[1285] = classic_spec(1285, wall='#ece6d2', trim='#f6f4ee', rust=False, garch=True, hood='cornice', pil=True, lay=dict(nf=2))   # Eteläranta / S. Palmgreninkatu: very light cream, TWO storeys, arched ground-floor windows (owner + Street View 14.11.2026); chamfered corner with a balcony not modelled yet
 SPECK[1563] = classic_spec(1563, trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=False)   # Antinkatu 3 corner: white 2-storey, window cornices (Street View 14.11.2026); the Hallituskatu end looks yellow - two houses in one LoD2 shell?
 SPECK[1447] = classic_spec(1447, wall='#9c4f3c', trim='#e6dccb', rust=False, garch=True, hood=None, pil=True, bw=3.8, first=dict(arch=True), top=dict(arch=True))   # old red-brick building at Eteläranta/Karhu: round-arched windows with light surrounds, brick pilasters (was a plain modern box; Street View 14.11.2026)
 SPECK[1575] = classic_spec(1575, trim='#f4f1e8', rust=False, garch=True, hood='cornice', pil=True)   # Antinkatu/Hallituskatu corner: yellow, big round-arched shop windows, white corner quoins (Street View 14.11.2026)
@@ -146,7 +153,7 @@ SPECK[1572] = classic_spec(1572, trim='#f4f1e8', rust=False, garch=False, hood='
 SPECK[1561] = classic_spec(1561, trim='#f6f4ee', rust=False, garch=False, hood=None, pil=False)   # Antinkatu: small white gabled 1-storey house, plain windows (Street View 14.11.2026)
 SPECK[1562] = classic_spec(1562, trim='#f6f4ee', rust=False, garch=False, hood='cornice', pil=False)   # Antinkatu: white 2-storey (Street View 14.11.2026)
 SPECK[1573] = classic_spec(1573, trim='#f4f1e8', rust=False, garch=False, hood=None, pil=False)   # Antinkatu: low 1-storey yellow house, no arched windows; the arched gateway with columns is not modelled (Street View 14.11.2026, owner)
-SPECK[1566] = classic_spec(1566, trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=False)   # Eteläranta 4 / Antinkatu 2 (1854): 2 storeys, rectangular windows with cornices, no arches (Street View 14.11.2026)
+SPECK[1566] = classic_spec(1566, wall='#cdd8de', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=False)   # Eteläranta 4 / Antinkatu 2 (1854): light blue (owner 14.11.2026), 2 storeys, rectangular windows with cornices
 SPECK[1454] = classic_spec(1454, trim='#f7f6f1', rust=False, garch=False, hood='pediment', pil=False, ground=dict(hood='pediment'))   # Teatterikatu: white 1-storey, triangular pediments over the windows (Street View 14.11.2026)
 SPECK[1292] = classic_spec(1292, trim='#f5f2ea', rust=False, garch=False, hood='cornice', pil=True)   # Selim Palmgreninkatu / Valtakatu corner: yellow 1-storey, white window surrounds with cornices, white corner pilasters (Street View 14.11.2026)
 
