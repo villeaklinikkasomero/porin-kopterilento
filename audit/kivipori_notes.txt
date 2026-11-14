@@ -66,3 +66,4 @@ OPPI: jokainen talo tunnistetaan SV-kuvasta talonumerolla ennen korjausta; säte
 Uudet: cut_walls 1288 (punainen/keltainen), 1560 (Antinkadun matala valkoinen 1561 kuoren sisällä), 1563 alt (Antinkatu valkoinen / Hallituskatu keltainen),
 1287, 1565, 1559, 1567, 1562 f1, 1619 (Hallituskadun alku). Avoimet: 1285 viisto kulma + parveke, 1560 kulmaparveke, 1559 harmaa maantaso,
 1573 pylväsportti, 8385 liiketilat + porrastorni, 1565 ullakkoikkunat, 1286 keskirisaliitti.
+- 14.11 ilta: kulmaparvekkeet (1560, 1285 viistot), 1559 harmaa maantaso (gwall), 1573 kaariportti (col G), 2 Antinkatu matala räystäs + jyrkkä lape (lower_eave), 1562 2 krs (tunnistettu projisoimalla ID:t SV-kuvaan, work/svlabel.py)

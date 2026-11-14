@@ -364,6 +364,7 @@ def m_classic(mb, col, P):
     """19th-century rendered stone facade bay: framed window with sill, hood (cornice / pediment) or round arch,
     optional rustication, pilasters, storey band and granite plinth.  col: 'W' window, 'D' door, 'S' shop, 'N' blank, 'P' window pair"""
     bw, fh, W = mb.bw, mb.fh, P['wall']; T = P.get('trim', WHITE); fr = P.get('frame', WHITE)
+    if P.get('ground') and P.get('gwall'): W = P['gwall']        # a ground floor in its own colour (grey rusticated base under a coloured house)
     ph = P.get('plinth_h', 0)                     # granite plinth at the foot of the row (ground floor)
     ww = min(P.get('ww', 1.2), bw - 0.9); wh = P.get('wh', 2.0); sill = P.get('sill', 0.95) + ph
     if not P.get('wh_fixed'):                     # windows grow with the storey: a high ground floor or piano nobile has tall windows
@@ -373,7 +374,10 @@ def m_classic(mb, col, P):
         if g_ and free - wh > 1.0: sill += (free - wh) * 0.6     # a ground floor raised on its plinth: the extra height goes under the sill
         if wh > 2.3: ww = min(bw - 0.9, ww * min(1.2, (wh / 2.0) ** 0.5))
     wh = min(wh, fh - sill - (0.75 if P.get('hood') else 0.35))
+    balc = col == 'D' and not P.get('ground') and P.get('balcony')   # door onto a projecting balcony with an iron railing (corner chamfers)
+    if col == 'G' and not P.get('ground'): col = 'W'
     if col in ('D', 'S') and not P.get('ground'): col = 'W'
+    if balc: sill = 0.12; wh = min(fh - 0.12 - (0.75 if P.get('hood') else 0.35), 2.7)
     if P.get('blank'): col = 'N'
     arch = P.get('arch', False); holes = []; uc = bw / 2
     wins = []
@@ -390,6 +394,14 @@ def m_classic(mb, col, P):
         holes.append((u0, ph, u1, top))
         mb.prot(u0 - 0.16, ph, u0, top, 0.04, T); mb.prot(u1, ph, u1 + 0.16, top, 0.04, T)
         if not arch: mb.prot(u0 - 0.3, top, u1 + 0.3, top + 0.3, 0.12, T)
+    elif col == 'G':                                                       # arched gateway into the yard: dark iron gate, dressed surround
+        gw = min(3.0, bw - 0.6); u0, u1 = uc - gw / 2, uc + gw / 2; gh = min(fh - ph - 0.5 - gw / 2, 2.6)
+        mb.sides(u0, ph, u1, ph + gh, 0, -0.6, W)
+        mb.q(u0, ph, u1, ph + gh, -0.6, P.get('gate', M('#1f2326', 0.5)))
+        for k in range(1, 9): mb.q(u0 + (u1 - u0) * k / 9 - 0.015, ph, u0 + (u1 - u0) * k / 9 + 0.015, ph + gh, -0.58, M('#3a3f43', 0.5))
+        top = _arch_top(mb, u0, u1, ph + gh, W, P.get('gate', M('#1f2326', 0.5)), r=0.35, trim=T)
+        holes.append((u0, ph, u1, top))
+        mb.prot(u0 - 0.3, ph, u0, top, 0.08, T); mb.prot(u1, ph, u1 + 0.3, top, 0.08, T)
     elif col == 'S':
         u0, u1 = 0.35, bw - 0.35
         holes.append(mb.window(u0, ph + 0.15, u1, fh - 0.5, W, r=0.15, nx=2, fmat=P.get('sframe', DARK), glass=GLASS, curt=0))
@@ -415,6 +427,15 @@ def m_classic(mb, col, P):
                 mb.prot(a0, b0 - 0.04, a1, b0 + 0.1, 0.13, T)
                 mb.hq([(a0, b0 + 0.1, 0.1), (a1, b0 + 0.1, 0.1), ((a0 + a1) / 2, ap + 0.1, 0.1)], T)
                 mb.hq([(a0 + 0.22, b0 + 0.16, 0.103), (a1 - 0.22, b0 + 0.16, 0.103), ((a0 + a1) / 2, ap - 0.05, 0.103)], W)
+        if balc:                                                                                 # balcony slab, brackets and a dark wrought-iron railing
+            b0, b1, bd = u0 - 0.55, u1 + 0.55, P.get('bd', 0.85); dk = M('#202427', 0.5)
+            mb.s3box(b0, sill - 0.2, b1, sill, 0, bd, T)
+            for uu in (b0 + 0.15, b1 - 0.35): mb.s3box(uu, sill - 0.75, uu + 0.2, sill - 0.2, 0, bd * 0.7, T)
+            mb.s3box(b0, sill + 0.95, b1, sill + 1.0, 0, bd, dk)
+            n_ = max(4, int((b1 - b0) / 0.13))
+            for k in range(n_ + 1): uu = b0 + (b1 - b0) * k / n_; mb.s3box(uu - 0.012, sill, uu + 0.012, sill + 0.95, bd - 0.03, bd, dk)
+            for v_ in (sill + 0.12, sill + 0.5): mb.s3box(b0, v_, b1, v_ + 0.04, bd - 0.05, bd, dk)
+            continue
         mb.prot(u0 - 0.14, sill - 0.12, u1 + 0.14, sill, 0.1, T)                                 # sill
         if P.get('apron'): mb.prot(u0 - 0.05, max(ph + 0.1, sill - 0.75), u1 + 0.05, sill - 0.16, 0.03, P.get('apron_mat', T))
     mb.wall(holes + ([(0, 0, bw, ph)] if ph else []), W)

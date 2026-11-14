@@ -103,6 +103,22 @@ def cut_walls(i, p0, d):
             if len(poly) >= 3: out.append((k, poly, holes))
     RAW[i] = out
 
+def lower_eave(i, test, z_eave, depth):
+    """Pull the street wall of a low house down to its real eave and give it a steep roof slope back up to the LoD2 wall top
+    (the scan drew 2 Antinkatu's front as a 6.9 m wall; the house is one storey under a high roof)."""
+    out = []
+    for k, r, holes in RAW.get(i, []):
+        if k == 'W' and test(r):
+            ztop = max(q[2] for q in r); r2 = [(q[0], q[1], min(q[2], z_eave)) for q in r]; out.append((k, r2, holes))
+            lo = [q for q in r if q[2] < 0.5]
+            if len(lo) >= 2 and ztop > z_eave + 0.3:
+                (ax, ay, _), (bx, by, _) = lo[0], lo[1]; L = math.hypot(bx - ax, by - ay); nx, ny = -(by - ay) / L, (bx - ax) / L
+                _p = B[i]['p']; cxm, cym = sum(_p[0::2]) / len(_p[0::2]) / 10, sum(_p[1::2]) / len(_p[1::2]) / 10
+                if (cxm - ax) * nx + (cym - ay) * ny < 0: nx, ny = -nx, -ny          # into the house
+                out.append(('R', [(ax, ay, z_eave), (bx, by, z_eave), (bx + nx * depth, by + ny * depth, ztop), (ax + nx * depth, ay + ny * depth, ztop)], None))
+        else: out.append((k, r, holes))
+    RAW[i] = out
+
 def corner_tower(cx, cy, r, z0, z1, wall, trim, dome, n=16):
     """round corner tower above the eaves with an ogee dome and a spire (the LoD2 scan cuts such towers off at the roof)"""
     def ex(Z, *a):
@@ -154,12 +170,13 @@ SPECK[1574] = classic_spec(1574, wall='#e3d7b9', trim='#f4f1ea', rust=False, gar
 # Eteläranta side; west of it (the shell's roof steps at x = 52) the Eteläranta front is a pale grey-green house. One LoD2 shell holds
 # both: its Eteläranta wall is cut at x = 52 and the pieces get their spec by position.
 cut_walls(1560, (52.0, 439.2), (0.9732, -0.2298))
-cut_walls(1560, (59.6, 413.7), (0.2257, 0.9742))   # its Antinkatu wall also runs along the low white house 2 Antinkatu: cut where the wall steps up
+cut_walls(1560, (59.6, 413.7), (0.2257, 0.9742))
+lower_eave(1560, lambda r: all(q[1] < 413.8 and q[0] > 55 for q in r) and min(q[2] for q in r) < 0.5, 4.2, 2.6)   # its Antinkatu wall also runs along the low white house 2 Antinkatu: cut where the wall steps up
 _k1560 = dict(lay=dict(nf=3, gh=5.6, frieze=1.4), ground=dict(rustc=M('#9fa29e')), top=dict(wh=1.35, ww=1.1, sill=0.9, hood=None))
 _e1560 = classic_spec(1560, wall='#c9cfc6', trim='#f2f1ec', rust=True, garch=False, hood='cornice', pil=True, **_k1560)
 SPECK[1560] = classic_spec(1560, wall='#d98a6c', trim='#f4f1ea', rust=True, garch=True, hood='cornice', pil=True, **_k1560)
 _c1560 = classic_spec(1560, wall='#d98a6c', trim='#f4f1ea', rust=True, garch=True, hood='cornice', pil=True, bw=2.6,
-                      **dict(_k1560, lay=dict(_k1560['lay'], cols=lambda c, nb: 'D')))      # the chamfer: corner door, windows above
+                      **dict(_k1560, lay=dict(_k1560['lay'], cols=lambda c, nb: 'D'), first=dict(balcony=True, hood='cornice')))      # the chamfer: corner door, windows above
 _w1561 = classic_spec(1561, wall='#efede6', trim='#f7f6f1', rust=False, garch=False, hood=None, pil=False, lay=dict(nf=1))   # the low white house 2 Antinkatu lies inside the corner house's LoD2 shell
 SPECK[1560]['alt'] = lambda x, y: _w1561 if y < 413.6 else (_c1560 if 62.3 < x < 64.8 and 433.5 < y < 437.2 else _e1560 if x < 52.0 and y > 430.0 else None)
 SPECK[1286] = classic_spec(1286, trim='#f4f1ea', rust=False, garch=False, hood='pediment', pil=False, lay=dict(nf=3, gh=5.2, frieze=1.4),
@@ -170,6 +187,9 @@ SPECK[1284] = classic_spec(1284, wall='#e4dcc6', trim='#f3eee2', rust=True, garc
 SPECK[1513] = classic_spec(1513, wall='#9b4b36', trim='#b9654c', rust=False, garch=True, hood=None, pil=True, bw=4.6, cornice=(0.3, 0.7, M('#7f3d2c')))   # brewery remnant
 SPECK[1281] = classic_spec(1281, wall='#e2dcbc', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=True)   # Eteläranta 10: pale yellow render, white pilasters, window surrounds and cornice (Street View 14.11.2026)
 SPECK[1285] = classic_spec(1285, wall='#e8ddb6', trim='#f6f4ee', rust=False, garch=True, hood='cornice', pil=True, lay=dict(nf=2))   # Eteläranta / S. Palmgreninkatu: very light cream, TWO storeys, arched ground-floor windows (owner + Street View 14.11.2026); chamfered corner with a balcony not modelled yet
+_c1285 = classic_spec(1285, wall='#e8ddb6', trim='#f6f4ee', rust=False, garch=True, hood='cornice', pil=False, bw=2.2, lay=dict(nf=2, cols=lambda c, nb: 'D'),
+                      first=dict(balcony=True, hood='cornice'))
+SPECK[1285]['alt'] = lambda x, y: _c1285 if -39.6 < x < -36.5 and 457.8 < y < 460.2 else None   # the corner chamfer: door below, balcony above (block walk 14.11.2026)
 # 3 Antinkatu / 10 Hallituskatu (block walk 14.11.2026): the whole Antinkatu front is white, the Hallituskatu front yellow
 _w1563 = classic_spec(1563, wall='#efede6', trim='#f7f6f1', rust=False, garch=False, hood='cornice', pil=False, lay=dict(nf=2), ground=dict(plinth=M('#a08a6a', 0.85), plinth_h=1.2))
 SPECK[1563] = classic_spec(1563, wall='#e6cf8f', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=False, lay=dict(nf=2))
@@ -178,8 +198,8 @@ SPECK[1447] = classic_spec(1447, wall='#9c4f3c', trim='#e6dccb', rust=False, gar
 SPECK[1575] = classic_spec(1575, trim='#f4f1e8', rust=False, garch=True, hood='cornice', pil=True)   # Antinkatu/Hallituskatu corner: yellow, big round-arched shop windows, white corner quoins (Street View 14.11.2026)
 SPECK[1572] = classic_spec(1572, trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=True)   # Antinkatu 2-4: ochre, white quoins and window surrounds, frieze under the eaves (Street View 14.11.2026)
 SPECK[1561] = classic_spec(1561, wall='#efede6', trim='#f7f6f1', rust=False, garch=False, hood=None, pil=False, lay=dict(nf=1))   # 2 Antinkatu: low white one-storey house (block walk 14.11.2026)
-SPECK[1562] = classic_spec(1562, wall='#efede6', trim='#f7f6f1', rust=False, garch=False, hood=None, pil=False, lay=dict(nf=1))   # 4 Antinkatu: long white ONE-storey house, high roof (block walk 14.11.2026)
-SPECK[1573] = classic_spec(1573, trim='#f4f1e8', rust=False, garch=False, hood=None, pil=False)   # Antinkatu: low 1-storey yellow house, no arched windows; the arched gateway with columns is not modelled (Street View 14.11.2026, owner)
+SPECK[1562] = classic_spec(1562, wall='#efede6', trim='#f7f6f1', rust=False, garch=False, hood='cornice', pil=False, lay=dict(nf=2))   # 4 Antinkatu: white TWO-storey house (ids projected onto the Street View image 14.11.2026; the low one-storey house is 2 Antinkatu)
+SPECK[1573] = classic_spec(1573, trim='#f4f1e8', rust=False, garch=False, hood=None, pil=False, lay=dict(nf=1, cols=lambda c, nb: 'G' if c == nb - 1 else 'W'))   # 4 Antinkatu (east): low 1-storey yellow house; the arched gateway at its end (Street View 14.11.2026, owner)
 SPECK[1566] = classic_spec(1566, wall='#e3dfcf', trim='#efece2', rust=True, garch=False, hood='cornice', pil=True, bw=3.6,
                            ground=dict(hood='cornice', basement=False, plinth_h=1.1, plinth=M('#8d8c87', 0.85), rustc=M('#c9c4b3')),
                            top=dict(ww=0.9, wh=0.45, sill=0.35, hood=None), lay=dict(nf=2, frieze=1.1), roofmat=M('#4b5552', 0.5, 0.3))
@@ -194,7 +214,7 @@ _n1288 = classic_spec(1288, wall='#e2d6aa', trim='#f4f1e8', rust=False, garch=Fa
 SPECK[1288] = classic_spec(1288, wall='#c9675f', trim='#f4f1ea', rust=False, garch=False, hood=None, pil=True, lay=dict(nf=1))
 SPECK[1288]['alt'] = lambda x, y: _n1288 if y > 423.5 else None
 SPECK[1565] = classic_spec(1565, wall='#dcdbe2', trim='#f4f3f2', rust=False, garch=False, hood='cornice', pil=False, lay=dict(nf=2, frieze=1.2), top=dict(ww=0.9, wh=0.55, sill=0.4, hood=None))   # 5 Hallituskatu: pale lilac-grey, 2 storeys + small attic windows (block walk 14.11.2026)
-SPECK[1559] = classic_spec(1559, wall='#c8764e', trim='#f4f1ea', rust=True, garch=True, hood='cornice', pil=True, lay=dict(nf=2), ground=dict(rustc=M('#8f918d')))   # 6 Eteläranta: narrow, rusticated ground floor with three arches, terracotta upper floors with white surrounds (block walk 14.11.2026)
+SPECK[1559] = classic_spec(1559, wall='#c8764e', trim='#f4f1ea', rust=True, garch=True, hood='cornice', pil=True, lay=dict(nf=2), ground=dict(gwall=M('#9b9d99'), rustc=M('#7c7e7a')))   # 6 Eteläranta: narrow, rusticated ground floor with three arches, terracotta upper floors with white surrounds (block walk 14.11.2026)
 SPECK[1567] = classic_spec(1567, wall='#dcc27e', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=True, lay=dict(nf=3))   # 2 Eteläranta: ochre, 3 storeys, white pilasters (block walk 14.11.2026)
 SPECK[1619] = classic_spec(1619, wall='#ece0b4', trim='#f5f2ea', rust=False, garch=False, hood=None, pil=True, bw=3.5, first=dict(arch=True, apron=False, hood=None), top=dict(arch=True), lay=dict(nf=2))   # 4 Hallituskatu / 5 Yrjönkatu: pale yellow, smooth render, round-arched windows upstairs, plain rectangular ground floor, white corner pilasters (Street View 14.11.2026, owner)
 SPECK[1454] = classic_spec(1454, trim='#f7f6f1', rust=False, garch=False, hood='pediment', pil=False, ground=dict(hood='pediment'))   # Teatterikatu: white 1-storey, triangular pediments over the windows (Street View 14.11.2026)
