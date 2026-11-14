@@ -1,2 +1,5 @@
 # MML orthophoto sheets (large; the game gets a converted, cropped JPEG)
 mml_orto/
+# tekstuuripaketit (zipit) ja Clauden tulostekansio eivät kuulu repoon
+tex/*.zip
+Claude outputs/

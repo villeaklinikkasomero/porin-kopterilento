@@ -1,0 +1,29 @@
+# AI textures on Modal (no local Python needed): Actions -> "porikit aitex" -> Run workflow.
+# mode "facade": every tex/ai_in/*.png (our own orthographic building renders) is repainted photorealistic, edges kept by a ControlNet.
+# mode "tiles":  seamless material textures (yellow tiles, washed concrete, roofs ...).
+# The results come back as a pull request (tex/ai/*.png); look at them and merge, or just close it.
+name: porikit aitex
+on:
+  workflow_dispatch:
+    inputs:
+      mode: { description: 'facade tai tiles', required: true, default: 'facade' }
+      only: { description: 'vain yksi (tyhjä = kaikki)', required: false, default: '' }
+      strength: { description: 'kuinka paljon AI saa maalata uudelleen (0.3-0.8)', required: false, default: '0.55' }
+permissions: { contents: write, pull-requests: write }
+jobs:
+  aitex:
+    runs-on: ubuntu-latest
+    env: { MODAL_TOKEN_ID: '${{ secrets.MODAL_TOKEN_ID }}', MODAL_TOKEN_SECRET: '${{ secrets.MODAL_TOKEN_SECRET }}' }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - run: pip install modal && modal run pipeline/aitex.py --mode "${{ inputs.mode }}" --only "${{ inputs.only }}" --strength "${{ inputs.strength }}"
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: aitex/${{ github.run_id }}
+          title: 'AI-tekstuurit (${{ inputs.mode }})'
+          body: 'Modalissa generoidut tekstuurit (pipeline/aitex.py). Katso kuvat, ja yhdistä tai sulje.'
+          commit-message: 'AI-tekstuurit ${{ inputs.mode }}'
+          add-paths: |
+            tex/ai/**
