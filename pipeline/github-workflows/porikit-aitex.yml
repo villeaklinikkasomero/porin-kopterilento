@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       mode: { description: 'facade tai tiles', required: true, default: 'facade' }
-      only: { description: 'vain yksi (tyhjä = kaikki)', required: false, default: '' }
+      only: { description: 'vain nämä: tiedostonimen alku, esim. raati tai b21 (tyhjä = kaikki)', required: false, default: '' }
       strength: { description: 'kuinka paljon AI saa maalata uudelleen (0.3-0.8)', required: false, default: '0.55' }
 permissions: { contents: write, pull-requests: write }
 jobs:

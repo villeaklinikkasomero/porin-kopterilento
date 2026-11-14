@@ -56,7 +56,7 @@ def _png(im):
     b = io.BytesIO(); im.save(b, 'PNG'); return b.getvalue()
 
 
-@app.function(gpu='L4', timeout=1800, region='eu')
+@app.function(gpu=['L4', 'A10', 'L40S'], timeout=1800)   # any region: inputs are our own renders, no photos
 def tiles(names: list[str], variants: int = 2) -> dict:
     import torch
     from diffusers import StableDiffusionXLPipeline
@@ -71,7 +71,7 @@ def tiles(names: list[str], variants: int = 2) -> dict:
     return out
 
 
-@app.function(gpu='L4', timeout=1800, region='eu')
+@app.function(gpu=['L4', 'A10', 'L40S'], timeout=1800)   # any region: inputs are our own renders, no photos
 def facades(items: list[tuple[str, bytes, str]], strength: float = 0.55, control: float = 0.65) -> dict:
     """items: (name, png bytes of our orthographic render, prompt) -> {name_ai.png: bytes, name_canny.png: bytes}"""
     import io, numpy as np, cv2, torch
@@ -99,7 +99,7 @@ def main(mode: str = 'tiles', only: str = '', variants: int = 2, strength: float
     if mode == 'facade':
         src = ROOT / 'tex' / 'ai_in'; items = []
         for p in sorted(src.glob('*.png')):
-            if only and p.stem != only: continue
+            if only and not p.stem.startswith(only): continue      # prefix: 'raati' = all four sides
             t = p.with_suffix('.txt'); prompt = t.read_text(encoding='utf-8').strip() if t.exists() else 'apartment block facade'
             items.append((p.stem, p.read_bytes(), prompt))
         print('facades:', [i[0] for i in items], flush=True)
