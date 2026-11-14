@@ -1,0 +1,50 @@
+KIVI-PORI SV-KARTOITUS (2026-11-14)
+== Eteläranta (B = eteläpuoli; A-puoli on jokiranta) ==
+1447 kl0 punatiili, kaarevat ikkunat: ok (ER00A/03B)
+1450/1512 karhu: LUKITTU, ei muutoksia
+1280 Satakunnan Museo: jokipuolella harmaanbeige betoni/elementti, ei kermankeltainen -> w #b8b1a6 k concrete (ER06B-08B)
+1281 kivi0 (Eteläranta 10, taidemuseon vanha osa): vaalea kermanbeige rappaus, 3 krs, vyöhykelistat -> w #ddd2b2 f3 (ER09B)
+  -> lähempää (ER10B): vaalea keltainen, valkoiset nurkka/välipilasterit, ikkunapielet ja räystäslista -> SPECK pil=True hood=cornice
+1282 = Porin taidemuseo (lm.py 'taidemuseo'): vaalea harmaanvalkoinen rappaus, korkeat kaari-ikkunat/-ovet, pilasterit, räystäslista (ER11B/12B). Tarkista lm-render.
+1280 = lm 'museo'? tarkista lm-render.
+1285 kivi2 (Eteläranta): ei siniharmaa vaan vaalea keltainen 3 krs, kaari-ikkunat maantasossa, valkoiset pielet -> w #e3d8ae f3, SPECK garch hood=cornice pil
+1560 kivi2 (Antinkatu 1 kulma): lohenpunainen, valkoiset pielet, kulmaparveke: ok (SPECK 13.11)
+1566 kivi4 (Eteläranta 4): ikkunalistat ensimmäisessä kerroksessa, porttikaari: ok
+== Hallituskatu ==
+1563 kivi2: keltainen 2 krs valkoisin pielin (ei valkoinen) -> w #e6cf8f, SPECK hood=cornice
+1565 kivi2: valkoinen 2 krs -> w #ebe9e2
+1572 kivi4: hiekanbeige, erkkeri/kulmatorni - ok väri
+1578 kivi3: matala 1-krs keltainen (h 4.7) ok
+RAATIHUONE (lm raati): kellotorni keltaiseksi, kellomainen kuparikatto + lyhty (ei sipulia/parveketta), kuparipatina. -> Modal: landmarks raati
+1286 kivi2: lohenpunainen, 3 krs -> f3; 1565 vaalean liilanharmaa -> #dcdbe1; 1287 luonnonvalkoinen 2 krs pääty ok
+1284 kivi0 Heinen talo: maantasossa vaakarustiikka + kaari-ikkunat, yläkerrassa kolmiofrontonit -> SPECK rust garch pediment; kulmatornin tumma kupoli puuttuu mallista (LoD2?)
+1358 = lm teatteri: vaalea keltainen, valkoiset pielet, kaari-ikkunat: ok
+1280 = lm museo #a9a294: ok
+1447 kl0 vanha punatiilitalo (kaari-ikkunat, vaaleat pielet, päätykoristeet): oli moderni laatikko -> SPECK classic garch
+== Antinkatu ==
+1604 kivi3 jugend: vaalea keltaokra, ikkunoiden yllä tiilenpunaiset kaarevat otsalistat + lakikivet joka kerroksessa -> trim #b0603f hood=cornice myös ylin krs, w #e5d29c
+1577 kivi1: okranruskea 2 krs (oli tumma violetti) -> #d4a86c
+1574 kivi1: matala kermanvaalea, ok
+1563: Antinkatu-puoli VALKOINEN (AN03A 8 m) -> palautettu #ebe8df; Hallituskadun pää keltainen -> uusintakierrokseen (kaksi taloa yhdessä kuoressa?)
+1575 kivi1 (Antinkatu/Hallituskatu, Martela): keltainen, kaari-ikkunat maantasossa, valkoiset nurkkarustiikat: väri ok
+1572 kivi4: keltaokra, valkoinen nurkkarustiikka ja vaakalistat, kaari-ikkunat: ok
+1573 kivi4: matala keltainen + pylväsportiikki: ok
+1561 kivi2 valkoinen 1-krs päätytalo; 1562 valkoinen 2-krs (ennen satunnaisvärit) -> styles + SPECK yksinkertaiset
+1569 (-): beige 1960-70-luvun 2-krs nauhaikkunat -> #e4d9bd
+== Teatterikatu ==
+1454 kivi0: valkoinen 1-krs, kolmiofrontonit (oli harmaa) -> #eeede6 f1 SPECK pediment
+1284 Heinen: auringossa lähes valkoinen -> #e9e4d6
+1281: auringossa hyvin vaalea -> #e2dcbc
+== S. Palmgreninkatu ==
+1292 kivi1: keltainen 1-krs, valkoiset ikkunapielet + suorat otsalistat, nurkkapilasterit -> SPECK hood=cornice pil, w #e3c26c
+1287 kivi2: kermanvalkea -> #e3ddc8; 1288 kivi2: punertava/lohenpun. matala talo (oli harmaa) -> #d4877a; 1289 kivi2: luonnonvalkoinen parvekkeellinen -> #ebe6d8
+== Otavankatu ==
+1310 kl1: 1960-l. beige kerrostalo, ok
+1308 kivi0: valkoinen puutalo (ei keltainen) -> #ede8da
+1297 kl1: vaaleanruskea tiili toimistotalo -> #cdb498 brick
+== Omistajan palaute 14.11 (pari-kuvat) ==
+- kerrosmäärät: styles f=1 piirsi silti 2 ikkunariviä korkeaan LoD2-seinään -> klay: f=1 = yksi kerros (1292, 1454, 1573, 1574 ...)
+- 1573 Antinkatu: 1-krs, ei kaari-ikkunoita (SPECK). Pylväin reunustettu kaariportti EI vielä mallissa.
+- 1284 Heinen talo: kulmatorni puuttui -> kivi.py corner_tower (pyöreä torni, tumma sipulimainen ogee-kupoli + huippu) Hallituskatu/Teatterikatu-kulmaan
+- kivijalka: uusi styles-avain 'pl' (maalattu sokkeli); asetettu 1563 (keltainen), 1575 (tiilenpunainen), 1574 (harmaa). Muut vielä graniitinharmaa -> käydään läpi
+- 1566 (Eteläranta 4/Antinkatu 2): kaari-ikkunat poistettu (suorakaide + otsalistat). 1573 matala talo on 1566:n LoD2-kuoren sisällä -> kuori piirtää sen 2-kerroksisena; korjaus vaatii kuoren leikkaamisen (uusintakierros)

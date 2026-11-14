@@ -58,6 +58,29 @@ def mat(name, hexs, rough=0.85, metal=0.0, tex=None, col2=None):
         cr = nt.nodes.new('ShaderNodeValToRGB'); cr.color_ramp.elements[0].position = 0.0; cr.color_ramp.elements[0].color = (*[c * 0.62 for c in rgb], 1)
         cr.color_ramp.elements[1].position = 0.35; cr.color_ramp.elements[1].color = (*rgb, 1)
         nt.links.new(cb.outputs[0], w.inputs['Vector']); nt.links.new(w.outputs['Fac'], cr.inputs['Fac']); nt.links.new(cr.outputs['Color'], b.inputs['Base Color'])
+    if tex == 'patina':                                    # weathered copper (Raatihuone, 14.11.2026): mottled green patina, darker
+        # streaks running down the slope and standing seams every ~0.6 m - the flat single green read as plastic next to the AI test
+        tc = nt.nodes.new('ShaderNodeTexCoord')
+        nz = nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 0.35; nz.inputs['Detail'].default_value = 8; nz.inputs['Roughness'].default_value = 0.62
+        nt.links.new(tc.outputs['Object'], nz.inputs['Vector'])
+        cr = nt.nodes.new('ShaderNodeValToRGB'); e = cr.color_ramp.elements
+        e[0].position = 0.36; e[0].color = (*lin('#4d7a6b'), 1); e[1].position = 0.68; e[1].color = (*lin('#9ccbb8'), 1)
+        mid = e.new(0.52); mid.color = (*rgb, 1)
+        nt.links.new(nz.outputs['Fac'], cr.inputs['Fac'])
+        mp = nt.nodes.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (1.6, 1.6, 0.12); nt.links.new(tc.outputs['Object'], mp.inputs['Vector'])
+        st = nt.nodes.new('ShaderNodeTexNoise'); st.inputs['Scale'].default_value = 1.4; st.inputs['Detail'].default_value = 3; nt.links.new(mp.outputs['Vector'], st.inputs['Vector'])
+        sr = nt.nodes.new('ShaderNodeValToRGB'); sr.color_ramp.elements[0].position = 0.45; sr.color_ramp.elements[0].color = (0.72, 0.74, 0.73, 1)
+        sr.color_ramp.elements[1].position = 0.62; sr.color_ramp.elements[1].color = (1, 1, 1, 1); nt.links.new(st.outputs['Fac'], sr.inputs['Fac'])
+        sx = nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(tc.outputs['Object'], sx.inputs[0])
+        ad = nt.nodes.new('ShaderNodeMath'); ad.operation = 'ADD'; nt.links.new(sx.outputs['X'], ad.inputs[0]); nt.links.new(sx.outputs['Y'], ad.inputs[1])
+        cb = nt.nodes.new('ShaderNodeCombineXYZ'); nt.links.new(ad.outputs[0], cb.inputs['X'])
+        w = nt.nodes.new('ShaderNodeTexWave'); w.bands_direction = 'X'; w.inputs['Scale'].default_value = 1.15; w.inputs['Distortion'].default_value = 0; nt.links.new(cb.outputs[0], w.inputs['Vector'])
+        wr = nt.nodes.new('ShaderNodeValToRGB'); wr.color_ramp.elements[0].position = 0.0; wr.color_ramp.elements[0].color = (0.62, 0.66, 0.64, 1)
+        wr.color_ramp.elements[1].position = 0.1; wr.color_ramp.elements[1].color = (1, 1, 1, 1); nt.links.new(w.outputs['Fac'], wr.inputs['Fac'])
+        m1 = nt.nodes.new('ShaderNodeMix'); m1.data_type = 'RGBA'; m1.blend_type = 'MULTIPLY'; m1.inputs['Factor'].default_value = 1.0
+        nt.links.new(cr.outputs['Color'], m1.inputs[6]); nt.links.new(sr.outputs['Color'], m1.inputs[7])
+        m2 = nt.nodes.new('ShaderNodeMix'); m2.data_type = 'RGBA'; m2.blend_type = 'MULTIPLY'; m2.inputs['Factor'].default_value = 1.0
+        nt.links.new(m1.outputs[2], m2.inputs[6]); nt.links.new(wr.outputs['Color'], m2.inputs[7]); nt.links.new(m2.outputs[2], b.inputs['Base Color'])
     if tex == 'rust':                                      # horizontal rustication joints
         tc = nt.nodes.new('ShaderNodeTexCoord'); sx = nt.nodes.new('ShaderNodeSeparateXYZ'); nt.links.new(tc.outputs['Object'], sx.inputs[0])
         w = nt.nodes.new('ShaderNodeTexWave'); w.bands_direction = 'Z'; w.inputs['Scale'].default_value = 0.42; w.inputs['Distortion'].default_value = 0
@@ -414,21 +437,41 @@ elif KEY == 'raati':
     extrude([c0 - U * (W + 0.3) + Vector((0, 0, h - 0.1)), c0 + U * (W + 0.3) + Vector((0, 0, h - 0.1)), c0 + Vector((0, 0, h + 2.5))], R * 1.5, 'white')
     extrude([c0 - U * (W - 0.9) + Vector((0, 0, h + 0.2)), c0 + U * (W - 0.9) + Vector((0, 0, h + 0.2)), c0 + Vector((0, 0, h + 1.95))], R * 1.56, 'plaster')
     top = h + rise - 0.6; cc = (C.x, C.y)
-    obox(cc, U, 2.2, 2.2, top, top + 5.2, 'white')
-    for i in range(4):
-        n = (U, R, -U, -R)[i]; u2 = Vector((-n.y, n.x, 0)); o = C + n * 2.2
-        extrude([o + u2 * (1.05 * math.cos(t)) + Vector((0, 0, top + 3.4 + 1.05 * math.sin(t))) for t in [k * math.pi / 10 for k in range(20)]], n * 0.1, 'dark')
-        extrude([o + u2 * (0.85 * math.cos(t)) + Vector((0, 0, top + 3.4 + 0.85 * math.sin(t))) for t in [k * math.pi / 10 for k in range(20)]], n * 0.14, 'clock')
-    obox(cc, U, 2.9, 2.9, top + 5.2, top + 5.5, 'white')
+    # Clock tower (owner's photo + Street View, 14.11.2026): a low square base rising from the roof with an iron-railed balcony on
+    # top, above it a tall narrow YELLOW clock stage (about twice as high as wide) with white corner pilasters, an arched window under
+    # the clock, small finials at the corners, a ribbed green bell roof, a small green lantern with windows, a little cap and a spire.
+    obox(cc, U, 2.6, 2.6, top, top + 2.3, 'plaster')                           # base
+    obox(cc, U, 2.95, 2.95, top + 2.3, top + 2.55, 'white')                    # balcony floor
     for i in range(4):                                                         # balcony railing
         n = (U, R, -U, -R)[i]; u2 = Vector((-n.y, n.x, 0))
-        for k in range(7): obox((C + n * 2.8 + u2 * (-2.7 + 0.9 * k))[:2], U, 0.05, 0.05, top + 5.5, top + 6.4, 'dark')
-        extrude([C + n * 2.8 + u2 * s + Vector((0, 0, z)) for s, z in ((-2.8, top + 6.35), (2.8, top + 6.35), (2.8, top + 6.45), (-2.8, top + 6.45))], n * 0.08, 'dark')
-    frustum(cc, 1.6, 1.5, top + 5.5, top + 9.0, 8, 'white', math.pi / 8)
+        for k in range(9): obox((C + n * 2.88 + u2 * (-2.8 + 0.7 * k))[:2], U, 0.04, 0.04, top + 2.55, top + 3.45, 'dark')
+        extrude([C + n * 2.88 + u2 * s_ + Vector((0, 0, z)) for s_, z in ((-2.9, top + 3.4), (2.9, top + 3.4), (2.9, top + 3.5), (-2.9, top + 3.5))], n * 0.07, 'dark')
+    z1 = top + 9.4; HS = 1.75                                                  # clock stage
+    obox(cc, U, HS, HS, top + 2.55, z1, 'plaster')
+    for i in range(4):
+        n = (U, R, -U, -R)[i]; u2 = Vector((-n.y, n.x, 0)); o = C + n * HS
+        extrude([o + u2 * (0.82 * math.cos(t)) + Vector((0, 0, z1 - 1.5 + 0.82 * math.sin(t))) for t in [k * math.pi / 10 for k in range(20)]], n * 0.1, 'white')
+        extrude([o + u2 * (0.68 * math.cos(t)) + Vector((0, 0, z1 - 1.5 + 0.68 * math.sin(t))) for t in [k * math.pi / 10 for k in range(20)]], n * 0.14, 'clock')
+        window(o, u2, n, 0.75, 1.7, top + 4.3, arch=True, frame='white', glass='dark')
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            pc = C + U * sx * (HS - 0.15) + R * sy * (HS - 0.15)
+            obox(pc[:2], U, 0.24, 0.24, top + 2.55, z1, 'white')
+            frustum(pc[:2], 0.18, 0.18, z1 + 0.3, z1 + 0.65, 8, 'white'); frustum(pc[:2], 0.18, 0.02, z1 + 0.65, z1 + 1.15, 8, 'white')
+    obox(cc, U, HS + 0.22, HS + 0.22, z1, z1 + 0.3, 'white')                  # cornice of the clock stage
+    rot = math.atan2(U.y, U.x) + math.pi / 8; R0 = (HS + 0.1) / math.cos(math.pi / 8); RL = 0.6; HD = 2.1; z0 = z1 + 0.3
+    prof = [(t / 6, RL + (R0 - RL) * math.sqrt(max(0.0, 1 - (t / 6) ** 1.6))) for t in range(7)]   # convex bell, full width at the eaves
+    for (t0, r0), (t1, r1) in zip(prof, prof[1:]): frustum(cc, r0, r1, z0 + HD * t0, z0 + HD * t1, 8, 'copper', rot)
+    zl = z0 + HD
+    frustum(cc, RL, RL, zl, zl + 1.2, 8, 'copper', rot)                          # lantern
     for i in range(8):
-        a = math.pi / 4 * i; n = Vector((math.cos(a), math.sin(a), 0)); window(C + n * 1.45, Vector((-n.y, n.x, 0)), n, 0.6, 2.0, top + 6.3, arch=True, frame=None, glass='dark')
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=16, ring_count=10, radius=1.9, location=(C.x, C.y, top + 9.7)); d = bpy.context.object; d.scale = (1, 1, 0.95); d.data.materials.append(MATS['copper']); objs.append(d)
-    frustum(cc, 0.9, 0.5, top + 11.2, top + 12.4, 8, 'copper'); frustum(cc, 0.5, 0.03, top + 12.4, top + 15.6, 8, 'copper')
+        a = rot + math.pi / 8 + math.pi / 4 * i; n = Vector((math.cos(a), math.sin(a), 0))
+        window(C + n * (RL * math.cos(math.pi / 8) + 0.01), Vector((-n.y, n.x, 0)), n, 0.22, 0.65, zl + 0.28, arch=True, frame=None, glass='dark')
+    frustum(cc, RL + 0.1, RL + 0.1, zl + 1.2, zl + 1.32, 8, 'copper', rot)
+    frustum(cc, 0.5, 0.42, zl + 1.32, zl + 1.75, 8, 'copper', rot); frustum(cc, 0.42, 0.1, zl + 1.75, zl + 2.4, 8, 'copper', rot)   # small cap
+    frustum(cc, 0.06, 0.01, zl + 2.4, zl + 4.6, 6, 'dark')                       # spire with the weathervane rod
+    boxc((C.x, C.y, zl + 3.9), (0.9, 0.04, 0.35), 'dark')
+    # spire
 elif KEY == 'kaupungintalo':
     M('rust', '#8d7f70', tex='rust'); M('diamond', '#c87850', tex='diamond', col2='#dc9a72'); M('sand', '#e3d2b8'); h = 17.0; ROOF_IN_MODEL = True
     walls(offset(P, 0.16), 0, 1.1, 'granite'); cap(offset(P, 0.16), 1.1, 'granite'); walls(offset(P, 0.08), 1.1, 6.2, 'rust'); cap(offset(P, 0.08), 6.2, 'sand'); walls(P, 6.2, h, 'diamond')
@@ -654,7 +697,9 @@ scene.render.engine = 'CYCLES'; scene.cycles.device = 'CPU'; sys.path.insert(0, 
 
 if STILL:
     cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam')); scene.collection.objects.link(cam); scene.camera = cam; cam.data.lens = 30; cam.data.clip_end = 3000
-    rad = max(O['a'], O['b']) * 2.2 + 30; pos = Vector((rad * 0.55, -rad, rad * 0.45)); tgt = Vector((0, 0, 8)); cam.location = pos; cam.rotation_euler = (tgt - pos).to_track_quat('-Z', 'Y').to_euler()
+    rad = max(O['a'], O['b']) * 2.2 + 30; pos = Vector((rad * 0.55, -rad, rad * 0.45)); tgt = Vector((0, 0, 8))
+    if os.environ.get('PORI_STILL_CAM'): q = [float(v) for v in os.environ['PORI_STILL_CAM'].split(',')]; pos, tgt = Vector(q[:3]), Vector(q[3:])   # close-up check
+    cam.location = pos; cam.rotation_euler = (tgt - pos).to_track_quat('-Z', 'Y').to_euler()
     scene.render.resolution_x, scene.render.resolution_y = 1000, 640; scene.cycles.samples = 32; scene.cycles.use_denoising = True
     scene.render.image_settings.file_format = 'JPEG'; scene.render.image_settings.quality = 85
     scene.render.filepath = OUT + '/still_%s.jpg' % KEY; bpy.ops.render.render(write_still=True)

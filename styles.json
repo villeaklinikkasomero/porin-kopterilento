@@ -3943,19 +3943,21 @@
 "r": "#3f4246"
 },
 "1280": {
-"w": "#e3d6b6",
-"k": "render",
+"w": "#b8b1a6",
+"k": "concrete",
 "f": 3,
 "r": "#3f4246",
-"note": "Y-pakki: Satakunnan Museo, Hallituskatu 11, 1973",
-"y": 1973
+"note": "Y-pakki: Satakunnan Museo, Hallituskatu 11, 1973; jokipuoli harmaanbeige betoni (SV 14.11.2026)",
+"y": 1973,
+"sv": 1
 },
 "1281": {
-"w": "#9da1a1",
-"m": 1,
+"w": "#e2dcbc",
 "k": "render",
 "r": "#74787b",
-"f": 2
+"f": 3,
+"note": "Eteläranta 10: kermanbeige rappaus, 3 krs (SV 14.11.2026)",
+"sv": 1
 },
 "1282": {
 "w": "#818490",
@@ -3981,38 +3983,42 @@
 "sv": 1
 },
 "1285": {
-"w": "#8791a1",
-"m": 1,
+"w": "#e3d8ae",
 "k": "render",
 "r": "#74787b",
-"f": 2
+"f": 3,
+"note": "Eteläranta: vaalea keltainen 3-krs, kaari-ikkunat maantasossa, valkoiset pielet, kulmaparveke (SV ER13B/14B 14.11.2026)",
+"sv": 1
 },
 "1286": {
 "w": "#d98f7a",
 "k": "render",
 "r": "#b9bbb9",
-"f": 2,
-"sv": 1
+"f": 3,
+"sv": 1,
+"note": "lohenpunainen 3 krs (SV HA09B 14.11.2026)"
 },
 "1287": {
-"w": "#d9d2bd",
+"w": "#e3ddc8",
 "k": "render",
 "r": "#b9bbb9",
 "f": 2,
 "sv": 1
 },
 "1288": {
-"w": "#c2c1c0",
-"m": 1,
+"w": "#d4877a",
 "k": "render",
 "r": "#b9bbb9",
-"f": 2
+"f": 2,
+"note": "vaaleanpunertava 1-krs, valkoiset pielet (SV SP04B 14.11.2026)",
+"sv": 1
 },
 "1289": {
-"w": "#b1acb5",
-"m": 1,
+"w": "#ebe6d8",
 "k": "render",
-"r": "#b9bbb9"
+"r": "#b9bbb9",
+"note": "luonnonvalkoinen, parvekkeet (SV SP04B 14.11.2026)",
+"sv": 1
 },
 "1291": {
 "w": "#a85a42",
@@ -4022,7 +4028,7 @@
 "y": 1894
 },
 "1292": {
-"w": "#dcb658",
+"w": "#e3c26c",
 "k": "render",
 "r": "#b5553a",
 "f": 1,
@@ -4042,13 +4048,14 @@
 "f": 2
 },
 "1297": {
-"w": "#e3dccd",
-"k": "render",
+"w": "#cdb498",
+"k": "brick",
 "f": 5,
 "r": "#b9bbb9",
 "w2": "#9a4a3a",
 "s2": 0.25,
-"sv": 1
+"sv": 1,
+"note": "vaaleanruskea tiili, toimistotalo (SV OT01B 14.11.2026)"
 },
 "1298": {
 "w": "#3b3f44",
@@ -4108,12 +4115,13 @@
 "y": 1939
 },
 "1308": {
-"w": "#e6d49e",
+"w": "#ede8da",
 "k": "wood",
 "r": "#74787b",
 "f": 1,
 "u": 1,
-"sv": 1
+"sv": 1,
+"note": "valkoinen puutalo (SV OT00B 14.11.2026)"
 },
 "1309": {
 "w": "#e8dcbc",
@@ -4716,10 +4724,12 @@
 "s2": 0.56
 },
 "1454": {
-"w": "#bfb4b0",
-"m": 1,
+"w": "#eeede6",
 "k": "render",
-"r": "#74787b"
+"r": "#74787b",
+"f": 1,
+"note": "valkoinen 1-krs, ikkunoissa kolmiofrontonit (SV TE01B 14.11.2026)",
+"sv": 1
 },
 "1455": {
 "w": "#a79098",
@@ -5147,17 +5157,19 @@
 "sv": 1
 },
 "1563": {
-"w": "#ebe8df",
+"w": "#e6cf8f",
 "k": "render",
 "f": 2,
 "sv": 1,
-"note": "Street View 13.11.2026: valkoinen 2-kerroksinen rappaustalo (ei keltainen)"
+"note": "Hallituskadun julkisivu keltainen 2-krs valkoisin pielin (SV HA08B, AN02A 14.11.2026); Antinkadun pää näyttää valkoiselta (AN03A) - kaksi taloa yhdessä LoD2-kuoressa?",
+"pl": "#c9b27a"
 },
 "1565": {
-"w": "#c9cbd8",
+"w": "#dcdbe1",
 "k": "render",
 "f": 2,
-"sv": 1
+"sv": 1,
+"note": "valkoinen 2-krs rappaus (SV HA08B 14.11.2026)"
 },
 "1566": {
 "w": "#efe0a8",
@@ -5185,11 +5197,12 @@
 "sv": 1
 },
 "1569": {
-"w": "#9da4b6",
-"m": 1,
+"w": "#e4d9bd",
 "k": "render",
 "r": "#b9bbb9",
-"f": 2
+"f": 2,
+"note": "1960-70-l. beige 2-krs, nauhaikkunat ruskein karmein (SV AN04B 14.11.2026)",
+"sv": 1
 },
 "1571": {
 "w": "#ddcfae",
@@ -5209,7 +5222,8 @@
 "k": "render",
 "r": "#74787b",
 "f": 2,
-"sv": 1
+"sv": 1,
+"pl": "#a0503a"
 },
 "1576": {
 "w": "#a1a0aa",
@@ -5217,9 +5231,11 @@
 "k": "render"
 },
 "1577": {
-"w": "#575569",
-"m": 1,
-"k": "render"
+"w": "#d4a86c",
+"k": "render",
+"f": 2,
+"note": "okranruskea 2 krs (SV AN00A 14.11.2026)",
+"sv": 1
 },
 "1578": {
 "w": "#d9c48e",
@@ -5367,7 +5383,7 @@
 "sv": 1
 },
 "1604": {
-"w": "#e2c878",
+"w": "#e5d29c",
 "k": "render",
 "r": "#b9bbb9",
 "f": 4,
@@ -11237,7 +11253,8 @@
 "w": "#ddd2b4",
 "k": "render",
 "f": 1,
-"sv": 1
+"sv": 1,
+"pl": "#8e9088"
 },
 "1553": {
 "w": "#c9cbcc",
@@ -11850,6 +11867,20 @@
 "3982": {
 "w": "#ecebe6",
 "note": "valkoinen 1,5 krs omakotitalo, tumma katto (SV 13.11.2026)",
+"sv": 1
+},
+"1561": {
+"w": "#ece9e1",
+"k": "render",
+"f": 1,
+"note": "valkoinen 1-krs päätytalo (SV AN04A 14.11.2026)",
+"sv": 1
+},
+"1562": {
+"w": "#efece4",
+"k": "render",
+"f": 2,
+"note": "valkoinen 2-krs (SV AN04A 14.11.2026)",
 "sv": 1
 }
 }
