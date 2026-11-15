@@ -156,7 +156,8 @@ const THG = new Int16Array(TDEC(TER.hg).buffer), THS = new Int16Array(TDEC(TER.h
 function tBil(A, x, y) { const fx = Math.min(TER.nx - 1.001, Math.max(0, (x - TER.x0) / TER.g)), fy = Math.min(TER.ny - 1.001, Math.max(0, (y - TER.y0) / TER.g)), i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j, k = j * TER.nx + i;
   return ((A[k] * (1 - u) + A[k + 1] * u) * (1 - v) + (A[k + TER.nx] * (1 - u) + A[k + TER.nx + 1] * u) * v) / 10; }
 const TZg = (x, y) => tBil(THG, x, y), TZs = (x, y) => tBil(THS, x, y);
-const tSkip = (x, y) => { const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
+const QUAY_MODEL = false;   // 15.11.2026: the MML 2025 aerial photo shows the renewed Eteläranta quay, so its hand-built walk, steps, hedges and railing are off and the ground covers the strip
+const tSkip = (x, y) => { if (!QUAY_MODEL) return false; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
 let gridGeo;
 const WREL = (x, y) => TER.wl - TZs(x, y);          // water level relative to the lifted objects at (x, y)
 const terrainTex = (() => { const n = TER.nx * TER.ny, d = new Uint16Array(n); for (let i = 0; i < n; i++) d[i] = THREE.DataUtils.toHalfFloat(THS[i] / 10);
@@ -236,9 +237,9 @@ const DETB = new THREE.TextureLoader().load('./det_brick.jpg'); DETB.wrapS = DET
 const DETP = new THREE.TextureLoader().load('./det_plaster.jpg'); DETP.wrapS = DETP.wrapT = THREE.RepeatWrapping; DETP.anisotropy = 4;
 function brickify(m) {
   m.onBeforeCompile = sh => { sh.uniforms.detB = { value: DETB }; sh.uniforms.detP = { value: DETP };
-    sh.vertexShader = 'varying vec3 vBW;\nvarying vec3 vBN;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvBW = ( modelMatrix * vec4( position, 1.0 ) ).xyz; vBN = normalize( mat3( modelMatrix ) * normal );');
-    sh.fragmentShader = 'uniform sampler2D detB;\nuniform sampler2D detP;\nvarying vec3 vBW;\nvarying vec3 vBN;\n' + sh.fragmentShader.replace('#include <alphamap_fragment>',
-      '{ vec3 bc = diffuseColor.rgb; float red = clamp( ( bc.r / ( max( bc.g, bc.b ) + 0.015 ) - 1.3 ) * 2.0, 0.0, 1.0 ) * ( 1.0 - abs( vBN.y ) );\n' +
+    sh.vertexShader = 'attribute float tNB;\nvarying float vNB;\nvarying vec3 vBW;\nvarying vec3 vBN;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvNB = tNB; vBW = ( modelMatrix * vec4( position, 1.0 ) ).xyz; vBN = normalize( mat3( modelMatrix ) * normal );');
+    sh.fragmentShader = 'uniform sampler2D detB;\nuniform sampler2D detP;\nvarying float vNB;\nvarying vec3 vBW;\nvarying vec3 vBN;\n' + sh.fragmentShader.replace('#include <alphamap_fragment>',
+      '{ vec3 bc = diffuseColor.rgb; float red = clamp( ( bc.r / ( max( bc.g, bc.b ) + 0.015 ) - 1.3 ) * 2.0, 0.0, 1.0 ) * ( 1.0 - abs( vBN.y ) ) * ( 1.0 - vNB );\n' +
       '  vec2 buv = abs( vBN.x ) > abs( vBN.z ) ? vBW.zy : vBW.xy; float bd = texture2D( detB, buv / 2.2 ).r;\n' +
       '  diffuseColor.rgb *= 1.0 + ( bd - 0.5 ) * 1.7 * red; diffuseColor.r *= 1.0 + ( bd - 0.5 ) * 0.25 * red;\n' +
       '  float mx = max( bc.r, max( bc.g, bc.b ) ), mn = min( bc.r, min( bc.g, bc.b ) ), sat = ( mx - mn ) / ( mx + 0.02 );\n' +
@@ -815,7 +816,8 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
       const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
       new GLTFLoader().parse(buf.buffer, '', gl => {
         gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { map.anisotropy = 8; TEXLOD.add(map, K.x, K.y); } q.material = brickify(glassify(new THREE.MeshBasicMaterial({ map }))); } });
-        const g = new THREE.Group(); g.position.set(K.x, 0, -K.y); g.add(gl.scene); scene.add(g);
+        const g = new THREE.Group(); const L0 = LMB[key]; let z0 = null; if (L0 && L0.pts) { z0 = 1e9; z0 = 0; for (const q of L0.pts) z0 += TZs(q[0], q[1]) / L0.pts.length; if (!isFinite(z0)) z0 = null; }   /* owner 15.11.2026: the Kaupungintalo stood with its stone ground floor under the street - a landmark stands as one piece on the mean ground under it */
+        g.position.set(K.x, z0 === null ? 0 : z0, -K.y); g.add(gl.scene); scene.add(z0 === null ? g : noT(g));
         for (const q of proc) if (K.roof || q.material !== roofMat) scene.remove(q);
         (window.__bl = window.__bl || []).push(key);
       }, () => {});
@@ -1040,7 +1042,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     quad(s2(0, WREL(Q[i][0], Q[i][1]) - 0.4, i), s2(0, WREL(Q[i + 1][0], Q[i + 1][1]) - 0.4, i + 1), s2(0, LOW, i + 1), s2(0, LOW, i), wallc);      // quay wall into the water
   }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(C, 3)); g.computeVertexNormals();
-  scene.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })));
+  if (QUAY_MODEL) scene.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })));
   // walk along the line: railing posts, hedges on the steps, lamps on the street edge
   const segs = []; let tot = 0; for (let i = 0; i + 1 < Q.length; i++) { const L = Math.hypot(Q[i + 1][0] - Q[i][0], Q[i + 1][1] - Q[i][1]); segs.push([tot, L]); tot += L; }
   const along = (d, o) => { let i = 0; while (i < segs.length - 1 && d > segs[i][0] + segs[i][1]) i++; const f = Math.min(1, Math.max(0, (d - segs[i][0]) / segs[i][1]));
@@ -1049,10 +1051,10 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const dark = new THREE.MeshLambertMaterial({ color: 0x2a2d30 }), hedge = new THREE.MeshLambertMaterial({ color: 0x3f6b2f }), M4 = new THREE.Matrix4(), Q4 = new THREE.Quaternion(), V3 = new THREE.Vector3(), S3 = new THREE.Vector3(1, 1, 1), UP = new THREE.Vector3(0, 1, 0);
   const posts = []; for (let d = 1; d < tot - 1; d += 2.2) if (!nearTaavi(d)) posts.push(along(d, 0.25));
   const pm = new THREE.InstancedMesh(new THREE.BoxGeometry(0.07, 1.05, 0.07), dark, posts.length);
-  posts.forEach((p, k) => pm.setMatrixAt(k, M4.compose(V3.set(p[0], LOW + 0.52, -p[1]), Q4.setFromAxisAngle(UP, p[2]), S3))); scene.add(pm);
-  { const rp = []; for (let i = 0; i + 1 < Q.length; i++) { const a = at(i, 0.25), b = at(i + 1, 0.25); for (const h of [LOW + 1.05, LOW + 0.55]) rp.push(a[0], h, -a[1], b[0], h, -b[1]); }
+  posts.forEach((p, k) => pm.setMatrixAt(k, M4.compose(V3.set(p[0], LOW + 0.52, -p[1]), Q4.setFromAxisAngle(UP, p[2]), S3))); if (QUAY_MODEL) scene.add(pm);
+  if (QUAY_MODEL) { const rp = []; for (let i = 0; i + 1 < Q.length; i++) { const a = at(i, 0.25), b = at(i + 1, 0.25); for (const h of [LOW + 1.05, LOW + 0.55]) rp.push(a[0], h, -a[1], b[0], h, -b[1]); }
     const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); scene.add(new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0x222528 }))); }
-  for (let d = 12; d < tot - 20; d += 40) { if (nearTaavi(d) || nearTaavi(d + 22)) continue;
+  if (QUAY_MODEL) for (let d = 12; d < tot - 20; d += 40) { if (nearTaavi(d) || nearTaavi(d + 22)) continue;
     const a = along(d, 5.7), b = along(d + 22, 5.7), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, L = Math.hypot(b[0] - a[0], b[1] - a[1]);
     const hm = new THREE.Mesh(new THREE.BoxGeometry(L, 1.0, 1.5), hedge); hm.position.set(mx, LOW + 0.7 + 0.5, -my); hm.rotation.y = -Math.atan2(b[1] - a[1], b[0] - a[0]); scene.add(hm);
     const bm = new THREE.Mesh(new THREE.BoxGeometry(L + 0.2, 0.5, 1.7), new THREE.MeshLambertMaterial({ color: 0x5c5a56 })); bm.position.set(mx, LOW + 0.7 + 0.1, -my); bm.rotation.y = hm.rotation.y; scene.add(bm); }
@@ -1062,7 +1064,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const cp = new THREE.Mesh(new THREE.ConeGeometry(0.33, 0.3, 6), lampPost); cp.position.set(p[0], 4.9, -p[1]); scene.add(cp); }
   // pontoon jetties with moored boats
   const pont = new THREE.MeshLambertMaterial({ color: 0x9b9890 }), hullM = new THREE.MeshLambertMaterial({ color: 0xf2f2ee }), cabM = new THREE.MeshLambertMaterial({ color: 0x32404a });
-  for (const f of [64, 159, 249]) { const p = along(Math.min(tot - 15, f), 0), ang = p[2], nx = -Math.sin(ang), ny = Math.cos(ang);
+  if (QUAY_MODEL) for (const f of [64, 159, 249]) { const p = along(Math.min(tot - 15, f), 0), ang = p[2], nx = -Math.sin(ang), ny = Math.cos(ang);
     const sgn = inRiver(p[0] + nx * 6, p[1] + ny * 6) ? 1 : -1, L = 24, cx = p[0] + nx * sgn * L / 2, cy = p[1] + ny * sgn * L / 2;
     const pm2 = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.45, L), pont); pm2.position.set(cx, WREL(cx, cy) + 0.2, -cy); pm2.rotation.y = -ang; scene.add(pm2);
     for (const k of [-1, 1]) for (const t of [0.35, 0.75]) { const bx = p[0] + nx * sgn * L * t + Math.cos(ang) * k * 3.4, by = p[1] + ny * sgn * L * t + Math.sin(ang) * k * 3.4;
@@ -1125,13 +1127,13 @@ function liftBlock(gr, shells) {
   gr.updateMatrixWorld(true); const v = new THREE.Vector3();
   const S = (shells || []).map(e => { const rs = e.r || e; const pts = rs.map(r => { const o = []; for (let i = 0; i < r.length; i += 2) o.push([r[i], r[i + 1]]); return o; });
     let m = -1e9; const bb = [1e9, 1e9, -1e9, -1e9]; for (const R of pts) for (const q of R) { m = Math.max(m, TZs(q[0], q[1])); bb[0] = Math.min(bb[0], q[0]); bb[1] = Math.min(bb[1], q[1]); bb[2] = Math.max(bb[2], q[0]); bb[3] = Math.max(bb[3], q[1]); }
-    return { pts, bb, lift: (e.l !== undefined && e.l !== null) ? e.l : m }; });   // e.l: the house's own ground from the bake (lowest ground under it)
+    return { pts, bb, nb: e.nb ? 1 : 0, lift: (e.l !== undefined && e.l !== null) ? e.l : m }; });   // e.l: the house's own ground from the bake (lowest ground under it)
   gr.traverse(q => { if (!q.isMesh) return;
     if (q.geometry.index) q.geometry = q.geometry.toNonIndexed();   // one lift per triangle (its centre decides the house): a wall on a house's edge never shears
-    const P = q.geometry.attributes.position, A = new Float32Array(P.count), w = new THREE.Vector3();
+    const P = q.geometry.attributes.position, A = new Float32Array(P.count), NB = new Float32Array(P.count), w = new THREE.Vector3();
     for (let i = 0; i + 2 < P.count; i += 3) { v.set(0, 0, 0); for (let k = 0; k < 3; k++) v.add(w.fromBufferAttribute(P, i + k)); v.multiplyScalar(1 / 3).applyMatrix4(q.matrixWorld);
-      const h = S.length ? shellAt(S, v.x, -v.z) : null; const r = h ? null : bldAt(v.x, -v.z); A[i] = A[i + 1] = A[i + 2] = h ? h.lift : r ? bLift(r) : TZs(v.x, -v.z); }
-    q.geometry.setAttribute('tLift', new THREE.BufferAttribute(A, 1)); q.material.defines = Object.assign(q.material.defines || {}, { T_LIFT: '' }); });
+      const h = S.length ? shellAt(S, v.x, -v.z) : null; const r = h ? null : bldAt(v.x, -v.z); A[i] = A[i + 1] = A[i + 2] = h ? h.lift : r ? bLift(r) : TZs(v.x, -v.z); if (h && h.nb) NB[i] = NB[i + 1] = NB[i + 2] = 1; }
+    q.geometry.setAttribute('tLift', new THREE.BufferAttribute(A, 1)); q.geometry.setAttribute('tNB', new THREE.BufferAttribute(NB, 1));   /* tNB: rendered brick-red house, no brick bond */ q.material.defines = Object.assign(q.material.defines || {}, { T_LIFT: '' }); });
 }
 function streamUpdate(x, y) {
   if (!CITY_ON) return;

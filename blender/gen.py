@@ -377,6 +377,7 @@ def m_classic(mb, col, P):
     balc = col == 'D' and not P.get('ground') and P.get('balcony')   # door onto a projecting balcony with an iron railing (corner chamfers)
     if col == 'G' and not P.get('ground'): col = 'W'
     if col == 'X': col = 'N' if P.get('ground') else 'W'   # blank bay on the ground floor, window (attic vent) above
+    if col == 'Y': col = 'W' if P.get('ground') else 'N'   # window on the ground floor, blank above (an oriel stands there)
     if col in ('D', 'S') and not P.get('ground'): col = 'W'
     if balc: sill = 0.12; wh = min(fh - 0.12 - (0.75 if P.get('hood') else 0.35), 2.7)
     if P.get('blank'): col = 'N'
@@ -387,6 +388,7 @@ def m_classic(mb, col, P):
     door_hole = None
     if col == 'D':
         dw = min(P.get('dw', 1.7), bw - 0.8)
+        if P.get('darch'): arch = True                                     # an arched entrance in a row of square windows
         # the door sits low in the plinth with stone steps in front (owner 14.11.2026: door bottoms are not at the window sill level);
         # its head lines up with the window heads of the storey
         dz = min(ph, P.get('door_z', 0.5)) if ph > 0.15 else ph

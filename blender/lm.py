@@ -193,6 +193,30 @@ def window(o, u, nrm, w, h, z0, arch=False, frame='stone', glass='glass', fw=0.2
         extrude([o + u * a + Vector((0, 0, z0 + b)) for a, b in ((-0.05, 0), (0.05, 0), (0.05, h * (0.8 if arch else 1)), (-0.05, h * (0.8 if arch else 1)))], nrm * 0.23, frame)
         extrude([o + u * a + Vector((0, 0, z0 + h * 0.62 + b)) for a, b in ((-w / 2, 0), (w / 2, 0), (w / 2, 0.08), (-w / 2, 0.08))], nrm * 0.23, frame)
 
+def gothic_pair(o, u, nrm, w, h, z0, hood='hood', tymp='sand', frame='white', glass='glass'):
+    """Venetian-Gothic bifora (Kaupungintalo): two square-headed lights side by side under one pointed-arch hood with a small finial,
+    a light tympanum between the lights' heads and the hood (owner 15.11.2026: the round arches were wrong)"""
+    o, u, nrm = Vector(o), Vector(u).normalized(), Vector(nrm).normalized(); g = 0.18; W = 2 * w + g
+    for s_ in (-1, 1):
+        c = o + u * s_ * (w / 2 + g / 2)
+        extrude(shape(c, u, w + 0.16, h + 0.08, z0 - 0.08, False, -0.03, nrm), nrm * 0.14, frame)
+        extrude(shape(c, u, w, h, z0, False, -0.03, nrm), nrm * 0.19, glass)
+    extrude([o + u * a_ + Vector((0, 0, z0 + b_)) for a_, b_ in ((-W / 2 - 0.15, -0.22), (W / 2 + 0.15, -0.22), (W / 2 + 0.15, 0), (-W / 2 - 0.15, 0))], nrm * 0.26, frame)
+    R = W * 0.62; zs = z0 + h + 0.08; n = 6                                   # pointed arch: two arcs of radius R from the opposite springers
+    def arc(r, k=0.0):
+        L = [(-W / 2 - k + r * (1 - math.cos(t)) , r * math.sin(t)) for t in [math.acos((r - W / 2 - k) / r) * i / n for i in range(n + 1)]]
+        return L
+    left = [(-(W / 2 + 0.0) + R - R * math.cos(t), R * math.sin(t)) for t in [i / n * math.acos((R - W / 2) / R) for i in range(n + 1)]]
+    apex = left[-1][1]
+    inner = left + [(-x, z) for x, z in reversed(left[:-1])]
+    extrude([o + u * x + Vector((0, 0, zs + z)) for x, z in inner], nrm * 0.12, tymp)        # tympanum
+    out = [(x * (W / 2 + 0.22) / (W / 2), z * (apex + 0.3) / apex) for x, z in inner]     # hood moulding: the arch widened and raised
+    band = [(x, z) for x, z in out] + [(x, z) for x, z in reversed(inner)]
+    for k in range(len(inner) - 1):
+        q = [inner[k], inner[k + 1], out[k + 1], out[k]]
+        extrude([o + u * x + Vector((0, 0, zs + z)) for x, z in q], nrm * 0.2, hood)
+    extrude([o + u * x + Vector((0, 0, zs + apex + 0.3 + z)) for x, z in ((-0.12, 0), (0.12, 0), (0.0, 0.55))], nrm * 0.2, hood)   # finial
+
 def edges(pts):
     n = len(pts)
     for i in range(n):
@@ -473,11 +497,15 @@ elif KEY == 'raati':
     boxc((C.x, C.y, zl + 3.9), (0.9, 0.04, 0.35), 'dark')
     # spire
 elif KEY == 'kaupungintalo':
-    M('rust', '#8d7f70', tex='rust'); M('diamond', '#c87850', tex='diamond', col2='#dc9a72'); M('sand', '#e3d2b8'); h = 17.0; ROOF_IN_MODEL = True
+    M('rust', '#a39c90', tex='rust'); M('diamond', '#d8ad86', tex='diamond', col2='#c47a58'); M('sand', '#e6dccb'); M('hood', '#a8553d'); M('white', '#efebe2'); h = 17.0; ROOF_IN_MODEL = True   # owner 15.11.2026: buff brick with red lozenges, light grey stone base
     walls(offset(P, 0.16), 0, 1.1, 'granite'); cap(offset(P, 0.16), 1.1, 'granite'); walls(offset(P, 0.08), 1.1, 6.2, 'rust'); cap(offset(P, 0.08), 6.2, 'sand'); walls(P, 6.2, h, 'diamond')
     ledge(P, 0.3, 5.9, 6.3, 'sand'); ledge(P, 0.18, 11.3, 11.6, 'sand'); ledge(P, 0.7, h - 0.9, h, 'sand'); ledge(P, 0.35, h - 1.5, h - 0.9, 'rust')
     windows(offset(P, 0.08), 1.1, 5.1, 1, 3.4, 1.3, 3.0, sill=1.2, arch=True, frame='sand')
-    windows(P, 6.2, 5.2, 2, 3.4, 0.75, 2.7, sill=1.1, arch=True, frame='sand', pair=True, mull=False)
+    for a, u, nrm, L in edges(P):                                                  # upper floors: Venetian-Gothic biforas
+        if L < 2.0: continue
+        n = max(1, round(L / 3.4)); step = L / n
+        for k in range(n):
+            for f in range(2): gothic_pair(a + u * (step * (k + 0.5)), u, nrm, 0.62, 2.15, 6.2 + f * 5.2 + 1.0)
     hip(P, 3.0, h, 0.9, 'roofdark', eave=0.75)
 elif KEY == 'teatteri':
     M('plaster', '#ecd9a0'); classic('plaster', 12.5, 2, 3.6, 1.35, 3.3, True, pil=True)

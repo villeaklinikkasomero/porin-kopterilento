@@ -96,3 +96,18 @@ OPPI: Modal-baken tulos ei sisällä muutoksia, joita ei ole puskettu GitHubiin 
 1562: 1 krs korkealla kivijalalla, sileä seinä räystääseen (omistaja: "yksitasoinen, korkea kivijalka").
 1559 (6 Eteläranta): vaalea kivi / oranssi ~50/50 (omistaja), ullakkofriisi pienin ikkunoin, kolme kaariaukkoa ovi-ikkuna-ovi.
 Avoimet: 1573 yllä tumma katon jäänne; 2 Antinkadun katto (harmaa loiva pelti) ja liian korkea sokkeli; keskikaaren koko 1559.
+
+== 15.11.2026 Hallituskadun eteläpuoli (S. Palmgreninkatu – Antinkatu), rautalanka ==
+1291 Kaupungintalo (lm kaupungintalo, EI kivi-lohkossa): 3 krs; harmaa kivi-pohjakerros kaari-ikkunoin + kaarioven molemmin puolin koristepaneelit;
+     2 yläkerrosta buffi tiili punaisin vinoneliöin, ikkunaparit terävän (venetsialaisgoottilaisen) kaaren alla + pieni huippukoriste. Malli korjattu,
+     ovi puuttuu. Maamerkki oli 6 m kadun alla -> index.html: maamerkit noT + maaston keskikorkeus.
+muuri: vaalea rapattu ~2,3 m muuri Hallituskadun varressa 1576:n länsipäästä Kaupungintalon itäkulmaan (kivi.py 1576 extra 'wall').
+1295/1343/1622: puutarhan matalat rakennukset muurin takana (ei tarkistettu lähempää).
+1576 7 Hallituskatu (SV-osoite 5 Hallituskatu -pano): 1 krs, tiilenpunainen RAPATTU (ei tiili, omistaja), 5 suorakaideikkunaa valkoisin pielin,
+     3 tuuletusaukkoa räystäslistan alla, 2 piippua, tummanharmaa loiva aumakatto. LoD2-räystäs heitteli 6,0-7,0 -> tasattu 6,3.
+1575 5 Antinkatu / Hallituskatu: keltainen 2 krs; Antinkadulla 8 akselia, EI ovea; maantasossa isot kaari-ikkunat matalan tiilenpunaisen sokkelin
+     päällä; yläkerrassa kehystetyt ikkunat + otsalistat, pilasterit; ullakkoikkuna jokaisen akselin yllä. Hallituskadun pääty 3 akselia.
+     1575-1576 välissä valkoinen kaariporttimuuri, vaalea puuportti.
+OPPI: Pelin tiilikuvio (brickify) ja gen.py:n detail_kind tunnistavat tiilen VÄRISTÄ -> rapattu punainen talo tarvitsee nobrick + MT(...,'plaster').
+OPPI: outo pinta -> tools/rautalanka/bake_faces.py ja scene_meshes.mjs kertovat mistä se tulee ennen kuin arvaa.
+OPPI: omistaja katsoo myös irralliset muurit, portit, katon värin ja ullakkoikkunat - tarkista ne jokaisesta näkymästä.

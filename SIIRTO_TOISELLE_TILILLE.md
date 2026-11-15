@@ -1,4 +1,4 @@
-# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 14.11.2026 klo 23; uusin tila ja työtapa: osio "14.11.2026 – ALOITA TÄSTÄ" lopussa)
+# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 15.11.2026; UUSIN TILA: osio "15.11.2026 – ALOITA TÄSTÄ" aivan lopussa)
 
 Liitä tämä tiedosto uuden keskustelun alkuun. Pyydä Claudea lukemaan myös repon `SIIRTO.md`, `pipeline/README.md` ja `HANDOFF_Y-PAKKI.md` (jos repossa).
 Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
@@ -374,3 +374,90 @@ Tarkemmat havainnot: `audit/kivipori_notes.txt` (lopussa TYÖOHJE: rautalanka-ve
   Katariinankatu, Vapaudenkatu).
 - **Ajamatta (käyttäjä):** commit + push, sitten `porikit run` → `bake kivi2 kivi4` (paikalliset 8 näytteen baket ovat jo kansiossa);
   myöhemmin muut kivi-lohkot uudelleen, jotta vino kivijalka (shells + skirt) tulee niihinkin.
+
+
+## 15.11.2026 – ALOITA TÄSTÄ (viikon tauko; jatko toisella tilillä)
+Lue ensin tämä osio, sitten 14.11-osio yllä ja `audit/kivipori_notes.txt` (lopussa korttelikohtaiset havainnot).
+
+### Pysyvät säännöt (käyttäjä)
+- Vastaa suomeksi ja lyhyesti. Näytä muutoksesta aina kuva (peli + rautalanka). Älä ole tyytyväinen ennen kuin rautalanka osuu.
+- API-avaimia tai GitHub-salaisuuksia ei käsitellä. Push ja Modal-ajot tekee käyttäjä (GitHub Desktop / GitHub Actions → porikit run).
+- Street View-, kaupungin- ja Y-pakin kuvia EI viedä GitHubiin eikä peliin. Niistä luetaan vain värit, materiaalit ja muodot.
+  SV:tä sisältävät rautalankakuvat saa tallentaa vain kansioon `Claude outputs/` (gitignore).
+- Lukittuja ei muuteta kysymättä: KARHU-värit (kivi.py), Airionkulman 603/602/604 valokuvajulkisivut.
+- Säästä rahaa: Modalissa ajetaan vain muuttuneet lohkot; kokeilut bakeataan paikallisesti 8 näytteellä.
+- Tunnista talo AINA osoitteesta ja projisoidusta ID:stä (`tools/rautalanka/svlabel.py`) ennen kuin muutat sitä.
+- Lataukset vain luvalla, tiedostojen poisto käyttäjän koneelta vain luvalla.
+
+### Rautalanka – miten se on rakennettu (tools/rautalanka/)
+Idea: Street View -kuva ja peli kuvataan TÄSMÄLLEEN samasta paikasta, suunnasta, kallistuksesta ja kuvakulmasta. Pelikuvan reunat
+piirretään punaisena SV-kuvan päälle. Kun punaiset viivat osuvat oikean talon ikkunoihin, räystääseen ja sokkeliin, malli on oikein.
+
+1. **SV-kuva paikasta, jonka koordinaatit tiedät.** Laske pelikoordinaateista lat/lon:
+   `lon = 21.796 + x/53278`, `lat = 61.486 + y/111437` (peli: `x = (lon-21.796)*53278`, `y = (lat-61.486)*111437`; city.js `p` on desimetreinä).
+   Avaa selaimessa (sovelluksen sisäinen selain, viewport 1280×720):
+   `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=LAT,LON&heading=SUUNTA&pitch=KALLISTUS&fov=90`
+   – tämä muoto hyppää lähimpään panoraamaan (pelkkä `@LAT,LON,3a,...`-URL jää usein mustaksi).
+   Odota 4–5 s, lue panoraaman TODELLINEN paikka osoiteriviltä (`@61.4891517,21.7963296,12a,80y,200h,95t`) ja ota kuvakaappaus
+   (scale 1 → 800×450, scale 0.6 → 480×270). **`80y`/`90y` on PYSTYSUUNTAINEN kuvakulma**, `95t` = 5° ylöspäin (`90t` = vaaka).
+2. **Näkymä JSON:iin** pelikoordinaateissa (esimerkki `tools/rautalanka/examples/hallituskatu_etela.json`):
+   `{"k":"H1576b","x":17.5,"y":351.4,"h":200,"p":5,"fov":80,"ch":2.5}` – x,y = panon todellinen paikka, h = suunta, p = kallistus (95t → 5),
+   fov = pystykulma (y-luku), ch = kameran korkeus maasta (SV ≈ 2.5 m). `back` (m) siirtää kameraa taaksepäin.
+3. **Pelikuva:** `ZONE=kivi1 node tools/rautalanka/gshot_sv.mjs index.html ulos/ näkymät.json` (paikallinen `python3 -m http.server 8765`
+   pelikansiossa; playwright + swiftshader). Skripti siirtää helikopterin paikalle, odottaa katulohkot ja korttelin baken (`window.__bl`
+   sisältää ZONE-nimen) ja asettaa kameran: `z = TZs(x,y) + ch`. Ilman odotusta kuvaan jää karkea varaseinä.
+4. **Rautalanka:** `python3 tools/rautalanka/ov.py SV.jpg peli.jpg ulos.jpg` → ylhäällä pelikuva, alhaalla SV-kuva + mallin reunat
+   (Pillow FIND_EDGES, kynnys 40, punainen). Kaikki kerralla: `ZONE=kivi1 tools/rautalanka/runov.sh näkymät.json koonti.jpg H1576b:/polku/sv.jpg ...`
+5. **ID:t kuvaan:** `python3 tools/rautalanka/svlabel.py sv.jpg LAT LON SUUNTA KALLISTUS ulos.jpg [id...]` piirtää city.js-pohjat ja ID:t SV-kuvaan.
+   Toinen variantti `wire.py` projisoi kivi.py:n LoD2-seinät ja julkisivurivit suoraan (ei tarvitse pelikuvaa).
+6. **Diagnostiikka, kun pinta on outo:** `bake_faces.py bl_kivi1.js xmin xmax ymin ymax [zmin]` listaa baken kolmiot (korkeus, normaali, väri);
+   `scene_meshes.mjs X Y zone` kertoo mitkä pelin meshit peittävät pisteen (Blender-lohko / maamerkki / ilmakuvakatto / varaseinä).
+   Esimerkki: 7 Hallituskadun "punainen katto" oli 1 m kaistale seinää räystäslistan yläpuolella (LoD2-räystäs heitteli 6,0–7,0 m).
+7. **Korjaus → paikallinen bake → uusi rautalanka**, kunnes osuu: `python3 blender/kivi.py kivi1 8` (≈140 s; kirjoittaa `out/bl_kivi1.js`),
+   maamerkit `python3 blender/lm.py kaupungintalo` + `python3 tools/lm_to_js.py kaupungintalo` (`lm.py KEY still` = nopea esikatselukuva).
+
+**Rautalangan lukeminen (esimerkit 15.11):**
+- `Claude outputs/rautalanka_esimerkit/rautalanka_o13.jpg` (vain paikallisesti, sisältää SV:tä): 7 Hallituskatu. Ensin malli piirsi 4 kaari-ikkunaa,
+  beige vaakaurat → SV:ssä 5 suorakaideikkunaa valkoisin pielin, punainen rappaus, 3 tuuletusaukkoa, 2 piippua. Punaiset ikkunareunat osuvat nyt pieliin.
+- `rautalanka_oa4.jpg`: Antinkatu 5. Malli 6 akselia + ovi → SV 8 akselia, ei ovea, isot kaari-ikkunat matalan sokkelin päällä. Mittakaava = seinän
+  pituus (LoD2 24,6 m) / pikselit → bw 3,07 m. Hallituskadun pääty 11,6 m = 3 akselia (alt-spec bw 3,6).
+- `rautalanka_o12.jpg`: Kaupungintalo. Malli näytti 2 kerrosta, koska kivinen pohjakerros oli kadun alla (maamerkki seisoi z=0:ssa, maasto 6 m).
+- Pelkät pelikuvat samoista näkymistä: `tools/rautalanka/examples/peli_*.jpg` (saa olla GitHubissa).
+- Lue aina: akselimäärä, ikkunan muoto (kaari/suora/pari), kerrosrajat, räystään korkeus, sokkelin korkeus, ovien paikat, värialueet.
+  Ihmissilmä (käyttäjä) huomaa: väärä materiaali (rappaus vs tiili), irralliset muurit/portit, katon väri, ullakkoikkunat.
+
+### Tehty 15.11.2026
+- **Ilmakuva:** `ot/` 88 ruutua MML 2025 (0,5 m). 27 ruutuun, joissa ei muutosta, palautettu vanha tarkka 0,25 m kuva värisovitettuna
+  (Lab-keskiarvo/hajonta MML:ään) → saumat eivät näy. Muuttuneet (Karjaranta/Puuvilla, Eteläranta, Kirjurinluodon länsiosa, uudisrakennukset,
+  hakkuut) ovat MML 2025. Työkalut `tools/ot_tilefrac.py` (muutososuus ruuduittain) ja `tools/mk_ot_mix.py` (pikselisekoitus, hylätty: laikukas).
+  Tarkempaa avointa ilmakuvaa ei löytynyt (MML avoin 0,5 m). Porin kaupungin oma ortokuvarajapinta (vanhojen 0,25 m ruutujen lähde) – uudempi vuosi tarkistamatta.
+- **Pelin `index.html`:** (1) maamerkit (lm.py-mallit) seisovat yhtenä kappaleena maaston keskikorkeudella jalanjälkensä alla (`noT` + `TZs`-keskiarvo);
+  aiemmin maastoshader nosti ne pisteittäin ja Kaupungintalon pohjakerros jäi kadun alle. (2) Rapatut punaiset talot: shellin `nb:1` → `tNB`-attribuutti
+  → `brickify` ei piirrä tiilikuviota. Bakessa `MT(väri, 'plaster')` estää gen.py:n värin perusteella tehdyn tiilitunnistuksen (r > 2,3·g).
+- **kivi.py uutta:** `facade_bits`-osat `chimney` (s, syvyys, z0, z1, leveys), `wall` (irrallinen muuri 3 m paloina), `archgate` (kaariportti),
+  `vents` valinnaisella koolla (ullakkoikkunat valkoisin kehyksin). Spec-avaimet `nobrick`, `roofmat`. Sisäpihan kerrosmäärä ≤ kadun puolen
+  kerrosmäärä (`fit`: nst = lay.nf / styles `f`). `RAW[i]`-muokkaus suoraan (1576 räystäs tasattu 6,3 m).
+- **Korjatut talot (rautalanka):** 1576 (7 Hallituskatu, punainen rapattu 1 krs), muuri 1576–Kaupungintalo, 1575 (Antinkatu 5 / Hallituskatu kulma, 8+3 akselia,
+  ullakkoikkunat, kaariportti 1575–1576), Kaupungintalo (lm.py: 3 krs, harmaa kivinen pohjakerros, buffi tiili punaisin vinoneliöin, gotiikkaparikkunat
+  terävän kaaren alla `gothic_pair`).
+- **Kaupungintalossa vielä:** pääovi puuttuu, pohjakerros hieman liian korkea (malli 1,1–6,2 m), koristeelliset ikkunakehykset yksinkertaisia.
+
+### Tila: Kivi-Pori
+- Rautalangalla tarkistettu ~23 / 109 rakennuksesta: Eteläranta–Antinkatu–Hallituskatu–S. Palmgreninkatu -kortteli (19) +
+  Hallituskadun eteläpuoli S. Palmgreninkatu–Antinkatu (1576, muuri, 1575, Kaupungintalo).
+- **Seuraavaksi:** Antinkadun itäpuoli (kivi3: 1578, 1579, 1583, 1585, 1586, 1603, 1604, 1716, 1581 Valtakatu 7 torni), sitten kivi1 loput
+  (1292, 1293, 1294, 1296, 1341, 1574, 1577, 1622), kivi0 (Teatterikatu–Otavankatu), kivi5, kl0, kl1, p1.
+- Avoimet vanhat: 1573 viimeinen ikkuna ~1,4 m; 2 Antinkatu katto + sokkeli; 1285 viistokulman parveke; 8385 liiketilat + porrastorni;
+  1286 keskirisaliitti; pohjois-/länsiseinät bakessa liian tummia.
+
+### Ajamatta (käyttäjä)
+1. Commit + push (kaikki yllä oleva on jo kansiossa; paikalliset 8 näytteen baket bl_kivi1.js, bl_kivi4.js, bl_kaupungintalo.js mukana).
+2. Modal `porikit run`: `bake kivi0 kivi2` (uusi sisäpihan kerroslogiikka + shells), myöhemmin `bake kivi1 kivi3 kivi4 kivi5 kl0 kl1 p1` 64 näytteellä.
+   Kaupungintalolle: `landmarks kaupungintalo` (paikallinen bake on jo kansiossa).
+3. Ilmakuvat (`ot/`) ovat valmiina, ei Modal-ajoa.
+
+### Ympäristö uudella tilillä
+- Tarvitaan: Blender Python (`bpy`) paikallisesti bakeihin, node + playwright (polku `gshot_sv.mjs`:n alussa `/home/claude/.npm-global/...` – vaihda),
+  python3 + Pillow + numpy + shapely + scipy (+ rasterio/pyproj ilmakuviin). Data: `/home/claude/pori/` = repon kopio (city.js, terrain.js, styles.json,
+  lod2.js, orto.jpg); `svlabel.py` lukee `/home/claude/pori/city.js`.
+- Paikallinen bake-tulos: `/home/claude/out/bl_<lohko>.js` → kopioi repon juureen.
