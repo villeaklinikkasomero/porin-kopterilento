@@ -67,3 +67,32 @@ Uudet: cut_walls 1288 (punainen/keltainen), 1560 (Antinkadun matala valkoinen 15
 1287, 1565, 1559, 1567, 1562 f1, 1619 (Hallituskadun alku). Avoimet: 1285 viisto kulma + parveke, 1560 kulmaparveke, 1559 harmaa maantaso,
 1573 pylväsportti, 8385 liiketilat + porrastorni, 1565 ullakkoikkunat, 1286 keskirisaliitti.
 - 14.11 ilta: kulmaparvekkeet (1560, 1285 viistot), 1559 harmaa maantaso (gwall), 1573 kaariportti (col G), 2 Antinkatu matala räystäs + jyrkkä lape (lower_eave), 1562 2 krs (tunnistettu projisoimalla ID:t SV-kuvaan, work/svlabel.py)
+
+== TYÖOHJE: rautalanka-vertailu (14.11 myöhäisilta, korvaa aiemman "pari-kuva" -tarkistuksen) ==
+1. Street View -kuva otetaan selaimella tunnetusta paikasta: https://www.google.com/maps/@LAT,LON,3a,90y,SUUNTAh,KALLISTUSt
+   URL:n '90y' on PYSTYSUUNTAINEN kuvakulma 90 astetta (ei vaakasuuntainen). Kameran todellinen paikka luetaan URL:sta latauksen jälkeen
+   (panoraama hyppää lähimpään kuvauspisteeseen). Kuva vain vertailuun, ei koskaan peliin eikä GitHubiin.
+2. Peli kuvataan TÄSMÄLLEEN samasta paikasta, suunnasta ja kuvakulmasta: game/gshot_sv.mjs (näkymä: x, y, h, p, fov 90, kameran korkeus 2.5 m tien pinnasta).
+   Odotetaan kunnes korttelin bake on latautunut (window.__bl); muuten kuvassa näkyy pelin karkea varaseinä.
+3. Mallin reunat piirretään punaisena SV-kuvan päälle (ov.py). Erot luetaan suoraan: kerrosten korkeudet, ikkuna-akselit,
+   räystäs, kivijalka, värialueiden osuudet. Mitat metreinä: kuvan mittakaava = seinän tunnettu pituus / pikselit.
+4. Vasta sitten muutetaan SPECK-mitat (gh, frieze, plinth_h, sill, wh, ww, dw, bw, cols) ja bakeataan uudelleen; toistetaan kunnes reunat osuvat.
+5. Talot tunnistetaan osoitteella (SV-otsikko) ja projisoimalla ID:t kuvaan (work/svlabel.py) ennen muutosta.
+OPPI: LoD2-seinän korkeus sisältää usein ullakkofriisin/attikan; sitä ei saa jakaa kerroksille (1559: 12 m seinä = 4.7 kivi + 4.8 oranssi + 2.5 ullakko).
+OPPI: pelin kuvausskripti voi ottaa kuvan ennen bake-tiedoston latautumista -> tarkista aina, että kuvassa on bake (ikkunanpielet, ei kehyksettömiä ikkunoita).
+OPPI: Modal-baken tulos ei sisällä muutoksia, joita ei ole puskettu GitHubiin ennen ajoa -> tarkista tiedoston aika ennen vertailua.
+
+== Mäkiset kadut: vino kivijalka (14.11) ==
+- Ennen: maaston korkeus lisättiin jokaiseen mallin pisteeseen erikseen -> koko talo kallistui rinteessä.
+- Nyt (kivi2, kivi4; muut korttelit kun ne bakeataan uudelleen): bake kirjoittaa bl_*.js:ään 'shells' (talojen ääriviivat);
+  peli nostaa jokaisen talon yhdellä korkeudella (korkein maasto talon alla), kolmio kerrallaan (index.html liftBlock).
+  Bake lisää jokaisen seinän alle 2.6 m kivijalkahelman (kivi.py skirt), joka näkyy alamäen puolella korkeampana kivijalkana.
+- Saman LoD2-kuoren eri talot jaetaan omiksi (SHELL_SPLIT: 1560 / 2 Antinkatu, 1566 / 4 Antinkatu).
+- Graniitti vaalennettu #5b5752 -> #7a7771 (SV:n kivijalat harmaita, eivät lähes mustia).
+
+== Mitattu rautalangalla 14.11 ==
+1573 (4 Antinkatu): räystäs 5.6 m, ikkunat 1.5-3.6 m, sokkeli 0.6, kuusi ullakkoikkunaa 4.3-4.6 m, ovi 3. akselilla (kapea vaalea lasiovi),
+  5. akselilla ei ikkunaa (col 'X'). Kaariportti kuuluu naapuriin. Viimeinen ikkuna ~1.4 m väärässä (tasajako) -> avoin.
+1562: 1 krs korkealla kivijalalla, sileä seinä räystääseen (omistaja: "yksitasoinen, korkea kivijalka").
+1559 (6 Eteläranta): vaalea kivi / oranssi ~50/50 (omistaja), ullakkofriisi pienin ikkunoin, kolme kaariaukkoa ovi-ikkuna-ovi.
+Avoimet: 1573 yllä tumma katon jäänne; 2 Antinkadun katto (harmaa loiva pelti) ja liian korkea sokkeli; keskikaaren koko 1559.

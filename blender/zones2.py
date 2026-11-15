@@ -10,6 +10,8 @@ from zones import *
 RAW = pickle.load(open('/home/claude/mmlproc/raw.pkl', 'rb'))
 STREET = None        # optional fn(mid_xy, normal_xy) -> True when the wall faces a street
 ROOFOCC = M('#4f5459', 0.7)
+ZBASE = None         # optional fn(i, mid_xy, normal_xy) -> street level above the shell base at that wall (sloping ground)
+ZBASE_MAT = None     # material of the wall below such a raised facade (plinth)
 ROOFBAKE = False     # True: the LoD2 roofs are baked into the block (Kivi-Pori); False: shadow casters only, the game shows the aerial photo
 try: LOOK = json.load(open('/home/claude/pori/styles.json'))
 except Exception: LOOK = dict(pal=[], b={})
@@ -141,7 +143,8 @@ def build_lod2(Z, i, spec, upper=None):
                 runs.append((u0 if k0 == 0 else u0 + (u1 - u0) * k0 / ns, u1 if k == ns else u0 + (u1 - u0) * k / ns, min(tops[k0:k]))); k0 = k
         merged = []
         for r_ in runs:                                        # slivers join their neighbour
-            if merged and (r_[1] - r_[0] < 2.6 or merged[-1][1] - merged[-1][0] < 2.6): merged[-1] = (merged[-1][0], r_[1], min(merged[-1][2], r_[2]))
+            if merged and (r_[1] - r_[0] < 2.6 or merged[-1][1] - merged[-1][0] < 2.6):   # the longer piece keeps its eave (a sliver's low top drew the cornice across the upper windows, owner 15.11.2026)
+                merged[-1] = (merged[-1][0], r_[1], r_[2] if r_[1] - r_[0] > merged[-1][1] - merged[-1][0] else merged[-1][2])
             else: merged.append(r_)
         runs = merged; seed += 1; boxes = []
         if spec.get('splitruns') and spec.get('runalt'):             # one LoD2 shell over two houses: cut the runs where runalt changes
@@ -171,11 +174,18 @@ def build_lod2(Z, i, spec, upper=None):
             seed += 1
             p = (o.x + t.x * u0r, o.y + t.y * u0r); q = (o.x + t.x * u1r, o.y + t.y * u1r)
             mid2 = ((p[0] + q[0]) / 2, (p[1] + q[1]) / 2); street = STREET is None or STREET(mid2, (n.x, n.y))
+            zf = zb
+            if ZBASE and zb < 1.5:                             # uphill side of a house on a slope: the facade starts at the street there,
+                zf = zb + max(0.0, min(ZBASE(i, mid2, (n.x, n.y)), ze - zb - 3.0))   # the wall below it is plinth (owner 14.11.2026)
+                if zf > zb + 0.05:
+                    pz = [W3(u0r, zb), W3(u1r, zb), W3(u1r, zf), W3(u0r, zf)]
+                    if newell(pz) is not None and newell(pz).dot(Vector((n.x, n.y, 0))) < 0: pz.reverse()
+                    add_solid(Z, pz, ZBASE_MAT or P_['wall'], 0.4)
             ra = spec.get('runalt') and spec['runalt'](*mid2); s_ = ra or spec_; Pr = ra['P'] if ra else P_      # one stretch of a wall as another building part
             lay_ = (s_['layout'] if street or 'yard' not in s_ else s_['yard']) if zb < 1.5 else (s_.get('upper') or upper or lay(ze - zb, 'punched', bw=3.3, fh=3.0))
-            if s_.get('fit'): lay_ = s_['fit'](lay_, ze - zb, street)
-            if s_.get('fitw'): lay_ = s_['fitw'](lay_, ze - zb, street, u1r - u0r, zb)   # also by wall length and base height (gable ends, walls above a lower roof)
-            build_wall(Z, p, q, zb, ze, lay_, s_.get('Pyard', Pr) if not street else Pr, i * 31 + seed, i)
+            if s_.get('fit'): lay_ = s_['fit'](lay_, ze - zf, street)
+            if s_.get('fitw'): lay_ = s_['fitw'](lay_, ze - zf, street, u1r - u0r, zf)   # also by wall length and base height (gable ends, walls above a lower roof)
+            build_wall(Z, p, q, zf, ze, lay_, s_.get('Pyard', Pr) if not street else Pr, i * 31 + seed, i)
             if spec_.get('cornice') and zb < 1.5 and (street or spec_.get('cornice_all')):
                 cw, ch, cm = spec_['cornice']; nn = Vector((n.x, n.y)).normalized()
                 for (dd, z0_, z1_) in ((cw * 0.45, ze - ch, ze - ch * 0.55), (cw, ze - ch * 0.55, ze)):

@@ -384,17 +384,27 @@ def m_classic(mb, col, P):
     wins = []
     if col == 'P' and bw > 2 * ww + 0.9: wins = [(uc - ww - 0.15, uc - 0.15), (uc + 0.15, uc + ww + 0.15)]
     elif col in ('W', 'P'): wins = [(uc - ww / 2, uc + ww / 2)]
+    door_hole = None
     if col == 'D':
-        dw = min(P.get('dw', 1.7), bw - 0.8); dh = min(fh - ph - 0.6, 3.2) if not arch else min(fh - ph - 0.4 - dw / 2, 2.6)
+        dw = min(P.get('dw', 1.7), bw - 0.8)
+        # the door sits low in the plinth with stone steps in front (owner 14.11.2026: door bottoms are not at the window sill level);
+        # its head lines up with the window heads of the storey
+        dz = min(ph, P.get('door_z', 0.5)) if ph > 0.15 else ph
+        dh = min(fh - dz - 0.6, 3.2) if not arch else min(fh - dz - 0.4 - dw / 2, 2.6)
+        if ph > 0.15 and not P.get('wh_door'): dh = max(2.1, min(dh, sill + wh - dz))
         u0, u1 = uc - dw / 2, uc + dw / 2
-        mb.sides(u0, ph, u1, ph + dh, 0, -0.35, W)
-        mb.q(u0, ph, u1, ph + dh, -0.35, P.get('door', M('#4a3323', 0.6)))
-        mb.q(uc - 0.02, ph, uc + 0.02, ph + dh, -0.33, DARK)
-        top = ph + dh
-        if arch: top = _arch_top(mb, u0, u1, ph + dh, W, fr, r=0.35, trim=T)
-        holes.append((u0, ph, u1, top))
-        mb.prot(u0 - 0.16, ph, u0, top, 0.04, T); mb.prot(u1, ph, u1 + 0.16, top, 0.04, T)
+        mb.sides(u0, dz, u1, dz + dh, 0, -0.35, W)
+        mb.q(u0, dz, u1, dz + dh, -0.35, P.get('door', M('#4a3323', 0.6)))
+        mb.q(uc - 0.02, dz, uc + 0.02, dz + dh, -0.33, DARK)
+        top = dz + dh
+        if arch: top = _arch_top(mb, u0, u1, dz + dh, W, fr, r=0.35, trim=T)
+        holes.append((u0, dz, u1, top)); door_hole = (u0, dz, u1, ph)
+        mb.prot(u0 - 0.16, dz, u0, top, 0.04, T); mb.prot(u1, dz, u1 + 0.16, top, 0.04, T)
         if not arch: mb.prot(u0 - 0.3, top, u1 + 0.3, top + 0.3, 0.12, T)
+        if dz > 0.1:                                                       # stone steps up to the threshold (real geometry)
+            stm = P.get('steps', M('#8e8b85', 0.85)); n_ = max(1, round(dz / 0.17)); rz = dz / n_; td = 0.32
+            for k in range(n_):
+                mb.s3box(u0 - 0.35, -0.4, u1 + 0.35, rz * (k + 1), 0, td * (n_ - k), stm, bottom=False)
     elif col == 'G':                                                       # arched gateway into the yard: dark iron gate, dressed surround
         gw = min(3.0, bw - 0.6); u0, u1 = uc - gw / 2, uc + gw / 2; gh = min(fh - ph - 0.5 - gw / 2, 2.6)
         mb.sides(u0, ph, u1, ph + gh, 0, -0.6, W)
@@ -466,6 +476,7 @@ def m_classic(mb, col, P):
         bh = [] 
         if P.get('basement') and col in ('W', 'P'):
             for u0, u1 in wins: bh.append(mb.window(u0 + 0.1, 0.12, u1 - 0.1, ph - 0.12, pl, r=0.12, nx=2, fmat=fr, glass=GLASS2, d=0.07, curt=0))
+        if door_hole: bh.append(door_hole)
         mb.wall(bh, pl, d=0.07, v1=ph); mb.sides(0, 0, bw, ph, 0, 0.07, pl, bottom=False)
 
 def _spans(holes, v, x0, x1, pad=0.0):

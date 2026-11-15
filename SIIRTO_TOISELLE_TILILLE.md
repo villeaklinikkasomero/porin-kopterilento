@@ -1,4 +1,4 @@
-# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 12.11.2026 klo 23)
+# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 14.11.2026 klo 23; uusin tila ja työtapa: osio "14.11.2026 – ALOITA TÄSTÄ" lopussa)
 
 Liitä tämä tiedosto uuden keskustelun alkuun. Pyydä Claudea lukemaan myös repon `SIIRTO.md`, `pipeline/README.md` ja `HANDOFF_Y-PAKKI.md` (jos repossa).
 Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
@@ -322,3 +322,55 @@ Kauppakeskus Puuvilla rakennettu peltihallina 13.11. (lm.py, bl_puuvilla.js, tex
 - 600 Bepop ja 601 (It.k 35): valkoiset nauhaikkunat, lasiset liiketilat, ei c-lohkoissa (landmark) → kesken.
 - Live-peli näyttää vanhaa bakea: vertaa SV:tä styles.jsoniin / paikalliseen bakeen.
 - Jatko: I12B → I44, sitten Isolinnankatu jne.
+
+
+## 14.11.2026 – ALOITA TÄSTÄ (Kivi-Pori, Raatihuone, rautalanka, mäkiset kadut)
+Tarkemmat havainnot: `audit/kivipori_notes.txt` (lopussa TYÖOHJE: rautalanka-vertailu) ja `audit/kivipori_kortteli_eteläranta_antinkatu.txt`.
+
+### Uusi pääsääntöinen työtapa: rautalanka-vertailu (korvaa kuvaparit ±55°)
+1. Street View -kuva selaimella tunnetusta paikasta: `https://www.google.com/maps/@LAT,LON,3a,90y,SUUNTAh,KALLISTUSt`
+   (`90t` = vaakasuora, `102t` = 12° ylös). **`90y` on PYSTYSUUNTAINEN kuvakulma.** Lue kameran todellinen paikka URL:sta latauksen jälkeen.
+   Viewport 1280×720 → kuvakaappaus 800×450.
+2. Peli samasta paikasta, suunnasta ja kuvakulmasta: `tools/rautalanka/gshot_sv.mjs` (näkymät JSON: k, x, y, h, p, fov 90, ch 2.5).
+   Skripti odottaa, että korttelin bake on latautunut (`window.__bl`) – muuten kuvassa on karkea varaseinä (kehyksettömät ikkunat).
+3. `tools/rautalanka/ov.py SV.jpg peli.jpg ulos.jpg`: mallin reunat punaisena SV-kuvan päällä. Lue erot: kerroskorkeudet,
+   ikkuna-akselit, räystäs, sokkeli, värialueiden osuudet (mittakaava = seinän tunnettu pituus / pikselit).
+4. Korjaa SPECK-mitat, bakea paikallisesti (`python3 kivi.py kivi2 8`), toista kunnes reunat osuvat. Tunnista talo osoitteella ja
+   `work/svlabel.py`-projektiolla ennen muutosta (useita väärin tunnistettuja taloja 14.11: 1561, 1562, 1563, 1566).
+- **Opit:** LoD2-seinän korkeus sisältää usein ullakkofriisin (1559: 12 m = 4,7 kivi + 4,8 oranssi + 2,5 ullakko) – älä jaa sitä kerroksille.
+  Modal-bake ei sisällä puskemattomia muutoksia – tarkista tiedoston aika ennen vertailua. Pelin kuvausskripti voi ottaa kuvan ennen latautumista.
+
+### Mäkiset kadut: talo suorassa, kivijalka vinossa (uutta 14.11)
+- Ennen pelin maastoshader nosti jokaista pistettä erikseen → koko talo kallistui rinteessä.
+- Nyt bake kirjoittaa `bl_*.js`:ään `export const shells` (talojen ääriviivat) ja lisää jokaisen seinän alle 2,6 m kivijalkahelman (`kivi.py skirt`).
+  Peli (`index.html liftBlock/shellAt`) nostaa jokaisen talon yhdellä korkeudella (korkein maasto talon alla), kolmio kerrallaan (keskipiste ratkaisee).
+  Käytössä vain lohkoissa, joiden bl-tiedostossa on `shells` (nyt kivi2, kivi4); muut toimivat entiseen tapaan kunnes ne bakeataan uudelleen.
+- Saman LoD2-kuoren erilliset talot: `SHELL_SPLIT` kivi.py:ssä (1560 / 2 Antinkatu, 1566 / 4 Antinkatu).
+- Graniitti vaalennettu `#5b5752 → #7a7771`.
+
+### Uudet työkalut kivi.py / gen.py
+- `cut_walls(i, p0, d)` leikkaa LoD2-seinät pystytasolla (kaksi taloa samassa kuoressa → `SPECK[i]['alt'](x, y)` valitsee specin).
+- `lower_eave(i, test, z_eave, depth)` laskee matalan talon katuseinän räystääseen + lappeen; poistaa vanhan katon irtopalan.
+- `corner_tower(...)` (Heinen talon kulmatorni), `extra=[...]` specissä.
+- `classic_spec`: `ground/first/top` dictit (gwall = maantason oma väri, plinth_h, sill, wh, ww, wh_fixed, dw = oven leveys, door = oven materiaali,
+  basement=False, blank, wall), `lay=dict(nf, gh, frieze, cols)`. nf=1 + frieze → yksi kerros + ullakkoikkunarivi.
+- Sarakekoodit: `W` ikkuna, `D` ovi (yläkerroksissa ikkuna; `first=dict(balcony=True)` → parvekeovi + kaide viistokulmissa), `G` kaariportti,
+  `X` maantasossa umpiseinä / yläpuolella ikkuna, `N` umpi, `P` ikkunapari, `S` liiketila.
+- styles.json: uusi avain `pl` (sokkelin väri).
+- `pipeline/modal_app.py`: `landmarks <nimi>` tekee nyt bl_<nimi>.js:n (uusi `landmark`-funktio).
+
+### Raatihuone ja AI
+- `lm.py raati`: kellotorni keltainen, korkeampi, parveke ja rautakaide, kellokerros, kellomainen kuparikatto + lyhty, alkuperäinen katon väri.
+  Yhteinen AI-kuparikattomateriaali myöhemmin.
+- AI-julkisivut: `pipeline/aitex.py` (Modal SDXL + canny ControlNet), syötteet `tex/ai_in/*.png + .json` (englanninkielinen materiaalikuvaus).
+  Paras: ControlNet 0.55 + strength 0.95 + värilukitus (`pipeline/aiface/lock.py`) + projektio (`proj2.py`). Projektio katoaa rebakessa →
+  tarvitaan pysyvä bake-jälkeinen vaihe (pygltflib puuttuu requirementsistä). AI-syötteeksi vain omat renderit + teksti.
+
+### Tila ja avoimet (Eteläranta–Antinkatu–Hallituskatu–S. Palmgreninkatu -kortteli)
+- Rautalangalla mitattu: 1573 (4 Antinkatu, räystäs 5,6, ovi 3. akselilla, 6 ullakkoikkunaa), 1562 (1 krs korkealla sokkelilla), 1559 (6 Eteläranta).
+- Avoimet: 1573 viimeinen ikkuna ~1,4 m väärässä (tasajako) ja tumma katon jäänne yllä; 2 Antinkadun harmaa loiva peltikatto ja liian korkea sokkeli;
+  1559 keskikaari pienempi kuin ovet; 1566 portti; 8385 liiketilat + porrastorni; 1286 keskirisaliitti; pohjoisjulkisivut bakessa liian tummia.
+- Seuraavaksi: koko kortteli rautalangalla, sitten Hallituskatu–Valtakatu ja muut Kivi-Porin kadut (Yrjönkatu, Teatterikatu, Otavankatu, Annankatu,
+  Katariinankatu, Vapaudenkatu).
+- **Ajamatta (käyttäjä):** commit + push, sitten `porikit run` → `bake kivi2 kivi4` (paikalliset 8 näytteen baket ovat jo kansiossa);
+  myöhemmin muut kivi-lohkot uudelleen, jotta vino kivijalka (shells + skirt) tulee niihinkin.

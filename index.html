@@ -1123,9 +1123,9 @@ function shellAt(S, x, y) {   // S: houses from the bake (bl_*.js 'shells'), eac
 }
 function liftBlock(gr, shells) {
   gr.updateMatrixWorld(true); const v = new THREE.Vector3();
-  const S = (shells || []).map(rs => { const pts = rs.map(r => { const o = []; for (let i = 0; i < r.length; i += 2) o.push([r[i], r[i + 1]]); return o; });
+  const S = (shells || []).map(e => { const rs = e.r || e; const pts = rs.map(r => { const o = []; for (let i = 0; i < r.length; i += 2) o.push([r[i], r[i + 1]]); return o; });
     let m = -1e9; const bb = [1e9, 1e9, -1e9, -1e9]; for (const R of pts) for (const q of R) { m = Math.max(m, TZs(q[0], q[1])); bb[0] = Math.min(bb[0], q[0]); bb[1] = Math.min(bb[1], q[1]); bb[2] = Math.max(bb[2], q[0]); bb[3] = Math.max(bb[3], q[1]); }
-    return { pts, bb, lift: m }; });
+    return { pts, bb, lift: (e.l !== undefined && e.l !== null) ? e.l : m }; });   // e.l: the house's own ground from the bake (lowest ground under it)
   gr.traverse(q => { if (!q.isMesh) return;
     if (q.geometry.index) q.geometry = q.geometry.toNonIndexed();   // one lift per triangle (its centre decides the house): a wall on a house's edge never shears
     const P = q.geometry.attributes.position, A = new Float32Array(P.count), w = new THREE.Vector3();
