@@ -810,13 +810,14 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   }
 
   // Blender-built models (sunlight and soft shadows baked into one texture) replace the code-built ones once they have loaded
+  const LM_ONE = new Set(['kaupungintalo']);   // landmarks lifted as one piece (owner 15.11: the museum on its slope sank and lost its roof when all were)
   function track(key, fn) {
     const start = scene.children.length; fn(); const proc = scene.children.slice(start);
     import(`./bl_${key}.js`).then(K => {
       const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
       new GLTFLoader().parse(buf.buffer, '', gl => {
         gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { map.anisotropy = 8; TEXLOD.add(map, K.x, K.y); } q.material = brickify(glassify(new THREE.MeshBasicMaterial({ map }))); } });
-        const g = new THREE.Group(); const L0 = LMB[key]; let z0 = null; if (L0 && L0.pts) { z0 = 1e9; z0 = 0; for (const q of L0.pts) z0 += TZs(q[0], q[1]) / L0.pts.length; if (!isFinite(z0)) z0 = null; }   /* owner 15.11.2026: the Kaupungintalo stood with its stone ground floor under the street - a landmark stands as one piece on the mean ground under it */
+        const g = new THREE.Group(); const L0 = LMB[key]; let z0 = null; if (L0 && L0.pts && LM_ONE.has(key)) { z0 = 1e9; z0 = 0; for (const q of L0.pts) z0 += TZs(q[0], q[1]) / L0.pts.length; if (!isFinite(z0)) z0 = null; }   /* owner 15.11.2026: the Kaupungintalo stood with its stone ground floor under the street - a landmark stands as one piece on the mean ground under it */
         g.position.set(K.x, z0 === null ? 0 : z0, -K.y); g.add(gl.scene); scene.add(z0 === null ? g : noT(g));
         for (const q of proc) if (K.roof || q.material !== roofMat) scene.remove(q);
         (window.__bl = window.__bl || []).push(key);

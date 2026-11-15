@@ -461,3 +461,31 @@ piirretään punaisena SV-kuvan päälle. Kun punaiset viivat osuvat oikean talo
   python3 + Pillow + numpy + shapely + scipy (+ rasterio/pyproj ilmakuviin). Data: `/home/claude/pori/` = repon kopio (city.js, terrain.js, styles.json,
   lod2.js, orto.jpg); `svlabel.py` lukee `/home/claude/pori/city.js`.
 - Paikallinen bake-tulos: `/home/claude/out/bl_<lohko>.js` → kopioi repon juureen.
+
+### Sovittu jatkosuunnitelma: AI-fotorealismi (käyttäjä hyväksyi 15.11.2026)
+1. Ensin muodot ja värit rautalangalla koko Kivi-Poriin (geometria = kerroksellisuus, syvennykset, listat, ikkunat).
+2. Sitten AI vain **seinämateriaaliksi** yhdessä korttelissa (testi: kivi2), ennen/jälkeen-pelikuvat:
+   - syöte = oma render + teksti (ControlNet pitää ikkunat ja kerrosrajat paikallaan),
+   - lasit ja karmit maskataan pois AI-kerroksesta (mallin omat, heijastus pelissä),
+   - AI:lta vain materiaali (rappauksen rakeisuus, tiilen saumat, likaantuminen), AI-kuvan omat varjot vaimennetaan – valo tulee bakesta,
+   - pysyvä bake-jälkeinen vaihe (pygltflib Modalin requirementsiin), ettei projektio katoa rebakessa.
+3. Rautalanka toimii edelleen tarkistuksena (mittaa geometriaa, ei tekstuuria).
+
+### Omistajan vikalista 15.11.2026 ilta (kuvat: `Claude outputs/vikalista_15_11/`, vain paikallisesti – sisältää SV:tä)
+Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä (svlabel.py) ennen korjausta.
+1. **`1_linna_irtokatot.png`** – Hallituskatu / paikka "Linna" (city.js places: Linna x 28, y 211), suunta KO, korkeus 17 m:
+   vasemmalla keltaisen talon läpi pistää tumma kalteva kattolaatta + kattolaatikko; oikealla talon katto leijuu mustan avoimen
+   rungon päällä (seinät jäävät katon alapuolelle). Todennäköisesti eri talojen eri nosto (shells/liftBlock) tai vanha bake ilman shellejä (kivi3 14.11).
+   Etsi paikka: renderöi `gshot_sv.mjs`-näkymiä x 0–140, y 200–330, h 45, ch 20.
+2. **`2_taidemuseo_varit_puuttuu.png`** – Taidemuseon (lm museo −264.8, 455.9 / taidemuseo −94.8, 462.6) lähellä: talot valkoisia/harmaita
+   ("taitaa puuttua värit"). Tarkista styles.json w-arvot ja onko `m:1` (automaattinen) → SPECK ilman väriä → KIVIP-hash. Kivi0-lohko.
+3. **`3_1576_kulma_puuttuu.png`** – 7 Hallituskatu (1576) itäpää porttikäytävän vieressä: kulma puuttuu (katto/seinä porttimuurin kohdalla).
+   Syy luultavasti 15.11 räystään tasaus `RAW[1576]` (5,5<z<7,4 → 6,3) tai porttimuurin `wall`-pala 1575 extrassa. Tarkista bake_faces.py:llä.
+4. **`4_sv_1287_kermanvalkoinen.png` + `4_peli_1287.png`** – 12 Hallituskatu / S. Palmgreninkatu (1287): oikeasti kermanvalkoinen, harmaa
+   loiva katto, 6+ piippua, maantasossa suorat ikkunat ja sisäänkäynnin lippa, ullakkoikkunat räystään alla. Pelissä harmaa ja liian
+   tumma, maantason kellari-ikkunat. → väri vaaleammaksi/lämpimämmäksi, basement=False, lippa, piiput (facade_bits chimney).
+5. **`5_sv_1286_portti7.png` + `5_peli_1286.png`** – 7 Hallituskatu (1286, lohenpunainen 3 krs): pihaportti "7" – vaalea rapattu
+   kaariportti + pieni kaariovi + muuri talon länsipäässä (kivi.py `wall` + `archgate`), yläkerran ikkunoissa otsalistat,
+   valkoinen rustikoitu sokkelinauha, 2 isoa piippua. Pelissä portti puuttuu.
+6. **`6_museo_katto_irti.png`** – Satakunnan Museo (lm museo): katto irti ja etuosa liian matalalla. SYY: 15.11 maamerkkien
+   yhden kappaleen nosto (index.html track). KORJATTU 15.11 ilta: yhden kappaleen nosto vain `LM_ONE = {'kaupungintalo'}` – tarkista pelissä.
