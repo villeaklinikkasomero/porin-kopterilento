@@ -975,12 +975,16 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     { const dp = [], du = [], fp = [], conc = lam(0x9a9890);
       for (const b of RIV.br) { const P = b.p;
         if (onPorinsilta((P[0] + P[P.length - 2]) / 2, (P[1] + P[P.length - 1]) / 2, 12)) continue;
-        for (let i = 0; i + 3 < P.length; i += 2) { const ax = P[i], ay = P[i + 1], bx = P[i + 2], by = P[i + 3], L = Math.hypot(bx - ax, by - ay); if (L < 0.5) continue;
+        const P0 = P; const Q = [];   /* owner 15.11.2026: the ground rose through the long deck pieces - cut the deck into <= 3 m pieces so it follows the terrain levels */
+        for (let i = 0; i + 3 < P0.length; i += 2) { const L0 = Math.hypot(P0[i + 2] - P0[i], P0[i + 3] - P0[i + 1]), n = Math.max(1, Math.ceil(L0 / 3));
+          for (let k = 0; k < n; k++) Q.push(P0[i] + (P0[i + 2] - P0[i]) * k / n, P0[i + 1] + (P0[i + 3] - P0[i + 1]) * k / n); }
+        Q.push(P0[P0.length - 2], P0[P0.length - 1]);
+        for (let i = 0; i + 3 < Q.length; i += 2) { const ax = Q[i], ay = Q[i + 1], bx = Q[i + 2], by = Q[i + 3], L = Math.hypot(bx - ax, by - ay); if (L < 0.05) continue;
           const nx = (by - ay) / L * b.w / 2, ny = -(bx - ax) / L * b.w / 2, q = [[ax + nx, ay + ny], [bx + nx, by + ny], [bx - nx, by - ny], [ax + nx, ay + ny], [bx - nx, by - ny], [ax - nx, ay - ny]];
           for (const [x, y] of q) { dp.push(x, 0.05, -y); du.push(inCore(x, y) ? (x + HW) / (2 * HW) : 0, inCore(x, y) ? (y - YS) / YSPAN : 0); }
           for (const sg of [1, -1]) { const e = [[ax + nx * sg, ay + ny * sg], [bx + nx * sg, by + ny * sg]];
             fp.push(e[0][0], 0.05, -e[0][1], e[1][0], 0.05, -e[1][1], e[1][0], -0.95, -e[1][1], e[0][0], 0.05, -e[0][1], e[1][0], -0.95, -e[1][1], e[0][0], -0.95, -e[0][1]); }
-          for (let d = 12; d < L - 6; d += 24) { const x = ax + (bx - ax) * d / L, y = ay + (by - ay) * d / L; if (!inRiver(x, y)) continue;
+          if (i % 16 === 0) for (let d = 1.5; d < L; d += 24) { const x = ax + (bx - ax) * d / L, y = ay + (by - ay) * d / L; if (!inRiver(x, y)) continue;
             const wr = WREL(x, y), pr = add(new THREE.BoxGeometry(1.2, -wr - 0.9, b.w * 0.8), conc); pr.position.set(x, (wr - 0.95) / 2, -y); pr.rotation.y = Math.atan2(by - ay, bx - ax); } } }
       const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.Float32BufferAttribute(dp, 3)); dg.setAttribute('uv', new THREE.Float32BufferAttribute(du, 2));
       add(dg, new THREE.MeshBasicMaterial({ map: orto, side: THREE.DoubleSide }));
