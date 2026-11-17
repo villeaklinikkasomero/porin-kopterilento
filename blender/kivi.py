@@ -810,6 +810,11 @@ def _x1451():
     return [facade_bits((-383.0, 324.0), (-369.9, 321.0), south), facade_bits((-369.9, 321.0), (-361.9, 356.0), east)]
 SPECK[1451] = dict(SPECK[1451]); SPECK[1451]['extra'] = list(SPECK[1451].get('extra', [])) + _x1451()
 
+SPECK[1446] = classic_spec(1446, wall='#e8a593', trim='#f3f1eb', rust=False, garch=False, hood=None, pil=False, bw=3.4,
+                           lay=dict(nf=3, gh=3.6, fh=3.2, door_mid=False), ground=dict(plinth_h=0.45, plinth=M('#36383a', 0.6), basement=False, sband=0, ww=1.3, wh=1.75, sill=0.9),
+                           first=dict(ww=1.2, wh=1.6, sill=0.9, sband=0), top=dict(ww=1.2, wh=1.5, sill=0.9), cornice=(0.3, 0.25, M('#45484a', 0.5)))
+SPECK[1446]['extra'] = [facade_bits((-421.6, 440.1), (-444.6, 445.7), [('canopy', 1.5, 2.2, 3.1, 1.0, M('#2a2b2d', 0.5)), ('box', 0.9, 2.1, 0.45, 2.8, 0.0, 0.05, M('#9a6a3c', 0.6)),
+                                                                     ('box', 2.6, 3.4, 1.4, 2.5, 0.0, 0.05, M('#5a4030', 0.6))])]   # 22 Hallituskatu (Street View 17.11.2026): salmon render, white-framed windows, restaurant door with a dark canopy at the west end, menu board
 def kspec(i):
     if i in SPECK: return SPECK[i]
     if i in MODERN: return spec_for(i)
