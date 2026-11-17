@@ -1,4 +1,4 @@
-# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 15.11.2026; UUSIN TILA: osio "15.11.2026 – ALOITA TÄSTÄ" aivan lopussa)
+# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 17.11.2026; UUSIN TILA: osio "17.11.2026 – ALOITA TÄSTÄ" aivan lopussa)
 
 Liitä tämä tiedosto uuden keskustelun alkuun. Pyydä Claudea lukemaan myös repon `SIIRTO.md`, `pipeline/README.md` ja `HANDOFF_Y-PAKKI.md` (jos repossa).
 Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
@@ -512,3 +512,19 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   (kuparinvihreä kaakeli ilman ikkunoita Antinkadulle, lasitetut kulmaparvekkeet, valkoiset pilarit), 1579 Hallituskatu 6 (5 krs + avoin pilarikerros,
   vaalea nauhajulkisivu, päättyy oikeaan kohtaan; keltainen 1578 jatkuu siihen asti), 1603 Valtakatu 5 (5 krs liiketilojen päällä).
 - Seuraavaksi: kivi3 sisäpiha (1585, 1586), sitten kivi1 loput (1292–1296, 1341, 1574, 1577, 1622), kivi0, kivi5, kl0, kl1.
+
+#### 17.11.2026 – ALOITA TÄSTÄ seuraavassa keskustelussa
+- Tarkistettu rautalangalla ~51 / 109. Tehty 16.–17.11: kivi1 (1294, 1574 + aita, 1577 liiketalo, 1293 Valtakatu 11, 1622 vaja + Antinkadun lauta-aita,
+  1575 umpinainen pääty + räystäskonsolit, 1287 kulmaovi), kivi0 (1454 Teatterikatu 3 puutalo + matala siipi, 1281 Teatterikadun puoli 2 riviä + aita,
+  1308 Valtakatu 17 puutalo pysty/vaakalaudoitus, 1311 Valtakatu 19 harmaanvihreä omistajan kuvan mukaan), kivi3 (1603 liiketilojen syvennys),
+  kivi5 (1618/1620 valkoisiksi, 1548 tiilipäädyt + ulkonevat ikkunaerkkerit, 1553 liikepaviljonki, valkoisen talon umpiseinät),
+  kl1 (1398 Valtakatu 18 erkkeri + yksi kivijalkaikkuna, 1352 Annankatu vaalea tiili + rappausnauhat + lasitetut parvekkeet, 1527 koulu vaalea tiili;
+  Lyseo: 1353:n kuori leikattu x=-405, länsiosa keltainen tavallisin ikkunoin – omistaja 17.11), kl0 (1535 Valtakatu 26 parvekkeet), c039 (1459/1526 koulu vaalea tiili).
+- Uusi kopteri: `heli.js` (Porikopteri.glb) ja `heli_m.js` (mobiili), index.html: nokka -z (rotation.y = π), y -1.85, PBR + oma ympäristökartta vain kopterille.
+  Omistajan Blender-render on tavoite; terävä kopterin varjo tekemättä (ei nyt).
+- Opit: tarkista jokainen näkyvä pääty/sivuseinä (ohjelma keksii ikkunoita), räystäskoristeet; `yard_same=True` jotta sivuseinä käyttää annettua layoutia;
+  facade_bits 'box' kuoren seinän kanssa samaan tasoon voi mustua bakessa; city-lohkojen (c###) symlinkit game/ osoittivat /tmp/pk:hon → `ln -sf out/bl_X.js game/`.
+- gshot_sv.mjs odottaa `includes('<lohko>')` – vaihda sed:llä lohkon mukaan.
+- Seuraavaksi: kl0 loput (1517 kulmatalon lasitettu kulmaparveke, 1516, 1449, 1458, 1446, 1447, 1338, 1357, 1336, 1337, 1368, 1370, 1261), kivi5 1551/1552,
+  vikalistan kohta 2 (taidemuseon ympäristön värit), sitten Valtakadun keltaiset toimistotalot (1361/1367/1488/1489, eivät missään kivi-lohkossa → city-lohko).
+- Modal (käyttäjä, pushin jälkeen): bake kivi0 kivi1 kivi2 kivi3 kivi4 kivi5 kl0 kl1 --samples 64, landmarks kaupungintalo raati, city 64 c039.

@@ -483,6 +483,19 @@ SPECK[1527] = classic_spec(1527, wall='#e3d8b6', trim='#f3f1ea', rust=False, gar
                            lay=dict(nf=2, gh=3.6, fh=3.4, cols=lambda c, nb: 'W'), ground=dict(plinth_h=0.4, basement=False, ww=1.6, wh=1.3, sill=0.9, wh_fixed=True), first=dict(ww=2.2, wh=1.2, sill=1.2, hood=None, wh_fixed=True), yard_same=True)
 SPECK[1527]['P']['wall'] = MT('#e3d8b6', 'brick', 0.8)   # Annankatu school: light yellow brick, white-framed windows, a band of windows upstairs (owner 17.11)
 SPECK[1535] = dict(spec_for(1535)); SPECK[1535]['extra'] = [facade_bits((-469.6, 343.0), (-412.8, 329.6), [('box', 49.7, 55.3, 3.60, 3.82, 0.0, 1.4, M('#e9e8e3')), ('box', 49.7, 55.3, 3.82, 4.80, 1.33, 1.4, M('#a9bcbd', 0.1, 0.2)), ('box', 49.7, 55.3, 6.80, 7.02, 0.0, 1.4, M('#e9e8e3')), ('box', 49.7, 55.3, 7.02, 8.00, 1.33, 1.4, M('#a9bcbd', 0.1, 0.2)), ('box', 49.7, 55.3, 10.00, 10.22, 0.0, 1.4, M('#e9e8e3')), ('box', 49.7, 55.3, 10.22, 11.20, 1.33, 1.4, M('#a9bcbd', 0.1, 0.2)), ('box', 49.7, 55.3, 13.20, 13.42, 0.0, 1.4, M('#e9e8e3')), ('box', 49.7, 55.3, 13.42, 14.40, 1.33, 1.4, M('#a9bcbd', 0.1, 0.2)), ('box', 49.7, 55.3, 16.40, 16.62, 0.0, 1.4, M('#e9e8e3')), ('box', 49.7, 55.3, 16.62, 17.60, 1.33, 1.4, M('#a9bcbd', 0.1, 0.2)), ('box', 23.7, 28.3, 3.60, 3.82, 0.0, 1.4, M('#e9e8e3')), ('box', 23.7, 28.3, 3.82, 4.80, 1.33, 1.4, M('#a9bcbd', 0.1, 0.2)), ('box', 23.7, 28.3, 6.80, 7.02, 0.0, 1.4, M('#e9e8e3')), ('box', 23.7, 28.3, 7.02, 8.00, 1.33, 1.4, M('#a9bcbd', 0.1, 0.2)), ('box', 23.7, 28.3, 10.00, 10.22, 0.0, 1.4, M('#e9e8e3')), ('box', 23.7, 28.3, 10.22, 11.20, 1.33, 1.4, M('#a9bcbd', 0.1, 0.2)), ('box', 23.7, 28.3, 13.20, 13.42, 0.0, 1.4, M('#e9e8e3')), ('box', 23.7, 28.3, 13.42, 14.40, 1.33, 1.4, M('#a9bcbd', 0.1, 0.2)), ('box', 23.7, 28.3, 16.40, 16.62, 0.0, 1.4, M('#e9e8e3')), ('box', 23.7, 28.3, 16.62, 17.60, 1.33, 1.4, M('#a9bcbd', 0.1, 0.2))])]   # Valtakatu 26: two stacks of projecting balconies with glass parapets (SV 2026, 17.11)
+
+def _glazed_stack(sa, sb, f0=1, f1=7, fh=3.1875, d=1.5):
+    """a stack of glazed balconies (frameless glass, frosted railing band, dark slabs) on floors f0..f1"""
+    sl, gl, fr = M('#2f3336', 0.6), M('#5d7078', 0.08, 0.25), M('#b7c4c6', 0.35)
+    out = []
+    for k in range(f0, f1 + 1):
+        z = k * fh
+        out += [('box', sa, sb, z - 0.05, z + 0.22, 0.0, d, sl),             # slab, dark edge
+                ('box', sa + 0.05, sb - 0.05, z + 0.22, z + 1.1, d - 0.08, d - 0.02, fr),   # frosted railing band
+                ('box', sa + 0.03, sb - 0.03, z + 0.22, z + fh - 0.05, 0.0, d - 0.06, gl)]  # glazing
+    out.append(('box', sa, sb, (f1 + 1) * fh - 0.05, (f1 + 1) * fh + 0.2, 0.0, d, sl))       # cap over the top balcony
+    return out
+SPECK[1517] = dict(spec_for(1517)); SPECK[1517]['extra'] = [facade_bits((-456.9, 392.0), (-463.1, 365.4), _glazed_stack(24.0, 27.3) + _glazed_stack(17.4, 21.0))]   # Katariinankatu 4 (Street View 17.11.2026): two stacks of glazed balconies on the Katariinankatu side, one at the SW corner; floors 1-7
 SPECK[1553] = classic_spec(1553, wall='#e9e8e3', trim='#e9e8e3', rust=False, garch=False, hood=None, pil=False, bw=4.0,
                            lay=dict(nf=1, frieze=1.0, cols=lambda c, nb: 'S'), ground=dict(plinth_h=0.3, basement=False), yard_same=True)
 SPECK[1553]['alt'] = lambda x, y: _blankw if y > 191.5 else None   # its tall back wall (part of the white house over it) is blank
