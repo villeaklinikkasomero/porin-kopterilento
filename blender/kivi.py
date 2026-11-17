@@ -211,6 +211,14 @@ def facade_bits(p0, p1, items):
                     quad([P(u0, z1, 0.0), P(u1, z1, 0.0), P(u1, z1, -tk), P(u0, z1, -tk)], mat)
                 for u, sg in ((s0, -1), (s1, 1)):
                     quad([P(u, z0, -tk if sg > 0 else 0.0), P(u, z0, 0.0 if sg > 0 else -tk), P(u, z1, 0.0 if sg > 0 else -tk), P(u, z1, -tk if sg > 0 else 0.0)], mat)
+            elif it[0] == 'cyl':                                            # ('cyl', s, d, r, z0, z1, mat): upright cylinder (silo) standing out from the wall
+                _, sc, dc, r, z0, z1, mat = it[:7]; nseg = 24
+                ang = [2 * math.pi * q / nseg for q in range(nseg + 1)]
+                for q in range(nseg):
+                    a0, a1 = ang[q], ang[q + 1]
+                    quad([P(sc + r * math.cos(a1), z0, dc + r * math.sin(a1)), P(sc + r * math.cos(a0), z0, dc + r * math.sin(a0)),
+                          P(sc + r * math.cos(a0), z1, dc + r * math.sin(a0)), P(sc + r * math.cos(a1), z1, dc + r * math.sin(a1))], mat)
+                quad([P(sc + r * math.cos(a), z1, dc + r * math.sin(a)) for a in reversed(ang[:-1])], mat)
             elif it[0] == 'archwin':                                        # ('archwin', s0, s1, z0, zs, surround): round-headed window, glass + mullion/transom, stone surround
                 _, s0, s1, z0, zs, sm = it[:6]; r = (s1 - s0) / 2; c = (s0 + s1) / 2; gw = M('#71838f', 0.05, 0.4); fr = M('#3a3530', 0.5); sw = 0.16
                 arcp = [P(c + r * math.cos(math.pi * q / 12), zs + r * math.sin(math.pi * q / 12), 0.06) for q in range(13)]
@@ -972,6 +980,66 @@ SPECK[1337] = classic_spec(1337, wall='#e8e6df', trim='#e8e6df', rust=False, gar
                            first=dict(ww=1.55, wh=1.9, sill=0.9, sband=0, wh_fixed=True), top=dict(ww=1.55, wh=1.9, sill=0.9, wh_fixed=True), cornice=(0.3, 0.3, M('#e8e6df')))
 SPECK[1337]['P'] = dict(SPECK[1337]['P'], frame=M('#6b3a2a', 0.6))
 SPECK[1337]['roof'] = dict(kind='hip', rise=3.4, inset=5.0, mat=M('#45484b', 0.5), ov=0.45)
+# 1370 Vapaudenkatu (owner + Street View 17.11.2026): precast block clad in cream brick tiles; west side towards Vapaudenkatu: two stacks of
+# glazed balconies in the north part, the south part blank but for one window pair and small windows per storey, the ground storey blank
+# but for the entrance door; a white loggia column at the SW corner on the south gable
+_s70 = dict(spec_for(1370)); _l = dict(_s70['layout']); _l['plain'] = True; _s70['layout'] = _l
+def _ra70(x, y):
+    for A, t in (((-599.9, 285.3), (-0.2235, -0.9747)), ((-609.3, 244.3), (0.9750, -0.2237))):
+        if abs((x - A[0]) * t[1] - (y - A[1]) * t[0]) < 1.5: return _s70
+    return None
+def _x70():
+    fh = 15.28 / 5; TL, WH = MT('#e9dbbd', 'brick', 0.8), M('#f1f0ec', 0.5); w = []; s = []
+    for fl in range(1, 5):
+        z = fl * fh
+        for s0, s1 in ((15.0, 20.0), (23.5, 29.5)):
+            w += [('box', s0, s1, z - 0.2, z, 0.0, 1.4, WH), ('box', s0, s1, z, z + 1.0, 1.32, 1.4, M('#d9dee0', 0.3)),
+                  ('box', s0 + 0.04, s1 - 0.04, z + 1.0, z + fh - 0.2, 1.35, 1.4, M('#8fa3b0', 0.05, 0.35))]
+            for e in (s0, s1 - 0.08): w.append(('box', e, e + 0.08, z, z + fh - 0.2, 0.0, 1.4, WH))
+            for q in (1, 2, 3): u = s0 + (s1 - s0) * q / 4; w.append(('box', u - 0.03, u + 0.03, z + 1.0, z + fh - 0.2, 1.4, 1.43, WH))
+            kwin(w, s0 + 0.6, s0 + 1.5, z + 0.1, z + 2.4, TL, panes=1, sill=False); kwin(w, s0 + 1.9, s1 - 0.6, z + 0.9, z + 2.4, TL, panes=2, sill=False)
+        for c in (3.0, 7.0, 11.0): kwin(w, c - 0.7, c + 0.7, z + 0.9, z + 2.3, TL, panes=2)
+        kwin(w, 33.4, 35.6, z + 0.8, z + 2.2, TL, panes=3)
+        if fl <= 2: kwin(w, 30.9, 31.4, z + 1.2, z + 1.7, TL, panes=1, sill=False); kwin(w, 31.9, 32.4, z + 1.2, z + 1.7, TL, panes=1, sill=False)
+    for s0, s1 in ((15.0, 20.0), (23.5, 29.5)): w.append(('box', s0, s1, 5 * fh - 0.2, 5 * fh, 0.0, 1.4, WH))
+    w += [('box', 27.0, 28.4, 0.0, 2.3, 0.0, 0.05, GLASS_SKY), ('box', 26.9, 28.5, 2.3, 2.42, 0.0, 0.08, M('#34383b', 0.5))]   # entrance door
+    s.append(('box', 0.0, 3.2, 0.0, 15.28, 0.0, 0.35, WH))                                     # white loggia column, SW corner
+    for fl in range(5):
+        z = fl * fh; s.append(('box', 0.35, 2.85, z + 0.9, z + fh - 0.35, 0.35, 0.37, M('#4f565c', 0.4)))
+    return [facade_bits((-599.9, 285.3), (-609.3, 244.3), w), facade_bits((-609.3, 244.3), (-598.4, 241.8), s)]
+SPECK[1370] = dict(spec_for(1370), runalt=_ra70, splitruns=True, extra=_x70())
+# 1261 Vapaudenkatu 4 (owner 17.11.2026): a long loading dock with a canopy along the Vapaudenkatu side of the low wing
+SPECK[1261] = dict(SPECK.get(1261) or spec_for(1261))
+def _fit61(lay_, hh, st):
+    n = max(1, round((hh - 4.4) / 3.2)); bw = 3.4
+    return dict(bw=bw, rows=[(4.4, 'shop', 'G')] + [(3.2, 'punched', 'F')] * n, cols=lambda c, nb: 'W',
+                P=dict(ww=bw - 0.3, wh=1.25, sill=1.0, nx=3), rowP={})
+SPECK[1261]['fit'] = _fit61; SPECK[1261]['layout'] = _fit61(None, 10.8, True)   # owner 17.11.2026: two storeys of long window bands over the shop storey (was five)
+SPECK[1261]['extra'] = list(SPECK[1261].get('extra', [])) + [facade_bits((-641.0, 266.4), (-624.4, 337.6), [
+    ('box', 4.5, 56.0, 0.0, 1.0, 0.0, 3.6, M('#b3b1aa', 0.8)), ('box', 4.5, 56.0, 0.98, 1.05, 3.4, 3.65, M('#3a3d40', 0.5)),
+    ('box', 4.0, 56.5, 4.0, 4.45, 0.0, 4.6, M('#ecebe6', 0.5)), ('box', 4.0, 56.5, 3.75, 4.0, 4.4, 4.6, M('#ecebe6', 0.5)),   # deep cantilevered canopy
+    ('box', 40.0, 45.0, 0.0, 0.33, 3.6, 4.6, M('#5fa38f', 0.6)), ('box', 40.0, 45.0, 0.33, 0.66, 3.6, 4.3, M('#5fa38f', 0.6)),   # green steps up to the dock
+    ('box', 18.0, 21.0, 1.05, 2.0, 2.0, 2.15, M('#c8312c', 0.5)), ('box', 30.0, 33.0, 1.05, 2.0, 2.0, 2.15, M('#c8312c', 0.5))])]   # red sale banners
+# Porin Siilo (1261, owner's photos 17.11.2026): north end of the tower = four slender white silo cylinders (2.4 m, 19.6 m high, on a grey
+# base) carrying a cream top storey with three small windows (the 22.7 m LoD2 part), a brick chimney at the joint, and west of them a
+# cream five-storey block with grey-framed window pairs
+_C61 = M('#ebe4c4', 0.6)
+_s61w = dict(SPECK[1261]); _l = dict(_s61w['layout']); _l['plain'] = True; _s61w['layout'] = _l; _s61w['P'] = dict(_s61w['P'], wall=M('#eeede8', 0.6)); _s61w.pop('fit', None)
+_s61c = dict(SPECK[1261]); _s61c['P'] = dict(_s61c['P'], wall=_C61); _s61c.pop('fit', None)
+_s61c['layout'] = dict(bw=3.4, rows=[(3.6, 'punched', 'G')] + [(3.4, 'punched', 'F')] * 4, cols=lambda c, nb: 'W', P=dict(ww=2.0, wh=1.35, sill=0.95, nx=2, frame=M('#6c7175', 0.5)), rowP={})
+def _ra61(x, y, A=(-624.4, 337.6), t=(-0.9737, 0.2275)):
+    d = (x - A[0]) * t[1] - (y - A[1]) * t[0]; s = (x - A[0]) * t[0] + (y - A[1]) * t[1]
+    if abs(d) > 1.5: return None
+    return _s61w if s < 12.0 else _s61c
+SPECK[1261]['runalt'] = _ra61; SPECK[1261]['splitruns'] = True
+_sil = [('box', 1.9, 11.9, 0.0, 1.3, 0.0, 1.6, M('#9a9c9c', 0.7))]
+for q in range(4): _sil.append(('cyl', 3.3 + q * 2.4, 0.3, 1.2, 1.3, 19.6, M('#eeede8', 0.6)))
+_sil += [('box', 1.5, 12.3, 19.6, 22.7, 0.0, 0.12, _C61), ('box', 1.5, 12.3, 22.6, 22.9, 0.0, 0.25, M('#d9d6c8', 0.5)),
+         ('box', 11.9, 12.9, 0.0, 24.2, 0.0, 1.0, MT('#8b4a36', 'brick', 0.8))]
+for c in (4.6, 6.9, 9.2): _sil += [('box', c - 0.45, c + 0.45, 20.6, 21.6, 0.12, 0.15, M('#3c4248', 0.3))]
+_sil += [('box', 14.7, 16.8, 0.0, 18.1, 0.0, 0.15, _C61), ('box', 17.6, 19.0, 0.0, 18.1, 0.0, 0.15, _C61)]                                   # close the jog between the LoD2 wall pieces (it baked black)
+for q in range(4): kwin(_sil, 14.9, 16.6, 3.6 + q * 3.4 + 0.95, 3.6 + q * 3.4 + 2.3, _C61, panes=2, frame=M('#6c7175', 0.5), dd=0.15)
+SPECK[1261]['extra'] = list(SPECK[1261]['extra']) + [facade_bits((-624.4, 337.6), (-642.8, 341.9), _sil)]
 def kspec(i):
     if i in SPECK: return SPECK[i]
     if i in MODERN: return spec_for(i)
