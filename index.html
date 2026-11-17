@@ -1348,10 +1348,10 @@ let rotor, tailRotor;
   }
   scene.add(heli);
   // Blender-made helicopter replaces the simple one once loaded
-  loadModel('heli', root => {
-    const pm = new THREE.MeshPhongMaterial({ vertexColors: true, shininess: 55, specular: 0x3a3a3a });
-    root.traverse(q => { if (q.isMesh) q.material = pm; });
-    const nr = root.getObjectByName('rotor'), nt = root.getObjectByName('trotor'); if (!nr || !nt) return;
+  loadModel(isTouch ? 'heli_m' : 'heli', root0 => {   // Porikopteri (owner 17.11.2026): textured PBR model, nose +z, skids at y 0; the mobile file is lighter
+    const root = new THREE.Group(); root.add(root0); root0.rotation.y = Math.PI; root0.position.y = -1.85;   // game frame: nose -z, skids at -1.85 (as the old model)
+    root0.traverse(q => { if (q.isMesh) { const m = q.material; if (m && m.map) { m.map.anisotropy = 4; } q.frustumCulled = false; } });
+    const nr = root0.getObjectByName('MainRotor'), nt = root0.getObjectByName('TailRotor'); if (!nr || !nt) return;
     const disc = new THREE.Mesh(new THREE.CircleGeometry(5.1, 32), new THREE.MeshBasicMaterial({ color: 0x15191d, transparent: true, opacity: 0.12, side: THREE.DoubleSide, depthWrite: false })); disc.rotation.x = -Math.PI / 2; nr.add(disc);
     heli.clear(); heli.add(root); rotor = nr; tailRotor = nt; window.__heli = true;
   });
