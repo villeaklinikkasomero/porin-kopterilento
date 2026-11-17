@@ -1,4 +1,4 @@
-# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 17.11.2026; UUSIN TILA: osio "17.11.2026 – ALOITA TÄSTÄ" aivan lopussa)
+# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 15.11.2026; UUSIN TILA: osio "15.11.2026 – ALOITA TÄSTÄ" aivan lopussa)
 
 Liitä tämä tiedosto uuden keskustelun alkuun. Pyydä Claudea lukemaan myös repon `SIIRTO.md`, `pipeline/README.md` ja `HANDOFF_Y-PAKKI.md` (jos repossa).
 Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
@@ -528,3 +528,17 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
 - Seuraavaksi: kl0 loput (1517 kulmatalon lasitettu kulmaparveke, 1516, 1449, 1458, 1446, 1447, 1338, 1357, 1336, 1337, 1368, 1370, 1261), kivi5 1551/1552,
   vikalistan kohta 2 (taidemuseon ympäristön värit), sitten Valtakadun keltaiset toimistotalot (1361/1367/1488/1489, eivät missään kivi-lohkossa → city-lohko).
 - Modal (käyttäjä, pushin jälkeen): bake kivi0 kivi1 kivi2 kivi3 kivi4 kivi5 kl0 kl1 --samples 64, landmarks kaupungintalo raati, city 64 c039.
+
+#### 17.11.2026 iltapäivä (jatko, toinen keskustelu)
+- Korjattu rautalangalla (kl0 + karhu): 1517 lasitetut parvekepinot Katariinankadulle + pohjoissivun loggiat, 1535 harjakatto + kahden kerroksen syvennys kulman molemmin puolin,
+  1516 sisäänvedetyt loggiat NW + vaaleat 2 ylintä kerrosta + pohjoissivun lasiparvekkeet 4 tiilipylvään välissä (3|3|1), 1458 Valtakatu 24 julkisivu mitattu (ikkunat, lasiporrashuone,
+  autotalli, sisäänkäynti, itäpään parvekesyvennys + sisäänpäin nousevat portaat), 1451 (karhu) kadun päälle ulottuvat parvekenauhat, 1446 Hallituskatu 22 (lohenpunainen, itäpäädyn parveke),
+  1447 vanha sähkölaitos (omistajan valokuvasta mitattu: korkeat kaari-ikkunat, kivipilarit, pääty-ikkuna, matalan siiven kaari-ikkunat, graniittisokkeli), 1338 vaalea tiili + ranskalaiset parvekkeet,
+  1357 kaksi sinipaneelista lasiparvekepinoa + sisäänvedetty maantaso Katariinankadulla, 1336 Valtakatu 30, 1368 tornitalon päätypystyrivi, 1337 Hallituskatu 26 (2 krs + kellari, aumakatto).
+- Jäljellä kl0: 1370, 1261 (ei tarkkaa SV-panoraamaa kokeilluista kohdista). Sitten kivi5 1551/1552, vikalista 2, Valtakadun keltaiset (city-lohko).
+- Uudet työkalut: `tools/rautalanka/px2wall.py` (SV-pikseli -> seinän s, z; fov-parametri), kivi.py `kwin()` (moderni ikkuna: kehys, puitteet, harmaansininen lasi, pelti),
+  facade_bits `archwin` (kaari-ikkuna kivikehyksellä), gen.py roof `gablemat`. gshot_sv.mjs: ZONE välitetään selaimeen (aiemmin `process.env` selaimessa -> ei odottanut lohkoa).
+- index.html: ilmakuvakattoa ei piirretä kivi-/kl-lohkojen taloille (näkyi väärässä city.js-korkeudessa 1535:n syvennyksessä).
+- Pilvityötilassa ei ole laitteen shelliä: repo kloonataan GitHubista, bpy 5.2.4 pip, data `pipeline/data/porikit_data.tgz` -> /home/claude/mmlproc.
+- Kaupungin kuvat: OneDrive Kuvat_kopterilento (Kalle Aaltonen). Omistaja hyväksyi 17.11. käsittelyn pilvityötilassa (EU ok).
+- Modal (käyttäjä, pushin jälkeen): `bake kl0 karhu --samples 64`.

@@ -952,6 +952,26 @@ def _x36():
     for c in (5.6, 8.6, 13.3): kwin(it, c - 0.5, c + 0.5, 1.5, 2.3, TL, panes=2, sill=False)
     return facade_bits((-568.2, 365.7), (-548.6, 361.1), it)
 SPECK[1336] = dict(spec_for(1336), runalt=_ra36, splitruns=True, extra=[_x36()])
+# 1368 (Street View 17.11.2026): dark grey-brown point block; the north gable is blank but for a central column of windows with red panels
+_s68 = dict(spec_for(1368)); _l = dict(_s68['layout']); _l['plain'] = True; _s68['layout'] = _l
+def _ra68(x, y, A=(-561.7, 329.2), t=(-0.9708, 0.2412)):
+    d = (x - A[0]) * t[1] - (y - A[1]) * t[0]
+    return _s68 if abs(d) < 1.5 else None
+def _x68():
+    it = []; fh = 28.92 / 9; W = M('#6f6a62')
+    for fl in range(9):
+        z = fl * fh
+        it.append(('box', 7.4, 8.4, z + 0.5, z + 2.6, 0.0, 0.05, M('#a8322c', 0.5)))
+        kwin(it, 8.6, 10.9, z + 0.8, z + 2.4, W, panes=2)
+    return facade_bits((-561.7, 329.2), (-578.2, 333.3), it)
+SPECK[1368] = dict(spec_for(1368), runalt=_ra68, splitruns=True, extra=[_x68()])
+# 1337 Hallituskatu 26 (Street View 17.11.2026): white rendered two-storey block on a low basement, large multi-pane windows in brown frames,
+# dark hipped roof with chimneys (no LoD2 here)
+SPECK[1337] = classic_spec(1337, wall='#e8e6df', trim='#e8e6df', rust=False, garch=False, hood=None, pil=False, bw=3.9,
+                           lay=dict(nf=2, gh=5.0, fh=4.4, door_mid=False), ground=dict(plinth_h=0.8, plinth=M('#8d8f90', 0.7), basement=True, sband=0, ww=1.55, wh=2.0, sill=1.5, wh_fixed=True),
+                           first=dict(ww=1.55, wh=1.9, sill=0.9, sband=0, wh_fixed=True), top=dict(ww=1.55, wh=1.9, sill=0.9, wh_fixed=True), cornice=(0.3, 0.3, M('#e8e6df')))
+SPECK[1337]['P'] = dict(SPECK[1337]['P'], frame=M('#6b3a2a', 0.6))
+SPECK[1337]['roof'] = dict(kind='hip', rise=3.4, inset=5.0, mat=M('#45484b', 0.5), ov=0.45)
 def kspec(i):
     if i in SPECK: return SPECK[i]
     if i in MODERN: return spec_for(i)
