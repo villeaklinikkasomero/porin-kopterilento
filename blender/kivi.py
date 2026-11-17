@@ -927,6 +927,31 @@ def _ra57(x, y, A=(-476.3, 388.1), t=(0.2398, 0.9708)):
     d = (x - A[0]) * t[1] - (y - A[1]) * t[0]
     return _s57e if abs(d) < 1.5 else None
 SPECK[1357]['runalt'] = _ra57; SPECK[1357]['splitruns'] = True   # owner 17.11.2026: the ground storey of the Katariinankatu side is recessed under the floors above
+# 1336 Valtakatu 30 (Street View 17.11.2026): light grey render, yellow tiled ground storey, loggia columns at both ends with yellow tiled
+# parapets, a central stair column of narrow windows over the entrance canopy, three windows per storey between
+_s36 = dict(spec_for(1336)); _l = dict(_s36['layout']); _l['plain'] = True; _s36['layout'] = _l
+def _ra36(x, y, A=(-568.2, 365.7), t=(0.9734, -0.2290)):
+    d = (x - A[0]) * t[1] - (y - A[1]) * t[0]; s = (x - A[0]) * t[0] + (y - A[1]) * t[1]
+    return _s36 if abs(d) < 1.5 and -0.5 < s < 20.6 else None
+def _x36():
+    fh = (15.49 - 2.8) / 4; WL, TL, WT = M('#cdcbc4'), M('#d9cba0', 0.5), M('#ecebe6', 0.5); it = []
+    it.append(('box', 0.0, 20.1, 0.0, 2.8, 0.0, 0.05, TL))
+    for s0, s1 in ((1.2, 4.2), (14.8, 17.9)):
+        it.append(('box', s0, s1, 0.0, 2.6, 0.05, 0.07, WT))                                     # light recessed bays under the loggias
+        for fl in range(4):
+            z = 2.8 + fl * fh
+            it += [('box', s0, s1, z + 1.15, z + fh - 0.08, 0.0, 0.02, M('#4f565c', 0.4)), ('box', s0, s1, z - 0.08, z + 0.08, 0.0, 0.1, WT),
+                   ('box', s0, s1, z + 0.08, z + 1.15, 0.0, 0.09, TL)]                              # loggia: dark opening, slab edge, tiled parapet
+            kwin(it, s0 + 0.35, s1 - 0.35, z + 1.3, z + fh - 0.3, M('#4f565c', 0.4), panes=3, sill=False, dd=0.02)
+        it += [('box', s0 - 0.1, s0, 2.8, 15.49, 0.0, 0.1, WL), ('box', s1, s1 + 0.1, 2.8, 15.49, 0.0, 0.1, WL)]
+    for fl in range(4):
+        z = 2.8 + fl * fh
+        for c in (5.6, 8.6, 13.3): kwin(it, c - 0.8, c + 0.8, z + 0.9, z + 2.4, WL, panes=2)
+        it.append(('box', 10.4, 11.3, z + 0.3, z + 2.6, 0.0, 0.04, M('#b7c3c6', 0.2, 0.2)))  # glass-block strip of the stair
+    it += [('box', 10.1, 11.6, 0.0, 2.4, 0.04, 0.06, GLASS_SKY), ('canopy', 10.85, 2.8, 2.75, 1.4, M('#9fb0ba', 0.05, 0.3))]
+    for c in (5.6, 8.6, 13.3): kwin(it, c - 0.5, c + 0.5, 1.5, 2.3, TL, panes=2, sill=False)
+    return facade_bits((-568.2, 365.7), (-548.6, 361.1), it)
+SPECK[1336] = dict(spec_for(1336), runalt=_ra36, splitruns=True, extra=[_x36()])
 def kspec(i):
     if i in SPECK: return SPECK[i]
     if i in MODERN: return spec_for(i)
