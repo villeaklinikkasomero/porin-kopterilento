@@ -894,6 +894,39 @@ def _x16n():
     return facade_bits((-408.7, 410.6), (-440.5, 417.9), it)
 _l16n = dict(SPECK[1516]['layout']); _l16n['plain'] = True; _l16n['P'] = dict(_l16n.get('P', {}), wall=M('#3a3d40', 0.5))
 SPECK[1516]['walls'] = {**SPECK[1516]['walls'], 1: _l16n}; SPECK[1516]['extra'] = list(SPECK[1516].get('extra', [])) + [_x16n()]
+SPECK[1338] = dict(spec_for(1338)); _l38 = dict(SPECK[1338]['layout']); _l38['cols'] = lambda c, nb: 'W'; SPECK[1338]['layout'] = _l38   # no loggias (Street View 17.11.2026)
+def _x38():
+    """1338 Katariinankatu side (owner + Street View 17.11.2026): two columns of French balconies (tall door, grey rail) on floors 1-4"""
+    fh = 16.43 / 5; it = []; rl = M('#6c7175', 0.5)
+    for fl in range(1, 5):
+        z = fl * fh
+        for c in (2.75, 12.2):
+            it += [('box', c - 0.45, c + 0.45, z + 0.05, z + 2.25, 0.0, 0.03, GLASS_SKY), ('box', c - 0.55, c + 0.55, z + 0.05, z + 0.12, 0.0, 0.25, rl),
+                   ('box', c - 0.55, c + 0.55, z + 0.95, z + 1.02, 0.18, 0.25, rl)]
+            for q in range(9): u = c - 0.5 + q * 0.125; it.append(('box', u, u + 0.025, z + 0.12, z + 0.95, 0.2, 0.23, rl))
+    return facade_bits((-485.6, 350.4), (-481.5, 369.1), it)
+SPECK[1338]['extra'] = list(SPECK[1338].get('extra', [])) + [_x38()]
+def _x57():
+    """1357 (owner + Street View 17.11.2026): two stacks of glazed balconies with blue spandrel panels on the south side, floors 1-3:
+    one right at the SE corner, the other about three windows further west; the south end of the Katariinankatu side is windowless"""
+    fh = 13.37 / 4; it = []; WH = M('#ecebe6', 0.5)
+    for s0, s1 in ((33.7, 37.9), (20.5, 24.7)):
+        for fl in range(1, 4):
+            z = fl * fh
+            it += [('box', s0, s1, z - 0.2, z, 0.0, 1.6, WH), ('box', s0, s1, z, z + 1.05, 1.52, 1.6, M('#2f4f8f', 0.4)),
+                   ('box', s0 + 0.05, s1 - 0.05, z + 1.05, z + fh - 0.2, 1.55, 1.6, M('#8fa3b0', 0.05, 0.35))]
+            for e in (s0, s1 - 0.08): it += [('box', e, e + 0.08, z, z + 1.05, 0.0, 1.6, M('#2f4f8f', 0.4)), ('box', e, e + 0.08, z + 1.05, z + fh - 0.2, 0.0, 1.6, M('#8fa3b0', 0.05, 0.35))]
+            for q in (1, 2): u = s0 + (s1 - s0) * q / 3; it.append(('box', u - 0.03, u + 0.03, z + 1.05, z + fh - 0.2, 1.6, 1.63, M('#34383b', 0.5)))
+        it.append(('box', s0, s1, 4 * fh - 0.2, 4 * fh, 0.0, 1.6, WH))
+    east = [('box', 0.2, 6.8, 13.37 / 4, 13.37, 0.0, 0.06, WH)]                                    # windowless south end of the east side (above the recessed ground storey)
+    return [facade_bits((-513.1, 397.2), (-476.3, 388.1), it), facade_bits((-476.3, 388.1), (-472.1, 405.1), east)]
+SPECK[1357] = dict(spec_for(1357)); SPECK[1357]['extra'] = list(SPECK[1357].get('extra', [])) + _x57()
+_s57e = dict(spec_for(1357)); _l = dict(_s57e['layout']); _r = list(_l['rows']); _r[0] = (_r[0][0], 'shop', 'G'); _l['rows'] = _r
+_l['rowP'] = dict(_l.get('rowP', {}), G=dict(setback=1.5, soffit=M('#ecebe6', 0.5))); _s57e['layout'] = _l
+def _ra57(x, y, A=(-476.3, 388.1), t=(0.2398, 0.9708)):
+    d = (x - A[0]) * t[1] - (y - A[1]) * t[0]
+    return _s57e if abs(d) < 1.5 else None
+SPECK[1357]['runalt'] = _ra57; SPECK[1357]['splitruns'] = True   # owner 17.11.2026: the ground storey of the Katariinankatu side is recessed under the floors above
 def kspec(i):
     if i in SPECK: return SPECK[i]
     if i in MODERN: return spec_for(i)
