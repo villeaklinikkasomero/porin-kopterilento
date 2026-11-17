@@ -728,7 +728,7 @@ def build_roof(Z, pts, h, R, P):
         add_solid(Z, [Pt(-1, -1, ov, h), Pt(1, -1, ov, h), Pt(1, 0, ov, h + rise), Pt(-1, 0, ov, h + rise)], rm, 0.6)
         add_solid(Z, [Pt(1, 1, ov, h), Pt(-1, 1, ov, h), Pt(-1, 0, ov, h + rise), Pt(1, 0, ov, h + rise)], rm, 0.6)
         for su in (-1, 1):
-            add_solid(Z, [Pt(su, -su, 0, h), Pt(su, su, 0, h), Pt(su, 0, 0, h + rise)], P['wall'], 0.5)
+            add_solid(Z, [Pt(su, -su, 0, h), Pt(su, su, 0, h), Pt(su, 0, 0, h + rise)], R.get('gablemat', P['wall']), 0.5)
     if R.get('pent'):                                    # set-back attic / plant room
         ins, ph = R['pent']; i_ = offset(pts, -ins); n = len(i_); pm = R.get('pentmat', P['wall'])
         for k in range(n):

@@ -605,7 +605,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     }
     const tris = THREE.ShapeUtils.triangulateShape(pts.map(q => new THREE.Vector2(q[0], q[1])), []);
     if (OWNROOF.has(b.w) && T) { const g = b.w === SKOOLI ? 0.2 : 0.56; if (b.w !== SKOOLI) for (const q of pts) karhuPts.push(q); for (const t of tris) for (const k of t) { const q = pts[k]; tp.push(q[0], h, -q[1]); tu.push(0.02, 0.02); tn.push(0, 1, 0); tc.push(g, g, g + 0.02); } }   // new restaurant: the aerial image predates it, so no photo roof
-    else if (!ZROOF.has(bIdx)) {   // blocks with a Blender-made roof skip the photo roof
+    else if (!ZROOF.has(bIdx) && !(ZB[bIdx] !== undefined && ROOFZ.has(ZB[bIdx]))) {   // blocks with a Blender-made roof skip the photo roof (Kivi-Pori blocks too: at the wrong city.js height it showed inside the Valtakatu 26 recess, 17.11.2026)
       let gable = null;
       if (house && pts.length <= 14) { const o = obbOf(pts); let ar = 0; for (let i = 0; i < pts.length; i++) { const a = pts[i], c2 = pts[(i + 1) % pts.length]; ar += a[0] * c2[1] - c2[0] * a[1]; }
         if (o && Math.abs(ar) / 2 > 0.7 * 4 * o.a * o.b && o.b > 1.8) gable = o; }

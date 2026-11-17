@@ -495,6 +495,15 @@ def _glazed_stack(sa, sb, f0=1, f1=7, fh=3.1875, d=1.5):
                 ('box', sa + 0.03, sb - 0.03, z + 0.22, z + fh - 0.05, 0.0, d - 0.06, gl)]  # glazing
     out.append(('box', sa, sb, (f1 + 1) * fh - 0.05, (f1 + 1) * fh + 0.2, 0.0, d, sl))       # cap over the top balcony
     return out
+# Valtakatu 26 (owner 17.11.2026): pitched roof along Valtakatu, dark glazed gable at the Katariinankatu corner; at the west end of the
+# Valtakatu side a two-storey recess (white soffit, brown metal back wall) behind a brick corner pier (Street View s 1.0-3.7 m from the corner)
+B[1535]['p'] = [-4097, 3426, -4665, 3561, -4688, 3466, -4694, 3440, -4696, 3430, -4686, 3428, -4660, 3422, -4128, 3296]
+SPECK[1535]['roof'] = dict(kind='gable', rise=4.5, ov=0.3, mat=M('#3a3e42', 0.5, 0.3), gablemat=M('#41505a', 0.1, 0.3))
+_l35 = dict(SPECK[1535]['layout']); _r35 = list(_l35['rows'])
+_l35['rows'] = [(_r35[0][0] + _r35[1][0], 'plain', 'R')] + _r35[2:]
+_l35['rowP'] = dict(_l35.get('rowP', {}), R=dict(setback=3.7, soffit=M('#ecebe7'), wall=M('#6e4b36', 0.5, 0.2), open_ends=True))
+SPECK[1535]['walls'] = {2: _l35, 5: _l35}   # owner 17.11: the recess runs round the corner (both streets), a brick pier stands at the corner
+SPECK[1535]['extra'] = list(SPECK[1535]['extra']) + [facade_bits((-469.6, 343.0), (-412.8, 329.6), [('box', 0.0, 1.0, 0.0, 6.5, -1.0, 0.0, MT('#5a3f35', 'brick', 0.8))])]   # inner faces of the corner pier
 SPECK[1517] = dict(spec_for(1517)); SPECK[1517]['extra'] = [facade_bits((-456.9, 392.0), (-463.1, 365.4), _glazed_stack(24.0, 27.3) + _glazed_stack(17.4, 21.0))]   # Katariinankatu 4 (Street View 17.11.2026): two stacks of glazed balconies on the Katariinankatu side, one at the SW corner; floors 1-7
 SPECK[1553] = classic_spec(1553, wall='#e9e8e3', trim='#e9e8e3', rust=False, garch=False, hood=None, pil=False, bw=4.0,
                            lay=dict(nf=1, frieze=1.0, cols=lambda c, nb: 'S'), ground=dict(plinth_h=0.3, basement=False), yard_same=True)
