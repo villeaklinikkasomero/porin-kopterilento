@@ -504,7 +504,75 @@ _l35['rows'] = [(_r35[0][0] + _r35[1][0], 'plain', 'R')] + _r35[2:]
 _l35['rowP'] = dict(_l35.get('rowP', {}), R=dict(setback=3.7, soffit=M('#ecebe7'), wall=M('#6e4b36', 0.5, 0.2), open_ends=True))
 SPECK[1535]['walls'] = {2: _l35, 5: _l35}   # owner 17.11: the recess runs round the corner (both streets), a brick pier stands at the corner
 SPECK[1535]['extra'] = list(SPECK[1535]['extra']) + [facade_bits((-469.6, 343.0), (-412.8, 329.6), [('box', 0.0, 1.0, 0.0, 6.5, -1.0, 0.0, MT('#5a3f35', 'brick', 0.8))])]   # inner faces of the corner pier
+SPECK[1516] = dict(spec_for(1516)); SPECK[1516]['roof'] = dict(kind='flat', mat=M('#3a3e42', 0.5), pent=(0.8, 3.0), pentmat=M('#9aaab3', 0.15, 0.3))   # glazed top storey, light grey-blue (SV 17.11.2026)
+_lt16 = dict(SPECK[1516]['layout']); _lt16['rows'] = list(_lt16['rows'][:-1]) + [(_lt16['rows'][-1][0], _lt16['rows'][-1][1], 'T')]
+_lt16['rowP'] = dict(_lt16.get('rowP', {}), T=dict(wall=M('#b4bfc5', 0.4)))   # owner 17.11: the two top storeys are clad in a light grey-blue material
+SPECK[1516]['layout'] = _lt16; SPECK[1516]['roof']['pentmat'] = M('#b4bfc5', 0.4)
+_l16 = dict(SPECK[1516]['layout']); _l16['cols'] = lambda c, nb: 'B' if c == 0 else 'W'; _l16['P'] = dict(_l16.get('P', {}), rail=M('#b7c4c6', 0.35), ldepth=1.6)
+SPECK[1516]['walls'] = {2: _l16}   # owner 17.11: the glazed balconies at the NW corner (Katariinankatu side) are recessed loggias
+# Valtakatu 24 / LoD2 shell (Street View 17.11.2026): white rendered west part, a glazed stair column, orange-red brick east part with dark window bands,
+# grey panel cladding along the whole ground floor; the east end grey with balconies
+def _s58(wall):
+    s = dict(spec_for(1458)); s['P'] = dict(s['P'], wall=wall); l = dict(s['layout']); l['plain'] = True; s['layout'] = l; return s
+_S58 = [_s58(M('#ecebe7')), _s58(M('#2f4252', 0.1, 0.3)), _s58(MT('#9c4f39', 'brick', 0.8)), _s58(M('#4d5154', 0.5))]
+def _ra58(x, y, A=(-412.8, 329.6), t=(0.9709, -0.2393)):
+    s = (x - A[0]) * t[0] + (y - A[1]) * t[1]; d = (x - A[0]) * t[1] - (y - A[1]) * t[0]
+    if abs(d) > 2.5: return None                         # only the Valtakatu side
+    return _S58[0] if s < 11.4 else _S58[1] if s < 14.0 else _S58[2] if s < 19.6 else _S58[3]
+GLASS_SKY = M('#71838f', 0.05, 0.4)   # window glass as Street View shows it: grey-blue sky reflection, not black
+def kwin(it, s0, s1, z0, z1, wall, panes=None, sill=True, frame=None, dd=0.0):
+    """a modern window on a plain wall: a wall-coloured reveal standing 0.14 m out (so the glass reads as set back), dark frame,
+    sky-grey glass split into panes by mullions, a light sill flashing below"""
+    fr = frame or M('#34383b', 0.5); w = s1 - s0; n = panes or max(1, min(3, round(w / 0.95))); B_ = lambda *a: a[:5] + (a[5] + dd, a[6] + dd) + a[7:]
+    it += [B_('box', s0 - 0.12, s0, z0, z1, 0.0, 0.14, wall), B_('box', s1, s1 + 0.12, z0, z1, 0.0, 0.14, wall),
+           B_('box', s0 - 0.12, s1 + 0.12, z1, z1 + 0.12, 0.0, 0.14, wall),
+           B_('box', s0, s1, z0, z1, 0.0, 0.03, fr), B_('box', s0 + 0.06, s1 - 0.06, z0 + 0.06, z1 - 0.06, 0.03, 0.045, GLASS_SKY)]
+    for q in range(1, n): u = s0 + w * q / n; it.append(B_('box', u - 0.035, u + 0.035, z0, z1, 0.03, 0.06, fr))
+    if sill: it.append(B_('box', s0 - 0.06, s1 + 0.06, z0 - 0.06, z0, 0.0, 0.18, M('#c9cbcc', 0.4)))
+def _x58():
+    """Valtakatu 24 street side, measured on the Street View pose (owner 17.11.2026: windows, stair column, garage door, entrance,
+    ground-floor windows, the stair under the balconies). Ground storey 5.5 m, then four storeys of 2.95 m. East of the LoD2 shell
+    (s 22.3-29.3, up to Karhukortteli 1451) a recessed bay: dark wall 2 m back, balconies with dark slatted rails, a stair under them."""
+    fr, gp, dk = M('#34383b', 0.5), M('#7f8386', 0.5), M('#26282a', 0.6)
+    WH, BR, BG = M('#ecebe7'), MT('#9c4f39', 'brick', 0.8), M('#4d5154', 0.5)
+    it = []
+    it.append(('box', 0.9, 19.6, 0.0, 5.5, 0.0, 0.02, gp))                                   # grey panel cladding along the ground storey
+    for zz in (1.4, 2.8, 4.2): it.append(('box', 0.9, 19.6, zz - 0.02, zz + 0.02, 0.02, 0.035, M('#6c7073', 0.5)))   # panel joints
+    it += [('box', 5.8, 9.9, 0.0, 3.0, 0.02, 0.04, dk), ('box', 5.6, 10.1, 3.0, 3.2, 0.0, 0.7, gp)]   # garage door + its canopy
+    for zz in (0.5, 1.0, 1.5, 2.0, 2.5): it.append(('box', 5.8, 9.9, zz - 0.015, zz + 0.015, 0.04, 0.05, M('#3a3c3e', 0.5)))   # door sections
+    kwin(it, 6.8, 9.0, 4.1, 5.0, gp, panes=2)                                                   # small window over the garage
+    it += [('box', 11.4, 15.6, 0.0, 3.0, 0.02, 0.04, GLASS_SKY), ('box', 11.1, 15.9, 3.0, 3.25, 0.0, 0.9, M('#3a3d40', 0.5))]   # glazed entrance, canopy
+    for u in (11.45, 12.45, 13.5, 14.55, 15.55): it.append(('box', u - 0.05, u + 0.05, 0.0, 3.0, 0.04, 0.07, fr))
+    it.append(('box', 11.4, 15.6, 2.3, 2.38, 0.04, 0.07, fr))
+    it.append(('box', 12.0, 13.6, 3.6, 4.6, 0.02, 0.05, M('#5c6064', 0.5)))                 # the "19D" plate
+    kwin(it, 16.5, 17.2, 2.9, 4.8, gp, panes=1); kwin(it, 17.8, 19.2, 2.9, 4.9, gp, panes=2)   # ground-storey windows of the brick part
+    it.append(('box', 16.9, 19.1, 1.7, 2.5, 0.02, 0.06, M('#3e4245', 0.5)))                  # house-name plate
+    for fl in range(4):
+        z = 5.5 + fl * 2.95
+        if fl == 0: kwin(it, 4.6, 9.3, z + 0.35, z + 2.6, WH, panes=4)
+        else: kwin(it, 4.8, 7.6, z + 0.6, z + 2.4, WH, panes=2); kwin(it, 8.6, 10.2, z + 0.6, z + 2.4, WH, panes=1)
+        it.append(('box', 11.4, 14.0, z - 0.08, z + 0.08, 0.0, 0.06, fr))                    # stair column: floor lines in the glazing
+        kwin(it, 14.7, 15.8, z + 0.55, z + 2.35, BR, panes=1)                                  # brick part: window | dark panel | window, brick bands between
+        it.append(('box', 15.9, 17.8, z + 0.55, z + 2.35, 0.0, 0.03, M('#3c3f42', 0.5))); kwin(it, 17.9, 19.2, z + 0.55, z + 2.35, BR, panes=2)
+        # east bay (owner 17.11): two recessed balconies whose fronts stand in line with Karhukortteli 1451 (d -1.7), back wall at d -3.5
+        if fl < 4:
+            for s0, s1 in ((22.35, 25.7), (25.8, 29.15)):
+                it += [('box', s0, s1, z - 0.22, z, -3.5, -1.7, M('#3a3e42', 0.5)), ('box', s0, s1, z, z + 1.05, -1.78, -1.7, M('#3f4448', 0.5))]
+                for q in range(int((s1 - s0) / 0.25)): u = s0 + 0.1 + 0.25 * q; it.append(('box', u, u + 0.06, z + 0.05, z + 1.0, -1.84, -1.78, M('#2f3336', 0.5)))
+                kwin(it, s0 + 0.4, s0 + 1.3, z + 0.1, z + 2.5, BG, panes=1, sill=False, dd=-3.5); kwin(it, s0 + 1.6, s1 - 0.3, z + 0.9, z + 2.5, BG, panes=2, sill=False, dd=-3.5)
+    it.append(('box', 22.3, 29.2, 0.0, 17.6, -3.55, -3.5, BG))                               # back wall of the bay (no LoD2 here)
+    it.append(('box', 25.7, 25.8, 0.0, 17.6, -3.5, -1.7, BG))                                # fin between the two balconies
+    it.append(('box', 22.3, 29.2, 17.6, 17.9, -3.55, -1.7, M('#3a3e42', 0.5)))               # roof edge
+    for q in range(9):                                                                         # stair under the west balcony, rising inwards (north) to a door
+        it.append(('box', 22.4, 25.6, 0.0, 0.17 * (q + 1), -0.3 - 0.3 * (q + 1), -0.3 - 0.3 * q, M('#9a9b98', 0.6)))
+    it += [('box', 22.4, 25.6, 0.0, 1.53, -3.5, -3.0, M('#9a9b98', 0.6)), ('box', 25.55, 25.6, 1.0, 2.6, -3.3, -0.3, fr)]   # landing, rail
+    it += [('box', 23.3, 24.7, 1.53, 3.8, -3.5, -3.47, dk)]                                   # door at the top of the stair
+    it += [('box', 26.6, 28.4, 0.0, 2.5, -3.5, -3.46, GLASS_SKY), ('box', 26.5, 28.5, 2.5, 2.6, -3.5, -3.44, fr), ('box', 27.48, 27.52, 0.0, 2.5, -3.46, -3.44, fr)]   # entrance under the east balcony
+    return facade_bits((-412.8, 329.6), (-391.7, 324.4), it)
+SPECK[1458] = dict(_S58[0], runalt=_ra58, splitruns=True, extra=[_x58()])
 SPECK[1517] = dict(spec_for(1517)); SPECK[1517]['extra'] = [facade_bits((-456.9, 392.0), (-463.1, 365.4), _glazed_stack(24.0, 27.3) + _glazed_stack(17.4, 21.0))]   # Katariinankatu 4 (Street View 17.11.2026): two stacks of glazed balconies on the Katariinankatu side, one at the SW corner; floors 1-7
+_l17 = dict(SPECK[1517]['layout']); _l17['cols'] = lambda c, nb: 'B' if c < 3 else 'W'; _l17['P'] = dict(_l17.get('P', {}), rail=M('#b7c4c6', 0.35), ldepth=1.6)
+SPECK[1517]['walls'] = {1: _l17}   # owner 17.11: the east half of the north side is all glazed loggias, only brick piers between them
 SPECK[1553] = classic_spec(1553, wall='#e9e8e3', trim='#e9e8e3', rust=False, garch=False, hood=None, pil=False, bw=4.0,
                            lay=dict(nf=1, frieze=1.0, cols=lambda c, nb: 'S'), ground=dict(plinth_h=0.3, basement=False), yard_same=True)
 SPECK[1553]['alt'] = lambda x, y: _blankw if y > 191.5 else None   # its tall back wall (part of the white house over it) is blank
@@ -720,6 +788,27 @@ for i, (wc, kind) in KARHU.items():
     SPECK[i] = dict(h=B[i]['h'] - rise, P=dict(wall=W_, sign=SIGNS, gwall=M('#3b3f44', 0.4), fascia=M('#2d3135'), frame=M('#2f3337', 0.5), rail=M('#c9ced2', 0.3, 0.5), slab=M('#e9e9e6')),
                     layout=lay(B[i]['h'] - rise, 'punched', gh=4.4, bw=3.6, fh=3.05, cols=lambda c, nb: 'B' if c % 3 == 1 else 'W', P=dict(ww=2.1, wh=1.9, sill=0.55, nx=2)),
                     roof=dict(kind='hip', rise=rise, inset=4.2, mat=M('#34393d', 0.5, 0.3), ov=0.35), footprint=True)   # hip ring on the footprint: an OBB gable overhung the L-shaped plans
+
+def _x1451():
+    """Valtakatu 19 (Karhukortteli, owner 17.11.2026 / Street View): balcony bands across the whole street side, projecting 2 m over the
+    pavement, glazed above a dark slatted rail, white soffits; they turn the SE corner, where two round columns stand under them
+    (geometry only: the Karhukortteli colours stay as approved)"""
+    sc = 23.8 / 22.7; zs = [4.4 * sc + q * 3.05 * sc for q in range(6)]; fh = 3.05 * sc
+    sl, rl, gl = M('#eeeeea', 0.5), M('#2f3336', 0.5), M('#9fb0ba', 0.05, 0.35)
+    def bands(L, a=0.0):
+        it = []
+        for z in zs:
+            it += [('box', a, L, z - 0.25, z, 0.0, 2.0, sl), ('box', a, L, z, z + 1.0, 1.93, 2.0, rl), ('box', a, L, z + 1.0, z + fh - 0.3, 1.97, 2.0, gl)]
+            for q in range(int((L - a) / 0.22)): u = a + 0.08 + 0.22 * q; it.append(('box', u, u + 0.05, z + 0.05, z + 0.95, 1.88, 1.93, rl))
+            for u in [a + (L - a) * r / max(1, round((L - a) / 1.6)) for r in range(1, round((L - a) / 1.6))]: it.append(('box', u - 0.03, u + 0.03, z + 1.0, z + fh - 0.3, 1.95, 2.02, rl))
+        it.append(('box', a, L, zs[-1] + fh - 0.3, zs[-1] + fh, 0.0, 2.0, sl))
+        return it
+    south = bands(15.4)                                                                      # 13.4 m wall + 2 m round the corner
+    south += [('box', 14.9, 15.4, 0.0, zs[0] - 0.25, 1.35, 1.85, M('#7d8184', 0.5))]   # column under the corner
+    east = bands(4.0)
+    east += [('box', 3.4, 3.9, 0.0, zs[0] - 0.25, 1.35, 1.85, M('#7d8184', 0.5))]
+    return [facade_bits((-383.0, 324.0), (-369.9, 321.0), south), facade_bits((-369.9, 321.0), (-361.9, 356.0), east)]
+SPECK[1451] = dict(SPECK[1451]); SPECK[1451]['extra'] = list(SPECK[1451].get('extra', [])) + _x1451()
 
 def kspec(i):
     if i in SPECK: return SPECK[i]
