@@ -393,10 +393,34 @@ SPECK = {}
 # Signelinna, Hallituskatu 2 (Newanderin talo, Signe Hornborg 1890s): salmon render with ochre dressings, dark granite plinth with
 # basement windows, rusticated ground floor with round-arched windows, pedimented first-floor windows on ochre aprons, pilasters
 _sig = '#d9ac72'
-SPECK[1551] = classic_spec(1551, wall='#b5705a', trim=_sig, rust=True, garch=True, hood='pediment', pil=False, bw=3.4,
-                           ground=dict(plinth_h=1.6, basement=True, rustc=M('#8c5444'), rust_step=0.36, sband=0.45, wh=2.2),
+SPECK[1551] = classic_spec(1551, wall='#b0735e', trim=_sig, rust=True, garch=True, hood='pediment', pil=False, bw=3.4,
+                           ground=dict(plinth_h=1.9, plinth=M('#3b3c3d', 0.85), basement=True, rustc=M('#8c5444'), rust_step=0.36, sband=0.45, wh=2.2),
                            first=dict(apron=True, apron_mat=M(_sig), sband=0.0, wh=2.3, ww=1.25), upper_mat=M('#4e5358', 0.6),
                            top=dict(blank=True, dentils=True, panels=True, panel_mat=M('#c8875f')), lay=dict(gh=6.0, fh=5.6, frieze=2.2), cornice=(0.5, 0.6, M(_sig)))
+# Signelinna (owner + Street View 17.11.2026): a square corner turret at the west end of the Hallituskatu side, standing a little out of
+# both faces and rising above the eave to a slender zinc spire; behind it a zinc mansard dome with a dormer; a smaller spire turret on the
+# east corner; no door on the Hallituskatu side (the generator put one in the middle)
+_ZN = M('#aab2b6', 0.35, 0.6); _OC = M(_sig)   # new galvanised sheet (owner 17.11.2026)
+SPECK[1551]['layout'] = dict(SPECK[1551]['layout'])
+_f51 = SPECK[1551]['fit']
+SPECK[1551]['fit'] = lambda lay_, hh, st: dict(_f51(lay_, hh, st), cols=(lambda c, nb, _c=_f51(lay_, hh, st)['cols']: 'W' if _c(c, nb) == 'D' else _c(c, nb)))
+SPECK[1551]['roofmat'] = M('#aab2b6', 0.35, 0.6)
+def _corner51(p0, p1):
+    """the 45-degree corner of Signelinna (owner 17.11.2026): door at the base; from the first floor up a bay that rises through the
+    eave as a turret, with an ochre top storey and the slender galvanised spire standing on it"""
+    it = [('box', 0.9, 2.1, 1.9, 4.6, 0.0, 0.06, M('#5a3e2c', 0.6)), ('box', 0.7, 2.3, 4.6, 5.0, 0.0, 0.25, _OC),
+          ('box', 0.2, 2.8, 5.6, 16.4, -0.6, 0.85, M('#b0735e')), ('band', 0.1, 2.9, 5.35, 5.65, 0.95, _OC), ('band', 0.1, 2.9, 10.5, 10.9, 0.95, _OC),
+          ('band', 0.1, 2.9, 12.9, 13.5, 1.0, _OC), ('box', 0.1, 2.9, 16.4, 18.6, -0.7, 0.95, _OC), ('band', 0.0, 3.0, 18.4, 18.8, 1.05, _OC),
+          ('box', 0.7, 2.3, 6.5, 9.6, 0.85, 0.88, M('#3c4248', 0.3)), ('box', 0.8, 2.2, 11.3, 12.6, 0.85, 0.88, M('#3c4248', 0.3)),
+          ('box', 1.05, 1.95, 16.9, 18.1, 0.95, 0.98, M('#3c4248', 0.3))]
+    L = math.hypot(p1[0] - p0[0], p1[1] - p0[1]); n = ((p1[1] - p0[1]) / L, -(p1[0] - p0[0]) / L)
+    q0, q1 = (p0[0] + n[0] * 1.0, p0[1] + n[1] * 1.0), (p1[0] + n[0] * 1.0, p1[1] + n[1] * 1.0)
+    return [facade_bits(p0, p1, it), facade_bits(q0, q1, [('spire', 1.5, 2.4, 18.8, 27.5, _ZN)])]
+SPECK[1551]['extra'] = list(SPECK[1551].get('extra', [])) + [
+    *_corner51((255.57, 278.25), (254.05, 280.83)), *_corner51((229.25, 287.17), (226.66, 285.65)),
+    facade_bits((256.1, 280.3), (227.2, 287.7), [                 # mansard domes with round dormers over the bays next to the corners
+        ('spire', 5.2, 4.2, 16.0, 19.8, _ZN), ('box', 4.6, 5.8, 16.2, 17.8, -0.3, 0.3, _OC), ('box', 4.9, 5.5, 16.5, 17.4, 0.3, 0.33, M('#3c4248', 0.3)),
+        ('spire', 24.6, 4.2, 16.0, 19.8, _ZN), ('box', 24.0, 25.2, 16.2, 17.8, -0.3, 0.3, _OC), ('box', 24.3, 24.9, 16.5, 17.4, 0.3, 0.33, M('#3c4248', 0.3))])]
 # Hotelli Otava (von Heideken 1857, third storey and neo-renaissance dress 1891): salmon render, light dressings, dark sheet roof
 SPECK[1249] = classic_spec(1249, wall='#d9967c', trim='#f1e6d6', rust=True, garch=True, hood='cornice', pil=True, bw=3.3,
                            lay=dict(gh=4.2, fh=3.8), roofmat=M('#3f4246', 0.5, 0.3))
@@ -787,6 +811,12 @@ SPECK[1559] = classic_spec(1559, wall='#c8764e', trim='#f4f1ea', rust=True, garc
 SPECK[1567] = classic_spec(1567, wall='#dcc27e', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=True, lay=dict(nf=3, cols=lambda c, nb: 'D' if c in (1, nb - 2) else 'W'))   # 2 Eteläranta: ochre, 3 storeys, white pilasters (block walk 14.11.2026)
 SPECK[1567]['runalt'] = lambda x, y: _c1568 if math.hypot(x - 182.9, y - 408.3) < 1.8 else None   # the corner chamfer cut by styles.json 'ch'
 SPECK[1619] = classic_spec(1619, wall='#ece0b4', trim='#f5f2ea', rust=False, garch=False, hood=None, pil=True, bw=3.5, first=dict(arch=True, apron=False, hood=None), top=dict(arch=True), lay=dict(nf=2))   # 4 Hallituskatu / 5 Yrjönkatu: pale yellow, smooth render, round-arched windows upstairs, plain rectangular ground floor, white corner pilasters (Street View 14.11.2026, owner)
+# east end on Hallituskatu (owner + Street View 17.11.2026): rectangular windows upstairs in flat white surrounds, ground-floor windows
+# under cornice hoods, a strong band between the storeys and a low attic frieze of small horizontal windows under the eave
+_e1619 = classic_spec(1619, wall='#ece0b4', trim='#f5f2ea', rust=False, garch=False, hood='cornice', pil=True, bw=3.5,
+                      first=dict(arch=False, apron=False, hood=None, sband=0.35), top=dict(arch=False, hood=None),
+                      attic=dict(ww=1.2, wh=0.45, sill=0.35, hood=None, wh_fixed=True), lay=dict(nf=2, frieze=1.3, door_mid=False))
+SPECK[1619]['runalt'] = lambda x, y: _e1619 if x > 192.0 else None; SPECK[1619]['splitruns'] = True
 squash(1454, 8.0, 0.4)   # Teatterikatu 3: a 1½-storey wooden house - the scan stood 9-11 m (SV 2026, 17.11)
 SPECK[1454] = classic_spec(1454, trim='#f7f6f1', rust=False, garch=False, hood='pediment', pil=False, bw=3.4,
                            lay=dict(nf=1, frieze=0.9, cols=lambda c, nb: 'W'), ground=dict(hood='pediment', plinth_h=0.7, plinth=M('#b9b7b0', 0.85), basement=False, sill=1.6, wh=1.9, ww=1.05, wh_fixed=True),
@@ -1040,6 +1070,15 @@ for c in (4.6, 6.9, 9.2): _sil += [('box', c - 0.45, c + 0.45, 20.6, 21.6, 0.12,
 _sil += [('box', 14.7, 16.8, 0.0, 18.1, 0.0, 0.15, _C61), ('box', 17.6, 19.0, 0.0, 18.1, 0.0, 0.15, _C61)]                                   # close the jog between the LoD2 wall pieces (it baked black)
 for q in range(4): kwin(_sil, 14.9, 16.6, 3.6 + q * 3.4 + 0.95, 3.6 + q * 3.4 + 2.3, _C61, panes=2, frame=M('#6c7175', 0.5), dd=0.15)
 SPECK[1261]['extra'] = list(SPECK[1261]['extra']) + [facade_bits((-624.4, 337.6), (-642.8, 341.9), _sil)]
+# 1552 (Street View 17.11.2026): a low dark timber shed, open towards Hallituskatu between posts, behind a white board fence with a gate
+SPECK[1552] = dict(spec_for(1552)); _l = dict(SPECK[1552]['layout']); _l['plain'] = True; SPECK[1552]['layout'] = _l
+SPECK[1552]['P'] = dict(SPECK[1552]['P'], wall=M('#6a5444', 0.8))
+_fen = [('box', 0.0, 23.0, 0.0, 2.2, 0.0, 0.08, M('#eeeeea', 0.7))]
+for q in range(0, 23): _fen.append(('box', q + 0.0, q + 0.06, 0.0, 2.2, 0.08, 0.1, M('#d8d8d4', 0.7)))
+_fen += [('box', 9.0, 9.25, 0.0, 2.4, -0.1, 0.2, M('#d8d8d4', 0.7)), ('box', 12.75, 13.0, 0.0, 2.4, -0.1, 0.2, M('#d8d8d4', 0.7))]   # gate posts
+SPECK[1552]['extra'] = [facade_bits((214.6, 286.1), (208.6, 287.3), [('box', 0.3, 5.8, 0.0, 2.9, 0.0, 0.02, M('#2a2622', 0.8)), ('box', 0.2, 0.4, 0.0, 2.9, 0.0, 0.2, M('#6a5444', 0.8)),
+                                                                    ('box', 2.95, 3.15, 0.0, 2.9, 0.0, 0.2, M('#6a5444', 0.8)), ('box', 5.7, 5.9, 0.0, 2.9, 0.0, 0.2, M('#6a5444', 0.8))]),
+                        facade_bits((226.0, 287.8), (203.0, 292.4), _fen)]
 def kspec(i):
     if i in SPECK: return SPECK[i]
     if i in MODERN: return spec_for(i)
