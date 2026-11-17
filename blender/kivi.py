@@ -211,6 +211,18 @@ def facade_bits(p0, p1, items):
                     quad([P(u0, z1, 0.0), P(u1, z1, 0.0), P(u1, z1, -tk), P(u0, z1, -tk)], mat)
                 for u, sg in ((s0, -1), (s1, 1)):
                     quad([P(u, z0, -tk if sg > 0 else 0.0), P(u, z0, 0.0 if sg > 0 else -tk), P(u, z1, 0.0 if sg > 0 else -tk), P(u, z1, -tk if sg > 0 else 0.0)], mat)
+            elif it[0] == 'archwin':                                        # ('archwin', s0, s1, z0, zs, surround): round-headed window, glass + mullion/transom, stone surround
+                _, s0, s1, z0, zs, sm = it[:6]; r = (s1 - s0) / 2; c = (s0 + s1) / 2; gw = M('#71838f', 0.05, 0.4); fr = M('#3a3530', 0.5); sw = 0.16
+                arcp = [P(c + r * math.cos(math.pi * q / 12), zs + r * math.sin(math.pi * q / 12), 0.06) for q in range(13)]
+                quad([P(s0, z0, 0.06), P(s1, z0, 0.06)] + arcp, gw)
+                ob = [P(c + (r + sw) * math.cos(math.pi * q / 12), zs + (r + sw) * math.sin(math.pi * q / 12), 0.09) for q in range(13)]
+                ib = [P(c + r * math.cos(math.pi * q / 12), zs + r * math.sin(math.pi * q / 12), 0.09) for q in range(13)]
+                for q in range(12): quad([ib[q], ob[q], ob[q + 1], ib[q + 1]][::-1], sm)
+                quad([P(s0 - sw, z0, 0.09), P(s0, z0, 0.09), P(s0, zs, 0.09), P(s0 - sw, zs, 0.09)], sm)
+                quad([P(s1, z0, 0.09), P(s1 + sw, z0, 0.09), P(s1 + sw, zs, 0.09), P(s1, zs, 0.09)], sm)
+                quad([P(s0 - sw - 0.05, z0 - 0.15, 0.16), P(s1 + sw + 0.05, z0 - 0.15, 0.16), P(s1 + sw + 0.05, z0, 0.16), P(s0 - sw - 0.05, z0, 0.16)], sm)
+                quad([P(c - 0.04, z0, 0.09), P(c + 0.04, z0, 0.09), P(c + 0.04, zs + r, 0.09), P(c - 0.04, zs + r, 0.09)], fr)
+                quad([P(s0, zs - 0.04, 0.09), P(s1, zs - 0.04, 0.09), P(s1, zs + 0.04, 0.09), P(s0, zs + 0.04, 0.09)], fr)
             elif it[0] == 'archgate':                                       # ('archgate', s, w, zs, mat_gate): round-arched gateway in a wall: dark arch, light board gate below the springing
                 _, s0, w, zs, gm = it; r = w / 2; dk = M('#3b3a36', 0.6)
                 arcp = [P(s0 + r * math.cos(math.pi * k / 10), zs + r * math.sin(math.pi * k / 10), 0.03) for k in range(11)]
@@ -643,7 +655,7 @@ SPECK[1576]['extra'] = [facade_bits((23.5, 335.0), (7.3, 339.0), [('chimney', 8.
                         facade_bits((7.3, 339.0), (-43.7, 351.7), [('wall', 0.2, 51.6, -0.6, 2.3, 0.45, MT('#d8d3c7', 'plaster'))])]   # owner 15.11.2026: the free-standing light rendered garden wall along Hallituskatu between this house and the Kaupungintalo
 SPECK[1563] = classic_spec(1563, wall='#e6cf8f', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=False, bw=2.7, lay=dict(nf=2, frieze=1.2, cols=lambda c, nb: 'D' if c == 0 else 'N' if c == 3 else 'W'), attic=dict(ww=0.6, wh=0.3, sill=0.45, hood=None, pil=False, wh_fixed=True))   # 10 Hallituskatu (wireframe 14.11.2026): five bays, door with a dressed surround at the west end, blind 4th bay, vents in the frieze
 SPECK[1563]['alt'] = lambda x, y: _w1563 if x > 44.0 else None
-SPECK[1447] = classic_spec(1447, wall='#9c4f3c', trim='#e6dccb', rust=False, garch=True, hood=None, pil=True, bw=3.8, first=dict(arch=True), top=dict(arch=True))   # old red-brick building at Eteläranta/Karhu: round-arched windows with light surrounds, brick pilasters (was a plain modern box; Street View 14.11.2026)
+SPECK[1447] = classic_spec(1447, wall='#8e4a3c', trim='#e6dccb', rust=False, garch=True, hood=None, pil=True, bw=3.8, first=dict(arch=True), top=dict(arch=True))   # old red-brick building at Eteläranta/Karhu: round-arched windows with light surrounds, brick pilasters (was a plain modern box; Street View 14.11.2026)
 def _s1575(bw):
     return classic_spec(1575, wall='#e6d29c', trim='#f4f1e8', rust=False, garch=True, hood='cornice', pil=True, bw=bw,
                         lay=dict(nf=2, frieze=1.1, cols=lambda c, nb: 'W'), ground=dict(plinth_h=0.55, basement=False, ww=1.85, wh=2.95, sill=0.15, wh_fixed=True),
@@ -815,6 +827,73 @@ SPECK[1446] = classic_spec(1446, wall='#e8a593', trim='#f3f1eb', rust=False, gar
                            first=dict(ww=1.2, wh=1.6, sill=0.9, sband=0), top=dict(ww=1.2, wh=1.5, sill=0.9), cornice=(0.3, 0.25, M('#45484a', 0.5)))
 SPECK[1446]['extra'] = [facade_bits((-421.6, 440.1), (-444.6, 445.7), [('canopy', 1.5, 2.2, 3.1, 1.0, M('#2a2b2d', 0.5)), ('box', 0.9, 2.1, 0.45, 2.8, 0.0, 0.05, M('#9a6a3c', 0.6)),
                                                                      ('box', 2.6, 3.4, 1.4, 2.5, 0.0, 0.05, M('#5a4030', 0.6))])]   # 22 Hallituskatu (Street View 17.11.2026): salmon render, white-framed windows, restaurant door with a dark canopy at the west end, menu board
+# 1447 (old brick building on Hallituskatu, owner 17.11.2026 / Street View): the tall east part has only tall round-headed windows over a
+# light stone plinth, a stone cornice and a triangular pediment with a window in the middle; the low wing has short round-headed windows
+_ST47 = M('#cbc2b0', 0.7)
+SPECK[1447]['cornice'] = (0.16, 0.3, _ST47)
+_P47 = dict(SPECK[1447]); _l47 = dict(_P47['layout']); _l47['plain'] = True; _P47['layout'] = _l47; _P47.pop('fit', None)
+def _ra47(x, y, A=(-370.4, 427.9), t=(-0.9755, 0.2197)):
+    d = (x - A[0]) * t[1] - (y - A[1]) * t[0]
+    return _P47                                          # all walls plain: the generator's windows on the back mass and gables were wrong
+SPECK[1447] = dict(SPECK[1447], runalt=_ra47, splitruns=True)
+def _x47():
+    """measured on the owner's frontal photo of the old power station (17.11.2026), scaled to the LoD2 widths (tall part 17.6 m, eave 10.2 m)"""
+    BR = MT('#8e4a3c', 'brick', 0.8); J = M('#a9a092', 0.7); ST = _ST47; it = []
+    it.append(('box', 0.0, 29.8, 0.0, 1.75, 0.0, 0.07, M('#a8a59f', 0.8)))                     # grey granite plinth, flush
+    for zz in (0.58, 1.16): it.append(('box', 0.0, 29.8, zz - 0.02, zz + 0.02, 0.07, 0.08, J))
+    for q in range(1, 40): u = q * 0.8 + (0.4 if q % 2 else 0); it.append(('box', u - 0.015, u + 0.015, 0.0, 1.75, 0.07, 0.08, J)) if u < 29.8 else None
+    it.append(('box', 0.0, 29.8, 1.72, 1.85, 0.0, 0.12, ST))                                   # plinth cap
+    for s0, s1 in ((0.0, 0.8), (6.4, 7.4), (16.8, 17.6)):                                       # stone pilasters with alternating quoins
+        it.append(('box', s0 + 0.1, s1 - 0.1, 1.85, 9.2, 0.0, 0.08, ST))
+        for q in range(int((9.2 - 1.85) / 0.42)):
+            z = 1.85 + q * 0.42; e = 0.1 if q % 2 else 0.0
+            it.append(('box', s0 - e, s1 + e, z + 0.02, z + 0.4, 0.0, 0.09, ST))
+    it.append(('band', 0.0, 17.6, 4.95, 5.2, 0.08, ST))                                         # string course at the arch springing
+    it += [('band', 0.0, 17.6, 9.2, 9.75, 0.1, ST), ('band', 0.0, 17.6, 9.75, 10.2, 0.18, ST)]   # stone entablature under the roof
+    for c in (3.6, 9.6, 14.4):                                                                  # three tall round-headed windows, stone surrounds + keystone
+        s0, s1 = c - 0.9, c + 0.9
+        it += [('archwin', s0, s1, 1.95, 5.1, ST), ('box', c - 0.2, c + 0.2, 5.95, 6.45, 0.0, 0.15, ST)]
+    it += [('gable', 12.1, 5.0, 10.0, 4.6, BR, 1), ('box', 11.45, 12.75, 9.5, 11.9, 0.12, 0.2, ST), ('box', 11.6, 12.6, 9.65, 11.75, 0.2, 0.22, M('#71838f', 0.05, 0.4)),
+           ('box', 11.95, 12.25, 14.6, 15.3, 0.0, 0.25, M('#3d4246', 0.5))]                      # central gable with its window and finial
+    for c in (19.6, 23.7, 27.8):                                                                # low wing: short round-headed windows
+        s0, s1 = c - 0.8, c + 0.8
+        it += [('archwin', s0, s1, 1.95, 2.9, ST), ('box', c - 0.17, c + 0.17, 3.6, 3.95, 0.0, 0.12, ST)]
+    it += [('band', 17.6, 29.8, 2.85, 3.0, 0.06, ST), ('band', 17.6, 29.8, 4.25, 4.6, 0.14, ST)]
+    return facade_bits((-370.4, 427.9), (-399.7, 434.5), it)
+SPECK[1447]['extra'] = [_x47()]   # positions measured on Street View with px2wall
+# 22 Hallituskatu east gable (owner 17.11.2026): far fewer windows than the generator drew, and a long dark balcony on the 2nd floor
+_P46 = dict(SPECK[1446]); _l46 = dict(_P46['layout']); _l46['plain'] = True; _P46['layout'] = _l46; _P46.pop('fit', None)
+def _ra46(x, y, A=(-424.3, 427.8), t=(0.2147, 0.9767)):
+    d = (x - A[0]) * t[1] - (y - A[1]) * t[0]
+    return _P46 if abs(d) < 1.5 and (x - A[0]) * t[0] + (y - A[1]) * t[1] > -0.5 else None
+SPECK[1446]['runalt'] = _ra46; SPECK[1446]['splitruns'] = True
+_x46 = []; _W46 = M('#e8a593')
+kwin(_x46, 4.9, 5.9, 0.9, 2.3, _W46, panes=2); kwin(_x46, 3.9, 4.5, 4.4, 5.9, _W46, panes=1); kwin(_x46, 5.1, 6.2, 4.4, 5.9, _W46, panes=3); kwin(_x46, 6.7, 7.4, 4.4, 5.9, _W46, panes=2)
+kwin(_x46, 4.8, 5.4, 7.9, 8.9, _W46, panes=1); kwin(_x46, 6.8, 7.6, 7.1, 9.3, _W46, panes=1); kwin(_x46, 5.6, 5.9, 10.6, 11.3, _W46, panes=1); kwin(_x46, 6.2, 6.5, 10.6, 11.3, _W46, panes=1)
+_x46 += [('box', 1.9, 2.9, 0.45, 2.6, 0.0, 0.05, M('#e9e6df', 0.5)), ('canopy', 2.4, 1.4, 2.9, 0.6, M('#4a3a30', 0.5)),
+         ('box', 6.0, 7.1, 0.4, 2.7, 0.0, 0.04, M('#26282a', 0.6)), ('box', 5.95, 7.15, 2.7, 2.85, 0.0, 0.08, M('#26282a', 0.6)),
+         ('box', 3.3, 8.6, 6.75, 6.95, 0.0, 1.3, M('#2e3134', 0.5)), ('box', 3.3, 8.6, 6.95, 8.0, 1.22, 1.3, M('#363a3e', 0.5)),
+         ('box', 3.3, 3.38, 6.95, 8.0, 0.0, 1.3, M('#363a3e', 0.5)), ('box', 8.52, 8.6, 6.95, 8.0, 0.0, 1.3, M('#363a3e', 0.5))]
+SPECK[1446]['extra'] = list(SPECK[1446]['extra']) + [facade_bits((-424.3, 427.8), (-421.6, 440.1), _x46)]
+# 1516 north side towards Hallituskatu (owner 17.11.2026 / Street View): recessed glazed balconies between four brick-clad concrete
+# columns and brick floor beams, from the east: column | 3 glazed bays | column | 3 bays | column | 1 bay | column; the top storey and
+# the glazed attic light grey (as on the Katariinankatu side)
+def _x16n():
+    fh = 3.1875; BRK, LT = MT('#5e4639', 'brick', 0.8), M('#b4bfc5', 0.4); fr = M('#34383b', 0.5); it = []
+    W = 32.6; cw = 1.0; bw = (W - 4 * cw) / 7
+    cols = [(0.0, cw), (cw + 3 * bw, 2 * cw + 3 * bw), (2 * cw + 6 * bw, 3 * cw + 6 * bw), (W - cw, W)]
+    bays = [(cw + q * bw, cw + (q + 1) * bw) for q in range(3)] + [(2 * cw + 3 * bw + q * bw, 2 * cw + 3 * bw + (q + 1) * bw) for q in range(3)] + [(3 * cw + 6 * bw, W - cw)]
+    for fl in range(8):
+        z = fl * fh; m = BRK if fl < 7 else LT
+        it.append(('box', 0.0, W, z - 0.1, z + 0.5, 0.0, 0.15, m))
+        for a, b in bays:
+            it += [('box', a, b, z + 0.5, z + fh - 0.1, 0.0, 0.03, M('#8d9aa2', 0.06, 0.35))]
+            for q in range(1, 4): u = a + (b - a) * q / 4; it.append(('box', u - 0.03, u + 0.03, z + 0.5, z + fh - 0.1, 0.03, 0.06, fr))
+    it.append(('box', 0.0, W, 8 * fh - 0.3, 8 * fh, 0.0, 0.14, LT))
+    for a, b in cols: it += [('box', a, b, 0.0, 7 * fh, 0.0, 0.3, BRK), ('box', a, b, 7 * fh, 8 * fh, 0.0, 0.3, LT)]
+    return facade_bits((-408.7, 410.6), (-440.5, 417.9), it)
+_l16n = dict(SPECK[1516]['layout']); _l16n['plain'] = True; _l16n['P'] = dict(_l16n.get('P', {}), wall=M('#3a3d40', 0.5))
+SPECK[1516]['walls'] = {**SPECK[1516]['walls'], 1: _l16n}; SPECK[1516]['extra'] = list(SPECK[1516].get('extra', [])) + [_x16n()]
 def kspec(i):
     if i in SPECK: return SPECK[i]
     if i in MODERN: return spec_for(i)
