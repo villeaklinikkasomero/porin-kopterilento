@@ -501,3 +501,14 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   (`Claude outputs/antinkatu_nyt.jpg`), takana näkyy vielä 1566:n kaltevia kattopintoja ja 1572:n viereinen keltainen pala.
 - 2 (taidemuseon lähellä värit): todennäköisesti 1287 (näytti valkoiselta) – väri korjattu; tarkista muut.
 - Sillat: kannet pilkottu ≤ 3 m paloiksi (index.html), seuraavat maastoa. Porinsilta (Blender-malli) ennallaan.
+
+#### 16.11.2026 jatko (kivi3 / Antinkatu, Hallituskatu, Valtakatu)
+- Uudet kivi.py-työkalut: `_low_strip(i, j|None, zc, extra=polygon)` (talo j toisen kuoren sisällä → kuoren seinät/katot leikataan zc:hen, oma litteä katto),
+  `_hand_over(src, dst, strip, moves)` (kaistale kuoresta toiselle talolle, jotta ulkonäkö jatkuu samana), facade_bits-osat `box`, `spire`, `irongate`, `canopy`.
+  Vapaat muurit/portit: `WALL_SHELLS` (zt = korkeusraja) + index.html `shellAt(S,x,y,z)`.
+- Korjattu rautalangalla: 1573 Antinkatu 4 (vaakasuora räystäs, 5 akselia, portti 1573–1572 rautaportteineen), 1287 kulmaovi+lippa, portti "7" 1286–1287,
+  1563 Antinkadun puoli keltainen (omistaja), 1578 Antinkatu 6 matala okra (oli moderni 4 krs), 1604 jugend (pihaportti, ovi, porraspääty, 2 suippotornia),
+  1580 (1960-l. tummanvihreä nauhaikkunatalo 1604:n kuoresta erotettu, umpinainen pääty), 1716 matala liikepaviljonki, 1581 Valtakatu 7 torni
+  (kuparinvihreä kaakeli ilman ikkunoita Antinkadulle, lasitetut kulmaparvekkeet, valkoiset pilarit), 1579 Hallituskatu 6 (5 krs + avoin pilarikerros,
+  vaalea nauhajulkisivu, päättyy oikeaan kohtaan; keltainen 1578 jatkuu siihen asti), 1603 Valtakatu 5 (5 krs liiketilojen päällä).
+- Seuraavaksi: kivi3 sisäpiha (1585, 1586), sitten kivi1 loput (1292–1296, 1341, 1574, 1577, 1622), kivi0, kivi5, kl0, kl1.
