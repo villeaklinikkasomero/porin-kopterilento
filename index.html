@@ -1119,9 +1119,10 @@ function bldAt(x, y) {
   return best;
 }
 function bLift(r) { if (r.lift === undefined) { let m = -1e9; for (const q of r.pts) m = Math.max(m, TZs(q[0], q[1])); r.lift = m; } return r.lift; }
-function shellAt(S, x, y) {   // S: houses from the bake (bl_*.js 'shells'), each a list of rings: the one containing (x, y), else the nearest within 2 m
+function shellAt(S, x, y, z) {   // S: houses from the bake (bl_*.js 'shells'), each a list of rings: the one containing (x, y), else the nearest within 2 m
   let best = null, bd = 2.0;
   for (const h of S) { if (x < h.bb[0] - 2 || x > h.bb[2] + 2 || y < h.bb[1] - 2 || y > h.bb[3] + 2) continue;
+    if (h.zt !== undefined && z !== undefined && z > h.zt) continue;   // free walls/gates (16.11): only their own height
     for (const R of h.pts) { if (pip(x, y, R)) return h;
       for (let i = 0, j = R.length - 1; i < R.length; j = i++) { const a = R[j], b = R[i], dx = b[0] - a[0], dy = b[1] - a[1];
         const t = Math.max(0, Math.min(1, ((x - a[0]) * dx + (y - a[1]) * dy) / (dx * dx + dy * dy || 1))), d = Math.hypot(a[0] + dx * t - x, a[1] + dy * t - y);
@@ -1132,12 +1133,12 @@ function liftBlock(gr, shells) {
   gr.updateMatrixWorld(true); const v = new THREE.Vector3();
   const S = (shells || []).map(e => { const rs = e.r || e; const pts = rs.map(r => { const o = []; for (let i = 0; i < r.length; i += 2) o.push([r[i], r[i + 1]]); return o; });
     let m = -1e9; const bb = [1e9, 1e9, -1e9, -1e9]; for (const R of pts) for (const q of R) { m = Math.max(m, TZs(q[0], q[1])); bb[0] = Math.min(bb[0], q[0]); bb[1] = Math.min(bb[1], q[1]); bb[2] = Math.max(bb[2], q[0]); bb[3] = Math.max(bb[3], q[1]); }
-    return { pts, bb, nb: e.nb ? 1 : 0, lift: (e.l !== undefined && e.l !== null) ? e.l : m }; });   // e.l: the house's own ground from the bake (lowest ground under it)
+    return { pts, bb, nb: e.nb ? 1 : 0, zt: e.zt, lift: (e.l !== undefined && e.l !== null) ? e.l : m }; });   // e.l: the house's own ground from the bake (lowest ground under it)
   gr.traverse(q => { if (!q.isMesh) return;
     if (q.geometry.index) q.geometry = q.geometry.toNonIndexed();   // one lift per triangle (its centre decides the house): a wall on a house's edge never shears
     const P = q.geometry.attributes.position, A = new Float32Array(P.count), NB = new Float32Array(P.count), w = new THREE.Vector3();
     for (let i = 0; i + 2 < P.count; i += 3) { v.set(0, 0, 0); for (let k = 0; k < 3; k++) v.add(w.fromBufferAttribute(P, i + k)); v.multiplyScalar(1 / 3).applyMatrix4(q.matrixWorld);
-      const h = S.length ? shellAt(S, v.x, -v.z) : null; const r = h ? null : bldAt(v.x, -v.z); A[i] = A[i + 1] = A[i + 2] = h ? h.lift : r ? bLift(r) : TZs(v.x, -v.z); if (h && h.nb) NB[i] = NB[i + 1] = NB[i + 2] = 1; }
+      const h = S.length ? shellAt(S, v.x, -v.z, v.y) : null; const r = h ? null : bldAt(v.x, -v.z); A[i] = A[i + 1] = A[i + 2] = h ? h.lift : r ? bLift(r) : TZs(v.x, -v.z); if (h && h.nb) NB[i] = NB[i + 1] = NB[i + 2] = 1; }
     q.geometry.setAttribute('tLift', new THREE.BufferAttribute(A, 1)); q.geometry.setAttribute('tNB', new THREE.BufferAttribute(NB, 1));   /* tNB: rendered brick-red house, no brick bond */ q.material.defines = Object.assign(q.material.defines || {}, { T_LIFT: '' }); });
 }
 function streamUpdate(x, y) {

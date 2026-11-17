@@ -12,7 +12,7 @@ ZONESK = {
     'kivi0': [1513, 1249, 1284, 1454, 1281, 1456, 1311, 1308],                       # brewery block, Hotelli Otava, seurakuntatoimisto
     'kivi1': [1292, 1293, 1294, 1296, 1341, 1295, 1576, 1574, 1577, 1622, 1575],                 # Kaupungintalo block
     'kivi2': [1287, 1288, 1285, 1286, 1565, 1289, 1564, 1290, 1559, 8386, 1563, 1562, 1561, 1560, 1744],   # river block east of the Raatihuone
-    'kivi3': [1581, 1716, 1586, 1604, 1578, 1603, 1579, 1585, 1583],                                   # Hallituskatu - Valtakatu, east
+    'kivi3': [1581, 1716, 1586, 1604, 1578, 1603, 1579, 1585, 1583, 1580],                                   # Hallituskatu - Valtakatu, east
     'kivi4': [1572, 1573, 1607, 1566, 1567, 8385],                                               # river block at Yrjönkatu
     'kivi5': [1553, 1620, 1550, 1619, 1552, 1551, 1548, 1549],                                   # Signelinna block
     'p1': [125, 126, 127, 129, 169, 272, 273, 133, 135, 275, 276, 277, 290, 291],                # Antinkatu 21-25 / Mikonkatu (bl_p1.js of 11.11. had no generator left in the repo; 13.11.2026)
@@ -20,7 +20,7 @@ ZONESK = {
     'kl0': [1261, 1336, 1337, 1338, 1351, 1357, 1368, 1369, 1370, 1446, 1447, 1448, 1449, 1458, 1461, 1462, 1516, 1517, 1525, 1535],                                                                       # west of Kivi-Pori (modern blocks)
     'kl1': [1297, 1309, 1310, 1352, 1353, 1373, 1374, 1375, 1377, 1398, 1407, 1527, 1528],
 }
-MODERN = set(ZONESK['kl0'] + ZONESK['kl1']) | (set(ZONESK['p1']) - {276, 133}) | {1581, 1603, 1579, 1620, 1548, 1578, 1716, 1586, 1585, 1550, 1552, 1549, 1553}   # 1573 (low yellow house on Antinkatu) and 1604 (yellow Jugend, Street View 13.11.2026) is classic
+MODERN = set(ZONESK['kl0'] + ZONESK['kl1']) | (set(ZONESK['p1']) - {276, 133}) | {1581, 1603, 1579, 1620, 1548, 1716, 1580, 1586, 1585, 1550, 1552, 1549, 1553}   # 1573 (low yellow house on Antinkatu) and 1604 (yellow Jugend, Street View 13.11.2026) is classic
 
 # ---------------------------------------------------------------- streets: a wall faces a street when a named street runs in front of it
 _src = open('/home/claude/pori/city.js').read(); _C = json.loads(_src[_src.index('{'):_src.rindex('}') + 1])
@@ -158,6 +158,7 @@ def corner_tower(cx, cy, r, z0, z1, wall, trim, dome, n=16):
         for (ra, za), (rb, zb) in zip(prof, prof[1:]): band(ra, rb, z1 + za, z1 + zb, dome)
     return ex
 
+WALL_SHELLS = []   # free-standing walls / gates of facade_bits: their own 'houses' in the bl_*.js shells
 def facade_bits(p0, p1, items):
     """hand-placed features on one street wall p0->p1 (plan x, y); n is the outward normal on the right of p0->p1 looking down.
     items: ('gable', s, w, z, h, mat) stepped brick gable over the eave; ('oriel', s, w, z0, z1, d, mat) a bay window"""
@@ -202,6 +203,7 @@ def facade_bits(p0, p1, items):
                     quad([P(u + 0.09, z - 0.75, 0.22), P(u + 0.09, z - 0.75, 0.0), P(u + 0.09, z, 0.0), P(u + 0.09, z, 0.45)], mat)
             elif it[0] == 'wall':                                           # ('wall', s0, s1, z0, z1, t, mat): free-standing garden wall, in 3 m pieces (the game lifts each piece to its ground)
                 _, s0, s1, z0, z1, tk, mat = it; nseg = max(1, int((s1 - s0) / 3.0))
+                WALL_SHELLS.append((z1 + 0.3, [(p0[0] + t[0] * u_ - n[0] * d_, p0[1] + t[1] * u_ - n[1] * d_) for u_, d_ in ((s0 + 0.2, -0.05), (s1 - 0.2, -0.05), (s1 - 0.2, tk - 0.08), (s0 + 0.2, tk - 0.08))]))   # the game lifts this wall as one piece (a free piece was sheared per triangle on the slope)
                 for k in range(nseg):
                     u0 = s0 + (s1 - s0) * k / nseg; u1 = s0 + (s1 - s0) * (k + 1) / nseg
                     quad([P(u0, z0, 0.0), P(u1, z0, 0.0), P(u1, z1, 0.0), P(u0, z1, 0.0)], mat)
@@ -216,6 +218,37 @@ def facade_bits(p0, p1, items):
                 quad([P(s0 - r + 0.08, 0.0, 0.06), P(s0 + r - 0.08, 0.0, 0.06), P(s0 + r - 0.08, zs, 0.06), P(s0 - r + 0.08, zs, 0.06)], gm)
                 ob = [P(s0 + (r + 0.35) * math.cos(math.pi * k / 10), zs + (r + 0.35) * math.sin(math.pi * k / 10), 0.05) for k in range(11)]
                 for k in range(10): quad([arcp[k], ob[k], ob[k + 1], arcp[k + 1]][::-1], M('#f3f0e8'))
+            elif it[0] == 'irongate':                                       # ('irongate', s, w, zs): open round arch with a wrought-iron gate: the yard shows through the bars
+                _, s0, w, zs = it; r = w / 2; yd = M('#7c7f78', 0.9); ir = M('#1f2123', 0.4)
+                arcp = [P(s0 + r * math.cos(math.pi * k / 12), zs + r * math.sin(math.pi * k / 12), 0.02) for k in range(13)]
+                quad([P(s0 - r, 0.0, 0.02), P(s0 + r, 0.0, 0.02)] + arcp, yd)
+                u = s0 - r + 0.07
+                while u < s0 + r - 0.05:
+                    top = zs + math.sqrt(max(0.0, r * r - (u - s0) ** 2)) - 0.05
+                    quad([P(u - 0.025, 0.0, 0.08), P(u + 0.025, 0.0, 0.08), P(u + 0.025, top, 0.08), P(u - 0.025, top, 0.08)], ir)
+                    u += 0.16
+                for zz in (0.15, 1.1, zs):
+                    quad([P(s0 - r, zz, 0.09), P(s0 + r, zz, 0.09), P(s0 + r, zz + 0.07, 0.09), P(s0 - r, zz + 0.07, 0.09)], ir)
+                ob = [P(s0 + (r + 0.3) * math.cos(math.pi * k / 12), zs + (r + 0.3) * math.sin(math.pi * k / 12), 0.1) for k in range(13)]
+                for k in range(12): quad([arcp[k], ob[k], ob[k + 1], arcp[k + 1]][::-1], M('#f6f4ee'))
+            elif it[0] == 'spire':                                          # ('spire', s, w, z0, z1, mat): slender pyramid roof of a Jugend turret, its base square flush with the wall face
+                _, s0, w, z0, z1, mat = it; hw = w / 2
+                c = [(s0 - hw, 0.15), (s0 + hw, 0.15), (s0 + hw, -w + 0.15), (s0 - hw, -w + 0.15)]; ap = P(s0, z1, 0.15 - hw)
+                for k in range(4):
+                    (u0, d0), (u1, d1) = c[k], c[(k + 1) % 4]
+                    quad([P(u0, z0, d0), P(u1, z0, d1), ap], mat, True)
+            elif it[0] == 'box':                                            # ('box', sa, sb, z0, z1, d0, d1, mat): plain box in front of the wall (balcony slabs and parapets)
+                _, sa, sb, z0, z1, d0, d1, mat = it
+                quad([P(sa, z0, d1), P(sb, z0, d1), P(sb, z1, d1), P(sa, z1, d1)], mat)
+                quad([P(sb, z0, d0), P(sa, z0, d0), P(sa, z1, d0), P(sb, z1, d0)], mat)
+                quad([P(sa, z1, d1), P(sb, z1, d1), P(sb, z1, d0), P(sa, z1, d0)], mat)
+                quad([P(sa, z0, d0), P(sb, z0, d0), P(sb, z0, d1), P(sa, z0, d1)], mat)
+                quad([P(sa, z0, d0), P(sa, z0, d1), P(sa, z1, d1), P(sa, z1, d0)], mat)
+                quad([P(sb, z0, d1), P(sb, z0, d0), P(sb, z1, d0), P(sb, z1, d1)], mat)
+            elif it[0] == 'canopy':                                         # ('canopy', s, w, z, depth, mat): door canopy, a thin slab sloping out from the wall
+                _, s0, w, z, dp, mat = it; hw = w / 2
+                quad([P(s0 - hw, z, 0.0), P(s0 + hw, z, 0.0), P(s0 + hw, z - 0.25, dp), P(s0 - hw, z - 0.25, dp)][::-1], mat, True)
+                quad([P(s0 - hw, z - 0.25, dp), P(s0 + hw, z - 0.25, dp), P(s0 + hw, z - 0.4, dp), P(s0 - hw, z - 0.4, dp)], mat, True)
             elif it[0] == 'chimney':                                        # ('chimney', s, d, z0, z1, w, mat): square stack d m behind the wall
                 _, s0, dd, z0, z1, w, mat = it; hw = w / 2; c = [(s0 - hw, -dd - hw), (s0 + hw, -dd - hw), (s0 + hw, -dd + hw), (s0 - hw, -dd + hw)]
                 for k in range(4):
@@ -223,10 +256,11 @@ def facade_bits(p0, p1, items):
                     quad([P(u0, z0, d0), P(u1, z0, d1), P(u1, z1, d1), P(u0, z1, d0)], mat, True)
                 quad([P(u, z1, d) for u, d in c], mat, True)
             elif it[0] == 'vents':                                          # a row of small attic openings
-                _, s0, n_, z, mat = it; dk = M('#2a2f33', 0.4)
+                _, s0, n_, z, mat = it[:5]; dk = M('#2a2f33', 0.4); vw = it[5] if len(it) > 5 else 0.3; vh = it[6] if len(it) > 6 else 0.3   # optional size (attic windows)
                 for k in range(n_):
-                    u = s0 + (k - (n_ - 1) / 2) * 0.55
-                    quad([P(u - 0.15, z, 0.14), P(u + 0.15, z, 0.14), P(u + 0.15, z + 0.3, 0.14), P(u - 0.15, z + 0.3, 0.14)], dk)
+                    u = s0 + (k - (n_ - 1) / 2) * (vw + 0.25)
+                    if len(it) > 5: quad([P(u - vw / 2 - 0.08, z - 0.08, 0.12), P(u + vw / 2 + 0.08, z - 0.08, 0.12), P(u + vw / 2 + 0.08, z + vh + 0.08, 0.12), P(u - vw / 2 - 0.08, z + vh + 0.08, 0.12)], M('#f4f1e8'))
+                    quad([P(u - vw / 2, z, 0.14), P(u + vw / 2, z, 0.14), P(u + vw / 2, z + vh, 0.14), P(u - vw / 2, z + vh, 0.14)], dk)
             elif it[0] == 'orielv':                                         # oriel with a triangular plan: two sides meeting at a point, windows in both
                 _, s0, w, z0, z1, d, mat = it; gl = M('#47525c', 0.15); a_, b_ = s0 - w / 2, s0 + w / 2
                 fr = M('#2e3a33', 0.5)
@@ -358,8 +392,45 @@ _lyy = dict(spec_for(1351)); _lyy['P'] = dict(_lyy['P'], wall=M('#e9c46a'), fram
 _lyy['layout'] = lay(11, 'punched', gh=0, bw=3.4, fh=3.5, P=dict(ww=1.7, wh=1.7, nx=2)); _lyy.pop('fit', None); _lyy.pop('yard', None)
 _ly['alt'] = lambda x, y: _lyy if x * 0.9744 - y * 0.225 < -486.6 else None
 SPECK[1351] = classic_spec(1351, **_ly); SPECK[1353] = classic_spec(1353, **dict(_ly, lay=dict(gh=4.6, fh=4.2)))
-SPECK[1311] = classic_spec(1311, wall='#e3d8b4', trim='#f4f1ea', rust=False, garch=False, hood=None, pil=False)   # Valtakatu 17-19 side: long 2-storey pale yellow house, plain windows (Street View 13.11.2026)
-SPECK[1574] = classic_spec(1574, wall='#e3d7b9', trim='#f4f1ea', rust=False, garch=False, hood=None, pil=False)   # Valtakatu 9: small 1-storey stucco house with a gable, plain windows (Street View 13.11.2026)
+SPECK[1308] = classic_spec(1308, wall='#e9e6de', trim='#f6f4ee', rust=False, garch=False, hood='pediment', pil=False, bw=4.3,
+                           lay=dict(nf=1, frieze=0.6, cols=lambda c, nb: 'W'), ground=dict(plinth_h=1.1, plinth=M('#5c6168', 0.85), basement=False, sill=2.1, wh=2.0, ww=1.3, wh_fixed=True, hood='pediment', sband=0.3),
+                           attic=dict(blank=True))   # Valtakatu 17 (SV 2026, 17.11): pale one-storey house, six windows under pediments with red-brown sashes, patterned frieze under the eave, dark plinth, NO street door
+SPECK[1308]['P']['wall'] = MT('#e9e6de', 'wood'); SPECK[1308]['P']['frame'] = M('#7b3b2c', 0.6)
+SPECK[1308]['layout']['rowP']['G']['gwall'] = MT('#e9e6de', 'woodv')   # owner 17.11: wooden house - vertical boards below, horizontal above (the frieze row), decorated window surrounds
+SPECK[1311] = classic_spec(1311, wall='#cdd0b6', trim='#ecebe0', rust=True, garch=False, hood='cornice', pil=False, bw=3.1,
+                           lay=dict(nf=2, gh=4.6, frieze=1.2, cols=lambda c, nb: 'D' if c == 2 else 'W'), ground=dict(hood='cornice', plinth_h=0.8, plinth=M('#5d5a52', 0.85), basement=False, rustc=M('#bfc2a8'), dw=1.2),
+                           first=dict(hood=None, pil=False), attic=dict(ww=0.6, wh=0.3, sill=0.45, hood=None, pil=False, wh_fixed=True))   # Valtakatu 19 (owner's photo 17.11.2026): pale grey-green, rusticated ground floor with corniced windows and a door up steps, framed upper windows, small attic windows, dark plinth (was salmon by mistake)
+SPECK[1574] = classic_spec(1574, wall='#e3d7b9', trim='#f4f1ea', rust=False, garch=False, hood='cornice', pil=True, bw=3.1,
+                           lay=dict(nf=1, frieze=1.3, cols=lambda c, nb: 'N' if c == nb - 2 else 'W'), ground=dict(plinth_h=1.2, basement=False, sill=1.0, wh=1.85, ww=1.0, wh_fixed=True),
+                           attic=dict(ww=0.6, wh=0.3, sill=0.5, hood=None, pil=False, wh_fixed=True))   # Valtakatu 9 (SV 2026, 16.11): one storey on a high grey plinth, framed windows with cornices, a blind (former door) bay, small attic windows
+SPECK[1574]['P']['frame'] = M('#7a4a2c', 0.6)   # brown window frames
+SPECK[1574]['extra'] = [facade_bits((-2.4, 232.4), (2.8, 231.0), [('wall', 0.0, 5.37, -0.4, 2.3, 0.15, MT('#5a4a36', 'wood'))])]   # weathered board fence with a gate between the pink house and Valtakatu 9 (SV 2026)
+def _eave_overhang(i, z_eave, ov=0.55, below=8.2):
+    """hip/gable roof with a real eave: the scan's roof edge (all vertices below 'below') is levelled to z_eave and pushed out ov m past the walls
+    (owner 16.11.2026: the roof falls four ways and the eave must show on the side too)"""
+    G = [r for k, r, _ in RAW.get(i, []) if k == 'G'][0]; cx = sum(q[0] for q in G) / len(G); cy = sum(q[1] for q in G) / len(G)
+    def mv(q):
+        if q[2] >= below: return q
+        dx, dy = q[0] - cx, q[1] - cy; L = math.hypot(dx, dy) or 1
+        return (q[0] + dx / L * ov * 1.41, q[1] + dy / L * ov * 1.41, z_eave - 0.12)
+    RAW[i] = [(k, [mv(q) for q in r] if k == 'R' else [(q[0], q[1], min(q[2], z_eave) if q[2] > 0.5 else q[2]) for q in r] if k == 'W' else r, h) for k, r, h in RAW.get(i, [])]
+_eave_overhang(1294, 7.0)
+SPECK[1577] = classic_spec(1577, wall='#d6a96e', trim='#e6c98a', rust=False, garch=False, hood=None, pil=True, bw=2.5,
+                           lay=dict(nf=2, gh=4.2, cols=lambda c, nb: 'S' if c % 2 == 0 else 'D'), ground=dict(plinth_h=0.45, basement=False, door=M('#c9a24a', 0.6), dw=1.0),
+                           first=dict(ww=0.75, wh=0.55, sill=0.9, hood=None, pil=False, wh_fixed=True))   # 7 Antinkatu (SV 2026, 16.11): ochre two-storey shop house - three big shop windows between yellow-framed doors, a low upper floor with small windows, dark low hip roof
+SPECK[1293] = classic_spec(1293, wall='#e5d6a4', trim='#f3eee2', rust=False, garch=False, hood='cornice', pil=False, bw=3.4,
+                           lay=dict(nf=2, gh=4.6, frieze=1.4, cols=lambda c, nb: 'W'), ground=dict(plinth_h=1.5, plinth=M('#a08a7c', 0.9), basement=False, sill=0.3, wh=2.2, ww=1.5, wh_fixed=True, hood='cornice', pil=True),
+                           attic=dict(ww=0.7, wh=0.5, sill=0.45, hood=None, pil=False, wh_fixed=True))   # Valtakatu 11 (SV 2026, 16.11): cream-yellow Jugend house on a red-granite base, big ground-floor windows in heavy white surrounds, curved gables (was grey-green)
+SPECK[1293]['P']['wall'] = MT('#e5d6a4', 'plaster')
+SPECK[1622] = dict(spec_for(1622)); SPECK[1622].pop('extra', None)   # red board shed in the garden behind the Antinkatu fence (SV 2026, 16.11)
+SPECK[1577]['extra'] = [facade_bits((26.7, 272.3), (34.7, 307.3), [('wall', 0.3, 35.6, -0.5, 2.25, 0.12, MT('#c8c5bb', 'wood'))])]   # long pale board fence along Antinkatu in front of the garden (SV 2026, 16.11)
+SPECK[1294] = classic_spec(1294, wall='#e3b8a6', trim='#f4efe8', rust=False, garch=False, hood=None, pil=True, bw=2.9,
+                           lay=dict(nf=1, frieze=1.2, cols=lambda c, nb: 'W'), ground=dict(plinth_h=1.3, basement=False, sill=0.95, wh=1.75, ww=1.05, wh_fixed=True),
+                           attic=dict(ww=0.6, wh=0.28, sill=0.45, hood=None, pil=False, wh_fixed=True))   # pink one-storey house on a high plinth, white pilasters, small attic windows; white gable end (SV 2026, 16.11; was 2 storeys with arched windows)
+_s1294 = classic_spec(1294, wall='#e3b8a6', trim='#f4efe8', rust=False, garch=False, hood=None, pil=False, bw=3.2,
+                      lay=dict(nf=1, frieze=1.2, cols=lambda c, nb: 'W' if c == nb - 1 else 'N'), ground=dict(plinth_h=1.3, basement=False, sill=0.95, wh=1.75, ww=1.05, wh_fixed=True),
+                      attic=dict(blank=True), yard_same=True)   # its east side wall along the yard gap: blank (sunlit, it reads white), one window at the far (north) end, the eave cornice runs on round the corner (SV 2026, 16.11)
+SPECK[1294]['alt'] = lambda x, y: _s1294 if x > -3.0 else None
 # Eteläranta / Antinkatu corner (Street View 14.11.2026, owner): three tall storeys with small windows in the top storey. The salmon
 # corner house (white dressings, grey rusticated ground floor) has the 45-degree chamfer with the door and three window bays on the
 # Eteläranta side; west of it (the shell's roof steps at x = 52) the Eteläranta front is a pale grey-green house. One LoD2 shell holds
@@ -378,7 +449,62 @@ _w1561 = classic_spec(1561, wall='#efede6', trim='#f7f6f1', rust=False, garch=Fa
 SPECK[1560]['alt'] = lambda x, y: _w1561 if y < 413.6 else (_c1560 if 62.3 < x < 64.8 and 433.5 < y < 437.2 else _e1560 if x < 52.0 and y > 430.0 else _a1560 if x > 59.0 and y < 433.5 else None)
 SPECK[1286] = classic_spec(1286, trim='#f4f1ea', rust=False, garch=False, hood='pediment', pil=False, lay=dict(nf=3, gh=5.2, frieze=1.4),
                            top=dict(wh=1.35, ww=1.1, sill=0.9, hood=None))   # Hallituskatu: salmon, pediments on the first floor, small top-floor windows (owner 14.11.2026)
-SPECK[1604] = classic_spec(1604, trim='#b0603f', rust=False, garch=False, hood='cornice', pil=False, top=dict(hood='cornice'))  # yellow Jugend house on Antinkatu: brick-red arched lintels with keystones over the windows on every floor (Street View 14.11.2026); gables from the LoD2 shell
+squash(1578, 6.6, 0.06)   # 6 Antinkatu / Hallituskatu (1578): a LOW one-storey house; the scan's walls reach 9-18 m (owner 16.11, Street View 2026)
+SPECK[1578] = classic_spec(1578, wall='#d6b27a', trim='#f1ede2', rust=False, garch=False, hood=None, pil=True, bw=3.3,
+                           lay=dict(nf=1, frieze=1.1, cols=lambda c, nb: 'W'), ground=dict(plinth_h=0.7, plinth=M('#9b978e', 0.85), basement=False, sill=0.9, wh=2.1, ww=1.3, wh_fixed=True),
+                           attic=dict(ww=0.5, wh=0.28, sill=0.45, hood=None, pil=False, wh_fixed=True))   # ochre, white rusticated pilaster strips, white window surrounds, small attic windows under the cornice
+SPECK[1578]['extra'] = [facade_bits((57.6, 327.4), (51.8, 302.6), [('vents', 1.05, 1, 5.5, None, 0.55, 0.3), ('vents', 3.15, 1, 5.5, None, 0.55, 0.3), ('vents', 5.25, 1, 5.5, None, 0.55, 0.3), ('vents', 7.35, 1, 5.5, None, 0.55, 0.3), ('vents', 9.45, 1, 5.5, None, 0.55, 0.3), ('vents', 11.55, 1, 5.5, None, 0.55, 0.3), ('vents', 13.65, 1, 5.5, None, 0.55, 0.3), ('vents', 15.75, 1, 5.5, None, 0.55, 0.3), ('vents', 17.85, 1, 5.5, None, 0.55, 0.3), ('vents', 19.95, 1, 5.5, None, 0.55, 0.3), ('vents', 22.05, 1, 5.5, None, 0.55, 0.3), ('vents', 24.15, 1, 5.5, None, 0.55, 0.3)])]   # the row of small attic windows under the cornice (Antinkatu)
+SPEC[1581]['P'] = dict(SPEC[1581]['P'], wall=M('#5c7377', 0.35, 0.1), spandrel=M('#4b6266', 0.35, 0.1))   # Valtakatu 7 tower: blue-green glass mosaic since the renovation (Street View 2026, 16.11; the white/orange note of 13.11 was older imagery)
+RAW[1579] = [(k, [(q[0], q[1], 20.6 + (q[2] - 20.6) * 0.15 if q[1] > 280.0 and q[0] > 60.0 and q[2] > 20.6 else q[2]) for q in r], h) for k, r, h in RAW.get(1579, [])]   # Hallituskatu 6 (1963): 5 floors over an open ground floor - the scan stood a storey too high (SV 2026, 16.11)
+RAW[1579] = [(k, [(q[0], q[1], 21.6 + (q[2] - 21.6) * 0.1 if q[1] < 240.0 and q[0] > 95.0 and q[2] > 21.6 else q[2]) for q in r], h) for k, r, h in RAW.get(1579, [])]   # Valtakatu 5 (1603): five floors over the shops, ~21.5 m - the scan stood two storeys too high (SV 2026, 16.11)
+import zones as _zn; _V5P = _zn._V5P
+_zn._SPEC_Y2B['P'].update(wall=MT('#ebe8e0', 'plaster'), spandrel=MT('#ebe8e0', 'plaster'), fascia=M('#ebe8e0'), joints=M('#d9d5cb'), frame=M('#3a3f44', 0.5))   # Yrjönkatu 2 b (1618) reads white in Street View 2026 (17.11), not brick
+SPEC[_zn.VALT3]['P'].update(wall=M('#e9e6de'), spandrel=M('#cdb98e'), fascia=M('#e9e6de'))   # Valtakatu 3: white with beige bands under the windows (SV 2026, 17.11)
+_e1548 = classic_spec(1548, wall='#b08d58', trim='#9ea3a6', rust=False, garch=False, hood=None, pil=False, bw=4.25,
+                      lay=dict(nf=7, gh=3.6, fh=3.0, cols=lambda c, nb: 'P' if c == nb // 2 else 'N'), ground=dict(gwall=M('#3a3d40', 0.5), plinth_h=0.2, basement=False, blank=True),
+                      first=dict(ww=1.25, wh=1.5, sill=0.95, hood=None, pil=False, wh_fixed=True), top=dict(ww=1.25, wh=1.5, sill=0.95, hood=None, pil=False, wh_fixed=True), yard_same=True)
+_e1548['P']['wall'] = MT('#b08d58', 'brick', 0.8); _e1548['P']['frame'] = M('#9ea3a6', 0.5)
+SPECK[1548] = dict(spec_for(1548)); SPECK[1548]['alt'] = lambda x, y: _e1548 if y < 181.5 or y > 236.0 else None   # Valtakatu 1 (1965) end walls: yellow-brown brick with one central column of windows over grey panels, open ground floor on pilotis (SV 2026, 17.11)
+SPECK[1553] = classic_spec(1553, wall='#e9e8e3', trim='#e9e8e3', rust=False, garch=False, hood=None, pil=False, bw=4.0,
+                           lay=dict(nf=1, frieze=1.0, cols=lambda c, nb: 'S'), ground=dict(plinth_h=0.3, basement=False), yard_same=True)   # one-storey shop pavilion on Valtakatu: shopfronts under a white fascia (SV 2026, 17.11)
+SPEC[1603] = dict(SPEC[1603]); SPEC[1603]['layout'] = lay(21, 'ribbon', gh=4.6, bw=3.0, fh=3.35, P=_V5P); SPEC[1603]['fit'] = lambda lay_, H, street: lay(H, 'ribbon', gh=4.6 if H > 6 else 0, bw=3.0, fh=3.35, P=_V5P)
+_H6P = dict(sill=0.85, wh=1.45, nx=3, frame=M('#3a3d40', 0.4, 0.4))
+SPEC[1579] = dict(P=dict(wall=M('#e2ddcf', 0.8), spandrel=M('#c8c5bd', 0.7), sign=SIGNS, gwall=M('#3b3e41', 0.5), fascia=M('#d9d3c3', 0.8), gframe=ALU),
+                  layout=lay(20, 'ribbon', gh=4.6, bw=3.0, fh=3.2, P=_H6P), fit=lambda lay_, H, street: lay(H, 'ribbon', gh=4.6 if H > 6 else 0, bw=3.0, fh=3.2, P=_H6P))   # pale buff brick, window bands with light panels, dark open ground floor
+cut_walls(1579, (100.6, 317.3), (0.974, -0.227))   # split the Hallituskatu wall where the tall house really ends (the yard passage begins)
+def _hand_over(src, dst, strip, moves):
+    """give a strip of building src's LoD2 shell to building dst: src's walls/roofs there are dropped, dst's corner points move out to the new end
+    (owner 16.11.2026: the yellow 1578 runs on to Hallituskatu 6 and must look the same all the way)"""
+    from shapely.geometry import Polygon as _P, Point as _Pt
+    S = _P(strip).buffer(0.3)
+    out = []
+    for k, r, h in RAW.get(src, []):
+        c = _Pt(sum(q[0] for q in r) / len(r), sum(q[1] for q in r) / len(r))
+        if k in ('W', 'R') and S.contains(c): continue
+        if k == 'G':
+            d = _P([(q[0], q[1]) for q in r]).buffer(0).difference(_P(strip).buffer(0))
+            if d.geom_type == 'Polygon' and d.area > 1: r = [(x, y, 0.0) for x, y in list(d.exterior.coords)[:-1]]
+        out.append((k, r, h))
+    RAW[src] = out
+    def mv(q):
+        for (ax, ay), (bx, by) in moves:
+            if math.hypot(q[0] - ax, q[1] - ay) < 0.4: return (bx, by, q[2])
+        return q
+    RAW[dst] = [(k, [mv(q) for q in r], h) for k, r, h in RAW.get(dst, [])]
+_hand_over(1579, 1578, [(91.8, 306.4), (98.6, 304.8), (100.6, 317.3), (94.4, 318.8)], [((94.4, 318.8), (100.6, 317.3)), ((91.8, 306.4), (98.6, 304.8))])
+_H6X = facade_bits((148.0, 306.3), (94.4, 318.8), [('box', 15.0, 46.5, 0.4, 5.3, 0.0, 0.06, M('#34383b', 0.6)), ('box', 15.25, 15.75, 0.4, 5.3, 0.06, 0.5, MT('#eeece6', 'plaster')), ('box', 21.25, 21.75, 0.4, 5.3, 0.06, 0.5, MT('#eeece6', 'plaster')), ('box', 27.25, 27.75, 0.4, 5.3, 0.06, 0.5, MT('#eeece6', 'plaster')), ('box', 33.25, 33.75, 0.4, 5.3, 0.06, 0.5, MT('#eeece6', 'plaster')), ('box', 39.25, 39.75, 0.4, 5.3, 0.06, 0.5, MT('#eeece6', 'plaster')), ('box', 45.25, 45.75, 0.4, 5.3, 0.06, 0.5, MT('#eeece6', 'plaster')), ('box', 45.75, 46.25, 0.4, 5.3, 0.06, 0.5, MT('#eeece6', 'plaster'))])   # owner 16.11: shop front only at the east end; the rest of the ground floor is open behind white columns (garage gates); yard passage at the west end
+SPECK_X1581 = facade_bits((40.3, 236.6), (37.2, 223.2), [('box', -0.3, 14.0, 6.6, 25.8, 0.0, 0.12, M('#86a19f', 0.3, 0.15)), ('box', 10.4, 15.2, 6.90, 7.10, 0.0, 1.55, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 7.10, 9.45, 1.45, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 10.5, 7.10, 9.45, 0.0, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 15.2, 9.45, 9.85, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 7.95, 8.02, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 9.85, 10.05, 0.0, 1.55, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 10.05, 12.40, 1.45, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 10.5, 10.05, 12.40, 0.0, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 15.2, 12.40, 12.80, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 10.90, 10.97, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 12.80, 13.00, 0.0, 1.55, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 13.00, 15.35, 1.45, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 10.5, 13.00, 15.35, 0.0, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 15.2, 15.35, 15.75, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 13.85, 13.92, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 15.75, 15.95, 0.0, 1.55, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 15.95, 18.30, 1.45, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 10.5, 15.95, 18.30, 0.0, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 15.2, 18.30, 18.70, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 16.80, 16.87, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 18.70, 18.90, 0.0, 1.55, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 18.90, 21.25, 1.45, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 10.5, 18.90, 21.25, 0.0, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 15.2, 21.25, 21.65, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 19.75, 19.82, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 21.65, 21.85, 0.0, 1.55, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 21.85, 24.20, 1.45, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 10.5, 21.85, 24.20, 0.0, 1.55, M('#3c4a52', 0.12, 0.3)), ('box', 10.4, 15.2, 24.20, 24.60, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 10.4, 15.2, 22.70, 22.77, 1.43, 1.57, M('#1d1f21', 0.4)), ('box', 0.15, 0.65, 1.6, 6.6, 0.25, 0.75, MT('#f1efe9', 'plaster')), ('box', 9.95, 10.45, 1.6, 6.6, 0.25, 0.75, MT('#f1efe9', 'plaster')), ('box', 13.35, 13.85, 1.6, 6.6, 0.25, 0.75, MT('#f1efe9', 'plaster'))])   # owner 16.11: tower face = copper-green ceramic tile, no windows; glazed corner balconies stacked at the south end; white pilotis under it
+_V80P = dict(sill=0.8, wh=1.75, nx=4, frame=M('#2f3436', 0.4, 0.4))
+SPEC[1580] = dict(P=dict(wall=M('#3e544e', 0.6), spandrel=M('#e9e7e0'), sign=SIGNS, gwall=M('#3e544e', 0.6), fascia=M('#e9e7e0'), gframe=ALU),
+                  layout=lay(7.7, 'ribbon', gh=3.8, bw=3.0, fh=3.9, P=_V80P), fit=lambda lay_, H, street: lay(H, 'ribbon', gh=3.8, bw=3.0, fh=3.9, P=_V80P))   # Antinkatu 1960s house: dark green panels, a white ribbon-window band upstairs
+cut_walls(1604, (43.7, 268.0), (0.228, 0.973))   # 1604's LoD2 shell runs on over the low 1960s house 1580 south of it (SV 2026, 16.11)
+SPECK[1604] = classic_spec(1604, trim='#b0603f', rust=False, garch=False, hood='cornice', pil=False, top=dict(hood='cornice'),
+                           lay=dict(cols=lambda c, nb: 'G' if c == 0 else 'D' if c == 1 else 'W'))   # yellow Jugend house on Antinkatu: brick-red lintels on every floor; wooden yard gate in the north bay, entrance next to it (Street View 2026, 16.11)
+SPECK[1604]['extra'] = [facade_bits((51.8, 302.6), (39.0, 248.0), [('gable', 1.9, 4.6, 14.4, 3.2, MT('#ead9a6', 'plaster'), 3),   # north risalit with its stepped gable
+                                                                   ('spire', 1.9, 1.6, 17.0, 21.5, M('#4a4f53', 0.5, 0.2)),                # and the pointed turret roof on it
+                                                                   ('gable', 16.0, 4.0, 14.4, 2.2, MT('#ead9a6', 'plaster'), 1), ('spire', 16.0, 1.4, 16.2, 20.2, M('#4a4f53', 0.5, 0.2))]),
+                        facade_bits((39.0, 248.0), (51.5, 245.0), [('box', -0.05, 12.85, -0.5, 8.2, 0.0, 0.1, M('#3e544e', 0.6))])]   # owner 16.11: the south end of the 1960s house 1580 is a blank dark-green panel wall, no windows   # second turret mid-facade
+RAW[1576] = [(k, [(q[0], q[1], 6.3 if 5.5 < q[2] < 7.4 else q[2]) for q in r], h) for k, r, h in RAW.get(1576, [])]   # the scan's eave wobbles 6.0-7.0 m: a strip of red wall stood above the cornice (owner 15.11.2026). One eave at 6.3 m.
 cut_walls(1284, (-170.4, 407.5), (0.204, 0.981))     # Heinen talo: the two street walls are cut 2.4 m from the corner; the round corner bay
 cut_walls(1284, (-173.3, 405.5), (-0.986, 0.168))    # stands there, so those stretches stay blank (owner 15.11.2026: windows and clutter behind the tower)
 _b1284 = classic_spec(1284, wall='#e4dcc6', trim='#f3eee2', rust=True, garch=False, hood=None, pil=False, lay=dict(cols=lambda c, nb: 'N'))
@@ -388,18 +514,22 @@ SPECK[1284] = classic_spec(1284, wall='#e4dcc6', trim='#f3eee2', rust=True, garc
 SPECK[1284]['alt'] = lambda x, y: _b1284 if math.hypot(x + 170.9, y - 405.1) < 2.6 else None
 SPECK[1513] = classic_spec(1513, wall='#9b4b36', trim='#b9654c', rust=False, garch=True, hood=None, pil=True, bw=4.6, cornice=(0.3, 0.7, M('#7f3d2c')))   # brewery remnant
 SPECK[1281] = classic_spec(1281, wall='#e2dcbc', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=True)   # Eteläranta 10: pale yellow render, white pilasters, window surrounds and cornice (Street View 14.11.2026)
+_t1281 = classic_spec(1281, wall='#e8e0bf', trim='#f6f3ea', rust=False, garch=False, hood='cornice', pil=False, bw=3.3,
+                      lay=dict(nf=2, gh=5.8, cols=lambda c, nb: 'W'), ground=dict(plinth_h=1.6, basement=False, sill=0.6, wh=1.8, ww=1.15, wh_fixed=True), first=dict(ww=1.1, wh=1.7, sill=0.9, wh_fixed=True), yard_same=True)
+SPECK[1281]['alt'] = lambda x, y: _t1281 if y < 466.5 else None   # Teatterikatu side (SV 2026, 17.11): two rows of framed windows over a high base, not three storeys
 SPECK[1285] = classic_spec(1285, wall='#e8ddb6', trim='#f6f4ee', rust=False, garch=True, hood='cornice', pil=True, lay=dict(nf=2, gh=6.4, frieze=1.4, cols=lambda c, nb: 'W'), ground=dict(plinth_h=1.9), top=dict(blank=True))   # wireframe 14.11.2026: high plinth with cellar windows, ground 4.5 m, first 4.8 m, plain frieze 1.4 m under the cornice   # Eteläranta / S. Palmgreninkatu: very light cream, TWO storeys, arched ground-floor windows (owner + Street View 14.11.2026); chamfered corner with a balcony not modelled yet
 _c1285 = classic_spec(1285, wall='#e8ddb6', trim='#f6f4ee', rust=False, garch=True, hood='cornice', pil=False, bw=2.2, lay=dict(nf=2, gh=6.4, frieze=1.4, cols=lambda c, nb: 'D'), ground=dict(plinth_h=1.9), top=dict(blank=True),
                       first=dict(balcony=True, hood='cornice'))
 _w1285 = classic_spec(1285, wall='#e8ddb6', trim='#f6f4ee', rust=False, garch=True, hood='cornice', pil=True, bw=2.9, lay=dict(nf=2, gh=6.4, frieze=1.4, cols=lambda c, nb: 'W'), ground=dict(plinth_h=0.8, basement=False), top=dict(blank=True))   # S. Palmgreninkatu side: the street is higher, a low plinth (wireframe 14.11.2026)
 SPECK[1285]['alt'] = lambda x, y: _c1285 if -39.6 < x < -36.5 and 457.8 < y < 460.2 else _w1285 if x < -39.5 and y < 457.0 else None   # the corner chamfer: door below, balcony above (block walk 14.11.2026)
 # 3 Antinkatu / 10 Hallituskatu (block walk 14.11.2026): the whole Antinkatu front is white, the Hallituskatu front yellow
-_w1563 = classic_spec(1563, wall='#efede6', trim='#f7f6f1', rust=False, garch=False, hood='cornice', pil=False, lay=dict(nf=2, frieze=0.9, cols=lambda c, nb: 'W'), ground=dict(plinth_h=0.6, plinth=GRANITE), top=dict(ww=0.6, wh=0.3, sill=0.3, hood=None, pil=False, wh_fixed=True))   # 3 Antinkatu (wireframe 14.11.2026): grey plinth (the ochre patch on the wall is paint), no street door, small vents under the eave
+_w1563 = classic_spec(1563, wall='#e6cf8f', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=False, lay=dict(nf=2, frieze=0.9, cols=lambda c, nb: 'W'), ground=dict(plinth_h=0.6, plinth=GRANITE), top=dict(ww=0.6, wh=0.3, sill=0.3, hood=None, pil=False, wh_fixed=True))   # 3 Antinkatu (wireframe 14.11.2026): grey plinth (the ochre patch on the wall is paint), no street door, small vents under the eave
 SPECK[1576] = classic_spec(1576, wall='#a5513d', trim='#ece6da', rust=False, garch=False, hood=None, pil=False, bw=3.3,
-                           lay=dict(nf=1, frieze=0.9, cols=lambda c, nb: 'W' if c % 2 == 0 else 'Y'), ground=dict(plinth_h=0.7, plinth=M('#7e3d2e', 0.85), basement=False, ww=1.15, wh=1.85),
+                           lay=dict(nf=1, frieze=0.9, cols=lambda c, nb: 'W' if c % 2 == 0 else 'Y'), ground=dict(plinth_h=0.7, plinth=M('#7e3d2e', 0.85), basement=False, ww=1.15, wh=1.85, sband=0),
                            attic=dict(ww=0.45, wh=0.25, sill=0.35, hood=None, pil=False, wh_fixed=True))   # Hallituskatu south side: brick-red RENDERED one-storey house (owner 15.11.2026: rapattu, ei tiili), five windows in white surrounds, three small vents under the white cornice (Street View 15.11.2026)
-SPECK[1576]['nobrick'] = True; SPECK[1576]['P']['wall'] = MT('#a5513d', 'plaster')   # owner 15.11.2026: rendered, not brick (the bake and the game would read this red as brick)
+SPECK[1576]['roofmat'] = M('#3d4247', 0.55, 0.2); SPECK[1576]['nobrick'] = True; SPECK[1576]['P']['wall'] = MT('#a5513d', 'plaster')   # owner 15.11.2026: rendered, not brick (the bake and the game would read this red as brick)
 SPECK[1576]['extra'] = [facade_bits((23.5, 335.0), (7.3, 339.0), [('chimney', 8.0, 2.6, 6.0, 8.8, 0.6, M('#3b3634')), ('chimney', 11.9, 2.6, 6.0, 8.8, 0.6, M('#3b3634'))]),
+                        facade_bits((23.5, 335.0), (7.3, 339.0), [('vents', 1.7, 1, 4.95, None, 0.5, 0.22), ('vents', 8.35, 1, 4.95, None, 0.5, 0.22), ('vents', 15.0, 1, 4.95, None, 0.5, 0.22)]),
                         facade_bits((7.3, 339.0), (-43.7, 351.7), [('wall', 0.2, 51.6, -0.6, 2.3, 0.45, MT('#d8d3c7', 'plaster'))])]   # owner 15.11.2026: the free-standing light rendered garden wall along Hallituskatu between this house and the Kaupungintalo
 SPECK[1563] = classic_spec(1563, wall='#e6cf8f', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=False, bw=2.7, lay=dict(nf=2, frieze=1.2, cols=lambda c, nb: 'D' if c == 0 else 'N' if c == 3 else 'W'), attic=dict(ww=0.6, wh=0.3, sill=0.45, hood=None, pil=False, wh_fixed=True))   # 10 Hallituskatu (wireframe 14.11.2026): five bays, door with a dressed surround at the west end, blind 4th bay, vents in the frieze
 SPECK[1563]['alt'] = lambda x, y: _w1563 if x > 44.0 else None
@@ -410,8 +540,12 @@ def _s1575(bw):
                         attic=dict(ww=0.55, wh=0.3, sill=0.4, hood=None, pil=False, wh_fixed=True))
 SPECK[1575] = _s1575(3.07)   # 5 Antinkatu / Hallituskatu corner (wireframe 15.11.2026): eight bays on Antinkatu, NO door there; big round-arched shop windows from just above the low brick-red plinth, framed windows with cornices above, a small attic window over every bay
 _h1575 = _s1575(3.6)         # Hallituskatu end: three bays
-SPECK[1575]['alt'] = lambda x, y: _h1575 if y > 331.0 else None   # Hallituskatu end: three bays
-SPECK[1575]['extra'] = [facade_bits((28.8, 333.9), (23.5, 335.0), [('wall', 0.0, 5.4, -0.6, 5.4, 0.5, MT('#f1eee6', 'plaster')), ('archgate', 2.9, 3.4, 3.1, MT('#ece3c4', 'wood'))])]   # white arched gateway to the yard between 1575 and 1576 (Street View 15.11.2026)
+_b1575 = classic_spec(1575, wall='#e6d29c', trim='#f4f1e8', rust=False, garch=False, hood=None, pil=False, bw=3.0,
+                     lay=dict(nf=1, cols=lambda c, nb: 'N'), ground=dict(plinth_h=0.55, basement=False, blank=True, sband=0, rust=False), yard_same=True)
+SPECK[1575]['alt'] = lambda x, y: _h1575 if y > 331.0 else _b1575 if y < 311.0 else None
+SPECK[1575]['extra'] = [facade_bits((28.8, 333.9), (23.5, 335.0), [('wall', 0.0, 5.4, -0.6, 5.4, 0.5, MT('#f1eee6', 'plaster')), ('archgate', 2.9, 3.4, 3.1, MT('#ece3c4', 'wood'))]),
+                        facade_bits((34.7, 307.3), (40.1, 331.4), [('vents', 1.54, 1, 8.95, None, 0.55, 0.3), ('vents', 4.61, 1, 8.95, None, 0.55, 0.3), ('vents', 7.69, 1, 8.95, None, 0.55, 0.3), ('vents', 10.76, 1, 8.95, None, 0.55, 0.3), ('vents', 13.84, 1, 8.95, None, 0.55, 0.3), ('vents', 16.91, 1, 8.95, None, 0.55, 0.3), ('vents', 19.99, 1, 8.95, None, 0.55, 0.3), ('vents', 23.06, 1, 8.95, None, 0.55, 0.3)]), facade_bits((40.1, 331.4), (28.8, 333.9), [('vents', 1.93, 1, 8.95, None, 0.55, 0.3), ('vents', 5.80, 1, 8.95, None, 0.55, 0.3), ('vents', 9.67, 1, 8.95, None, 0.55, 0.3)])]   # small attic windows in the frieze over every bay   # white arched gateway to the yard between 1575 and 1576 (Street View 15.11.2026)
+SPECK[1575].setdefault('extra', []).append(facade_bits((23.2, 309.9), (34.7, 307.3), [('band', 0.0, 11.8, 8.9, 9.25, 0.2, M('#f4f1e8')), ('brackets', 0.6, 11.2, 9.25, M('#f4f1e8'))]))   # only the ornamental eave cornice on that blank end (owner 16.11)   # owner 16.11: its south end wall over the garden is blank (no windows), only the cornice runs round   # Hallituskatu end: three bays
 SPECK[1572] = classic_spec(1572, wall='#c9b07a', trim='#efe9da', rust=True, garch=False, hood=None, pil=False, bw=2.8, lay=dict(nf=2, cols=lambda c, nb: 'D' if c == 8 else 'Y' if c == 3 else 'W'),   # 'Y': no wall window upstairs behind the oriel (owner 15.11.2026)
                           
                            ground=dict(plinth_h=0.8, plinth=M('#8f8a80', 0.85), basement=False, rustc=M('#b39c68'), sband=0.3, darch=True, dw=1.6, door=M('#2b241e', 0.6)), first=dict(ww=1.2, sband=0))   # 8 Hallituskatu (owner photos 15.11.2026): buff rendered Jugend house, ashlar-lined ground floor, white dentil band, pointed-arch entrance under the east gable
@@ -444,10 +578,43 @@ SPECK[1561] = classic_spec(1561, wall='#efede6', trim='#f7f6f1', rust=False, gar
 SPECK[1562] = classic_spec(1562, wall='#efede6', trim='#f7f6f1', rust=False, garch=False, hood='cornice', pil=False, lay=dict(nf=1, frieze=1.4), ground=dict(plinth_h=1.6), top=dict(blank=True))   # white ONE-storey house on a high plinth, plain wall up to the eave (wireframe on Street View 14.11.2026, owner: 'yksitasoinen, korkea kivijalka')
 cut_walls(1566, (70.8, 383.4), (0.2297, 0.9738))   # 4 Antinkatu (1573) is the south end of 1566's long Antinkatu wall: cut where its footprint ends
 lower_eave(1566, lambda r: all(q[1] < 383.6 and q[0] < 72.0 for q in r) and min(q[2] for q in r) < 0.5 and max(q[1] for q in r) - min(q[1] for q in r) > 10, 5.6, 15.0)   # one storey and an attic frieze under the eave (owner 14.11.2026)
-SPECK[1573] = classic_spec(1573, trim='#f4f1e8', rust=False, garch=False, hood=None, pil=False, bw=3.08,
-                           lay=dict(nf=1, frieze=1.6, cols=lambda c, nb: 'D' if c == 2 else 'X' if c == nb - 2 else 'W'),
-                           ground=dict(plinth_h=0.6, sill=0.93, wh=2.07, ww=1.15, wh_fixed=True, dw=1.15, door=M('#c9ccc6', 0.4)), first=dict(hood=None),
-                           top=dict(ww=0.6, wh=0.37, sill=0.26, hood=None, pil=False, wh_fixed=True))   # 4 Antinkatu, measured with the wireframe on Street View (14.11.2026): eave 5.6 m, windows 1.5-3.6 m, plinth 0.6 m, six attic vents 4.3-4.6 m; door third from the north, no window in the fifth bay
+def _low_strip(i, j, zc, extra=None):
+    """the low house j stands inside building i's LoD2 shell: walls of i over j's footprint are cut to zc(x, y), i's roofs are clipped
+    away there and j gets its own low roof (owner 15./16.11.2026: the 1566 roof floated over a black open box above 4 Antinkatu, 1573)"""
+    from shapely.geometry import Polygon as _P, Point as _Pt
+    import numpy as _np
+    if j is None: F0 = _P(extra).buffer(0)
+    else:
+        p = B[j]['p']; F0 = _P([(p[k] / 10, p[k + 1] / 10) for k in range(0, len(p), 2)]).buffer(0)
+        if extra: F0 = F0.union(_P(extra).buffer(0))          # e.g. the shell's sliver over a gate passage next to j
+    F = F0.buffer(0.6)
+    zf = zc if callable(zc) else (lambda x, y: zc)
+    out = []
+    for k, r, h in RAW.get(i, []):
+        cx, cy = sum(q[0] for q in r) / len(r), sum(q[1] for q in r) / len(r)
+        if k == 'W':
+            if F.contains(_Pt(cx, cy)): r = [(q[0], q[1], zf(q[0], q[1]) if q[2] > 3.0 else q[2]) for q in r]
+            out.append((k, r, h)); continue
+        if k == 'R':
+            g = _P([(q[0], q[1]) for q in r]).buffer(0)
+            if g.is_empty or not g.intersects(F0): out.append((k, r, h)); continue
+            A = _np.array([[q[0], q[1], 1.0] for q in r]); z = _np.array([q[2] for q in r]); c_ = _np.linalg.lstsq(A, z, rcond=None)[0]   # roof plane
+            d = g.difference(F0)
+            for gg in ([d] if d.geom_type == 'Polygon' else list(getattr(d, 'geoms', []))):
+                if gg.geom_type == 'Polygon' and gg.area > 0.5:
+                    out.append((k, [(x, y, float(c_[0] * x + c_[1] * y + c_[2])) for x, y in list(gg.exterior.coords)[:-1]], None))
+            continue
+        out.append((k, r, h))
+    RAW[i] = out
+    G = [_P([(q[0], q[1]) for q in r]).buffer(0) for k, r, _ in RAW[i] if k == 'G' and len(r) >= 3]
+    cap = G[0].intersection(F0) if G else None
+    for g in ([cap] if cap is not None and cap.geom_type == 'Polygon' else list(getattr(cap, 'geoms', []))):
+        if g.area > 4: RAW[i].append(('R', [(x, y, zf(x, y)) for x, y in list(g.exterior.coords)[:-1]], None))
+
+SPECK[1573] = classic_spec(1573, wall='#e9d6a0', trim='#f4f1e8', rust=False, garch=False, hood=None, pil=False, bw=3.08,
+                           lay=dict(nf=1, frieze=2.0, cols=lambda c, nb: 'D' if c == 2 else 'N' if c == nb - 1 else 'W'),   # 16.11: W W D W W; the last (south) bay lies behind the gateway
+                           ground=dict(plinth_h=1.0, plinth=M('#a7a49c', 0.85), sill=0.8, wh=2.6, ww=1.3, wh_fixed=True, dw=1.0, door=M('#c9ccc6', 0.4)), first=dict(hood=None),
+                           attic=dict(ww=0.9, wh=0.42, sill=0.6, hood=None, pil=False, wh_fixed=True))   # 4 Antinkatu (wireframe on SV 2026, 16.11): high grey plinth, eave ~6.9 m above the street, small double attic windows in a tall frieze
 SPECK[1566] = classic_spec(1566, wall='#e3dfcf', trim='#efece2', rust=True, garch=False, hood='cornice', pil=True, bw=3.6,
                            ground=dict(hood='cornice', basement=False, plinth_h=1.1, plinth=M('#8d8c87', 0.85), rustc=M('#c9c4b3')),
                            top=dict(ww=0.9, wh=0.45, sill=0.35, hood=None), lay=dict(nf=2, frieze=1.1, cols=lambda c, nb: 'W'), roofmat=M('#4b5552', 0.5, 0.3))
@@ -455,15 +622,30 @@ _e1566 = classic_spec(1566, wall='#e3dfcf', trim='#efece2', rust=True, garch=Fal
                       ground=dict(hood='cornice', basement=False, plinth_h=1.1, plinth=M('#8d8c87', 0.85), rustc=M('#c9c4b3')),
                       top=dict(ww=0.9, wh=0.45, sill=0.35, hood=None), lay=dict(nf=2, frieze=1.1, cols=lambda c, nb: 'G' if c == 1 else 'W'), roofmat=M('#4b5552', 0.5, 0.3))   # Eteläranta front: arched gateway in the second bay from the east, no street door (wireframe 15.11.2026)
 SPECK[1566]['alt'] = lambda x, y: _e1566 if y > 418.0 and x > 85.0 else None
+_gate1573 = facade_bits((66.13, 367.04), (64.50, 359.74), [   # white gateway between 4 Antinkatu and 1572 (SV 2026), 7.5 m, set 0.6 m in front of the house line so it covers the shell's south end
+    ('wall', 0.0, 7.48, -0.6, 5.0, 0.6, MT('#f2efe6', 'plaster')), ('band', 0.0, 7.48, -0.6, 0.45, 0.06, M('#b9b6ae', 0.85)),
+    ('irongate', 3.05, 3.6, 2.9), ('archgate', 6.45, 0.85, 2.0, M('#2a2b2c', 0.5)),
+    ('band', 0.35, 0.85, 0.45, 4.6, 0.14, MT('#f2efe6', 'plaster')), ('band', 5.0, 5.5, 0.45, 4.6, 0.14, MT('#f2efe6', 'plaster')), ('band', 7.0, 7.48, 0.45, 4.6, 0.14, MT('#f2efe6', 'plaster')),   # pilasters
+    ('band', -0.1, 7.58, 4.6, 5.0, 0.3, M('#f7f5ef')),                                                                       # cornice
+    ('gable', 3.05, 4.6, 5.0, 0.85, MT('#f2efe6', 'plaster'), 1)])   # drawn with 1566 (4 Antinkatu is a stretch of 1566's shell, its own extras never run)
+SPECK[1566].setdefault('extra', []).append(_gate1573)
 # Eteläranta 4 / Antinkatu 2 (owner photo 14.11.2026): pale cream render, two storeys, block-rusticated ground floor, straight cornices
 # over every window, a strong string course, rusticated corners, small attic windows in the frieze, grey stone plinth, dark sheet roof;
 # a gateway at the Antinkatu end (not modelled)
 SPECK[1569] = dict(P=dict(wall=M('#dedcd5'), spandrel=M('#dedcd5'), frame=M('#5b3f2c', 0.6), sign=SIGNS), cornice=(0.7, 0.2, M('#2f3437', 0.5)),
                    layout=lay(7.5, 'ribbon', gh=0, bw=1.3, fh=3.4))   # Antinkatu, mid-20th-century infill (owner photo 14.11.2026): light grey render, two long window bands with brown wooden frames, dark fascia
-squash(1287, 10.0, 0.25)   # the scan's walls reach 14-17 m; Street View: 2 storeys + attic frieze, eave about 8 m above the street, low roof (wireframe 14.11.2026)
-SPECK[1287] = classic_spec(1287, wall='#e9e4d2', trim='#f6f4ee', rust=True, garch=False, hood='cornice', pil=False, bw=2.7, lay=dict(nf=2, frieze=1.3, cols=lambda c, nb: 'W'), attic=dict(ww=0.6, wh=0.4, sill=0.45, hood=None, pil=False, wh_fixed=True))   # 12 Hallituskatu / 3 S. Palmgreninkatu: pale cream, banded ground floor, cornices over the upper windows, small attic windows, eight bays
-_h1287 = classic_spec(1287, wall='#e9e4d2', trim='#f6f4ee', rust=True, garch=False, hood='cornice', pil=False, bw=2.07, lay=dict(nf=2, frieze=1.3, cols=lambda c, nb: 'N' if c == 1 else 'W'), ground=dict(plinth_h=0.35, basement=False, sill=0.1, wh=2.3, wh_fixed=True), attic=dict(ww=0.6, wh=0.4, sill=0.45, hood=None, pil=False, wh_fixed=True))   # Hallituskatu front: seven narrow bays, the second blind; tall ground-floor windows from just above the pavement, no cellar windows (owner 14.11.2026)
-SPECK[1287]['alt'] = lambda x, y: _h1287 if y < 377.0 else None
+squash(1287, 8.5, 0.15)   # (16.11: eave was 1.6 m too high on the wireframe) the scan's walls reach 14-17 m; Street View: 2 storeys + attic frieze, eave about 8 m above the street, low roof (wireframe 14.11.2026)
+SPECK[1287] = classic_spec(1287, wall='#e6d9bb', trim='#f6f4ee', rust=True, garch=False, hood='cornice', pil=False, bw=2.7, lay=dict(nf=2, frieze=1.3, cols=lambda c, nb: 'W'), attic=dict(ww=0.6, wh=0.4, sill=0.45, hood=None, pil=False, wh_fixed=True))   # 12 Hallituskatu / 3 S. Palmgreninkatu: pale cream, banded ground floor, cornices over the upper windows, small attic windows, eight bays
+_h1287 = classic_spec(1287, wall='#e6d9bb', trim='#f6f4ee', rust=True, garch=False, hood='cornice', pil=False, bw=2.07, lay=dict(nf=2, frieze=1.3, cols=lambda c, nb: 'Y' if c == 1 else 'W'), ground=dict(plinth_h=0.35, basement=False, sill=0.1, wh=2.3, wh_fixed=True), attic=dict(ww=0.6, wh=0.4, sill=0.45, hood=None, pil=False, wh_fixed=True))   # Hallituskatu front: seven narrow bays, the second blind; tall ground-floor windows from just above the pavement, no cellar windows (owner 14.11.2026)
+_c1287 = classic_spec(1287, wall='#e6d9bb', trim='#f6f4ee', rust=True, garch=False, hood='cornice', pil=False, bw=4.2, lay=dict(nf=2, frieze=1.3, cols=lambda c, nb: 'D'), ground=dict(plinth_h=0.35, basement=False, dw=1.1), attic=dict(ww=0.6, wh=0.4, sill=0.45, hood=None, pil=False, wh_fixed=True))   # owner 16.11: the corner wall: door with a canopy below, one window above
+SPECK[1287]['alt'] = lambda x, y: _c1287 if math.hypot(x + 57.35, y - 377.55) < 1.5 else _h1287 if y < 377.0 else None
+SPECK[1287]['extra'] = [facade_bits((-58.5, 379.4), (-56.2, 375.7), [('canopy', 2.15, 1.9, 4.25, 1.1, M('#3d4146', 0.5))])]
+_gw = MT('#e8e2cf', 'plaster')
+SPECK[1286].setdefault('extra', []).append(facade_bits((-42.0, 372.1), (-27.2, 369.1), [   # yard gate '7' between 1287 (s=0) and 1286 (s=15.1), street face south (owner 15.11.2026, Street View 16.11)
+    ('wall', 0.0, 5.0, -0.6, 4.6, 0.5, _gw), ('archgate', 2.4, 1.0, 2.2, MT('#6a5d4c', 'wood')),                 # low cream wing with a door
+    ('wall', 5.0, 11.1, -0.6, 6.6, 0.7, _gw), ('archgate', 8.05, 3.6, 3.4, M('#3a3a36', 0.6)),                # big open round arch (passage into the yard)
+    ('archgate', 5.55, 0.8, 2.0, MT('#6a5d4c', 'wood')), ('archgate', 10.55, 0.8, 2.0, MT('#6a5d4c', 'wood')),   # small arched doors in the piers
+    ('wall', 11.1, 15.1, -0.6, 3.8, 0.4, _gw)]))                                                             # low wall up to 1286
 cut_walls(1288, (-47.7, 423.5), (0.2350, 0.9720))   # S. Palmgreninkatu: red 1½-storey house to the south, pale yellow 2-storey house to the north (block walk 14.11.2026)
 _n1288 = classic_spec(1288, wall='#e2d6aa', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=False, lay=dict(nf=2), ground=dict(ww=1.1, wh=1.5, sill=1.0, wh_fixed=True), first=dict(wh=1.9, wh_fixed=True))   # ground-floor windows lower than the upper ones (owner 15.11.2026)
 SPECK[1288] = classic_spec(1288, wall='#c9675f', trim='#f4f1ea', rust=False, garch=False, hood=None, pil=True, bw=2.5, lay=dict(nf=1, cols=lambda c, nb: 'W'))   # red one-storey house: five narrow window bays (wireframe 14.11.2026)
@@ -475,7 +657,16 @@ SPECK[1559] = classic_spec(1559, wall='#c8764e', trim='#f4f1ea', rust=True, garc
 SPECK[1567] = classic_spec(1567, wall='#dcc27e', trim='#f4f1e8', rust=False, garch=False, hood='cornice', pil=True, lay=dict(nf=3, cols=lambda c, nb: 'D' if c in (1, nb - 2) else 'W'))   # 2 Eteläranta: ochre, 3 storeys, white pilasters (block walk 14.11.2026)
 SPECK[1567]['runalt'] = lambda x, y: _c1568 if math.hypot(x - 182.9, y - 408.3) < 1.8 else None   # the corner chamfer cut by styles.json 'ch'
 SPECK[1619] = classic_spec(1619, wall='#ece0b4', trim='#f5f2ea', rust=False, garch=False, hood=None, pil=True, bw=3.5, first=dict(arch=True, apron=False, hood=None), top=dict(arch=True), lay=dict(nf=2))   # 4 Hallituskatu / 5 Yrjönkatu: pale yellow, smooth render, round-arched windows upstairs, plain rectangular ground floor, white corner pilasters (Street View 14.11.2026, owner)
-SPECK[1454] = classic_spec(1454, trim='#f7f6f1', rust=False, garch=False, hood='pediment', pil=False, ground=dict(hood='pediment'))   # Teatterikatu: white 1-storey, triangular pediments over the windows (Street View 14.11.2026)
+squash(1454, 8.0, 0.4)   # Teatterikatu 3: a 1½-storey wooden house - the scan stood 9-11 m (SV 2026, 17.11)
+SPECK[1454] = classic_spec(1454, trim='#f7f6f1', rust=False, garch=False, hood='pediment', pil=False, bw=3.4,
+                           lay=dict(nf=1, frieze=0.9, cols=lambda c, nb: 'W'), ground=dict(hood='pediment', plinth_h=0.7, plinth=M('#b9b7b0', 0.85), basement=False, sill=1.6, wh=1.9, ww=1.05, wh_fixed=True),
+                           attic=dict(ww=0.6, wh=0.45, sill=0.25, hood=None, pil=False, wh_fixed=True))   # white wooden house: tall windows under triangular pediments, small attic window in the gable
+SPECK[1454]['P']['wall'] = MT('#f1efe9', 'wood')
+_w1454 = classic_spec(1454, wall='#f3f2ee', trim='#f7f6f1', rust=False, garch=False, hood=None, pil=False, bw=3.6,
+                      lay=dict(nf=1, cols=lambda c, nb: 'W' if c == 0 else 'N'), ground=dict(plinth_h=0.6, plinth=M('#b9b7b0', 0.85), basement=False, sill=1.0, wh=1.1, ww=1.1, wh_fixed=True), yard_same=True)
+_w1454['P']['wall'] = MT('#f3f2ee', 'wood')
+SPECK[1454]['alt'] = lambda x, y: _w1454 if x < -172.5 else None   # the low white board-clad wing west of the main house (one small window)   # Teatterikatu 3 (SV 2026, 17.11): white WOODEN house, board-clad, pediments over the windows
+SPECK[1281].setdefault('extra', []).append(facade_bits((-185.0, 461.6), (-155.5, 459.6), [('wall', 0.0, 29.5, -0.4, 1.25, 0.08, MT('#f4f3ef', 'wood')), ('box', 0.0, 29.5, 1.25, 1.65, 0.0, 0.05, M('#f4f3ef'))]))   # white board fence with a lattice top in front of the garden (SV 2026)
 SPECK[1292] = classic_spec(1292, trim='#f5f2ea', rust=False, garch=False, hood='cornice', pil=True)   # Selim Palmgreninkatu / Valtakatu corner: yellow 1-storey, white window surrounds with cornices, white corner pilasters (Street View 14.11.2026)
 
 # Karhukortteli: five apartment buildings (2016-2020) where the Porin Oluttehdas stood. The LoD2 shells and the aerial image still show
@@ -492,6 +683,8 @@ def kspec(i):
     if i in SPECK: return SPECK[i]
     if i in MODERN: return spec_for(i)
     return classic_spec(i)
+SPECK[1579] = dict(spec_for(1579)); SPECK[1579]['extra'] = list(SPECK[1579].get('extra', [])) + [SPECK_X1581, _H6X, facade_bits((37.2, 223.2), (135.9, 200.1), [('box', 59.3, 101.3, 5.25, 5.8, 0.0, 1.1, M('#cfbd93')), ('box', 59.3, 59.6, 1.2, 5.25, 0.0, 1.1, M('#cfbd93')), ('box', 101.0, 101.3, 1.2, 5.25, 0.0, 1.1, M('#cfbd93'))])]   # owner 16.11: Valtakatu 5's shops sit back under the upper floors - an overhanging band with end piers gives the recess   # Hallituskatu 6 shell carries the tower face
+
 
 # One MML LoD2 building can hold several OSM buildings (1579 Hallituskatu 6 holds the Valtakatu 7 tower 1581, 1603, 1583 and 1716).
 # Built both ways, the footprint walls stood 0.1-0.8 m in front of the shell walls and the bake hit the other surface: black facades
@@ -551,6 +744,10 @@ def TZs(x, y):
     fx = min(_T['nx'] - 1.001, max(0, (x - _T['x0']) / _T['g'])); fy = min(_T['ny'] - 1.001, max(0, (y - _T['y0']) / _T['g']))
     i, j = int(fx), int(fy); u, v = fx - i, fy - j
     return float((_HS[j, i] * (1 - u) + _HS[j, i + 1] * u) * (1 - v) + (_HS[j + 1, i] * (1 - u) + _HS[j + 1, i + 1] * u) * v)
+_low_strip(1566, 1573, 7.5, extra=[(64.0, 363.2), (77.5, 360.3), (78.5, 366.4), (65.4, 369.0)])   # owner 16.11: the uphill (south) end was right at 5.6 m above the street; the roof line runs level from there (north end on its high plinth)   # owner 16.11: Antinkatu climbs south - eave 5.6 m above the STREET in front (house base 2.61 = lowest ground)
+_low_strip(1454, None, 4.3, extra=[(-172.6, 444.3), (-208.5, 456.9), (-212.0, 441.5), (-174.2, 433.0)])   # the wing and the rest of the long scan behind the fence: one low storey
+_low_strip(1604, 1580, 8.2)   # owner 16.11: was too low
+_low_strip(1579, 1716, 5.5)
 def house_list(ids, spec, inside):
     """the houses of a block: LoD2 shells (split where one shell holds two houses on different ground) with their ground height.
     An MML LoD2 model stands on the LOWEST ground of its footprint (mml_parse z0), so a house is lifted to the lowest ground under it
@@ -642,6 +839,8 @@ def build_and_bake(name, ids, samples=16, spec=None):
             if zones2.ROOFBAKE and not sp2.get('roof'): sp2['roof'] = dict(kind='flat', mat=roof_mat(i))   # no LoD2 shell: the game shows no roof here, the block must
             build_building(Z, i, sp2)
     shells = [dict(l=h['l'], r=[[round(v, 1) for q in r for v in (q[0], q[1])] for r in h['rings']], **({'nb': 1} if spec(h['i']).get('nobrick') else {})) for h in HOUSES]   # nb: rendered house in brick red, no brick bond in the game   # the game lifts each house by l
+    for zt, ring in WALL_SHELLS:     # zt: only triangles below the wall top take its lift (a house cornice next to it keeps the house's)
+        if _T: shells.append(dict(l=round(min(TZs(x, y) for x, y in ring), 2), zt=round(zt, 2), r=[[round(v, 1) for q in ring for v in q]]))
     Z.shells = shells
     context2(Z); pack(Z)
     print('hi', len(Z.hi), 'lo', len(Z.lo), 'exp', len(Z.exp))

@@ -489,3 +489,15 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
    valkoinen rustikoitu sokkelinauha, 2 isoa piippua. Pelissä portti puuttuu.
 6. **`6_museo_katto_irti.png`** – Satakunnan Museo (lm museo): katto irti ja etuosa liian matalalla. SYY: 15.11 maamerkkien
    yhden kappaleen nosto (index.html track). KORJATTU 15.11 ilta: yhden kappaleen nosto vain `LM_ONE = {'kaupungintalo'}` – tarkista pelissä.
+
+#### Vikalistan tila 16.11.2026
+- 3 (1576 kulma): räystään tasauksen jälkeen kulma ja lonkka kunnossa – omistaja tarkistaa.
+- 4 (1287): räystäs 1,6 m liian korkea → squash(1287, 8.5, 0.15); väri lämpimämpi #e6d9bb. Rautalanka osuu.
+- 5 (portti 7): 1286–1287 väliin kaariportti, sivupilarien kaariovet, matala muuri (kivi.py SPECK[1286]['extra']). Rautalanka osuu.
+- Irralliset muurit/portit saavat oman nostonsa (`WALL_SHELLS` → shells, `zt` = vain muurin korkeuteen asti; index.html shellAt(S,x,y,z)).
+  Ilman tätä muuri vääntyi rinteessä kolmio kerrallaan ja viereisen talon räystäspala nousi irti.
+- 1 (Linna/Antinkatu): 1563 Antinkadun puoli KELTAINEN (omistaja 16.11; vanha SV näytti valkoista). 1573:n päällä leijunut 1566:n katto
+  leikattu 6,2 m:iin `_low_strip(1566, 1573, 6.2)` + litteä katto. Omistaja: "oikealla rakennus liian matala, kun katto kelluu" – tarkista näkymä
+  (`Claude outputs/antinkatu_nyt.jpg`), takana näkyy vielä 1566:n kaltevia kattopintoja ja 1572:n viereinen keltainen pala.
+- 2 (taidemuseon lähellä värit): todennäköisesti 1287 (näytti valkoiselta) – väri korjattu; tarkista muut.
+- Sillat: kannet pilkottu ≤ 3 m paloiksi (index.html), seuraavat maastoa. Porinsilta (Blender-malli) ennallaan.
