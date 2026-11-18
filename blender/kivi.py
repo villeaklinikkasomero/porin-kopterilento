@@ -1081,7 +1081,7 @@ SPECK[1552]['extra'] = [facade_bits((214.6, 286.1), (208.6, 287.3), [('box', 0.3
                         facade_bits((226.0, 287.8), (203.0, 292.4), _fen)]
 def kspec(i):
     if i in SPECK: return SPECK[i]
-    if i in MODERN: return spec_for(i)
+    if i in MODERN or i in zones2.FACADES: return spec_for(i)   # measured facades (blender/facades.json) go through spec_for
     return classic_spec(i)
 SPECK[1579] = dict(spec_for(1579)); SPECK[1579]['extra'] = list(SPECK[1579].get('extra', [])) + [SPECK_X1581, _H6X, facade_bits((37.2, 223.2), (135.9, 200.1), [('box', 59.3, 101.3, 5.25, 5.8, 0.0, 1.1, M('#cfbd93')), ('box', 59.3, 59.6, 1.2, 5.25, 0.0, 1.1, M('#cfbd93')), ('box', 101.0, 101.3, 1.2, 5.25, 0.0, 1.1, M('#cfbd93'))])]   # owner 16.11: Valtakatu 5's shops sit back under the upper floors - an overhanging band with end piers gives the recess   # Hallituskatu 6 shell carries the tower face
 

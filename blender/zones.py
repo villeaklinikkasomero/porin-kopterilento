@@ -153,14 +153,14 @@ _A31 = ((-154.3, -510.5), (-141.4, -453.7))
 def _a31wall(Z, p0, p1):
     L = math.hypot(p1[0] - p0[0], p1[1] - p0[1]); t = ((p1[0] - p0[0]) / L, (p1[1] - p0[1]) / L); n = (t[1], -t[0])
     return lambda s_, z, d: (p0[0] + t[0] * s_ + n[0] * d - Z.cx, p0[1] + t[1] * s_ + n[1] * d - Z.cy, z)
-def _a31q(Z, W, s0, s1, z0, z1, d, m):                     # a flat panel d metres proud of the wall, both faces
-    for o in (1, -1): add_solid(Z, [W(s0, z0, d), W(s1, z0, d), W(s1, z1, d), W(s0, z1, d)][::o], m, 0.5)
-def _a31bx(Z, W, s0, s1, z0, z1, d0, d1, m):              # a box on the wall (piers, canopies)
+def _a31q(Z, W, s0, s1, z0, z1, d, m):                     # a flat panel d metres proud of the wall, facing out
+    add_solid(Z, [W(s0, z0, d), W(s1, z0, d), W(s1, z1, d), W(s0, z1, d)], m, 0.5)   # one face: back-to-back copies shade each other grey in the bake
+def _a31bx(Z, W, s0, s1, z0, z1, d0, d1, m):              # a box on the wall (piers, canopies), outward faces only
     _a31q(Z, W, s0, s1, z0, z1, d1, m)
-    for s_ in (s0, s1):
-        for o in (1, -1): add_solid(Z, [W(s_, z0, d0), W(s_, z0, d1), W(s_, z1, d1), W(s_, z1, d0)][::o], m, 0.3)
-    for z_ in (z0, z1):
-        for o in (1, -1): add_solid(Z, [W(s0, z_, d0), W(s1, z_, d0), W(s1, z_, d1), W(s0, z_, d1)][::o], m, 0.3)
+    add_solid(Z, [W(s0, z0, d0), W(s0, z0, d1), W(s0, z1, d1), W(s0, z1, d0)], m, 0.3)          # end facing -s
+    add_solid(Z, [W(s1, z0, d0), W(s1, z0, d1), W(s1, z1, d1), W(s1, z1, d0)][::-1], m, 0.3)    # end facing +s
+    add_solid(Z, [W(s0, z0, d0), W(s1, z0, d0), W(s1, z0, d1), W(s0, z0, d1)], m, 0.3)          # underside
+    add_solid(Z, [W(s0, z1, d0), W(s1, z1, d0), W(s1, z1, d1), W(s0, z1, d1)][::-1], m, 0.3)    # top
 def _a31win(Z, W, s0, s1, z0, z1, fr, gl, d=0.03):
     _a31q(Z, W, s0, s1, z0, z1, d, fr); _a31q(Z, W, s0 + 0.09, s1 - 0.09, z0 + 0.09, z1 - 0.09, d + 0.01, gl)
     if s1 - s0 > 1.0: _a31q(Z, W, (s0 + s1) / 2 - 0.04, (s0 + s1) / 2 + 0.04, z0, z1, d + 0.02, fr)   # mullion
@@ -930,7 +930,7 @@ def _on_line(x, y, a, b, tol=1.5):
     dx, dy = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dy * dy; u = ((x - a[0]) * dx + (y - a[1]) * dy) / L2
     return -0.05 < u < 1.05 and abs((x - a[0]) * dy - (y - a[1]) * dx) / L2 ** 0.5 < tol
 _bare_lay = dict(bw=60.0, rows=[(30.0, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True)
-_bare = lambda hx: dict(P=dict(wall=MT(hx, 'plaster', 0.9)), layout=_bare_lay, upper=_bare_lay)   # upper: also the stretch above a lower roof
+_bare = lambda hx, kind='plaster': dict(P=dict(wall=MT(hx, kind, 0.9)), layout=_bare_lay, upper=_bare_lay)   # upper: also the stretch above a lower roof
 _b569, _b570 = _bare('#eeeeea'), _bare('#ededea')
 SPEC[569]['runalt'] = lambda x, y: _b569 if (_on_line(x, y, (-144.2, -398.7), (-148.0, -414.9)) or _on_line(x, y, (-148.0, -414.9), (-190.1, -404.9))) else None
 def _hoard569(Z, pts, h, P):
@@ -1268,7 +1268,7 @@ SPEC[1490] = dict(P=dict(wall=M('#c8c1b4', 0.85), sign=SIGNS), layout=lay(27, 'p
 # ---------------------------------------------------------------- measured facades as data (blender/facades.json, 18.11.2026)
 # One entry per building: {"id": OSM index, "note": ..., "walls": [{"a": [x, y], "b": [x, y], "bare": "#hex" (optional: the wall is plain
 # render in that colour, no generated windows), "items": [...]}]}. s runs from a to b along the wall (measured on the rectified Street View
-# image, tools/rautalanka/rectify.py), z from the street; the outside is on the right of a->b. Items:
+# image, tools/rautalanka/rectify.py), z from the street; the outside is on the right of a->b ("side": "left" when it is on the left). Items:
 #   ["win", s0, s1, z0, z1]            white-framed window (optional 6th: frame hex, 7th: glass hex)
 #   ["door", s0, s1, z0, z1, hex]      flat door / panel on the wall
 #   ["box", s0, s1, z0, z1, d0, d1, hex(, "brick"|"woodv"|"plaster")]   a box standing out of the wall (piers, strips, canopies, plinths)
@@ -1279,8 +1279,17 @@ def _fac_mat(hx, kind=None): return MT(hx, kind, 0.85) if kind else M(hx, 0.85 i
 def _fac_extra(walls):
     def ex(Z, pts, h, P):
         for w in walls:
-            W = _a31wall(Z, tuple(w['a']), tuple(w['b']))
-            for it in w.get('items', []):
+            a_, b_ = tuple(w['a']), tuple(w['b']); its = w.get('items', [])
+            if w.get('side') == 'left':                  # the outside is on the left of a->b: draw on b->a with s mirrored
+                Lw = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); a_, b_ = b_, a_
+                def fl(it):
+                    it = list(it)
+                    if it[0] == 'wins': it[1] = [Lw - c for c in it[1]]
+                    else: it[1], it[2] = Lw - it[2], Lw - it[1]
+                    return it
+                its = [fl(it) for it in its]
+            W = _a31wall(Z, a_, b_)
+            for it in its:
                 k = it[0]
                 if k == 'win': _a31win(Z, W, it[1], it[2], it[3], it[4], M(it[5]) if len(it) > 5 else _a31FR, M(it[6], 0.1, 0.3) if len(it) > 6 else _a31GL)
                 elif k == 'wins':
@@ -1292,13 +1301,13 @@ def _fac_extra(walls):
                     _a31balc(Z, W, it[1], it[2], tuple(it[3]), it[4], it[5], M(it[7], 0.85), M(it[8], 0.1, 0.3), _a31WH, r=it[6],
                              ph=it[9] if len(it) > 9 else 1.0, gh=it[10] if len(it) > 10 else 2.75)
     return ex
-_FJ = _os_f.path.join(_os_f.path.dirname(_os_f.path.abspath(__file__)), 'facades.json')
+_FJ = _os_f.path.join(_os_f.path.dirname(_os_f.path.realpath(__file__)), 'facades.json')   # realpath: zones.py is also imported through a symlink
 FACADES = {e['id']: e for e in (_json_f.load(open(_FJ)) if _os_f.path.exists(_FJ) else [])}
 for _i, _e in FACADES.items():
     _bw = [w for w in _e['walls'] if w.get('bare')]
     def _ra(x, y, _bw=_bw):
         for w in _bw:
-            if _on_line(x, y, tuple(w['a']), tuple(w['b'])): return _bare(w['bare'])
+            if _on_line(x, y, tuple(w['a']), tuple(w['b'])): return _bare(w['bare'], w.get('kind', 'plaster'))
         return None
     if _i in SPEC:
         SPEC[_i] = dict(SPEC[_i]); SPEC[_i]['extra'] = list(SPEC[_i].get('extra', [])) + [_fac_extra(_e['walls'])]
