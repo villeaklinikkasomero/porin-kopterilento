@@ -164,7 +164,22 @@ SPEC[1599] = dict(P=dict(wall=M('#dedad0'), spandrel=M('#6a7479', 0.5), sign=SIG
 # Hallitalo (Viljanen): 1217 Hellmanin pilvenpiirtäjä 1927 (classicist, 5 storeys), 1218 funkis wing 1938 (shop windows, window band above)
 SPEC[1217] = dict(P=dict(wall=M('#e2d3a4'), band=M('#f2ecd8'), sign=SIGNS, gwall=M('#d5c697')), layout=lay(20, 'punched', gh=4.2, bw=2.8, fh=3.15, P=dict(ww=1.15, wh=1.7, nx=2, band2=False)), roof=dict(kind='hip', inset=3.5, rise=2.2, mat=SHEET), cornice=(0.35, 0.4, M('#f2ecd8')))
 SPEC[1218] = dict(P=dict(wall=M('#f1eee6'), sign=SIGNS, gframe=DARK, gwall=M('#f1eee6')), layout=lay(10, 'ribbon', gh=4.6, bw=3.4, fh=5.0, P=dict(wh=1.9, sill=1.3, nx=3, pier=0.1)))
-SPEC[1219] = dict(P=dict(wall=M('#e9e7e1'), spandrel=M('#3d4347', 0.4), sign=SIGNS, gwall=M('#2f3235', 0.3), gframe=ALU, rail=M('#a9b4ba', 0.3)), layout=lay(23, 'ribbon', gh=4.2, bw=3.6, fh=3.1, cols=every(2, 'F')))
+# 1219 Itäpuisto 1 / Isolinnankatu (ent. hotelli Juhana Herttua, SV 2026, 18.11): two-storey windowless plinth with tall white art panels
+# (photographs), above it six storeys: the south part beige render with single punched windows, the north part (to the Kauppahalli)
+# dark blue-grey panels with a dense window grid and glazed corner balconies. The Isolinnankatu wall is split where the two parts meet.
+def m_artpanel(mb, col, P):
+    bw, fh, W = mb.bw, mb.fh, P['wall']; mb.wall([], W)
+    if col == 'N': return
+    a, b = bw / 2 - 0.62, bw / 2 + 0.62; mb.prot(a, 0.45, b, fh - 0.75, 0.06, P.get('panel', WHITE))
+    mb.q(a + 0.12, 0.95, b - 0.12, 1.85, 0.07, P.get('photo', M('#5d5a55', 0.6)))
+MODS['artpanel'] = m_artpanel
+_p19 = B[1219]['p']; _k19 = [(_p19[k], _p19[k + 1]) for k in range(0, len(_p19), 2)].index((1709, -861))
+if (1744, -715) not in [(_p19[k], _p19[k + 1]) for k in range(0, len(_p19), 2)]: B[1219]['p'] = _p19[:2 * _k19 + 2] + [1744, -715] + _p19[2 * _k19 + 2:]
+_rows19 = [(6.6, 'artpanel', 'G')] + [(2.73, 'punched', 'F')] * 6
+_pl19 = dict(wall=M('#bdb4a3'), panel=M('#efeee9'))
+_beige19 = dict(bw=3.0, rows=_rows19, cols=lambda c, nb: 'W', P=dict(ww=1.1, wh=1.5, nx=1, sill=0.8, frame=M('#ece9e2')), rowP={'G': _pl19}, plain=False)
+_blue19 = dict(bw=1.7, rows=_rows19, cols=lambda c, nb: 'B' if c >= nb - 2 else 'W', P=dict(wall=M('#46546a', 0.5), ww=0.95, wh=1.6, nx=1, sill=0.7, frame=M('#2c3138'), linner=M('#3a4656', 0.5), rail=M('#9fb2bd', 0.1, 0.3), ldepth=1.0), rowP={'G': _pl19}, plain=False)
+SPEC[1219] = dict(P=dict(wall=M('#cbbfa6'), sign=SIGNS), layout=_beige19, walls={6: _blue19, 7: _blue19}, roof=dict(kind='flat', mat=M('#5c6064', 0.6)))
 
 
 # ---------------------------------------------------------------- BePOP (Nurmela-Raimoranta-Tasa 1989)

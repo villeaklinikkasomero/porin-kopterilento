@@ -513,32 +513,22 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   vaalea nauhajulkisivu, päättyy oikeaan kohtaan; keltainen 1578 jatkuu siihen asti), 1603 Valtakatu 5 (5 krs liiketilojen päällä).
 - Seuraavaksi: kivi3 sisäpiha (1585, 1586), sitten kivi1 loput (1292–1296, 1341, 1574, 1577, 1622), kivi0, kivi5, kl0, kl1.
 
-#### 17.11.2026 – ALOITA TÄSTÄ seuraavassa keskustelussa
-- Tarkistettu rautalangalla ~51 / 109. Tehty 16.–17.11: kivi1 (1294, 1574 + aita, 1577 liiketalo, 1293 Valtakatu 11, 1622 vaja + Antinkadun lauta-aita,
-  1575 umpinainen pääty + räystäskonsolit, 1287 kulmaovi), kivi0 (1454 Teatterikatu 3 puutalo + matala siipi, 1281 Teatterikadun puoli 2 riviä + aita,
-  1308 Valtakatu 17 puutalo pysty/vaakalaudoitus, 1311 Valtakatu 19 harmaanvihreä omistajan kuvan mukaan), kivi3 (1603 liiketilojen syvennys),
-  kivi5 (1618/1620 valkoisiksi, 1548 tiilipäädyt + ulkonevat ikkunaerkkerit, 1553 liikepaviljonki, valkoisen talon umpiseinät),
-  kl1 (1398 Valtakatu 18 erkkeri + yksi kivijalkaikkuna, 1352 Annankatu vaalea tiili + rappausnauhat + lasitetut parvekkeet, 1527 koulu vaalea tiili;
-  Lyseo: 1353:n kuori leikattu x=-405, länsiosa keltainen tavallisin ikkunoin – omistaja 17.11), kl0 (1535 Valtakatu 26 parvekkeet), c039 (1459/1526 koulu vaalea tiili).
-- Uusi kopteri: `heli.js` (Porikopteri.glb) ja `heli_m.js` (mobiili), index.html: nokka -z (rotation.y = π), y -1.85, PBR + oma ympäristökartta vain kopterille.
-  Omistajan Blender-render on tavoite; terävä kopterin varjo tekemättä (ei nyt).
-- Opit: tarkista jokainen näkyvä pääty/sivuseinä (ohjelma keksii ikkunoita), räystäskoristeet; `yard_same=True` jotta sivuseinä käyttää annettua layoutia;
-  facade_bits 'box' kuoren seinän kanssa samaan tasoon voi mustua bakessa; city-lohkojen (c###) symlinkit game/ osoittivat /tmp/pk:hon → `ln -sf out/bl_X.js game/`.
-- gshot_sv.mjs odottaa `includes('<lohko>')` – vaihda sed:llä lohkon mukaan.
-- Seuraavaksi: kl0 loput (1517 kulmatalon lasitettu kulmaparveke, 1516, 1449, 1458, 1446, 1447, 1338, 1357, 1336, 1337, 1368, 1370, 1261), kivi5 1551/1552,
-  vikalistan kohta 2 (taidemuseon ympäristön värit), sitten Valtakadun keltaiset toimistotalot (1361/1367/1488/1489, eivät missään kivi-lohkossa → city-lohko).
-- Modal (käyttäjä, pushin jälkeen): bake kivi0 kivi1 kivi2 kivi3 kivi4 kivi5 kl0 kl1 --samples 64, landmarks kaupungintalo raati, city 64 c039.
 
-#### 17.11.2026 iltapäivä (jatko, toinen keskustelu)
-- Korjattu rautalangalla (kl0 + karhu): 1517 lasitetut parvekepinot Katariinankadulle + pohjoissivun loggiat, 1535 harjakatto + kahden kerroksen syvennys kulman molemmin puolin,
-  1516 sisäänvedetyt loggiat NW + vaaleat 2 ylintä kerrosta + pohjoissivun lasiparvekkeet 4 tiilipylvään välissä (3|3|1), 1458 Valtakatu 24 julkisivu mitattu (ikkunat, lasiporrashuone,
-  autotalli, sisäänkäynti, itäpään parvekesyvennys + sisäänpäin nousevat portaat), 1451 (karhu) kadun päälle ulottuvat parvekenauhat, 1446 Hallituskatu 22 (lohenpunainen, itäpäädyn parveke),
-  1447 vanha sähkölaitos (omistajan valokuvasta mitattu: korkeat kaari-ikkunat, kivipilarit, pääty-ikkuna, matalan siiven kaari-ikkunat, graniittisokkeli), 1338 vaalea tiili + ranskalaiset parvekkeet,
-  1357 kaksi sinipaneelista lasiparvekepinoa + sisäänvedetty maantaso Katariinankadulla, 1336 Valtakatu 30, 1368 tornitalon päätypystyrivi, 1337 Hallituskatu 26 (2 krs + kellari, aumakatto).
-- Jäljellä kl0: 1370, 1261 (ei tarkkaa SV-panoraamaa kokeilluista kohdista). Sitten kivi5 1551/1552, vikalista 2, Valtakadun keltaiset (city-lohko).
-- Uudet työkalut: `tools/rautalanka/px2wall.py` (SV-pikseli -> seinän s, z; fov-parametri), kivi.py `kwin()` (moderni ikkuna: kehys, puitteet, harmaansininen lasi, pelti),
-  facade_bits `archwin` (kaari-ikkuna kivikehyksellä), gen.py roof `gablemat`. gshot_sv.mjs: ZONE välitetään selaimeen (aiemmin `process.env` selaimessa -> ei odottanut lohkoa).
-- index.html: ilmakuvakattoa ei piirretä kivi-/kl-lohkojen taloille (näkyi väärässä city.js-korkeudessa 1535:n syvennyksessä).
-- Pilvityötilassa ei ole laitteen shelliä: repo kloonataan GitHubista, bpy 5.2.4 pip, data `pipeline/data/porikit_data.tgz` -> /home/claude/mmlproc.
-- Kaupungin kuvat: OneDrive Kuvat_kopterilento (Kalle Aaltonen). Omistaja hyväksyi 17.11. käsittelyn pilvityötilassa (EU ok).
-- Modal (käyttäjä, pushin jälkeen): `bake kl0 karhu --samples 64`.
+## 17.11.2026 ilta: keskustan heittävät ikkunarivit (aloitus Isolinnankatu)
+- **Syy:** build_wall venytti jokaisen seinäpätkän rivit omaan räystääseensä (z0..z1). LoD2-seinien yläreunat vaihtelevat samassa talossa
+  (esim. 656: 19,6 / 22,2 m; 609: 21,5 / 24,4 m) → samat kerrosrivit eri korkeudella → rivit hyppäävät kulmissa ja seinäpätkien välillä.
+- **Korjaus (gen.py + zones2.py + city.py):** `zones2.GRID` (city.py: päällä, `PORI_GRID=0` pois). build_lod2 laskee talolle päärääystään
+  (maaseinien pituuspainotettu mediaani) → layout `grid=(0, HREF/rivien summa)`. build_wall pitää rivit absoluuttisilla korkeuksilla:
+  matalampi seinä päättyy umpinauhaan, korkeampi saa räystäsnauhan, alemman katon päällä oleva seinä jatkaa samoja kerroksia.
+  Ei koske specejä, joilla on fit/fitw/runalt/nogrid (Kivi-Pori ja käsilohkot ennallaan). Debug: `GDBG=1`.
+- **Pelin bugi korjattu (index.html streamUpdate):** uudet bake-tiedostot alkavat rivillä `export const shells = ...`; striimaus luki base64:n
+  ensimmäisestä lainausmerkistä → parse epäonnistui → lohko jäi pelin tasaisiksi seiniksi (c039 nyt pelissä). Nyt luetaan `export default`,
+  ja shells → liftBlock kuten nimetyissä lohkoissa. ILMAN tätä kaikki tämän päivän koodilla leivotut c-lohkot näkyisivät tyhjinä.
+- Paikallinen koepoltto tarvitsee tekstuurit: `ln -s /home/claude/pori/blender/tex /home/claude/tex` (muuten tiili puuttuu).
+- **18.11 aamu:** (1) Sokoksen ja IsoKarhun välissä maassa ollut vaaleanvihreä laatikko = vanha bl_h100 (leivottu ennen kuin
+  kävelysilta 1243 sai `lift`-merkinnän; pelin bl_h100:n origo 153.3,-270.4 ≠ nykyinen jako). Uusi h100-poltto poistaa sen.
+  city.py house_spec.gable_ends kaatui LoD2-taloihin (pts None) → h-lohkojen poltto kaatui; korjattu.
+  (2) 1219 Itäpuisto 1 / Isolinnankatu (SV): ikkunaton 2-kerroksinen jalusta + valkoiset taidepaneelit, yllä 6 krs: eteläosa beige
+  rappaus, pohjoisosa tummansininen levy + tiheä ikkunajako + lasitetut kulmaparvekkeet. zones.py SPEC[1219], uusi moduuli `artpanel`,
+  itäseinään lisätty piste (1744,-715). Avoinna: sinisen osan katto ehkä matalampi, Kauppahallin väri pelissä keltainen (todellisuudessa vaalea).
+- **Ajettava:** `bake tori4 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.

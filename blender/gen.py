@@ -625,6 +625,26 @@ def build_wall(Z, p, q, z0, z1, layout, P, seed, bid):
     t = (dx / L, dy / L); n = (t[1], -t[0])
     W = lambda u, v, d, uo=0, vo=0: (p[0] + t[0] * (u + uo) + n[0] * d - Z.cx, p[1] + t[1] * (u + uo) + n[1] * d - Z.cy, z0 + v + vo)
     rows = layout['rows']; tot = sum(r[0] for r in rows); sc = (z1 - z0) / tot
+    grid = layout.get('grid')       # (zg0, sc_ref): one storey grid for the whole building (window rows line up on every wall,
+    if grid and not layout.get('plain') and L >= 2.6:     # owner 17.11.2026 "heittävät ikkunarivit"): rows keep their absolute
+        zg0, scr = grid; zg0 = z0 if z0 < 1.5 else zg0    # heights, a lower wall ends in a blank band, a taller one gets a parapet
+        if abs(zg0 + tot * scr - z1) > 0.45 or z0 >= 1.5:
+            nr = []; za = zg0
+            for rh, mod, rk_ in rows:
+                a_, b_ = za, za + rh * scr; za = b_
+                a2, b2 = max(a_, z0), min(b_, z1)
+                if b2 - a2 < 0.02: continue
+                full = a2 - a_ < 0.05 and b_ - b2 < 0.05
+                nr.append((b2 - a2, mod if full else 'plain', rk_ if full else 'P'))
+            if za < z1 - 0.02: nr.append((z1 - max(za, z0), 'plain', 'P'))
+            if zg0 > z0 + 0.02: nr.insert(0, (zg0 - z0, 'plain', 'P'))
+            mg = []
+            for r_ in nr:
+                if mg and r_[1] == 'plain' and mg[-1][1] == 'plain': mg[-1] = (mg[-1][0] + r_[0], 'plain', 'P')
+                else: mg.append(r_)
+            if not any(m_ != 'plain' for _, m_, _ in mg): layout = dict(layout, plain=True)
+            if os.environ.get('GDBG'): print('GRID', bid, round(z0, 1), round(z1, 1), round(L, 1), [(round(h_, 1), m_) for h_, m_, _ in layout['rows']], '->', [(round(h_, 1), m_) for h_, m_, _ in mg])
+            rows = mg; tot = sum(r[0] for r in rows); sc = (z1 - z0) / tot
     nb = max(1, round(L / layout['bw'])); bw = L / nb
     if L < 2.6 or layout.get('plain'):
         rows = [(tot, 'plain', 'P')]; nb = 1; bw = L

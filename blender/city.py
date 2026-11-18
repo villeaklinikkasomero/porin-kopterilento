@@ -112,7 +112,7 @@ def house_spec(i):
     gwall = MT(tuple(c_ * 1.001 for c_ in hexlin(gcol)), 'woodl', 0.9) if clad == 'h' else W if gcol == wall else MT(gcol, 'woodv' if clad == 'v' else 'plaster', 0.9)
     def gable_ends(Z, pts, hh, P):                      # same pitched roof the game draws for houses: ridge along the long side
         import math
-        if len(pts) > 14 or shed or l2: return
+        if l2 or shed or pts is None or len(pts) > 14: return      # LoD2 shells: build_and_bake calls extras without a footprint
         ux, uy, a, bb, cx, cy = kivi.obb(pts); ar = abs(sum(pts[k][0] * pts[(k + 1) % len(pts)][1] - pts[(k + 1) % len(pts)][0] * pts[k][1] for k in range(len(pts)))) / 2
         if not (ar > 0.7 * 4 * a * bb and bb > 1.8): return
         rise = min(4.6, bb * 0.66); vx, vy = -uy, ux; L = lambda x, y, z: (x - Z.cx, y - Z.cy, z)
@@ -129,7 +129,8 @@ def house_spec(i):
 if __name__ == '__main__':
     if sys.argv[1] == 'split': split(); sys.exit()
     if sys.argv[1] == 'split-houses': split(houses=True); sys.exit()
-    import kivi
+    import kivi, zones2
+    zones2.GRID = os.environ.get('PORI_GRID', '1') == '1'                                 # window rows on one storey grid per building (17.11.2026)
     zones = json.load(open(MAN))['zones']; name = sys.argv[1]
     L2B = json.loads(open(os.path.join(GAME, 'lod2.js')).read()[len('export default '):-2])['b']
     def hspec(i):                                        # OSM tags some blocks of flats as houses: an eave over 9.5 m in the scan is not a house

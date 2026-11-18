@@ -12,6 +12,7 @@ STREET = None        # optional fn(mid_xy, normal_xy) -> True when the wall face
 ROOFOCC = M('#4f5459', 0.7)
 ZBASE = None         # optional fn(i, mid_xy, normal_xy) -> street level above the shell base at that wall (sloping ground)
 ZBASE_MAT = None     # material of the wall below such a raised facade (plinth)
+GRID = False        # True (city blocks): one storey grid per building, window rows line up on every wall (17.11.2026)
 ROOFBAKE = False     # True: the LoD2 roofs are baked into the block (Kivi-Pori); False: shadow casters only, the game shows the aerial photo
 try: LOOK = json.load(open('/home/claude/pori/styles.json'))
 except Exception: LOOK = dict(pal=[], b={})
@@ -98,6 +99,18 @@ def build_lod2(Z, i, spec, upper=None):
             if pg.contains(Point(x, y)): best = max(best, p0.z - (nn.x * (x - p0.x) + nn.y * (y - p0.y)) / nn.z)
         return best
     FP = unary_union([Polygon([(p[0], p[1]) for p in r]).buffer(0) for k, r, _ in RAW[i] if k == 'G' and len(r) >= 3])
+    HREF = None
+    if GRID:                                                   # the building's main eave: length-weighted median of its ground walls
+        tw = []
+        for k, r, _ in RAW[i]:
+            if k != 'W' or len(r) < 3 or min(p[2] for p in r) > 1.5: continue
+            ln = max(math.hypot(r[a][0] - r[a - 1][0], r[a][1] - r[a - 1][1]) for a in range(len(r)))
+            if ln > 2.5: tw.append((max(p[2] for p in r), ln))
+        if tw:
+            tw.sort(); half = sum(l for _, l in tw) / 2; acc = 0
+            for z_, l_ in tw:
+                acc += l_
+                if acc >= half: HREF = z_; break
     for k, r, holes in RAW[i]:
         if k == 'G' or len(r) < 3: continue
         if spec.get('skip') and spec['skip'](r, k): continue          # parts replaced by hand-built geometry (BePOP tower)
@@ -183,6 +196,11 @@ def build_lod2(Z, i, spec, upper=None):
                     add_solid(Z, pz, ZBASE_MAT or P_['wall'], 0.4)
             ra = spec.get('runalt') and spec['runalt'](*mid2); s_ = ra or spec_; Pr = ra['P'] if ra else P_      # one stretch of a wall as another building part
             lay_ = (s_['layout'] if street or 'yard' not in s_ else s_['yard']) if zb < 1.5 else (s_.get('upper') or upper or lay(ze - zb, 'punched', bw=3.3, fh=3.0))
+            if HREF and not ra and not s_.get('fit') and not s_.get('fitw') and not s_.get('nogrid'):
+                if zb >= 1.5 and not s_.get('upper') and zb < HREF - 1.5:
+                    lay_ = s_['layout'] if street or 'yard' not in s_ else s_['yard']      # a wall above a lower roof keeps the main storeys
+                if zb < 1.5 or zb < HREF - 1.5:
+                    if lay_.get('rows') and not lay_.get('plain'): lay_ = dict(lay_, grid=(0.0, HREF / sum(r_[0] for r_ in lay_['rows'])))
             if s_.get('fit'): lay_ = s_['fit'](lay_, ze - zf, street)
             if s_.get('fitw'): lay_ = s_['fitw'](lay_, ze - zf, street, u1r - u0r, zf)   # also by wall length and base height (gable ends, walls above a lower roof)
             build_wall(Z, p, q, zf, ze, lay_, s_.get('Pyard', Pr) if not street else Pr, i * 31 + seed, i)
