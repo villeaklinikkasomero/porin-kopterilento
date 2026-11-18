@@ -41,7 +41,7 @@
   #card h1 span { color:var(--accent); }
   #card p { margin:8px 0; color:var(--dim); line-height:1.5; font-size:15px; }
   #keys { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; margin:16px 0; font-size:14px; align-items:center; }
-  #keys kbd { font:600 12px ui-monospace, Menlo, Consolas, monospace; border:1px solid var(--line); border-radius:5px; padding:3px 7px; background:rgba(255,255,255,.07); white-space:nowrap; }
+  #keys kbd, #keys2 kbd { font:600 12px ui-monospace, Menlo, Consolas, monospace; border:1px solid var(--line); border-radius:5px; padding:3px 7px; background:rgba(255,255,255,.07); white-space:nowrap; }
   #keys div:nth-child(odd) { white-space:nowrap; }
   #go { pointer-events:auto; font:700 17px inherit; font-family:inherit; color:#16110a; background:var(--accent); border:0; border-radius:8px; padding:12px 26px; cursor:pointer; margin-top:6px; }
   #go:disabled { opacity:.55; cursor:progress; }
@@ -67,6 +67,17 @@
   #nicksave { pointer-events:auto; font:700 14px inherit; font-family:inherit; color:#16110a; background:var(--accent); border:0; border-radius:6px; padding:8px 14px; cursor:pointer; }
   #board h2 { margin:0 0 2px; font-size:19px; }
   #board .sub { font-size:12.5px; color:var(--dim); }
+  #nav { left:50%; top:14px; transform:translateX(-50%); padding:8px 14px 8px 8px; display:none; align-items:center; gap:10px; }
+  #nav canvas { width:58px; height:58px; display:block; }
+  #nav .nd { font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1; }
+  #nav .nn { font-size:13px; color:var(--dim); margin-top:3px; max-width:46vw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  #vehs { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0 6px; }
+  .veh { pointer-events:auto; position:relative; padding:0; border:2px solid var(--line); border-radius:10px; overflow:hidden; background:#0e161e; cursor:pointer; color:var(--ink); font:inherit; text-align:left; }
+  .veh video, .veh img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; }
+  .veh span { position:absolute; left:8px; bottom:6px; font-weight:700; font-size:15px; text-shadow:0 1px 6px rgba(0,0,0,.8); }
+  .veh[aria-pressed="true"] { border-color:var(--accent); box-shadow:0 0 0 2px rgba(255,201,40,.35); }
+  .veh:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+  .car .heli-only { display:none !important; } body:not(.car) .car-only { display:none !important; }
   /* touch */
   #touch { display:none; }
   .touch #touch { display:block; }
@@ -95,33 +106,45 @@
 <div id="mapwrap" class="hud panel"><canvas id="mini" width="340" height="340"></canvas></div>
 <div id="gauges" class="hud panel">
   <div class="g"><div class="v" id="gs">0</div><div class="u">km/h</div></div>
-  <div class="g"><div class="v" id="ga">0</div><div class="u">korkeus m</div></div>
+  <div class="g heli-only"><div class="v" id="ga">0</div><div class="u">korkeus m</div></div>
   <div class="g"><div class="v" id="gh">P</div><div class="u">suunta</div></div>
   <div class="g"><div id="hp"><i></i></div><div class="u">kunto</div></div>
 </div>
 <div id="street" class="hud"><div class="s" id="sn"></div><div class="p" id="sp"></div></div>
+<div id="nav" class="hud panel"><canvas id="navc" width="116" height="116"></canvas><div><div class="nd" id="navd"></div><div class="nn" id="navn"></div></div></div>
 <div id="toast" class="hud panel"></div>
 <div id="board" class="hud panel"><h2>Päivän top-10</h2><div class="sub" id="bsub"></div><div id="nickrow" style="display:none;margin:10px 0 4px"><label for="nick">Pääsit listalle! Nimimerkki</label><input id="nick" maxlength="5" autocomplete="off" spellcheck="false" placeholder="5 merkkiä"><button id="nicksave" >Tallenna</button><span style="font-size:12px;width:100%">Älä käytä oikeaa nimeäsi.</span></div><ol class="top" id="top1"></ol><div class="topnote" id="note1"></div></div>
 <div id="help" class="hud panel">
-  <kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
-  <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
+  <span class="heli-only"><kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
+  <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · </span><span class="car-only"><kbd>W</kbd> kaasu · <kbd>S</kbd> jarru/peruutus · <kbd>A</kbd><kbd>D</kbd> ohjaus · <kbd>Väli</kbd> käsijarru<br></span><kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
 </div>
 <div id="credit">Ilmakuva © Maanmittauslaitos, ortokuva 2025 (CC BY 4.0) · Kartta-aineisto © OpenStreetMapin tekijät · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0) · valokuvat © Porin kaupunki</div>
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
-  <div class="tb" id="tup">▲</div><div class="tb" id="tdn">▼</div>
+  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div>
 </div>
 
 <div id="start">
   <div id="card" class="panel">
     <h1>Pori<span>kopteri</span></h1>
-    <p>Lennä helikopterilla Porin keskustan katujen yllä ja välissä. Joka päivä arvotaan uusi kierros: nouse Kauppatorilta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja laskeudu takaisin torille. Nopeimmat ajat pääsevät päivän top-10:een.</p>
-    <div id="keys">
+    <p>Lennä helikopterilla tai aja autolla Porin keskustassa. Joka päivä arvotaan uusi kierros: lähde Kauppatorilta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja palaa torille. Nopeimmat ajat pääsevät päivän top-10:een – kopterille ja autolle on omat listansa.</p>
+    <div id="vehs" role="group" aria-label="Valitse kulkuneuvo">
+      <button class="veh" id="vheli" aria-pressed="true"><video poster="./veh_heli.jpg" autoplay muted loop playsinline><source src="./veh_heli.webm" type="video/webm"><source src="./veh_heli.mp4" type="video/mp4"></video><span>Helikopteri</span></button>
+      <button class="veh" id="vcar" aria-pressed="false"><video poster="./veh_auto.jpg" autoplay muted loop playsinline><source src="./veh_auto.webm" type="video/webm"><source src="./veh_auto.mp4" type="video/mp4"></video><span>Auto</span></button>
+    </div>
+    <div id="keys" class="heli-only">
       <div><kbd>W</kbd> <kbd>S</kbd> / <kbd>↑</kbd> <kbd>↓</kbd></div><div>eteen ja taakse</div>
       <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>käännä</div>
       <div><kbd>Q</kbd> <kbd>E</kbd></div><div>liu'u sivulle</div>
       <div><kbd>Väli</kbd> / <kbd>Shift</kbd></div><div>ylös ja alas</div>
+      <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
+    </div>
+    <div id="keys2" class="car-only" style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0;font-size:14px;align-items:center">
+      <div><kbd>W</kbd> / <kbd>↑</kbd></div><div>kaasu</div>
+      <div><kbd>S</kbd> / <kbd>↓</kbd></div><div>jarru ja peruutus</div>
+      <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>ohjaus</div>
+      <div><kbd>Väli</kbd></div><div>käsijarru</div>
       <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
     </div>
     <div id="daily">
@@ -1095,8 +1118,87 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const g = gridGeo(19, 26, 106, 113, 0.5, (x, y) => [x / 8, y / 8], (x, y) => !inP(x, y), 0.09); g.computeVertexNormals();
   const t = new THREE.TextureLoader().load('./tori_pave.jpg'); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
   const m = new THREE.MeshLambertMaterial({ map: t, color: 0xffffff, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
-  const me = noT(new THREE.Mesh(g, m)); scene.add(me);
+  const me = noT(new THREE.Mesh(g, m)); me.visible = false; scene.add(me);   // 18.11.2026: replaced by the stone paving in roads.js
 }
+
+// ---------- streets as geometry (tools/roads/build_roads.py -> roads.js, 18.11.2026): asphalt carriageways, pavements raised on granite kerbs,
+// traffic islands and zebra crossings. The surfaces are procedural; the aerial photo only darkens them where it is dark (building shadows).
+const ROAD = { asph: 0.06, pave: 0.19, mark: 0.075, on: true, paveAt: () => false };
+// cars stand on the asphalt: the car meshes follow the smoothed field TZs, the street surface the true ground TZg
+const roadDZ = (x, y) => ROAD.on && inCore(x, y) ? TZg(x, y) + ROAD.asph - TZs(x, y) : 0;
+import('./roads.js').then(mod => {
+  const R = mod.default, dec = b => new Int16Array(TDEC(b).buffer);
+  const noiseTex = (seed, base, amp, spots, N = 512) => {
+    const c = document.createElement('canvas'); c.width = c.height = N; const g = c.getContext('2d'), d = g.createImageData(N, N);
+    let sd = seed; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+    const v = new Float32Array(N * N); for (let i = 0; i < N * N; i++) v[i] = rnd() * 0.5 + 0.5;
+    for (let k = 0; k < spots; k++) { const x = rnd() * N, y = rnd() * N, r = 2 + rnd() * 18, a = (rnd() - 0.5) * 0.25;   // patches and stains
+      for (let yy = -r; yy <= r; yy++) for (let xx = -r; xx <= r; xx++) if (xx * xx + yy * yy < r * r) { const q = (((y + yy) | 0) % N + N) % N * N + (((x + xx) | 0) % N + N) % N; v[q] += a * (1 - (xx * xx + yy * yy) / (r * r)); } }
+    for (let i = 0; i < N * N; i++) { const q = Math.max(0, Math.min(255, (base + (v[i] - 0.75) * amp) * 255)); d.data[i * 4] = q; d.data[i * 4 + 1] = q; d.data[i * 4 + 2] = q * 1.02; d.data[i * 4 + 3] = 255; }
+    g.putImageData(d, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; t.colorSpace = THREE.SRGBColorSpace; return t; };
+  const ld = (f, srgb = true) => { const t = new THREE.TextureLoader().load(f); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
+  // tools/roads/make_tex.py: Pori stone-mastic asphalt (grey chips, some red granite), finer pavement asphalt, a 16 m crack / sealed-crack / patch map
+  const tAsph = ld('./road_asph.jpg'), tPave = ld('./road_pave.jpg'), tCrack = ld('./road_crack.png', false), tMac = noiseTex(11, 0.75, 0.5, 600);
+  // world-space chips (two scales, rotated, so the 1.6 m tile never shows), large-scale wear, cracks gated "here and there",
+  // and the photo shade: how much darker the photo is than sunlit paving there (the houses' shadows)
+  const surf = (tex, rep, tint, ref, off, crackAmt) => { const m = new THREE.MeshLambertMaterial({ color: tint, polygonOffset: true, polygonOffsetFactor: off, polygonOffsetUnits: off });
+    m.onBeforeCompile = sh => { Object.assign(sh.uniforms, { tS: { value: tex }, tC: { value: tCrack }, tM: { value: tMac }, tO: { value: orto }, uC: { value: new THREE.Vector3(HW, YS, YSPAN) } });
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vRw;').replace('#include <project_vertex>', '#include <project_vertex>\nvRw = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vRw; uniform sampler2D tS, tC, tM, tO; uniform vec3 uC;').replace('#include <map_fragment>', `
+        vec2 wp = vec2(vRw.x, -vRw.z);
+        vec2 r2 = mat2(0.8, -0.6, 0.6, 0.8) * wp;
+        vec3 tx = texture2D(tS, wp * ${(1 / rep).toFixed(4)}).rgb * 0.55 + texture2D(tS, r2 * ${(0.37 / rep).toFixed(4)} + 0.31).rgb * 0.45;
+        float mac = texture2D(tM, wp * 0.021).r * 0.6 + texture2D(tM, r2 * 0.0047 + 0.5).r * 0.4;          // worn / newer areas
+        tx *= 0.86 + 0.28 * mac;
+        float gate = smoothstep(0.52, 0.72, texture2D(tM, wp * 0.0091 + 0.13).r);                                  // cracks only in some stretches
+        float ck = texture2D(tC, wp * 0.0625).r, ck2 = texture2D(tC, r2 * 0.051 + 0.47).r;
+        tx *= mix(1.0, min(ck, mix(1.0, ck2, 0.6)), ${crackAmt.toFixed(2)} * (0.35 + 0.65 * gate));
+        vec3 ph = texture2D(tO, vec2((wp.x + uC.x) / (2.0 * uC.x), (wp.y - uC.y) / uC.z), 2.0).rgb;
+        float L = dot(ph, vec3(0.3, 0.55, 0.15)), sh_ = clamp(L / ${ref.toFixed(3)}, 0.6, 1.04);
+        diffuseColor.rgb *= tx * 1.9 * mix(1.0, sh_, 0.55);`); };
+    return m; };
+  const mAsph = surf(tAsph, 1.6, 0xaab0b8, 0.30, -6, 0.9), mPave = surf(tPave, 1.2, 0xd9dde2, 0.42, -6, 0.3);
+  const mMark = new THREE.MeshLambertMaterial({ color: 0xe9e9e4, polygonOffset: true, polygonOffsetFactor: -8, polygonOffsetUnits: -8 });
+  const mKerb = new THREE.MeshLambertMaterial({ color: 0x9a9893, side: THREE.DoubleSide });
+  const flat = (a, dz) => { const P = new Float32Array(a.length / 2 * 3);
+    for (let i = 0, k = 0; i < a.length; i += 2, k += 3) { const x = a[i] / 10, y = a[i + 1] / 10; P[k] = x; P[k + 1] = TZg(x, y) + dz; P[k + 2] = -y; }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.computeVertexNormals(); return g; };
+  const add = (g, m) => { const me = noT(new THREE.Mesh(g, m)); me.matrixAutoUpdate = false; scene.add(me); return me; };
+  add(flat(dec(R.asph), ROAD.asph), mAsph); add(flat(dec(R.pave), ROAD.pave), mPave); add(flat(dec(R.mark), ROAD.mark), mMark);
+  if (R.path) add(flat(dec(R.path), 0.05), mPave);
+  // stone paving on the pedestrian streets, Eetunaukio and Kauppatori (owner's PBR set pori_kivetys_harmaanpunainen, one repeat = 2.2 m)
+  if (R.kivi) {
+    const g = flat(dec(R.kivi), ROAD.pave), P = g.attributes.position.array, U = new Float32Array(P.length / 3 * 2);
+    for (let i = 0, k = 0; i < P.length; i += 3, k += 2) { U[k] = P[i] / 2.2; U[k + 1] = -P[i + 2] / 2.2; }
+    g.setAttribute('uv', new THREE.BufferAttribute(U, 2));
+    const orm = ld('./kivetys_orm.jpg', false);
+    const mK = new THREE.MeshStandardMaterial({ map: ld('./kivetys_albedo.jpg'), normalMap: ld('./kivetys_normal.jpg', false), aoMap: orm, roughnessMap: orm, metalness: 0, roughness: 1,
+      polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 });
+    mK.normalScale.set(1.2, 1.2);
+    mK.onBeforeCompile = sh => { sh.uniforms.tO = { value: orto }; sh.uniforms.uC = { value: new THREE.Vector3(HW, YS, YSPAN) };
+      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vRw;').replace('#include <project_vertex>', '#include <project_vertex>\nvRw = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vRw; uniform sampler2D tO; uniform vec3 uC;').replace('#include <map_fragment>', `#include <map_fragment>
+        { vec2 wp = vec2(vRw.x, -vRw.z); vec3 ph = texture2D(tO, vec2((wp.x + uC.x) / (2.0 * uC.x), (wp.y - uC.y) / uC.z), 2.0).rgb;
+          float L = dot(ph, vec3(0.3, 0.55, 0.15)), sh_ = clamp(L / 0.42, 0.65, 1.04); diffuseColor.rgb *= 1.38 * mix(1.0, sh_, 0.45); }`); };
+    add(g, mK);
+  }
+  // kerbs: the pavement edge (pavement on the left of a->b) drops to the asphalt / ground; a 0.15 m granite band along the top
+  const K = dec(R.kerb), P = [];
+  for (let i = 0; i < K.length; i += 4) { const ax = K[i] / 10, ay = K[i + 1] / 10, bx = K[i + 2] / 10, by = K[i + 3] / 10, za = TZg(ax, ay), zb = TZg(bx, by);
+    P.push(ax, za + ROAD.pave, -ay, ax, za + ROAD.asph - 0.03, -ay, bx, zb + ROAD.asph - 0.03, -by, ax, za + ROAD.pave, -ay, bx, zb + ROAD.asph - 0.03, -by, bx, zb + ROAD.pave, -by); }
+  const kg = new THREE.BufferGeometry(); kg.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); kg.computeVertexNormals(); add(kg, mKerb);
+  { // 1 m raster of the pavements for the car: driving over a kerb lifts it onto the pavement
+    const [x0, y0, x1, y1] = R.bb, nx = Math.ceil(x1 - x0), ny = Math.ceil(y1 - y0), M = new Uint8Array(nx * ny), T = dec(R.pave);
+    for (let i = 0; i < T.length; i += 6) { const ax = T[i] / 10, ay = T[i + 1] / 10, bx = T[i + 2] / 10, by = T[i + 3] / 10, cx = T[i + 4] / 10, cy = T[i + 5] / 10;
+      const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy); if (Math.abs(d) < 1e-6) continue;
+      for (let gy = Math.floor(Math.min(ay, by, cy) - y0); gy <= Math.ceil(Math.max(ay, by, cy) - y0); gy++) for (let gx = Math.floor(Math.min(ax, bx, cx) - x0); gx <= Math.ceil(Math.max(ax, bx, cx) - x0); gx++) {
+        if (gx < 0 || gy < 0 || gx >= nx || gy >= ny) continue; const px = x0 + gx + 0.5, py = y0 + gy + 0.5;
+        const u = ((by - cy) * (px - cx) + (cx - bx) * (py - cy)) / d, v = ((cy - ay) * (px - cx) + (ax - cx) * (py - cy)) / d;
+        if (u >= -0.05 && v >= -0.05 && u + v <= 1.05) M[gy * nx + gx] = 1; } }
+    ROAD.paveAt = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny && M[gy * nx + gx] === 1; };
+  }
+  ROAD.on = true; window.__roads = { asph: R.asph.length, pave: R.pave.length };
+}).catch(e => console.log('roads.js not loaded', e));
 
 // embedded Blender models: base64 glb inside a script file
 // whole-city blocks: fetched when the helicopter comes within 600 m, dropped again beyond 850 m (the plain walls stay as a stand-in)
@@ -1312,7 +1414,7 @@ const HOME = { x: 70, y: 45 };   // open paving south of the stalls, clear of th
   x.strokeStyle = '#ffc928'; x.lineWidth = 10; x.beginPath(); x.arc(128, 128, 112, 0, 7); x.stroke();
   x.fillStyle = '#fff'; x.font = '700 150px ui-sans-serif, system-ui, Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('H', 128, 136);
   const g = new THREE.PlaneGeometry(17, 17); g.rotateX(-Math.PI / 2);
-  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.material.polygonOffset = true; m.material.polygonOffsetFactor = -8; m.material.polygonOffsetUnits = -8; m.position.set(HOME.x, TZg(HOME.x, HOME.y) + 0.2, -HOME.y); m.renderOrder = 1; scene.add(noT(m));
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.material.polygonOffset = true; m.material.polygonOffsetFactor = -8; m.material.polygonOffsetUnits = -8; m.position.set(HOME.x, TZg(HOME.x, HOME.y) + 0.24, -HOME.y); m.renderOrder = 1; scene.add(noT(m));
 }
 
 // checkpoint beacon
@@ -1372,6 +1474,132 @@ const blob = (() => {
   const m = new THREE.Mesh(p, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.renderOrder = 5; m.userData.noT = true; scene.add(m); return m;
 })();
 
+// ---------- the player's car (owner 18.11.2026: drive the daily tour by car; porikopteri_auto.py, Blender) ----------
+// Arcade bicycle model on the street surface: W/S throttle and brake/reverse, A/D steer, Space handbrake. Buildings and the river stop it.
+let VEH = 'heli'; try { VEH = localStorage.getItem('pori-veh') === 'car' ? 'car' : 'heli'; } catch (e) {}
+const CAR = { x: 0, y: 0, yaw: 0, v: 0, steer: 0, z: 0, pitch: 0, roll: 0, spin: 0 }, WB = 2.64, CAR_R = 0.325;
+const carG = new THREE.Group(); carG.rotation.order = 'YXZ'; carG.userData.noT = true; carG.visible = false; scene.add(carG);
+let wheels = [], carLoading = false;
+const loadCar = () => { if (carLoading) return; carLoading = true; loadModel(isTouch ? 'auto_m' : 'auto', root0 => {   // glTF: nose +z, wheels Wheel_FL/FR/RL/RR spinning about their local x, ground at y 0
+  const root = new THREE.Group(); root.add(root0); root0.rotation.y = Math.PI;   // game frame: nose -z, like the helicopter
+  const envS = new THREE.Scene(), eg = new THREE.SphereGeometry(50, 32, 16), ec = [];
+  for (let i = 0; i < eg.attributes.position.count; i++) { const y = eg.attributes.position.getY(i) / 50; const c = y > 0 ? new THREE.Color(0xbfd3e6).lerp(new THREE.Color(0xffffff), Math.max(0, 1 - y * 2.5)) : new THREE.Color(0x77736c); ec.push(c.r, c.g, c.b); }
+  eg.setAttribute('color', new THREE.Float32BufferAttribute(ec, 3)); envS.add(new THREE.Mesh(eg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
+  const sunB = new THREE.Mesh(new THREE.SphereGeometry(3, 12, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(8, 7.5, 6.5) })); sunB.position.set(30, 32, 24); envS.add(sunB);
+  const envTex = new THREE.PMREMGenerator(renderer).fromScene(envS, 0.02).texture;
+  root0.traverse(q => { if (q.isMesh) { const m = q.material; if (m && m.isMeshStandardMaterial) { m.envMap = envTex; m.envMapIntensity = 1.0; m.needsUpdate = true; } q.frustumCulled = false; } });
+  wheels = ['Wheel_FL', 'Wheel_FR', 'Wheel_RL', 'Wheel_RR'].map(n => root0.getObjectByName(n)).filter(Boolean);
+  for (const w of wheels) { w.rotation.order = 'YXZ'; w.userData.front = /F[LR]$/.test(w.name); }
+  carG.clear(); carG.add(root);
+}); };   // loaded only when the car is chosen
+// ground under the car: the street surface (asphalt / pavement), bridge decks, the smoothed field elsewhere
+function carGround(x, y) {
+  if (onPorinsilta(x, y) !== null) return TZs(x, y) + bridgeZ(x, y);
+  if (inRiver(x, y)) return onBridgeDeck(x, y) ? Math.max(TZs(x, y), TER.wl + 2.2) : null;
+  if (!inCore(x, y)) return TZs(x, y);
+  return TZg(x, y) + (ROAD.paveAt(x, y) ? ROAD.pave : ROAD.asph);
+}
+function carBlocked(x, y, yaw) {   // a corner of the car inside a house or over open water
+  const sn = Math.sin(yaw), cs = Math.cos(yaw), g = TZs(x, y);
+  for (const [f, r] of [[2.1, 0.9], [2.1, -0.9], [-2.1, 0.9], [-2.1, -0.9], [0, 0.95], [0, -0.95]]) {
+    const px = x + sn * f + cs * r, py = y + cs * f - sn * r;
+    if (carGround(px, py) === null) return true;
+    if (roofAt(px, py) > Math.max(g, TZg(px, py)) + 1.4 && onPorinsilta(px, py) === null) return true;
+  }
+  return false;
+}
+function resetCar() {
+  Object.assign(CAR, { x: HOME.x - 6, y: HOME.y - 10, yaw: Math.PI * 0.5 - 0.23, v: 0, steer: 0, spin: 0 }); CAR.z = carGround(CAR.x, CAR.y) || 0;
+  S.hp = 100; S.dead = 0; carG.visible = VEH === 'car';
+}
+function stepCar(dt, live) {
+  const f = live ? input.f : 0, t = live ? input.t : 0, hb = live && keys.has('Space');
+  // throttle / brake / reverse
+  const fw = Math.cos(CAR.steer);
+  if (f > 0) CAR.v += (CAR.v < -0.3 ? 9 : 4.2 * (1 - Math.max(0, CAR.v) / 24)) * f * dt;
+  else if (f < 0) CAR.v += (CAR.v > 0.3 ? 9 : 2.6 * (1 + CAR.v / 6)) * f * dt;
+  CAR.v *= Math.exp(-(f === 0 ? 0.22 : 0.05) * dt); if (f === 0 && Math.abs(CAR.v) < 0.25) CAR.v = 0;
+  if (hb) { CAR.v *= Math.exp(-2.2 * dt); if (Math.abs(CAR.v) < 0.4) CAR.v = 0; }
+  // steering: less lock at speed
+  const lock = 0.58 / (1 + Math.abs(CAR.v) / 11);
+  CAR.steer += (t * lock - CAR.steer) * Math.min(1, dt * 6);
+  const yr = CAR.v / WB * Math.tan(CAR.steer) * (hb ? 1.25 : 1);
+  const nyaw = CAR.yaw + yr * dt, sn = Math.sin(nyaw), cs = Math.cos(nyaw);
+  const nx = CAR.x + sn * CAR.v * dt * fw, ny = CAR.y + cs * CAR.v * dt * fw;
+  if (carBlocked(nx, ny, nyaw)) {
+    if (Math.abs(CAR.v) > 5) { damage((Math.abs(CAR.v) - 5) * 4); toast('Kolari!', 1); }
+    CAR.v *= -0.25;
+  } else { CAR.x = nx; CAR.y = ny; CAR.yaw = nyaw; }
+  if (!tourOn && !tourDone && Math.abs(CAR.v) > 0.5) tourOn = true;
+  // body on the ground: height (kerbs lift it smoothly), pitch and roll from the four wheel contacts
+  const s0 = Math.sin(CAR.yaw), c0 = Math.cos(CAR.yaw), gz = (fx, rx) => { const z = carGround(CAR.x + s0 * fx + c0 * rx, CAR.y + c0 * fx - s0 * rx); return z === null ? CAR.z : z; };
+  const zf = (gz(1.32, 0.77) + gz(1.32, -0.77)) / 2, zr = (gz(-1.32, 0.77) + gz(-1.32, -0.77)) / 2, zl = (gz(1.32, 0.77) + gz(-1.32, 0.77)) / 2, zrr = (gz(1.32, -0.77) + gz(-1.32, -0.77)) / 2;
+  CAR.z += ((zf + zr) / 2 - CAR.z) * Math.min(1, dt * 14);
+  const tp = Math.atan2(zf - zr, WB) + (live ? -f * 0.012 : 0), tr = Math.atan2(zl - zrr, 1.55) + yr * CAR.v * 0.0016;
+  CAR.pitch += (tp - CAR.pitch) * Math.min(1, dt * 8); CAR.roll += (tr - CAR.roll) * Math.min(1, dt * 8);
+  carG.position.set(CAR.x, CAR.z, -CAR.y); carG.rotation.set(CAR.pitch, -CAR.yaw, -CAR.roll);
+  CAR.spin += CAR.v / CAR_R * dt;
+  for (const w of wheels) { w.rotation.x = CAR.spin; w.rotation.y = w.userData.front ? CAR.steer : 0; }
+  // keep the shared state in step: camera, HUD, tour, minimap read S
+  S.x = CAR.x; S.y = CAR.y; S.alt = CAR.z; S.yaw = CAR.yaw; S.vx = Math.sin(CAR.yaw) * CAR.v; S.vy = Math.cos(CAR.yaw) * CAR.v; S.vz = 0; S.landed = Math.abs(CAR.v) < 0.5;
+}
+
+// ---------- navigator for the car: shortest route on the street graph, the next turn as an arrow ----------
+const NAV = { route: null, t: 0, tgt: null };
+{
+  const nodes = new Map(), key = (x, y) => x + ',' + y;
+  const node = (x, y) => { const k = key(x, y); if (!nodes.has(k)) nodes.set(k, { x, y, e: [] }); return nodes.get(k); };
+  for (const r of CITY.r) { if (!r.k) continue;
+    for (let i = 0; i + 3 < r.p.length; i += 2) { const a = node(r.p[i], r.p[i + 1]), b = node(r.p[i + 2], r.p[i + 3]); if (a === b) continue;
+      const L = Math.hypot(b.x - a.x, b.y - a.y); a.e.push({ to: b, L, n: r.n || '' }); b.e.push({ to: a, L, n: r.n || '' }); } }
+  const list = [...nodes.values()].filter(n => n.e.length);
+  const nearSeg = (x, y) => { let best = null, bd = 1e18;
+    for (const a of list) { if (Math.abs(a.x - x) > 150 || Math.abs(a.y - y) > 150) continue;
+      for (const e of a.e) { const b = e.to, dx = b.x - a.x, dy = b.y - a.y, t = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy || 1))), px = a.x + dx * t, py = a.y + dy * t, d = (px - x) ** 2 + (py - y) ** 2;
+        if (d < bd) { bd = d; best = { a, b, t, px, py, n: e.n, d: Math.sqrt(d) }; } } }
+    return best; };
+  const nearNode = (x, y) => { let best = null, bd = 1e18; for (const a of list) { const d = (a.x - x) ** 2 + (a.y - y) ** 2; if (d < bd) { bd = d; best = a; } } return best; };
+  NAV.plan = (x, y, tx, ty) => {
+    const s0 = nearSeg(x, y), goal = nearNode(tx, ty); if (!s0 || !goal) return null;
+    const dist = new Map(), prev = new Map(), H = [];
+    const push = (n, d, p, pn) => { if (d < (dist.get(n) ?? 1e18)) { dist.set(n, d); prev.set(n, [p, pn]); H.push([d, n]); let i = H.length - 1; while (i > 0) { const j = (i - 1) >> 1; if (H[j][0] <= H[i][0]) break; [H[i], H[j]] = [H[j], H[i]]; i = j; } } };
+    const pop = () => { const top = H[0], last = H.pop(); if (H.length) { H[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < H.length && H[l][0] < H[m][0]) m = l; if (r < H.length && H[r][0] < H[m][0]) m = r; if (m === i) break; [H[i], H[m]] = [H[m], H[i]]; i = m; } } return top; };
+    const L = Math.hypot(s0.b.x - s0.a.x, s0.b.y - s0.a.y);
+    push(s0.a, s0.t * L, null, s0.n); push(s0.b, (1 - s0.t) * L, null, s0.n);
+    const done = new Set();
+    while (H.length) { const [d, n] = pop(); if (done.has(n)) continue; done.add(n); if (n === goal) break;
+      for (const e of n.e) if (!done.has(e.to)) push(e.to, d + e.L, n, e.n); }
+    if (!prev.has(goal)) return null;
+    const pts = []; let n = goal; while (n) { const [p, nm] = prev.get(n); pts.push({ x: n.x, y: n.y, n: nm, deg: n.e.length }); n = p; }
+    pts.push({ x: s0.px, y: s0.py, n: s0.n, deg: 2 }); pts.reverse();
+    pts.push({ x: tx, y: ty, n: '', deg: 1 });
+    return pts;
+  };
+  // the next manoeuvre along the route from the car: { turn: signed angle (rad, + = right), d: metres to it, n: street after it }
+  NAV.next = (x, y, yaw) => {
+    const R = NAV.route; if (!R || R.length < 2) return null;
+    let k = 1, acc = Math.hypot(R[1].x - x, R[1].y - y);
+    const head = (a, b) => Math.atan2(b.x - a.x, b.y - a.y);
+    for (; k < R.length - 1; k++) {
+      const h1 = head(R[k - 1], R[k]), h2 = head(R[k], R[k + 1]); let dh = h2 - h1; dh = Math.atan2(Math.sin(dh), Math.cos(dh));
+      const seg = Math.hypot(R[k + 1].x - R[k].x, R[k + 1].y - R[k].y);
+      if (Math.abs(dh) > 0.52 && R[k].deg >= 3 && seg > 4) return { turn: dh, d: acc, n: R[k + 1].n };
+      acc += seg;
+    }
+    return { turn: 0, d: acc, n: '', end: true };
+  };
+  NAV.off = (x, y) => { const R = NAV.route; if (!R) return 1e9; let bd = 1e9;
+    for (let i = 0; i + 1 < R.length; i++) { const a = R[i], b = R[i + 1], dx = b.x - a.x, dy = b.y - a.y, t = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy || 1)));
+      bd = Math.min(bd, Math.hypot(a.x + dx * t - x, a.y + dy * t - y)); } return bd; };
+  NAV.update = (dt, tg) => {
+    NAV.t -= dt; const moved = !NAV.tgt || NAV.tgt.x !== tg.x || NAV.tgt.y !== tg.y;
+    if (moved || NAV.t <= 0 && NAV.off(CAR.x, CAR.y) > 18) { NAV.route = NAV.plan(CAR.x, CAR.y, tg.x, tg.y); NAV.tgt = tg; NAV.t = 1.5; }
+    else if (NAV.t <= 0) NAV.t = 1.5;
+    // drop the route points already passed
+    const R = NAV.route; if (R) while (R.length > 2 && Math.hypot(R[1].x - CAR.x, R[1].y - CAR.y) < 9) R.shift();
+  };
+}
+
 // ---------- traffic: cars wandering the street network, sized like the cars in the aerial image ----------
 const cars = [];
 {
@@ -1398,7 +1626,7 @@ const cars = [];
       if (c.t >= 1) { const opts = c.b.nb.filter(n => n !== c.a), nx = opts.length ? opts[Math.floor(rnd() * opts.length)] : c.a; c.a = c.b; c.b = nx; c.t = 0; dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
       const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * 1.7, y = c.a.y + dy * c.t - ux * 1.7;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
-      p3.set(x, 0.03 + bridgeZ(x, y), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
+      const bz = bridgeZ(x, y); p3.set(x, 0.03 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
     for (const q of parts) q.instanceMatrix.needsUpdate = true;
   };
   cars.update(0);
@@ -1419,7 +1647,7 @@ const cars = [];
     for (let i = 0; i < n; i++) lists[pick(hs(i, 1), [0.36, 0.28, 0.24, 0.12])].push(i);
     lists.forEach((ids, k) => { const im = new THREE.InstancedMesh(geo[k], cm, ids.length);
       ids.forEach((ci, j) => { const yaw = PARKED[ci * 4 + 2] / 100, sc = (k === 3 ? 0.9 : 0.94) + hs(ci, 3) * 0.08;      // heading already faces the traffic (kerbside) or the bay (car parks)
-        p3.set(PARKED[ci * 4] / 10, 0.02, -PARKED[ci * 4 + 1] / 10); q4.setFromAxisAngle(UP, -yaw); s3.set(sc, sc, sc); im.setMatrixAt(j, m4.compose(p3, q4, s3));
+        p3.set(PARKED[ci * 4] / 10, 0.02 + roadDZ(PARKED[ci * 4] / 10, PARKED[ci * 4 + 1] / 10), -PARKED[ci * 4 + 1] / 10); q4.setFromAxisAngle(UP, -yaw); s3.set(sc, sc, sc); im.setMatrixAt(j, m4.compose(p3, q4, s3));
         tc.setHex(PARKED[ci * 4 + 3]); const mxc = Math.max(tc.r, tc.g, tc.b); if (mxc < 0.05) tc.setRGB(0.05, 0.055, 0.06); im.setColorAt(j, tc); });
       s3.set(1, 1, 1); im.frustumCulled = false; scene.add(im); });
     window.__cars = n;
@@ -1432,7 +1660,7 @@ const S = { x: HOME.x, y: HOME.y, alt: SKID, vx: 0, vy: 0, vz: 0, yaw: 0, yawRat
 const input = { f: 0, t: 0, s: 0, l: 0 };
 const keys = new Set();
 let started = false, camMode = 0, tourIdx = 0, tourT = 0, tourOn = false, tourDone = false, best = null;
-const BESTKEY = 'pori-kopteri-best-' + DAY.key; try { best = parseFloat(localStorage.getItem(BESTKEY)) || null; } catch (e) {}
+let BESTKEY = 'pori-kopteri-best-' + DAY.key; try { best = parseFloat(localStorage.getItem(BESTKEY)) || null; } catch (e) {}
 
 function pip(x, y, pts) { let r = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const a = pts[i], b = pts[j]; if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) r = !r; } return r; }
 const PROBE = [[0, 0], [3, 0], [-3, 0], [0, 3], [0, -3], [2.1, 2.1], [-2.1, 2.1], [2.1, -2.1], [-2.1, -2.1]];
@@ -1467,11 +1695,13 @@ const fmtT = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart
 const fmtT1 = s => fmtT(s) + '.' + Math.floor(s * 10 % 10);
 
 function resetHeli() { Object.assign(S, { x: HOME.x, y: HOME.y, alt: SKID, vx: 0, vy: 0, vz: 0, yaw: 0, yawRate: 0, hp: 100, landed: true, dead: 0 }); heli.visible = true; }
-function newTour() { LB.show(false); tourIdx = 0; tourT = 0; tourOn = false; tourDone = false; resetHeli(); setTarget(); toast('Nouse ilmaan ja lennä valopylvääseen'); }
-function target() { return tourIdx < TOUR.length ? TOUR[tourIdx] : { n: 'Laskeudu Kauppatorille', x: HOME.x, y: HOME.y, h: 0, land: true }; }
+function newTour() { LB.show(false); tourIdx = 0; tourT = 0; tourOn = false; tourDone = false; NAV.route = null; NAV.tgt = null;
+  if (VEH === 'car') { heli.visible = false; resetCar(); } else { carG.visible = false; resetHeli(); }
+  setTarget(); toast(VEH === 'car' ? 'Aja valopylvään luo – navigaattori näyttää käännökset' : 'Nouse ilmaan ja lennä valopylvääseen'); }
+function target() { return tourIdx < TOUR.length ? TOUR[tourIdx] : { n: VEH === 'car' ? 'Pysähdy Kauppatorille' : 'Laskeudu Kauppatorille', x: HOME.x, y: HOME.y, h: 0, land: true }; }
 function setTarget() {
   const t = target(); beacon.position.set(t.x, 0, -t.y);
-  const ry = t.land ? 3 : Math.max(38, Math.min(t.h, 70) + 26);
+  const ry = t.land ? 3 : VEH === 'car' ? 7 : Math.max(38, Math.min(t.h, 70) + 26);
   beacon.getObjectByName('ring').position.y = ry; beacon.getObjectByName('ring2').position.y = ry;
   beacon.visible = !tourDone;
   $('mt').textContent = tourDone ? 'Vapaa lento' : t.n; $('mn').textContent = Math.min(tourIdx, TOUR.length) + '/' + TOUR.length;
@@ -1480,7 +1710,7 @@ function setTarget() {
 
 function damage(d) {
   S.hp = Math.max(0, S.hp - d);
-  if (S.hp <= 0 && !S.dead) { S.dead = 2.2; heli.visible = false; toast('Kopteri hajosi – palataan torille', 2.2); }
+  if (S.hp <= 0 && !S.dead) { S.dead = 2.2; heli.visible = false; carG.visible = false; toast(VEH === 'car' ? 'Auto hajosi – palataan torille' : 'Kopteri hajosi – palataan torille', 2.2); }
 }
 
 // ---------- cemeteries: rows of gravestones ----------
@@ -1553,8 +1783,18 @@ function toggleSound() { soundOn = !soundOn; toast(soundOn ? 'Ääni päällä' 
 const DIRS = ['P', 'KO', 'I', 'KA', 'E', 'LO', 'L', 'LU'];
 function step(dt) {
   readInput();
-  if (S.dead > 0) { S.dead -= dt; if (S.dead <= 0) resetHeli(); return; }
+  if (S.dead > 0) { S.dead -= dt; if (S.dead <= 0) (VEH === 'car' ? resetCar : resetHeli)(); return; }
   const live = started;
+  if (VEH === 'car') {
+    stepCar(dt, live);
+    if (performance.now() - HR.last > 500) { HR.last = performance.now(); hrUpdate(S.x, S.y); TEXLOD.update(S.x, S.y); streamUpdate(S.x, S.y); TREES.update(S.x, S.y); GRASS.update(); }
+    GRASS.tick(performance.now() / 1000);
+    blob.position.set(CAR.x, CAR.z + 0.04, -CAR.y); blob.scale.set(0.42, 1, 0.62); blob.rotation.y = -CAR.yaw; blob.material.opacity = 0.9;
+    tourTick(dt); if (started && !tourDone) NAV.update(dt, target());
+    if (actx && sGain) { const sp = Math.abs(CAR.v), tgt = soundOn && started ? 0.035 + Math.min(0.06, sp / 300) + Math.abs(input.f) * 0.02 : 0; sGain.gain.value += (tgt - sGain.gain.value) * Math.min(1, dt * 4);
+      sFilt.frequency.value = 140 + sp * 14 + Math.abs(input.f) * 90; sLfo.frequency.value = 22 + (sp % 9) * 5 + sp * 1.5; }
+    return;
+  }
   const f = live ? input.f : 0, t = live ? input.t : 0, s = live ? input.s : 0, l = live ? input.l : 0;
   S.rotorSpd += ((live ? 1 : 0.25) - S.rotorSpd) * Math.min(1, dt * 3);
   // yaw
@@ -1605,17 +1845,20 @@ function step(dt) {
   rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt;
   blob.position.set(S.x, roofAt(S.x, S.y) + 0.3, -S.y); const bs = Math.max(0.35, 1 - (S.alt - SKID) / 160); blob.scale.setScalar(bs); blob.material.opacity = bs;
 
-  // tour
+  tourTick(dt);
+  if (actx && sGain) { const tgt = soundOn && started ? 0.05 + 0.07 * S.rotorSpd + Math.min(0.05, Math.hypot(S.vx, S.vy) / 900) : 0; sGain.gain.value += (tgt - sGain.gain.value) * Math.min(1, dt * 4); sFilt.frequency.value = 220 + 260 * S.rotorSpd + Math.abs(l) * 120; sLfo.frequency.value = 4 + 9 * S.rotorSpd; }
+}
+
+function tourTick(dt) {
   if (tourOn && !tourDone) {
     tourT += dt; const tg = target(), d = Math.hypot(tg.x - S.x, tg.y - S.y);
     if (tg.land) {
-      if (d < 45 && S.landed && S.alt < roofAt(S.x, S.y) + SKID + 0.5) {
+      if (VEH === 'car' ? d < 40 && Math.abs(CAR.v) < 1.5 : d < 45 && S.landed && S.alt < roofAt(S.x, S.y) + SKID + 0.5) {
         tourDone = true; tourOn = false; const rec = !best || tourT < best; if (rec) { best = tourT; try { localStorage.setItem(BESTKEY, String(best)); } catch (e) {} } LB.submit(tourT); LB.show(true);
         toast(`Kierros valmis ajassa ${fmtT(tourT)}${rec ? ' – uusi ennätys!' : ''}  ·  N = uusi kierros`, 7); setTarget(); $('prog').firstElementChild.style.width = '100%';
       }
-    } else if (d < 30) { tourIdx++; toast('✓ ' + tg.n, 1.6); setTarget(); }
+    } else if (d < (VEH === 'car' ? 45 : 30)) { tourIdx++; toast('✓ ' + tg.n, 1.6); setTarget(); }
   }
-  if (actx && sGain) { const tgt = soundOn && started ? 0.05 + 0.07 * S.rotorSpd + Math.min(0.05, Math.hypot(S.vx, S.vy) / 900) : 0; sGain.gain.value += (tgt - sGain.gain.value) * Math.min(1, dt * 4); sFilt.frequency.value = 220 + 260 * S.rotorSpd + Math.abs(l) * 120; sLfo.frequency.value = 4 + 9 * S.rotorSpd; }
 }
 
 // ---------- camera ----------
@@ -1625,6 +1868,17 @@ function updateCamera(dt) {
   const sn = Math.sin(S.yaw), cs = Math.cos(S.yaw);
   if (!started) { // slow orbit around the square
     introA += dt * 0.12; camera.position.set(HOME.x + Math.sin(introA) * 210, 120, -HOME.y + Math.cos(introA) * 210); camera.lookAt(HOME.x, 10, -HOME.y); return;
+  }
+  if (VEH === 'car') {
+    if (camMode === 1) { // driver's seat (left-hand drive)
+      const rx = Math.cos(S.yaw), ry = -Math.sin(S.yaw);
+      camera.position.set(CAR.x - sn * 0.22 - rx * 0.37, CAR.z + 1.17, -(CAR.y - cs * 0.22 - ry * 0.37)); camera.rotation.order = 'YXZ'; camera.rotation.set(CAR.pitch - 0.05, -S.yaw, -CAR.roll * 0.8); return;
+    }
+    if (camMode === 2) { tmp.set(CAR.x, CAR.z + 90, -CAR.y + 1); camPos.lerp(tmp, Math.min(1, dt * 4)); camera.position.copy(camPos); camera.up.set(sn, 0, -cs); camera.lookAt(CAR.x, CAR.z, -CAR.y); camera.up.set(0, 1, 0); return; }
+    const back = 7.8, up = 2.9; tmp.set(CAR.x - sn * back, CAR.z + up, -CAR.y + cs * back);
+    const gb = carGround(tmp.x, -tmp.z); if (gb !== null && tmp.y < gb + 1.2) tmp.y = gb + 1.2;
+    camPos.lerp(tmp, 1 - Math.exp(-dt * 6)); tmp2.set(CAR.x + sn * 6, CAR.z + 1.1, -CAR.y - cs * 6); camLook.lerp(tmp2, 1 - Math.exp(-dt * 9));
+    camera.position.copy(camPos); camera.lookAt(camLook); return;
   }
   if (camMode === 1) { // cockpit
     camera.position.set(S.x + sn * 1.6, S.alt + 0.9, -S.y - cs * 1.6); camera.rotation.order = 'YXZ'; camera.rotation.set(S.pitch * 0.6 - 0.12, -S.yaw, S.roll * 0.7); return;
@@ -1656,6 +1910,7 @@ function hud(dt) {
   if (!pl && S.y > 470 && S.y < 640 && Math.abs(S.x) < HW) pl = 'Kokemäenjoki';
   $('sp').textContent = pl && pl !== st ? pl : '';
   const tg = target(), d = Math.hypot(tg.x - S.x, tg.y - S.y);
+  if (VEH === 'car') navHud(); else $('nav').style.display = 'none';
   $('md').textContent = tourDone ? '–' : d < 1000 ? Math.round(d / 5) * 5 + ' m' : (d / 1000).toFixed(1) + ' km';
   $('mtime').textContent = fmtT(tourT) + (best ? '' : ''); $('mk').textContent = 'Päivän kierros ' + DAY.label + (best ? ' · paras ' + fmtT(best) : '');
   // minimap (north up, 700 m across)
@@ -1665,12 +1920,37 @@ function hud(dt) {
     const ix = (S.x - R - OX0) / OXS * miniImg.naturalWidth, iy = (OY1 - (S.y + R)) / OYS * miniImg.naturalHeight;
     mx.drawImage(miniImg, ix, iy, 2 * R / OXS * miniImg.naturalWidth, 2 * R / OYS * miniImg.naturalHeight, 0, 0, W, W);
   }
+  if (VEH === 'car' && NAV.route && !tourDone) {   // the route on the minimap
+    mx.strokeStyle = 'rgba(64,160,255,.9)'; mx.lineWidth = 6; mx.lineJoin = mx.lineCap = 'round'; mx.beginPath();
+    mx.moveTo(W / 2, W / 2); for (const q of NAV.route) mx.lineTo(W / 2 + (q.x - S.x) * sc, W / 2 - (q.y - S.y) * sc); mx.stroke();
+  }
   if (!tourDone) {
     let tx = (tg.x - S.x) * sc, ty = -(tg.y - S.y) * sc; const m = Math.hypot(tx, ty), lim = W / 2 - 14; const off = m > lim; if (off) { tx *= lim / m; ty *= lim / m; }
     mx.fillStyle = '#ffc928'; mx.strokeStyle = '#16110a'; mx.lineWidth = 3; mx.beginPath(); mx.arc(W / 2 + tx, W / 2 + ty, off ? 8 : 12, 0, 7); mx.fill(); mx.stroke();
   }
   mx.save(); mx.translate(W / 2, W / 2); mx.rotate(S.yaw); mx.fillStyle = '#fff'; mx.strokeStyle = '#0e161e'; mx.lineWidth = 3; mx.beginPath(); mx.moveTo(0, -16); mx.lineTo(11, 12); mx.lineTo(0, 6); mx.lineTo(-11, 12); mx.closePath(); mx.fill(); mx.stroke(); mx.restore();
   mx.fillStyle = 'rgba(14,22,30,.7)'; mx.fillRect(W - 34, 6, 28, 28); mx.fillStyle = '#fff'; mx.font = '700 20px system-ui, sans-serif'; mx.textAlign = 'center'; mx.textBaseline = 'middle'; mx.fillText('P', W - 20, 21);
+}
+
+// navigator panel: an arrow for the next turn, the distance to it and the street to turn into
+const navc = $('navc'), nvx = navc.getContext('2d');
+function drawArrow(turn, end) {
+  const W = navc.width; nvx.clearRect(0, 0, W, W); nvx.save(); nvx.translate(W / 2, W * 0.78);
+  nvx.strokeStyle = '#fff'; nvx.fillStyle = '#fff'; nvx.lineWidth = 11; nvx.lineCap = 'round'; nvx.lineJoin = 'round';
+  if (end) { nvx.beginPath(); nvx.moveTo(0, 0); nvx.lineTo(0, -W * 0.38); nvx.stroke(); nvx.beginPath(); nvx.arc(0, -W * 0.52, 13, 0, 7); nvx.fillStyle = '#ffc928'; nvx.fill(); nvx.restore(); return; }
+  const a = Math.max(-2.6, Math.min(2.6, turn)), L1 = W * 0.3, L2 = W * 0.3, ex = Math.sin(a) * L2, ey = -L1 - Math.cos(a) * L2;
+  nvx.beginPath(); nvx.moveTo(0, 0); nvx.lineTo(0, -L1); nvx.lineTo(ex, ey); nvx.stroke();
+  nvx.translate(ex, ey); nvx.rotate(a); nvx.beginPath(); nvx.moveTo(0, -17); nvx.lineTo(15, 4); nvx.lineTo(-15, 4); nvx.closePath(); nvx.fill(); nvx.restore();
+}
+function navHud() {
+  const el = $('nav'); if (!started || tourDone || !NAV.route) { el.style.display = 'none'; return; }
+  const m = NAV.next(CAR.x, CAR.y, CAR.yaw); if (!m) { el.style.display = 'none'; return; }
+  el.style.display = 'flex';
+  const dd = m.d < 1000 ? (m.d < 100 ? Math.round(m.d / 5) * 5 : Math.round(m.d / 10) * 10) + ' m' : (m.d / 1000).toFixed(1) + ' km';
+  if (m.end) { drawArrow(0, true); $('navd').textContent = dd; $('navn').textContent = target().n; return; }
+  drawArrow(m.turn, false); $('navd').textContent = dd;
+  const dir = Math.abs(m.turn) > 2.4 ? 'Käänny ympäri' : m.turn > 0 ? (m.turn < 0.9 ? 'Loivasti oikealle' : 'Oikealle') : (m.turn > -0.9 ? 'Loivasti vasemmalle' : 'Vasemmalle');
+  $('navn').textContent = dir + (m.n ? ' – ' + m.n : '');
 }
 
 // ---------- loop ----------
@@ -1721,6 +2001,20 @@ const LB = { open: false, rows: [], uid: null, ref: null, field: 'd' + DAY.key, 
     catch (e) { note(e && e.code === 'invalid_argument' ? 'Sinulla ei ole oikeutta tallentaa tuloksia tähän peliin.' : 'Tuloksen tallennus ei onnistunut.'); }
   };
   $('nicksave').addEventListener('click', () => LB.save());
+  // one list per vehicle: d<YYYYMMDD> helicopter, c<YYYYMMDD> car
+  LB.listen = () => {
+    const db = LB.db; if (!db) return; if (LB.unsub) { try { LB.unsub(); } catch (e) {} LB.unsub = null; }
+    const field = LB.field;
+    if (LB.ref) LB.ref.get().then(d => { const v = d.exists ? d.data()[field] : null; if (typeof v === 'number' && field === LB.field) LB.saved = v; }).catch(() => {});
+    const timer = setTimeout(() => note('Tulostaulua ei saada juuri nyt yhteyttä.'), 10000);
+    LB.unsub = db.collection('runs').where(field, '>', 0).orderBy(field).limit(10).onSnapshot(snap => {
+      if (!snap.metadata.fromCache) clearTimeout(timer); if (field !== LB.field) return;
+      LB.rows = snap.docs.map(d => { const v = d.data(); return { id: d.id, n: String(v.n || '?????').slice(0, 5), t: +v[field] }; }).filter(r => r.t > 0);
+      render(); if ($('note1').textContent.startsWith('Ladataan') || $('note1').textContent.startsWith('Tulostaulua ei saada')) note('');
+    }, () => { clearTimeout(timer); note('Tulostaulua ei voitu ladata.'); });
+  };
+  LB.useField = f => { if (LB.field === f) return; LB.field = f; LB.saved = null; LB.rows = []; render();
+    $('bsub').textContent = DAY.label + ' · ' + TOUR.length + ' maamerkkiä · ' + (f[0] === 'c' ? 'autolla' : 'kopterilla'); LB.listen(); };
   render(); note('Ladataan tulostaulua…');
   (async () => {
     const db = window.claude ? await window.claude.use('db') : null, user = window.claude ? await window.claude.use('user') : null;
@@ -1728,17 +2022,21 @@ const LB = { open: false, rows: [], uid: null, ref: null, field: 'd' + DAY.key, 
     try { LB.uid = user ? await user.id() : null; } catch (e) {}
     if (LB.uid) LB.ref = db.collection('runs').doc(LB.uid); else LB.err = 'Tuloksia ei voi tallentaa tässä näkymässä.';
     try { if (user && (await user.can('data.write')) === false && !LB.uid) LB.ref = null; } catch (e) {}
-    if (LB.ref) LB.ref.get().then(d => { const v = d.exists ? d.data()[LB.field] : null; if (typeof v === 'number') LB.saved = v; }).catch(() => {});
-    const timer = setTimeout(() => note('Tulostaulua ei saada juuri nyt yhteyttä.'), 10000);
-    db.collection('runs').where(LB.field, '>', 0).orderBy(LB.field).limit(10).onSnapshot(snap => {
-      if (!snap.metadata.fromCache) clearTimeout(timer);
-      LB.rows = snap.docs.map(d => { const v = d.data(); return { id: d.id, n: String(v.n || '?????').slice(0, 5), t: +v[LB.field] }; }).filter(r => r.t > 0);
-      render(); if ($('note1').textContent.startsWith('Ladataan') || $('note1').textContent.startsWith('Tulostaulua ei saada')) note('');
-    }, () => { clearTimeout(timer); note('Tulostaulua ei voitu ladata.'); });
+    LB.db = db; LB.listen();
   })();
 }
+function pickVeh(v) {
+  VEH = v; try { localStorage.setItem('pori-veh', v); } catch (e) {}
+  document.body.classList.toggle('car', v === 'car');
+  $('vheli').setAttribute('aria-pressed', String(v === 'heli')); $('vcar').setAttribute('aria-pressed', String(v === 'car'));
+  heli.visible = v === 'heli'; carG.visible = v === 'car'; if (v === 'car') { loadCar(); resetCar(); }
+  if (!$('go').disabled) $('go').textContent = v === 'car' ? 'Aloita ajo (Enter)' : 'Aloita lento (Enter)';
+}
+$('vheli').addEventListener('click', () => pickVeh('heli')); $('vcar').addEventListener('click', () => pickVeh('car'));
+pickVeh(VEH);
 function begin() {
   if (started) return; started = true; $('start').style.display = 'none';
+  if (VEH === 'car') { BESTKEY = 'pori-auto-best-' + DAY.key; try { best = parseFloat(localStorage.getItem(BESTKEY)) || null; } catch (e) { best = null; } LB.useField('c' + DAY.key); }
   camPos.copy(camera.position); camLook.set(HOME.x, 5, -HOME.y);
   initSound(); newTour();
 }
@@ -1748,7 +2046,7 @@ for (const id of ['mission', 'mapwrap', 'gauges', 'street', 'help']) $(id).style
 // load the aerial image
 {
   const img = new Image();
-  img.onload = () => { orto.image = img; orto.needsUpdate = true; groundMat.color.set(0xffffff); roofMat.color.set(0xffffff); groundMat.needsUpdate = roofMat.needsUpdate = true; $('go').disabled = false; $('go').textContent = isTouch ? 'Aloita lento' : 'Aloita lento (Enter)'; window.__ready = true; };
+  img.onload = () => { orto.image = img; orto.needsUpdate = true; groundMat.color.set(0xffffff); roofMat.color.set(0xffffff); groundMat.needsUpdate = roofMat.needsUpdate = true; $('go').disabled = false; $('go').textContent = isTouch ? 'Aloita lento' : (VEH === 'car' ? 'Aloita ajo (Enter)' : 'Aloita lento (Enter)'); window.__ready = true; };
   img.onerror = () => { $('go').disabled = false; $('go').textContent = 'Aloita ilman ilmakuvaa'; groundMat.map = null; roofMat.map = null; groundMat.color.set(0x6f7a70); roofMat.color.set(0x8a8f92); groundMat.needsUpdate = roofMat.needsUpdate = true; };
   img.src = './orto.jpg';
 }

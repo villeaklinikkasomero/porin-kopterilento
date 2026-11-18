@@ -569,3 +569,71 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   522 Antinkatu 31 + 414 Antinkatu 29 (yksi LoD2-kuori): rapattu tasainen seinä + mitatut ikkunat, ovet, laattapilarit, 3 ulkonevaa lasitettua
   parvekepinoa pyöristetyin kulmin; 414 kerma, porrasoven suora lippa ja lasitiilinauha lähes räystäälle. gen.py: sarake `d` (ovi, yllä tyhjä), `wmarg`.
 - **Ajettava:** `city 64 c048`.
+
+## 18.11.2026 ilta – ALOITA TÄSTÄ: Antinkatu julkisivu kerrallaan (facades.json + rectify)
+
+### Uusi työtapa (käyttäjä hyväksyi: "jos pystyt tuollaisella tasolla tekemään kaikki muut julkisivut, voidaan jatkaa")
+1. **Tunnista talo** osoitteesta + ID:stä (`who.py x y`, `rays.py cx cy h0 h1 step`, styles-notet). LoD2-kuoren seinälinja: `raw.pkl` (W-rivit),
+   jalanjälkitalo: `zones.poly(i)`. **Tärkeää:** jalanjäljestä rakennettu talo (SPECissä `walls`, esim. 564, 163) → käytä jalanjäljen reunaa,
+   ei LoD2-linjaa (564:n päädyssä 0,2 m ero kätki ohuet laatikot seinän sisään).
+2. **SV-kuva** Claude_Browser browser_batch (navigate → wait 6 → screenshot 0.1 → wait 3 → screenshot 1, 800×450). Panon oikea paikka URL:n `@lat,lon`.
+3. **`tools/rautalanka/rectify.py`**: `python3 rectify.py sv.jpg cx cy heading pitch Ax,Ay Bx,By s0 s1 z0 z1 out.png [ppm] [fov] [ch] [d]`
+   → suoristettu seinäkuva metriruudukolla (s alkaa A:sta, ulkopuoli A→B:n oikealla; rectifyssa puoli ei väliä). Mittaa ikkunat/kerrokset siitä.
+   Panon paikka voi heittää 1–2 m / mittakaava 4–6 % → vertaa kahta panoa, sovita LoD2-seinän pituuteen (kulmasta kulmaan).
+   Käyttäjien 360-kuvien (2e10) asento epäluotettava → käytä vain lukumääriin.
+4. **`blender/facades.json`** (yksi talo / rivi, `json.dumps(lista, indent=0)` – käyttäjän tiedoston muoto): `{"id", "note", "walls":[{"a","b","bare","kind",
+   "items":[...]}], "nobrick"}`. Itemit (s, z metreinä; d ulospäin seinästä):
+   `["win",s0,s1,z0,z1,frame,glass]` (keskipuite jos >1 m), `["winp",s0,s1,z0,z1,n,frame,glass]` (n ruutua, uusi), `["wins",[keskikohdat],w,[z-alat],h]`,
+   `["door",s0,s1,z0,z1,väri]`, `["glass",s0,s1,z0,z1,väri,(d)]` (uusi, lasinauha), `["box",s0,s1,z0,z1,d0,d1,väri,(kind)]` (d0 saa olla negatiivinen
+   syvennyksessä), `["balc",s0,s1,[tasot],top,D,r,kaide,lasi,ph,gh]`. Seinän avaimet: `bare` (seinän pohjaväri → runalt tasainen),
+   `kind` (plaster/brick/concrete/woodv/**sheet** = sileä pelti, uusi), `bare_s` [u0,u1], `side:"left"`, **`recess:[gh, sb, h]`** (uusi: katutaso gh m korkea
+   sb m sisäänvedetty, pilarit itemeinä d -sb..0), `shop_bw`. Talotason **`nobrick: true`** → peli ei piirrä tiilikuviota (Ratsula: pelti!).
+5. Poltto 8 näytteellä: c-lohkot `PYTHONPATH=/home/claude python3 city.py c052 8`, nimetyt `python3 run.py tori3 8` (ZONES zones.py:ssä),
+   kivi-lohkot `kivi.build_and_bake(...)`. Lohko: `city_zones.json` / zones.ZONES / kivi.ZONESK.
+6. Tarkistus: `bash tools/rautalanka/runov_fast.sh views.json out.jpg KEY:sv.jpg ...` (3 s), lopuksi oikea peli `ZONE=- node tools/rautalanka/gshot_sv.mjs`.
+   Pikarenderin vino vaalea juova isoissa tasaisissa seinissä on vain pikarenderin virhe (ei pelissä). Länteen katsovat seinät jäävät bakessa
+   tummiksi (aurinko 118°) → vaaleampi `bare`.
+
+### Tehty 18.11 ilta (kaikki käyttäjän kansiossa)
+- **215 Antinkatu 14 Kansankulma (c052):** harmaa rappaus, 2,5 m ikkunat ryhmissä 2-4-4-2 + porraskäytävien pikkuikkunaparit, 1. krs leveät/pienet,
+  tumma kivijalka, Nuovon harmaat ja kulman punainen markiisi, 2 syöksytorvea.
+- **221 Ratsula (c052):** punainen **pelti** (ei tiiltä, käyttäjä muistutti uudelleen), 4 m lasinauha 2,75 m puittein, punainen otsalauta,
+  liiketilat 1,4 m sisään punaisten pilarien (7,65 m välein) takana. LoD2-seinän ensimmäiset 3,5 m eivät näy kuvassa punaisena.
+- **564 Itäpuisto 7 / Antinkatu 12 (tori3):** Antinkadun pääty: muraali pelkkinä väripintoina (taideteosta EI kopioida), sininen pystykyltti,
+  vaalea kylttitaulu; Itäpuiston julkisivu: 11 pilariväliä, 3-ruutuiset ikkunat 5 krs, liikkeet + sininen/vaalea otsavyö.
+- **163 Antinkatu 15 / Itäpuisto 9 funkis (tori2):** 4-ruutuiset ikkunat 5 krs (4 + 5 saraketta), vihreät kulmaparvekkeet, graniittinen katutaso,
+  Taito-liike raidallisen markiisin alla, ovi 15 C, punainen pystykyltti. Pohjapiirroksessa kulma viisto (todellisuudessa pyöreä).
+- **index.html:** tietokoneella c-lohkot mukaan TEXLODiin: lähimmät 8 mallia 2048 px, muut 512 px (ennen kaikki lohkot 1024) → terävämmät
+  julkisivut; lohkon poistuessa tekstuuri poistetaan TEXLOD-listalta. Mobiili ennallaan (512). Jos GPU-muisti loppuu: pienennä `TEXLOD.N`.
+- **zones.py:** `_bare_mat`, `_bare_w` (recess, sheet), `winp`, `glass`, `nobrick` facades.jsonista.
+
+### Opittua
+- **Tallennus käyttäjän kansioon:** device_commit_files saattaa kirjoittaa vanhan välimuistiversion, jos stagedPath-nimi on käytetty aiemmin
+  (zones.py kirjoittui kahdesti vanhana!). Käytä aina uutta nimeä (`/mnt/user-data/outputs/cN/zones_xxx.py`) ja tarkista staging + cmp jälkeenpäin.
+  Ennen kirjoitusta: `.git`issa ei `MERGE_HEAD`, stage + diff (vain omat rivit), expectedMtimeMs.
+- device_bash ei aina ole saatavilla → stage/commit-tiedostotyökalut riittävät.
+
+### Ajettava (käyttäjä, Modal)
+- `city 64 c048,c051,c052,c067`
+- `bake p1 tori2 tori3 --samples 64`
+- (aiemmat, jos ajamatta: `bake tori0 tori1 tori4 kivi2`, `city 64 c064,c065,c069,h100`)
+
+### Seuraavaksi
+- Antinkatu pohjoiseen: 161 (OO Studio, Antinkatu 13; pelissä valkoinen ja liikaa ikkunoita, todellisuudessa tummempi ruskeanbeige),
+  563 (564:n pohjoispuolinen osa / Cafe Anton), sitten Antinkatu 10 (lasitoimisto torin kulmassa) ja Airionkulma 602/603/604
+  (käyttäjä: lukitutkin saa tehdä uudelleen, jos näyttävät vääriltä). Sen jälkeen muut keskustan kadut (Pohjoisranta, Hallituskatu ...).
+- Oikean pelin tarkistus (gshot) vielä tekemättä: 274, 137, 255, 216, 569/570, 564, 163.
+- Myöhemmin: mobiiliversiot bakeista, Teljäntorin putkikatos, 569/570 päätyikkunat, 163:n pyöreä kulma.
+
+### 18.11 ilta: kadut geometriana, autotila, pyöritysvideot
+- **Kadut (tools/roads/build_roads.py -> roads.js):** OSM-tiet api.openstreetmap.org:sta (pilven verkko estää Overpassin; haettu sisäisellä selaimella,
+  javascript_tool-tulos tallentuu levylle kun se on iso) -> `tools/roads/osm_ways_center.json` (x -790…900, y -995…995). Ajoradan reuna mitataan kummallekin
+  puolelle: jalkakäytävä-/pyörätieviiva on jalkakäytävän keskellä -> reunakivi = 2·viiva − julkisivu. Jalkakäytävät +0,13 m reunakivellä, saarekkeet,
+  suojatiet, katkoviivat. Kivetys (`kivi`, omistajan PBR `kivetys_*.jpg`, 2,2 m toisto): Yrjönkadun ja Itäpuiston kävelykadut (Eetunaukio) ja Kauppatori;
+  vanha tori_pave-mesh piilotettu. Kirjurinluotoon EI katuja (omistaja: siellä ei asfalttia). Pinnat: tools/roads/make_tex.py (road_asph/pave/crack).
+- **Autotila (index.html):** aloitusruudussa valinta kopteri/auto (videot veh_*.webm/mp4, posterit jpg). Auto = omistajan porikopteri_auto.py (tools/vehicles/;
+  auto.js korkea sisustoineen, auto_m.js matala mobiiliin, ladataan vain autoa valittaessa). Ajomalli `stepCar`, korkeus `carGround` (asfaltti/jalkakäytävä-
+  rasteri/sillat), talot ja joki pysäyttävät. Navigaattori `NAV`: Dijkstra CITY.r-verkossa, nuoli + matka + katu (#nav), reitti minikartalla. Autolle oma
+  top-10 (kenttä c<YYYYMMDD>) ja oma ennätys. Kamera C: takaa / kuljettajan paikka / ylhäältä.
+- **Pyöritysvideot:** `python3 tools/vehicles/turntable.py malli.glb out nimi 96 24 640` (Cycles CPU ~12 s/kuva, HDRI blender/tex, alla road_asph) + ffmpeg.
+- Avoinna: suojateiden madallukset, autot (liikenne) eivät väistä pelaajaa, sillat autolla karkeasti (deck = vedenpinta + 2,2 m), mobiilissa ei käsijarrua.
