@@ -358,7 +358,7 @@ const GRASS = (() => {
       P.push(bx - Math.cos(o) * w, 0, bz - Math.sin(o) * w, bx + Math.cos(o) * w, 0, bz + Math.sin(o) * w, bx + Math.cos(la) * l, hb, bz + Math.sin(la) * l); }
     const g = new THREE.InstancedBufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); return g; };
   const VS = `
-    attribute vec3 iOff; uniform sampler2D uOrto, tHeight; uniform vec4 tGrid; uniform vec2 tSize; uniform vec4 uCore; uniform vec4 uRing; uniform vec2 uTile; uniform float uT;
+    attribute vec3 iOff; uniform sampler2D uOrto, tHeight, uRM; uniform vec4 uRB; uniform vec4 tGrid; uniform vec2 tSize; uniform vec4 uCore; uniform vec4 uRing; uniform vec2 uTile; uniform float uT;
     varying vec3 vC; varying float vFog;
     void main() {
       vec2 cam = vec2(cameraPosition.x, -cameraPosition.z), p = iOff.xy;
@@ -371,6 +371,7 @@ const GRASS = (() => {
       vec3 c1 = texture2D(uOrto, ou + du).rgb, c2 = texture2D(uOrto, ou - du).rgb, c3 = texture2D(uOrto, ou + dv).rgb, c4 = texture2D(uOrto, ou - dv).rgb;
       float gmin = min(min(c.g - max(c.r, c.b), c1.g - max(c1.r, c1.b)), min(min(c2.g - max(c2.r, c2.b), c3.g - max(c3.r, c3.b)), c4.g - max(c4.r, c4.b)));
       float inside = step(0.0, ou.x) * step(ou.x, 1.0) * step(0.0, ou.y) * step(ou.y, 1.0);
+      vec2 ru = (w - uRB.xy) / uRB.zw; if (uRB.z > 0.0 && ru.x > 0.0 && ru.x < 1.0 && ru.y > 0.0 && ru.y < 1.0 && texture2D(uRM, ru).g > 0.4) inside = 0.0;   // street surfaces
       float gr = smoothstep(0.015, 0.04, gmin) * smoothstep(0.9, 0.5, c.g * 3.0 - c.r - c.b);
       float rnd = fract(iOff.z * 7.13), h = (0.5 + 0.8 * rnd) * uTile.y * gr * fade * inside * smoothstep(0.02, 0.09, c.g);
       if (h < 0.04) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
@@ -399,11 +400,11 @@ const GRASS = (() => {
     g.setAttribute('iOff', new THREE.InstancedBufferAttribute(off, 3)); g.instanceCount = n * n;
     const m = new THREE.ShaderMaterial({ vertexShader: VS, fragmentShader: FS, side: THREE.DoubleSide, uniforms: {
       uOrto: { value: orto }, tHeight: { value: terrainTex }, tGrid: { value: new THREE.Vector4(TER.x0, TER.y0, TER.g, 0) }, tSize: { value: new THREE.Vector2(TER.nx, TER.ny) },
-      uCore: { value: new THREE.Vector4(HW, YS, YSPAN, 0) }, uRing: { value: new THREE.Vector4(...ring) }, uTile: { value: new THREE.Vector2(T, scale) }, uT: { value: 0 },
+      uCore: { value: new THREE.Vector4(HW, YS, YSPAN, 0) }, uRing: { value: new THREE.Vector4(...ring) }, uTile: { value: new THREE.Vector2(T, scale) }, uT: { value: 0 }, uRM: { value: null }, uRB: { value: new THREE.Vector4(0, 0, 0, 0) },
       fogColor: { value: lin }, fogDensity: { value: scene.fog.density || 0 } } });
     const me = noT(new THREE.Mesh(g, m)); me.frustumCulled = false; me.visible = false; scene.add(me); layers.push(me);
   }
-  return { layers, update() {   // only when flying low enough to see blades
+  return { layers, mask(t, b) { for (const me of layers) { me.material.uniforms.uRM.value = t; me.material.uniforms.uRB.value = b; } }, update() {   // only when flying low enough to see blades
     const cx = camera.position.x, cy = -camera.position.z, agl = camera.position.y - TZs(cx, cy), on = agl < 170 && inCore(cx, cy);
     for (const me of layers) me.visible = on; },
     tick(t) { for (const me of layers) me.material.uniforms.uT.value = t; } };
@@ -1123,9 +1124,21 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
 
 // ---------- streets as geometry (tools/roads/build_roads.py -> roads.js, 18.11.2026): asphalt carriageways, pavements raised on granite kerbs,
 // traffic islands and zebra crossings. The surfaces are procedural; the aerial photo only darkens them where it is dark (building shadows).
-const ROAD = { asph: 0.06, pave: 0.19, mark: 0.075, on: true, paveAt: () => false };
+// heights above the true ground: the aerial-photo ground is drawn as 6 m triangles that bulge a few cm above the true ground on curved terrain,
+// so the street surface needs a margin or the photo pokes through it near the camera (owner 18.11: 'asphalt vanishes under the car')
+const ROAD = { asph: 0.13, pave: 0.26, mark: 0.145, on: true, paveAt: () => false };
+// top of the drawn ground at (x, y): the true ground, or the 6 m triangles of the core ground mesh / the sharper aerial tiles when they bulge above it
+function gridTop(x, y, x0, y0, st, dy) { const fx = (x - x0) / st, fy = (y - y0) / st, i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j;
+  const X = a => x0 + a * st, Y = b => y0 + b * st, z00 = TZg(X(i), Y(j)), z10 = TZg(X(i + 1), Y(j)), z11 = TZg(X(i + 1), Y(j + 1)), z01 = TZg(X(i), Y(j + 1));
+  return (u >= v ? z00 + (z10 - z00) * u + (z11 - z10) * v : z00 + (z11 - z01) * u + (z01 - z00) * v) + dy; }
+function groundTop(x, y) {
+  const S = 512, ti = Math.floor((x + 1280) / S), tj = Math.floor((y + 1280) / S), st = 6;   // gridGeo steps exactly 6 m
+  return Math.max(TZg(x, y), gridTop(x, y, -HW, YS, 6, 0), gridTop(x, y, -1280 + ti * S, -1280 + tj * S, st, 0.03));
+}
 // cars stand on the asphalt: the car meshes follow the smoothed field TZs, the street surface the true ground TZg
-const roadDZ = (x, y) => ROAD.on && inCore(x, y) ? TZg(x, y) + ROAD.asph - TZs(x, y) : 0;
+const ONEWAY = new Map();   // 'road index,segment' -> +1 driving along the way's point order, -1 against (tools/roads/build_roads.py, OSM oneway / roundabouts)
+const owOk = (ri, si, fw) => { const d = ONEWAY.get(ri + ',' + si); return !d || (d > 0) === fw; };
+const roadDZ = (x, y) => ROAD.on && inCore(x, y) ? groundTop(x, y) + ROAD.asph - TZs(x, y) : 0;
 import('./roads.js').then(mod => {
   const R = mod.default, dec = b => new Int16Array(TDEC(b).buffer);
   const noiseTex = (seed, base, amp, spots, N = 512) => {
@@ -1138,13 +1151,15 @@ import('./roads.js').then(mod => {
     g.putImageData(d, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; t.colorSpace = THREE.SRGBColorSpace; return t; };
   const ld = (f, srgb = true) => { const t = new THREE.TextureLoader().load(f); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
   // tools/roads/make_tex.py: Pori stone-mastic asphalt (grey chips, some red granite), finer pavement asphalt, a 16 m crack / sealed-crack / patch map
+  const tAO = ld('./roads_ao.png', false), uAB = new THREE.Vector4(R.bb[0], R.bb[1], R.bb[2] - R.bb[0], R.bb[3] - R.bb[1]); ROAD.tAO = tAO; ROAD.uAB = uAB;
+  if (GRASS.mask) GRASS.mask(tAO, uAB);
   const tAsph = ld('./road_asph.jpg'), tPave = ld('./road_pave.jpg'), tCrack = ld('./road_crack.png', false), tMac = noiseTex(11, 0.75, 0.5, 600);
   // world-space chips (two scales, rotated, so the 1.6 m tile never shows), large-scale wear, cracks gated "here and there",
   // and the photo shade: how much darker the photo is than sunlit paving there (the houses' shadows)
   const surf = (tex, rep, tint, ref, off, crackAmt) => { const m = new THREE.MeshLambertMaterial({ color: tint, polygonOffset: true, polygonOffsetFactor: off, polygonOffsetUnits: off });
-    m.onBeforeCompile = sh => { Object.assign(sh.uniforms, { tS: { value: tex }, tC: { value: tCrack }, tM: { value: tMac }, tO: { value: orto }, uC: { value: new THREE.Vector3(HW, YS, YSPAN) } });
+    m.onBeforeCompile = sh => { Object.assign(sh.uniforms, { tS: { value: tex }, tC: { value: tCrack }, tM: { value: tMac }, tO: { value: orto }, uC: { value: new THREE.Vector3(HW, YS, YSPAN) }, tA: { value: tAO }, uAB: { value: uAB } });
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vRw;').replace('#include <project_vertex>', '#include <project_vertex>\nvRw = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vRw; uniform sampler2D tS, tC, tM, tO; uniform vec3 uC;').replace('#include <map_fragment>', `
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vRw; uniform sampler2D tS, tC, tM, tO, tA; uniform vec3 uC; uniform vec4 uAB;').replace('#include <map_fragment>', `
         vec2 wp = vec2(vRw.x, -vRw.z);
         vec2 r2 = mat2(0.8, -0.6, 0.6, 0.8) * wp;
         vec3 tx = texture2D(tS, wp * ${(1 / rep).toFixed(4)}).rgb * 0.55 + texture2D(tS, r2 * ${(0.37 / rep).toFixed(4)} + 0.31).rgb * 0.45;
@@ -1155,15 +1170,16 @@ import('./roads.js').then(mod => {
         tx *= mix(1.0, min(ck, mix(1.0, ck2, 0.6)), ${crackAmt.toFixed(2)} * (0.35 + 0.65 * gate));
         vec3 ph = texture2D(tO, vec2((wp.x + uC.x) / (2.0 * uC.x), (wp.y - uC.y) / uC.z), 2.0).rgb;
         float L = dot(ph, vec3(0.3, 0.55, 0.15)), sh_ = clamp(L / ${ref.toFixed(3)}, 0.6, 1.04);
-        diffuseColor.rgb *= tx * 1.9 * mix(1.0, sh_, 0.55);`); };
+        float ao = texture2D(tA, (wp - uAB.xy) / uAB.zw).r;                                                   // contact shade at the house walls
+        diffuseColor.rgb *= tx * 1.9 * mix(1.0, sh_, 0.55) * ao;`); };
     return m; };
   const mAsph = surf(tAsph, 1.6, 0xaab0b8, 0.30, -6, 0.9), mPave = surf(tPave, 1.2, 0xd9dde2, 0.42, -6, 0.3);
   const mMark = new THREE.MeshLambertMaterial({ color: 0xe9e9e4, polygonOffset: true, polygonOffsetFactor: -8, polygonOffsetUnits: -8 });
   const mKerb = new THREE.MeshLambertMaterial({ color: 0x9a9893, side: THREE.DoubleSide });
   const flat = (a, dz) => { const P = new Float32Array(a.length / 2 * 3);
-    for (let i = 0, k = 0; i < a.length; i += 2, k += 3) { const x = a[i] / 10, y = a[i + 1] / 10; P[k] = x; P[k + 1] = TZg(x, y) + dz; P[k + 2] = -y; }
+    for (let i = 0, k = 0; i < a.length; i += 2, k += 3) { const x = a[i] / 10, y = a[i + 1] / 10; P[k] = x; P[k + 1] = groundTop(x, y) + dz; P[k + 2] = -y; }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.computeVertexNormals(); return g; };
-  const add = (g, m) => { const me = noT(new THREE.Mesh(g, m)); me.matrixAutoUpdate = false; scene.add(me); return me; };
+  const add = (g, m) => { const me = noT(new THREE.Mesh(g, m)); me.matrixAutoUpdate = false; scene.add(me); (window.__roadM = window.__roadM || []).push(me); return me; };
   add(flat(dec(R.asph), ROAD.asph), mAsph); add(flat(dec(R.pave), ROAD.pave), mPave); add(flat(dec(R.mark), ROAD.mark), mMark);
   if (R.path) add(flat(dec(R.path), 0.05), mPave);
   // stone paving on the pedestrian streets, Eetunaukio and Kauppatori (owner's PBR set pori_kivetys_harmaanpunainen, one repeat = 2.2 m)
@@ -1175,18 +1191,28 @@ import('./roads.js').then(mod => {
     const mK = new THREE.MeshStandardMaterial({ map: ld('./kivetys_albedo.jpg'), normalMap: ld('./kivetys_normal.jpg', false), aoMap: orm, roughnessMap: orm, metalness: 0, roughness: 1,
       polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 });
     mK.normalScale.set(1.2, 1.2);
-    mK.onBeforeCompile = sh => { sh.uniforms.tO = { value: orto }; sh.uniforms.uC = { value: new THREE.Vector3(HW, YS, YSPAN) };
+    mK.onBeforeCompile = sh => { sh.uniforms.tO = { value: orto }; sh.uniforms.uC = { value: new THREE.Vector3(HW, YS, YSPAN) }; sh.uniforms.tA = { value: ROAD.tAO }; sh.uniforms.uAB = { value: ROAD.uAB };
       sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vRw;').replace('#include <project_vertex>', '#include <project_vertex>\nvRw = (modelMatrix * vec4(transformed, 1.0)).xyz;');
-      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vRw; uniform sampler2D tO; uniform vec3 uC;').replace('#include <map_fragment>', `#include <map_fragment>
-        { vec2 wp = vec2(vRw.x, -vRw.z); vec3 ph = texture2D(tO, vec2((wp.x + uC.x) / (2.0 * uC.x), (wp.y - uC.y) / uC.z), 2.0).rgb;
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vRw; uniform sampler2D tO, tA; uniform vec3 uC; uniform vec4 uAB;').replace('#include <map_fragment>', `#include <map_fragment>
+        { vec2 wp = vec2(vRw.x, -vRw.z); diffuseColor.rgb *= texture2D(tA, (wp - uAB.xy) / uAB.zw).r; vec3 ph = texture2D(tO, vec2((wp.x + uC.x) / (2.0 * uC.x), (wp.y - uC.y) / uC.z), 2.0).rgb;
           float L = dot(ph, vec3(0.3, 0.55, 0.15)), sh_ = clamp(L / 0.42, 0.65, 1.04); diffuseColor.rgb *= 1.38 * mix(1.0, sh_, 0.45); }`); };
-    add(g, mK);
+    add(g, mK); ROAD.mK = mK;
   }
   // kerbs: the pavement edge (pavement on the left of a->b) drops to the asphalt / ground; a 0.15 m granite band along the top
   const K = dec(R.kerb), P = [];
-  for (let i = 0; i < K.length; i += 4) { const ax = K[i] / 10, ay = K[i + 1] / 10, bx = K[i + 2] / 10, by = K[i + 3] / 10, za = TZg(ax, ay), zb = TZg(bx, by);
-    P.push(ax, za + ROAD.pave, -ay, ax, za + ROAD.asph - 0.03, -ay, bx, zb + ROAD.asph - 0.03, -by, ax, za + ROAD.pave, -ay, bx, zb + ROAD.asph - 0.03, -by, bx, zb + ROAD.pave, -by); }
+  for (let i = 0; i < K.length; i += 4) { const ax = K[i] / 10, ay = K[i + 1] / 10, bx = K[i + 2] / 10, by = K[i + 3] / 10, za = groundTop(ax, ay), zb = groundTop(bx, by);
+    P.push(ax, za + ROAD.pave, -ay, ax, za - 0.05, -ay, bx, zb - 0.05, -by, ax, za + ROAD.pave, -ay, bx, zb - 0.05, -by, bx, zb + ROAD.pave, -by); }
+  // lowered kerbs at the crossings: the top follows the ramp (h = share of the full kerb height)
+  const rz = (x, y, h) => groundTop(x, y) + ROAD.asph + 0.03 + (ROAD.pave - ROAD.asph - 0.03) * h;
+  if (R.kerbh) { const KH = dec(R.kerbh);
+    for (let i = 0; i < KH.length; i += 6) { const ax = KH[i] / 10, ay = KH[i + 1] / 10, ha = KH[i + 2] / 1000, bx = KH[i + 3] / 10, by = KH[i + 4] / 10, hb = KH[i + 5] / 1000, za = groundTop(ax, ay), zb = groundTop(bx, by), ta = rz(ax, ay, ha), tb = rz(bx, by, hb);
+      P.push(ax, ta, -ay, ax, za - 0.05, -ay, bx, zb - 0.05, -by, ax, ta, -ay, bx, zb - 0.05, -by, bx, tb, -by); } }
   const kg = new THREE.BufferGeometry(); kg.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); kg.computeVertexNormals(); add(kg, mKerb);
+  const sloped = (a, uv) => { const n = a.length / 3, Pp = new Float32Array(n * 3), U = uv ? new Float32Array(n * 2) : null;
+    for (let i = 0, k = 0; i < a.length; i += 3, k++) { const x = a[i] / 10, y = a[i + 1] / 10; Pp[k * 3] = x; Pp[k * 3 + 1] = rz(x, y, a[i + 2] / 1000); Pp[k * 3 + 2] = -y; if (U) { U[k * 2] = x / 2.2; U[k * 2 + 1] = y / 2.2; } }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(Pp, 3)); if (U) g.setAttribute('uv', new THREE.BufferAttribute(U, 2)); g.computeVertexNormals(); return g; };
+  if (R.rampp) add(sloped(dec(R.rampp)), mPave);
+  if (R.rampk && ROAD.mK) add(sloped(dec(R.rampk), true), ROAD.mK);
   { // 1 m raster of the pavements for the car: driving over a kerb lifts it onto the pavement
     const [x0, y0, x1, y1] = R.bb, nx = Math.ceil(x1 - x0), ny = Math.ceil(y1 - y0), M = new Uint8Array(nx * ny), T = dec(R.pave);
     for (let i = 0; i < T.length; i += 6) { const ax = T[i] / 10, ay = T[i + 1] / 10, bx = T[i + 2] / 10, by = T[i + 3] / 10, cx = T[i + 4] / 10, cy = T[i + 5] / 10;
@@ -1197,6 +1223,8 @@ import('./roads.js').then(mod => {
         if (u >= -0.05 && v >= -0.05 && u + v <= 1.05) M[gy * nx + gx] = 1; } }
     ROAD.paveAt = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny && M[gy * nx + gx] === 1; };
   }
+  if (R.ow) { const O = dec(R.ow); for (let i = 0; i < O.length; i += 3) ONEWAY.set(O[i] + ',' + O[i + 1], O[i + 2]); }
+  if (R.tmv && TREES.move) { const s0 = atob(R.tmv), u8 = new Uint8Array(s0.length); for (let i = 0; i < s0.length; i++) u8[i] = s0.charCodeAt(i); TREES.move(new Int32Array(u8.buffer)); }
   ROAD.on = true; window.__roads = { asph: R.asph.length, pave: R.pave.length };
 }).catch(e => console.log('roads.js not loaded', e));
 
@@ -1276,7 +1304,9 @@ function loadModel(name, done) {
   let sd = 23; const r2 = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   const addTree = (x, y, k, wood) => { const sc = (wood ? 0.9 : 0.8) + r2() * 0.55, t = r2();
     LIST.push({ x, y, k, sc, sy: sc * (0.9 + r2() * 0.25), rot: r2() * 6.28, c: [0.84 + 0.16 * t, 0.88 + 0.12 * r2(), 0.8 + 0.16 * t], fc: 0.85 + r2() * 0.3 }); };
-  for (let i = 0; i < CITY.t.length / 2; i++) { const v = r2(); addTree(CITY.t[i * 2], CITY.t[i * 2 + 1], v < 0.1 ? 2 : v < 0.38 ? 1 : 0, false); }
+  for (let i = 0; i < CITY.t.length / 2; i++) { const v = r2(), tx = CITY.t[i * 2], ty = CITY.t[i * 2 + 1];
+    if (v < 0.1 && inCore(tx, ty)) continue;   // owner 18.11.2026: no spruces in the centre (they were random picks, not real spruces)
+    addTree(tx, ty, v < 0.1 ? 2 : v < 0.38 ? 1 : 0, false); LIST[LIST.length - 1].i = i; }
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), UPV = THREE.Object3D.DEFAULT_UP;
   // far crowns: deciduous = squashed icosahedron on a short trunk, spruce = two stacked cones (about 30 triangles each)
   const BG = (() => { const g = new THREE.IcosahedronGeometry(1, 0); g.scale(3.2, 3.4, 3.2); g.translate(0, 6.6, 0); const t = new THREE.CylinderGeometry(0.22, 0.3, 3.6, 5); t.translate(0, 1.8, 0);
@@ -1306,6 +1336,11 @@ function loadModel(name, done) {
     const fin = (arr, cnt) => arr.forEach((im, k) => { im.count = cnt[k]; im.instanceMatrix.needsUpdate = true; if (im.instanceColor) im.instanceColor.needsUpdate = true; });
     fin(farMs, nf); if (nearMs) fin(nearMs, nn);
   };
+  // street trees that OSM puts on the carriageway: moved to the pavement edge (roads.js 'tmv': index, x dm, y dm; -32768 = dropped)
+  TREES.move = M => { const by = new Map(); for (let k = 0; k < M.length; k += 3) by.set(M[k], k);
+    for (let n = LIST.length - 1; n >= 0; n--) { const t = LIST[n]; if (t.i === undefined || !by.has(t.i)) continue; const k = by.get(t.i);
+      if (M[k + 1] === -32768) LIST.splice(n, 1); else { t.x = M[k + 1] / 10; t.y = M[k + 2] / 10; } }
+    last = { x: 1e9, y: 1e9 }; TREES.update(S && S.x !== undefined ? S.x : 70, S && S.y !== undefined ? S.y : 45); };
   window.__treesAt = (x, y) => { last = { x: 1e9, y: 1e9 }; TREES.update(x, y); };
   TREES.update(70, 45);
   // trees_extra.js (aerial-photo guesses) removed 13.11.2026: wrong places; to be replaced by trees from MML laser scanning
@@ -1414,7 +1449,7 @@ const HOME = { x: 70, y: 45 };   // open paving south of the stalls, clear of th
   x.strokeStyle = '#ffc928'; x.lineWidth = 10; x.beginPath(); x.arc(128, 128, 112, 0, 7); x.stroke();
   x.fillStyle = '#fff'; x.font = '700 150px ui-sans-serif, system-ui, Arial'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('H', 128, 136);
   const g = new THREE.PlaneGeometry(17, 17); g.rotateX(-Math.PI / 2);
-  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.material.polygonOffset = true; m.material.polygonOffsetFactor = -8; m.material.polygonOffsetUnits = -8; m.position.set(HOME.x, TZg(HOME.x, HOME.y) + 0.24, -HOME.y); m.renderOrder = 1; scene.add(noT(m));
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.material.polygonOffset = true; m.material.polygonOffsetFactor = -8; m.material.polygonOffsetUnits = -8; m.position.set(HOME.x, groundTop(HOME.x, HOME.y) + ROAD.pave + 0.03, -HOME.y); m.renderOrder = 1; scene.add(noT(m));
 }
 
 // checkpoint beacon
@@ -1471,13 +1506,13 @@ const blob = (() => {
   const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'); const g = x.createRadialGradient(32, 32, 2, 32, 32, 30);
   g.addColorStop(0, 'rgba(0,0,0,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64);
   const p = new THREE.PlaneGeometry(13, 13); p.rotateX(-Math.PI / 2);
-  const m = new THREE.Mesh(p, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.renderOrder = 5; m.userData.noT = true; scene.add(m); return m;
+  const m = new THREE.Mesh(p, new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false })); m.renderOrder = 5; m.userData.noT = true; scene.add(m); window.__blob = m; return m;
 })();
 
 // ---------- the player's car (owner 18.11.2026: drive the daily tour by car; porikopteri_auto.py, Blender) ----------
 // Arcade bicycle model on the street surface: W/S throttle and brake/reverse, A/D steer, Space handbrake. Buildings and the river stop it.
 let VEH = 'heli'; try { VEH = localStorage.getItem('pori-veh') === 'car' ? 'car' : 'heli'; } catch (e) {}
-const CAR = { x: 0, y: 0, yaw: 0, v: 0, steer: 0, z: 0, pitch: 0, roll: 0, spin: 0 }, WB = 2.64, CAR_R = 0.325;
+const CAR = { x: 0, y: 0, yaw: 0, v: 0, steer: 0, z: 0, pitch: 0, roll: 0, spin: 0 }, WB = 2.64, CAR_R = 0.325; window.__car = CAR;
 const carG = new THREE.Group(); carG.rotation.order = 'YXZ'; carG.userData.noT = true; carG.visible = false; scene.add(carG);
 let wheels = [], carLoading = false;
 const loadCar = () => { if (carLoading) return; carLoading = true; loadModel(isTouch ? 'auto_m' : 'auto', root0 => {   // glTF: nose +z, wheels Wheel_FL/FR/RL/RR spinning about their local x, ground at y 0
@@ -1497,16 +1532,24 @@ function carGround(x, y) {
   if (onPorinsilta(x, y) !== null) return TZs(x, y) + bridgeZ(x, y);
   if (inRiver(x, y)) return onBridgeDeck(x, y) ? Math.max(TZs(x, y), TER.wl + 2.2) : null;
   if (!inCore(x, y)) return TZs(x, y);
-  return TZg(x, y) + (ROAD.paveAt(x, y) ? ROAD.pave : ROAD.asph);
+  return groundTop(x, y) + (ROAD.paveAt(x, y) ? ROAD.pave : ROAD.asph);
 }
 function carBlocked(x, y, yaw) {   // a corner of the car inside a house or over open water
   const sn = Math.sin(yaw), cs = Math.cos(yaw), g = TZs(x, y);
   for (const [f, r] of [[2.1, 0.9], [2.1, -0.9], [-2.1, 0.9], [-2.1, -0.9], [0, 0.95], [0, -0.95]]) {
     const px = x + sn * f + cs * r, py = y + cs * f - sn * r;
     if (carGround(px, py) === null) return true;
-    if (roofAt(px, py) > Math.max(g, TZg(px, py)) + 1.4 && onPorinsilta(px, py) === null) return true;
+    if (onPorinsilta(px, py) === null && bldTopAt(px, py) > Math.max(g, TZg(px, py)) + 1.4) return true;
   }
   return false;
+}
+// the house standing exactly at (x, y), its roof height (with the ground lift), else -1e9. roofAt() samples a 3 m ring for the
+// helicopter's skids, which made the car stop short of walls and at corners where nothing was (owner 18.11: invisible obstacles)
+function bldTopAt(x, y) {
+  const l = grid.get(gkey(Math.floor(x / GRID) + 100, Math.floor(y / GRID) + 100)); if (!l) return -1e9; const tb = TZs(x, y); let h = -1e9;
+  for (const bi of l) { const b = blds[bi]; if (x < b.minx || x > b.maxx || y < b.miny || y > b.maxy || !pip(x, y, b.pts)) continue;
+    const z = b.tris ? triZ(b.tris, x, y) : b.h; if (z !== null && z + tb > h) h = z + tb; }
+  return h;
 }
 function resetCar() {
   Object.assign(CAR, { x: HOME.x - 6, y: HOME.y - 10, yaw: Math.PI * 0.5 - 0.23, v: 0, steer: 0, spin: 0 }); CAR.z = carGround(CAR.x, CAR.y) || 0;
@@ -1531,6 +1574,10 @@ function stepCar(dt, live) {
     CAR.v *= -0.25;
   } else { CAR.x = nx; CAR.y = ny; CAR.yaw = nyaw; }
   if (!tourOn && !tourDone && Math.abs(CAR.v) > 0.5) tourOn = true;
+  CAR.owT = (CAR.owT || 0) - dt;
+  if (CAR.v > 3 && CAR.owT <= 0 && NAV.seg) { CAR.owT = 0.5; const g = NAV.seg(CAR.x, CAR.y);
+    if (g && g.d < 5) { const dir = ONEWAY.get(g.ri + ',' + g.si); if (dir) { const hx = (g.b.x - g.a.x) * (g.fwd ? 1 : -1) * dir, hy = (g.b.y - g.a.y) * (g.fwd ? 1 : -1) * dir;
+      if (hx * Math.sin(CAR.yaw) + hy * Math.cos(CAR.yaw) < 0) { toast('⚠ Yksisuuntainen katu – ajat väärään suuntaan', 1.6); CAR.owT = 3; } } } }
   // body on the ground: height (kerbs lift it smoothly), pitch and roll from the four wheel contacts
   const s0 = Math.sin(CAR.yaw), c0 = Math.cos(CAR.yaw), gz = (fx, rx) => { const z = carGround(CAR.x + s0 * fx + c0 * rx, CAR.y + c0 * fx - s0 * rx); return z === null ? CAR.z : z; };
   const zf = (gz(1.32, 0.77) + gz(1.32, -0.77)) / 2, zr = (gz(-1.32, 0.77) + gz(-1.32, -0.77)) / 2, zl = (gz(1.32, 0.77) + gz(-1.32, 0.77)) / 2, zrr = (gz(1.32, -0.77) + gz(-1.32, -0.77)) / 2;
@@ -1545,31 +1592,33 @@ function stepCar(dt, live) {
 }
 
 // ---------- navigator for the car: shortest route on the street graph, the next turn as an arrow ----------
-const NAV = { route: null, t: 0, tgt: null };
+const NAV = { route: null, t: 0, tgt: null }; window.__nav = NAV;
 {
   const nodes = new Map(), key = (x, y) => x + ',' + y;
   const node = (x, y) => { const k = key(x, y); if (!nodes.has(k)) nodes.set(k, { x, y, e: [] }); return nodes.get(k); };
-  for (const r of CITY.r) { if (!r.k) continue;
+  CITY.r.forEach((r, ri) => { if (!r.k) return;
     for (let i = 0; i + 3 < r.p.length; i += 2) { const a = node(r.p[i], r.p[i + 1]), b = node(r.p[i + 2], r.p[i + 3]); if (a === b) continue;
-      const L = Math.hypot(b.x - a.x, b.y - a.y); a.e.push({ to: b, L, n: r.n || '' }); b.e.push({ to: a, L, n: r.n || '' }); } }
+      const L = Math.hypot(b.x - a.x, b.y - a.y), si = i / 2; a.e.push({ to: b, L, n: r.n || '', ri, si, fw: true }); b.e.push({ to: a, L, n: r.n || '', ri, si, fw: false }); } });
   const list = [...nodes.values()].filter(n => n.e.length);
   const nearSeg = (x, y) => { let best = null, bd = 1e18;
     for (const a of list) { if (Math.abs(a.x - x) > 150 || Math.abs(a.y - y) > 150) continue;
       for (const e of a.e) { const b = e.to, dx = b.x - a.x, dy = b.y - a.y, t = Math.max(0, Math.min(1, ((x - a.x) * dx + (y - a.y) * dy) / (dx * dx + dy * dy || 1))), px = a.x + dx * t, py = a.y + dy * t, d = (px - x) ** 2 + (py - y) ** 2;
-        if (d < bd) { bd = d; best = { a, b, t, px, py, n: e.n, d: Math.sqrt(d) }; } } }
+        if (d < bd) { bd = d; best = { a, b, t, px, py, n: e.n, d: Math.sqrt(d), ri: e.ri, si: e.si, fwd: e.fw }; } } }
     return best; };
   const nearNode = (x, y) => { let best = null, bd = 1e18; for (const a of list) { const d = (a.x - x) ** 2 + (a.y - y) ** 2; if (d < bd) { bd = d; best = a; } } return best; };
-  NAV.plan = (x, y, tx, ty) => {
+  NAV.seg = nearSeg;
+  NAV.plan = (x, y, tx, ty, free) => {
     const s0 = nearSeg(x, y), goal = nearNode(tx, ty); if (!s0 || !goal) return null;
     const dist = new Map(), prev = new Map(), H = [];
     const push = (n, d, p, pn) => { if (d < (dist.get(n) ?? 1e18)) { dist.set(n, d); prev.set(n, [p, pn]); H.push([d, n]); let i = H.length - 1; while (i > 0) { const j = (i - 1) >> 1; if (H[j][0] <= H[i][0]) break; [H[i], H[j]] = [H[j], H[i]]; i = j; } } };
     const pop = () => { const top = H[0], last = H.pop(); if (H.length) { H[0] = last; let i = 0; for (;;) { const l = 2 * i + 1, r = l + 1; let m = i; if (l < H.length && H[l][0] < H[m][0]) m = l; if (r < H.length && H[r][0] < H[m][0]) m = r; if (m === i) break; [H[i], H[m]] = [H[m], H[i]]; i = m; } } return top; };
     const L = Math.hypot(s0.b.x - s0.a.x, s0.b.y - s0.a.y);
-    push(s0.a, s0.t * L, null, s0.n); push(s0.b, (1 - s0.t) * L, null, s0.n);
+    const okA = owOk(s0.ri, s0.si, !s0.fwd), okB = owOk(s0.ri, s0.si, s0.fwd);
+    if (okA) push(s0.a, s0.t * L, null, s0.n); if (okB || !okA) push(s0.b, (1 - s0.t) * L, null, s0.n);
     const done = new Set();
     while (H.length) { const [d, n] = pop(); if (done.has(n)) continue; done.add(n); if (n === goal) break;
-      for (const e of n.e) if (!done.has(e.to)) push(e.to, d + e.L, n, e.n); }
-    if (!prev.has(goal)) return null;
+      for (const e of n.e) if (!done.has(e.to) && (free || owOk(e.ri, e.si, e.fw))) push(e.to, d + e.L, n, e.n); }   // one-way streets only forwards
+    if (!prev.has(goal)) return free ? null : NAV.plan(x, y, tx, ty, true);
     const pts = []; let n = goal; while (n) { const [p, nm] = prev.get(n); pts.push({ x: n.x, y: n.y, n: nm, deg: n.e.length }); n = p; }
     pts.push({ x: s0.px, y: s0.py, n: s0.n, deg: 2 }); pts.reverse();
     pts.push({ x: tx, y: ty, n: '', deg: 1 });
@@ -1605,9 +1654,11 @@ const cars = [];
 {
   const nodes = new Map(), key = (x, y) => x + ',' + y, inb = (x, y) => x > OX0 + 8 && x < OX1 - 8 && y > OY0 + 8 && y < OY1 - 8;
   const node = (x, y) => { const k = key(x, y); if (!nodes.has(k)) nodes.set(k, { x, y, nb: [] }); return nodes.get(k); };
-  for (const r of CITY.r) { if (!r.k) continue;                                   // k = 0 is a pedestrian street
+  CITY.r.forEach((r, ri) => { if (!r.k) return;                                  // k = 0 is a pedestrian street
     for (let i = 0; i + 3 < r.p.length; i += 2) { const ax = r.p[i], ay = r.p[i + 1], bx = r.p[i + 2], by = r.p[i + 3];
-      if (!inb(ax, ay) || !inb(bx, by) || (ax === bx && ay === by)) continue; const a = node(ax, ay), b = node(bx, by); if (!a.nb.includes(b)) a.nb.push(b); if (!b.nb.includes(a)) b.nb.push(a); } }
+      if (!inb(ax, ay) || !inb(bx, by) || (ax === bx && ay === by)) continue; const a = node(ax, ay), b = node(bx, by);
+      if (!a.nb.includes(b)) { a.nb.push(b); (a.ow || (a.ow = new Map())).set(b, [ri, i / 2, true]); } if (!b.nb.includes(a)) { b.nb.push(a); (b.ow || (b.ow = new Map())).set(a, [ri, i / 2, false]); } } });
+  const may = (a, b) => { const e = a.ow && a.ow.get(b); return !e || owOk(e[0], e[1], e[2]); };   // one-way streets (filled when roads.js loads)
   const list = [...nodes.values()].filter(n => n.nb.length);
   const N = Math.min(300, list.length), L = 4.4, W = 1.8;
   const bodyG = new THREE.BoxGeometry(W, 0.62, L); bodyG.translate(0, 0.56, 0);
@@ -1623,7 +1674,7 @@ const cars = [];
   cars.update = dt => {
     for (let i = 0; i < N; i++) { const c = cars[i]; let dx = c.b.x - c.a.x, dy = c.b.y - c.a.y, len = Math.hypot(dx, dy) || 1;
       c.t += c.v * dt / len;
-      if (c.t >= 1) { const opts = c.b.nb.filter(n => n !== c.a), nx = opts.length ? opts[Math.floor(rnd() * opts.length)] : c.a; c.a = c.b; c.b = nx; c.t = 0; dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
+      if (c.t >= 1) { let opts = c.b.nb.filter(n => n !== c.a && may(c.b, n)); if (!opts.length) opts = c.b.nb.filter(n => may(c.b, n)); const nx = opts.length ? opts[Math.floor(rnd() * opts.length)] : c.a; c.a = c.b; c.b = nx; c.t = 0; dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
       const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * 1.7, y = c.a.y + dy * c.t - ux * 1.7;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
       const bz = bridgeZ(x, y); p3.set(x, 0.03 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
@@ -1682,7 +1733,9 @@ function triZ(T, x, y) {   // highest roof triangle under (x, y), or null
 }
 function roofAt(x, y) {
   const tb = TZs(x, y), l = grid.get(gkey(Math.floor(x / GRID) + 100, Math.floor(y / GRID) + 100));
-  let h = onPorinsilta(x, y) !== null ? bridgeZ(x, y) + tb : inRiver(x, y) && !onBridgeDeck(x, y) ? TER.wl : Math.max(TZg(x, y), tb - 0.5); if (!l) return h;
+  let h = onPorinsilta(x, y) !== null ? bridgeZ(x, y) + tb : inRiver(x, y) && !onBridgeDeck(x, y) ? TER.wl : Math.max(TZg(x, y), tb - 0.5);
+  if (ROAD.on && inCore(x, y) && !inRiver(x, y)) h = Math.max(h, groundTop(x, y) + (ROAD.paveAt(x, y) ? ROAD.pave : ROAD.asph));   // stand on the street surface
+  if (!l) return h;
   for (const bi of l) { const b = blds[bi]; if (x < b.minx - 4 || x > b.maxx + 4 || y < b.miny - 4 || y > b.maxy + 4 || b.h + tb <= h) continue;
     if (b.tris) { for (const p of PROBE) { const z = triZ(b.tris, x + p[0], y + p[1]); if (z !== null && z + tb > h) h = z + tb; } continue; }
     for (const p of PROBE) if (pip(x + p[0], y + p[1], b.pts)) { h = b.h + tb; break; } }

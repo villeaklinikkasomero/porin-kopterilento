@@ -153,13 +153,14 @@ PAVE = PAVE.intersection(CLIP).simplify(0.25); CARR = CARR.intersection(CLIP).si
 FLATW = WALK.difference(CARR.buffer(12.0)).difference(BLD).intersection(CLIP).buffer(-0.2).buffer(0.2)   # paths in parks: flat, not raised
 
 # ---------------------------------------------------------------- zebra crossings: footway/cycleway lines crossing the carriageway
-marks = []
+marks = []; RAMPS = []   # crossing ends: (kerb point, inward unit, lateral unit, half width)
 for L, t, wd in walks:
     x = L.intersection(CARR)
     for part in getattr(x, 'geoms', [x]):
         if part.is_empty or part.geom_type != 'LineString' or part.length < 4 or part.length > 30: continue
         (ax, ay), (bx, by) = part.coords[0], part.coords[-1]; dx, dy = bx - ax, by - ay; ll = math.hypot(dx, dy)
         ux, uy = dx / ll, dy / ll; nx, ny = -uy, ux; hw = 1.5 if t.get('h') != 'cycleway' else 1.75
+        RAMPS.append((ax, ay, -ux, -uy, nx, ny, hw)); RAMPS.append((bx, by, ux, uy, nx, ny, hw))      # kerb drops at both ends
         k = 0.4
         while k + 0.5 < ll - 0.4:
             a0, a1 = k, k + 0.5
@@ -175,8 +176,31 @@ for L, t in roads:
 MARK = unary_union(marks).intersection(CARR.buffer(-0.3)) if marks else Polygon()
 tick('MARK')
 
+# ---------------------------------------------------------------- lowered kerbs at the crossings (owner 18.11.2026)
+# The pavement dips to 3 cm above the asphalt over the crossing width (+ 0.25 m), climbs back over RD m inwards and over RF m to the sides.
+RD, RF = 1.4, 1.0
+rz = []
+for ex, ey, ux, uy, nx, ny, hw in RAMPS:
+    RW_ = hw + 0.25 + RF
+    rz.append(Polygon([(ex - ux * 0.4 + nx * RW_, ey - uy * 0.4 + ny * RW_), (ex + ux * RD + nx * RW_, ey + uy * RD + ny * RW_),
+                       (ex + ux * RD - nx * RW_, ey + uy * RD - ny * RW_), (ex - ux * 0.4 - nx * RW_, ey - uy * 0.4 - ny * RW_)]))
+RZ = unary_union(rz) if rz else Polygon()
+RTREE = shapely.STRtree(rz) if rz else None
+def ramp_h(x, y):
+    """height share of the full kerb at (x, y): 0 = lowered, 1 = full pavement height"""
+    h = 1.0
+    if RTREE is None: return h
+    for k in RTREE.query(Point(x, y).buffer(0.01)):
+        ex, ey, ux, uy, nx, ny, hw = RAMPS[k]; px, py = x - ex, y - ey
+        din, lat = px * ux + py * uy, abs(px * nx + py * ny)
+        h = min(h, max(min(1.0, max(0.0, din) / RD), min(1.0, max(0.0, lat - hw - 0.25) / RF)))
+    return h
+RAMP_P = PAVE.intersection(RZ); RAMP_K = STONE.intersection(RZ)
+PAVE = PAVE.difference(RZ); STONE = STONE.difference(RZ)
+tick('RAMPS ' + str(len(RAMPS)))
+
 # ---------------------------------------------------------------- triangulate (max ~4 m triangles so they follow the ground) and pack
-def tri(geom, step=8.0):
+def tri(geom, step=6.0):
     out = []
     geom = geom.buffer(0)
     if geom.is_empty: return out
@@ -211,11 +235,108 @@ def edges(geom, step=8.0):
                 out += [round(a[0] * 10), round(a[1] * 10), round(b[0] * 10), round(b[1] * 10)]
     return out
 
+def tri_h(geom, step=0.9):
+    """fine triangles with a height share per vertex: x dm, y dm, h * 1000"""
+    out = []; g = shapely.segmentize(geom.buffer(0), step)
+    for pg in getattr(g, 'geoms', [g]):
+        if pg.geom_type != 'Polygon' or pg.area < 0.02: continue
+        # interior points too, so the slope is smooth inside
+        x0, y0, x1, y1 = pg.bounds; pts = [Point(x, y) for x in np.arange(x0 + step / 2, x1, step) for y in np.arange(y0 + step / 2, y1, step)]
+        inner = [q for q in pts if pg.buffer(-0.08).contains(q)]
+        T = shapely.delaunay_triangles(shapely.MultiPoint(list(pg.exterior.coords)[:-1] + [c for r in pg.interiors for c in list(r.coords)[:-1]] + [(q.x, q.y) for q in inner]))
+        for tr in T.geoms:
+            if not pg.buffer(0.02).contains(tr.centroid): continue
+            q = list(tr.exterior.coords)[:3]
+            if (q[1][0] - q[0][0]) * (q[2][1] - q[0][1]) - (q[1][1] - q[0][1]) * (q[2][0] - q[0][0]) < 0: q = [q[0], q[2], q[1]]
+            for x, y in q: out += [round(x * 10), round(y * 10), round(ramp_h(x, y) * 1000)]
+    return out
+
+def edges_h(geom):
+    """kerb segments with the kerb top height share at both ends: x1 y1 h1 x2 y2 h2; densified where the kerb is lowered"""
+    out, full = [], []; BB3 = BLD.buffer(0.3); shapely.prepare(BB3); RZp = RZ.buffer(0.5); shapely.prepare(RZp)
+    geom = shapely.segmentize(geom.buffer(0), 8.0)
+    geom = shapely.geometry.polygon.orient(geom, 1.0) if geom.geom_type == 'Polygon' else MultiPolygon([shapely.geometry.polygon.orient(p, 1.0) for p in geom.geoms])
+    for pg in getattr(geom, 'geoms', [geom]):
+        for ring in [pg.exterior] + list(pg.interiors):
+            c = list(ring.coords)
+            for a, b in zip(c[:-1], c[1:]):
+                m = Point((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)
+                if BB3.contains(m): continue
+                seg = LineString([a, b]); n = max(1, int(seg.length / 0.8)) if RZp.intersects(seg) else 1
+                P = [seg.interpolate(k / n, normalized=True) for k in range(n + 1)]
+                for q0, q1 in zip(P[:-1], P[1:]):
+                    h0, h1 = ramp_h(q0.x, q0.y), ramp_h(q1.x, q1.y)
+                    if h0 > 0.999 and h1 > 0.999: full += [round(q0.x * 10), round(q0.y * 10), round(q1.x * 10), round(q1.y * 10)]
+                    else: out += [round(q0.x * 10), round(q0.y * 10), round(h0 * 1000), round(q1.x * 10), round(q1.y * 10), round(h1 * 1000)]
+    return full, out
+
+# ---------------------------------------------------------------- one-way streets for the game's street graph (CITY.r segments)
+ROUND = {4445264,5071122,5071124,5410262,46115386,302861256,302861258,302861265,302861267,302861268,302861271,302923083,302923093,519692022,519692026,
+         519692027,525420999,525421000,1137365068,1137365069,1231162792,1238644900,1238644901,1240126246,1240362611,1187426430,6022401,41757090,46124957,
+         46128379,46128380,302770115,302772031,302772033,302923105,383336587,386333303,386333304,386333305,386333306,1240398064,5867771,23898487,302709989,
+         302709994,302755559,302760330,302923080,302923082,302923117,302923119,1240088656,1240375897,1240376442}   # junction=roundabout (implies one-way)
+ONE = []
+for w in W:
+    t = w['t']
+    if t.get('h') not in MOTOR or len(w['g']) < 2: continue
+    o = t.get('o'); sg = 1 if (o in ('yes', '1', 'true') or w['id'] in ROUND) else -1 if o == '-1' else 0
+    if sg: ONE.append((LineString(w['g']), sg))
+OTREE = shapely.STRtree([L for L, _ in ONE]) if ONE else None
+ow = []
+for ri, r in enumerate(C['r']):
+    if not r.get('k') or OTREE is None: continue
+    P = r['p']
+    for si in range(len(P) // 2 - 1):
+        ax, ay, bx, by = P[si * 2], P[si * 2 + 1], P[si * 2 + 2], P[si * 2 + 3]; L = math.hypot(bx - ax, by - ay)
+        if L < 0.5: continue
+        m = Point((ax + bx) / 2, (ay + by) / 2); best = None
+        for k in OTREE.query(m.buffer(4.0)):
+            Lw, sg = ONE[k]; d = Lw.distance(m)
+            if d > 4.0: continue
+            u = Lw.project(m); q0, q1 = Lw.interpolate(max(0, u - 1)), Lw.interpolate(min(Lw.length, u + 1))
+            tx, ty = q1.x - q0.x, q1.y - q0.y; tl = math.hypot(tx, ty) or 1
+            c = ((bx - ax) * tx + (by - ay) * ty) / (L * tl)
+            if abs(c) > 0.85 and (best is None or d < best[0]): best = (d, sg * (1 if c > 0 else -1))
+        if best: ow += [ri, si, best[1]]
+print('one-way segments', len(ow) // 3)
+
+# ---------------------------------------------------------------- trees standing on the carriageway: to the pavement edge, 0.8 m in from the kerb
+tmv = []
+PI = PAVE.buffer(-0.8); shapely.prepare(CARR)
+from shapely.ops import nearest_points
+for i in range(len(C['t']) // 2):
+    x, y = C['t'][i * 2], C['t'][i * 2 + 1]; pt = Point(x, y)
+    if not CLIP.contains(pt) or not CARR.contains(pt): continue
+    q = nearest_points(PI, pt)[0]
+    if q.distance(pt) < 9: tmv += [i, round(q.x * 10), round(q.y * 10)]
+    else: tmv += [i, -32768, -32768]                    # nowhere near a pavement: drop it
+print('trees moved', len(tmv) // 3)
+
+# ---------------------------------------------------------------- 0.5 m raster: R = contact shade at the house walls, G = street surface (no grass tufts there)
+from PIL import Image, ImageDraw
+from scipy.ndimage import distance_transform_edt
+PX = 0.5; RW, RH = int((BB[2] - BB[0]) / PX), int((BB[3] - BB[1]) / PX)
+def rast(geoms, img=None):
+    img = img or Image.new('L', (RW, RH), 0); d = ImageDraw.Draw(img)
+    for g in geoms:
+        for pg in getattr(g, 'geoms', [g]):
+            if pg.geom_type != 'Polygon' or pg.is_empty: continue
+            d.polygon([((x - BB[0]) / PX, (BB[3] - y) / PX) for x, y in pg.exterior.coords], fill=255)
+            for r in pg.interiors: d.polygon([((x - BB[0]) / PX, (BB[3] - y) / PX) for x, y in r.coords], fill=0)
+    return img
+bm = np.asarray(rast(blds)) > 0
+dist = distance_transform_edt(~bm) * PX
+ao = 1.0 - 0.42 * np.exp(-dist / 0.8)
+sm = np.asarray(rast([CARR, PAVE, STONE, RAMP_P, RAMP_K, ISL]))
+Image.fromarray(np.stack([(ao * 255).astype(np.uint8), sm, np.zeros_like(sm)], -1)).save(OUT.replace('.js', '_ao.png'), optimize=True)
+
 def b64(a): return base64.b64encode(np.array(a, dtype=np.int16).tobytes()).decode()
-R = dict(asph=tri(CARR), pave=tri(PAVE), kivi=tri(STONE), kerb=edges(unary_union([PAVE, STONE])), mark=tri(MARK, 50))
-js = 'export default ' + json.dumps({k: b64(v) for k, v in R.items()} | {'bb': BB}) + ';\n'
+KF, KH = edges_h(unary_union([PAVE, STONE, RAMP_P, RAMP_K]))
+R = dict(asph=tri(CARR), pave=tri(PAVE), kivi=tri(STONE), kerb=KF, kerbh=KH, mark=tri(MARK, 50),
+         rampp=tri_h(RAMP_P), rampk=tri_h(RAMP_K))
+js = 'export default ' + json.dumps({k: b64(v) for k, v in R.items()} | {'bb': BB, 'ow': b64(ow), 'tmv': base64.b64encode(np.array(tmv, dtype=np.int32).tobytes()).decode(), 'aopx': PX}) + ';\n'
 open(OUT, 'w').write(js)
 print('carriageway m2', round(CARR.area), 'pavement m2', round(PAVE.area), 'paths', round(FLATW.area), 'marks', round(MARK.area),
-      {k: len(v) // (6 if k != 'kerb' else 4) for k, v in R.items()}, 'KB', len(js) // 1024)
+      {k: len(v) for k, v in R.items()}, 'KB', len(js) // 1024)
 json.dump(log, open('/home/claude/work/road_widths.json', 'w'), ensure_ascii=False, indent=0)
-import pickle; pickle.dump(dict(STONE=STONE, CARR=CARR, PAVE=PAVE, FLATW=FLATW, MARK=MARK, ISL=ISL), open('/home/claude/work/roads_geom.pkl', 'wb'))
+import pickle; pickle.dump(dict(RAMPS=RAMPS, STONE=STONE, CARR=CARR, PAVE=PAVE, FLATW=FLATW, MARK=MARK, ISL=ISL), open('/home/claude/work/roads_geom.pkl', 'wb'))

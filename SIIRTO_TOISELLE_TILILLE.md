@@ -637,3 +637,19 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   top-10 (kenttä c<YYYYMMDD>) ja oma ennätys. Kamera C: takaa / kuljettajan paikka / ylhäältä.
 - **Pyöritysvideot:** `python3 tools/vehicles/turntable.py malli.glb out nimi 96 24 640` (Cycles CPU ~12 s/kuva, HDRI blender/tex, alla road_asph) + ffmpeg.
 - Avoinna: suojateiden madallukset, autot (liikenne) eivät väistä pelaajaa, sillat autolla karkeasti (deck = vedenpinta + 2,2 m), mobiilissa ei käsijarrua.
+
+### 18.11 klo 21–22.30: suojatiet, yksisuuntaiset, korjaukset
+- **Madalletut reunakivet** suojateiden päissä (build_roads.py `RAMPS`, `ramp_h`): jalkakäytävä laskee 3 cm:iin asfaltista suojatien levyltä, nousee 1,4 m sisään
+  ja 1,0 m sivuille; roads.js `rampp`/`rampk` (x, y dm, h·1000), reunakivet `kerb` (täysi) ja `kerbh` (korkeus päissä).
+- **"Asfaltti katoaa auton alta"**: ilmakuvamaa piirretään 6 m kolmioina, jotka pullistuvat todellisen maan (TZg) yli jopa 13 cm (99 %) -> kuva puski läpi
+  lähellä kameraa. Korjaus: `groundTop(x,y)` = max(TZg, ytimen maaverkko, 0,25 m ilmakuvalaatat) ja pinnat sen päälle (asfaltti +0,13, jalkakäytävä +0,26).
+  Reunakivien pystypinnat maahan asti. Kopteri ja auto seisovat katupinnalla (roofAt, carGround).
+- **Näkymättömät esteet autolla**: roofAt kokeili 3 m kehää (kopterin jalakset). Autolle `bldTopAt` (vain piste talon pohjan sisällä).
+- **Kuuset pois keskustasta** (ne olivat satunnaisia 10 %:n arvontoja, ei oikeita kuusia).
+- **Puut ajoradalla** (OSM) siirretään jalkakäytävän reunaan 0,8 m reunakivestä (roads.js `tmv`, 749 puuta), kaukana jalkakäytävästä olevat poistetaan.
+- **Nurmikkotupsut** eivät kasva katupinnoilla (roads_ao.png G-kanava, GRASS-shader). R-kanava = kontaktivarjo talojen seinien juurella (talot eivät näytä leijuvan).
+- **Yksisuuntaiset kadut**: OSM oneway + liikenneympyrät (ROUND-lista, junction-tagia ei ollut aineistossa) -> CITY.r-pätkät (`ow`, 1111 kpl). Navigaattori ajaa
+  vain sallittuun suuntaan (varalla ilman rajoitusta), liikenteen autot noudattavat, pelaajalle varoitus väärästä suunnasta.
+- **Paistot**: Antinkadun mitatut julkisivut (facades.json) eivät olleet leivottuina -> paikalliset 8 näytteen baket c052, c048, c051, c067, tori3, p1 (tori2 jo).
+  Huom: 8 Gt muistissa kaksi bakea yhtä aikaa (tai bake + Chromium) kaatuu (exit 137) – aja yksi kerrallaan.
+- Ajettava Modal 64: `city 64 c048,c051,c052,c067` ja `bake p1 tori2 tori3 --samples 64`.
