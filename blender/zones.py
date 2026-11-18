@@ -1296,12 +1296,28 @@ def _fac_extra(walls):
                     for c in it[1]:
                         for zb in it[3]: _a31win(Z, W, c - it[2] / 2, c + it[2] / 2, zb, zb + it[4], _a31FR, _a31GL)
                 elif k == 'door': _a31q(Z, W, it[1], it[2], it[3], it[4], 0.02, M(it[5], 0.6))
+                elif k == 'winp':                             # window of n equal panes: ['winp', s0, s1, z0, z1, n, frame, glass]
+                    fr_, gl_ = M(it[6]) if len(it) > 6 else _a31FR, M(it[7], 0.1, 0.3) if len(it) > 7 else _a31GL
+                    _a31q(Z, W, it[1], it[2], it[3], it[4], 0.03, fr_); _a31q(Z, W, it[1] + 0.08, it[2] - 0.08, it[3] + 0.08, it[4] - 0.08, 0.04, gl_)
+                    for j in range(1, int(it[5])):
+                        m_ = it[1] + (it[2] - it[1]) * j / it[5]; _a31q(Z, W, m_ - 0.04, m_ + 0.04, it[3], it[4], 0.05, fr_)
+                elif k == 'glass': _a31q(Z, W, it[1], it[2], it[3], it[4], it[6] if len(it) > 6 else 0.02, M(it[5], 0.1, 0.3))   # a sheet of glass
                 elif k == 'box': _a31bx(Z, W, it[1], it[2], it[3], it[4], it[5], it[6], _fac_mat(it[7], it[8] if len(it) > 8 else None))
                 elif k == 'balc':
                     _a31balc(Z, W, it[1], it[2], tuple(it[3]), it[4], it[5], M(it[7], 0.85), M(it[8], 0.1, 0.3), _a31WH, r=it[6],
                              ph=it[9] if len(it) > 9 else 1.0, gh=it[10] if len(it) > 10 else 2.75)
     return ex
 _FJ = _os_f.path.join(_os_f.path.dirname(_os_f.path.realpath(__file__)), 'facades.json')   # realpath: zones.py is also imported through a symlink
+def _bare_mat(w): return M(w['bare'], 0.45, 0.35) if w.get('kind') == 'sheet' else MT(w['bare'], w.get('kind', 'plaster'), 0.9)
+def _bare_w(w):
+    """the runalt spec of a facades.json wall: plain, or (recess [gh, sb, h]) a shop floor gh high set sb metres back behind the
+    wall line, plain above; kind 'sheet' = smooth sheet-metal cladding (no render grain)"""
+    wm = _bare_mat(w)
+    if 'recess' not in w: return dict(P=dict(wall=wm), layout=_bare_lay, upper=_bare_lay)
+    gh, sb, h = w['recess']
+    rl = dict(bw=w.get('shop_bw', 2.0), rows=[(gh, 'shop', 'G'), (max(1.0, h - gh), 'plain', 'P')], cols=lambda c, nb: 'W', P={},
+              rowP={'G': dict(setback=sb, piers=(0, 0.3), soffit=M('#35383b'), fasc_h=0.2, gpier=0.04)})
+    return dict(P=dict(wall=wm, gwall=M('#2c2f31', 0.6), fascia=M('#2c2f31', 0.6), piermat=wm), layout=rl, upper=_bare_lay)
 WALLS = {}; FEXTRA = {}
 FACADES = {e['id']: e for e in (_json_f.load(open(_FJ)) if _os_f.path.exists(_FJ) else [])}
 for _i, _e in FACADES.items():
@@ -1312,7 +1328,7 @@ for _i, _e in FACADES.items():
                 if 'bare_s' in w:                          # only the runs whose middle lies in this stretch of the wall (s from a)
                     a_, b_ = w['a'], w['b']; Lw = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); u = ((x - a_[0]) * (b_[0] - a_[0]) + (y - a_[1]) * (b_[1] - a_[1])) / Lw
                     if not (w['bare_s'][0] <= u <= w['bare_s'][1]): continue
-                return _bare(w['bare'], w.get('kind', 'plaster'))
+                return _bare_w(w)
         return None
     FEXTRA[_i] = _fac_extra(_e['walls'])                # also run when the house is a stretch of another house's LoD2 shell (kivi.shell_runalt)
     _wk = {}                                             # footprint-built houses (no LoD2 shell): the bare walls by footprint edge
@@ -1327,7 +1343,7 @@ for _i, _e in FACADES.items():
     if _i in SPEC:
         SPEC[_i] = dict(SPEC[_i]); SPEC[_i]['extra'] = list(SPEC[_i].get('extra', [])) + [FEXTRA[_i]]
         if _bw: SPEC[_i]['runalt'] = _ra
-        if _wk: SPEC[_i]['walls'] = {**SPEC[_i].get('walls', {}), **{k: v for k, v in _wk.items()}}; SPEC[_i]['P'] = dict(SPEC[_i]['P'], wall=MT(_bw[0]['bare'], _bw[0].get('kind', 'plaster'), 0.9))
+        if _wk: SPEC[_i]['walls'] = {**SPEC[_i].get('walls', {}), **{k: v for k, v in _wk.items()}}; SPEC[_i]['P'] = dict(SPEC[_i]['P'], wall=_bare_mat(_bw[0]))
     else:
         RUNALT[_i] = _ra; EXTRA[_i] = EXTRA.get(_i, []) + [FEXTRA[_i]]
-        if _wk: WALLS[_i] = (_wk, MT(_bw[0]['bare'], _bw[0].get('kind', 'plaster'), 0.9))
+        if _wk: WALLS[_i] = (_wk, _bare_mat(_bw[0]))
