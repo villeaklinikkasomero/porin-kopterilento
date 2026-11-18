@@ -1069,3 +1069,12 @@ SPEC[659] = dict(P=dict(wall=_WHT('#eeede8'), sign=SIGNS), layout=_lay59, runalt
 # 609 Isolinnankatu 28 (1979): light tan brick, rows of windows close together, shop floor
 _tan9 = MT('#d4bb9e', 'brick', 0.8)
 SPEC[609] = dict(P=dict(wall=_tan9, spandrel=_tan9, sign=SIGNS, gframe=M('#3a3f45'), gwall=_tan9), layout=lay(23, 'ribbon', gh=3.9, bw=2.6, fh=3.0, P=dict(wh=1.4, sill=0.9, nx=2, pier=0.35, frame=M('#ebe8e2'))))
+# 640 Isolinnankatu / Itäpuisto corner (SV 18.11.2026): the north end (towards Isolinnankatu 14) is clad in blue-grey sheet metal with big
+# windows and glass-railed balconies on the corner; the rest a pale render block with recessed balconies; shops on the street
+_s640b = dict(P=dict(wall=M('#60708a', 0.5, 0.25), sign=SIGNS, rail=M('#9fb2bd', 0.1, 0.3), slab=M('#cfd3d6'), proj_balcony=True, bd=1.4),
+              layout=lay(23, 'punched', gh=3.6, bw=3.0, fh=3.05, cols=lambda c, nb: 'B' if nb >= 4 and c >= nb - 2 else 'W', P=dict(wall=M('#60708a', 0.5, 0.25), slab=M('#cfd3d6'), ww=1.7, wh=1.6, nx=2, frame=M('#2e3338'), proj_balcony=True, bd=1.4, rail=M('#9fb2bd', 0.1, 0.3))))
+SPEC[640] = dict(P=dict(wall=M('#d6d0c4'), sign=SIGNS), layout=lay(23, 'punched', gh=3.6, bw=3.1, fh=3.05, cols=every(3, 'B'), P=dict(ww=1.4, wh=1.45, nx=2)),
+                 runalt=lambda x, y: _s640b if y > 14.0 else None, splitruns=True)
+_pp640, _ = poly(640)      # tori4 builds 640 from its footprint: the blue walls are the edges north of y = 14
+SPEC[640]['walls'] = {k: _s640b['layout'] for k in range(len(_pp640)) if _pp640[k][1] > 14.0 and _pp640[(k + 1) % len(_pp640)][1] > 14.0}
+SPEC[640]['P']['rail'] = _s640b['P']['rail']

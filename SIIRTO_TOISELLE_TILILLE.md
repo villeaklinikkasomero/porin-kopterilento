@@ -538,4 +538,13 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   1222 ja 661 puutaloiksi, 1225 `gone` (sen julkisivu on 652:n LoD2-kuoressa; h100 piirsi siihen tyhjän puutaloseinän).
   kivi.py: `gone`-suodatin build_and_bakeen, lower_eave(1221) Isolinnankatu 16:n puutalon räystäs 4,1 m. city.py: hspec käyttää SPECiä.
   zones2.py: ruudukko myös runalt-pätkille. Avoinna: 661:n harjakatto (peli piirtää LoD2-katon), 606:n pyöreä lasiparvekepino.
-- **Ajettava:** `bake tori4 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.
+- **18.11 klo 10–11, Isolinnankadun länsipuoli:** 1623 ja 1724 rautalanka osuu (ikkunarivit kohdallaan). 640: pohjoispää (y > 14)
+  sinisenharmaata peltiä, isot ikkunat ja lasikaiteiset ulokeparvekkeet kulmassa, muu osa vaalea rappaus (zones.py SPEC[640], tori4 rakentaa
+  jalanjäljestä → `walls` reunaindekseittäin). Isolinnankatu valmis tältä erää; seuraavaksi listan 6: Pohjoisranta + Eteläranta.
+- **18.11 klo 11–12, Eteläranta (käyttäjä: ravintolarakennukset Shots / Skooli väärin):** Rantamakasiini 8386 (Eteläranta 5, 1896) oli
+  vaaleanpunainen kivitalo → nyt vaalea harmaanvihreä puupaviljonki, valkoiset listat, korkeat ikkunat, keskellä päätykolmio ja lasiovet,
+  vihreä peltikatto; lower_eave(8386) räystäs 4,0 m (skannauksen seinä 6,5 m). Varoitus: facade_bits-laatikko seinän edessä mustasi koko
+  julkisivun (jaettu "rep"-ruutu leivottiin laatikon takaa) → ovi tehty 'S'-sarakkeena. 1744 matala paviljonki (ei 2-krs). index.html: pelin
+  kaksi koodilla piirrettyä ravintolapaviljonkia (vihreät aumakatot, aurinkovarjot): läntinen (-106, 500) poistettu (SV: nurmikko),
+  itäinen (-3, 487) valkoinen matala laatikko (SV). Bärco ja muut Etelärannan talot kunnossa.
+- **Ajettava:** `bake tori4 kivi2 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.

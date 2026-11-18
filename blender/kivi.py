@@ -1214,6 +1214,20 @@ def skirt(Z, i, sp):
                 add_solid(Z, [L(P, -SKIRT), L(Q, -SKIRT), L(Q, 0), L(P, 0)], pm, 0.3)
 
 # Isolinnankatu 16 (1222, in shell 1221): one-storey timber house under a hip roof (SV 2026, 18.11). The scan wall on the street runs to 7.9 m.
+# Rantamakasiini, Eteläranta 5 (1896; restaurants Shots / Skooli): a long one-storey timber pavilion, pale grey-green vertical boarding with
+# white trim, tall windows behind grey-green board shutters, white lattice skirt, a deep bracketed eave on the street side, low green
+# standing-seam hip roof, a glazed gabled entrance bay in the middle of both long sides (owner's photos + SV 2026, 18.11)
+_rmW = MT('#bfc8b9', 'woodv', 0.9); _rmT = M('#eef0ea', 0.8); _rmR = M('#6f9682', 0.5, 0.2)
+_rmLay = dict(bw=2.65, rows=[(3.4, 'punched', 'G'), (0.6, 'plain', 'P')], cols=lambda c, nb: 'S' if nb > 6 and c == nb // 2 else 'W', P={},   # glazed double doors in the middle bay (a box in front of the facade blackened the shared bay tile)
+              rowP={'G': dict(ww=1.85, wh=2.3, nx=3, sill=0.55, frame=_rmT, surround=_rmT),
+                    'P': dict(wall=_rmT)}, plain=False)
+lower_eave(8386, lambda r: min(q[2] for q in r) < 0.5 and max(q[2] for q in r) > 5.0, 4.0, 3.0)   # the scan wall runs to 6.5 m: the real eave is ~4 m under a green roof sloping back
+SPECK[8386] = dict(P=dict(wall=_rmW, trim=_rmT, frame=_rmT), layout=_rmLay, yard=_rmLay, roofmat=_rmR, nogrid=True, extra=[
+    facade_bits((19.4, 474.4), (50.8, 466.6), [('gable', 16.2, 5.6, 4.0, 2.4, _rmT, 14)]),
+    facade_bits((52.6, 473.8), (21.2, 481.5), [('gable', 16.2, 5.6, 4.0, 2.4, _rmT, 14)])])
+# 1744 east of Rantamakasiini: a low one-storey pale beige pavilion with a flat roof and a grey roof band (SV 2026, 18.11), not a two-storey house
+SPECK[1744] = dict(P=dict(wall=M('#e3dccb'), frame=M('#f2f0ea')), layout=lay(4.6, 'punched', bw=3.0, fh=4.6, P=dict(ww=1.7, wh=1.6, nx=2, sill=1.0)),
+                   roof=dict(kind='flat', mat=M('#7d8286', 0.6)), cornice=(0.25, 0.5, M('#8f9499', 0.6)))
 lower_eave(1221, lambda r: max(q[0] for q in r) < 210.5 and min(q[2] for q in r) < 0.5 and max(q[2] for q in r) > 7.0, 4.1, 4.5)
 
 def build_and_bake(name, ids, samples=16, spec=None):

@@ -1078,14 +1078,13 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   // Barco, the restaurant ship moored west of Taavi-silta: Blender model at the water level
   loadModel('bl_barco', (root, K) => { const m = new THREE.MeshLambertMaterial({ vertexColors: true }); root.traverse(q => { if (q.isMesh) q.material = m; });
     const g = new THREE.Group(); g.position.set(K.x, TER.wl, -K.y); g.add(root); scene.add(noT(g)); window.__barco = true; });
-  // two restaurant pavilions: glazed walls under light green standing-seam hip roofs, terraces with white parasols
-  const roofG = new THREE.MeshLambertMaterial({ color: 0x9ccab3 }), glassP = new THREE.MeshLambertMaterial({ color: 0x3b4c58 }), frameP = new THREE.MeshLambertMaterial({ color: 0xe9ebe6 }), para = new THREE.MeshLambertMaterial({ color: 0xf6f6f2, side: THREE.DoubleSide });
-  for (const [f, w, dpt] of [[201, 17, 9], [315, 13, 8]]) { const p = along(Math.min(tot - 12, f), 17), ang = p[2], gr = new THREE.Group(); gr.position.set(p[0], 0, -p[1]); gr.rotation.y = -ang; scene.add(gr);
-    const body = new THREE.Mesh(new THREE.BoxGeometry(w, 3.4, dpt), glassP); body.position.y = 1.7; gr.add(body);
-    for (let x = -w / 2; x <= w / 2 + 0.01; x += 1.6) for (const z of [-dpt / 2 - 0.02, dpt / 2 + 0.02]) { const fm = new THREE.Mesh(new THREE.BoxGeometry(0.12, 3.4, 0.08), frameP); fm.position.set(x, 1.7, z); gr.add(fm); }
-    const rf = new THREE.Mesh(new THREE.ConeGeometry(Math.hypot(w, dpt) / 2 + 1.2, 2.2, 4, 1), roofG); rf.rotation.y = Math.PI / 4; rf.scale.set((w + 2.4) / (dpt + 2.4) * 0.72, 1, 0.72); rf.position.y = 3.4 + 1.1; gr.add(rf);
-    for (let k = 0; k < 6; k++) { const um = new THREE.Mesh(new THREE.ConeGeometry(1.5, 0.6, 8, 1, true), para); um.position.set(-w / 2 + 1.5 + k * (w - 3) / 5, 2.5, -dpt / 2 - 3.2); gr.add(um);
-      const st = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 2.3, 4), lampPost); st.position.set(um.position.x, 1.15, um.position.z); gr.add(st); } }
+  // restaurant pavilion by the river west of Rantamakasiini (SV 2026, 18.11): a low white box with a band of dark windows and a thin grey roof.
+  // (The second pavilion that stood further west was not there in Street View: an open lawn.)
+  const pavW = new THREE.MeshLambertMaterial({ color: 0xeef0ee }), pavG = new THREE.MeshLambertMaterial({ color: 0x2f3a42 }), pavR = new THREE.MeshLambertMaterial({ color: 0x8c9196 });
+  for (const [f, w, dpt] of [[315, 12, 6]]) { const p = along(Math.min(tot - 12, f), 17), ang = p[2], gr = new THREE.Group(); gr.position.set(p[0], 0, -p[1]); gr.rotation.y = -ang; scene.add(gr);
+    const body = new THREE.Mesh(new THREE.BoxGeometry(w, 3.0, dpt), pavW); body.position.y = 1.5; gr.add(body);
+    for (const z of [-dpt / 2 - 0.03, dpt / 2 + 0.03]) { const gl = new THREE.Mesh(new THREE.BoxGeometry(w - 1.6, 1.5, 0.06), pavG); gl.position.set(0, 1.55, z); gr.add(gl); }
+    const rf = new THREE.Mesh(new THREE.BoxGeometry(w + 0.6, 0.3, dpt + 0.6), pavR); rf.position.y = 3.15; gr.add(rf); }
 }
 
 // ---------- Kauppatori today: brick paving with grey bands (colour from Porin kaupunki photos) over the old aerial image's parked cars ----------
