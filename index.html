@@ -470,6 +470,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const ROOFZ = new Set(['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1'].map(n => KN.indexOf(n)));   // blocks whose roofs are in the Blender model
   for (const b of CITY.b) {
     bIdx++;
+    if (LOOK.b[bIdx] && LOOK.b[bIdx].gone) continue;   // demolished since the map data (styles 'gone', e.g. Saukkosen talo 1748): the bake skips it, so must the plain walls (phones never load the bakes)
     if (b.w === 1196441531) continue;   // Barco: the moored ship is a Blender model (below), not a building
     const pts = []; for (let i = 0; i < b.p.length; i += 2) pts.push([b.p[i] / 10, b.p[i + 1] / 10]);
     const L2raw = L2OLD.has(bIdx) ? null : LOD2.b[bIdx];   // L2OLD: the scan predates a new building on the plot

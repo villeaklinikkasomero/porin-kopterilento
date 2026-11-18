@@ -103,6 +103,111 @@ SPEC[1493] = dict(P=dict(wall=M('#d6b25a'), trim=_a9T, frame=M('#f4f2ea')),
                               rowP={'G': dict(ground=True, arch=True, plinth_h=0.45, plinth=M('#7d776e', 0.8), ww=2.3, wh=3.5, sill=0.35, wh_fixed=True, pil=True),
                                     'F': dict(hood='pediment', apron=True, pil=True, ww=1.25, wh=2.5, sill=1.0, dentils=True)}, plain=False),
                   cornice=(0.6, 0.9, _a9T), extra=[_a9_awnings], roof=dict(kind='flat', mat=SHEET))
+# 116  Antinlinna, Antinkatu 26 (1929; owner 18.11.2026 "nyt on menossa pahasti väärään", SV from Antinkatu 31, measured with px2wall):
+# pale cream render, window pairs between brown pilaster strips, brown surrounds and balconette panels, raised ground floor on a plinth;
+# the south end wall (edge 0) is a bare white fire wall with three top-floor windows only (s 2.95 / 6.25 / 9.1 m from the street corner)
+_al = dict(wall=M('#f0dfb0'), trim=MT('#6d4a38', None, 0.8), frame=M('#e8e4d8'), pil_mat=MT('#84563f', None, 0.8))   # smooth brown render (M() made it brick)
+def _al_gable(Z, pts, h, P):
+    p0, p1 = (-129.8, -478.6), (-116.5, -481.9); L = math.hypot(p1[0] - p0[0], p1[1] - p0[1]); t = ((p1[0] - p0[0]) / L, (p1[1] - p0[1]) / L); n = (t[1], -t[0])   # the LoD2 shell's wall line (the OSM footprint runs 0.2 m inside it)
+    W = lambda s_, z, d: (p0[0] + t[0] * s_ + n[0] * d - Z.cx, p0[1] + t[1] * s_ + n[1] * d - Z.cy, z)
+    fr, gl = M('#e8e4d8'), M('#2c3236', 0.1, 0.3)
+    for c in (2.95, 6.25, 9.1):
+        a, b = c - 0.5, c + 0.5
+        for o in (1, -1):                                   # both faces: the quad shows whichever way the wall line runs
+            add_solid(Z, [W(a, 9.85, 0.03 * o), W(b, 9.85, 0.03 * o), W(b, 11.25, 0.03 * o), W(a, 11.25, 0.03 * o)][::o], fr, 0.4)
+            add_solid(Z, [W(a + 0.08, 9.93, 0.04 * o), W(b - 0.08, 9.93, 0.04 * o), W(b - 0.08, 11.17, 0.04 * o), W(a + 0.08, 11.17, 0.04 * o)][::o], gl, 0.4)
+# owner 18.11.2026 "miten selität ikkunoiden määrän": counted from SV facing the facade (px2wall): three storeys on a high plinth, eight single
+# window axes at s = 3.4 / 7.0 / 11.8 / 17.4 / 22.2 / 25.8 (entrance) / 29.5 / 33.0 m from the north corner, brown stone pilasters only beside the entrance
+_AL_K = {1: 'W', 3: 'W', 6: 'W', 9: 'W', 12: 'W', 14: 'D', 16: 'W', 18: 'W', 13: 'Z'}   # 1.8 m bays (20 on the 36 m front); 'Z' blank bay with its own tile (pilaster)
+def _al_cols(c, nb):
+    k = round(c * 20 / nb) if nb != 20 else c
+    return _AL_K.get(k, 'N')
+def _al_pil(Z, pts, h, P):                              # the two stone pilasters beside the entrance, full height, 0.16 m proud
+    p0, p1 = (-121.3, -443.7), (-129.8, -478.6); L = math.hypot(p1[0] - p0[0], p1[1] - p0[1]); t = ((p1[0] - p0[0]) / L, (p1[1] - p0[1]) / L); n = (t[1], -t[0])   # on the LoD2 shell's street wall
+    W = lambda s_, z, d: (p0[0] + t[0] * s_ + n[0] * d - Z.cx, p0[1] + t[1] * s_ + n[1] * d - Z.cy, z)
+    m = MT('#8f7b68', None, 0.85)
+    for a, b in ((23.15, 23.85), (26.15, 26.85)):
+        for o in (1, -1):
+            d = 0.16 * o
+            add_solid(Z, [W(a, 1.4, d), W(b, 1.4, d), W(b, 13.0, d), W(a, 13.0, d)][::o], m, 0.4)
+            add_solid(Z, [W(a, 1.4, 0), W(a, 1.4, d), W(a, 13.0, d), W(a, 13.0, 0)][::o], m, 0.3)
+            add_solid(Z, [W(b, 1.4, d), W(b, 1.4, 0), W(b, 13.0, 0), W(b, 13.0, d)][::o], m, 0.3)
+SPEC[116] = dict(P=_al, nogrid=True,
+                 layout=dict(bw=1.8, rows=[(5.6, 'classic', 'G'), (3.6, 'classic', 'F'), (4.3, 'classic', 'T')], cols=_al_cols, P={},
+                             rowP={'G': dict(ground=True, plinth_h=1.4, plinth=MT('#5f4c40', None, 0.85), ww=1.3, wh=1.9, sill=1.4, wh_fixed=True, wmarg=0.3, surround=0.18, dw=1.5, sband=0.2, sband_mat=M('#dccaa2')),
+                                   'F': dict(ww=1.3, wh=1.8, sill=0.6, wh_fixed=True, wmarg=0.3, surround=0.18, apron=True, apron_mat=MT('#8c8a5e', None, 0.8)),
+                                   'T': dict(ww=1.3, wh=1.9, sill=0.2, wh_fixed=True, wmarg=0.3, surround=0.18, dentils=True, dentil_mat=MT('#6d4a38', None, 0.8))}, plain=False),
+                 cornice=(0.45, 0.6, MT('#6d4a38', None, 0.8)),
+                 extra=[_al_gable, _al_pil])
+_al_g = dict(P=dict(_al, wall=M('#ebeae4')), layout=dict(bw=14.1, rows=[(14.0, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True))
+def _al_on_gable(x, y, a=(-130.0, -478.4), b=(-116.3, -481.9)):   # the LoD2 shell has no edge list: pick the fire wall by its line
+    dx, dy = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dy * dy; u = ((x - a[0]) * dx + (y - a[1]) * dy) / L2
+    return -0.05 < u < 1.05 and abs((x - a[0]) * dy - (y - a[1]) * dx) / L2 ** 0.5 < 1.5
+SPEC[116]['runalt'] = lambda x, y: _al_g if _al_on_gable(x, y) else None
+# 522 + 414  Antinkatu 31 and 29 on one LoD2 shell wall (street front from (-154.3, -510.5) to (-141.4, -453.7), s along it from the south;
+# 414's front starts at s 36.0). Owner 18.11.2026: "rapattu 1940-luvun talo, ei elementtitalo; oven päällä suora lippa ja korkea lasi lähes
+# kattoon saakka rappukäytävässä. Viereisessä vaaleassa talossa ulos työnnetyt parvekkeet, valkoinen rapattu kaide ja lasitus, kolme kerrosta,
+# kivijalassa vain ovi, parvekkeiden kulmat pyöristetty." Positions measured with px2wall from Street View (Antinkatu 28 / 29, 18.11.2026).
+# Both fronts are one plain rendered tile each (no bay seams); windows, doors, piers and balconies are real geometry placed on the measured axes.
+_A31 = ((-154.3, -510.5), (-141.4, -453.7))
+def _a31wall(Z, p0, p1):
+    L = math.hypot(p1[0] - p0[0], p1[1] - p0[1]); t = ((p1[0] - p0[0]) / L, (p1[1] - p0[1]) / L); n = (t[1], -t[0])
+    return lambda s_, z, d: (p0[0] + t[0] * s_ + n[0] * d - Z.cx, p0[1] + t[1] * s_ + n[1] * d - Z.cy, z)
+def _a31q(Z, W, s0, s1, z0, z1, d, m):                     # a flat panel d metres proud of the wall, both faces
+    for o in (1, -1): add_solid(Z, [W(s0, z0, d), W(s1, z0, d), W(s1, z1, d), W(s0, z1, d)][::o], m, 0.5)
+def _a31bx(Z, W, s0, s1, z0, z1, d0, d1, m):              # a box on the wall (piers, canopies)
+    _a31q(Z, W, s0, s1, z0, z1, d1, m)
+    for s_ in (s0, s1):
+        for o in (1, -1): add_solid(Z, [W(s_, z0, d0), W(s_, z0, d1), W(s_, z1, d1), W(s_, z1, d0)][::o], m, 0.3)
+    for z_ in (z0, z1):
+        for o in (1, -1): add_solid(Z, [W(s0, z_, d0), W(s1, z_, d0), W(s1, z_, d1), W(s0, z_, d1)][::o], m, 0.3)
+def _a31win(Z, W, s0, s1, z0, z1, fr, gl, d=0.03):
+    _a31q(Z, W, s0, s1, z0, z1, d, fr); _a31q(Z, W, s0 + 0.09, s1 - 0.09, z0 + 0.09, z1 - 0.09, d + 0.01, gl)
+    if s1 - s0 > 1.0: _a31q(Z, W, (s0 + s1) / 2 - 0.04, (s0 + s1) / 2 + 0.04, z0, z1, d + 0.02, fr)   # mullion
+def _a31ol(s0, s1, D, r=0.7, k=4):               # plan (s, d) of a projecting balcony with both outer corners rounded
+    out = [(s0, 0.0), (s0, D - r)]
+    out += [(s0 + r - r * math.cos(math.pi / 2 * j / k), D - r + r * math.sin(math.pi / 2 * j / k)) for j in range(1, k + 1)]
+    out += [(s1 - r + r * math.sin(math.pi / 2 * j / k), D - r + r * math.cos(math.pi / 2 * j / k)) for j in range(0, k)]
+    return out + [(s1, D - r), (s1, 0.0)]
+def _a31balc(Z, W, s0, s1, levels, top, D, par, gl, slab, r=0.7, ph=1.0, gh=2.75):
+    ol = _a31ol(s0, s1, D, r) if r > 0.05 else [(s0, 0.0), (s0, D), (s1, D), (s1, 0.0)]
+    for b_ in levels:
+        add_solid(Z, [W(s_, b_, d) for s_, d in ol][::-1], slab, 0.5); add_solid(Z, [W(s_, b_ - 0.2, d) for s_, d in ol], slab, 0.4)
+        for (sa, da), (sb, db) in zip(ol, ol[1:]):
+            if da == 0.0 and db == 0.0: continue
+            for o in (1, -1):
+                add_solid(Z, [W(sa, b_ - 0.2, da), W(sb, b_ - 0.2, db), W(sb, b_ + ph, db), W(sa, b_ + ph, da)][::o], par, 0.4)   # parapet
+                add_solid(Z, [W(sa, b_ + ph, da), W(sb, b_ + ph, db), W(sb, b_ + gh, db), W(sa, b_ + gh, da)][::o], gl, 0.3)    # glazing
+    add_solid(Z, [W(s_, top, d) for s_, d in ol][::-1], slab, 0.5); add_solid(Z, [W(s_, top - 0.15, d) for s_, d in ol], slab, 0.4)
+_a31WH = M('#f1f1ed'); _a31FR = M('#f6f6f2'); _a31GL = M('#4b565c', 0.1, 0.3); _a31BG = M('#c9d4d8', 0.1, 0.3)   # the glazing reads light in the photos (sky reflections)
+def _a31_bits(Z, pts, h, P):
+    W = _a31wall(Z, *_A31); tile = MT('#9a5a3a', 'brick', 0.85)
+    for s0, s1 in ((1.8, 2.6), (3.25, 4.05), (7.9, 9.3), (10.7, 11.7), (13.85, 14.5), (16.5, 17.2), (17.6, 18.2), (20.4, 21.1), (23.2, 24.0), (26.3, 26.8), (28.0, 28.8), (31.45, 32.6), (34.0, 35.0)):
+        _a31bx(Z, W, s0, s1, 0.0, 3.3, 0.0, 0.06, tile)                                   # brown tile piers of the ground floor
+    for s0, s1 in ((0.2, 1.7), (2.7, 3.2), (4.15, 5.9), (9.4, 10.6), (11.8, 13.75), (14.6, 16.4), (18.3, 20.3), (21.2, 23.1), (24.1, 26.2), (28.9, 31.35), (32.7, 33.9)):
+        _a31win(Z, W, s0 + 0.1, s1 - 0.1, 2.2, 2.9, _a31FR, _a31GL)                            # high strip windows in the white ground-floor panels
+    for s0, s1 in ((6.05, 7.8), (26.8, 28.0)):
+        _a31q(Z, W, s0, s1, 0.0, 2.4, 0.02, M('#6a4a2c', 0.6))                          # the two entrances, under the end balcony stacks
+    for b_ in (3.3, 6.2, 9.1):
+        for s0, s1 in ((1.9, 2.45), (3.5, 4.0), (12.0, 13.1), (21.75, 23.0), (24.1, 24.7)):
+            _a31win(Z, W, s0, s1, b_ + 0.9, b_ + 2.3, _a31FR, _a31GL)                          # windows of the wall between the stacks
+        for s0, s1 in ((4.3, 9.1), (13.9, 20.9), (24.8, 33.7)):
+            _a31q(Z, W, s0, s1, b_ + 0.2, b_ + 2.6, 0.02, M('#8a9296', 0.5))           # rooms seen through the balcony glazing
+    for s0, s1 in ((4.0, 9.4), (13.6, 21.2), (24.4, 34.0)):
+        _a31balc(Z, W, s0, s1, (3.3, 6.2, 9.1), 12.0, 1.3, _a31WH, _a31BG, _a31WH)
+    # 414, Antinkatu 29 (front s 36.0 ... 59.5): white-framed windows, the staircase door under a straight canopy with a tall glass strip above
+    for s_ in (39.5, 42.4, 45.0, 50.6, 53.2, 55.9):
+        for z0 in (4.35, 7.35): _a31win(Z, W, s_ - 0.72, s_ + 0.72, z0, z0 + 1.45, _a31FR, _a31GL)
+    for s_ in (39.8, 42.5, 45.1, 50.5, 53.1):
+        _a31win(Z, W, s_ - 0.72, s_ + 0.72, 1.15, 2.6, _a31FR, _a31GL)
+    _a31q(Z, W, 47.4, 48.6, 0.3, 2.6, 0.02, M('#5a3a24', 0.6))                         # staircase door (wood and glass)
+    _a31bx(Z, W, 46.8, 49.2, 2.8, 2.95, 0.0, 1.1, M('#6b5a48', 0.6))                     # straight canopy over it
+    _a31win(Z, W, 47.5, 48.5, 3.3, 9.3, _a31FR, M('#c9d3d2', 0.2, 0.2))                    # glass-block strip lighting the stairs, almost to the eave
+    _a31q(Z, W, 54.7, 55.5, 0.3, 2.3, 0.02, M('#5a3a24', 0.6)); _a31win(Z, W, 56.4, 58.2, 0.7, 2.6, _a31FR, _a31GL)   # side door and shop window, north end
+    _a31q(Z, W, 36.0, 59.5, 0.0, 0.6, 0.02, M('#8d8a84', 0.85))                        # low grey plinth
+_a31PL = lambda H: dict(bw=50.0, rows=[(H, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True)
+SPEC[522] = dict(P=dict(wall=MT('#eeeeea', 'plaster', 0.9)), layout=_a31PL(12.0), extra=[_a31_bits])
+SPEC[414] = dict(P=dict(wall=MT('#e9dfca', 'plaster', 0.9)), layout=_a31PL(9.9))
 # 238  Sampotalo, Yrjönkatu 13 (1961; Street View 13.11.2026): two storeys of shops in front of Teljäntori, glazed shop fronts under a
 # green fascia, the upper storey clad in light grey-green ribbed sheet with a high window band (drawn as a stretch of Teljäntori's LoD2 shell)
 SPEC[238] = dict(P=dict(wall=M('#c5cbc6', 0.5, 0.3), spandrel=M('#aeb5b1', 0.5, 0.3), sign=SIGNS, fascia=M('#3f6e5c'), gwall=M('#3a3f42', 0.3), gframe=ALU),
@@ -807,7 +912,55 @@ _GL = dict(colmod={'L': 'gloggia'}, ww=1.5, wh=1.45, nx=2)
 _DK = M('#3d3f44', 0.6)
 def _svP(wall, **kw): d = dict(wall=wall, linner=kw.pop('linner', wall), sign=SIGNS, gwall=M('#34383b', 0.3), fascia=wall, gframe=ALU); d.update(kw); return d
 # 569  Antinkatu 27 A (new): white/light grey panels, the street face wall-to-wall glazed balconies, yellow panel at the entrance, shops
-SPEC[569] = dict(P=_svP(M('#e9eae6')), layout=_sv_lay(20.0, 4.0, 3.0, _stk(2, 0), _GL, gmod='shop'), roof=dict(kind='flat', mat=SHEET))
+SPEC[569] = dict(P=_svP(M('#e9eae6')), layout=_sv_lay(20.0, 4.0, 3.0, _stk(2, 0), _GL, gmod='punched'), roof=dict(kind='flat', mat=SHEET))
+# owner 18.11.2026 "älä lisää ylimääräisiä ikkunoita" - SV from both sides of the lot (Antinkatu 24 / 27): the faces of 569 towards the
+# street (east gable) and the empty lot (south) are bare white render, and so is the south face of 570; along their foot and across the lot
+# to 570 runs a dark brown board hoarding 2.3 m high (the lot of the demolished timber house). The game drew window grids on all of them.
+def _on_line(x, y, a, b, tol=1.5):
+    dx, dy = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dy * dy; u = ((x - a[0]) * dx + (y - a[1]) * dy) / L2
+    return -0.05 < u < 1.05 and abs((x - a[0]) * dy - (y - a[1]) * dx) / L2 ** 0.5 < tol
+_bare_lay = dict(bw=60.0, rows=[(30.0, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True)
+_bare = lambda hx: dict(P=dict(wall=MT(hx, 'plaster', 0.9)), layout=_bare_lay, upper=_bare_lay)   # upper: also the stretch above a lower roof
+_b569, _b570 = _bare('#eeeeea'), _bare('#ededea')
+SPEC[569]['runalt'] = lambda x, y: _b569 if (_on_line(x, y, (-144.2, -398.7), (-148.0, -414.9)) or _on_line(x, y, (-148.0, -414.9), (-190.1, -404.9))) else None
+def _hoard569(Z, pts, h, P):
+    m = MT('#4b3b31', 'woodv', 0.9)
+    W = _a31wall(Z, (-190.1, -404.9), (-148.0, -414.9))   # along the south face (right of the line = south)
+    L1 = math.hypot(42.1, 10.0); _a31bx(Z, W, 0.0, L1, 0.0, 2.3, 0.0, 0.08, m)
+    W = _a31wall(Z, (-148.0, -414.9), (-128.5, -387.5))   # across the lot along Antinkatu
+    _a31bx(Z, W, 0.0, math.hypot(19.5, 27.4), 0.0, 2.3, 0.0, 0.08, m)
+SPEC[569]['extra'] = [_hoard569]
+# 569's balcony stack: at the east end of its north face, yellow-tinted glass, five levels (SV from Antinkatu 24, owner 18.11.2026 "puuttuu
+# parvekkeet vasemmalta"; its width is estimated from the side view, about 5 m)
+def _bal569(Z, pts, h, P):
+    W = _a31wall(Z, (-144.2, -398.7), (-184.4, -389.0))   # north face from the east corner westwards; right of the line = north
+    _a31balc(Z, W, 0.4, 5.4, (3.4, 6.3, 9.2, 12.1, 15.0), 17.9, 1.5, M('#d8c46e', 0.15, 0.3), M('#c9d4d8', 0.1, 0.3), _a31WH, r=0.0, ph=1.0, gh=2.7)
+SPEC[569]['extra'].append(_bal569)
+# 570 Antinkatu 27 B (SV from Antinkatu 24, 18.11.2026; owner: "oikealla ei erkkeriä vaan parvekkeet, mutta nekin väärässä kohdassa"):
+# south piece of the street front (8 m, 1.7 m proud): white render, three window columns, an orange strip, grey stone plinth; the main
+# front: the entrance under one glazed balcony stack at its south end, then continuous glazed balconies on six floors over a recessed
+# glazed ground floor on round white columns, orange panels at the ends and between the two balcony runs. Bare white everywhere else.
+_E570S = ((-126.9, -388.7), (-125.1, -380.9)); _E570M = ((-127.4, -380.3), (-122.6, -359.5))
+def _f570(Z, pts, h, P):
+    org, gl, gr, fr = MT('#c8642c', None, 0.8), _a31GL, M('#9a9890', 0.85), _a31FR
+    W = _a31wall(Z, *_E570S)
+    _a31q(Z, W, 0.0, 8.0, 0.0, 2.2, 0.03, MT('#9a9890', 'brick', 0.85))                       # grey stone-tile plinth
+    _a31bx(Z, W, 3.7, 4.6, 2.2, 22.5, 0.0, 0.06, org)                                       # orange strip
+    for k in range(7):
+        z0 = 2.9 + 3.05 * k
+        for s0, s1 in ((2.3, 3.6), (4.8, 6.3), (6.9, 7.8)): _a31win(Z, W, s0, s1, z0, z0 + 1.7, fr, gl)
+    W = _a31wall(Z, *_E570M); L = 21.35; lv = tuple(3.6 + 3.05 * k for k in range(6))
+    _a31q(Z, W, 0.7, 3.3, 0.0, 3.4, 0.02, M('#3f4a42', 0.3)); _a31q(Z, W, 0.8, 3.2, 0.0, 2.6, 0.03, gl)        # entrance: glass doors, green frame
+    _a31q(Z, W, 4.6, L - 0.3, 0.3, 3.4, 0.02, M('#55606a', 0.2, 0.3))                          # recessed glazed ground floor
+    for s_ in (4.6, 8.4, 12.2, 16.0, 19.8): _a31q(Z, W, s_ - 0.06, s_ + 0.06, 0.3, 3.4, 0.03, M('#8fbf4a', 0.6))   # green mullions
+    for s_ in (4.4, 12.2, 19.6): _a31bx(Z, W, s_ - 0.3, s_ + 0.3, 0.0, 3.6, 1.0, 1.6, _a31WH)  # round white columns (square here)
+    _a31balc(Z, W, 0.7, 4.3, lv, 22.0, 1.4, M('#b9c6cc', 0.1, 0.3), M('#c9d4d8', 0.1, 0.3), _a31WH, r=0.0)
+    _a31balc(Z, W, 4.6, 12.6, lv, 22.0, 1.4, M('#b9c6cc', 0.1, 0.3), M('#c9d4d8', 0.1, 0.3), _a31WH, r=0.0)
+    _a31balc(Z, W, 12.9, L, lv, 22.0, 1.4, M('#b9c6cc', 0.1, 0.3), M('#c9d4d8', 0.1, 0.3), _a31WH, r=0.0)
+    for s0 in (4.3, 12.6): _a31bx(Z, W, s0, s0 + 0.3, 3.4, 22.0, 0.0, 1.4, org)               # orange panels between the runs
+_on570 = lambda x, y: (_on_line(x, y, (-126.9, -388.7), (-141.0, -385.5)) or _on_line(x, y, *_E570S) or _on_line(x, y, *_E570M))
+RUNALT = {570: lambda x, y: _b570 if _on570(x, y) else None}
+EXTRA = {570: [_f570]}
 # 415  It.k./Antinkatu corner: white 5 storeys, stacks of glazed balconies
 SPEC[415] = dict(P=_svP(M('#ecebe6')), layout=_sv_lay(17.6, 0, 3.0, _stk(3), _GL), roof=dict(kind='flat', mat=SHEET))
 # 665  new block (c077): white and dark grey panels, glazed balcony stacks, dark grey ground floor
@@ -820,8 +973,7 @@ SPEC[1242] = dict(P=_svP(M('#d8cdb8')), layout=_sv_lay(17.6, 5.6, 3.0, _stk(3), 
 SPEC[1241] = dict(P=_svP(M('#ecebe6')), layout=_sv_lay(20.7, 0, 3.0, _stk(3), _GL), roof=dict(kind='flat', mat=SHEET))
 # 143  glazed single-storey shop wing with a canopy in front of the tower 141
 SPEC[143] = dict(P=_svP(M('#d9dcdc')), layout=dict(bw=3.4, rows=[(4.7, 'shop', 'G')], cols=lambda c, nb: 'W', P={}, rowP={}), roof=dict(kind='flat', mat=SHEET))
-# 116  Antinlinna, Antinkatu 26 (1929): ochre render, dark brown window frames and door, classicist
-SPEC[116] = dict(P=dict(wall=M('#d9b866'), frame=M('#4a3426'), trim=M('#e8d9a8'), sign=SIGNS), layout=lay(14.0, 'classic', bw=3.2, fh=3.3, P=dict(ww=1.2, wh=1.6)))
+# 116  Antinlinna: see the SV 18.11.2026 spec near Antinkatu 9 (the ochre guess here drew windows on the bare fire wall)
 # 119  small cream two-storey house with a gable roof (Street View I05A), plain punched windows in white frames
 SPEC[119] = dict(P=dict(wall=M('#e2d8c2'), frame=WHITE), layout=lay(6.6, 'punched', bw=3.0, fh=3.2, P=dict(ww=1.2, wh=1.4, nx=2)))
 # 4  Karhulinna, Tasavallankatu 2 (1928; user photo 13.11.2026): monumental classicism, ivory render, three storeys under a strong

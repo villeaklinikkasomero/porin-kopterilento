@@ -562,3 +562,10 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   gen.py `_hidden_wall`: vain jos naapuri on vähintään yhtä korkea. Kaaret näkyviin (`wh_fixed`, leveämmät aukot), markiisit kaarten
   sisään. 1361:n eteläpäätyseinä (9:n yllä, leipoutui mustaksi) → yksi koko seinän laatta (`SPEC[1361]['walls']`).
 - **Ajettava:** `bake tori0 tori1 tori3 tori4 kivi2 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.
+- **18.11 ilta, Antinkatu (SV + rautalanka):** index.html: lohkon shells-rivi luetaan `;`-merkkiin asti (Windowsin CRLF-bake ei latautunut →
+  Keskuskartano ym. tavallisina seininä, katot irti), latausvirhe konsoliin. Purettu talo (styles `gone`) jätetään pois myös tavallisista
+  seinistä (mobiili ei lataa bakeja: Saukkosen talo näkyi). 116 Antinlinna: 3 krs, 8 akselia kuvasta mitattuna, pilasterit vain oven vieressä,
+  valkoinen palomuuripääty 3 yläikkunalla. 114 puutalo: isot 6-ruutuiset ikkunat, punatiilisokkeli (styles `win`, `pl`, city.py).
+  522 Antinkatu 31 + 414 Antinkatu 29 (yksi LoD2-kuori): rapattu tasainen seinä + mitatut ikkunat, ovet, laattapilarit, 3 ulkonevaa lasitettua
+  parvekepinoa pyöristetyin kulmin; 414 kerma, porrasoven suora lippa ja lasitiilinauha lähes räystäälle. gen.py: sarake `d` (ovi, yllä tyhjä), `wmarg`.
+- **Ajettava:** `city 64 c048`.

@@ -1128,7 +1128,7 @@ def shell_runalt(sp, subs, spec):
         r = base(x, y) if base else None                   # a hand-made runalt (Eteläpuisto 9 in 11's shell) wins
         if r: return r
         for sj, g in zone:
-            if g.contains(_Pt(x, y)): return sj
+            if g.contains(_Pt(x, y)): return (sj.get('runalt') and sj['runalt'](x, y)) or sj   # the part's own bare walls (zones.RUNALT, 570) win
         return None
     return dict(sp, runalt=ra, splitruns=True)
 

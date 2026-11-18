@@ -378,6 +378,7 @@ def m_classic(mb, col, P):
     if col == 'G' and not P.get('ground'): col = 'W'
     if col == 'X': col = 'N' if P.get('ground') else 'W'   # blank bay on the ground floor, window (attic vent) above
     if col == 'Y': col = 'W' if P.get('ground') else 'N'   # window on the ground floor, blank above (an oriel stands there)
+    if col == 'd': col = 'D' if P.get('ground') else 'N'   # door on the ground floor, blank wall above (a staircase lit by a glass-block strip)
     if col in ('D', 'S') and not P.get('ground'): col = 'W'
     if balc: sill = 0.12; wh = min(fh - 0.12 - (0.75 if P.get('hood') else 0.35), 2.7)
     if P.get('blank'): col = 'N'

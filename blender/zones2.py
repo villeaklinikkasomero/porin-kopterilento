@@ -266,6 +266,9 @@ def _bal(sp, i):
 def spec_for(i):
     sp = SPEC.get(i)
     if sp: return _bal(sp, i)
+    if i in RUNALT: sp = dict(spec_for_auto(i)); sp['runalt'] = RUNALT[i]; sp['extra'] = list(sp.get('extra', [])) + EXTRA.get(i, []); return sp   # an auto facade with hand-checked bare walls (zones.RUNALT) and hand-placed parts (zones.EXTRA)
+    return spec_for_auto(i)
+def spec_for_auto(i):
     e_ = LOOK['b'].get(str(i)) or {}
     if e_.get('k') == 'wood' and e_.get('sv'):           # Street View 13.11.2026: timber houses inside the city blocks get the house facade
         import city                                      # (weatherboards, corner boards, gable ends), not a block of flats
