@@ -1130,7 +1130,8 @@ def shell_runalt(sp, subs, spec):
         for sj, g in zone:
             if g.contains(_Pt(x, y)): return (sj.get('runalt') and sj['runalt'](x, y)) or sj   # the part's own bare walls (zones.RUNALT, 570) win
         return None
-    return dict(sp, runalt=ra, splitruns=True)
+    ex = list(sp.get('extra', [])) + [zones2.FEXTRA[j] for j in subs if j in zones2.FEXTRA]   # the parts' measured facades
+    return dict(sp, runalt=ra, splitruns=True, extra=ex)
 
 # ---------------------------------------------------------------- ground under the houses (the game's smoothed terrain field, terrain.js 'hs')
 import base64 as _b64

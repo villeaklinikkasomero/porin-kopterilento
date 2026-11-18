@@ -266,7 +266,10 @@ def _bal(sp, i):
 def spec_for(i):
     sp = SPEC.get(i)
     if sp: return _bal(sp, i)
-    if i in RUNALT: sp = dict(spec_for_auto(i)); sp['runalt'] = RUNALT[i]; sp['extra'] = list(sp.get('extra', [])) + EXTRA.get(i, []); return sp   # an auto facade with hand-checked bare walls (zones.RUNALT) and hand-placed parts (zones.EXTRA)
+    if i in RUNALT:
+        sp = dict(spec_for_auto(i)); sp['runalt'] = RUNALT[i]; sp['extra'] = list(sp.get('extra', [])) + EXTRA.get(i, [])
+        if i in WALLS: sp['walls'] = {**sp.get('walls', {}), **WALLS[i][0]}; sp['P'] = dict(sp['P'], wall=WALLS[i][1])   # footprint houses: bare edges
+        return sp   # an auto facade with hand-checked bare walls (zones.RUNALT) and hand-placed parts (zones.EXTRA)
     return spec_for_auto(i)
 def spec_for_auto(i):
     e_ = LOOK['b'].get(str(i)) or {}

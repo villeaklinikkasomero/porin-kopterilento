@@ -1273,7 +1273,7 @@ SPEC[1490] = dict(P=dict(wall=M('#c8c1b4', 0.85), sign=SIGNS), layout=lay(27, 'p
 #   ["door", s0, s1, z0, z1, hex]      flat door / panel on the wall
 #   ["box", s0, s1, z0, z1, d0, d1, hex(, "brick"|"woodv"|"plaster")]   a box standing out of the wall (piers, strips, canopies, plinths)
 #   ["balc", s0, s1, [levels], top, depth, r, parapet hex, glass hex(, parapet h, glass top)]   projecting balcony stack, r: corner radius
-# Repeated windows: ["wins", [s centres], width, [z bottoms], height]
+# Repeated windows: ["wins", [s centres], width, [z bottoms], height]. "bare_s": [s0, s1] limits the bare wall to the runs centred in that stretch.
 import json as _json_f, os as _os_f
 def _fac_mat(hx, kind=None): return MT(hx, kind, 0.85) if kind else M(hx, 0.85 if not hx.lower() in ('#c9d4d8', '#b9c6cc') else 0.1)
 def _fac_extra(walls):
@@ -1302,15 +1302,32 @@ def _fac_extra(walls):
                              ph=it[9] if len(it) > 9 else 1.0, gh=it[10] if len(it) > 10 else 2.75)
     return ex
 _FJ = _os_f.path.join(_os_f.path.dirname(_os_f.path.realpath(__file__)), 'facades.json')   # realpath: zones.py is also imported through a symlink
+WALLS = {}; FEXTRA = {}
 FACADES = {e['id']: e for e in (_json_f.load(open(_FJ)) if _os_f.path.exists(_FJ) else [])}
 for _i, _e in FACADES.items():
     _bw = [w for w in _e['walls'] if w.get('bare')]
     def _ra(x, y, _bw=_bw):
         for w in _bw:
-            if _on_line(x, y, tuple(w['a']), tuple(w['b'])): return _bare(w['bare'], w.get('kind', 'plaster'))
+            if _on_line(x, y, tuple(w['a']), tuple(w['b'])):
+                if 'bare_s' in w:                          # only the runs whose middle lies in this stretch of the wall (s from a)
+                    a_, b_ = w['a'], w['b']; Lw = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); u = ((x - a_[0]) * (b_[0] - a_[0]) + (y - a_[1]) * (b_[1] - a_[1])) / Lw
+                    if not (w['bare_s'][0] <= u <= w['bare_s'][1]): continue
+                return _bare(w['bare'], w.get('kind', 'plaster'))
         return None
+    FEXTRA[_i] = _fac_extra(_e['walls'])                # also run when the house is a stretch of another house's LoD2 shell (kivi.shell_runalt)
+    _wk = {}                                             # footprint-built houses (no LoD2 shell): the bare walls by footprint edge
+    if _bw:
+        try:
+            _pp, _ = poly(_i)
+            for _k in range(len(_pp)):
+                _p, _q = _pp[_k], _pp[(_k + 1) % len(_pp)]
+                for w in _bw:
+                    if _on_line((_p[0] + _q[0]) / 2, (_p[1] + _q[1]) / 2, tuple(w['a']), tuple(w['b'])): _wk[_k] = _bare_lay
+        except Exception: pass
     if _i in SPEC:
-        SPEC[_i] = dict(SPEC[_i]); SPEC[_i]['extra'] = list(SPEC[_i].get('extra', [])) + [_fac_extra(_e['walls'])]
+        SPEC[_i] = dict(SPEC[_i]); SPEC[_i]['extra'] = list(SPEC[_i].get('extra', [])) + [FEXTRA[_i]]
         if _bw: SPEC[_i]['runalt'] = _ra
+        if _wk: SPEC[_i]['walls'] = {**SPEC[_i].get('walls', {}), **{k: v for k, v in _wk.items()}}; SPEC[_i]['P'] = dict(SPEC[_i]['P'], wall=MT(_bw[0]['bare'], _bw[0].get('kind', 'plaster'), 0.9))
     else:
-        RUNALT[_i] = _ra; EXTRA[_i] = EXTRA.get(_i, []) + [_fac_extra(_e['walls'])]
+        RUNALT[_i] = _ra; EXTRA[_i] = EXTRA.get(_i, []) + [FEXTRA[_i]]
+        if _wk: WALLS[_i] = (_wk, MT(_bw[0]['bare'], _bw[0].get('kind', 'plaster'), 0.9))
