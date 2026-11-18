@@ -1,0 +1,98 @@
+{
+ "pop": [
+  {
+   "f": "pop_1.mp3",
+   "d": 136.65,
+   "t": "Kauppatorin kesä"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_2.mp3",
+   "d": 141.61,
+   "t": "Yrjönkadun valot"
+  },
+  {
+   "f": "jingle_2.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_3.mp3",
+   "d": 152.45,
+   "t": "Kirjurinluodon ilta"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  }
+ ],
+ "electric": [
+  {
+   "f": "electric_1.mp3",
+   "d": 148.74,
+   "t": "Neon Isolinnankatu"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "electric_2.mp3",
+   "d": 146.52,
+   "t": "Kopteri Pulse"
+  },
+  {
+   "f": "jingle_2.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "electric_3.mp3",
+   "d": 153.76,
+   "t": "Kokemäenjoki Flow"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  }
+ ],
+ "rock": [
+  {
+   "f": "rock_1.mp3",
+   "d": 110.32,
+   "t": "Antinkadun kuningas"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "rock_2.mp3",
+   "d": 120.32,
+   "t": "Reunakivi"
+  },
+  {
+   "f": "jingle_2.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "rock_3.mp3",
+   "d": 120.37,
+   "t": "Porinsilta Riff"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  }
+ ]
+}

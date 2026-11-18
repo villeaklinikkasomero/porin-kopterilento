@@ -653,3 +653,19 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
 - **Paistot**: Antinkadun mitatut julkisivut (facades.json) eivät olleet leivottuina -> paikalliset 8 näytteen baket c052, c048, c051, c067, tori3, p1 (tori2 jo).
   Huom: 8 Gt muistissa kaksi bakea yhtä aikaa (tai bake + Chromium) kaatuu (exit 137) – aja yksi kerrallaan.
 - Ajettava Modal 64: `city 64 c048,c051,c052,c067` ja `bake p1 tori2 tori3 --samples 64`.
+
+### 18.11 klo 22.30–23: autoradio
+- **Radio Porikopteri** (index.html `RADIO`, kansio `radio/`): kanavat Pop, Electric, Rock, 3 omaa kappaletta + jingle kullakin (radio.json: tiedosto, kesto, nimi).
+  Kappaleet sävelletty säännöillä MIDIksi ja soitettu FluidSynthillä (FluidR3_GM, MIT): `python3 tools/radio/compose.py ulos/` (apt: fluidsynth fluid-soundfont-gm,
+  pip: mido). Kanavat soivat "suorana": kohta lasketaan kellosta. R / 📻-nappi vaihtaa kanavaa, M mykistää. Käynnistyy Popilla autolla lähdettäessä.
+  Huom: python -m http.server ei tue Range-pyyntöjä -> kelaus ei toimi paikallisesti, GitHub Pagesissa toimii.
+- GPU-muistin säästö: roads_ao.png 1 m/px (1690×1990), kivetys_albedo 1024 px, road_crack 1024 px.
+- Avoinna: omistaja: "Keskuskartanosta puuttuu taas seiniä" – pilven pelissä c064 näkyy ehjänä; odotetaan kuvakaappausta (epäily GPU-muisti tai CRLF-bake).
+
+### 18.11 klo 23: puistotiet, nurmi, sepeli
+- **Puistoteiden keskikaistat** (Itä-, Länsi-, Etelä-, Pohjoispuisto; build_roads.py `MED`): alue kahden vastakkaissuuntaisen ajoradan välissä (puolitesti suunta huomioiden),
+  korotettu reunakivelle, pintana omistajan nurmi (`nurmi_*`, 1,2 m) ja keskellä 4 m punagraniittisepelikäytävä (`sepeli_*`, 0,6 m). Vanhat puut pois, tilalle
+  lehmusrivit ±3,6 m käytävästä 8 m välein (roads.js `tadd`). Suojatiet ja madallukset myös keskikaistan poikki.
+- **Nurmi muualla:** OSM-nurmikot ja puistot (`lawn`) maan tasossa; shader näyttää nurmen vain siellä missä ilmakuva on vihreä (polut, hiekka, kukkapenkit jäävät kuvaan).
+  Puistopolut (`path`) sepelillä.
+- Asfaltti ulottuu 0,35 m reunakiven alle (rako näkyi sinisenä viivana).

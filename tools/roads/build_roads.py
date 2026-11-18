@@ -9,7 +9,7 @@ the kerb sits 3 m out from the facade, and with neither the lane count decides. 
 cycleway line buffered to its width, minus buildings, parks and lawns. Output: flat 2D triangles (dm, base64 Int16) the game drapes on its
 ground: 'asph' carriageway, 'pave' pavements and islands, 'kerb' pavement edge segments, 'mark' white paint.
 """
-import sys, json, math, base64, collections
+import sys, os, json, math, base64, collections
 import numpy as np
 from shapely.geometry import LineString, Polygon, MultiPolygon, Point, box
 from shapely.ops import unary_union
@@ -136,10 +136,49 @@ ISL = unary_union([i.intersection(CARR.buffer(1)) for i in islands]) if islands 
 CARR = CARR.difference(ISL)
 tick('CARR')
 
+# ---------------------------------------------------------------- esplanades (owner 18.11.2026): the park strip between the two carriageways of
+# Itä-, Länsi-, Etelä- and Pohjoispuisto is a kerbed island: lawn (owner's PBR grass), a red granite gravel walk down the middle, trees in two rows
+from shapely.ops import linemerge
+ESPN = ('Itäpuisto', 'Länsipuisto', 'Eteläpuisto', 'Pohjoispuisto')
+MEDS, CLS, _cands = [], [], []
+for nm in ESPN:
+    ls = [L for L, t in roads if t.get('n') == nm]
+    if len(ls) < 2: continue
+    band = unary_union([L.buffer(26, cap_style='flat') for L in ls])
+    cand = band.difference(CARR.buffer(0.3)).difference(BLD).difference(SQ).intersection(CLIP)
+    for g in getattr(cand, 'geoms', [cand]):
+        if g.geom_type != 'Polygon' or g.area < 150: continue
+        _cands.append(g)
+        touch = [L for L in ls if L.distance(g) < 14]
+        # between two carriageways: lines on both sides of the piece
+        c = g.representative_point(); sides = set(); ref = None
+        for L in touch:
+            u = L.project(c); q0, q1 = L.interpolate(max(0, u - 1)), L.interpolate(min(L.length, u + 1)); q = L.interpolate(u)
+            tx, ty = q1.x - q0.x, q1.y - q0.y
+            if ref is None: ref = (tx, ty)
+            sg = 1 if tx * (c.y - q.y) - ty * (c.x - q.x) > 0 else -1
+            if tx * ref[0] + ty * ref[1] < 0: sg = -sg                     # the two carriageways run in opposite directions
+            sides.add(sg)
+        if len(sides) < 2: continue
+        g = g.buffer(-0.4).buffer(0.4)
+        if g.is_empty: continue
+        MEDS.append(g)
+        # walk down the middle: the median's long axis from the minimum rotated rectangle, clipped to the piece
+        mr = g.minimum_rotated_rectangle; cc = list(mr.exterior.coords)[:4]
+        e1, e2 = (cc[0], cc[1]), (cc[1], cc[2]); L1, L2 = math.dist(*e1), math.dist(*e2)
+        if L1 >= L2: a = ((cc[0][0] + cc[3][0]) / 2, (cc[0][1] + cc[3][1]) / 2); b = ((cc[1][0] + cc[2][0]) / 2, (cc[1][1] + cc[2][1]) / 2)
+        else: a = ((cc[0][0] + cc[1][0]) / 2, (cc[0][1] + cc[1][1]) / 2); b = ((cc[3][0] + cc[2][0]) / 2, (cc[3][1] + cc[2][1]) / 2)
+        w = min(L1, L2)
+        if w > 9: CLS.append((LineString([a, b]), w, g))
+MED = unary_union(MEDS) if MEDS else Polygon()
+MPATH = unary_union([L.buffer(2.0, cap_style='flat').intersection(g) for L, w, g in CLS]) if CLS else Polygon()
+MGRASS = MED.difference(MPATH)
+tick('MEDIANS %d, %.0f m2' % (len(MEDS), MED.area))
 # ---------------------------------------------------------------- stone paving (owner 18.11.2026): the pedestrian streets wall to wall, Eetunaukio, Kauppatori
 STONE = unary_union([L.buffer(13.0, cap_style='flat') for L in pedl] + [Point(17.7, -72.8).buffer(30)] + [a.buffer(1.0) for a in peda]) if pedl or peda else Polygon()
 STONE = STONE.difference(CARR.buffer(0.2)).difference(BLD).difference(GREEN.buffer(-0.3)).intersection(CLIP)
 STONE = unary_union([g for g in getattr(STONE, 'geoms', [STONE]) if g.area > 30]).buffer(-0.3).buffer(0.3).simplify(0.2) if not STONE.is_empty else STONE
+MED = MED.difference(STONE); MPATH = MPATH.difference(STONE); MGRASS = MGRASS.difference(STONE)
 
 # ---------------------------------------------------------------- pavements
 walkp = [L.buffer(wd / 2, cap_style='flat') for L, t, wd in walks]
@@ -147,10 +186,15 @@ WALK = unary_union(walkp) if walkp else Polygon()
 strip = CARR.buffer(7.0, join_style='mitre').difference(CARR)
 PAVE = unary_union([strip, WALK.intersection(CARR.buffer(12.0)), ISL])
 PAVE = PAVE.difference(CARR).difference(BLD).difference(GREEN.buffer(-0.3)).difference(SQ).difference(PK)
-PAVE = PAVE.difference(STONE).buffer(-0.35).buffer(0.35)
+PAVE = PAVE.difference(STONE).difference(MED).buffer(-0.35).buffer(0.35)
 tick('PAVE')
 PAVE = PAVE.intersection(CLIP).simplify(0.25); CARR = CARR.intersection(CLIP).simplify(0.2)
 FLATW = WALK.difference(CARR.buffer(12.0)).difference(BLD).intersection(CLIP).buffer(-0.2).buffer(0.2)   # paths in parks: flat, not raised
+
+# other lawns: OSM grass and parks in the centre (the game blends back to the photo where the photo is not green: paths, sand, flower beds)
+LAWN = GREEN.intersection(CLIP).difference(MED.buffer(0.2)).difference(CARR.buffer(0.2)).difference(PAVE).difference(STONE).difference(BLD).difference(SQ).difference(FLATW)
+LAWN = LAWN.buffer(-0.3).buffer(0.3).simplify(0.3)
+PATHS = FLATW.difference(MED).simplify(0.2)
 
 # ---------------------------------------------------------------- zebra crossings: footway/cycleway lines crossing the carriageway
 marks = []; RAMPS = []   # crossing ends: (kerb point, inward unit, lateral unit, half width)
@@ -195,8 +239,8 @@ def ramp_h(x, y):
         din, lat = px * ux + py * uy, abs(px * nx + py * ny)
         h = min(h, max(min(1.0, max(0.0, din) / RD), min(1.0, max(0.0, lat - hw - 0.25) / RF)))
     return h
-RAMP_P = PAVE.intersection(RZ); RAMP_K = STONE.intersection(RZ)
-PAVE = PAVE.difference(RZ); STONE = STONE.difference(RZ)
+RAMP_P = unary_union([PAVE.intersection(RZ), MED.intersection(RZ)]); RAMP_K = STONE.intersection(RZ)
+PAVE = PAVE.difference(RZ); STONE = STONE.difference(RZ); MGRASS = MGRASS.difference(RZ); MPATH = MPATH.difference(RZ)
 tick('RAMPS ' + str(len(RAMPS)))
 
 # ---------------------------------------------------------------- triangulate (max ~4 m triangles so they follow the ground) and pack
@@ -310,12 +354,26 @@ for i in range(len(C['t']) // 2):
     q = nearest_points(PI, pt)[0]
     if q.distance(pt) < 9: tmv += [i, round(q.x * 10), round(q.y * 10)]
     else: tmv += [i, -32768, -32768]                    # nowhere near a pavement: drop it
-print('trees moved', len(tmv) // 3)
+MEDp = MED.buffer(0.5); shapely.prepare(MEDp)
+for i in range(len(C['t']) // 2):
+    if MEDp.contains(Point(C['t'][i * 2], C['t'][i * 2 + 1])): tmv += [i, -32768, -32768]
+tadd = []
+for L, w, g in CLS:
+    for off in (-3.6, 3.6):
+        side = L.parallel_offset(abs(off), 'left' if off > 0 else 'right')
+        if side.is_empty: continue
+        for part in getattr(side, 'geoms', [side]):
+            d = 4.0
+            while d < part.length - 3:
+                q = part.interpolate(d)
+                if g.buffer(-1.2).contains(q) and not RZ.buffer(1.5).contains(q): tadd += [round(q.x * 10), round(q.y * 10)]
+                d += 8.0
+print('trees moved', len(tmv) // 3, 'median rows', len(tadd) // 2)
 
 # ---------------------------------------------------------------- 0.5 m raster: R = contact shade at the house walls, G = street surface (no grass tufts there)
 from PIL import Image, ImageDraw
 from scipy.ndimage import distance_transform_edt
-PX = 0.5; RW, RH = int((BB[2] - BB[0]) / PX), int((BB[3] - BB[1]) / PX)
+PX = 1.0; RW, RH = int((BB[2] - BB[0]) / PX), int((BB[3] - BB[1]) / PX)
 def rast(geoms, img=None):
     img = img or Image.new('L', (RW, RH), 0); d = ImageDraw.Draw(img)
     for g in geoms:
@@ -326,17 +384,19 @@ def rast(geoms, img=None):
     return img
 bm = np.asarray(rast(blds)) > 0
 dist = distance_transform_edt(~bm) * PX
-ao = 1.0 - 0.42 * np.exp(-dist / 0.8)
-sm = np.asarray(rast([CARR, PAVE, STONE, RAMP_P, RAMP_K, ISL]))
+ao = 1.0 - 0.42 * np.exp(-dist / 1.0)
+sm = np.asarray(rast([CARR, PAVE, STONE, RAMP_P, RAMP_K, ISL, MPATH]))
 Image.fromarray(np.stack([(ao * 255).astype(np.uint8), sm, np.zeros_like(sm)], -1)).save(OUT.replace('.js', '_ao.png'), optimize=True)
 
 def b64(a): return base64.b64encode(np.array(a, dtype=np.int16).tobytes()).decode()
-KF, KH = edges_h(unary_union([PAVE, STONE, RAMP_P, RAMP_K]))
-R = dict(asph=tri(CARR), pave=tri(PAVE), kivi=tri(STONE), kerb=KF, kerbh=KH, mark=tri(MARK, 50),
+KF, KH = edges_h(unary_union([PAVE, STONE, RAMP_P, RAMP_K, MGRASS, MPATH]))
+R = dict(asph=tri(CARR.buffer(0.35, join_style='mitre').difference(BLD)), pave=tri(PAVE), kivi=tri(STONE), medg=tri(MGRASS), medp=tri(MPATH), lawn=tri(LAWN, 8.0), path=tri(PATHS), kerb=KF, kerbh=KH, mark=tri(MARK, 50),
          rampp=tri_h(RAMP_P), rampk=tri_h(RAMP_K))
-js = 'export default ' + json.dumps({k: b64(v) for k, v in R.items()} | {'bb': BB, 'ow': b64(ow), 'tmv': base64.b64encode(np.array(tmv, dtype=np.int32).tobytes()).decode(), 'aopx': PX}) + ';\n'
+js = 'export default ' + json.dumps({k: b64(v) for k, v in R.items()} | {'bb': BB, 'ow': b64(ow), 'tmv': base64.b64encode(np.array(tmv, dtype=np.int32).tobytes()).decode(), 'tadd': b64(tadd), 'aopx': PX}) + ';\n'
 open(OUT, 'w').write(js)
 print('carriageway m2', round(CARR.area), 'pavement m2', round(PAVE.area), 'paths', round(FLATW.area), 'marks', round(MARK.area),
       {k: len(v) for k, v in R.items()}, 'KB', len(js) // 1024)
 json.dump(log, open('/home/claude/work/road_widths.json', 'w'), ensure_ascii=False, indent=0)
-import pickle; pickle.dump(dict(RAMPS=RAMPS, STONE=STONE, CARR=CARR, PAVE=PAVE, FLATW=FLATW, MARK=MARK, ISL=ISL), open('/home/claude/work/roads_geom.pkl', 'wb'))
+import pickle; pickle.dump(dict(MED=MED, MPATH=MPATH, LAWN=LAWN, PATHS=PATHS, RAMPS=RAMPS, STONE=STONE, CARR=CARR, PAVE=PAVE, FLATW=FLATW, MARK=MARK, ISL=ISL), open('/home/claude/work/roads_geom.pkl', 'wb'))
+if os.environ.get('MEDDBG'):
+    import pickle as _p; _p.dump(dict(CAND=[c for c in locals().get('_cands', [])]), open('/home/claude/work/med_dbg.pkl', 'wb'))

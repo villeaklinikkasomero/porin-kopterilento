@@ -74,7 +74,7 @@ pave = stones(1024, 1.2, (146, 147, 147), GREY, 0.7, 5, (1.5, 7))
 Image.fromarray((pave * 255).astype(np.uint8)).save(f'{OUT}/road_pave.jpg', quality=90)
 
 # ---------------------------------------------------------------- cracks, 16 m tile at 7.8 mm/px
-N = 2048; M = 16.0 / N
+N = 2048; M = 16.0 / N   # saved at 1024 px below (GPU memory)
 cr = Image.new('L', (N, N), 255); d = ImageDraw.Draw(cr)
 def wrapline(pts, fill, width):
     for ox in (-N, 0, N):
@@ -104,5 +104,5 @@ for _ in range(2):
     cx, cy = rng.random() * N, rng.random() * N
     for _ in range(18): crack(cx + rng.normal(0, 60), cy + rng.normal(0, 60), rng.random() * 6.283, rng.uniform(20, 70), 1, 2)
 cr = cr.filter(ImageFilter.GaussianBlur(0.6))
-cr.save(f'{OUT}/road_crack.png', optimize=True)
+cr.resize((1024, 1024), Image.LANCZOS).save(f'{OUT}/road_crack.png', optimize=True)
 print('ok')
