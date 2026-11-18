@@ -86,12 +86,22 @@ SPEC[1361] = dict(P=dict(wall=M('#dcb86c'), band=M('#f3eedf'), sign=SIGNS, ewall
                   layout=lay(23, 'punched', gh=4.2, bw=3.2, fh=3.7, cols=ends('E'), P=dict(colmod={'E': 'erker'}, ww=2.0, wh=1.5, nx=3)), roof=dict(kind='hip', inset=3.5, rise=1.4, mat=SHEET))
 # 1493  Antinkatu 9 (Street View 13.11.2026): two-storey neo-renaissance front, cream render with yellow pilasters and dressings,
 # round-arched ground-floor openings (green awnings); the 23 m block 1492 stands behind it
-_a9T = M('#d8b04f')
-SPEC[1493] = dict(P=dict(wall=M('#e6d6a6'), trim=_a9T, frame=M('#f4f2ea')),
-                  layout=dict(bw=3.3, rows=[(5.2, 'classic', 'G'), (4.8, 'classic', 'F')], cols=lambda c, nb: 'W', P={},
-                              rowP={'G': dict(ground=True, arch=True, plinth_h=0.4, plinth=M('#5b5752', 0.8), ww=1.7, wh=3.4, sill=0.4, pil=True),
-                                    'F': dict(hood='cornice', pil=True, ww=1.2, wh=2.2, sill=0.9)}, plain=False),
-                  cornice=(0.45, 0.7, _a9T))
+_a9T = M('#ece4cc')
+# owner 18.11.2026 "ihan erinäköinen" (SV, counted from the photo): five bays between paired cream pilasters on an ochre wall, tall first-floor windows under
+# pediments with panels below, round-arched ground floor under green awnings, a heavy cornice on brackets
+def _a9_awnings(Z, pts, h, P):
+    p0, p1 = (-3.9, 143.9), (0.2, 161.5); L = math.hypot(p1[0] - p0[0], p1[1] - p0[1]); t = ((p1[0] - p0[0]) / L, (p1[1] - p0[1]) / L); n = (t[1], -t[0])
+    W = lambda s_, z, d: (p0[0] + t[0] * s_ + n[0] * d - Z.cx, p0[1] + t[1] * s_ + n[1] * d - Z.cy, z)
+    g = M('#2e6a46', 0.7)
+    for k in range(5):
+        c = (k + 0.5) * L / 5; a, b = c - 1.3, c + 1.3
+        add_solid(Z, [W(a, 3.75, 0.02), W(b, 3.75, 0.02), W(b, 3.05, 1.0), W(a, 3.05, 1.0)][::-1], g, 0.4)
+        add_solid(Z, [W(a, 3.05, 1.0), W(b, 3.05, 1.0), W(b, 2.75, 1.0), W(a, 2.75, 1.0)][::-1], g, 0.3)
+SPEC[1493] = dict(P=dict(wall=M('#d6b25a'), trim=_a9T, frame=M('#f4f2ea')),
+                  layout=dict(bw=3.6, rows=[(4.6, 'classic', 'G'), (5.4, 'classic', 'F')], cols=lambda c, nb: 'W', P={},
+                              rowP={'G': dict(ground=True, arch=True, plinth_h=0.45, plinth=M('#7d776e', 0.8), ww=1.9, wh=3.2, sill=0.35, pil=True),
+                                    'F': dict(hood='pediment', apron=True, pil=True, ww=1.25, wh=2.5, sill=1.0, dentils=True)}, plain=False),
+                  cornice=(0.6, 0.9, _a9T), extra=[_a9_awnings], roof=dict(kind='flat', mat=SHEET))
 # 238  Sampotalo, Yrjönkatu 13 (1961; Street View 13.11.2026): two storeys of shops in front of Teljäntori, glazed shop fronts under a
 # green fascia, the upper storey clad in light grey-green ribbed sheet with a high window band (drawn as a stretch of Teljäntori's LoD2 shell)
 SPEC[238] = dict(P=dict(wall=M('#c5cbc6', 0.5, 0.3), spandrel=M('#aeb5b1', 0.5, 0.3), sign=SIGNS, fascia=M('#3f6e5c'), gwall=M('#3a3f42', 0.3), gframe=ALU),
@@ -1086,3 +1096,8 @@ SPEC[640]['P']['rail'] = _s640b['P']['rail']
 _s121w = dict(P=dict(wall=_WHT('#ecebe6'), sign=SIGNS, spandrel=_WHT('#ecebe6')), layout=lay(14.9, 'ribbon', gh=4.0, bw=3.2, fh=3.6, P=dict(wh=1.6, nx=3, sill=0.9, frame=M('#d9dad9'))))
 SPEC[121] = dict(P=dict(wall=MT('#b89a6e', 'brick', 0.8), sign=SIGNS), layout=lay(24.4, 'punched', gh=4.0, bw=3.0, fh=3.0, P=dict(ww=1.4, wh=1.4)),
                  runalt=lambda x, y: _s121w if y > -433.5 else None, splitruns=True)
+
+# behind and beside Antinkatu 9 (SV 18.11.2026): 1492 a plain grey concrete block with a grid of windows, 1490 a grey-beige rendered
+# office block (the game drew both as white flats with balconies / blue panels)
+SPEC[1492] = dict(P=dict(wall=M('#b9b7b0', 0.85)), layout=lay(23, 'punched', gh=0, bw=2.9, fh=3.0, P=dict(ww=1.4, wh=1.3, nx=2)), roof=dict(kind='flat', mat=SHEET))
+SPEC[1490] = dict(P=dict(wall=M('#c8c1b4', 0.85), sign=SIGNS), layout=lay(27, 'punched', gh=4.2, bw=3.0, fh=3.2, P=dict(ww=1.6, wh=1.4, nx=2)), roof=dict(kind='flat', mat=SHEET))

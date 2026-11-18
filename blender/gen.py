@@ -776,7 +776,7 @@ def _hidden_wall(i, p, q, L):
         if j == i or pg.is_empty: continue
         bx = pg.bounds
         if not (bx[0] - 1 < mx < bx[2] + 1 and bx[1] - 1 < my < bx[3] + 1): continue
-        if all(pg.contains(pt) for pt in pts): return True
+        if all(pg.contains(pt) for pt in pts) and float(B[j].get('h', 0)) >= float(B[i].get('h', 0)) - 0.5: return True   # a taller house's wall above the neighbour stays
     return False
 
 def build_building(Z, i, spec):

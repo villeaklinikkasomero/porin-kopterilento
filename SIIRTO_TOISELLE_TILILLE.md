@@ -555,4 +555,9 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   toisen talon runalt-pätkän 216:n räystääseen → zones2: ruudukko runalt-pätkille vain `gridalt=True` (659). 637 Itäpuisto 5
   tummempi terasti. 121 Palojoenkulma: torni ruskea tiili, Yrjönkadun siipi valkoinen nauhaikkunoin (runalt y > -433,5).
   Huom. gshot ZONE odottaa vain yhtä nimettyä lohkoa: muut nimetyt lohkot voivat näkyä kuvassa vielä pelin varamalleina.
-- **Ajettava:** `bake tori0 tori3 tori4 kivi2 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.
+- **Antinkatu 9 (1493, käyttäjä 18.11: "ihan erinäköinen"; SV laskettu kuvasta):** 5 akselia, okra seinä, kermanvalkoiset parilliset
+  pilasterit ja ikkunanpuitteet, ylhäällä korkeat ikkunat päätyfrontonein, katutasossa kaaret ja vihreät markiisit, raskas räystäslista,
+  tasakatto (ilman kattoa peli piirsi ilmakuvakaton vinoksi laataksi). Taustan 1492 harmaa betoni, vasen 1490 harmaa-beige (olivat
+  valkoisia parveketaloja). Käyttäjä: "älä keksi olemattomia, vaan vertaa kuvaan" → vain kuvassa näkyvät piirteet.
+  gen.py `_hidden_wall`: vain jos naapuri on vähintään yhtä korkea. Avoinna: 1361:n eteläpäätyseinä (9:n yllä) leipoutuu mustaksi.
+- **Ajettava:** `bake tori0 tori1 tori3 tori4 kivi2 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.
