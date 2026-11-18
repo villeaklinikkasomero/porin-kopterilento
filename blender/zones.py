@@ -279,6 +279,11 @@ SPEC[1601] = dict(P=dict(wall=M('#eeede8'), frame=M('#d6dad8'), wglass=M('#7f959
 # 564  Kansankulma, Antinkatu 14 (Karhulahti 1954): terasti, band of large windows on the first floor, small two-pane windows above, stone-clad street level
 SPEC[564] = dict(P=dict(wall=TERASTI2, gwall=M('#9c9a92', 0.4), plinth=M('#6d6b66', 0.4), sign=SIGNS),
                  layout=lay(23, 'punched', gh=4.0, bw=2.9, fh=3.15, second=('ribbon', dict(wh=1.7, sill=0.8, nx=3, pier=0.15)), P=dict(ww=1.25, wh=1.35, nx=2)), roof=dict(kind='hip', inset=3.2, rise=1.5, mat=SHEET))
+# 563  Antinkatu 12 (SV 18.11.2026): two-storey 1960s concrete shop building, 8.9 m to the coping (LoD2); the street front and the north end are
+# measured walls in facades.json, this spec covers the yard sides
+B[563]['h'] = 8.9
+SPEC[563] = dict(P=dict(wall=M('#a9a6a0', 0.85), gwall=M('#3d4446', 0.3), sign=SIGNS, fascia=M('#8a8781')),
+                 layout=lay(8.9, 'ribbon', gh=4.4, bw=4.43, fh=4.5, P=dict(wh=2.0, sill=1.0, nx=3)), roof=dict(kind='flat', mat=SHEET))
 # 637  As.oy Itäpuisto 5 (Valli 1955): terasti, bay windows with brown clinker, hipped tile roof, red mosaic at street level
 SPEC[637] = dict(P=dict(wall=M('#8f8a82', 0.85), epanel=M('#6e4a35', 0.5), gwall=M('#9a3b30', 0.4), plinth=M('#5a2a25', 0.4), sign=SIGNS, fascia=TERASTI2),
                  layout=lay(23, 'punched', gh=3.9, bw=3.3, fh=3.15, cols=every(3, 'E', 1), P=dict(colmod={'E': 'erker'}, ww=1.5, wh=1.4, edepth=0.6)), roof=dict(kind='hip', inset=4.2, rise=2.6, mat=TILE))

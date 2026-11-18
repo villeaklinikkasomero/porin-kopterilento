@@ -669,3 +669,17 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
 - **Nurmi muualla:** OSM-nurmikot ja puistot (`lawn`) maan tasossa; shader näyttää nurmen vain siellä missä ilmakuva on vihreä (polut, hiekka, kukkapenkit jäävät kuvaan).
   Puistopolut (`path`) sepelillä.
 - Asfaltti ulottuu 0,35 m reunakiven alle (rako näkyi sinisenä viivana).
+
+### Sovittu 18.11.2026 klo 23 (omistaja): polttojen työnjako
+- Paikallinen 8 näytteen poltto vain omaan tarkistukseen (rautalanka) – EI viedä käyttäjän kansioon, ellei omistaja pyydä.
+- Modal-poltto (64 näytettä) vasta kun on kertynyt tarpeeksi valmista. Pidä alla olevaa listaa ajan tasalla ja kerro se omistajalle, kun on sopiva hetki.
+- **Modal-jono nyt:** `city 64 c048,c051,c052,c067` · `bake p1 tori2 tori3 --samples 64` · `bake tori0 tori1 tori4 kivi2 --samples 64` · `city 64 c064,c065,c069,h100`
+  (myöhemmin mahdollisesti koko keskusta `city 64 c`).
+
+### 18.11 klo 23.30: Antinkatu jatkuu
+- **563 Antinkatu 12** (tori3): EI keltainen Cafe Anton (vanha merkintä väärä) vaan 2-kerroksinen 1960-l. betoninen liiketalo: tumma lasitettu liiketila-
+  kerros, ylhäällä toimistot, kuusi kolmiruutuista ikkunaryhmää 4,43 m välein, elementtisaumat, pohjoispäässä umpiseinä ja ovi. facades.json (jalanjäljen reunat),
+  zones.py SPEC[563] + B[563]['h'] = 8.9 (ilman SPECiä run.py käytti auto-speciä eikä facades.jsonia), index.html ZROOF += 563 (ilmakuvakatto leijui 10 m:ssä).
+  Rautalanka osuu. Huom: nimetyissä lohkoissa (run.py) facades.json vaatii SPEC-merkinnän.
+- Pysäköidyt autot: ei talon sisään eikä jalkakäytävälle (bldTopAt). Liikenne- ja pysäköityjen autojen korkeus +6 cm (pyörät upposivat).
+- Modal-jonoon kuuluu tori3 jo (563 näkyy pelissä vasta Modal-polton jälkeen).
