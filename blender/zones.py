@@ -1030,3 +1030,42 @@ SPEC[3174] = _hall(MT('#6b3f30', 'brick', 0.85))
 # 3915  yellow 1-storey row houses (K26B): one row of windows, not two (the LoD2 shell is ~6.5 m with the roof)
 SPEC[3915] = dict(P=dict(wall=M('#d9a93e')), layout=lay(3.0, 'punched', bw=2.6, fh=3.0, P=dict(ww=1.4, wh=1.3, sill=0.9)),
                   fit=lambda lay_, H, street: lay(H, 'punched', bw=2.6, fh=H, P=dict(ww=1.4, wh=1.3, sill=0.9)))
+
+
+# ---------------------------------------------------------------- Isolinnankatu, Street View 18.11.2026 (rautalanka: massing fits, facades wrong)
+_WHT = lambda hx='#eceae4': M(hx, 0.85)
+# 1741 Tullipuominkatu 5 / Isolinnankatu 3 (oikeustalo): white render, grey base band, tall narrow windows, three high storeys
+SPEC[1741] = dict(P=dict(wall=_WHT('#ecebe6'), frame=M('#33363a')), layout=dict(lay(16, 'punched', gh=0, bw=3.1, fh=5.3, P=dict(ww=0.72, wh=2.7, nx=1, sill=1.1, frame=M('#33363a'))), rowP={}), roof=dict(kind='flat', mat=M('#5c6064', 0.6)))
+# 1617 Nuorisotalo (Isolinnankatu 12, 1984): red brick, two storeys, a long window band upstairs
+_br17 = MT('#a24f39', 'brick', 0.8)
+SPEC[1617] = dict(P=dict(wall=_br17, spandrel=_br17, frame=M('#2f3236')), layout=dict(bw=3.0, rows=[(3.5, 'punched', 'G'), (3.3, 'ribbon', 'F')], cols=lambda c, nb: 'W', P=dict(ww=1.5, wh=1.4, nx=2, sill=0.9, frame=M('#2f3236')), rowP={'F': dict(wh=1.15, sill=1.0, pier=0.12, nx=3)}, plain=False))
+# 656 Isolinnankatu 14: white block, projecting balconies stacked at the corners, red-brown brick ground floor
+SPEC[656] = dict(P=dict(wall=_WHT('#eeede8'), rail=M('#e9e8e3'), slab=M('#e9e8e3'), proj_balcony=True, bd=1.3), layout=lay(23.9, 'punched', gh=3.2, bw=3.0, fh=2.95, cols=ends('B'), P=dict(ww=1.3, wh=1.4, nx=2, proj_balcony=True, bd=1.3), rowP={'G': dict(wall=MT('#8a4a3a', 'brick', 0.8), ww=1.2, wh=1.3, sill=1.0)}), roof=dict(kind='flat', mat=M('#5c6064', 0.6)))
+SPEC[656]['layout']['rows'] = [(3.2, 'punched', 'G')] + SPEC[656]['layout']['rows'][1:]
+# 607 Isolinnankatu 18 (1988): white metal panels, wide windows, glazed shop floor
+SPEC[607] = dict(P=dict(wall=_WHT('#e7e8e7'), sign=SIGNS, gframe=M('#3a3f45'), gwall=M('#e7e8e7')), layout=lay(12, 'punched', gh=4.0, bw=2.7, fh=3.2, P=dict(ww=1.95, wh=1.35, nx=2, sill=0.9, joints=M('#c8cbcc'))))
+# 606 Isolinnankatu 18 tower: white render, a stack of glazed balconies at each end
+SPEC[606] = dict(P=dict(wall=_WHT('#efeee9')), layout=lay(33, 'punched', gh=3.0, bw=3.0, fh=2.9, cols=ends('B'), P=dict(ww=1.3, wh=1.4, nx=2), rowP={'G': dict(ww=1.2)}))
+SPEC[606]['layout']['rows'] = [(3.0, 'punched', 'G')] + SPEC[606]['layout']['rows'][1:]
+# 652 / 651 / 1225 / 608 (Isolinnankatu 13-15, 22): white 1960-70s offices, continuous window bands, glazed ground floor
+def _office(h, sp=None):
+    w = _WHT('#ebeae5')
+    return dict(P=dict(wall=w, spandrel=sp or w, sign=SIGNS, gframe=M('#3a3f45'), gwall=M('#3b5a8a', 0.4)), layout=lay(h, 'ribbon', gh=3.8, bw=3.2, fh=3.3, P=dict(wh=1.45, sill=0.95, nx=3, pier=0.08, frame=M('#d9dad9'))))
+SPEC[1225] = _office(30); SPEC[608] = _office(23); SPEC[651] = _office(30)
+# the LoD2 shell of 652 carries the whole office front on Isolinnankatu (651 and 1225's footprints): the game showed a blank wood-house
+# wall there (house spec) in front of 1225. Its tall part is the office, the low wing behind (x > 207.5) a plain two-storey block;
+# 1225 itself is not baked again (styles 'gone') so the two never overlap.
+_low652 = dict(P=dict(wall=_WHT('#dcdad3')), layout=lay(7, 'ribbon', gh=0, bw=3.2, fh=3.3, P=dict(wh=1.3, sill=0.95, nx=3, frame=M('#d9dad9'))))
+SPEC[652] = dict(_office(25), runalt=lambda x, y: _low652 if x > 207.5 else None)
+# 659 Isolinnankatu 19: white block of flats, glazed balconies in every third bay
+# owner 18.11 (SV): on the Isolinnankatu corner the two lowest storeys are recessed behind concrete columns, along half of the north
+# side; past that a shop front on the street line
+_r59 = [(3.2, 'shop', 'G'), (3.0, 'punched', 'S')] + [(3.1, 'punched', 'F')] * 5
+_rec59 = dict(setback=2.6, piers=(2, 0.55), piermat=M('#b9b7b1', 0.8), soffit=M('#d8d6d0'), open_ends=True)
+_lay59 = dict(bw=3.0, rows=_r59, cols=every(3, 'B'), P=dict(ww=1.3, wh=1.4, nx=2), rowP={'G': dict(wall=MT('#5a4a44', 'brick', 0.8))}, plain=False)
+_lay59r = dict(_lay59, rowP={'G': dict(_rec59, wall=M('#d8d6d0')), 'S': dict(_rec59)})
+_s59r = dict(P=dict(wall=_WHT('#eeede8')), layout=_lay59r)
+SPEC[659] = dict(P=dict(wall=_WHT('#eeede8'), sign=SIGNS), layout=_lay59, runalt=lambda x, y: _s59r if x < 162.0 else None, splitruns=True)
+# 609 Isolinnankatu 28 (1979): light tan brick, rows of windows close together, shop floor
+_tan9 = MT('#d4bb9e', 'brick', 0.8)
+SPEC[609] = dict(P=dict(wall=_tan9, spandrel=_tan9, sign=SIGNS, gframe=M('#3a3f45'), gwall=_tan9), layout=lay(23, 'ribbon', gh=3.9, bw=2.6, fh=3.0, P=dict(wh=1.4, sill=0.9, nx=2, pier=0.35, frame=M('#ebe8e2'))))

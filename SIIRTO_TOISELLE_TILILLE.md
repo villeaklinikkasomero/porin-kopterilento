@@ -531,4 +531,11 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   (2) 1219 Itäpuisto 1 / Isolinnankatu (SV): ikkunaton 2-kerroksinen jalusta + valkoiset taidepaneelit, yllä 6 krs: eteläosa beige
   rappaus, pohjoisosa tummansininen levy + tiheä ikkunajako + lasitetut kulmaparvekkeet. zones.py SPEC[1219], uusi moduuli `artpanel`,
   itäseinään lisätty piste (1744,-715). Avoinna: sinisen osan katto ehkä matalampi, Kauppahallin väri pelissä keltainen (todellisuudessa vaalea).
+- **18.11 klo 9–10, Isolinnankatu itäpuoli rautalangalla (11 SV-kuvaa, massat osuvat, julkisivut korjattu):** zones.py SPEC 1741 (valkoinen,
+  korkeat kapeat ikkunat), 1617 (tiili + ikkunanauha), 656 (kulmien ulokeparvekkeet, tiilinen katutaso), 607 (valkoinen levy, liiketila),
+  606, 608/651/652/1225 (valkoiset nauhaikkunatoimistot, sininen katutaso), 659 (käyttäjä: kahden kerroksen syvennys betonipylväineen
+  puolessa talosta, sitten liiketila; runalt x < 162), 609 (vaalea ruskeankeltainen tiili). styles: 1748 Saukkosen talo `gone` (tontti tyhjä),
+  1222 ja 661 puutaloiksi, 1225 `gone` (sen julkisivu on 652:n LoD2-kuoressa; h100 piirsi siihen tyhjän puutaloseinän).
+  kivi.py: `gone`-suodatin build_and_bakeen, lower_eave(1221) Isolinnankatu 16:n puutalon räystäs 4,1 m. city.py: hspec käyttää SPECiä.
+  zones2.py: ruudukko myös runalt-pätkille. Avoinna: 661:n harjakatto (peli piirtää LoD2-katon), 606:n pyöreä lasiparvekepino.
 - **Ajettava:** `bake tori4 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.

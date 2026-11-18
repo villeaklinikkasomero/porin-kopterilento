@@ -135,5 +135,6 @@ if __name__ == '__main__':
     L2B = json.loads(open(os.path.join(GAME, 'lod2.js')).read()[len('export default '):-2])['b']
     def hspec(i):                                        # OSM tags some blocks of flats as houses: an eave over 9.5 m in the scan is not a house
         l = L2B.get(str(i))
-        return kivi.spec_for(i) if l and l.get('e', 0) > 9.5 else house_spec(i)
+        import zones2
+        return kivi.spec_for(i) if (l and l.get('e', 0) > 9.5) or i in zones2.SPEC else house_spec(i)   # hand specs win (652: office shell, 18.11.2026)
     kivi.build_and_bake(name, zones[name]['ids'], int(sys.argv[2]) if len(sys.argv) > 2 else 32, spec=hspec if name.startswith('h') else kivi.spec_for)

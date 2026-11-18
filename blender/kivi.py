@@ -1213,10 +1213,14 @@ def skirt(Z, i, sp):
             if P[2] < 0.05 and Q[2] < 0.05 and math.hypot(Q[0] - P[0], Q[1] - P[1]) > 0.3:
                 add_solid(Z, [L(P, -SKIRT), L(Q, -SKIRT), L(Q, 0), L(P, 0)], pm, 0.3)
 
+# Isolinnankatu 16 (1222, in shell 1221): one-storey timber house under a hip roof (SV 2026, 18.11). The scan wall on the street runs to 7.9 m.
+lower_eave(1221, lambda r: max(q[0] for q in r) < 210.5 and min(q[2] for q in r) < 0.5 and max(q[2] for q in r) > 7.0, 4.1, 4.5)
+
 def build_and_bake(name, ids, samples=16, spec=None):
     spec = spec or kspec
     if os.environ.get('PORI_PHS') and os.path.exists(os.environ['PORI_PHS']):
         ex = {int(k) for k in json.load(open(os.environ['PORI_PHS']))}; ids = [i for i in ids if i not in ex]
+    ids = [i for i in ids if not (LOOK['b'].get(str(i)) or {}).get('gone')]   # styles 'gone': demolished since the map data (Saukkosen talo 1748, SV 2026)
     t = time.time()
     for i in ids:
         if RAW.get(i) and not spec(i).get('footprint'): B[i]['h'] = eave_of(i)
