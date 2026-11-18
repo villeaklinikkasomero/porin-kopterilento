@@ -559,5 +559,6 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   pilasterit ja ikkunanpuitteet, ylhäällä korkeat ikkunat päätyfrontonein, katutasossa kaaret ja vihreät markiisit, raskas räystäslista,
   tasakatto (ilman kattoa peli piirsi ilmakuvakaton vinoksi laataksi). Taustan 1492 harmaa betoni, vasen 1490 harmaa-beige (olivat
   valkoisia parveketaloja). Käyttäjä: "älä keksi olemattomia, vaan vertaa kuvaan" → vain kuvassa näkyvät piirteet.
-  gen.py `_hidden_wall`: vain jos naapuri on vähintään yhtä korkea. Avoinna: 1361:n eteläpäätyseinä (9:n yllä) leipoutuu mustaksi.
+  gen.py `_hidden_wall`: vain jos naapuri on vähintään yhtä korkea. Kaaret näkyviin (`wh_fixed`, leveämmät aukot), markiisit kaarten
+  sisään. 1361:n eteläpäätyseinä (9:n yllä, leipoutui mustaksi) → yksi koko seinän laatta (`SPEC[1361]['walls']`).
 - **Ajettava:** `bake tori0 tori1 tori3 tori4 kivi2 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.

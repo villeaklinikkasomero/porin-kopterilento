@@ -366,7 +366,7 @@ def m_classic(mb, col, P):
     bw, fh, W = mb.bw, mb.fh, P['wall']; T = P.get('trim', WHITE); fr = P.get('frame', WHITE)
     if P.get('ground') and P.get('gwall'): W = P['gwall']        # a ground floor in its own colour (grey rusticated base under a coloured house)
     ph = P.get('plinth_h', 0)                     # granite plinth at the foot of the row (ground floor)
-    ww = min(P.get('ww', 1.2), bw - 0.9); wh = P.get('wh', 2.0); sill = P.get('sill', 0.95) + ph
+    ww = min(P.get('ww', 1.2), bw - P.get('wmarg', 0.9)); wh = P.get('wh', 2.0); sill = P.get('sill', 0.95) + ph   # wmarg: narrow bays laid on measured window axes
     if not P.get('wh_fixed'):                     # windows grow with the storey: a high ground floor or piano nobile has tall windows
         top = 0.95 if P.get('hood') else 0.6      # (user 13.11.2026: the taller lower windows were drawn the same as the upper ones)
         g_ = P.get('ground'); free = fh - sill - top

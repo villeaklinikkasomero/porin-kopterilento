@@ -1148,13 +1148,13 @@ function streamUpdate(x, y) {
     if (d < 600 && e.st === 0 && busy < 2) { e.st = 1; busy++;
       fetch(`./bl_${e.name}.js`).then(r => r.ok ? r.text() : Promise.reject()).then(t => {
         const ax = +t.match(/x = (-?[\d.]+)/)[1], ay = +t.match(/y = (-?[\d.]+)/)[1], di = t.indexOf('export default "'), b64 = t.slice(di + 16, t.lastIndexOf('"'));
-        const si = t.indexOf('export const shells = '), shells = si >= 0 && si < di ? JSON.parse(t.slice(si + 22, t.indexOf(';\n', si))) : null;   /* 17.11.2026: a block with a shells line was read from its first quote and fell back to plain walls (c039) */
+        const si = t.indexOf('export const shells = '), shells = si >= 0 && si < di ? JSON.parse(t.slice(si + 22, t.indexOf(';', si))) : null;   /* 17.11.2026: a block with a shells line was read from its first quote and fell back to plain walls (c039); 18.11: ';' not ';\n' - a bake written on Windows has CRLF lines and failed to load (Keskuskartano as hollow plain walls) */
         const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
         new GLTFLoader().parse(buf.buffer, '', gl => {
           if (e.st !== 1) return;
           gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { shrinkMap(map, isTouch ? 512 : 1024); map.anisotropy = 4; } q.material = brickify(glassify(new THREE.MeshBasicMaterial({ map }))); } });
           const gr = new THREE.Group(); gr.position.set(ax, 0, -ay); gr.add(gl.scene); if (shells) liftBlock(gr, shells); scene.add(gr); e.me.visible = false; e.gr = gr; e.st = 2; }, () => { e.st = 0; });
-      }).catch(() => { e.st = 3; });   // not baked yet: keep the plain walls
+      }).catch(err => { if (err) console.warn('bake ' + e.name + ': ' + err); e.st = 3; });   // not baked yet (or unreadable): keep the plain walls
     } else if (d > 850 && e.st === 2) {
       scene.remove(e.gr); e.gr.traverse(q => { if (q.isMesh) { q.geometry.dispose(); if (q.material.map) q.material.map.dispose(); q.material.dispose(); } });
       e.gr = null; e.me.visible = true; e.st = 0;

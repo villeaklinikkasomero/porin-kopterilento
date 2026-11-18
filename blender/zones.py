@@ -84,6 +84,7 @@ SPEC[1364] = dict(P=dict(wall=M('#dcd8cc'), spandrel=M('#8b8f8c'), sign=SIGNS), 
 # 1361  Sataraudan talo / Vidbominkulma, Valtakatu 10 (Laaksovirta 1940): 5 storeys, render, storey bands along the window rows, bay windows at the corners
 SPEC[1361] = dict(P=dict(wall=M('#dcb86c'), band=M('#f3eedf'), sign=SIGNS, ewall=M('#e6c57c'), gwall=M('#cfae66')),   # ochre yellow (Street View 13.11.2026; was beige)
                   layout=lay(23, 'punched', gh=4.2, bw=3.2, fh=3.7, cols=ends('E'), P=dict(colmod={'E': 'erker'}, ww=2.0, wh=1.5, nx=3)), roof=dict(kind='hip', inset=3.5, rise=1.4, mat=SHEET))
+SPEC[1361]['walls'] = {2: dict(bw=12.9, rows=[(23, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True)}   # south end wall above Antinkatu 9: mostly behind 1492/1493, one whole-wall tile so the visible part bakes in its own light (was black)
 # 1493  Antinkatu 9 (Street View 13.11.2026): two-storey neo-renaissance front, cream render with yellow pilasters and dressings,
 # round-arched ground-floor openings (green awnings); the 23 m block 1492 stands behind it
 _a9T = M('#ece4cc')
@@ -95,11 +96,11 @@ def _a9_awnings(Z, pts, h, P):
     g = M('#2e6a46', 0.7)
     for k in range(5):
         c = (k + 0.5) * L / 5; a, b = c - 1.3, c + 1.3
-        add_solid(Z, [W(a, 3.75, 0.02), W(b, 3.75, 0.02), W(b, 3.05, 1.0), W(a, 3.05, 1.0)][::-1], g, 0.4)
-        add_solid(Z, [W(a, 3.05, 1.0), W(b, 3.05, 1.0), W(b, 2.75, 1.0), W(a, 2.75, 1.0)][::-1], g, 0.3)
+        add_solid(Z, [W(a, 3.0, 0.02), W(b, 3.0, 0.02), W(b, 2.45, 0.9), W(a, 2.45, 0.9)][::-1], g, 0.4)   # inside the arch: the arch head shows above
+        add_solid(Z, [W(a, 2.45, 0.9), W(b, 2.45, 0.9), W(b, 2.2, 0.9), W(a, 2.2, 0.9)][::-1], g, 0.3)
 SPEC[1493] = dict(P=dict(wall=M('#d6b25a'), trim=_a9T, frame=M('#f4f2ea')),
                   layout=dict(bw=3.6, rows=[(4.6, 'classic', 'G'), (5.4, 'classic', 'F')], cols=lambda c, nb: 'W', P={},
-                              rowP={'G': dict(ground=True, arch=True, plinth_h=0.45, plinth=M('#7d776e', 0.8), ww=1.9, wh=3.2, sill=0.35, pil=True),
+                              rowP={'G': dict(ground=True, arch=True, plinth_h=0.45, plinth=M('#7d776e', 0.8), ww=2.3, wh=3.5, sill=0.35, wh_fixed=True, pil=True),
                                     'F': dict(hood='pediment', apron=True, pil=True, ww=1.25, wh=2.5, sill=1.0, dentils=True)}, plain=False),
                   cornice=(0.6, 0.9, _a9T), extra=[_a9_awnings], roof=dict(kind='flat', mat=SHEET))
 # 238  Sampotalo, Yrjönkatu 13 (1961; Street View 13.11.2026): two storeys of shops in front of Teljäntori, glazed shop fronts under a

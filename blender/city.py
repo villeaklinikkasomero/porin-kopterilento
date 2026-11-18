@@ -97,7 +97,10 @@ def house_spec(i):
     old = y < 1930
     win = dict(ww=1.05, wh=1.45, nx=2, ny=3) if old else dict(ww=1.2, wh=1.25, nx=2, ny=1) if y < 1962 else dict(ww=1.5, wh=1.1, nx=2, ny=1, surround=0.07)
     plinth = M('#77746e', 0.9) if old else M('#9a9a95', 0.9)           # natural stone under the old houses, cast concrete later
-    rowP = {'G': dict(plinth_h=0.7 if old else 0.55, plinth=plinth, clad=clad, **win), 'U': dict(clad=clad, **dict(win, wh=min(win['wh'], 1.25)), frieze=old, wband=True)}
+    if e.get('win'): win = dict(win, **e['win'])                       # styles 'win': window size / panes counted from Street View
+    ph_ = 0.7 if old else 0.55
+    if e.get('pl'): plinth = MT(e['pl'][0], 'brick' if len(e['pl']) > 2 and e['pl'][2] == 'brick' else None, 0.9); ph_ = e['pl'][1]   # styles 'pl': [colour, height(, 'brick')]
+    rowP = {'G': dict(plinth_h=ph_, plinth=plinth, clad=clad, **win), 'U': dict(clad=clad, **dict(win, wh=min(win['wh'], 1.25)), frieze=old, wband=True)}
     if e.get('w2') and yp and nf == 2: rowP['U']['wall'] = MT(e['w2'], 'wood', 0.9)
     def cols(c, nb):
         if nb == 1: return 'E' if not shed else 'e'
