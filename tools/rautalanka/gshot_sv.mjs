@@ -11,7 +11,7 @@ for (const v of V){
  await p.evaluate(([x,y])=>{const g=window.__game; g.S.x=x; g.S.y=y;}, [v.x,v.y]);
  await p.waitForTimeout(1500);
  try { await p.waitForFunction(([x,y]) => window.__stream.filter(e=>Math.hypot(e.x-x,e.y-y)<260).every(e=>e.st===2||e.st===3), [v.x,v.y], { timeout: 150000, polling: 1000 }); } catch(e) { console.log('timeout',v.k); }
- try { await p.waitForFunction((z) => (window.__bl||[]).includes(z), process.env.ZONE || 'kivi1', { timeout: 180000, polling: 1000 }); } catch(e) { console.log('nobl'); }
+ if (process.env.ZONE !== '-') try { await p.waitForFunction((z) => (window.__bl||[]).includes(z), process.env.ZONE || 'kivi1', { timeout: 180000, polling: 1000 }); } catch(e) { console.log('nobl'); }
  await p.waitForTimeout(2000);
  const url=await p.evaluate((v)=>{const g=window.__game; if (v.back) { const a0=v.h*Math.PI/180; v.x-=v.back*Math.sin(a0); v.y-=v.back*Math.cos(a0); } const a=v.h*Math.PI/180, pp=(v.p||0)*Math.PI/180; const z=g.TZs(v.x,v.y)+(v.ch||2.5);
   g.scene.traverse(o=>{if(o.isGroup&&o.userData&&o.userData.noT&&o.rotation.order==='YXZ')o.visible=false;});

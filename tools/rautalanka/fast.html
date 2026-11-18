@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>rautalanka fast</title>
+<style>html,body{margin:0;background:#8fb4e0}canvas{display:block}</style></head>
+<body>
+<script type="module">
+// Fast check render (18.11.2026): only the baked blocks (bl_*.js) near the camera on the game's smoothed ground, the same camera pose
+// as gshot_sv.mjs. No terrain texture, trees, cars, roofs drawn by the game or plain stand-in walls: for checking the baked facades only.
+// The final check is still the real game (gshot_sv.mjs).
+import * as THREE from '../../three.module.min.js';
+import { GLTFLoader } from '../../GLTFLoader.js';
+import TER from '../../terrain.js';
+const dec = b => { const s = atob(b), a = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) a[i] = s.charCodeAt(i); return a; };
+const THS = new Int16Array(dec(TER.hs).buffer);
+const TZs = (x, y) => { const fx = Math.min(TER.nx - 1.001, Math.max(0, (x - TER.x0) / TER.g)), fy = Math.min(TER.ny - 1.001, Math.max(0, (y - TER.y0) / TER.g)), i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j, k = j * TER.nx + i;
+  return ((THS[k] * (1 - u) + THS[k + 1] * u) * (1 - v) + (THS[k + TER.nx] * (1 - u) + THS[k + TER.nx + 1] * u) * v) / 10; };
+const pip = (x, y, R) => { let c = false; for (let i = 0, j = R.length - 1; i < R.length; j = i++) { const a = R[i], b = R[j]; if ((a[1] > y) !== (b[1] > y) && x < (b[0] - a[0]) * (y - a[1]) / (b[1] - a[1]) + a[0]) c = !c; } return c; };
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true }); renderer.setSize(1280, 720, false); document.body.appendChild(renderer.domElement);
+const scene = new THREE.Scene(); scene.background = new THREE.Color(0x8fb4e0);
+const camera = new THREE.PerspectiveCamera(90, 16 / 9, 0.3, 3000);
+const NAMED = ['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'tori0', 'tori1', 'tori2', 'tori3', 'tori4', 'tori5', 'uima', 'p1', 'kl0', 'kl1', 'karhu'];
+const CZ = await fetch('../../city_zones.json').then(r => r.json());
+const loaded = new Map();
+async function block(name) {
+  if (loaded.has(name)) return loaded.get(name);
+  const p = (async () => {
+    const r = await fetch('../../bl_' + name + '.js'); if (!r.ok) return null; const t = await r.text();
+    const ax = +t.match(/x = (-?[\d.]+)/)[1], ay = +t.match(/y = (-?[\d.]+)/)[1], di = t.indexOf('export default "');
+    const si = t.indexOf('export const shells = '), shells = si >= 0 && si < di ? JSON.parse(t.slice(si + 22, t.indexOf(';', si))) : [];
+    const S = shells.map(e => { const rs = (e.r || e).map(r => { const o = []; for (let i = 0; i < r.length; i += 2) o.push([r[i], r[i + 1]]); return o; });
+      let m = -1e9; for (const R of rs) for (const q of R) m = Math.max(m, TZs(q[0], q[1])); return { rs, lift: e.l ?? m, zt: e.zt }; });
+    const buf = dec(t.slice(di + 16, t.lastIndexOf('"')));
+    const gl = await new Promise((res, rej) => new GLTFLoader().parse(buf.buffer, '', res, rej));
+    const gr = new THREE.Group(); gr.position.set(ax, 0, -ay); gr.add(gl.scene); scene.add(gr); gr.updateMatrixWorld(true);
+    const v = new THREE.Vector3(), w = new THREE.Vector3();
+    gl.scene.traverse(q => { if (!q.isMesh) return; const map = q.material.map;
+      if (map && map.image && map.image.width > 1024) {   // as the game (shrinkMap): the atlas drawn at 1024 px, anisotropy 4
+        const c = document.createElement('canvas'); c.width = c.height = 1024; c.getContext('2d').drawImage(map.image, 0, 0, 1024, 1024); map.image = c; map.flipY = false; map.needsUpdate = true; }
+      if (map) map.anisotropy = 4;
+      q.material = new THREE.MeshBasicMaterial({ map });   // front faces only, as the game (the bakes hold back-to-back quads)
+      if (q.geometry.index) q.geometry = q.geometry.toNonIndexed();
+      const P = q.geometry.attributes.position;
+      for (let i = 0; i + 2 < P.count; i += 3) {   // one lift per triangle, as liftBlock in the game: the house it stands in, else the ground
+        v.set(0, 0, 0); for (let k = 0; k < 3; k++) v.add(w.fromBufferAttribute(P, i + k)); v.multiplyScalar(1 / 3).applyMatrix4(q.matrixWorld);
+        let L = null; for (const h of S) { if (h.zt !== undefined && v.y > h.zt) continue; if (h.rs.some(R => pip(v.x, -v.z, R))) { L = h.lift; break; } }
+        if (L === null) L = TZs(v.x, -v.z);
+        for (let k = 0; k < 3; k++) P.setY(i + k, P.getY(i + k) + L); }
+      P.needsUpdate = true; });
+    return { ax, ay };
+  })(); loaded.set(name, p); return p;
+}
+const near = (x, y, R, named) => [...Object.entries(CZ.zones).filter(([k, z]) => Math.hypot(z.x - x, z.y - y) < R).map(([k]) => k), ...(named || NAMED)];
+let ground = null;
+function groundAt(x, y) {   // grey ground following the smoothed terrain, 400 m around the camera
+  if (ground) { scene.remove(ground); ground.geometry.dispose(); }
+  const n = 100, s = 400, g = new THREE.PlaneGeometry(s, s, n, n); g.rotateX(-Math.PI / 2); const P = g.attributes.position;
+  for (let i = 0; i < P.count; i++) { const gx = P.getX(i) + x, gy = -(P.getZ(i)) + y; P.setXYZ(i, gx, TZs(gx, gy) - 0.05, -gy); }
+  ground = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0x77797b })); scene.add(ground);
+}
+window.shot = async (v) => {
+  const names = near(v.x, v.y, v.r || 330, v.named);
+  await Promise.all(names.map(n => block(n).catch(() => null)));
+  for (const n of names) { const b = await loaded.get(n); }
+  groundAt(v.x, v.y);
+  const a = v.h * Math.PI / 180, pp = (v.p || 0) * Math.PI / 180, z = TZs(v.x, v.y) + (v.ch || 2.5);
+  camera.fov = v.fov || 90; camera.updateProjectionMatrix(); camera.position.set(v.x, z, -v.y);
+  camera.lookAt(v.x + 100 * Math.sin(a) * Math.cos(pp), z + 100 * Math.sin(pp), -(v.y + 100 * Math.cos(a) * Math.cos(pp))); camera.updateMatrixWorld();
+  renderer.render(scene, camera); return renderer.domElement.toDataURL('image/jpeg', 0.9);
+};
+window.__ready = true;
+</script></body></html>

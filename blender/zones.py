@@ -175,11 +175,21 @@ def _a31balc(Z, W, s0, s1, levels, top, D, par, gl, slab, r=0.7, ph=1.0, gh=2.75
         add_solid(Z, [W(s_, b_, d) for s_, d in ol][::-1], slab, 0.5); add_solid(Z, [W(s_, b_ - 0.2, d) for s_, d in ol], slab, 0.4)
         for (sa, da), (sb, db) in zip(ol, ol[1:]):
             if da == 0.0 and db == 0.0: continue
-            for o in (1, -1):
-                add_solid(Z, [W(sa, b_ - 0.2, da), W(sb, b_ - 0.2, db), W(sb, b_ + ph, db), W(sa, b_ + ph, da)][::o], par, 0.4)   # parapet
-                add_solid(Z, [W(sa, b_ + ph, da), W(sb, b_ + ph, db), W(sb, b_ + gh, db), W(sa, b_ + gh, da)][::o], gl, 0.3)    # glazing
+            # one outward face each (the outline runs counter-clockwise seen from above): back-to-back copies shaded each other grey in the bake
+            add_solid(Z, [W(sa, b_ - 0.2, da), W(sb, b_ - 0.2, db), W(sb, b_ + ph, db), W(sa, b_ + ph, da)], par, 0.5)   # parapet
+            add_solid(Z, [W(sa, b_ + ph, da), W(sb, b_ + ph, db), W(sb, b_ + gh, db), W(sa, b_ + gh, da)], gl, 0.3)      # glazing
+        # white frames of the glazing (owner 18.11.2026: the stacks read as grey boxes): mullions about every metre on the front, one at each
+        # corner, and the rail along the parapet top
+        fm = _a31FR; fr_d = 0.03
+        for (sa, da), (sb, db) in zip(ol, ol[1:]):
+            if da == 0.0 and db == 0.0: continue
+            seg = math.hypot(sb - sa, db - da); nm = max(1, round(seg / 1.0)) if abs(db - da) < 1e-6 else 1
+            for j in range(nm + 1 if abs(db - da) < 1e-6 else 1):
+                f_ = j / nm; sm = sa + (sb - sa) * f_; dm = da + (db - da) * f_
+                add_solid(Z, [W(sm - 0.04, b_ + ph, dm + fr_d), W(sm + 0.04, b_ + ph, dm + fr_d), W(sm + 0.04, b_ + gh, dm + fr_d), W(sm - 0.04, b_ + gh, dm + fr_d)], fm, 0.2)
+            add_solid(Z, [W(sa, b_ + ph - 0.03, da + fr_d), W(sb, b_ + ph - 0.03, db + fr_d), W(sb, b_ + ph + 0.06, db + fr_d), W(sa, b_ + ph + 0.06, da + fr_d)], fm, 0.2)
     add_solid(Z, [W(s_, top, d) for s_, d in ol][::-1], slab, 0.5); add_solid(Z, [W(s_, top - 0.15, d) for s_, d in ol], slab, 0.4)
-_a31WH = M('#f1f1ed'); _a31FR = M('#f6f6f2'); _a31GL = M('#4b565c', 0.1, 0.3); _a31BG = M('#c9d4d8', 0.1, 0.3)   # the glazing reads light in the photos (sky reflections)
+_a31WH = M('#ffffff', 0.9); _a31FR = M('#f6f6f2'); _a31GL = M('#4b565c', 0.1, 0.3); _a31BG = M('#a9b9c2', 0.1, 0.3)   # the glazing reads light in the photos (sky reflections)
 def _a31_bits(Z, pts, h, P):
     W = _a31wall(Z, *_A31); tile = MT('#9a5a3a', 'brick', 0.85)
     for s0, s1 in ((1.8, 2.6), (3.25, 4.05), (7.9, 9.3), (10.7, 11.7), (13.85, 14.5), (16.5, 17.2), (17.6, 18.2), (20.4, 21.1), (23.2, 24.0), (26.3, 26.8), (28.0, 28.8), (31.45, 32.6), (34.0, 35.0)):
@@ -1254,3 +1264,44 @@ SPEC[121] = dict(P=dict(wall=MT('#b89a6e', 'brick', 0.8), sign=SIGNS), layout=la
 # office block (the game drew both as white flats with balconies / blue panels)
 SPEC[1492] = dict(P=dict(wall=M('#b9b7b0', 0.85)), layout=lay(23, 'punched', gh=0, bw=2.9, fh=3.0, P=dict(ww=1.4, wh=1.3, nx=2)), roof=dict(kind='flat', mat=SHEET))
 SPEC[1490] = dict(P=dict(wall=M('#c8c1b4', 0.85), sign=SIGNS), layout=lay(27, 'punched', gh=4.2, bw=3.0, fh=3.2, P=dict(ww=1.6, wh=1.4, nx=2)), roof=dict(kind='flat', mat=SHEET))
+
+# ---------------------------------------------------------------- measured facades as data (blender/facades.json, 18.11.2026)
+# One entry per building: {"id": OSM index, "note": ..., "walls": [{"a": [x, y], "b": [x, y], "bare": "#hex" (optional: the wall is plain
+# render in that colour, no generated windows), "items": [...]}]}. s runs from a to b along the wall (measured on the rectified Street View
+# image, tools/rautalanka/rectify.py), z from the street; the outside is on the right of a->b. Items:
+#   ["win", s0, s1, z0, z1]            white-framed window (optional 6th: frame hex, 7th: glass hex)
+#   ["door", s0, s1, z0, z1, hex]      flat door / panel on the wall
+#   ["box", s0, s1, z0, z1, d0, d1, hex(, "brick"|"woodv"|"plaster")]   a box standing out of the wall (piers, strips, canopies, plinths)
+#   ["balc", s0, s1, [levels], top, depth, r, parapet hex, glass hex(, parapet h, glass top)]   projecting balcony stack, r: corner radius
+# Repeated windows: ["wins", [s centres], width, [z bottoms], height]
+import json as _json_f, os as _os_f
+def _fac_mat(hx, kind=None): return MT(hx, kind, 0.85) if kind else M(hx, 0.85 if not hx.lower() in ('#c9d4d8', '#b9c6cc') else 0.1)
+def _fac_extra(walls):
+    def ex(Z, pts, h, P):
+        for w in walls:
+            W = _a31wall(Z, tuple(w['a']), tuple(w['b']))
+            for it in w.get('items', []):
+                k = it[0]
+                if k == 'win': _a31win(Z, W, it[1], it[2], it[3], it[4], M(it[5]) if len(it) > 5 else _a31FR, M(it[6], 0.1, 0.3) if len(it) > 6 else _a31GL)
+                elif k == 'wins':
+                    for c in it[1]:
+                        for zb in it[3]: _a31win(Z, W, c - it[2] / 2, c + it[2] / 2, zb, zb + it[4], _a31FR, _a31GL)
+                elif k == 'door': _a31q(Z, W, it[1], it[2], it[3], it[4], 0.02, M(it[5], 0.6))
+                elif k == 'box': _a31bx(Z, W, it[1], it[2], it[3], it[4], it[5], it[6], _fac_mat(it[7], it[8] if len(it) > 8 else None))
+                elif k == 'balc':
+                    _a31balc(Z, W, it[1], it[2], tuple(it[3]), it[4], it[5], M(it[7], 0.85), M(it[8], 0.1, 0.3), _a31WH, r=it[6],
+                             ph=it[9] if len(it) > 9 else 1.0, gh=it[10] if len(it) > 10 else 2.75)
+    return ex
+_FJ = _os_f.path.join(_os_f.path.dirname(_os_f.path.abspath(__file__)), 'facades.json')
+FACADES = {e['id']: e for e in (_json_f.load(open(_FJ)) if _os_f.path.exists(_FJ) else [])}
+for _i, _e in FACADES.items():
+    _bw = [w for w in _e['walls'] if w.get('bare')]
+    def _ra(x, y, _bw=_bw):
+        for w in _bw:
+            if _on_line(x, y, tuple(w['a']), tuple(w['b'])): return _bare(w['bare'])
+        return None
+    if _i in SPEC:
+        SPEC[_i] = dict(SPEC[_i]); SPEC[_i]['extra'] = list(SPEC[_i].get('extra', [])) + [_fac_extra(_e['walls'])]
+        if _bw: SPEC[_i]['runalt'] = _ra
+    else:
+        RUNALT[_i] = _ra; EXTRA[_i] = EXTRA.get(_i, []) + [_fac_extra(_e['walls'])]
