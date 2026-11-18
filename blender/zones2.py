@@ -196,7 +196,7 @@ def build_lod2(Z, i, spec, upper=None):
                     add_solid(Z, pz, ZBASE_MAT or P_['wall'], 0.4)
             ra = spec.get('runalt') and spec['runalt'](*mid2); s_ = ra or spec_; Pr = ra['P'] if ra else P_      # one stretch of a wall as another building part
             lay_ = (s_['layout'] if street or 'yard' not in s_ else s_['yard']) if zb < 1.5 else (s_.get('upper') or upper or lay(ze - zb, 'punched', bw=3.3, fh=3.0))
-            if HREF and not s_.get('fit') and not s_.get('fitw') and not s_.get('nogrid'):
+            if HREF and (not ra or spec.get('gridalt')) and not s_.get('fit') and not s_.get('fitw') and not s_.get('nogrid'):   # runalt runs are often other houses in the same shell (Sampotalo in Teljäntori): own storeys
                 if zb >= 1.5 and not s_.get('upper') and zb < HREF - 1.5:
                     lay_ = s_['layout'] if street or 'yard' not in s_ else s_['yard']      # a wall above a lower roof keeps the main storeys
                 if zb < 1.5 or zb < HREF - 1.5:

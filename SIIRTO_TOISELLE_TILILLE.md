@@ -548,4 +548,11 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   kaksi koodilla piirrettyä ravintolapaviljonkia (vihreät aumakatot, aurinkovarjot): läntinen (-106, 500) poistettu (SV: nurmikko),
   itäinen (-3, 487) valkoinen matala laatikko (SV). Bärco ja muut Etelärannan talot kunnossa.
 - **Bärco (käyttäjä 18.11):** ylhäältä kansi ja laitojen sisäpinnat puuttuivat (takapinnat karsittiin) → vesi näkyi laivan sisällä. index.html: Bärcon materiaali DoubleSide.
-- **Ajettava:** `bake tori4 kivi2 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.
+- **18.11 iltapäivä, Yrjönkatu koko pituudelta (28 SV-kuvaa, rautalanka):** Kivi-Porin pää ja valokuvajulkisivut (602, 603, 1599) kunnossa.
+  Korjattu: 1729 Yrjönkatu 7 / OP-kortteli ruskeankeltainen tiili + sininen pankkikerros (oli harmaa nauha) ja musta pystylaatta
+  1728/1729-saumassa → gen.py `_hidden_wall`: jalanjäljestä rakennettu seinä, jonka ulkopuoli on toisen talon sisällä, jätetään pois
+  (koskee kaikkia jalanjälkilohkoja). 238 Sampotalo piirtyi Teljäntorin (216) kuoressa tyhjäksi seinäksi: ruudukko (GRID) venytti
+  toisen talon runalt-pätkän 216:n räystääseen → zones2: ruudukko runalt-pätkille vain `gridalt=True` (659). 637 Itäpuisto 5
+  tummempi terasti. 121 Palojoenkulma: torni ruskea tiili, Yrjönkadun siipi valkoinen nauhaikkunoin (runalt y > -433,5).
+  Huom. gshot ZONE odottaa vain yhtä nimettyä lohkoa: muut nimetyt lohkot voivat näkyä kuvassa vielä pelin varamalleina.
+- **Ajettava:** `bake tori0 tori3 tori4 kivi2 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.

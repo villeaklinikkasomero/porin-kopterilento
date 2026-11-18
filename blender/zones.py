@@ -59,6 +59,8 @@ SPEC[1727] = dict(P=dict(wall=M('#d8d0bd')), layout=lay(4.7, plain=True))       
 # 1729/1730  Juseliuksenkulma, Yrjönkatu 7: 3-storey rendered house (Finnilä 1940) + 6-storey block (1961)
 SPEC[1730] = dict(P=dict(wall=M('#e9e3d2'), sign=SIGNS, band=M('#f4f1e8')), layout=lay(10, 'punched', gh=3.6, bw=3.2, fh=3.2, P=dict(ww=1.7, wh=1.4, nx=3)))
 SPEC[1729] = dict(P=dict(wall=M('#aaa397', 0.8), sign=SIGNS, spandrel=M('#a39c90', 0.8)), layout=lay(23, 'ribbon', gh=3.9, bw=3.3, fh=3.15, cols=every(4, 'F', 1)), roof=dict(kind='flat', mat=SHEET))
+# Yrjönkatu side of the OP block (SV 18.11.2026): tan brick with small balconies as Valtakatu 6, a glazed blue-white bank floor
+SPEC[1729] = dict(P=dict(wall=MT('#b39c76', 'brick', 0.8), sign=SIGNS, gwall=M('#dfe3e6'), fascia=M('#dfe3e6'), rail=M('#c9ced2', 0.3, 0.5), gframe=ALU, gglass=M('#3f6fae', 0.1, 0.3)), layout=lay(23, 'punched', gh=3.9, bw=3.3, fh=3.0, cols=every(3, 'B'), P=dict(ww=1.5, wh=1.5)), roof=dict(kind='flat', mat=SHEET))
 SPEC[1621] = dict(P=dict(wall=M('#d2cdbf'), sign=SIGNS, rail=M('#e4e2da')), layout=lay(20, 'punched', gh=3.9, bw=3.5, fh=3.2, cols=every(3, 'B'), P=dict(ww=1.7)))
 # Valtakatu 6 (1987; Street View 13.11.2026 from Valtakatu 7): orange-red brick upper floors with small balconies, light grey ground floor
 _v6B = MT('#b8653f', 'brick', 0.8)
@@ -152,7 +154,7 @@ SPEC[1601] = dict(P=dict(wall=M('#eeede8'), frame=M('#d6dad8'), wglass=M('#7f959
 SPEC[564] = dict(P=dict(wall=TERASTI2, gwall=M('#9c9a92', 0.4), plinth=M('#6d6b66', 0.4), sign=SIGNS),
                  layout=lay(23, 'punched', gh=4.0, bw=2.9, fh=3.15, second=('ribbon', dict(wh=1.7, sill=0.8, nx=3, pier=0.15)), P=dict(ww=1.25, wh=1.35, nx=2)), roof=dict(kind='hip', inset=3.2, rise=1.5, mat=SHEET))
 # 637  As.oy Itäpuisto 5 (Valli 1955): terasti, bay windows with brown clinker, hipped tile roof, red mosaic at street level
-SPEC[637] = dict(P=dict(wall=TERASTI2, epanel=M('#6e4a35', 0.5), gwall=M('#9a3b30', 0.4), plinth=M('#5a2a25', 0.4), sign=SIGNS, fascia=TERASTI2),
+SPEC[637] = dict(P=dict(wall=M('#8f8a82', 0.85), epanel=M('#6e4a35', 0.5), gwall=M('#9a3b30', 0.4), plinth=M('#5a2a25', 0.4), sign=SIGNS, fascia=TERASTI2),
                  layout=lay(23, 'punched', gh=3.9, bw=3.3, fh=3.15, cols=every(3, 'E', 1), P=dict(colmod={'E': 'erker'}, ww=1.5, wh=1.4, edepth=0.6)), roof=dict(kind='hip', inset=4.2, rise=2.6, mat=TILE))
 SPEC[641] = dict(P=dict(wall=M('#e9dfc4'), band=M('#f4efe2'), sign=SIGNS), layout=lay(10, 'punched', gh=3.8, bw=3.0, fh=3.1, P=dict(ww=1.3, wh=1.6)))   # 1928 two-storey house
 
@@ -1065,7 +1067,7 @@ _rec59 = dict(setback=2.6, piers=(2, 0.55), piermat=M('#b9b7b1', 0.8), soffit=M(
 _lay59 = dict(bw=3.0, rows=_r59, cols=every(3, 'B'), P=dict(ww=1.3, wh=1.4, nx=2), rowP={'G': dict(wall=MT('#5a4a44', 'brick', 0.8))}, plain=False)
 _lay59r = dict(_lay59, rowP={'G': dict(_rec59, wall=M('#d8d6d0')), 'S': dict(_rec59)})
 _s59r = dict(P=dict(wall=_WHT('#eeede8')), layout=_lay59r)
-SPEC[659] = dict(P=dict(wall=_WHT('#eeede8'), sign=SIGNS), layout=_lay59, runalt=lambda x, y: _s59r if x < 162.0 else None, splitruns=True)
+SPEC[659] = dict(P=dict(wall=_WHT('#eeede8'), sign=SIGNS), layout=_lay59, runalt=lambda x, y: _s59r if x < 162.0 else None, splitruns=True, gridalt=True)
 # 609 Isolinnankatu 28 (1979): light tan brick, rows of windows close together, shop floor
 _tan9 = MT('#d4bb9e', 'brick', 0.8)
 SPEC[609] = dict(P=dict(wall=_tan9, spandrel=_tan9, sign=SIGNS, gframe=M('#3a3f45'), gwall=_tan9), layout=lay(23, 'ribbon', gh=3.9, bw=2.6, fh=3.0, P=dict(wh=1.4, sill=0.9, nx=2, pier=0.35, frame=M('#ebe8e2'))))
@@ -1078,3 +1080,9 @@ SPEC[640] = dict(P=dict(wall=M('#d6d0c4'), sign=SIGNS), layout=lay(23, 'punched'
 _pp640, _ = poly(640)      # tori4 builds 640 from its footprint: the blue walls are the edges north of y = 14
 SPEC[640]['walls'] = {k: _s640b['layout'] for k in range(len(_pp640)) if _pp640[k][1] > 14.0 and _pp640[(k + 1) % len(_pp640)][1] > 14.0}
 SPEC[640]['P']['rail'] = _s640b['P']['rail']
+
+# 121 Palojoenkulma, Yrjönkatu 23 (SV 18.11.2026): the brick tower (y < -434) is tan brick; the long Yrjönkatu wing north of it is
+# white render with bands of large windows over a shop floor (the game drew the whole shell in ochre brick)
+_s121w = dict(P=dict(wall=_WHT('#ecebe6'), sign=SIGNS, spandrel=_WHT('#ecebe6')), layout=lay(14.9, 'ribbon', gh=4.0, bw=3.2, fh=3.6, P=dict(wh=1.6, nx=3, sill=0.9, frame=M('#d9dad9'))))
+SPEC[121] = dict(P=dict(wall=MT('#b89a6e', 'brick', 0.8), sign=SIGNS), layout=lay(24.4, 'punched', gh=4.0, bw=3.0, fh=3.0, P=dict(ww=1.4, wh=1.4)),
+                 runalt=lambda x, y: _s121w if y > -433.5 else None, splitruns=True)

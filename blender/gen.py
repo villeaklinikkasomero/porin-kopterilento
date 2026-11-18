@@ -758,6 +758,27 @@ def build_roof(Z, pts, h, R, P):
         sa = sum(i_[k][0] * i_[(k + 1) % n][1] - i_[(k + 1) % n][0] * i_[k][1] for k in range(n))
         add_solid(Z, [L(x, y, h + ph) for x, y in (i_ if sa > 0 else i_[::-1])], rm, 0.2)
 
+_FOOT = None
+def _hidden_wall(i, p, q, L):
+    """True when the wall's outer side lies inside another building's footprint (18.11.2026: a black slab between Yrjönkatu 7 and
+    Pohjoiskauppatori 1 was 1729's short wall standing inside 1728)"""
+    global _FOOT
+    from shapely.geometry import Polygon, Point
+    if _FOOT is None:
+        _FOOT = {}
+        for j, b in enumerate(B):
+            try: _FOOT[j] = Polygon([(b['p'][k] / 10, b['p'][k + 1] / 10) for k in range(0, len(b['p']), 2)]).buffer(0)
+            except Exception: pass
+    nx, ny = (q[1] - p[1]) / L, -(q[0] - p[0]) / L
+    pts = [Point(p[0] + (q[0] - p[0]) * f + nx * 0.5, p[1] + (q[1] - p[1]) * f + ny * 0.5) for f in (0.25, 0.5, 0.75)]
+    mx, my = pts[1].x, pts[1].y
+    for j, pg in _FOOT.items():
+        if j == i or pg.is_empty: continue
+        bx = pg.bounds
+        if not (bx[0] - 1 < mx < bx[2] + 1 and bx[1] - 1 < my < bx[3] + 1): continue
+        if all(pg.contains(pt) for pt in pts): return True
+    return False
+
 def build_building(Z, i, spec):
     pts, area = poly(i); h = spec.get('h', B[i]['h']); P = spec['P']
     n = len(pts)
@@ -765,6 +786,7 @@ def build_building(Z, i, spec):
         p, q = pts[k], pts[(k + 1) % n]; dx, dy = q[0] - p[0], q[1] - p[1]; L = math.hypot(dx, dy)
         if L < 0.05: continue
         d = gdir((dy / L, -dx / L))
+        if _hidden_wall(i, p, q, L): continue           # a wall against a neighbour (party wall / notch inside the next house) baked black
         lay = spec.get('walls', {}).get(k) or spec.get('dirs', {}).get(d) or spec['layout']
         if isinstance(lay, tuple):                      # (layout, min length) -> fall back to the default for short walls
             lay = lay[0] if L >= lay[1] else spec['layout']
