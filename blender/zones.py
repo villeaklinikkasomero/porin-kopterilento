@@ -1341,7 +1341,9 @@ for _i, _e in FACADES.items():
                     if _on_line((_p[0] + _q[0]) / 2, (_p[1] + _q[1]) / 2, tuple(w['a']), tuple(w['b'])): _wk[_k] = _bare_lay
         except Exception: pass
     if _i in SPEC:
-        SPEC[_i] = dict(SPEC[_i]); SPEC[_i]['extra'] = list(SPEC[_i].get('extra', [])) + [FEXTRA[_i]]
+        SPEC[_i] = dict(SPEC[_i])
+        if _e.get('nobrick'): SPEC[_i]['nobrick'] = True        # red but not brick: the game draws no brick bond on it (shells 'nb')
+        SPEC[_i]['extra'] = list(SPEC[_i].get('extra', [])) + [FEXTRA[_i]]
         if _bw: SPEC[_i]['runalt'] = _ra
         if _wk: SPEC[_i]['walls'] = {**SPEC[_i].get('walls', {}), **{k: v for k, v in _wk.items()}}; SPEC[_i]['P'] = dict(SPEC[_i]['P'], wall=_bare_mat(_bw[0]))
     else:

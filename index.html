@@ -1153,11 +1153,11 @@ function streamUpdate(x, y) {
         const bin = atob(b64), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
         new GLTFLoader().parse(buf.buffer, '', gl => {
           if (e.st !== 1) return;
-          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { shrinkMap(map, isTouch ? 512 : 1024); map.anisotropy = 4; } q.material = brickify(glassify(new THREE.MeshBasicMaterial({ map }))); } });
+          gl.scene.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { if (isTouch) { shrinkMap(map, 512); map.anisotropy = 4; } else { shrinkMap(map, 2048); map.anisotropy = 8; TEXLOD.add(map, e.x, e.y); } } q.material = brickify(glassify(new THREE.MeshBasicMaterial({ map }))); } });   /* 18.11.2026 (owner: sharper facades): desktop blocks join TEXLOD - the nearest get the full 2048 px atlas, the rest a 512 px copy (was 1024 for all) */
           const gr = new THREE.Group(); gr.position.set(ax, 0, -ay); gr.add(gl.scene); if (shells) liftBlock(gr, shells); scene.add(gr); e.me.visible = false; e.gr = gr; e.st = 2; }, () => { e.st = 0; });
       }).catch(err => { if (err) console.warn('bake ' + e.name + ': ' + err); e.st = 3; });   // not baked yet (or unreadable): keep the plain walls
     } else if (d > 850 && e.st === 2) {
-      scene.remove(e.gr); e.gr.traverse(q => { if (q.isMesh) { q.geometry.dispose(); if (q.material.map) q.material.map.dispose(); q.material.dispose(); } });
+      scene.remove(e.gr); e.gr.traverse(q => { if (q.isMesh) { q.geometry.dispose(); if (q.material.map) { const m_ = q.material.map; TEXLOD.L = TEXLOD.L.filter(t => t.map !== m_); m_.dispose(); } q.material.dispose(); } });
       e.gr = null; e.me.visible = true; e.st = 0;
     }
   }
