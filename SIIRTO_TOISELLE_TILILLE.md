@@ -547,4 +547,5 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   julkisivun (jaettu "rep"-ruutu leivottiin laatikon takaa) → ovi tehty 'S'-sarakkeena. 1744 matala paviljonki (ei 2-krs). index.html: pelin
   kaksi koodilla piirrettyä ravintolapaviljonkia (vihreät aumakatot, aurinkovarjot): läntinen (-106, 500) poistettu (SV: nurmikko),
   itäinen (-3, 487) valkoinen matala laatikko (SV). Bärco ja muut Etelärannan talot kunnossa.
+- **Bärco (käyttäjä 18.11):** ylhäältä kansi ja laitojen sisäpinnat puuttuivat (takapinnat karsittiin) → vesi näkyi laivan sisällä. index.html: Bärcon materiaali DoubleSide.
 - **Ajettava:** `bake tori4 kivi2 --samples 64` ja `city 64 c064,c065,c067,c069,h100`. Koko keskusta hyötyy ruudukosta → lopuksi `city 64 c`.
