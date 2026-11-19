@@ -1817,6 +1817,8 @@ const cars = [];
     for (const [side, k] of [[1, 'R'], [-1, 'L']]) { const h = new THREE.Group(); h.position.set(side * 0.93, 0, 0.58); const lg = new THREE.BoxGeometry(0.05, 0.6, 1.04); lg.translate(0, 0.68, -0.52); const wg = new THREE.BoxGeometry(0.04, 0.36, 1.0); wg.translate(0, 1.16, -0.52);   /* the car's nose is +z: hinge on the front seam, leaf towards the tail */
       h.add(new THREE.Mesh(lg, mat), new THREE.Mesh(wg, dk)); const og = new THREE.BoxGeometry(0.03, 0.92, 1.0); og.translate(side * 0.925, 0.84, 0.06); const o = new THREE.Mesh(og, dk); g.add(h, o); D[k] = h; D['o' + k] = o; }
     g.visible = false; scene.add(g); return D; };
+  cars.vanish = c => { for (let k = 0; k < 60; k++) { const a = list[Math.floor(rnd() * list.length)]; if (!a.nb.length || Math.hypot(a.x - S.x, a.y - S.y) < 150) continue;      /* the player took this parked car: it starts again far away */
+      if (c.pk && c.pk.door) { c.pk.door.g.visible = false; doorPool.push(c.pk.door); } c.pk = null; c.a = a; c.b = a.nb[Math.floor(rnd() * a.nb.length)]; c.t = 0; c.st = 0; c.blk = 0; c.lat = 1.7; c.s = c.v; return; } };
   cars.update = dt => {
     if (dt < 0) dt = 0; sigT += dt; const Q = new Map(); let plc = false; try { plc = VEH === 'car' && !WALK.on; } catch (e) {}      // the player is driving: the traffic queues behind his car too
                                                 // cars by street segment, the front one first
@@ -1915,7 +1917,8 @@ const cars = [];
     lists.forEach((ids, k) => { const im = new THREE.InstancedMesh(geo[k], cm, ids.length);
       ids.forEach((ci, j) => { const yaw = PARKED[ci * 4 + 2] / 100, sc = (k === 3 ? 0.9 : 0.94) + hs(ci, 3) * 0.08;      // heading already faces the traffic (kerbside) or the bay (car parks)
         p3.set(PARKED[ci * 4] / 10, 0.08 + roadDZ(PARKED[ci * 4] / 10, PARKED[ci * 4 + 1] / 10), -PARKED[ci * 4 + 1] / 10); q4.setFromAxisAngle(UP, -yaw); s3.set(sc, sc, sc); im.setMatrixAt(j, m4.compose(p3, q4, s3));
-        tc.setHex(PARKED[ci * 4 + 3]); const mxc = Math.max(tc.r, tc.g, tc.b); if (mxc < 0.05) tc.setRGB(0.05, 0.055, 0.06); im.setColorAt(j, tc); });
+        tc.setHex(PARKED[ci * 4 + 3]); const mxc = Math.max(tc.r, tc.g, tc.b); if (mxc < 0.05) tc.setRGB(0.05, 0.055, 0.06); im.setColorAt(j, tc);
+        (window.__parked || (window.__parked = [])).push({ x: PARKED[ci * 4] / 10, y: PARKED[ci * 4 + 1] / 10, yaw, hex: tc.getHex(), im, j, gone: false }); });      /* for takeCar: the player can borrow a parked car */
       s3.set(1, 1, 1); im.frustumCulled = false; scene.add(im); });
     window.__cars = n;
   });
@@ -2234,7 +2237,8 @@ function walkNear() {   // what Enter would do here: 'in' (church door), 'out' (
     if (M.ports) for (const q of M.ports) if (Math.hypot(WALK.ix - q[0], WALK.iy - q[1]) < q[2]) { WALK.port = q; return 'port'; }   // inner doors that move the player (theatre: foyer <-> upstairs café): [x, y, r, to x, to y, yaw, hint]
     return ''; }
   for (const P of PLACES) { const d = placeDoor(P); if (d && Math.hypot(WALK.x - d.x, WALK.y - d.y) < 4.2) { WALK.at = P; return 'in'; } }
-  const v = WALK.veh; return v && Math.hypot(WALK.x - v.x, WALK.y - v.y) < (VEH === 'car' ? 4.2 : 6) ? 'veh' : '';
+  const v = WALK.veh; if (v && Math.hypot(WALK.x - v.x, WALK.y - v.y) < (VEH === 'car' ? 4.2 : 6)) return 'veh';
+  return takeNear();      // 'heli' (the helicopter left behind), 'take' (a parked car to borrow) or ''
 }
 function walkAction() {
   if (!started || S.dead > 0 || WALK.busy) return;
@@ -2247,6 +2251,7 @@ function walkAction() {
   else if (k === 'out') fadeDo(() => { const d = placeDoor(WALK.in); WALK.in = false; WALK.x = d.x; WALK.y = d.y; WALK.yaw = d.out; WALK.v = 0; WALK.z = carGround(d.x, d.y) || 0; scene.add(walkG);
       camPos.set(WALK.x - Math.sin(d.out) * 3, WALK.z + 2, -WALK.y + Math.cos(d.out) * 3); camera.near = 0.25; camera.updateProjectionMatrix(); });
   else if (k === 'port') fadeDo(() => { const q = WALK.port; WALK.ix = q[3]; WALK.iy = q[4]; WALK.iyaw = q[5]; WALK.v = 0; WALK.z = inFloor(q[3], q[4]); camPos.set(q[3] - Math.sin(q[5]) * 1.5, WALK.z + 2, -(q[4] - Math.cos(q[5]) * 1.5)); });
+  else if (k === 'take' || k === 'heli') takeDo(k);
   else toast(VEH === 'car' ? 'Auto on liian kaukana' : 'Kopteri on liian kaukana', 1.4);
 }
 function walkCollide(p) {   // push the player's circle out of the hall's walls, columns, pews and rails
@@ -2294,7 +2299,7 @@ function stepWalk(dt) {
   walkG.visible = camMode !== 1;
   if (VEH !== 'car') { S.rotorSpd += (0 - S.rotorSpd) * Math.min(1, dt * 0.6); rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt; }
   if (actx && sGain) sGain.gain.value += ((VEH !== 'car' && soundOn && !WALK.in ? 0.05 * S.rotorSpd : 0) - sGain.gain.value) * Math.min(1, dt * 4);
-  const k = walkNear(), h = $('hint'), msg = k === 'in' ? WALK.at.hint : k === 'out' ? 'ulos' : k === 'port' ? WALK.port[6] : k === 'veh' ? (VEH === 'car' ? 'nouse autoon' : 'nouse kopteriin') : '';
+  const k = walkNear(), h = $('hint'), msg = k === 'in' ? WALK.at.hint : k === 'out' ? 'ulos' : k === 'port' ? WALK.port[6] : k === 'veh' ? (VEH === 'car' ? 'nouse autoon' : 'nouse kopteriin') : k === 'heli' ? 'nouse kopteriin' : k === 'take' ? 'ota auto' : '';
   if (msg) { if (h.dataset.m !== msg) { h.dataset.m = msg; h.innerHTML = (isTouch ? '🚶 ' : '<kbd>Enter</kbd> ') + msg; } h.classList.add('on'); } else h.classList.remove('on');
 }
 function walkCamera(dt) {
@@ -2411,7 +2416,7 @@ function navHud() {
 let lastT = performance.now(), bt = 0;
 function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; bt += dt;
-  step(dt); cars.update(dt); if (window.__npc) window.__npc.update(dt); if (window.__statueTick) window.__statueTick(dt); if (window.__caseTick) window.__caseTick(dt); if (window.__birdTick) window.__birdTick(dt); if (window.__raceTick) window.__raceTick(dt); updateCamera(dt); hud(dt);
+  step(dt); cars.update(dt); if (window.__npc) window.__npc.update(dt); if (window.__statueTick) window.__statueTick(dt); if (window.__caseTick) window.__caseTick(dt); if (window.__birdTick) window.__birdTick(dt); if (window.__raceTick) window.__raceTick(dt); window.__takeTick(); updateCamera(dt); hud(dt);
   const r1 = beacon.getObjectByName('ring'), r2 = beacon.getObjectByName('ring2'); const pu = 1 + Math.sin(bt * 3) * 0.06; r1.scale.setScalar(pu); r2.scale.setScalar(0.72 + (bt * 0.5 % 1) * 0.5); r2.material.opacity = 0.8 - (bt * 0.5 % 1) * 0.8;
   for (const sp of sprites) { const d = sp.position.distanceTo(camera.position), far = sp.userData.big ? 2600 : 1100;
     const o = Math.min(1, Math.max(0, (d - 70) / 110)) * Math.min(1, Math.max(0, (far - d) / 250)); sp.visible = o > 0.02; sp.material.opacity = o; }
@@ -2804,6 +2809,36 @@ const KESPA = {"p":[32.6,-339.0,28,-338,20,-336,14,-334,-91,-310,-99,-308,-111,-
         RC.pos = pos; hud.textContent = '🏁 Sija ' + pos + '/4 · ' + fmtT1(RC.t) + (rec ? ' · oma ennätys!' : ' · ennätys ' + fmtT1(RC.best)); toast(pos === 1 ? 'Voitto! Kespan lenkki ' + fmtT1(RC.t) : 'Maalissa ' + pos + '. · ' + fmtT1(RC.t), 6); RC.rib.visible = false; } }
     else if ((RC.end += dt) > 25) clear(); };
 }
+
+// 20.11.2026 (owner: "can a parked car be taken into use"): on foot next to a parked car (the aerial-photo ones in window.__parked, a traffic car standing
+// parked, or the car the player left earlier) Enter borrows it: the player's car model moves to its place and heading and takes its colour, the parked one
+// disappears (a traffic car starts again far away). The car driven until then stays where it was as a copy (TAKE.left, one at a time, its damage kept) and
+// can be taken back. From the helicopter the game switches to driving; the helicopter waits where it landed (TAKE.heli) and is boarded again on foot -
+// the landmark round pauses meanwhile, so a car cannot finish a helicopter round.
+const TAKE = { left: null, heli: null, hex: null, applied: null, tgt: null }; window.__take = TAKE;
+function takeNear() { const x = WALK.x, y = WALK.y; if (TAKE.heli && VEH === 'car' && Math.hypot(TAKE.heli.x - x, TAKE.heli.y - y) < 6) return 'heli';
+  let best = null, bd = 3.4; if (TAKE.left && Math.hypot(TAKE.left.x - x, TAKE.left.y - y) < 4.2) { TAKE.tgt = { l: TAKE.left }; return 'take'; }
+  if (window.__parked) for (const p of window.__parked) { if (p.gone) continue; const dx = p.x - x; if (dx > 3.4 || dx < -3.4) continue; const d = Math.hypot(dx, p.y - y); if (d < bd) { bd = d; best = { p }; } }
+  for (const c of cars) if (c.pk && c.pk.ph === 1 && c.wx !== undefined) { const d = Math.hypot(c.wx - x, c.wy - y); if (d < bd) { bd = d; best = { c }; } }
+  TAKE.tgt = best; if (best && !carG.children.length) loadCar();      /* from the helicopter: fetch the car model as soon as the offer shows */
+  return best ? 'take' : ''; }
+function takeLeave() {      /* the car driven so far stays behind as a copy */
+  if (TAKE.left) { scene.remove(TAKE.left.g); TAKE.left = null; } if (!carG.children.length) return;
+  const g = new THREE.Group(), body = carG.children[0].clone(true), mats = new Map(); g.rotation.order = 'YXZ'; g.userData.noT = true; g.add(body); let hex = 0x103070;
+  body.traverse(q => { if (q.isMesh && q.material && q.material.name === 'CarPaint') { if (!mats.has(q.material)) { const m = q.material.clone(); m.userData.noT = true; mats.set(q.material, m); hex = m.color.getHex(); } q.material = mats.get(q.material); } });
+  g.position.set(CAR.x, CAR.z, -CAR.y); g.rotation.set(0, -CAR.yaw, 0); scene.add(g); TAKE.left = { x: CAR.x, y: CAR.y, yaw: CAR.yaw, hp: S.hp, hex, g }; }
+function takeDo(k) { if (window.__race && (window.__race.st === 1 || window.__race.st === 2)) return;
+  if (k === 'heli') { const H = TAKE.heli; takeLeave(); carG.visible = false; VEH = 'heli'; document.body.classList.remove('car'); heli.visible = true; S.hp = H.hp; tourOn = H.tour; TAKE.heli = null; WALK.veh = H; walkBoard(); toast('Takaisin kopterissa', 1.8); return; }
+  const T = TAKE.tgt; if (!T) return; let x, y, yaw, hex, hp = 100;
+  if (T.l) { ({ x, y, yaw, hex, hp } = T.l); scene.remove(T.l.g); TAKE.left = null; if (VEH === 'car') takeLeave(); }
+  else { if (VEH === 'car') takeLeave(); if (T.p) { ({ x, y, yaw, hex } = T.p); T.p.gone = true; T.p.im.setMatrixAt(T.p.j, new THREE.Matrix4().makeScale(0, 0, 0)); T.p.im.instanceMatrix.needsUpdate = true; }
+    else { x = T.c.wx; y = T.c.wy; yaw = T.c.yaw; hex = T.c.paint || 0x8b9096; cars.vanish(T.c); } }
+  if (VEH !== 'car') { TAKE.heli = { x: WALK.veh.x, y: WALK.veh.y, alt: WALK.veh.alt, yaw: WALK.veh.yaw, hp: S.hp, tour: tourOn }; tourOn = false; VEH = 'car'; document.body.classList.add('car'); loadCar(); }
+  carG.visible = true; Object.assign(CAR, { x, y, yaw, v: 0, steer: 0, pitch: 0, roll: 0 }); CAR.z = carGround(x, y) ?? TZs(x, y); S.hp = hp; TAKE.hex = hex; TAKE.tgt = null;
+  WALK.veh = { x, y, alt: CAR.z, yaw }; walkBoard(); toast(T.l ? 'Takaisin omassa autossa' : Math.random() < 0.4 ? '🚗 Lainasit auton – "Hei! Se o mnuu auto!"' : '🚗 Lainasit auton', 2.6); }
+TAKE.near = takeNear; TAKE.do = takeDo;
+window.__takeTick = () => { if (TAKE.hex !== TAKE.applied && carG.children.length) { carG.traverse(q => { if (q.isMesh && q.material && q.material.name === 'CarPaint') q.material.color.setHex(TAKE.hex); }); TAKE.applied = TAKE.hex; }
+  if (TAKE.heli && VEH === 'car' && !S.dead && !heli.visible) heli.visible = true; };
 
 window.__game = { WALK, IN, PLACES, placeDoor, walkAction, sceneIn, door: churchDoor, S, begin, keys, camera, renderer, scene, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
 terrainizeScene(); setInterval(terrainizeScene, 1000);

@@ -1726,3 +1726,20 @@ puhuvat tekoälyasukkaat. Omistaja: "tehdään" + ensin autokilpailu. **Seuraava
 **Tarkistettu:** headless-simulaatio koko kierroksesta (pelaaja 17,5 m/s tasaisesti = 3:10, botit n. 3:30), ruudukko- ja ympyräkuva (`kespan_lenkki_20_11.jpg`), ei konsolivirheitä.
 **EI testattu:** oikea ajaminen; bottien tasapaino ihmistä vastaan; törmäys bottiin; Nesteen pihan ajettavuus (rakennus/katos voi olla tiellä); jonottava muu liikenne
 lähtöruudukossa. **Ei vielä:** päivän tulostaulu verkossa (LB käyttää kierroksen kenttää – tarvitsee oman kentän 'k'+päivä), bottien vauriot, kierrosmäärän valinta.
+
+---
+
+## 20.11.2026 klo 07 – Pysäköidyn auton lainaus (c31)
+
+**Tehty (viety koneelle, EI pushattu), vain `index.html`** (yhdistetty toisen istunnon taidemuseo/jäähalli-muutosten päälle):
+- `window.__parked`: ilmakuvan pysäköidyt autot rekisteriin (x, y, yaw, väri, instanssi) siinä missä ne piirretään. `cars.vanish(c)`: liikenteen auto alkaa uudelleen kaukaa.
+- `walkNear()` palauttaa oman kulkuneuvon jälkeen `takeNear()`: `'heli'` (jätetty kopteri < 6 m) tai `'take'` (pysäköity auto < 3,4 m: ilmakuvan auto, parkissa seisova
+  liikenteen auto tai aiemmin jätetty oma auto). Vihje "ota auto", Enter/F → `takeDo`.
+- `takeDo`: pelaajan automalli siirtyy auton paikalle ja suuntaan ja saa sen värin (`CarPaint`-materiaali), pysäköity instanssi piilotetaan. Siihen asti ajettu auto jää
+  kopiona paikalleen (`TAKE.left`, yksi kerrallaan, vauriot ja väri tallessa) ja sen saa takaisin. Uusi auto alkaa ehjänä (hp 100).
+- Kopterista: `VEH` vaihtuu autoksi kesken pelin, kopteri jää laskeutumispaikalle (`TAKE.heli`) ja siihen noustaan kävellen takaisin; maamerkkikierros on tauolla sen ajan.
+  Kespan lenkin voi ajaa lainatulla autolla.
+
+**Tarkistettu:** headless (`auton_lainaus_20_11.jpg`): lainaus kopterista, toinen lainaus (edellinen jää kopioksi hp 55), paluu kopteriin; ei konsolivirheitä.
+**EI testattu:** pelaaminen; N (uusi kierros) ja auton hajoaminen lainatulla autolla kopteri-istunnossa (kopteri pakotetaan näkyviin `__takeTick`issä, mutta kierroksen
+tila voi sekoilla). Pysäköityihin autoihin ei edelleenkään voi törmätä. Omistajan huuto on vain teksti ruudulla, ei ääntä.
