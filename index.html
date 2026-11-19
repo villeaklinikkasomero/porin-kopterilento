@@ -1711,7 +1711,21 @@ const cars = [];
       if (!inb(ax, ay) || !inb(bx, by) || (ax === bx && ay === by)) continue; const a = node(ax, ay), b = node(bx, by);
       if (!a.nb.includes(b)) { a.nb.push(b); (a.ow || (a.ow = new Map())).set(b, [ri, i / 2, true]); } if (!b.nb.includes(a)) { b.nb.push(a); (b.ow || (b.ow = new Map())).set(a, [ri, i / 2, false]); } } });
   const may = (a, b) => { const e = a.ow && a.ow.get(b); return !e || owOk(e[0], e[1], e[2]); };   // one-way streets (filled when roads.js loads)
-  const list = [...nodes.values()].filter(n => n.nb.length);
+  const list = [...nodes.values()].filter(n => n.nb.length); list.forEach((n, i) => n.id = i);
+  // traffic lights (19.11.2026): signalled junctions from OpenStreetMap (tools/roads/traffic_signals.json, game metres). Every graph node with
+  // three or more arms within 24 m of a junction is signalled (a lone mid-block node = a signalled pedestrian crossing); the arms are split in
+  // two groups by direction. 40 s cycle: 16 s green, 3 s yellow, 1 s all red per group. The wandering cars stop at the line and queue.
+  const SIGJ = [[241,167],[296,-73],[292,-123],[-94,-303],[20,-340],[172,314],[350,134],[-269,-268],[-128,-432],[-385,-241],[-3,-463],[78,-482],[-303,-385],[193,-512],[-411,-367],[643,-76],[-596,361],[522,-581],[856,303],[-766,-760],[-494,990],[-856,-809],[-927,-825],[-1230,305],[-1394,-85],[1021,-1112],[-1565,340],[1339,-1219],[-1753,-706],[1377,-2028],[-2743,-7]], SR = 9, SIGC = 40; let sigT = 0; const sigPoles = [];
+  SIGJ.forEach(([jx, jy], ji) => { let c = list.filter(n => n.nb.length >= 3 && Math.hypot(n.x - jx, n.y - jy) < 24), mid = false;
+    if (!c.length) { let b = null, bd = 22; for (const n of list) { const d = Math.hypot(n.x - jx, n.y - jy); if (d < bd) { bd = d; b = n; } } if (!b) return; c = [b]; mid = true; }
+    const r0 = Math.atan2(c[0].nb[0].x - c[0].x, c[0].nb[0].y - c[0].y);
+    for (const n of c) { if (n.sig) continue; n.sig = { j: ji, off: (ji * 7) % SIGC, mid, grp: new Map() };
+      for (const a of n.nb) n.sig.grp.set(a, Math.abs(Math.cos(Math.atan2(a.x - n.x, a.y - n.y) - r0)) > 0.7071 ? 0 : 1); } });
+  const sigState = (n, from) => { const g = n.sig, t = (sigT + g.off) % SIGC; if (g.mid) return t < 26 ? 0 : t < 29 ? 1 : 2;      // 0 green, 1 yellow, 2 red
+    const tt = g.grp.get(from) ? (t + 20) % SIGC : t; return tt < 16 ? 0 : tt < 19 ? 1 : 2; };
+  const pedGo = (n, from) => { const g = n.sig, t = (sigT + g.off) % SIGC; if (g.mid) return t >= 30 && t < 38;                      // walk across the arm 'from'
+    const tt = g.grp.get(from) ? (t + 20) % SIGC : t; return tt >= 21 && tt < 34; };
+  window.__sig = { state: sigState, ped: pedGo, nodes: () => list.filter(n => n.sig), poles: sigPoles, t: () => sigT, cars };
   const N = Math.min(300, list.length), L = 4.4, W = 1.8;
   const bodyG = new THREE.BoxGeometry(W, 0.62, L); bodyG.translate(0, 0.56, 0);
   const cabG = new THREE.BoxGeometry(W * 0.86, 0.5, L * 0.5); cabG.translate(0, 1.1, 0.15);
@@ -1724,14 +1738,49 @@ const cars = [];
   scene.add(body, cab, base); let parts = [body, cab, base], typed = false;
   const m4 = new THREE.Matrix4(), q4 = new THREE.Quaternion(), p3 = new THREE.Vector3(), s3 = new THREE.Vector3(1, 1, 1), UP = new THREE.Vector3(0, 1, 0);
   cars.update = dt => {
+    if (dt > 0) sigT += dt; const Q = new Map();                                             // cars by street segment, the front one first
+    for (let i = 0; i < N; i++) { const c = cars[i], k = c.a.id * 65536 + c.b.id; let q = Q.get(k); if (!q) Q.set(k, q = []); q.push(c);
+      c.len = Math.hypot(c.b.x - c.a.x, c.b.y - c.a.y) || 1; c.pos = c.t * c.len; if (c.s === undefined) c.s = c.v; }
+    for (const q of Q.values()) { if (q.length > 1) q.sort((m, n) => n.pos - m.pos); let lead = null;
+      for (const c of q) { let room = 1e9; const g = c.b.sig;
+        if (g && !(c.a.sig && c.a.sig.j === g.j)) { const sp = Math.max(c.len - SR, 0), st = sigState(c.b, c.a);          // red, or a yellow it can still stop for
+          if (c.pos <= sp + 0.3 && (st === 2 || (st === 1 && sp - c.pos > c.s * 1.2))) room = sp - c.pos; }
+        if (lead) room = Math.min(room, lead.pos - 6.5 - c.pos);
+        room = Math.max(room, 0); const tv = Math.min(c.v, Math.sqrt(7 * room));
+        c.s = tv > c.s ? Math.min(tv, c.s + 2.5 * dt) : Math.max(tv, c.s - 7 * dt); if (room < 0.02) c.s = 0;
+        c.mv = Math.min(c.s * dt, room); c.pos += c.mv; lead = c; } }
     for (let i = 0; i < N; i++) { const c = cars[i]; let dx = c.b.x - c.a.x, dy = c.b.y - c.a.y, len = Math.hypot(dx, dy) || 1;
-      c.t += c.v * dt / len;
+      c.t += c.mv / len;
       if (c.t >= 1) { let opts = c.b.nb.filter(n => n !== c.a && may(c.b, n)); if (!opts.length) opts = c.b.nb.filter(n => may(c.b, n)); const nx = opts.length ? opts[Math.floor(rnd() * opts.length)] : c.a; c.a = c.b; c.b = nx; c.t = 0; dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
       const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * 1.7, y = c.a.y + dy * c.t - ux * 1.7;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
       const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
     for (const q of parts) q.instanceMatrix.needsUpdate = true;
+    if (sigL) { const ON = [0xff2a1c, 0xffb400, 0x22e060], OFF = [0x3a0d0a, 0x3a2c06, 0x083818];
+      sigPoles.forEach((p, i) => { const st = sigState(p.n, p.a), go = pedGo(p.n, p.a);
+        sigL[0].setColorAt(i, col.setHex(st === 2 ? ON[0] : OFF[0])); sigL[1].setColorAt(i, col.setHex(st === 1 ? ON[1] : OFF[1])); sigL[2].setColorAt(i, col.setHex(st === 0 ? ON[2] : OFF[2]));
+        sigL[3].setColorAt(i, col.setHex(go ? OFF[0] : ON[0])); sigL[4].setColorAt(i, col.setHex(go ? ON[2] : OFF[2])); });
+      for (const m of sigL) m.instanceColor.needsUpdate = true; }
   };
+  // the signal posts: one on the right-hand kerb at each stop line (lamps face the arriving cars; a red/green pair faces across the street
+  // for people on foot). Built a little after the start, when roads.js has told which streets are one-way.
+  let sigL = null;
+  setTimeout(() => {
+    for (const n of list) { if (!n.sig) continue;
+      for (const a of n.nb) { if ((a.sig && a.sig.j === n.sig.j) || (!n.sig.mid && !may(a, n))) continue;
+        const dx = n.x - a.x, dy = n.y - a.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, b = Math.min(SR, len);
+        sigPoles.push({ n, a, x: n.x - ux * b + uy * 4.6, y: n.y - uy * b - ux * 4.6, ux, uy }); } }
+    const P = sigPoles.length; if (!P) return;
+    const mk = (g, m) => { const im = new THREE.InstancedMesh(g, m, P); scene.add(im); return im; }, dark = new THREE.MeshLambertMaterial({ color: 0x25282b });
+    const pg = new THREE.BoxGeometry(0.12, 3.3, 0.12); pg.translate(0, 1.65, 0); const hg = new THREE.BoxGeometry(0.36, 1.02, 0.3); hg.translate(0, 2.72, 0);
+    const fg = new THREE.BoxGeometry(0.28, 0.56, 0.28); fg.translate(-0.18, 1.98, 0);
+    const pole = mk(pg, new THREE.MeshLambertMaterial({ color: 0x6f7477 })), head = mk(hg, dark), foot = mk(fg, dark);
+    const lamp = (x, h, z) => { const g = new THREE.BoxGeometry(x ? 0.06 : 0.2, 0.2, x ? 0.18 : 0.06); g.translate(x, h, z); return mk(g, new THREE.MeshBasicMaterial({ color: 0xffffff })); };
+    const L5 = [lamp(0, 3.04, 0.17), lamp(0, 2.72, 0.17), lamp(0, 2.4, 0.17), lamp(-0.34, 2.11, 0), lamp(-0.34, 1.86, 0)];
+    sigPoles.forEach((p, i) => { const bz = bridgeZ(p.x, p.y); p3.set(p.x, 0.09 + bz + (bz ? 0 : roadDZ(p.x, p.y)), -p.y); q4.setFromAxisAngle(UP, -Math.atan2(p.ux, p.uy)); m4.compose(p3, q4, s3);
+      for (const m of [pole, head, foot, ...L5]) m.setMatrixAt(i, m4); for (const m of L5) m.setColorAt(i, col.setHex(0x222222)); });
+    sigL = L5;
+  }, 9000);
   cars.update(0);
   // Blender-made car models: the traffic switches to them, and one is parked on top of every car found in the aerial image
   // car models car0..car6 (hatchback, saloon, SUV, van, box lorry, flatbed lorry, refuse lorry); types missing from cars.js are skipped

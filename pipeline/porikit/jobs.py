@@ -63,6 +63,8 @@ def layout():
         src = REPO / 'blender' / f
         if src.exists(): shutil.copy(src, HOME / f)
     for f in glob.glob(str(REPO / 'blender' / '*.py')): shutil.copy(f, HOME / 'blender' / os.path.basename(f))
+    for f in glob.glob(str(REPO / 'blender' / '*.json')):        # facades.json (measured facades) is read beside zones.py: without it the bakes silently lacked them (19.11.2026)
+        shutil.copy(f, HOME / os.path.basename(f)); shutil.copy(f, HOME / 'blender' / os.path.basename(f))
     for f in ('mml_city.py', 'river_build.py', 'dem_build.py', 'parse.py'):
         src = REPO / 'blender' / f
         if src.exists(): shutil.copy(src, HOME / 'mmlproc' / f)

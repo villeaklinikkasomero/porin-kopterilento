@@ -950,3 +950,71 @@ Testi: `python3 -m http.server 8765` + playwright (`/opt/npm-tools/node_modules/
   Seinät: k=1,2,3 → fresco1–3, k=5,6,7 → fresco4–6 (oikea järjestys hallissa tarkistamatta). Uudelleenleivottu (6 min) → `mausoleumi_sisa.js` 1,5 Mt.
 - Lupa koskee mausoleumia; kirkon alttaritaulu ja lasimaalaukset ovat edelleen abstrakteja. Tyyli on pelkistetty – tarkempi jälki vaatisi käsin maalatut tekstuurit.
 - index.html ei muuttunut. Kuva `Claude outputs/mausoleumi_sisa_19_11/maus_freskot.jpg`.
+
+## 19.11.2026 klo 14–15 – ITSENÄISYYDENKATU, keskustan erä (omistaja: "keskusta ensin", 15 isoa taloa) – ALOITA TÄSTÄ
+
+Kadun varrella on 62 rakennusta (33 kerros-/liiketaloa, 29 puutaloa/piharakennusta); värit ja kerrosluvut tarkistettu 13.–14.11 (styles `sv`).
+Mitattu julkisivu (facades.json) tehdään ensin näille 15:lle. **Tee vain rivit, joissa lukee TEKEMÄTTÄ – valmiita ei aloiteta uudelleen.**
+
+| ID | Mikä | Lohko | Tila |
+|---|---|---|---|
+| 415 | Itsenäisyydenkatu 52 / Antinkatu 26 | c048 | VALMIS 19.11 (f415.py) |
+| 118 | Antinkatu 24 | c048 | VALMIS 18.11 |
+| 116 | Antinlinna, Itsenäisyydenkadun julkisivu | c048 | VALMIS 19.11 (f116.py) |
+| 119 | Itsenäisyydenkatu 41 | c063 | VALMIS 19.11 (f119.py) |
+| 113 | matala keltainen talo 116:n itäpuolella | c063 | AUKI: LoD2-kuoressa on vain eteläosa, kadulle näkyvä matala lasikuistiosa puuttuu → vaatii jalanjälkiratkaisun (kuten 136) |
+| 115 | kioskipaviljonki | c063 | VÄRI KORJATTU 19.11 (keltainen), julkisivu mittaamatta |
+| 107 | Yrjönkatu 25 (1927) | c064 | TEKEMÄTTÄ |
+| 121 | Palojoenkulma, Yrjönkatu 23 | c064 | VALMIS 19.11 (f121.py) |
+| 600 | Hotelli Bepop, Itsenäisyydenkatu 37 | bepop (maamerkki) | TEKEMÄTTÄ |
+| 601 | Itsenäisyydenkatu 35 (1959) | ei lohkoa (maamerkki) | TEKEMÄTTÄ |
+| 585 | vanha linja-autoasema | c064 | TEKEMÄTTÄ |
+| 1228 | valkoinen 6 krs | ei lohkoa | TEKEMÄTTÄ |
+| 569 | Antinkatu 27 A (pohjoissivu Itsenäisyydenkadulle) | c048 | TEKEMÄTTÄ (parvekepino tehty 18.11) |
+| 164 | 569:n länsipuolella | c051 | TEKEMÄTTÄ |
+| 7 | Itsenäisyydenkatu 54 (1956) | c048 | TEKEMÄTTÄ |
+| 166 | okrankeltainen | c048 | TEKEMÄTTÄ |
+| 167 | 8 krs, lasitetut parvekkeet (SPEC 13.11) | c048 | TEKEMÄTTÄ |
+
+Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–693, länteen 141–265), viimeisenä puutalot.
+
+- **116 Antinlinna:** pylväsportaali ja nimikilpi ovat **Itsenäisyydenkadun** julkisivussa (seinä (−90.018,−451.231)→(−121.309,−443.652), 32,2 m), eivät Antinkadulla:
+  aiempi `_al_pil` (pilasterit Antinkadun seinässä) poistettu SPEC[116]:n extrasta. `f116.py`: 8 ikkuna-akselia ruskeissa kaksikerroksisissa kehyksissä
+  (kaidepaneeli + koristepaneeli), graniittiportaali + 2 pylvästä + attikalohko (nimi piirretty tyhjänä paneelina), sivuportaali, 2 näyteikkunaa.
+  Pano Itsenäisyydenkatu 41 (61.4820789, 21.7940872 → x −101.9, y −436.9; h 140/194/245 p 12); s = (s+1,0)·0,952, z = (z−0,3)·0,93.
+  zones.py: facades-silmukka ketjuttaa nyt aiemman `runalt`in (116:n palomuuripääty säilyy).
+- **119:** `f119.py`: 2 krs roiskerappaus, tummat ikkunanpuitteet, 3 näyteikkunaa, 2 ovea, punainen kyltti. Räystäs 6,8 m, kuori 8,5 m → väli piirretty
+  tummana kattokaistana. Pano (61.4820169, 21.7946426 → x −72.3, y −443.9; h 14 p 10). Näkyi vain s 1,5–18.
+- **Opit:** (1) `winp`-kehys on 3 cm seinästä: sen alle jäävä `box` saa olla enintään 2,5 cm paksu, muuten ikkuna jää piiloon (116). (2) `tools`-apuri
+  kadunpuoleisen seinän hakuun ei ole luotettava (W-polygonit): lue seinät `lod2.js`:stä ja tarkenna päätepisteet raw.pkl:stä. (3) Street View latautuu
+  tarkalla pano-osoitteella 45–60 s: navigate + 5×10 s odotus + erillinen screenshot. Pohjoisjulkisivut jäävät poltossa varjoon (tummuvat).
+- **Modal:** c048 on jo jonossa; **lisää c063** (119): `city 64 c048,c051,c052,c063,c064,c065,c067,c069,h100`.
+- Vertailukuva `Claude outputs/itsenaisyydenkatu_116_119_vertailu_19_11.jpg`.
+
+(Huom: toinen istunto kirjoitti tämän tiedoston välillä vanhemman pohjan päälle ja Itsenäisyydenkadun luku katosi – palautettu tähän. Stage aina juuri ennen vientiä.)
+
+## 19.11.2026 klo 15–16 – MODAL-POLTOISTA PUUTTUIVAT MITATUT JULKISIVUT (korjattu) + 121
+
+- **Vika:** omistaja ajoi jonon (PR #61, 15 lohkoa "ok"), mutta peliin ei tullut yhtään facades.json-julkisivua. Syy: Modalissa `pipeline/porikit/jobs.py`
+  KOPIOI `zones.py`:n kansioon /home/claude (ei symlinkkiä) eikä kopioinut `facades.json`:ia; `zones.py` etsi sitä vain omasta kansiostaan ja jätti
+  julkisivut hiljaa pois (`FACADES = {}`). Todiste: Modalin bl_c051.js 10 345 kärkeä, paikallinen 17 977; tori0 4 652 / 6 708. Koskee kaikkea 18.11 jälkeen.
+- **Korjaus:** `blender/zones.py` etsii facades.json:n myös `$PORI_REPO/blender/` ja `$PORI_GAME/blender/` -kansioista ja tulostaa lokiin
+  `facades.json: <polku>` tai `NOT FOUND`; `jobs.py` kopioi `blender/*.json` zones.py:n viereen. Testattu simuloimalla kopioitu asetelma (28 julkisivua löytyy).
+- **Omistajan ajettava:** push → odota että Actions-työ **"porikit image"** on vihreä (rakentaa Modal-kuvan uudesta koodista) → vasta sitten
+  `bake p1 tori0 tori1 tori2 tori3 tori4 kivi2 --samples 64` ja `city 64 c048,c051,c052,c063,c064,c065,c067,c069,h100` → "porikit collect" → yhdistä PR.
+  **Tarkistus polton jälkeen:** bl_c051.js:n pitää kasvaa selvästi (kärkiä ~18 000); jos ei, katso Modal-lokista rivi `facades.json:`.
+- **121 Palojoenkulma (c064):** `f121.py`: ruskeankeltainen tiili, 7 moduulia (5,7 m) tiilipilarien välissä: katutason ikkunanauha, ulkoneva tumma lasierkkeri,
+  leveä ikkunarivi, 4 riviä nauhaikkunapareja. Pano Itsenäisyydenkatu 39 (61.481935, 21.7953921 → x −32.39, y −453.0; h 13 p 25), mittakaava 1,0.
+  Moduuli mitattu kohdasta s 19–34 ja toistettu; päädyt ja ylin kerros näkemättä.
+- **115:** vain väri (seinät keltaiset, SPEC + styles). **113:** ks. taulukko. Seuraavaksi taulukon TEKEMÄTTÄ-rivit: 107, 600, 601, 585, 1228, 569, 164, 7, 166, 167.
+- SV-huomio: toinen ja kolmas suunta samasta panosta latautuvat hitaasti (60–90 s sumeana) – ota ensin leveä kuva ja mittaa moduuli, jos julkisivu toistuu.
+
+### 19.11 klo 15: liikennevalot (index.html, ei polttoa)
+- Data: `tools/roads/traffic_signals.json` (OSM, 124 solmua → 31 risteystä; haettu sovelluksen selaimella www.openstreetmap.org/api/0.6/map.json
+  -ruuduilla, koska Overpass antaa 406 / CSP estää). index.html:ssä risteyskeskipisteet vakiona `SIGJ` liikennelohkossa (`cars`).
+- Logiikka: jokainen katuverkon solmu, jolla ≥3 haaraa ja joka on <24 m risteyksestä, on valo-ohjattu (28 risteystä osuu verkkoon, 96 pylvästä);
+  haarat kahteen ryhmään suunnan mukaan; kierto 40 s (16 vihreä, 3 keltainen, 1 kaikki punaisella). `sigState(n, from)`, `pedGo(n, from)`, `window.__sig`.
+- Bottiautot: pysähtyvät 9 m ennen solmua punaiseen/keltaiseen, jonottavat 6,5 m välein, kiihdytys 2,5 ja jarrutus ≤7 m/s² (aiemmin vakionopeus).
+  Simuloitu 120 s: 0 punaisia päin, pisin seisonta 21 s, ei lukkiutumia. Pelaajaa valot eivät sido.
+- Pylväät rakennetaan 9 s käynnistyksen jälkeen (yksisuuntaisuus tulee roads.js:stä); autolle 3 valoa, kadun yli jalankulkijan punainen/vihreä.
+- **Pelissä ei ole bottikävelijöitä** (vain pelaaja kävelee) – jos niitä tehdään, `pedGo` kertoo saako haaran ylittää.

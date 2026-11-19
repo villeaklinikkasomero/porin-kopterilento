@@ -1044,7 +1044,8 @@ SPEC[4]['fit'] = _scale_fit(_k4)
 SPEC[4]['cornice_all'] = True; SPEC[4]['cornice'] = (0.35, 0.7, M('#efe7d2', 0.6))
 _k4['rowP']['S'] = dict(_k4['rowP']['S'], wh=2.9, ww=1.2)
 # 115  low kiosk / fast-food pavilion at Itsenäisyydenkatu - Yrjönkatu: glazed front, red fascia
-SPEC[115] = dict(P=dict(wall=M('#ece8e0'), sign=SIGNS, gwall=M('#34383b', 0.3), fascia=M('#b8312c', 0.6), fasc_h=0.8, plinth=DARK, gframe=ALU),
+SPEC[115] = dict(P=dict(wall=M('#e6c758'),   # 19.11.2026 SV: yellow walls under the red-and-white sign band (was white)
+                          sign=SIGNS, gwall=M('#34383b', 0.3), fascia=M('#b8312c', 0.6), fasc_h=0.8, plinth=DARK, gframe=ALU),
                  layout=dict(bw=3.2, rows=[(3.8, 'shop', 'G')], cols=lambda c, nb: 'W', P={}, rowP={}))
 # 585  former bus station (1955): two storeys, beige render, continuous window band upstairs, glazed shop fronts below
 _bsP = dict(wall=M('#eadfc6'), spandrel=M('#eadfc6'), sign=SIGNS, gwall=M('#34383b', 0.3), fascia=M('#eadfc6'), gframe=ALU)
@@ -1340,7 +1341,11 @@ def _fac_extra(walls):
                     _a31balc(Z, W, it[1], it[2], tuple(it[3]), it[4], it[5], M(it[7], 0.85), M(it[8], 0.1, 0.3), _a31WH, r=it[6],
                              ph=it[9] if len(it) > 9 else 1.0, gh=it[10] if len(it) > 10 else 2.75)
     return ex
-_FJ = _os_f.path.join(_os_f.path.dirname(_os_f.path.realpath(__file__)), 'facades.json')   # realpath: zones.py is also imported through a symlink
+# 19.11.2026: on Modal jobs.py COPIES zones.py to /home/claude (no symlink), so facades.json was not beside it and every measured facade was
+# silently left out of the cloud bakes. Look beside the file first, then in the repository (PORI_REPO / PORI_GAME), and say which one is used.
+_FJc = [_os_f.path.join(_os_f.path.dirname(_os_f.path.realpath(__file__)), 'facades.json')] + [_os_f.path.join(_os_f.environ[k], 'blender', 'facades.json') for k in ('PORI_REPO', 'PORI_GAME') if _os_f.environ.get(k)] + ['/home/claude/pori/blender/facades.json']
+_FJ = next((f for f in _FJc if _os_f.path.exists(f)), _FJc[0])
+print('facades.json:', _FJ if _os_f.path.exists(_FJ) else 'NOT FOUND - measured facades are left out', flush=True)
 def _bare_mat(w): return M(w['bare'], 0.45, 0.35) if w.get('kind') == 'sheet' else MT(w['bare'], w.get('kind', 'plaster'), 0.9)
 def _bare_w(w):
     """the runalt spec of a facades.json wall: plain, or (recess [gh, sb, h]) a shop floor gh high set sb metres back behind the
