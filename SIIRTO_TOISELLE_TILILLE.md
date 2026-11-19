@@ -966,8 +966,8 @@ Mitattu julkisivu (facades.json) tehdään ensin näille 15:lle. **Tee vain rivi
 | 115 | kioskipaviljonki | c063 | VÄRI KORJATTU 19.11 (keltainen), julkisivu mittaamatta |
 | 107 | Yrjönkatu 25 (1927) | c064 | VALMIS 19.11 (f107.py; vain Itsenäisyydenkadun pääty, Yrjönkadun pitkä sivu mittaamatta) |
 | 121 | Palojoenkulma, Yrjönkatu 23 | c064 | VALMIS 19.11 (f121.py) |
-| 600 | Hotelli Bepop, Itsenäisyydenkatu 37 | bepop (maamerkki) | TEKEMÄTTÄ |
-| 601 | Itsenäisyydenkatu 35 (1959) | ei lohkoa (maamerkki) | TEKEMÄTTÄ |
+| 600 | Hotelli Bepop, Itsenäisyydenkatu 37 | bepop (nimetty lohko, kuori 588) | VALMIS 19.11 (f588.py; katujulkisivu, nähty s 9,5–28, loput toistettu) |
+| 601 | Itsenäisyydenkatu 35, Maakuntalinna (1959) | bepop (nimetty lohko, kuori 588) | VALMIS 19.11 (f588.py; katujulkisivu, nähty s 7,5–34,6, länsipää toistettu) |
 | 585 | vanha linja-autoasema | c064 | OSITTAIN 19.11 (f585.py: vain Itsenäisyydenkadun pääty 13 m; länsi-, koillis- ja muut sivut mittaamatta) |
 | 1228 | valkoinen 6 krs | ei lohkoa | TEKEMÄTTÄ |
 | 569 | Antinkatu 27 A | c048 | EI KADUN VARRESSA: eteläsivu on 10 m sisäänvedetty lautaaidan takana (aita tehty 18.11) – jätetään |
@@ -1176,7 +1176,7 @@ Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 m
 | c064 | 107 (Yrjönkatu 25), 585 (vanha linja-autoasema, pohjoispääty) | 19.11 klo 17; 585 lisätty myöhemmin 19.11 |
 | c051 | 164 (Itsenäisyydenkatu 45, pysäköintitalo) | 19.11 |
 
-Ajettava illalla (push ensin, odota "porikit image" vihreäksi): `city 64 c048,c051,c064`
+Ajettava illalla (push ensin, odota "porikit image" vihreäksi): `city 64 c048,c051,c064` **ja** `bake bepop --samples 64` (600 ja 601)
 
 ## 19.11.2026 klo 17 – ALOITA TÄSTÄ (uusi chat: JULKISIVUINVENTAARIO, Itsenäisyydenkatu jatkuu)
 
@@ -1353,3 +1353,19 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
 - **Tervehdys itsestään:** kun pelaaja kävelee <2,6 m päähän, kävelijä puhuu (ryhmä kerran / 45 s, enintään yksi repliikki / 6 s). H ja 💬 toimivat edelleen 8 m asti.
 - **Huudahdukset:** huudot.json sai listan `n` (vain naiset, tiedostot huuto_n_13–18: Hyvä Ässät!, Mennääks jazzeil?, Lähdetääks Yyterii?, Torilt saa hyvää
   kahvii., Kyl Pori on kaunis kesäl., Onks toi sun kopteris?) ja lapsille 5 lisää (huuto_l_05–09). Yhteensä 39 äänitiedostoa.
+
+## 19.11.2026 – 600 Hotelli Bepop ja 601 Maakuntalinna (testipoltettu, nimetty lohko `bepop`)
+- **Rakenne (tärkeä):** 600 ja 601 ovat lod2.js:n `hide`-listalla eikä niillä ole omaa kuorta: ne ovat **BePOPin LoD2-kuoren (588) eteläseinän pätkiä**
+  (seinä (3.51,−450.606)→(83.248,−469.351), 81,9 m; hotelli s 0–47,2, Maakuntalinna s 47,2–81,9; zones.py `_SPEC_HB` / `_SPEC_ML` runaltina).
+  facades.json-merkintä on siksi **id 588**, kaksi seinää samalla janalla ja `bare_s`; skripti `tools/rautalanka/facades/f588.py` kirjoittaa molemmat
+  (älä tee erillistä id 600/601 -merkintää – se ei vaikuta). Poltto: `cd blender; python3 run.py bepop 8`.
+- **600 (omistaja: "ihmeellistä hyppyä tasaisissa nauhoissa"):** generoidut nauhaikkunarivit porrastuivat seinäpätkittäin. Nyt 5 tasaista ikkunanauhaa
+  koko pätkällä (väli 2,77 m, korkeus 1,4 m, puitejako 1,5 m, kaksi alinta sinisin verhoin), klinkkeri välissä, tumma punaruskea otsanauha liikekerroksen
+  päällä, näyteikkunat, porttikäytävä s 17,1–19,6 (tumma levy). Pano Itsenäisyydenkatu 37 (61.4818218, 21.7963801 → x 20.25, y −465.75; h 13 p 18),
+  mittakaava 1,0. Nähty s 9,5–28; loput toistettu. Kuori (25,7 m) on katujulkisivua (20,2 m) korkeampi → yläosa paljasta klinkkeriä.
+- **601:** valkoinen pelti, 5 ikkunanauhaa (väli 3,15 m, korkeus 1,73 m; moduuli 4,54 m = harmaa sälekenttä 1,14 m + 3 ikkunaa), korkea liikekerros:
+  näyteikkunat, sisäänkäynti, 2 pilaria, tyhjä sininen kylttilevy. Pano Itsenäisyydenkatu 35 (61.4816727, 21.7972856 → x 68.50, y −482.2; h 13 p 18),
+  mittakaava 1,107 (s = 23,2 + (s − 23,2)·1,107, z = z·1,107). Nähty s 7,5–34,6; länsipää toistettu. Seinä `plaster` (metallinen `sheet` leipoutui harmaaksi).
+- Vertailukuva `Claude outputs/itsenaisyydenkatu_600_601_vertailu_19_11.jpg`. bepop testipoltettu (14 839 kärkeä). **Modal: `bake bepop --samples 64`.**
+- **Jäljellä:** 1228 (lod2 `hide`, ei missään lohkossa, ei SPECiä – peli piirtää sen yleisellä city.js-talolla; mitattu julkisivu vaatii ensin lohkon tai
+  selvityksen minkä kuoren pätkä se on), 585:n muut sivut, 113 (auki), 115. Sen jälkeen Rautatienpuistokatu.
