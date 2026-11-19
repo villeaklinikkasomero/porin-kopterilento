@@ -13,5 +13,6 @@ def make(text, name, k):
     sr = wave.open(w).getframerate(); f = f'asetrate={sr}*{k},aresample=44100,atempo={1 / k:.4f},' if k != 1 else ''
     subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', w, '-af', f + 'loudnorm=I=-15:TP=-1.5', '-ac', '1', '-ar', '44100', '-b:a', '64k', os.path.join(out, name + '.mp3')], check=True)
 for i, t in enumerate(P['a']): make(t, f'huuto_m_{i + 1:02d}', 1); make(t, f'huuto_n_{i + 1:02d}', 1.22)
+for i, t in enumerate(P.get('n', [])): make(t, f"huuto_n_{len(P['a']) + i + 1:02d}", 1.22)      # naisten omat, numerointi jatkuu yhteisistä
 for i, t in enumerate(P['l']): make(t, f'huuto_l_{i + 1:02d}', 1.45)
-json.dump({'a': P['a'], 'l': P['l']}, open(os.path.join(out, 'huudot.json'), 'w'), ensure_ascii=False); print(len(P['a']) * 2 + len(P['l']), 'tiedostoa')
+json.dump({'a': P['a'], 'n': P.get('n', []), 'l': P['l']}, open(os.path.join(out, 'huudot.json'), 'w'), ensure_ascii=False); print(len(P['a']) * 2 + len(P.get('n', [])) + len(P['l']), 'tiedostoa')

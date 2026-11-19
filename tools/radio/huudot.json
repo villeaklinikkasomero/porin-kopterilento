@@ -1,5 +1,36 @@
 {
- "note": "Kävelijöiden porilaiset huudahdukset (H-näppäin kävellessä). a = aikuiset (sama teksti miehen ja naisen äänellä), l = lapset. Teksti näkyy ruudulla ja luetaan Piperillä sellaisenaan. Ajo: python3 tools/radio/huudot.py radio/voice/fi_FI-harri-medium.onnx radio/",
- "a": ["No moro! Eläks sääki viäl?", "Kui hurisee?", "Mitä sää täsä kuljet?", "Ei täsä mittää, torille ollaan menos.", "Kyl sää pärjäät!", "Onks sul kiirus johonki?", "Ootsää käyny Ässien pelis?", "Tuulee taas ko Yyteris.", "Mennääks porilaiselle?", "Älä ny viitti.", "Hianoo ilmaa tänää!", "Jaa-a, mää en tiä."],
- "l": ["Moi!", "Kato, kopteri!", "Ootsää se lentäjä?", "Mää saan jäätelöö!"]
+ "note": "Kävelijöiden porilaiset huudahdukset (H-näppäin kävellessä). a = aikuiset (sama teksti miehen ja naisen äänellä), n = vain naisten lisärepliikit (tiedostot huuto_n_13...), l = lapset. Teksti näkyy ruudulla ja luetaan Piperillä sellaisenaan. Ajo: python3 tools/radio/huudot.py radio/voice/fi_FI-harri-medium.onnx radio/",
+ "a": [
+  "No moro! Eläks sääki viäl?",
+  "Kui hurisee?",
+  "Mitä sää täsä kuljet?",
+  "Ei täsä mittää, torille ollaan menos.",
+  "Kyl sää pärjäät!",
+  "Onks sul kiirus johonki?",
+  "Ootsää käyny Ässien pelis?",
+  "Tuulee taas ko Yyteris.",
+  "Mennääks porilaiselle?",
+  "Älä ny viitti.",
+  "Hianoo ilmaa tänää!",
+  "Jaa-a, mää en tiä."
+ ],
+ "n": [
+  "Hyvä Ässät!",
+  "Mennääks jazzeil?",
+  "Lähdetääks Yyterii?",
+  "Torilt saa hyvää kahvii.",
+  "Kyl Pori on kaunis kesäl.",
+  "Onks toi sun kopteris?"
+ ],
+ "l": [
+  "Moi!",
+  "Kato, kopteri!",
+  "Ootsää se lentäjä?",
+  "Mää saan jäätelöö!",
+  "Hyvä Ässät!",
+  "Mennääks jazzeil?",
+  "Mää haluun Yyterii!",
+  "Saaks mää lentää kans?",
+  "Äiti kato, lentäjä!"
+ ]
 }

@@ -1340,3 +1340,16 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
   585:n muut sivut, 113 (auki), 115 (mittaamatta).
 - **OMISTAJAN OHJE 19.11: Itsenäisyydenkadun jälkeen jatketaan Rautatienpuistokadulle.** (Talolistaa ei ole vielä tehty: poimi kadun varren talot
   city.js/lod2.js:stä kuten Itsenäisyydenkadulla ja tee taulukko ID / osoite / lohko / tila ennen ensimmäistä taloa.)
+
+### 19.11 klo 22: kivetyksen korkeus kolmioista, värivaihtelu, automaattinen tervehdys, lisää huudahduksia
+- **Uppoaminen kävelykadulla jatkui pelaajalla** (omistajan kuva). Maskikorjaus (R.kivi → paveAt) ei riittänyt: kivetys on muutamia kymmenien metrien
+  kolmioita, jotka nostetaan maastoon vain kulmistaan, joten pinta EI ole groundTop(x,y)+pave kolmion keskellä. Uusi `ROAD.kiviZ(x, y)` = kolmion
+  kulmakorkeuksien (groundTop kulmissa) tasointerpolaatio + ROAD.pave; `carGround` käyttää sitä kivetyksellä (kävelijät, pelaaja, auto).
+  Oletus: varjostin nostaa kivetyksen vain kärjistä. Pelaajan uppoamista ei saatu toistettua pilvessä (begin() ei käynnisty headless) – omistaja tarkistaa.
+- **Länkisäärikävely:** pelaajan ja NPC:iden Walk-klippi on sama (hahmo.js = zipin hahmo.glb); jalkaterät kulkevat ±10–15 cm keskilinjasta. Vika on
+  mallichatin animaatiossa, ei pelin koodissa – ei korjattu.
+- **Värit:** `tintChar` kloonaa hahmolle TShirt/Jeans/Shoe/Hair(+HairShell, Brow) -materiaalit ja kertoo värin satunnaisella sävyllä (`TINT`-taulukko);
+  mies_b:n hiuksia ei sävytetä; kloonit vapautetaan poistossa. Tekstuuri säilyy, joten sävytys on kertova (tumma tekstuuri ei vaalene).
+- **Tervehdys itsestään:** kun pelaaja kävelee <2,6 m päähän, kävelijä puhuu (ryhmä kerran / 45 s, enintään yksi repliikki / 6 s). H ja 💬 toimivat edelleen 8 m asti.
+- **Huudahdukset:** huudot.json sai listan `n` (vain naiset, tiedostot huuto_n_13–18: Hyvä Ässät!, Mennääks jazzeil?, Lähdetääks Yyterii?, Torilt saa hyvää
+  kahvii., Kyl Pori on kaunis kesäl., Onks toi sun kopteris?) ja lapsille 5 lisää (huuto_l_05–09). Yhteensä 39 äänitiedostoa.

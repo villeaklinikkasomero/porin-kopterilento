@@ -1273,6 +1273,16 @@ import('./roads.js').then(mod => {
         const u = ((by - cy) * (px - cx) + (cx - bx) * (py - cy)) / d, v = ((cy - ay) * (px - cx) + (ax - cx) * (py - cy)) / d;
         if (u >= -0.05 && v >= -0.05 && u + v <= 1.05) M[gy * nx + gx] |= bit; } }
     ROAD.paveAt = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny && (M[gy * nx + gx] & 1) === 1; };
+    if (R.kivi) { const T = dec(R.kivi), KI = new Int32Array(nx * ny), ZC = new Map();       // which stone triangle covers each 1 m cell (index + 1)
+      const tri = i => [T[i] / 10, T[i + 1] / 10, T[i + 2] / 10, T[i + 3] / 10, T[i + 4] / 10, T[i + 5] / 10], bary = (t, px, py) => { const d = (t[3] - t[5]) * (t[0] - t[4]) + (t[4] - t[2]) * (t[1] - t[5]); if (Math.abs(d) < 1e-6) return null;
+        const u = ((t[3] - t[5]) * (px - t[4]) + (t[4] - t[2]) * (py - t[5])) / d, v = ((t[5] - t[1]) * (px - t[4]) + (t[0] - t[4]) * (py - t[5])) / d; return [u, v, 1 - u - v]; };
+      for (let i = 0; i < T.length; i += 6) { const t = tri(i); for (let gy = Math.floor(Math.min(t[1], t[3], t[5]) - y0); gy <= Math.ceil(Math.max(t[1], t[3], t[5]) - y0); gy++) for (let gx = Math.floor(Math.min(t[0], t[2], t[4]) - x0); gx <= Math.ceil(Math.max(t[0], t[2], t[4]) - x0); gx++) {
+          if (gx < 0 || gy < 0 || gx >= nx || gy >= ny) continue; const w = bary(t, x0 + gx + 0.5, y0 + gy + 0.5); if (w && w[0] >= -0.05 && w[1] >= -0.05 && w[2] >= -0.05) KI[gy * nx + gx] = i + 1; } }
+      // height of the stone paving at (x, y): the plane through its triangle's corner heights (the mesh is lifted only at the corners, and the triangles are
+      // tens of metres long, so groundTop(x, y) is off by up to a few decimetres in between: walkers and the player sank or floated, 19.11.2026)
+      ROAD.kiviZ = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); if (gx < 0 || gy < 0 || gx >= nx || gy >= ny) return null; const k = KI[gy * nx + gx]; if (!k) return null;
+        const t = tri(k - 1); let w = bary(t, x, y); if (!w) return null; let z = ZC.get(k); if (!z) { z = [groundTop(t[0], t[1]), groundTop(t[2], t[3]), groundTop(t[4], t[5])]; ZC.set(k, z); }
+        w = w.map(q => Math.max(0, q)); const sw = w[0] + w[1] + w[2] || 1; return (w[0] * z[0] + w[1] * z[1] + w[2] * z[2]) / sw + ROAD.pave; }; }
     ROAD.asphAt = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny && M[gy * nx + gx] === 2; };
   }
   if (R.ow) { const O = dec(R.ow); for (let i = 0; i < O.length; i += 3) ONEWAY.set(O[i] + ',' + O[i + 1], O[i + 2]); }
@@ -1608,6 +1618,7 @@ function carGround(x, y) {
   if (inRiver(x, y)) return onBridgeDeck(x, y) ? Math.max(TZs(x, y), TER.wl + 2.2) : null;
   if (!inCore(x, y)) return TZs(x, y);
   if (inHall(x, y)) return hallZ(x, y);   // parking hall floor (test)
+  if (ROAD.kiviZ) { const k = ROAD.kiviZ(x, y); if (k !== null) return k; }      // on the stone paving of the pedestrian streets and the square
   return groundTop(x, y) + (ROAD.paveAt(x, y) ? ROAD.pave : ROAD.asph);
 }
 function carBlocked(x, y, yaw) {   // a corner of the car inside a house or over open water
@@ -2448,7 +2459,15 @@ setTarget();
     for (const a of busy) if (!a.grid) for (const e of a.nb) if (e.n.busy && !e.n.grid) busyE.push({ a, e, w: Math.hypot(e.n.x - a.x, e.n.y - a.y) }); }).catch(() => {});
   KIND.forEach(k => import(`./npc_${k}.js`).then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
     new GLTFLoader().parse(buf.buffer, '', gl => { gl.scene.rotation.y = Math.PI; gl.scene.traverse(q => { q.userData.noT = true; if (q.isMesh) { q.frustumCulled = false; q.material.userData.noT = true; } }); MOD[k] = gl; }, () => {}); }).catch(() => {}));
-  const mkChar = k => { const g = new THREE.Group(), root = cloneSk(MOD[k].scene); g.add(root); g.userData.noT = true; scene.add(g); const mix = new THREE.AnimationMixer(root), act = {};
+  // every walker gets own tints for shirt, trousers, shoes and hair (owner 19.11: "aika homogeenistä porukkaa"): the part's material is cloned and its
+  // colour multiplied (the texture stays); mies_b keeps his hair.
+  const TINT = { TShirt: [[1, 1, 1], [1, 1, 1], [1, 0.82, 0.62], [0.5, 0.5, 0.56], [0.72, 1, 0.74], [1, 0.62, 0.6], [1, 0.95, 0.6], [0.7, 0.85, 1], [0.95, 0.7, 1], [0.32, 0.34, 0.4]],
+    Jeans: [[1, 1, 1], [1, 1, 1], [0.5, 0.5, 0.56], [0.95, 0.8, 0.62], [0.75, 0.78, 0.8], [0.35, 0.36, 0.4], [0.8, 1, 0.85]], Shoe: [[1, 1, 1], [0.3, 0.3, 0.32], [0.9, 0.3, 0.25], [0.5, 0.35, 0.25]],
+    Hair: [[1, 1, 1], [1, 1, 1], [0.62, 0.46, 0.32], [0.3, 0.24, 0.2], [0.95, 0.55, 0.32], [0.82, 0.82, 0.86], [0.5, 0.4, 0.3]] };
+  const tintChar = (root, k) => { const pick = {}, mats = []; for (const part in TINT) pick[part] = TINT[part][Math.floor(rnd() * TINT[part].length)];
+    root.traverse(o => { if (!o.isMesh || !o.material || !o.material.name) return; const n = o.material.name, part = n.startsWith('Hair') || n === 'Brow' ? 'Hair' : n; const t = pick[part];
+      if (!t || (part === 'Hair' && k === 'mies_b') || (t[0] === 1 && t[1] === 1 && t[2] === 1)) return; const m = o.material.clone(); m.color.setRGB(m.color.r * t[0], m.color.g * t[1], m.color.b * t[2]); o.material = m; mats.push(m); }); return mats; };
+  const mkChar = k => { const g = new THREE.Group(), root = cloneSk(MOD[k].scene), mats = tintChar(root, k); g.mats = mats; g.add(root); g.userData.noT = true; scene.add(g); const mix = new THREE.AnimationMixer(root), act = {};
     for (const c of MOD[k].animations) act[c.name] = mix.clipAction(c); if (act.Walk) act.Walk.play(); return { k, g, mix, act, cur: 'Walk', x: 0, y: 0, z: 0, yaw: 0, kid: k === 'tytto' || k === 'poika' }; };
   const setAnim = (c, name) => { if (c.cur === name || !c.act[name]) return; c.act[name].reset().play(); if (c.act[c.cur]) c.act[c.cur].crossFadeTo(c.act[name], 0.25, false); c.cur = name; };
   const count = () => parties.reduce((a, p) => a + p.m.length, 0);
@@ -2468,18 +2487,20 @@ setTarget();
   // H on foot: the nearest walker within 8 m stops, turns to the player and says something in the Pori dialect (radio/huuto_*.mp3, tools/radio/huudot.py;
   // m = man, n = woman, l = child; the text is shown too). The party stands for the length of the line.
   let HU = null, huEl = null, huT = 0; fetch('./radio/huudot.json').then(r => r.json()).then(j => { HU = j; }).catch(() => {});
-  const greet = () => { if (!HU || performance.now() < huT) return; let best = null, bp = null, bd = 8;
+  const greet = auto => { if (!HU || performance.now() < huT) return; let best = null, bp = null, bd = auto ? 2.6 : 8;
     for (const p of parties) for (const c of p.m) { const d = Math.hypot(c.x - WALK.x, c.y - WALK.y); if (d < bd) { bd = d; best = c; bp = p; } }
-    if (!best) { toast('Ei ketään kuuloetäisyydellä', 1.4); return; }
-    const kid = best.kid, L = kid ? HU.l : HU.a, i = Math.floor(Math.random() * L.length), v = kid ? 'l' : best.k.startsWith('mies') ? 'm' : 'n';
-    bp.hold = 3.2; huT = performance.now() + 2500; toast('💬 ' + L[i], 3);
+    if (!best) { if (!auto) toast('Ei ketään kuuloetäisyydellä', 1.4); return; }
+    if (auto && performance.now() < (bp.saidT || 0)) return; bp.saidT = performance.now() + 45000; if (auto) huT = performance.now() + 6000;      // by itself: once per party in 45 s, at most one line in 6 s
+    const kid = best.kid, v = kid ? 'l' : best.k.startsWith('mies') ? 'm' : 'n', L = kid ? HU.l : v === 'n' ? HU.a.concat(HU.n || []) : HU.a, i = Math.floor(Math.random() * L.length);   /* women: the shared lines + their own (files n_13...) */
+    bp.hold = 3.2; huT = Math.max(huT, performance.now() + 2500); toast('💬 ' + L[i], 3);
     try { huEl = huEl || new Audio(); huEl.src = './radio/huuto_' + v + '_' + String(i + 1).padStart(2, '0') + '.mp3'; huEl.volume = soundOn ? 0.9 : 0; huEl.play().catch(() => {}); } catch (e) {} };
-  $('thei').addEventListener('pointerdown', e => { e.preventDefault(); if (WALK.on && !WALK.in) greet(); });
+  $('thei').addEventListener('pointerdown', e => { e.preventDefault(); if (WALK.on && !WALK.in) greet(false); });
   let acc = 0;
-  window.__npc = { parties, greet, update: dt => { if (!net || dt <= 0) return; const px = S.x, py = S.y;
-    acc += dt; if (acc > 0.25) { acc = 0; if (count() < NMAX) spawn(px, py);
+  window.__npc = { parties, greet: () => greet(false), update: dt => { if (!net || dt <= 0) return; const px = S.x, py = S.y;
+    acc += dt; if (acc > 0.25) { acc = 0; if (WALK.on && !WALK.in) greet(true);       /* walking up to somebody (2.6 m) makes them speak; H still calls from further away */
+      if (count() < NMAX) spawn(px, py);
       else { let w = null, wd = 85; for (const q of parties) { const d = Math.hypot(q.m[0].x - px, q.m[0].y - py); if (d > wd) { wd = d; w = q; } } if (w) w.m[0].x = 1e6; }   /* full: the farthest party (over 85 m away) makes room, so the people gather where the player is */
-      for (let i = parties.length - 1; i >= 0; i--) { const p = parties[i]; if (Math.hypot(p.m[0].x - px, p.m[0].y - py) > 150) { for (const c of p.m) { scene.remove(c.g); c.mix.stopAllAction(); } parties.splice(i, 1); } } }
+      for (let i = parties.length - 1; i >= 0; i--) { const p = parties[i]; if (Math.hypot(p.m[0].x - px, p.m[0].y - py) > 150) { for (const c of p.m) { scene.remove(c.g); c.mix.stopAllAction(); for (const m of c.g.mats || []) m.dispose(); } parties.splice(i, 1); } } }
     for (const p of parties) { let dx = p.b.x - p.a.x, dy = p.b.y - p.a.y, len = Math.hypot(dx, dy) || 1;
       if (p.c && !p.pc && p.t < 0.02) { if (p.sg === undefined) p.sg = sigFor(p.a, p.b); p.wait = !!p.sg && !window.__sig.ped(p.sg.n, p.sg.a); } else p.wait = false;   // at the kerb of a signalled crossing
       if (p.hold > 0) { p.hold -= dt; p.wait = true; }                         // greeted: stand and face the player
