@@ -1018,3 +1018,18 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
   Simuloitu 120 s: 0 punaisia päin, pisin seisonta 21 s, ei lukkiutumia. Pelaajaa valot eivät sido.
 - Pylväät rakennetaan 9 s käynnistyksen jälkeen (yksisuuntaisuus tulee roads.js:stä); autolle 3 valoa, kadun yli jalankulkijan punainen/vihreä.
 - **Pelissä ei ole bottikävelijöitä** (vain pelaaja kävelee) – jos niitä tehdään, `pedGo` kertoo saako haaran ylittää.
+
+### 19.11.2026 klo 16 – oikeat maalaukset (omistaja: "niissäkin voidaan käyttää oikeita"; latauslupa kysytty ja saatu 8 kuvalle)
+- **Lähteet `blender/tex_art/`** (vapaat, saa olla GitHubissa): `gk_kevat, gk_rakennus, gk_tuonela, gk_havitys, gk_talvi, gk_syksy, gk_kosmos.jpg` = Akseli Gallen-Kallelan
+  teokset/esityöt Juseliuksen mausoleumin freskoihin 1901–03 (Wikimedia Commons, public domain; osa Kansallisgallerian kokoelmista) ja `ekman_luonnos.jpg` =
+  R. W. Ekman, "Kristuksen ylösnousemus, nykyisen Keski-Porin kirkon alttaritaulun luonnos" (Kansallisgalleria, Finna `kansallisgalleria.7E7BA4F7E0D580BB618DCBA12F84FFA6`, CC0).
+  Koko n. 739 px: pilvi ei pääse Wikimediaan/Finnaan (proxy 403), joten kuvat otettiin sovelluksen selaimen kuvakaappauksina (`?width=700`) ja rajattiin.
+  Huom: nämä ovat ESITÖITÄ/luonnoksia, eivät valokuvia itse seinäfreskoista tai valmiista alttaritaulusta; Tuonelan joella -työssä on alastomia hahmoja kuten alkuperäisessä.
+- **Mausoleumi:** `frescoes()` käyttää tex_art-kuvia jos ne ovat olemassa (muuten omat piirrokset varalla); kentät 3,3 × 1,72 m, syvennyksessä Kosmos. Uudelleenleivottu.
+  Kenttien järjestys seinillä edelleen tarkistamatta.
+- **Kirkko:** alttaritauluna Ekmanin luonnos (rajattu kehykseen 0,694). **Enckellin lasimaalauksista ei löytynyt vapaata kuvaa** (Commons, Finna) → kuorin ikkunoissa
+  alkuperäisiä muistuttava oma piirros (sininen viittahahmo, sädekehä, ruusuke). Jos omistaja kuvaa ikkunat itse, ne voi vaihtaa samalla tavalla.
+  Kirkkoa EI leivottu uudelleen: `tools/glb_swap_images.py in.glb out.glb altar=... glass_apse=...` vaihtaa GLB:n upotetut kuvat geometriaan koskematta.
+  kirkko_sisa.py tuottaa samat tekstuurit seuraavassa täydessä ajossa.
+- **index.html:** tekijätietoriville (#credit) lisätty maalausten lähdemaininta. Pushattavat: index.html, kirkko_sisa.js, mausoleumi_sisa.js, blender/tex_art/*,
+  blender/kirkko_sisa.py, blender/mausoleumi_sisa.py, tools/glb_swap_images.py. Kuva `Claude outputs/mausoleumi_sisa_19_11/oikeat_maalaukset.jpg`.

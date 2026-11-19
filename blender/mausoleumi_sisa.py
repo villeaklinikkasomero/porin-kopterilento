@@ -9,8 +9,8 @@ Käyttää kirkko_sisa.py:n työkaluja (Geo, wall, valokartan leivonta, vienti).
 
 Koordinaatit: X = ovelta kohti vastapäistä syvennystä, Y = vasemmalle, Z = ylös, origo hallin keskellä lattialla.
 Pelissä: ulkomallin (bl_mausoleumi.js) keskipiste (-1947.81, 193.18), X-akseli suuntaan 166° (ovi on mallin itäsivulla).
-Sisäkuvista (jalkipeli.net ym.) on luettu vain rakenne, värit ja materiaalit. Maalauskentissä on alkuperäisiä freskoja MUISTUTTAVAT
-omat piirrokset (omistajan lupa 19.11.2026: "näissä voidaan tehdä muistuttavia freskoja"), ei valokuvia eikä jäljennöksiä.
+Sisäkuvista (jalkipeli.net ym.) on luettu vain rakenne, värit ja materiaalit. Maalauskentissä on Akseli Gallen-Kallelan freskojen
+esityöt/teokset (blender/tex_art/gk_*.jpg, public domain, Wikimedia Commons; omistajan lupa 19.11.2026), varalla omat piirrokset.
 Pronssiovien reliefejä ei ole jäljitelty.
 """
 import os, sys, json, math
@@ -66,6 +66,16 @@ def frescoes():
         if frame: d.rectangle([0, 0, w - 1, h - 1], outline=(52, 38, 22), width=9); d.rectangle([9, 9, w - 10, h - 10], outline=(150, 118, 52), width=3)
         return im
     R = {}
+    # omistaja 19.11.2026: "voidaan käyttää oikeita" -> blender/tex_art/gk_*.jpg (Akseli Gallen-Kallela 1901-03, esityöt ja teokset, public domain,
+    # Wikimedia Commons / Kansallisgalleria). Jos tiedostot puuttuvat, käytetään alla olevia omia piirroksia.
+    art = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tex_art")
+    names = dict(fresco1="gk_kevat", fresco2="gk_rakennus", fresco3="gk_tuonela", fresco4="gk_havitys", fresco5="gk_talvi", fresco6="gk_syksy", frescot="gk_kosmos")
+    if all(os.path.exists("%s/%s.jpg" % (art, v)) for v in names.values()):
+        for k, v in names.items():
+            im = Image.open("%s/%s.jpg" % (art, v)).convert("RGB"); im = im.resize((512, 266) if k != "frescot" else (212, 512), Image.LANCZOS); d = ImageDraw.Draw(im)
+            if k != "frescot": d.rectangle([0, 0, im.width - 1, im.height - 1], outline=(52, 38, 22), width=7); d.rectangle([7, 7, im.width - 8, im.height - 8], outline=(150, 118, 52), width=2)
+            R[k] = im
+        return R
     skin, skin2, white, blue = (214, 170, 132), (196, 150, 112), (226, 220, 204), (62, 84, 120)
     # 1 Kevät: vaalea niitty, koivut, valkopukuiset naiset ja lapsi kukkia poimimassa
     im, d = canvas(); band(d, 0, 120, (176, 204, 220), (222, 230, 214)); band(d, 120, H, (150, 188, 96), (96, 142, 66))
@@ -239,7 +249,7 @@ def build():
         else:                                                  # ikkunaseinät: korkea ikkuna, alla maalauskenttä
             wall(p0, p1, top, (0, 0), [Win(L / 2, 1.9, 4.1, 7.5, 1.35, "glass_m")], bands=bands)
             fm = "fresco%d" % {1: 1, 2: 2, 3: 3, 5: 4, 6: 5, 7: 6}[k]         # Kevät, Rakennus, Tuonelan joella, Hävitys, Talvi, Syksy
-            G.face([P(L / 2 - 1.5, 1.55, 0.03), P(L / 2 + 1.5, 1.55, 0.03), P(L / 2 + 1.5, 3.45, 0.03), P(L / 2 - 1.5, 3.45, 0.03)], fm, uv=[(1, 0), (0, 0), (0, 1), (1, 1)], toward=(0, 0, 2.5))   # s kasvaa katsojan oikealta vasemmalle
+            G.face([P(L / 2 - 1.65, 1.6, 0.03), P(L / 2 + 1.65, 1.6, 0.03), P(L / 2 + 1.65, 3.32, 0.03), P(L / 2 - 1.65, 3.32, 0.03)], fm, uv=[(1, 0), (0, 0), (0, 1), (1, 1)], toward=(0, 0, 2.5))   # s kasvaa katsojan oikealta vasemmalle
         cx, cy = p0; ang = math.atan2(-cy, -cx)                # kulmapylväs
         G.cyl(cx, cy, 0, 1.1, 0.24, 8, "mdado", ang - 1.9, ang + 1.9); G.cyl(cx, cy, 1.1, ZS - 0.3, 0.15, 8, "ribm", ang - 1.9, ang + 1.9)
         G.cyl(cx, cy, ZS - 0.3, ZS + 0.05, 0.16, 8, "gold", ang - 1.9, ang + 1.9, r1=0.3)

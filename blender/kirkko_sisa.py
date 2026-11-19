@@ -173,12 +173,17 @@ def make_textures():
     except Exception: f = ImageFont.load_default()
     for k, t in enumerate(("301", "462", "105")): d.text((96, 52 + k * 68), t, font=f, fill=srgb((0.85, 0.72, 0.35)), anchor="mm")
     save_tex("hymn", im)
-    # alttaritaulun paikka: abstrakti valo tummalla pohjalla (EI kopio Ekmanin taulusta), kultakehys
-    yy, xx = np.mgrid[0:512, 0:256] / np.array([512, 256])[:, None, None]
-    glow = np.exp(-(((xx - 0.5) / 0.22) ** 2 + ((yy - 0.36) / 0.20) ** 2))
-    low = np.exp(-(((xx - 0.5) / 0.45) ** 2 + ((yy - 0.95) / 0.22) ** 2))
-    a = np.stack([0.06 + 0.75 * glow + 0.10 * low, 0.045 + 0.55 * glow + 0.06 * low, 0.04 + 0.28 * glow + 0.05 * low], -1) * (1 + 0.08 * fnoise(512, 21, 6)[:, :256, None])
-    im = to_img(a); d = ImageDraw.Draw(im); d.rectangle([0, 0, 255, 511], outline=srgb(C["gold"]), width=16); d.rectangle([16, 16, 239, 495], outline=srgb((0.25, 0.16, 0.05)), width=4)
+    # alttaritaulu: R. W. Ekmanin luonnos Keski-Porin kirkon alttaritauluun (Kansallisgalleria, CC0; blender/tex_art/ekman_luonnos.jpg, omistajan lupa 19.11.2026).
+    # Jos tiedosto puuttuu: abstrakti valo tummalla pohjalla.
+    artf = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tex_art", "ekman_luonnos.jpg")
+    if os.path.exists(artf):
+        im = Image.open(artf).convert("RGB"); w, h = im.size; cw = int(h * 0.694); im = im.crop(((w - cw) // 2, 0, (w - cw) // 2 + cw, h)).resize((356, 512), Image.LANCZOS)
+    else:
+        yy, xx = np.mgrid[0:512, 0:256] / np.array([512, 256])[:, None, None]
+        glow = np.exp(-(((xx - 0.5) / 0.22) ** 2 + ((yy - 0.36) / 0.20) ** 2)); low = np.exp(-(((xx - 0.5) / 0.45) ** 2 + ((yy - 0.95) / 0.22) ** 2))
+        a = np.stack([0.06 + 0.75 * glow + 0.10 * low, 0.045 + 0.55 * glow + 0.06 * low, 0.04 + 0.28 * glow + 0.05 * low], -1) * (1 + 0.08 * fnoise(512, 21, 6)[:, :256, None])
+        im = to_img(a)
+    d = ImageDraw.Draw(im); d.rectangle([0, 0, im.width - 1, im.height - 1], outline=srgb(C["gold"]), width=14); d.rectangle([14, 14, im.width - 15, im.height - 15], outline=srgb((0.25, 0.16, 0.05)), width=3)
     save_tex("altar", im)
     # ---- ikkunat (valaisevat pinnat)
     lead = (30, 32, 36)
@@ -208,23 +213,35 @@ def make_textures():
     for y in range(top + 122, H, 122): d.line([(0, y), (W, y)], fill=fr, width=5)
     d.rectangle([0, 0, W - 1, H - 1], outline=fr, width=9)
     save_tex("glass_up", im)
-    # kuorin ikkunat: syvän sininen ja punainen värilasi, omat geometriset kuviot (ei Enckellin aiheita)
-    W, H = 160, 640
-    rng = np.random.default_rng(9)
-    a = np.zeros((H, W, 3)); im = to_img(a); d = ImageDraw.Draw(im)
-    pal = [(28, 50, 170), (22, 36, 130), (40, 90, 200), (170, 24, 34), (210, 60, 40), (225, 170, 50), (60, 130, 190), (120, 30, 110)]
-    s = 20
-    for j in range(H // s + 1):
-        for i in range(W // s + 1):
-            c = pal[int(rng.choice(len(pal), p=[.22, .2, .18, .1, .08, .07, .1, .05]))]
-            d.rectangle([i * s, j * s, i * s + s, j * s + s], fill=c, outline=lead)
-    for cy in (120, 300, 480):
-        d.ellipse([W / 2 - 56, cy - 70, W / 2 + 56, cy + 70], fill=(200, 40, 40), outline=lead, width=4)
-        d.ellipse([W / 2 - 38, cy - 50, W / 2 + 38, cy + 50], fill=(235, 190, 70), outline=lead, width=3)
-        d.polygon([(W / 2, cy - 44), (W / 2 + 30, cy), (W / 2, cy + 44), (W / 2 - 30, cy)], fill=(30, 60, 180), outline=lead)
-    d.rectangle([0, 0, W - 1, H - 1], outline=(220, 180, 70), width=7); d.rectangle([9, 9, W - 10, H - 10], outline=lead, width=3)
-    d.line([(W / 2, 0), (W / 2, 50)], fill=lead, width=3)
-    save_tex("glass_apse", im.filter(ImageFilter.GaussianBlur(0.6)))
+    # kuorin ikkunat: Enckellin (1925) lasimaalauksia MUISTUTTAVA oma piirros - sininen viittahahmo sädekehineen, punaiset ja kullanväriset
+    # reunat, kärjessä ruusuke. Vapaata kuvaa alkuperäisistä ei löytynyt (Commons, Finna 19.11.2026), joten tämä ei ole jäljennös.
+    W, H, S2 = 160, 640, 2; im = Image.new("RGB", (W * S2, H * S2), (20, 30, 90)); d = ImageDraw.Draw(im); rng = np.random.default_rng(9)
+    Q = lambda pts: [(x * S2, y * S2) for x, y in pts]
+    blues = [(24, 44, 150), (18, 32, 112), (34, 70, 178), (46, 96, 190), (22, 60, 130)]
+    for j in range(-1, H // 16 + 2):
+        for i in range(-1, W // 16 + 2):
+            cx, cy = i * 16 + (8 if j % 2 else 0), j * 16
+            d.polygon(Q([(cx, cy - 16), (cx + 8, cy), (cx, cy + 16), (cx - 8, cy)]), fill=blues[int(rng.integers(0, 5))], outline=lead)
+    d.ellipse([34 * S2, 22 * S2, 126 * S2, 114 * S2], fill=(170, 26, 36), outline=lead, width=3 * S2)                      # kärjen ruusuke
+    for k in range(8):
+        an = k * pi / 4; d.polygon(Q([(80, 68), (80 + 40 * cos(an - 0.25), 68 + 40 * sin(an - 0.25)), (80 + 46 * cos(an), 68 + 46 * sin(an)), (80 + 40 * cos(an + 0.25), 68 + 40 * sin(an + 0.25))]), fill=(236, 230, 214) if k % 2 else (228, 176, 60), outline=lead)
+    d.ellipse([66 * S2, 54 * S2, 94 * S2, 82 * S2], fill=(228, 176, 60), outline=lead, width=2 * S2)
+    d.polygon(Q([(30, 190), (80, 140), (130, 190), (130, 200), (30, 200)]), fill=(196, 150, 50), outline=lead)                 # katos hahmon yllä
+    d.ellipse([50 * S2, 196 * S2, 110 * S2, 256 * S2], fill=(236, 196, 80), outline=lead, width=3 * S2)                     # sädekehä
+    d.ellipse([66 * S2, 208 * S2, 94 * S2, 246 * S2], fill=(226, 196, 170), outline=lead, width=2 * S2)                     # kasvot
+    d.polygon(Q([(62, 216), (80, 202), (98, 216), (96, 232), (64, 232)]), fill=(120, 84, 50), outline=lead)                    # hiukset / huntu
+    d.ellipse([70 * S2, 216 * S2, 90 * S2, 244 * S2], fill=(226, 196, 170))
+    d.polygon(Q([(50, 262), (80, 244), (110, 262), (128, 520), (32, 520)]), fill=(26, 52, 168), outline=lead)                  # sininen viitta
+    d.polygon(Q([(66, 262), (80, 250), (94, 262), (100, 520), (60, 520)]), fill=(168, 30, 40), outline=lead)                   # punainen alusvaate
+    for x0, x1 in ((44, 62), (98, 116)): d.line(Q([(x0 + 6, 290), (x0, 500)]), fill=(60, 100, 200), width=4 * S2); d.line(Q([(x1 - 6, 290), (x1, 500)]), fill=(16, 30, 110), width=4 * S2)
+    d.polygon(Q([(58, 330), (80, 316), (102, 330), (92, 352), (68, 352)]), fill=(226, 196, 170), outline=lead)                 # kädet rinnalla
+    d.rectangle([24 * S2, 520 * S2, 136 * S2, 536 * S2], fill=(196, 150, 50), outline=lead)
+    for i in range(4):                                                                                                         # alakentän vinoneliöt
+        cx = 38 + i * 28; d.polygon(Q([(cx, 544), (cx + 14, 578), (cx, 612), (cx - 14, 578)]), fill=(170, 26, 36) if i % 2 else (228, 176, 60), outline=lead)
+    for y in range(128, H, 96): d.line(Q([(0, y), (W, y)]), fill=lead, width=2 * S2)                                           # lyijypuitteet
+    d.line(Q([(80, 520), (80, H)]), fill=lead, width=2 * S2)
+    d.rectangle([0, 0, W * S2 - 1, H * S2 - 1], outline=(170, 26, 36), width=10 * S2); d.rectangle([10 * S2, 10 * S2, (W - 10) * S2, (H - 10) * S2], outline=(228, 176, 60), width=3 * S2)
+    save_tex("glass_apse", im.resize((W, H), Image.LANCZOS))
     im = Image.new("RGB", (16, 16), (255, 214, 150)); save_tex("bulb", im)
 
 # materiaali: (ruudun koko m, valovoima; 0 = tavallinen pinta)
