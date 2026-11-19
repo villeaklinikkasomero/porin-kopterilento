@@ -1703,7 +1703,7 @@ const cars = [];
       if (c.t >= 1) { let opts = c.b.nb.filter(n => n !== c.a && may(c.b, n)); if (!opts.length) opts = c.b.nb.filter(n => may(c.b, n)); const nx = opts.length ? opts[Math.floor(rnd() * opts.length)] : c.a; c.a = c.b; c.b = nx; c.t = 0; dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
       const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * 1.7, y = c.a.y + dy * c.t - ux * 1.7;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
-      const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y);   // +6 cm: the wheels of the car models reach a little below their origin q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
+      const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
     for (const q of parts) q.instanceMatrix.needsUpdate = true;
   };
   cars.update(0);

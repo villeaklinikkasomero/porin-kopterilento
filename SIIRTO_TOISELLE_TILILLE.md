@@ -683,3 +683,87 @@ Korjaa nämä ENSIN, ennen Antinkadun itäpuolta. Tunnista jokainen talo ID:llä
   Rautalanka osuu. Huom: nimetyissä lohkoissa (run.py) facades.json vaatii SPEC-merkinnän.
 - Pysäköidyt autot: ei talon sisään eikä jalkakäytävälle (bldTopAt). Liikenne- ja pysäköityjen autojen korkeus +6 cm (pyörät upposivat).
 - Modal-jonoon kuuluu tori3 jo (563 näkyy pelissä vasta Modal-polton jälkeen).
+
+### 19.11 klo 00.20: torin länsilaita, 1315 ja 1490 (tori1)
+- **1315 Antinkatu 11** (ent. PYP 1956): valkoinen betoniraster 10 × 2,22 m, kuusi kerrosta kaksiruutuisia ikkunoita sinharmaiden mosaiikkipaneelien päällä,
+  9. ruudussa sisäänvedetyt parvekkeet, beige otsanauha kultakirjaimin, Beer Hunter'sin vihreä markiisi. facades.json, bare-seinä.
+- **1490 Antinkatu 9**: harmaanbeige rappaus, seitsemän kerrosta, neljä kolmiruutuista ikkunaa, pohjoispäässä parikkunat, pyöreä betoniparveke ja ROSSO-kirjaimet,
+  ravintolan lasitus punaisten markiisien alla.
+- **Cafe Anton on olemassa**: lasijulkisivuinen talo heti 1490:n pohjoispuolella (Antinkatu 7?) – pelissä siinä nyt harmaa reikäikkunatalo + keltainen talo; tarkistettava seuraavaksi.
+- Rautalanka: `Claude outputs/rautalanka_1315_1490.jpg`. Modal-jonossa tori1 on jo (`bake tori0 tori1 tori4 kivi2`).
+
+---
+
+## 19.11.2026 – ALOITA TÄSTÄ (uusi chat)
+
+Vastaa suomeksi, lyhyesti, ja näytä jokaisesta muutoksesta kuva. Lue tämä luku ensin, sitten tarvittaessa luvut 18.11 (Antinkatu, tiet, auto, radio).
+
+### Tilanne
+- **Kaikki koodi on synkassa käyttäjän kansiossa** (tarkistettu cmp:llä 19.11 klo 00.30): index.html, roads.js, blender/zones.py, blender/facades.json,
+  styles.json, tools/roads/build_roads.py. Pilvessä ei jäänyt mitään viemätöntä paitsi paikalliset 8 näytteen testipoltot (ei viedä).
+- **Push ja Modal-ajot tekee käyttäjä.** Ennen niitä ei mikään facades.json-muutos näy pelissä.
+
+### Modal-jono (kun käyttäjä sanoo, että poltetaan)
+```
+city 64 c048,c051,c052,c067
+bake p1 tori2 tori3 --samples 64
+bake tori0 tori1 tori4 kivi2 --samples 64
+city 64 c064,c065,c069,h100
+```
+(myöhemmin mahdollisesti koko keskusta `city 64 c`).
+
+**Mistä puuttuu Modal-poltto (64 näytettä), tarkistettu 19.11:**
+
+| Lohko | Miksi | Talot / muutokset |
+|---|---|---|
+| tori1 | facades.json 19.11 | 1315 Antinkatu 11, 1490 Antinkatu 9 (Rosso) |
+| tori2 | facades.json 18.11 | 163 Antinkatu 15, 161 Antinkatu 13 (OO Studio), 1497 Liikekulma |
+| tori3 | facades.json + SPEC 18.11 | 564 Itäpuisto 7, 563 Antinkatu 12 (h 8,9) |
+| p1 | facades.json 18.11 | Antinkadun mitatut talot (paikallinen 8 näytteen bake tehty) |
+| c048, c051, c052, c067 | facades.json 18.11 | 118, 126, 133, 135, 290, 274, 137, 255, 216 (Teljäntorin sisäpiha), 221 Ratsula, 215 |
+| tori0, tori4, kivi2 | ikkunarivit 17.11 (ruudukko) | aiemmin jonossa, ajamatta |
+| c064, c065, c069, h100 | ikkunarivit 17.11 | c064 = Keskuskartano |
+
+Ei polttoa tarvitse: kadut, kivetys, nurmi, puut, autotila, radio, pysäköidyt autot (index.html / roads.js, näkyvät heti pushin jälkeen).
+
+### Pysyvät säännöt (omistaja)
+- API-avaimia/GitHub-salaisuuksia ei käsitellä. Push ja Modal käyttäjälle.
+- Street View-, kaupungin- ja Y-pakin kuvia EI viedä GitHubiin eikä peliin; niistä luetaan vain värit, materiaalit, muodot. SV-rautalankakuvat vain kansioon `Claude outputs/`.
+- Lukittuja ei muuteta kysymättä: KARHU-värit, Airionkulman 603/602/604 valokuvajulkisivut.
+- Lataukset ja tiedostojen poisto käyttäjän koneelta vain luvalla.
+- Tunnista talo AINA osoitteesta ja projisoidusta ID:stä ennen muutosta. Älä keksi olemattomia – vertaa kuvaan. Taideteoksia (muraalit) ei kopioida.
+- Paikallinen 8 näytteen poltto vain omaan tarkistukseen; Modal-poltto vasta kun on kertynyt tarpeeksi.
+
+### Julkisivun työtapa (facades.json)
+1. Street View sovelluksen omassa selaimessa: `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=LAT,LON&heading=H&pitch=P&fov=90`
+   (kuvakaappaus 743×418). Panon todellinen paikka luetaan URL:sta (`@lat,lon,...,Hh,Tt` → pitch = T−90).
+2. Muunnos: x = (lon − 21.796)·53278, y = (lat − 61.486)·111437.
+3. Talon jalanjälki: `cd blender; python3 -c "import zones; print(zones.poly(ID))"` – käytä jalanjäljen reunaa seinälinjana (a→b, ulkopuoli oikealla).
+4. Oikaisu: `python3 tools/rautalanka/rectify.py sv.jpg cx cy heading pitch Ax,Ay Bx,By s0 s1 z0 z1 out.png 22` (pystykulma 90°), mittaa ruudukosta.
+5. Kirjoita generaattoriskripti (mallit `tools/rautalanka/facades/f161.py, f563.py, f1497.py, f1315.py`; polku p skriptin lopussa osoittaa pilven
+   /home/claude/pori – vaihda tarvittaessa). Itemit: win, winp (n ruutua), glass, door, box (s0,s1,z0,z1,d0,d1,väri[,kind]), balc, wins. `bare`+`kind` poistaa generoidut ikkunat seinältä.
+6. Nimetyssä lohkossa (run.py tori*/p1/kivi*) talolla pitää olla SPEC zones.py:ssä, muuten facades.json ohitetaan. Jos ilmakuvakatto leijuu, lisää ID index.html:n ZROOFiin.
+7. Testipoltto (yksi kerrallaan, 8 GB muisti!): `cd blender; python3 run.py tori1 8` → tulos `/home/claude/out/bl_tori1.js` → kopioi pelikansioon testiä varten.
+   c-lohkot: `PYTHONPATH=/home/claude python3 blender/city.py c052 8`, kivi: `kivi.py p1 8`.
+8. Rautalanka: `python3 -m http.server 8765` pelikansiossa, sitten `ZONE=tori1 node tools/rautalanka/gshot_sv.mjs index.html out/ views.json`
+   (views: `[{"k":"a","x":..,"y":..,"h":..,"p":..,"fov":90}]`), vertaa SV:hen rinnakkain.
+9. Vienti käyttäjälle: stage → tarkista että laitteen tiedosto = pohjasi → device_commit_files (expectedMtimeMs, uusi nimi /mnt/user-data/outputs/cN/) → stage uudelleen ja cmp.
+   Aja `node --check` index.html:n skriptille jokaisen muokkauksen jälkeen (18.11 sed-kommentti rikkoi pelin).
+
+### Antinkatu – tehty
+161, 563 (Antinkatu 12, 2-krs liiketalo), 1497 (Antinkatu 13 Liikekulma), 1315 (Antinkatu 11, valkoinen raster + Beer Hunter's), 1490 (Antinkatu 9, Rosso).
+Aiemmin: 118, 126, 133, 135, 290, 274, 137, 255, 216, 221, 215, 564, 163.
+
+### Seuraavaksi
+1. **Cafe Anton -talo** heti 1490:n pohjoispuolella (lasijulkisivu, "anton gastropub & cafe", vieressä Hotel Torni/"TORGO"-katos). Pelissä siinä nyt harmaa reikäikkunatalo
+   ja keltainen talo – tunnista ID (todennäköisesti tori1:n 1491–1496) ja mittaa. Hyvä pano: Antinkatu 10, 61.4872248, 21.7961243, heading 255, pitch 16
+   (peli x≈6.6, y≈136.4; gshot-asento ei osunut aivan tarkasti – tarkista).
+   Huom: omistaja kysyi aiemmin "ethän poistanut cafe antonin muotoa?" – 563:n Cafe Anton -merkintä oli väärässä talossa, oikea on tämä.
+2. Antinkadun lista jatkuu: 1725, 1726, 1600 (Yrjönkadun kulma), 136 (Antinkatu 21a), 409, 570, 276, 415.
+3. Keskuskartano (c064) seinät puuttuvat omistajan koneella – pilvessä ehjä; odotetaan kuvakaappausta (epäily GPU-muisti tai CRLF-bake).
+4. Kun riittävästi kertynyt: pyydä omistajaa pushaamaan ja ajamaan Modal-jono.
+
+### Muistiinpanoja
+- Pilven tiedostot ovat väliaikaisia: uusi chat aloittaa tyhjästä. Hae repo käyttäjän koneelta (device_bash/stage) tai GitHubista; blender-paistoon tarvitaan
+  bpy-moduuli (`pip install bpy`), datat (OSM, LoD2, ilmakuvat) ks. luvut 14.–15.11.
+- OSM-haku onnistuu sovelluksen selaimella api.openstreetmap.org:sta (Overpass estetty pilvestä).
