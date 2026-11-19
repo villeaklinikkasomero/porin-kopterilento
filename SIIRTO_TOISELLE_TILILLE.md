@@ -1133,6 +1133,20 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
 - **Auki:** parvelle ei pääse (onnistuisi `ports`-ovella); lämpiö/ravintolasali ja Pieni näyttämö puuttuvat; ulkomalliin oikea pääovi; jalkipeli.net-artikkelin
   kuvien läpikäynti ja korjauskierros omistajan kanssa; testattu vain pilvessä (ovi, aula, käytävä, sali, näyttämö, kahvila ja takaisin; ei konsolivirheitä).
 
+### 19.11.2026 klo 21 – teatterin kattoon oikeat maalaukset vapaasta valokuvasta (omistaja: "katsotaan löytyykö vapaita, jos löytyy niin voidaan käyttää")
+- **Vapaat lähteet (Finna, Satakunnan Museo, CC BY 4.0 – lähde mainittava):** DIA4374 (Sven Raita 1955, värikuva koko katosta, `satakunnanmuseo.75655844-4677-40AD-8786-46E364600409`)
+  = KÄYTETTY; SATO3203 (1932, mv, kolme maalausta ja kulmamaalaus läheltä, `…532F3B2A-BC3C-4FAD-B26C-127CA81F27B3`), SMK1800:1 (1956, mv, sali taaksepäin + katto,
+  `…37A1A46D-5F42-4ECE-B25F-D3AB5D458EEB`) ja SMK1801:1 (1956, parvi ja näyttämöaukko, `…FBAD1E88-C9AB-4F1B-9FEC-1BFEB9AB83F7`) = käyttämättä, hyviä jatkoon.
+  **EI vapaa:** Satakunnan Kansan kuva-arkiston SK1051:3492 (1953, "tekijänoikeuden piirissä, käyttö maksullista"). Wikimedia Commonsissa vain ulkokuvia.
+- **Tehty:** DIA4374 otettu sovelluksen selaimesta kahtena 1:1-kuvakaappauksena (pilvi ei pääse Finnaan), oikaistu homografialla ylhäältä katsotuksi (kehän 8 pistettä,
+  keskiritilä ja kuuden maalauksen keskipisteet; rms 8 px), dian violetti sävy korjattu, kattokruunun häikäisy tasoitettu → `blender/tex_art/teatteri_katto_dia4374.jpg` (900², rivi 0 =
+  näyttämön puoli). `teatteri_sisa.py` `ceiling_tex()` käyttää sitä pyöreässä kentässä (varalla omat piirrokset). GLB:n kuva vaihdettu `tools/glb_swap_images.py … ceil=…` – EI uutta leivontaa.
+- **Puutteet:** takimmainen (seitsemäs, pienin) maalaus jää kuvassa kattokruunun taakse → tasainen vaalea läiskä; erottelu n. 1,5 cm/px ja 1955 värit (haalistunut dia), ei nykyinen
+  restauroitu asu; kulmamaalauksia ei ole (tasainen pohja). Tarkempi: SATO3203:n kolme maalausta mustavalkoisina tai omistajan omat valokuvat.
+- **Kuvista opittua, korjaamatta:** permannon takaseinässä on VIISI ovea käytävään ja parven alla konsolit + valorivi (SMK1800:1) – pelissä ovet ovat vain sivuilla;
+  keskellä kattoa on pyöreä ritilä punaisine kehineen (nyt mukana kuvassa).
+- index.html: #credit-riville lähdemaininta. Pushattavat lisäksi: `blender/tex_art/teatteri_katto_dia4374.jpg`. Kuva `Claude outputs/teatteri_sisa_19_11/katto_vertailu.jpg`.
+
 ## ILLAN MODAL-JONO (omistaja polttaa illalla – PÄIVITÄ TÄTÄ LISTAA, älä tee uutta)
 (Sisätilat ja jalankulku eivät kuulu tähän jonoon: ne eivät tarvitse polttoa, vain pushin – ks. edellinen luku "SISÄTILAT JA JALANKULKU".)
 Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 mennessä viedyn). Sen jälkeen kertyneet:

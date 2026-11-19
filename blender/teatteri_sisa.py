@@ -299,6 +299,18 @@ def ceiling_tex():
     ell(CX, 0, 1.75, fill=srgb((0.50, 0.30, 0.06)), outline=gd, width=9)
     for k in range(16): an = k * pi / 8; c = (CX + 1.15 * cos(an), 1.15 * sin(an)); ell(c[0], c[1], 0.36, fill=gd if k % 2 else gh, outline=gs, width=3)
     ell(CX, 0, 0.8, fill=gh, outline=gs, width=4); ell(CX, 0, 0.35, fill=gs)
+    # omistaja 19.11.2026: "jos löytyy vapaita niin voidaan käyttää" -> pyöreä kattokenttä oikeasta valokuvasta: Satakunnan Museo, DIA4374 (Sven Raita 1955,
+    # CC BY 4.0, Finna satakunnanmuseo.75655844-4677-40AD-8786-46E364600409), oikaistu ylhäältä katsotuksi (rivi 0 = näyttämön puoli), violetti sävy korjattu,
+    # kattokruunun häikäisy tasoitettu (takimmainen, seitsemäs maalaus ei näy kuvassa -> tasainen läiskä). Kulmien maalauksia ei ole: tasainen pohja.
+    artf = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tex_art", "teatteri_katto_dia4374.jpg")
+    if os.path.exists(artf):
+        ph = np.asarray(Image.open(artf).convert("RGB")).astype(np.float32) / 255; M = ph.shape[0]; RF = R - CO - 0.05
+        rr, cc = np.mgrid[0:N, 0:N]; X = (x0 + (cc + 0.5) / N * (x1 - x0) - CX) / RF; Y = (y0 + (rr + 0.5) / N * (y1 - y0)) / RF
+        pr = np.clip(((1 - X) / 2 * M).astype(int), 0, M - 1); pc = np.clip(((Y + 1) / 2 * M).astype(int), 0, M - 1); rad = np.hypot(X, Y)
+        edge = ph[(np.hypot(*(np.mgrid[0:M, 0:M] - M / 2)) / (M / 2) > 0.93) & (np.hypot(*(np.mgrid[0:M, 0:M] - M / 2)) / (M / 2) < 0.99)].mean(0)
+        base = np.broadcast_to(edge * 1.25, (N, N, 3)) * (1 + 0.04 * fnoise(N, 33, 6))[..., None]
+        w = np.clip((1.0 - rad) / 0.012, 0, 1)[..., None]; out = ph[pr, pc] * w + base * (1 - w)
+        return Image.fromarray((np.clip(out, 0, 1) * 255).astype(np.uint8))
     return im
 
 # ---------------------------------------------------------------- apurit
