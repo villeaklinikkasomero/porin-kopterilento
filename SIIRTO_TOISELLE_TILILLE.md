@@ -1405,7 +1405,7 @@ Länsi-/luoteispuoli = parittomat, itä-/kaakkoispuoli = parilliset. **Tee vain 
 | 111 | kermanvärinen 2 krs klassistinen talo (Rautatienpuistokatu 3:n eteläpuoli) | luode | c064 | oma | (−60.156,−555.791)→(−30.901,−523.977) 43,2 m | VALMIS 19.11 (f111.py; lounaispääty 12 m mittaamatta) |
 | 2 | **Keskuskartano** (Keskusaukio 2, 1962; SPEC KKART zones.py) + Hotel Amado -siipi; kadulle näkyy lamellin peltipääty ja matalat liikesiivet | kaakko | c064 | oma | matalat siivet (−37.2,−574.9)→(−20.3,−551.6) murtoviivana; torni (−40.4,−589.3)→(−37.2,−574.9) 14,7 m | POHJOISSIVU KORJATTU 19.11 (kivi.py `_kk_north`, ks. alla); mitattu julkisivu TEKEMÄTTÄ |
 | 122 | pieni piharakennus 51 m² | kaakko | c064 | ei kuorta | – | JÄTETÄÄN |
-| 124 | Rautatienpuistokatu 5, ent. Teljän ammattikoulu (1938), valkoinen 3 krs | luode | c063 | oma | (−114.398,−609.46)→(−80.242,−572.33) 50,5 m ja (−135.486,−639.38)→(−110.914,−612.67) 36,3 m | OSITTAIN 19.11 (f124.py: lounaissiipi 36,3 m VALMIS; **koillissiipi 50,5 m TEKEMÄTTÄ** – selainyhteys katkesi) |
+| 124 | Rautatienpuistokatu 5, ent. Teljän ammattikoulu (1938), valkoinen 3 krs | luode | c063 | oma | (−114.398,−609.46)→(−80.242,−572.33) 50,5 m ja (−135.486,−639.38)→(−110.914,−612.67) 36,3 m | VALMIS 19.11 (f124.py: molemmat siivet; sisänurkan portiikki mittaamatta) |
 | 13 | 4 krs lamelli | kaakko | c061 | oma | (−114.441,−655.249)→(−61.531,−596.099) 79,4 m | TEKEMÄTTÄ |
 | 23 | Rautatienpuistokatu 6 (1954) | kaakko | c061 | oma | (−164.549,−710.867)→(−138.006,−680.88) 40,0 m + (−136.824,−681.927)→(−128.432,−672.444) 12,7 m | TEKEMÄTTÄ |
 | 15 | iso koulurakennus (Rautatienpuistokatu 7, ent. poikien ammattikoulu?) | luode | c047 | oma | ei seinää alle 22 m kadusta (puiston takana) | TARKISTA näkyykö kadulle |
@@ -1417,17 +1417,20 @@ Länsi-/luoteispuoli = parittomat, itä-/kaakkoispuoli = parilliset. **Tee vain 
 Seinät on annettu raw.pkl:n päätepisteinä; **käännä suunta niin että katu on oikealla** (luoteispuolen taloilla a = lounaispää, kaakkoispuolella a = koillispää).
 6, 8, 10 ja 12 ovat saman sarjan taloja (1954): mittaa yksi huolella ja tarkista muista erot.
 
-### 124 Rautatienpuistokatu 5, lounaissiipi (testipoltettu, c063)
-- Katujulkisivu on kaksi siipeä loivassa V:ssä. `f124.py` sisältää VAIN lounaissiiven (−135.486,−639.38)→(−110.914,−612.67): valkoinen rappaus,
+### 124 Rautatienpuistokatu 5, molemmat siivet (testipoltettu, c063)
+- Katujulkisivu on kaksi siipeä, koillissiipi 4,7 m sisempänä. Lounaissiipi (−135.486,−639.38)→(−110.914,−612.67): valkoinen rappaus,
   15 ikkuna-akselia (jako 2,07 m) kolmessa kerroksessa punaruskein puittein, tiilinen kellarikerros ikkunoineen, sillinauha, räystäslista.
 - **Pano** "5 Rautatienpuistokatu" 61.4803068, 21.7938141 (→ x −116.46, y −634.75; h 313, p 18), huhti 2026. Kalibrointi kuoresta:
   s = 0,3 + (s − 2,0)·1,082, z = 1,114·z − 0,75.
 - **Uusi kikka: leveä kuva.** `resize_window` 1500×900 ennen navigointia → screenshot 800×480, pystykuvakulma yhä 90°, vaakaan ±60°: koko 36 m siipi
   yhdellä kuvalla 11 m päästä (16 px/m – riittää säännölliseen ruudukkoon, ei pieniin yksityiskohtiin). Ensimmäinen screenshot on sumea: odota
   vielä 10 s ja ota `zoom` koko alueesta. Palauta lopuksi `preset: desktop`.
-- **Koillissiipi** (−114.398,−609.46)→(−80.242,−572.33): panot noin 61.480525, 21.794199 ja 61.480697, 21.794529 (h 313, p 18); lisää toinen
-  seinä samaan merkintään (id 124) ja katso siipien välinen sisäänkäyntikatos (näkyi kuvan oikeassa reunassa).
-- Vertailukuva `Claude outputs/rautatienpuistokatu_124_lounaissiipi_vertailu_19_11.jpg`. c063 testipoltettu (3 668 kärkeä). **Modal-jonoon lisättävä c063.**
+- **Koillissiipi** (−114.398,−609.46)→(−80.242,−572.33), 50,45 m, sama merkintä (toinen seinä): 11 akselia (jako 2,23 m), sisäänkäynti s 25,0–28,8
+  (lippa sivuseinineen, korkea porrasikkuna yllä), 9 akselia (jako 2,16 m). Panot "4 Rautatienpuistokatu" 61.4805093, 21.794205 ja
+  "2 Rautatienpuistokatu" 61.480712, 21.794593 (h 313, p 18, leveä kuva); k 1,09 / 1,075 kameroiden suhteen. Kuvat erosivat n. 0,7 m kohdassa s 32
+  (keskiarvo); runkojen takana olevat akselit toistettu samalla jaolla. **Mittaamatta: sisänurkan portiikki** (lounaissiiven 4,7 m päätyseinässä).
+- Vertailukuvat `Claude outputs/rautatienpuistokatu_124_lounaissiipi_vertailu_19_11.jpg` ja `…_124_koillissiipi_vertailu_19_11.jpg`. c063 testipoltettu
+  (4 524 kärkeä). **c063 on Modal-jonossa.**
 
 ### Keskuskartano (2): pohjoissivun reiät ja "aaltoilu" korjattu (omistaja 19.11: kuvakaappaus + "julkisivu aaltoilee", "totaalisen rikki")
 - **Syy (toistui pilvessä, ei GPU/CRLF):** keilaus piirtää pitkän pohjoissivun irrallisina ulokkeina 1,1–1,6 m taustatason edessä, ja taustatasossa
