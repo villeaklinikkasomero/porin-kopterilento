@@ -811,3 +811,21 @@ Aiemmin: 118, 126, 133, 135, 290, 274, 137, 255, 216, 221, 215, 564, 163.
   → s = 1,054·s, z = 1,054·(z − 1,0). Street View -ruudut latautuvat hitaasti: odota 15–25 s ennen kuvakaappausta (muuten sumea/musta).
 - Huom: index.html muuttuu myös toisessa istunnossa (radio) – stage aina juuri ennen muokkausta. Modal: tori0 jonossa.
 - Vertailukuva `Claude outputs/antinkatu8_1600_vertailu_19_11.jpg`. Seuraavaksi: 1726:n punainen laattapääty Antinkadulle, sitten 136, 409, 570, 276, 415.
+
+## 19.11.2026 klo 11 – ALOITA TÄSTÄ (uusi chat, korvaa luvun "19.11.2026 – ALOITA TÄSTÄ" kohdan "Seuraavaksi")
+
+Vastaa suomeksi, lyhyesti, kuva jokaisesta muutoksesta. Säännöt ja julkisivun työtapa: luku "19.11.2026 – ALOITA TÄSTÄ (uusi chat)" yllä;
+tämän päivän työt ja opit: sen alaluvut "19.11 aamu: Cafe Anton", "klo 9–10: 1725", "klo 10–11: 1600".
+
+- **Tila:** kaikki koodi on käyttäjän kansiossa (takaisinluvulla tarkistettu klo 11): blender/zones.py, blender/facades.json, index.html,
+  tools/rautalanka/facades/f1492.py, f1725.py, f1600.py, f1315.py. Pushaamatta ja Modal-polttamatta (käyttäjä tekee). Modal-jono ennallaan
+  (tori0 ja tori1 ovat siinä jo) – tämän päivän talot 1490, 1492, 1493, 1725, 1600 tulevat peliin niistä.
+- **Tehty tänään:** 1492 (Cafe Anton -kyltin kaistale) + 1493 lyhennys/portti/ovi + 1490 uudelleenmittaus; 1725 (Antinkatu 10); 1600 (Dante).
+- **Seuraavaksi:** 1) 1726:n Antinkadun pääty (17.1,154.3 → 14.4,142.9): tummanpunainen laatta, 2 ikkunasaraketta, tumma liiketila; selvitä ensin
+  missä lohkossa 1726 poltetaan (ei tori0:ssa; ZONES/kivi). 2) 136, 409, 570, 276, 415. 3) Keskuskartano c064 (odottaa omistajan kuvakaappausta).
+- **Auki omistajalle:** 1600:n ikkunoiden valkoiset tekstipalkit (pois?), portin kohdan vaalea maalaatta 1492/1493 välissä (tarkista Modal-polton jälkeen),
+  1725:n portti ja 1492:n sisäänkäynti on piirretty tummina pintoina, ei aukkoina.
+- **Ympäristö uudessa chatissa (pilvi tyhjä):** `git clone https://github.com/villeaklinikkasomero/porin-kopterilento.git /home/claude/pori` +
+  stage koneelta GitHubia uudemmat tiedostot (yllä luetellut + styles.json) → `pip install bpy shapely opencv-python-headless scipy pillow --break-system-packages`
+  → `python3 -m http.server 8765` (kuolee vuorojen välissä, käynnistä uudelleen) → gshot_sv.mjs: vaihda playwright-polku `/opt/npm-tools/node_modules/`.
+  Poltto `cd blender; python3 run.py tori0 8` ~130 s. Laiteyhteys ja selain voivat katketa hetkeksi: vie tiedostot heti kun talo on valmis.
