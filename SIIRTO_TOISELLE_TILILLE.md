@@ -1634,3 +1634,21 @@ Suunnitelma: https://claude.ai/artifact/TMz2BXrs6MPJaUxXA6bXwA (12 tapausta, out
 **Tarkistettu:** headless-simulaatio koko ketjusta (kuva `tapaus1_karhu_19_11.jpg`), tallennus ja soittolistalisäys toimivat, ei konsolivirheitä.
 **EI testattu:** oikea pelaaminen (kävely karhulle, katseen tunnistus pelin omalla kameralla, äänet). Nauhurin rivi (oikea yläkulma, top 74 px) voi mennä muun HUDin päälle.
 **Seuraavaksi:** omistajan koepeluu → säädöt → tapausmoottorin yleistys ja tapaukset 2–4 (lokki, aina vihreä, kanava jota ei ole).
+
+---
+
+## 20.11.2026 klo 04 – Pulut ja lokit (c29)
+
+**Tehty (viety koneelle, EI pushattu):**
+- `linnut.js` (`{pulu, lokki}` base64-GLB; lähde `tools/props/porikopteri_linnut.py`, animaatiot Fly, Glide, Idle, Walk, Peck; värit verkon väriattribuutissa).
+- `index.html`: lohko `window.__birds` / `window.__birdTick` juuri ennen `window.__game`-riviä, kutsu pääsilmukassa `__caseTick`in perässä.
+  - Maaryhmät `B.G`: puluparvia 4 (kosketuslaitteella 2), koko 4–7; lokkiryhmiä 2 (1), koko 1–2. Paikka = vapaa jalkakäytävän/kiveyksen kohta 14–85 m pelaajasta
+    (`ROAD.paveAt`, ei ajorataa, jokea eikä taloa). Linnut kävelevät (pulu 0,24 m/s) ja nokkivat.
+  - Pako: pelaaja jalan 4,5 m, autolla 9 m, kopterilla alle 14 m korkeudessa 16 m → ryhmä nousee viiveellä lintu kerrallaan ja laskeutuu 30–70 m päähän
+    pelaajasta poispäin (Bezier-kaari, korkeus pulu 6–11 m, lokki 11–16 m; lokki liitää kaaren keskiosan).
+  - Kaartelevat lokit `B.A`: 2 ryhmää (1), koko 1–2, ympyrä r 22–44 m, korkeus 24–40 m, välillä siiveniskuja. Jos pelaaja etääntyy yli 150 m, ympyrä ajautuu perään.
+  - Yli 140 m taakse jäänyt maaryhmä siirtyy pelaajan lähelle; yli 90 m päässä olevia ei animoida. Mittakaava 1,25.
+
+**Tarkistettu:** headless-kuva (`linnut_20_11.jpg`), nousu ja laskeutuminen simuloituna, ei konsolivirheitä.
+**EI testattu:** pelaaminen; suorituskyky puhelimella (enimmillään n. 30 luurankomallia). Linnut eivät väistä bottiautoja eivätkä kävelijöitä, ei ääniä.
+**Jatko:** tapaus 2 "Lokki ja porilainen" voi käyttää samaa lokkia (`mk('lokki')`, lento `rise`-kaarella katolle `bldTopAt`).
