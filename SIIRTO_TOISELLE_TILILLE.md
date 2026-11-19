@@ -1572,3 +1572,18 @@ index.html, haku `HALL`: `inHall` / `hallZ` / muutokset `carBlocked`, `carGround
 **EI testattu:** ajaminen ja törmäys selaimessa (headless ei pysty `begin()`iin) – omistaja kokeilee. Korjautuuko malli, kun kunto palautuu
 (uusi auto / respawn): `setDmg` kutsutaan aina kun porras muuttuu, myös alaspäin, joten pitäisi.
 **Huomio:** osia on enemmän → hieman enemmän piirtokutsuja; jos kännykällä nykii, kevytmallista (`auto_m.js`) voi pudottaa portaat 1–2.
+
+---
+
+## 20.11.2026 klo 02 – Pehmeä savu ja huntupilvet (c27)
+
+**Tehty (viety koneelle, EI pushattu), vain `index.html`:**
+- **Savu:** kiinteät pallot pois. `smokeStep(dt, every, dark, x, y, z)` + `SMOKE` (ennen `window.__game`-riviä): kameraan kääntyvät spritet,
+  yksi proseduraalinen canvas-tekstuuri (16 päällekkäistä pehmeää läiskää → repaleinen reuna). Jokainen pöllähdys pyörii, paisuu, ajautuu tuulen mukana,
+  nousee hidastuen ja ohenee; tumma savu vaalenee levitessään. Tahti: hp < 60 → 0,16 s, < 45 → 0,09 s, < 30 → 0,05 s ja musta. Enintään 40 spriteä.
+  Testikoukku `window.__smoke`.
+- **Huntupilvet:** taivaskupolin sisään toinen kuori (r 5900, ShaderMaterial, ei tekstuuria): venytetty fbm-kohina, kerran vääristetty, ohenee horisonttiin,
+  liikkuu hitaasti (`onBeforeRender` päivittää ajan). Määrä säädetään `smoothstep(0.46, 0.78, c)` -rajoista ja lopun kertoimesta 0.62.
+
+**Tarkistettu:** headless-kuva (`savu_ja_pilvet_19_11.jpg`), ei konsolivirheitä. **EI testattu:** savu ajossa (päivittyy vain auton askeleessa, kuten ennenkin –
+jos pelaaja nousee autosta, pöllähdykset jäätyvät paikoilleen; korjaus olisi kutsua `smokeStep(dt, 0)` pääsilmukasta).
