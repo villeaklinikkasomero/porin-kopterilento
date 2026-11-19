@@ -973,8 +973,8 @@ Mitattu julkisivu (facades.json) tehdään ensin näille 15:lle. **Tee vain rivi
 | 569 | Antinkatu 27 A | c048 | EI KADUN VARRESSA: eteläsivu on 10 m sisäänvedetty lautaaidan takana (aita tehty 18.11) – jätetään |
 | 164 | 569:n länsipuolella | c051 | TEKEMÄTTÄ |
 | 7 | Itsenäisyydenkatu 54 (1956) | c048 | VALMIS 19.11 (f7.py; itäiset 4 akselia peilattu, näkemättä) |
-| 166 | okrankeltainen | c048 | TEKEMÄTTÄ |
-| 167 | 8 krs, lasitetut parvekkeet (SPEC 13.11) | c048 | TEKEMÄTTÄ |
+| 166 | Itsenäisyydenkatu 47, okrankeltainen 3 krs | c048 | VALMIS 19.11 (f166.py; koko katujulkisivu nähty) |
+| 167 | Itsenäisyydenkatu 58, 8 krs, lasitetut parvekkeet (SPEC 13.11) | c048 | VALMIS 19.11 (f167.py; vain Itsenäisyydenkadun pääty, Otavankadun ja pihan sivut mittaamatta) |
 
 Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–693, länteen 141–265), viimeisenä puutalot.
 
@@ -1096,7 +1096,7 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
   `tools/sisa_to_js.py`, `tools/glb_swap_images.py`, `tools/hahmo/porikopteri_hahmo.py`.
 - **Pelissä:** Enter (F autossa/jalan, kosketuksella 🚶) = ulos pysähtyneestä autosta tai maahan laskeutuneesta kopterista, takaisin kyytiin, ovesta sisään/ulos.
   W/S, A/D, Q/E, Shift juoksu, C kamera. Kierroksen kello seisoo jalan. Koodi: index.html, haku `WALK` ja `PLACES`.
-- **Valmiit sisätilat:** Keski-Porin kirkko (tornin länsiovi) ja Juseliuksen mausoleumi (itäsivun kuisti). Kumpikin on oma moduulinsa (GLB + valokartta + törmäykset),
+- **Valmiit sisätilat:** Keski-Porin kirkko (tornin länsiovi), Juseliuksen mausoleumi (itäsivun kuisti) ja **Porin Teatteri** (Hallituskadun julkisivun keskeltä; ks. alaluku "Porin Teatteri"). Kumpikin on oma moduulinsa (GLB + valokartta + törmäykset),
   ladataan kun kävelijä on alle 90 m ovesta.
 - **Uusi kohde:** 1) `blender/<nimi>_sisa.py` (malli: mausoleumi_sisa.py, käyttää kirkko_sisa.py:n työkaluja), 2) `python3 blender/<nimi>_sisa.py --out DIR --lm 2048 --samples 32`,
   3) pelikansiossa `python3 tools/sisa_to_js.py DIR <nimi>_sisa`, 4) yksi rivi `PLACES`-listaan (map = paikallinen → karttametrit, probe = oven kohta ja suunta ulos).
@@ -1107,13 +1107,39 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
 - **Auki (omistaja päättää):** seuraava kohde; kirkon lehterit ja eteinen; mausoleumin kryptaan kävely; freskojen oikea järjestys seinillä; Tuonelan joella -työn alastomat
   hahmot (pidetäänkö); Enckellin ikkunat omista valokuvista; hahmo näkyviin kulkuneuvoon (Sit-animaatio), askeläänet, ovien avautuminen.
 
+### 19.11.2026 klo 19–20.30 – Porin Teatteri: aula, kiertokäytävä, päänäyttämön sali, näyttämö ja yläkerran kahvila (omistaja: "Porin Teatteri seuraavaksi")
+- **Tila:** kansiossa, pushaamatta, ei Modal-polttoa. Pushattavat: `index.html`, `teatteri_sisa.js` (4,8 Mt), `blender/teatteri_sisa.py`. Kuvat `Claude outputs/teatteri_sisa_19_11/`.
+- **Omistajan ohjeet ja kuvat (chatissa 19.11):** aulan takaosassa pyöreä punainen seinä, jonka molemmilta puolilta kierretään saliin (kuva: valkoiset pylväät
+  messinkipalloineen, sitaattitaulu, VASEN/OIKEA); yläkerran kahvila (2 kuvaa: kolme kaari-ikkunaa, harmaanvioletit seinät, ovenpäällykset, kristallikruunu,
+  marmoripöydät ja mustat tuolit, takana oranssi syvennys ja kullatut pylväät); linkki jalkipeli.net "Porissa sijaitsee mahdollisesti Suomen upein teatterirakennus"
+  (EI vielä luettu – käytä seuraavalla kierroksella). Salin rakenne ja värit luettu akukon.fi:n referenssikuvista. Kuvia ei tallennettu peliin eikä GitHubiin.
+- **Sijainti:** vanha teatteritalo on jalanjäljen (city.js b 1358) ITÄOSA: Hallituskadun julkisivu (−208.6, 388.2)…(−185.5, 382.9), 23,8 m, keskirisaliitti 8,8 m.
+  index.html `TEAT`: origo (−199.62, 374.34) = salin takaseinän keskikohta 11,5 m julkisivusta, x-akseli kohti näyttämöä (suunta 193°), y vasemmalle (itään).
+  Ulko-ovi löytyi kohdasta (−196.6, 387.3). Ulkomallissa (bl_teatteri.js) ei ole ovea tällä kohtaa – vain kyltti.
+- **Malli `blender/teatteri_sisa.py`** (10 900 pintaa, valokartta 3072², leivonta 8 min 24 näytteellä; ajo `--out DIR --lm 3072 --samples 24`, esikatselu
+  `SHOTS=aula,sali --nobake --shots --samples 14`): aula x −11…−1,6 (4 pylvästä, 3 ulko-ovea, sitaattitaulu), takaseinän aukosta näkyy salin pyöreä ulkoseinä
+  (säde 7,7 m, punainen + kultanauha); kiertokäytävä (ulkosäde 9,9 m) vie kummaltakin puolelta salin sivuoville (x 8,9…10,3). Sali: puolileveys 7,2 m, takakaari,
+  katto 9,4 m, parvi (kullattu kaide, 83 istuinta), permanto 186 istuinta kaarevissa riveissä, näyttämöaukko (kori­kaari, medaljongit, punainen esirippu ja kappa),
+  näyttämö +1,0 m (portaat salin etukulmista), sininen taustakangas, kattomaalausten kehä (7 pyöreää) ja kattokruunu.
+- **Kahvila** on mallissa siirretty **x + 100 m** (`XO`); aulan itäpäädyn ovesta (kyltti KAHVILA ↑) Enter siirtää sinne ja takaisin. Kartta taittaa x > 50 takaisin (PLACES.map).
+- **index.html, uudet yleiset ominaisuudet (toimivat kaikille sisätiloille, vanhat ennallaan):** `meta.lev` = lattiatasot suorakulmioina [x0,y0,x1,y1,z] (`inFloor`),
+  `meta.rooms` = useita huonemonikulmioita (`inRoom`), `meta.ports` = sisäovet [x, y, r, kohde x, y, suunta, vihje] (`walkNear` → 'port'), ja kamera pysähtyy
+  seiniin (`col.seg`) kun `meta.rooms` on olemassa. Näillä saa myös kirkon lehterit ja mausoleumin kryptan (siirretty kopio + ovi).
+- **EI kopioitu / omaa:** kattomaalaukset (Wetterstrand / Wuorio 1884 – tekijänoikeus päättynyt, oikeat voi vaihtaa jos omistaja haluaa ja kuvat saadaan),
+  näyttämöaukon reliefi ja rintakuvat (pelkistetyt, ei kenenkään näköiset), julisteet ja muotokuvat (jätetty pois). Sitaattitaulun teksti (Satakunta 14.2.1874)
+  on kirjoitettu omalla kirjasimella – omistaja päättää, pidetäänkö.
+- **Arvioitua (ei mitattu):** kaikki mitat (sovitettu jalanjälkeen), permannon käytäväjako, portaat näyttämölle, näyttämön takaosa, kahvilan koko ja ovien paikat,
+  aulan ikkunat ja pylväsjako. Kahvilaan mennään ovesta ilman näkyvää porrasta.
+- **Auki:** parvelle ei pääse (onnistuisi `ports`-ovella); lämpiö/ravintolasali ja Pieni näyttämö puuttuvat; ulkomalliin oikea pääovi; jalkipeli.net-artikkelin
+  kuvien läpikäynti ja korjauskierros omistajan kanssa; testattu vain pilvessä (ovi, aula, käytävä, sali, näyttämö, kahvila ja takaisin; ei konsolivirheitä).
+
 ## ILLAN MODAL-JONO (omistaja polttaa illalla – PÄIVITÄ TÄTÄ LISTAA, älä tee uutta)
 (Sisätilat ja jalankulku eivät kuulu tähän jonoon: ne eivät tarvitse polttoa, vain pushin – ks. edellinen luku "SISÄTILAT JA JALANKULKU".)
 Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 mennessä viedyn). Sen jälkeen kertyneet:
 
 | Lohko | Talot | Lisätty |
 |---|---|---|
-| c048 | 7 (Itsenäisyydenkatu 54) | 19.11 klo 17 |
+| c048 | 7 (Itsenäisyydenkatu 54), 166 (Itsenäisyydenkatu 47), 167 (Itsenäisyydenkatu 58) | 19.11 klo 17; 166 lisätty myöhemmin 19.11 |
 | c064 | 107 (Yrjönkatu 25) | 19.11 klo 17 |
 
 Ajettava illalla (push ensin, odota "porikit image" vihreäksi): `city 64 c048,c064`
@@ -1124,8 +1150,8 @@ Vastaa suomeksi, lyhyesti, kuva jokaisesta muutoksesta (Street View vasemmalla, 
 ylempänä luvuissa "ITSENÄISYYDENKATU, keskustan erä" (taulukko), "MODAL-POLTOISTA PUUTTUIVAT…", "Antinkadun loput talot" ja "ILLAN MODAL-JONO".
 
 ### Tilanne
-- **Antinkatu VALMIS.** Itsenäisyydenkadun keskustan 15 talosta valmiina 415, 118, 116, 119, 121, 107, 7. **Tekemättä: 600 (Bepop), 601, 585 (vanha
-  linja-autoasema), 1228, 164, 166, 167.** 113 auki (vaatii jalanjälkiratkaisun kuten 136), 115 vain väri korjattu, 569 jätetty (aidan takana).
+- **Antinkatu VALMIS.** Itsenäisyydenkadun keskustan 15 talosta valmiina 415, 118, 116, 119, 121, 107, 7, 166, 167. **Tekemättä: 600 (Bepop), 601, 585 (vanha
+  linja-autoasema), 1228, 164.** 113 auki (vaatii jalanjälkiratkaisun kuten 136), 115 vain väri korjattu, 569 jätetty (aidan takana).
   Päivitä taulukon Tila-sarake jokaisen talon jälkeen – valmiita ei tehdä uudelleen.
 - Kaikki koodi on käyttäjän kansiossa (takaisinluvulla tarkistettu). Modal toimii (PR #62). **Omistaja polttaa illalla:** lisää jokainen uusi lohko
   lukuun "ILLAN MODAL-JONO" (nyt `city 64 c048,c064`).
@@ -1183,3 +1209,27 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
 - Lopullinen kävelijälogiikka: solmuvalinnassa vilkas väylä paino 12, paluu samaa kävelykatua 2 (muuten 0,02), toriruudukkoon sisään 0,25; ja kun hahmoja on
   täysi määrä, kauimmainen ryhmä (>85 m pelaajasta) poistetaan 0,25 s välein → väki kerääntyy sinne missä pelaaja on. Simulaatio 5 min pelaaja
   kävelykadulla: 33/48 hahmoa kävelykadulla (ennen 0–3). Torilla seistessä sama logiikka tuo väen torille ja sen laidoille.
+
+## 19.11.2026 (klo 17 -luvun jatko) – Itsenäisyydenkatu jatkuu: 166 (testipoltettu, Modal-polttamatta)
+- **166 Itsenäisyydenkatu 47 (c048):** `f166.py`, eteläjulkisivu 22,7 m, seinä (−244.925,−392.848)→(−222.745,−397.730): vaalea okrarappaus, 3 krs, neljä
+  akselia valkoisia kuusiruutuisia ikkunoita (s 2,94 / 7,77 / 14,89 / 19,88), keskellä ovi punagraniittikehyksessä (lippa + 2 porrasta), punagraniittisokkeli
+  ja kellari-ikkunat, räystäslista. Pano Itsenäisyydenkatu 47 (61.4823566, 21.7916471 → x −231.92, y −406.1; h 12 ja 330, p 14). Koko julkisivu nähty
+  (länsiakselin kellari-ikkuna liikennemerkin takana → jätetty pois). Vertailukuva `Claude outputs/itsenaisyydenkatu_166_vertailu_19_11.jpg`.
+- **Mittakaavaoppi:** LoD2-kuori seuraa räystästä (kuori 22,7 m, seinän nurkat s 0,25 ja 21,9), joten pelkkä kuoren pituus ei kelpaa mittakaavaksi. Tässä
+  kuoren nurkat + räystäskorkeus antoivat kertoimen 1,124 kameran suhteen → oikaisu tehtiin siirtämällä kamera paikkaan (−232.59, −407.23) ja `ch 2.16`
+  (rectify.py:n 15. argumentti), minkä jälkeen s ja z luetaan suoraan.
+- **Jalkakäytävä peittää julkisivun alaosan (koskee kaikkia mitattuja julkisivuja):** kadut geometriana (18.11) nostivat jalkakäytävän 0,26 m maaston
+  yläpuolelle (`ROAD.pave` index.html:ssä), mutta lohko nostetaan talon maanpintaan → z 0…0,26 jää jalkakäytävän alle (sokkeli, portaat, kellari-ikkunat).
+  f166.py:ssä kaikki paitsi räystäs on nostettu `PV = 0.26`. Aiempia taloja EI ole muutettu. **Omistajan päätös 19.11: "jätetään vanhat ennalleen"** –
+  vanhoja julkisivuja ei nosteta eikä zones.py:hyn tehdä yleistä nostoa; UUSISSA taloissa z mitataan jalkakäytävästä ja itemit nostetaan `PV = 0.26` (malli f166.py).
+- **Uusi: `"nobrick": true` toimii nyt myös taloille ilman SPECiä** (c-lohkojen automaattitalot): `zones.py` kerää ne joukkoon `NOBRICK`, `zones2.spec_for`
+  asettaa `sp['nobrick']` → shells `nb` → peli ei piirrä tiilisaumaa punaiseen pintaan (166:n graniitti näkyi tiilenä). Muutos 3 riviä, c048 testipoltettu
+  (23 329 kärkeä).
+- **Modal:** jono ennallaan `city 64 c048,c064` (c048 sisältää nyt myös 166:n). zones.py ja zones2.py muuttuivat → push ja "porikit image" vihreäksi ennen ajoa.
+- **167 Itsenäisyydenkatu 58 (c048, Otavankadun kulma – SPEC-kommentin "Antinkatu corner" on väärin):** `f167.py`, eteläpääty 14,3 m, seinä
+  (−274.232,−385.193)→(−260.311,−388.447): harmaanbeige roiskerappaus, 2 akselia leveitä tummapuitteisia ikkunoita 7 kerroksessa (kerrosväli 2,78 m),
+  lasitettu kulmaparvekepino kummassakin päässä, lasitettu liikekerros betonipilarien välissä + harmaa lippanauha, punaruskea lautavyö leveän tumman
+  räystään alla. Pano Itsenäisyydenkatu 58 (61.4824474, 21.7909043 → x −271.53, y −395.87; h 13 p 30), mittakaava 1,0, z = z − 0,17, + PV.
+  Yksinkertaistettu: länsiparvekkeiden alla oleva avoin pylväikkö on piirretty umpiseinänä; parvekepinot 0,3 m ulkonevina. `nobrick` (lautavyö).
+  Vertailukuva `Claude outputs/itsenaisyydenkatu_167_vertailu_19_11.jpg`. c048 testipoltettu (24 405 kärkeä).
+- Jäljellä taulukosta: 600, 601, 585, 1228, 164 (+113 auki, 115 mittaamatta). 164:n kadunpuoleinen seinä raw.pkl:stä: (−216.063,−398.788)→(−190.378,−404.806), 26,4 m, räystäs 7,9.

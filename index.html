@@ -2074,9 +2074,11 @@ const blobIn = new THREE.Mesh(new THREE.CircleGeometry(0.42, 20).rotateX(-Math.P
 // interiors (owner 19.11.2026: the church first, then Juseliuksen mausoleumi): each place is a group in sceneIn drawn in its own local frame.
 // map(x, y): local -> map metres; probe: a local point just inside the outer door and the outward direction (the first free spot becomes the door)
 const MAUS = { cx: -1947.81, cy: 193.18, ex: [-0.9703, 0.2419], ey: [-0.2419, -0.9703] };   // bl_mausoleumi.js: hall centre, local x runs from the east door inwards (166 deg)
+const TEAT = { cx: -199.62, cy: 374.34, ex: [-0.2236, -0.9747], ey: [0.9747, -0.2236] };   // Porin Teatteri (blender/teatteri_sisa.py): origin on the hall's rear wall, 11.5 m in from the middle of the Hallituskatu front; x runs towards the stage. The upstairs café is modelled 100 m further along x and folded back for the map
 const PLACES = [
   { key: 'kirkko', file: 'kirkko_sisa', name: 'Keski-Porin kirkko', room: 'kirkkosali', label: '⛪ Sisään kirkkoon', hint: 'astu Keski-Porin kirkkoon', ok: () => !!CHURCH.map, map: (x, y) => CHURCH.map(x, -y), probe: [-34, 0, -1, 0], markH: 8.2 },
-  { key: 'mausoleumi', file: 'mausoleumi_sisa', name: 'Juseliuksen mausoleumi', room: 'halli ja krypta', label: '🕯 Sisään mausoleumiin', hint: 'astu Juseliuksen mausoleumiin', ok: () => true, map: (x, y) => [MAUS.cx + MAUS.ex[0] * x + MAUS.ey[0] * y, MAUS.cy + MAUS.ex[1] * x + MAUS.ey[1] * y], probe: [-5.0, 0, -1, 0], markH: 5.2 } ];
+  { key: 'mausoleumi', file: 'mausoleumi_sisa', name: 'Juseliuksen mausoleumi', room: 'halli ja krypta', label: '🕯 Sisään mausoleumiin', hint: 'astu Juseliuksen mausoleumiin', ok: () => true, map: (x, y) => [MAUS.cx + MAUS.ex[0] * x + MAUS.ey[0] * y, MAUS.cy + MAUS.ex[1] * x + MAUS.ey[1] * y], probe: [-5.0, 0, -1, 0], markH: 5.2 },
+  { key: 'teatteri', file: 'teatteri_sisa', name: 'Porin Teatteri', room: 'aula, päänäyttämö ja kahvila', label: '🎭 Sisään teatteriin', hint: 'astu Porin Teatteriin', ok: () => true, map: (x, y) => { if (x > 50) x -= 100; return [TEAT.cx + TEAT.ex[0] * x + TEAT.ey[0] * y, TEAT.cy + TEAT.ex[1] * x + TEAT.ey[1] * y]; }, probe: [-11.3, 0, -1, 0], markH: 6 } ];
 const IN = PLACES[0];
 let walkMix = null, walkCur = '', walkLoading = false; const walkAct = {};
 function loadWalker() { if (walkLoading) return; walkLoading = true;
@@ -2124,7 +2126,9 @@ function walkBoard() {
 function walkReset() { if (WALK.on) { scene.add(walkG); walkBoard(); } }
 function fadeDo(fn) { if (WALK.busy) return; WALK.busy = true; $('fade').classList.add('on'); setTimeout(() => { fn(); $('fade').classList.remove('on'); WALK.busy = false; }, 240); }
 function walkNear() {   // what Enter would do here: 'in' (church door), 'out' (leave the church), 'veh' (board), or ''
-  if (WALK.in) { const M = WALK.in.meta; return WALK.ix < M.exit[0] + 1.6 && Math.abs(WALK.iy) < M.exit[1] + 0.6 ? 'out' : ''; }
+  if (WALK.in) { const M = WALK.in.meta; if (WALK.ix < M.exit[0] + 1.6 && Math.abs(WALK.iy) < M.exit[1] + 0.6) return 'out';
+    if (M.ports) for (const q of M.ports) if (Math.hypot(WALK.ix - q[0], WALK.iy - q[1]) < q[2]) { WALK.port = q; return 'port'; }   // inner doors that move the player (theatre: foyer <-> upstairs café): [x, y, r, to x, to y, yaw, hint]
+    return ''; }
   for (const P of PLACES) { const d = placeDoor(P); if (d && Math.hypot(WALK.x - d.x, WALK.y - d.y) < 4.2) { WALK.at = P; return 'in'; } }
   const v = WALK.veh; return v && Math.hypot(WALK.x - v.x, WALK.y - v.y) < (VEH === 'car' ? 4.2 : 6) ? 'veh' : '';
 }
@@ -2138,6 +2142,7 @@ function walkAction() {
       camPos.set(WALK.ix - 1, 2, 0); camLook.set(WALK.ix + 3, 1.5, 0); camera.near = 0.12; camera.updateProjectionMatrix(); toast(P.name, 2.2); }); }
   else if (k === 'out') fadeDo(() => { const d = placeDoor(WALK.in); WALK.in = false; WALK.x = d.x; WALK.y = d.y; WALK.yaw = d.out; WALK.v = 0; WALK.z = carGround(d.x, d.y) || 0; scene.add(walkG);
       camPos.set(WALK.x - Math.sin(d.out) * 3, WALK.z + 2, -WALK.y + Math.cos(d.out) * 3); camera.near = 0.25; camera.updateProjectionMatrix(); });
+  else if (k === 'port') fadeDo(() => { const q = WALK.port; WALK.ix = q[3]; WALK.iy = q[4]; WALK.iyaw = q[5]; WALK.v = 0; WALK.z = inFloor(q[3], q[4]); camPos.set(q[3] - Math.sin(q[5]) * 1.5, WALK.z + 2, -(q[4] - Math.cos(q[5]) * 1.5)); });
   else toast(VEH === 'car' ? 'Auto on liian kaukana' : 'Kopteri on liian kaukana', 1.4);
 }
 function walkCollide(p) {   // push the player's circle out of the hall's walls, columns, pews and rails
@@ -2148,7 +2153,9 @@ function walkCollide(p) {   // push the player's circle out of the hall's walls,
     for (const c of C.circ) { const ex = p.x - c[0], ey = p.y - c[1], d = Math.hypot(ex, ey), m = R + c[2]; if (d < m && d > 1e-6) { p.x += ex / d * (m - d); p.y += ey / d * (m - d); } }
   }
 }
-const inFloor = (x, y) => { const M = WALK.in.meta; return Math.abs(y) < M.py && x > M.xs0 - 0.15 ? Math.min(M.flz, 0.15 * (Math.floor((x - M.xs0 + 0.15) / 0.4) + 1)) : 0; };
+const inRoom = (M, x, y) => M.rooms ? M.rooms.some(r => pip(x, y, r)) : pip(x, y, M.room);
+const inFloor = (x, y) => { const M = WALK.in.meta; if (M.lev) { let z = 0; for (const r of M.lev) if (x >= r[0] && x <= r[2] && y >= r[1] && y <= r[3] && r[4] > z) z = r[4]; return z; }   // floor levels as rectangles [x0, y0, x1, y1, z] (theatre stage and its steps)
+  return Math.abs(y) < M.py && x > M.xs0 - 0.15 ? Math.min(M.flz, 0.15 * (Math.floor((x - M.xs0 + 0.15) / 0.4) + 1)) : 0; };
 function stepWalk(dt) {
   const run = keys.has('ShiftLeft') || keys.has('ShiftRight') || touchIn.run, f = input.f, t = input.t, sd = input.s;
   const tv = f > 0 ? f * (run ? 5.4 : 1.75) : f * 1.2; WALK.v += (tv - WALK.v) * Math.min(1, dt * 9); WALK.vs += (sd * 1.3 - WALK.vs) * Math.min(1, dt * 9);
@@ -2157,7 +2164,7 @@ function stepWalk(dt) {
     WALK.iyaw += tr; const sn = Math.sin(WALK.iyaw), cs = Math.cos(WALK.iyaw), p = { x: WALK.ix + (sn * WALK.v + cs * WALK.vs) * dt, y: WALK.iy + (cs * WALK.v - sn * WALK.vs) * dt };
     const ox = WALK.ix, oy = WALK.iy; walkCollide(p);
     if (inFloor(p.x, p.y) - WALK.z > 0.25) { p.x = ox; p.y = oy; }                        // no climbing the side of the chancel platform
-    if (!pip(p.x, p.y, WALK.in.meta.room)) { p.x = ox; p.y = oy; }
+    if (!inRoom(WALK.in.meta, p.x, p.y)) { p.x = ox; p.y = oy; }
     WALK.ix = p.x; WALK.iy = p.y; WALK.z += (inFloor(p.x, p.y) - WALK.z) * Math.min(1, dt * 12);
     walkG.position.set(WALK.ix, WALK.z, -WALK.iy); walkG.rotation.y = -WALK.iyaw; blobIn.position.set(WALK.ix, WALK.z + 0.02, -WALK.iy);
     const m0 = WALK.in.map(WALK.ix, WALK.iy), m1 = WALK.in.map(WALK.ix + sn, WALK.iy + cs); S.x = WALK.x = m0[0]; S.y = WALK.y = m0[1]; S.yaw = WALK.yaw = Math.atan2(m1[0] - m0[0], m1[1] - m0[1]);
@@ -2183,7 +2190,7 @@ function stepWalk(dt) {
   walkG.visible = camMode !== 1;
   if (VEH !== 'car') { S.rotorSpd += (0 - S.rotorSpd) * Math.min(1, dt * 0.6); rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt; }
   if (actx && sGain) sGain.gain.value += ((VEH !== 'car' && soundOn && !WALK.in ? 0.05 * S.rotorSpd : 0) - sGain.gain.value) * Math.min(1, dt * 4);
-  const k = walkNear(), h = $('hint'), msg = k === 'in' ? WALK.at.hint : k === 'out' ? 'ulos' : k === 'veh' ? (VEH === 'car' ? 'nouse autoon' : 'nouse kopteriin') : '';
+  const k = walkNear(), h = $('hint'), msg = k === 'in' ? WALK.at.hint : k === 'out' ? 'ulos' : k === 'port' ? WALK.port[6] : k === 'veh' ? (VEH === 'car' ? 'nouse autoon' : 'nouse kopteriin') : '';
   if (msg) { if (h.dataset.m !== msg) { h.dataset.m = msg; h.innerHTML = (isTouch ? '🚶 ' : '<kbd>Enter</kbd> ') + msg; } h.classList.add('on'); } else h.classList.remove('on');
 }
 function walkCamera(dt) {
@@ -2191,7 +2198,10 @@ function walkCamera(dt) {
   if (camMode === 1) { camera.position.set(px + sn * 0.1, WALK.z + 1.68, -(py + cs * 0.1)); camera.rotation.order = 'YXZ'; camera.rotation.set(-0.02, -yaw, 0); camPos.copy(camera.position); return; }
   if (camMode === 2 && !ins) { tmp.set(px, WALK.z + 38, -py + 0.5); camPos.lerp(tmp, Math.min(1, dt * 4)); camera.position.copy(camPos); camera.up.set(sn, 0, -cs); camera.lookAt(px, WALK.z, -py); camera.up.set(0, 1, 0); return; }
   let ok = 0.5;
-  for (const back of [3.6, 2.7, 1.9, 1.2, 0.7]) { const cx = px - sn * back, cy = py - cs * back;
+  if (ins && ins.meta.rooms) { const M = ins.meta;   // rooms with inner walls: the camera backs away only as far as nothing stands between it and the player
+    for (let b = 0.7; b < 3.65; b += 0.29) { const cx = px - sn * b, cy = py - cs * b;
+      if (!inRoom(M, cx, cy) || M.col.circ.some(c => Math.hypot(cx - c[0], cy - c[1]) < c[2] + 0.25) || M.col.seg.some(g => { const dx = g[2] - g[0], dy = g[3] - g[1], t = Math.max(0, Math.min(1, ((cx - g[0]) * dx + (cy - g[1]) * dy) / (dx * dx + dy * dy || 1))); return Math.hypot(cx - g[0] - dx * t, cy - g[1] - dy * t) < g[4] + 0.22; })) break; ok = b; } }
+  else for (const back of [3.6, 2.7, 1.9, 1.2, 0.7]) { const cx = px - sn * back, cy = py - cs * back;
     const free = ins ? pip(cx, cy, WALK.in.meta.room) && !WALK.in.meta.col.circ.some(c => Math.hypot(cx - c[0], cy - c[1]) < c[2] + 0.25) && cx > WALK.in.meta.xw + 0.3 : walkFree(cx, cy);
     if (free) { ok = back; break; } }
   tmp.set(px - sn * ok, WALK.z + 1.55 + ok * 0.17, -(py - cs * ok)); camPos.lerp(tmp, 1 - Math.exp(-dt * 8));

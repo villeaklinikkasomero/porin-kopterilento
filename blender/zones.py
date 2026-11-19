@@ -1356,7 +1356,7 @@ def _bare_w(w):
     rl = dict(bw=w.get('shop_bw', 2.0), rows=[(gh, 'shop', 'G'), (max(1.0, h - gh), 'plain', 'P')], cols=lambda c, nb: 'W', P={},
               rowP={'G': dict(setback=sb, piers=(0, 0.3), soffit=M('#35383b'), fasc_h=0.2, gpier=0.04)})
     return dict(P=dict(wall=wm, gwall=M('#2c2f31', 0.6), fascia=M('#2c2f31', 0.6), piermat=wm), layout=rl, upper=_bare_lay)
-WALLS = {}; FEXTRA = {}
+WALLS = {}; FEXTRA = {}; NOBRICK = set()   # NOBRICK: houses without a SPEC whose entry says "nobrick" (19.11.2026, 166: red granite, not brick)
 FACADES = {e['id']: e for e in (_json_f.load(open(_FJ)) if _os_f.path.exists(_FJ) else [])}
 for _i, _e in FACADES.items():
     _bw = [w for w in _e['walls'] if w.get('bare')]
@@ -1386,4 +1386,5 @@ for _i, _e in FACADES.items():
         if _wk: SPEC[_i]['walls'] = {**SPEC[_i].get('walls', {}), **{k: v for k, v in _wk.items()}}; SPEC[_i]['P'] = dict(SPEC[_i]['P'], wall=_bare_mat(_bw[0]))
     else:
         RUNALT[_i] = _ra; EXTRA[_i] = EXTRA.get(_i, []) + [FEXTRA[_i]]
+        if _e.get('nobrick'): NOBRICK.add(_i)
         if _wk: WALLS[_i] = (_wk, _bare_mat(_bw[0]))
