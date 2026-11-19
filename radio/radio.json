@@ -94,5 +94,132 @@
    "d": 3.71,
    "t": "Radio Porikopteri"
   }
+ ],
+ "puhe": [
+  {
+   "f": "puhe_avaus.mp3",
+   "d": 21.52,
+   "t": "Puhekanava – avaus"
+  },
+  {
+   "f": "puhe_synty.mp3",
+   "d": 29.28,
+   "t": "Kaupunki joen suulla"
+  },
+  {
+   "f": "puhe_roottori.mp3",
+   "d": 19.1,
+   "t": "Mainos: Kahvila Roottori"
+  },
+  {
+   "f": "puhe_palo.mp3",
+   "d": 30.77,
+   "t": "Palon jälkeen"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "puhe_reunakivi.mp3",
+   "d": 22.07,
+   "t": "Mainos: Reunakivi-Rengas"
+  },
+  {
+   "f": "puhe_jazz.mp3",
+   "d": 26.75,
+   "t": "Jazzin kaupunki"
+  },
+  {
+   "f": "puhe_tuulipesu.mp3",
+   "d": 21.37,
+   "t": "Mainos: Yyterin Tuulipesu"
+  },
+  {
+   "f": "puhe_yyteri.mp3",
+   "d": 24.01,
+   "t": "Hiekkaa ja dyynejä"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "puhe_kaksisiivua.mp3",
+   "d": 23.38,
+   "t": "Mainos: Grilli Kaksi Siivua"
+  },
+  {
+   "f": "puhe_porilainen.mp3",
+   "d": 27.35,
+   "t": "Leipä, jolla on kaupungin nimi"
+  },
+  {
+   "f": "puhe_siipi.mp3",
+   "d": 22.02,
+   "t": "Mainos: Kopterikoulu Pyörivä Siipi"
+  },
+  {
+   "f": "puhe_murre.mp3",
+   "d": 23.88,
+   "t": "Mää ja sää"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "puhe_kalatori.mp3",
+   "d": 21.19,
+   "t": "Mainos: Jokisuun Kalatiski"
+  },
+  {
+   "f": "puhe_juselius.mp3",
+   "d": 32.37,
+   "t": "Juseliuksen mausoleumi"
+  },
+  {
+   "f": "puhe_vihreaaalto.mp3",
+   "d": 21.73,
+   "t": "Mainos: Autokoulu Vihreä Aalto"
+  },
+  {
+   "f": "puhe_puuvilla.mp3",
+   "d": 24.22,
+   "t": "Tehtaiden kaupunki"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "puhe_luotokioski.mp3",
+   "d": 22.8,
+   "t": "Mainos: Luotokioski"
+  },
+  {
+   "f": "puhe_meri.mp3",
+   "d": 21.6,
+   "t": "Meren suunnassa"
+  },
+  {
+   "f": "puhe_liikenne.mp3",
+   "d": 25.23,
+   "t": "Liikennetiedote"
+  },
+  {
+   "f": "puhe_loppu.mp3",
+   "d": 13.92,
+   "t": "Puhekanava – kiitos"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  }
  ]
 }

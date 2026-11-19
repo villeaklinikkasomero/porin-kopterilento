@@ -767,3 +767,28 @@ Aiemmin: 118, 126, 133, 135, 290, 274, 137, 255, 216, 221, 215, 564, 163.
 - Pilven tiedostot ovat väliaikaisia: uusi chat aloittaa tyhjästä. Hae repo käyttäjän koneelta (device_bash/stage) tai GitHubista; blender-paistoon tarvitaan
   bpy-moduuli (`pip install bpy`), datat (OSM, LoD2, ilmakuvat) ks. luvut 14.–15.11.
 - OSM-haku onnistuu sovelluksen selaimella api.openstreetmap.org:sta (Overpass estetty pilvestä).
+
+### 19.11 aamu: radion puhekanava
+- Uusi kanava **Puhe** (index.html RADIO.names; R kiertää Pop, Electric, Rock, Puhe, pois; kanava ohitetaan jos radio.jsonissa ei ole sitä).
+- Käsikirjoitus `tools/radio/puhe.json` (13 Pori-puhetta + 7 keksityn yrityksen mainosta, numerot auki kirjoitettuna), generaattori
+  `python3 tools/radio/speak.py radio/voice/fi_FI-harri-medium.onnx radio/` → radio/puhe_*.mp3 (4 Mt, 8,2 min silmukka) + radio.json "puhe".
+- Ääni: Piper (`pip install "piper-tts>=1.5"`, MIT), malli fi_FI-harri-medium (MIT, aineisto CC0). Malli (63 Mt) on käyttäjän koneella `radio/voice/`,
+  .gitignoressa – ei GitHubiin. Hugging Face on estetty pilvestä; malli haettiin sovelluksen selaimella.
+- Mainosten alla radion oma pop hiljaa (−16 LUFS), puheet loudnorm −16 LUFS. Lisää puheita: lisää puhe.json:iin ja aja speak.py uudelleen (id:t uniikkeja!).
+
+### 19.11 aamu: Cafe Anton -kohta (1492 katukaistale, 1493, 1490 pohjoispää) – tehty, polttamatta
+- **Tunnistus:** "Cafe Anton -talo" = kaksi taloa. Kyltti on **1492:n 3,8 m katukaistaleella** (-4.7,140.2 → -3.9,143.9; lasiuloke, kylttipino),
+  itse kahvila on **keltaisen 1493:n** katutasossa. Niiden välissä on todellisuudessa **3,2 m avoin porttikäytävä** (Torget-katos), jonka
+  city.js:n jalanjälki oli laskenut 1493:ään (talo 15,6 m, jalanjälki 18,1 m).
+- **zones.py:** 1493:n eteläpää siirretty 3,2 m pohjoiseen (`B[1493]['p']`, `_a9S`), 5 aukkoa (bw 2,95), **vasen aukko ovi** (omistaja 19.11),
+  etelpääty paljas, musta katos portin päälle (`_a9_awnings`). 1492:n takaseinään lisätty kärki (-8.6,148.2), jotta portin kohta ei jää piiloseinäksi.
+- **facades.json / `tools/rautalanka/facades/f1492.py`:** 1492 (tumma lasisisäänkäynti, 2-krs lasiuloke 1 m ulkona, kyltit värilaattoina,
+  pohjoissivulla lasiparvekepino) ja **1490 mitattu uudelleen** (f1315.py:stä poistettu): Rosso-kirjaimet, parveke ja ikkunat olivat ~1,3 m liian
+  pohjoisessa; lisätty 2-krs lasikaista ja tummansininen kulmapilari. Todellinen julkisivu 22,4 m / jalanjälki 21,0 m → eteläosan 4 ikkunasaraketta
+  tiivistetty 0,915:llä, pohjoisosa oikeassa mitassa.
+- **Panot:** Antinkatu 10: (61.4872248, 21.7961243) → peli x 6.51, y 136.01 (korjattu 0,4 m) ja (61.4873143, 21.7961676) → x 8.93, y 146.5.
+  Sovelluksen selaimen ikkuna on nyt 743×1026 (pysty-FOV 90 pätee edelleen; älä käytä resize_window alle 768 px – Maps vaihtuu mobiiliksi).
+- **Ympäristö:** `git clone` GitHubista toimii pilvestä (+ uudemmat tiedostot koneelta stage), `pip install bpy shapely opencv-python-headless`,
+  gshot_sv.mjs: playwright on polussa `/opt/npm-tools/node_modules/`. tori1 8 näytteellä ~135 s.
+- **Modal:** tori1 on jo jonossa (`bake tori0 tori1 tori4 kivi2`) – ei uusia lohkoja. Vertailukuva: `Claude outputs/cafe_anton_vertailu_19_11.jpg`.
+- **Auki:** portin kohdalla maassa vaalea laatta (pelin puolen pohja vanhasta jalanjäljestä?) – tarkista Modal-polton jälkeen. Seuraavaksi lista: 1725, 1726, 1600, 136, 409, 570, 276, 415.

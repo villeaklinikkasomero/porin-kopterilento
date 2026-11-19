@@ -1,0 +1,125 @@
+{
+ "note": "Radio Porikopterin puhekanava: Pori-aiheiset puheet (t) ja keksittyjen yritysten mainokset (m). Teksti on kirjoitettu puhesyntetisaattorille: numerot auki. Kaikki mainosten yritykset ovat keksittyjä.",
+ "seg": [
+  {
+   "k": "t",
+   "id": "avaus",
+   "t": "Puhekanava – avaus",
+   "s": "Hyvää päivää, ja tervetuloa Radio Porikopterin puhekanavalle. Täällä puhutaan Porista: kaupungin historiasta, kesästä ja meren tuulista, ja välillä kuullaan myös paikallisten yritysten terveisiä. Pysy kyydissä, ja muista katsoa peiliin ennen kaistanvaihtoa."
+  },
+  {
+   "k": "t",
+   "id": "synty",
+   "t": "Kaupunki joen suulla",
+   "s": "Pori on vanha kaupunki. Juhana-herttua perusti sen vuonna tuhatviisisataaviisikymmentäkahdeksan Kokemäenjoen suulle, kauppapaikaksi meren ja sisämaan väliin. Siitä lähtien joki on ollut kaupungin sydän. Maa on noussut vuosisatojen aikana, ja meri on vetäytynyt yhä kauemmas. Siksi Pori on nykyään joen varrella, eikä enää aivan meren rannalla, vaikka merituulen tuntee edelleen."
+  },
+  {
+   "k": "m",
+   "id": "roottori",
+   "t": "Mainos: Kahvila Roottori",
+   "s": "Väsyttääkö lento? Pysähdy Kahvila Roottoriin! Meillä kahvi on vahvaa kuin vastatuuli, ja pulla pehmeää kuin pilvi. Kopterilentäjille toinen kuppi aina puoleen hintaan. Kahvila Roottori – täällä pyörii muukin kuin potkuri."
+  },
+  {
+   "k": "t",
+   "id": "palo",
+   "t": "Palon jälkeen",
+   "s": "Vuonna tuhatkahdeksansataaviisikymmentäkaksi suuri tulipalo tuhosi suuren osan Porin keskustasta. Kaupunki rakennettiin uudelleen, ja sille piirrettiin uusi, väljä asemakaava. Leveät puistokadut, Itäpuisto, Länsipuisto, Pohjoispuisto ja Eteläpuisto, antoivat kaupungille vihreät rajat ja estivät tulta leviämästä korttelista toiseen. Kun ajat puistokatua pitkin, ajat siis historian läpi."
+  },
+  {
+   "k": "m",
+   "id": "reunakivi",
+   "t": "Mainos: Reunakivi-Rengas",
+   "s": "Kolahtiko taas reunakiveen? Ei hätää! Reunakivi-Rengas vaihtaa, tasapainottaa ja suoristaa, nopeasti ja hymyillen. Talvirenkaat, kesärenkaat ja varapyörät, kaikki saman katon alta. Reunakivi-Rengas – me ollaan kuultu se kolahdus ennenkin."
+  },
+  {
+   "k": "t",
+   "id": "jazz",
+   "t": "Jazzin kaupunki",
+   "s": "Kesäisin Pori soi. Pori Jazz on järjestetty vuodesta tuhatyhdeksänsataakuusikymmentäkuusi, ja se on yksi Euroopan vanhimmista jazzfestivaaleista. Heinäkuussa Kirjurinluodon puistosaari täyttyy musiikista, ja keskustan kaduilla kuulee kielten kirjon. Moni porilainen sanoo, että kesä alkaa vasta, kun ensimmäiset rummut lyövät joen rannalla."
+  },
+  {
+   "k": "m",
+   "id": "tuulipesu",
+   "t": "Mainos: Yyterin Tuulipesu",
+   "s": "Hiekkaa matoissa ja suolaa lokasuojissa? Yyterin Tuulipesu puhdistaa autosi rannan jäljiltä! Harjat, vaahto ja lämmin ilmakuivaus. Ja jos sinulla on kopteri, pestään se myös, kunhan mahdut ovesta. Yyterin Tuulipesu – puhdasta kuin aamuranta."
+  },
+  {
+   "k": "t",
+   "id": "yyteri",
+   "t": "Hiekkaa ja dyynejä",
+   "s": "Porin keskustasta ei ole pitkä matka Yyteriin. Siellä on yksi Suomen tunnetuimmista hiekkarannoista: pitkä, matala ranta ja tuulen muovaamat dyynit. Kesällä rannalla uidaan ja pelataan, syksyllä siellä kävellään tuulessa ja katsellaan meren harmaata. Talvellakin hiekka liikkuu, kun tuuli kuljettaa sitä lumen päällä."
+  },
+  {
+   "k": "m",
+   "id": "kaksisiivua",
+   "t": "Mainos: Grilli Kaksi Siivua",
+   "s": "Nälkä yllätti yöllä? Grilli Kaksi Siivua tekee porilaisen niin kuin kuuluu: paksu viipale makkaraa kahden paahtoleivän välissä, sipulia, kurkkusalaattia, sinappia ja ketsuppia. Ei kikkailua, vaan klassikko. Grilli Kaksi Siivua – leipä, makkara ja sydän paikallaan."
+  },
+  {
+   "k": "t",
+   "id": "porilainen",
+   "t": "Leipä, jolla on kaupungin nimi",
+   "s": "Porilainen on makkaraleipä, joka kantaa kaupungin nimeä. Siinä on paksu viipale makkaraa kahden leivän välissä, ja päälle tulee yleensä sipulia, kurkkusalaattia ja kastikkeita. Sitä syödään grillikioskeilla, usein myöhään illalla. Väitellä voi siitä, kuuluuko leivän olla paahdettu, mutta siitä ollaan yhtä mieltä, että siivu saa olla paksu."
+  },
+  {
+   "k": "m",
+   "id": "siipi",
+   "t": "Mainos: Kopterikoulu Pyörivä Siipi",
+   "s": "Oletko aina halunnut nähdä Porin ylhäältä? Kopterikoulu Pyörivä Siipi opettaa nousut, leijunnat ja laskeutumiset turvallisesti ja kärsivällisesti. Ensimmäinen tunti on maassa, toinen jo ilmassa. Kopterikoulu Pyörivä Siipi – elämä on parempaa, kun on vähän korkeammalla."
+  },
+  {
+   "k": "t",
+   "id": "murre",
+   "t": "Mää ja sää",
+   "s": "Porin murteen tunnistaa helposti. Sanoista jätetään loppuja pois, ja puhe on lyhyttä ja rytmikästä. Minä on mää, ja sinä on sää. Moni porilainen sanoo, että asiat sanotaan suoraan ja vähin sanoin, ja loput ymmärretään äänensävystä. Jos joku sanoo sinulle kyl sää pärjäät, se on kehu."
+  },
+  {
+   "k": "m",
+   "id": "kalatori",
+   "t": "Mainos: Jokisuun Kalatiski",
+   "s": "Tuoretta kalaa joen ja meren rajalta! Jokisuun Kalatiskiltä saat siikaa, ahventa, silakkaa ja savulohta, aina päivän saaliista. Kysy myös reseptiä, me kerrotaan mielellään. Jokisuun Kalatiski – kala on parasta, kun se on tullut läheltä."
+  },
+  {
+   "k": "t",
+   "id": "juselius",
+   "t": "Juseliuksen mausoleumi",
+   "s": "Käppärän hautausmaalla Porissa seisoo Juseliuksen mausoleumi. Teollisuusmies Fritz Arthur Juselius rakennutti sen tyttärensä Sigridin muistoksi, joka kuoli nuorena. Rakennuksen seiniin Akseli Gallen-Kallela maalasi freskot. Alkuperäiset maalaukset vaurioituivat kosteuden vuoksi, ja myöhemmin taiteilijan poika Jorma maalasi ne uudelleen isänsä luonnosten mukaan. Mausoleumi on yksi Porin erikoisimmista nähtävyyksistä."
+  },
+  {
+   "k": "m",
+   "id": "vihreaaalto",
+   "t": "Mainos: Autokoulu Vihreä Aalto",
+   "s": "Ajokortti kesäksi? Autokoulu Vihreä Aalto opettaa sinut ajamaan liikenneympyrässä, yksisuuntaisella kadulla ja vaikka sateessa sillan yli. Opettajamme eivät hermostu, vaikka moottori sammuisi valoissa kolme kertaa. Autokoulu Vihreä Aalto – suunta on aina eteenpäin."
+  },
+  {
+   "k": "t",
+   "id": "puuvilla",
+   "t": "Tehtaiden kaupunki",
+   "s": "Pori on myös teollisuuden kaupunki. Joen varteen nousi aikanaan sahoja, konepajoja ja kutomoita. Porin Puuvillan punatiilinen tehdasalue on saanut uuden elämän: siellä on nykyään kauppakeskus, asuntoja ja yliopistokeskus. Kun katselet vanhoja tiiliseiniä, voit melkein kuulla kutomakoneiden äänen."
+  },
+  {
+   "k": "m",
+   "id": "luotokioski",
+   "t": "Mainos: Luotokioski",
+   "s": "Jäätelöä, limsaa ja lämmintä kaakaota, joen rannalla aamusta iltaan. Luotokioski on auki, kun aurinko paistaa, ja joskus silloinkin, kun ei paista. Tuo kaverit, tuo koira, tuo hyvä mieli. Luotokioski – pieni kioski, iso kesä."
+  },
+  {
+   "k": "t",
+   "id": "meri",
+   "t": "Meren suunnassa",
+   "s": "Porin keskustasta länteen ja luoteeseen avautuu meri. Mäntyluodossa on satama, josta laivat lähtevät maailmalle, ja Reposaaressa on vanha merellinen kylä puutaloineen. Kun tuuli kääntyy lännestä, sen tuntee kaupungissakin: ilma on raikkaampi, ja lokit kirkuvat torin yllä."
+  },
+  {
+   "k": "t",
+   "id": "liikenne",
+   "t": "Liikennetiedote",
+   "s": "Ja sitten liikennetiedote. Keskustassa monet kadut ovat yksisuuntaisia, joten seuraa merkkejä ja navigaattorin nuolta. Suojateillä jalankulkija on etusijalla. Kopterilentäjiä pyydetään laskeutumaan vain merkityille paikoille, ja autoilijoita muistutetaan, että reunakivi ei väistä. Hyvää matkaa!"
+  },
+  {
+   "k": "t",
+   "id": "loppu",
+   "t": "Puhekanava – kiitos",
+   "s": "Kiitos, että kuuntelit Radio Porikopterin puhekanavaa. Jos haluat musiikkia, vaihda kanavaa ärrä-näppäimellä. Me jatketaan täällä Porin tarinoilla hetken päästä uudelleen."
+  }
+ ]
+}

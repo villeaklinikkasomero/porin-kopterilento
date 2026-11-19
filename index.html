@@ -150,7 +150,7 @@
       <div><kbd>S</kbd> / <kbd>↓</kbd></div><div>jarru ja peruutus</div>
       <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>ohjaus</div>
       <div><kbd>Väli</kbd></div><div>käsijarru</div>
-      <div><kbd>R</kbd></div><div>autoradio: Pop, Electric, Rock, pois</div>
+      <div><kbd>R</kbd></div><div>autoradio: Pop, Electric, Rock, Puhe, pois</div>
       <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
     </div>
     <div id="daily">
@@ -1849,7 +1849,7 @@ function readInput() {
 
 // ---------- car radio: Radio Porikopteri, three channels of our own songs (tools/radio/compose.py, FluidSynth + FluidR3_GM) ----------
 // The channels run 'live': the place in a channel's playlist comes from the clock, so switching away and back finds it further on.
-const RADIO = { ch: 0, names: ['pois', 'Pop', 'Electric', 'Rock'], list: null, el: null, idx: -1, vol: 0.6 }; window.__radio = RADIO;
+const RADIO = { ch: 0, names: ['pois', 'Pop', 'Electric', 'Rock', 'Puhe'], list: null, el: null, idx: -1, vol: 0.6 }; window.__radio = RADIO;
 fetch('./radio/radio.json').then(r => r.json()).then(j => { RADIO.list = j; }).catch(() => {});
 RADIO.pos = ch => {   // [track index, seconds into it] for channel ch now
   const L = RADIO.list[RADIO.names[ch].toLowerCase()]; const tot = L.reduce((a, t) => a + t.d, 0);
@@ -1862,7 +1862,7 @@ RADIO.play = (ch, startAt) => {
 RADIO.load = (L, i, x) => { const el = RADIO.el, t = L[i]; el.src = './radio/' + t.f; el.volume = soundOn ? RADIO.vol : 0;
   const go = () => { try { el.currentTime = x; } catch (e) {} el.play().catch(() => {}); el.removeEventListener('loadedmetadata', go); };
   el.addEventListener('loadedmetadata', go); RADIO.cur = t; RADIO.show(); };
-RADIO.next = () => { RADIO.ch = (RADIO.ch + 1) % 4; RADIO.play(RADIO.ch); toast('📻 Radio Porikopteri – ' + RADIO.names[RADIO.ch], 1.4); };
+RADIO.next = () => { do { RADIO.ch = (RADIO.ch + 1) % RADIO.names.length; } while (RADIO.ch && RADIO.list && !RADIO.list[RADIO.names[RADIO.ch].toLowerCase()]); RADIO.play(RADIO.ch); toast('📻 Radio Porikopteri – ' + RADIO.names[RADIO.ch], 1.4); };
 RADIO.show = () => { $('rch').textContent = '📻 ' + (RADIO.ch ? 'Radio ' + RADIO.names[RADIO.ch] : 'Radio pois'); $('rsong').textContent = RADIO.ch && RADIO.cur ? RADIO.cur.t : ''; };
 RADIO.mute = () => { if (RADIO.el) RADIO.el.volume = soundOn ? RADIO.vol : 0; };
 $('tradio').addEventListener('pointerdown', e => { e.preventDefault(); if (VEH === 'car' && started) RADIO.next(); });

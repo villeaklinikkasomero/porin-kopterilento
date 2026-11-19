@@ -3,3 +3,5 @@ mml_orto/
 # tekstuuripaketit (zipit) ja Clauden tulostekansio eivät kuulu repoon
 tex/*.zip
 Claude outputs/
+# puheäänimalli (63 Mt) vain tools/radio/speak.py:lle, ei peliin eikä GitHubiin
+radio/voice/

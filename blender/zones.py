@@ -90,19 +90,33 @@ SPEC[1361]['walls'] = {2: dict(bw=12.9, rows=[(23, 'plain', 'P')], cols=lambda c
 _a9T = M('#ece4cc')
 # owner 18.11.2026 "ihan erinäköinen" (SV, counted from the photo): five bays between paired cream pilasters on an ochre wall, tall first-floor windows under
 # pediments with panels below, round-arched ground floor under green awnings, a heavy cornice on brackets
+# 19.11.2026 (SV Antinkatu 10 panos, rectified): the house is 15.6 m long, not the 18.1 m of the footprint - its south 3.2 m are the open
+# gateway to the yard (Torget canopy) between it and the glazed bay of 1492. Footprint cut back; owner: the leftmost ground-floor bay is the door.
+_a9S = (-3.18, 147.02)
+_r = {(-39, 1439): (-32, 1470), (-93, 1451): (-86, 1482)}; _p = B[1493]['p']   # the two south corners move 3.2 m north (dm)
+B[1493]['p'] = [v for k in range(0, len(_p), 2) for v in _r.get((_p[k], _p[k + 1]), (_p[k], _p[k + 1]))]
+_p = B[1492]['p']; _k = [(_p[k], _p[k + 1]) for k in range(0, len(_p), 2)]          # 1492's wall behind it gets a vertex there: its first 3.2 m now face the gateway
+if (-86, 1482) not in _k: _j = _k.index((-93, 1451)); B[1492]['p'] = _p[:2 * _j + 2] + [-86, 1482] + _p[2 * _j + 2:]
 def _a9_awnings(Z, pts, h, P):
-    p0, p1 = (-3.9, 143.9), (0.2, 161.5); L = math.hypot(p1[0] - p0[0], p1[1] - p0[1]); t = ((p1[0] - p0[0]) / L, (p1[1] - p0[1]) / L); n = (t[1], -t[0])
+    p0, p1 = _a9S, (0.2, 161.5); L = math.hypot(p1[0] - p0[0], p1[1] - p0[1]); t = ((p1[0] - p0[0]) / L, (p1[1] - p0[1]) / L); n = (t[1], -t[0])
     W = lambda s_, z, d: (p0[0] + t[0] * s_ + n[0] * d - Z.cx, p0[1] + t[1] * s_ + n[1] * d - Z.cy, z)
     g = M('#2e6a46', 0.7)
     for k in range(5):
         c = (k + 0.5) * L / 5; a, b = c - 1.3, c + 1.3
         add_solid(Z, [W(a, 3.0, 0.02), W(b, 3.0, 0.02), W(b, 2.45, 0.9), W(a, 2.45, 0.9)][::-1], g, 0.4)   # inside the arch: the arch head shows above
         add_solid(Z, [W(a, 2.45, 0.9), W(b, 2.45, 0.9), W(b, 2.2, 0.9), W(a, 2.2, 0.9)][::-1], g, 0.3)
+    k = M('#17181a', 0.7); a, b = -2.9, -0.4                                # the black canopy over the gateway (Torget), south of the house
+    add_solid(Z, [W(a, 4.5, 0.0), W(b, 4.5, 0.0), W(b, 3.7, 2.0), W(a, 3.7, 2.0)][::-1], k, 0.4)
+    add_solid(Z, [W(a, 3.7, 2.0), W(b, 3.7, 2.0), W(b, 3.25, 2.0), W(a, 3.25, 2.0)][::-1], k, 0.3)
+    add_solid(Z, [W(a, 4.5, 0.0), W(a, 3.7, 2.0), W(a, 3.25, 2.0), W(a, 3.25, 0.0)], k, 0.3)
+    add_solid(Z, [W(b, 4.5, 0.0), W(b, 3.7, 2.0), W(b, 3.25, 2.0), W(b, 3.25, 0.0)][::-1], k, 0.3)
 SPEC[1493] = dict(P=dict(wall=M('#d6b25a'), trim=_a9T, frame=M('#f4f2ea')),
-                  layout=dict(bw=3.6, rows=[(4.6, 'classic', 'G'), (5.4, 'classic', 'F')], cols=lambda c, nb: 'W', P={},
+                  layout=dict(bw=2.95, rows=[(4.6, 'classic', 'G'), (5.4, 'classic', 'F')], cols=lambda c, nb: 'W', P={},
                               rowP={'G': dict(ground=True, arch=True, plinth_h=0.45, plinth=M('#7d776e', 0.8), ww=2.3, wh=3.5, sill=0.35, wh_fixed=True, pil=True),
                                     'F': dict(hood='pediment', apron=True, pil=True, ww=1.25, wh=2.5, sill=1.0, dentils=True)}, plain=False),
                   cornice=(0.6, 0.9, _a9T), extra=[_a9_awnings], roof=dict(kind='flat', mat=SHEET))
+SPEC[1493]['walls'] = {0: dict(SPEC[1493]['layout'], cols=lambda c, nb: 'D' if c == 0 else 'W'),      # street front: the door is in the leftmost bay (owner 19.11.2026)
+                       3: dict(bw=5.5, rows=[(10, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True)}   # south gable over the gateway: bare
 # 116  Antinlinna, Antinkatu 26 (1929; owner 18.11.2026 "nyt on menossa pahasti väärään", SV from Antinkatu 31, measured with px2wall):
 # pale cream render, window pairs between brown pilaster strips, brown surrounds and balconette panels, raised ground floor on a plinth;
 # the south end wall (edge 0) is a bare white fire wall with three top-floor windows only (s 2.95 / 6.25 / 9.1 m from the street corner)
