@@ -9,6 +9,10 @@ Testattu Blender 4.2 ja 5.0.
 Skripti rakentaa auton, valot ja kameran, tallentaa .blend-tiedoston
 ja vie auton GLB-muotoon (glTF 2.0) selainpelia varten.
 
+Vauriot: kori on jaettu osiin, ja vaurioituvista osista on porrasversiot samassa GLB:ssa
+(solmut <Osa>_d0 ... _d3, ks. osio VAURIOT). Molemmat mallit: aja kahdesti, --detail high ja --detail low.
+Kuvat portaista: --shots front:0,front:1,front:2,front:3,rear:3
+
 Mitat metreina. GLB:ssa auton keula osoittaa +Z-suuntaan (three.js), Y on ylos,
 origo on maan tasossa auton keskella. Renkaat ovat omia solmujaan
 (Wheel_FL, Wheel_FR, Wheel_RL, Wheel_RR) ja pyorivat paikallisen X-akselin ympari.
@@ -57,6 +61,7 @@ def parse_args():
     p.add_argument("--res", type=int, default=1600)
     p.add_argument("--no-blend", action="store_true")
     p.add_argument("--no-glb", action="store_true")
+    p.add_argument("--shots", default="", help="kamera:vaurioporras, esim. front:0,front:3,rear:3")
     return p.parse_args(argv)
 
 # Auton koordinaatisto rakennusvaiheessa: x eteen, y vasemmalle, z ylos.
@@ -822,6 +827,397 @@ def build_sticker(M, col, surf):
     return [ob]
 
 # ----------------------------------------------------------------------------
+# VAURIOT: kori jaetaan osiin ja vaurioituvista osista tehdaan porrasversiot (_d0.._d3)
+# ----------------------------------------------------------------------------
+# Solmut nimetaan <Osa>_d<N>. Peli nayttaa kustakin osasta korkeimman portaan, joka on enintaan auton
+# nykyinen vaurioporras. Kaikilla portailla on sama origo ja asento, joten vaihto tehdaan pelkalla nakyvyydella.
+# Nakyvat vauriot ovat auton vasemmassa etukulmassa ja oikeassa takakulmassa.
+HOOD_OUTLINE = [(2.085, 0.0), (2.07, 0.30), (2.01, 0.56), (1.90, 0.70), (1.50, 0.755), (1.12, 0.775), (0.99, 0.775)]
+DAMAGE_PARTS_LOW = ("Hood", "BumperF", "Windshield", "HeadlightL", "HeadlightR")
+
+def corner_normals(me):
+    try:
+        return [tuple(n.vector) for n in me.corner_normals]            # Blender 4.1+
+    except AttributeError:
+        me.calc_normals_split()
+        return [tuple(l.normal) for l in me.loops]
+
+class Src:
+    """Lahdeverkko: pisteet, pinnat, kulmanormaalit ja materiaalit talteen ennen jakamista."""
+    def __init__(self, ob):
+        me = ob.data
+        self.V = [v.co.copy() for v in me.vertices]
+        cn = corner_normals(me)
+        self.P = [(tuple(p.vertices), [cn[i] for i in range(p.loop_start, p.loop_start + p.loop_total)],
+                   me.materials[p.material_index], Vector(p.center), Vector(p.normal)) for p in me.polygons]
+    def islands(self):
+        """Erilliset kappaleet: [(pintojen indeksit, keskipiste, materiaalien nimet)]"""
+        parent = list(range(len(self.V)))
+        def find(a):
+            while parent[a] != a:
+                parent[a] = parent[parent[a]]
+                a = parent[a]
+            return a
+        for idx, *_ in self.P:
+            r = find(idx[0])
+            for i in idx[1:]:
+                parent[find(i)] = r
+        groups = {}
+        for f, (idx, *_r) in enumerate(self.P):
+            groups.setdefault(find(idx[0]), []).append(f)
+        out = []
+        for fids in groups.values():
+            c = sum((self.P[f][3] for f in fids), Vector()) / len(fids)
+            out.append((fids, c, {self.P[f][2].name for f in fids}))
+        return out
+
+def piece(src, fids):
+    remap, F = {}, []
+    for f in fids:
+        idx, nrm, mat = src.P[f][:3]
+        F.append((tuple(remap.setdefault(i, len(remap)) for i in idx), nrm, mat))
+    V = [None] * len(remap)
+    for i, k in remap.items():
+        V[k] = src.V[i].copy()
+    return {"V": V, "F": F}
+
+def bm_piece(bm, mat):
+    bm.verts.index_update()
+    pc = {"V": [v.co.copy() for v in bm.verts], "F": [(tuple(v.index for v in f.verts), None, mat) for f in bm.faces]}
+    bm.free()
+    return pc
+
+def deform(pc, fn, keep_normals=False):
+    return {"V": [fn(v.copy()) for v in pc["V"]], "F": [(i, n if keep_normals else None, m) for i, n, m in pc["F"]]}
+
+def remat(pc, mp):
+    return {"V": pc["V"], "F": [(i, n, mp.get(m.name, m)) for i, n, m in pc["F"]]}
+
+def make_mesh(name, pieces, angle=40):
+    V, F, N, MI, mats = [], [], [], [], []
+    for pc in pieces:
+        off = len(V)
+        V += pc["V"]
+        for idx, nrm, mat in pc["F"]:
+            F.append(tuple(i + off for i in idx))
+            N.append(nrm)
+            if mat not in mats:
+                mats.append(mat)
+            MI.append(mats.index(mat))
+    me = bpy.data.meshes.new(name)
+    me.from_pydata([tuple(v) for v in V], [], F)
+    for m in mats:
+        me.materials.append(m)
+    me.polygons.foreach_set("material_index", MI)
+    me.polygons.foreach_set("use_smooth", [True] * len(F))
+    me.update()
+    try:
+        me.set_sharp_from_angle(angle=radians(angle))
+    except AttributeError:
+        pass
+    if any(n is not None for n in N):                       # ehjan auton varjostus sailyy tasmalleen samana
+        auto = corner_normals(me)
+        out, k = [], 0
+        for f, n in zip(F, N):
+            for c in range(len(f)):
+                out.append(n[c] if n is not None else auto[k])
+                k += 1
+        try:
+            me.normals_split_custom_set(out)
+        except Exception as e:
+            print("Normaalien asetus ei onnistunut:", name, e)
+    return me
+
+def sm(t):
+    t = max(0.0, min(1.0, t))
+    return t * t * (3 - 2 * t)
+
+def hood_half_width(x):
+    pts = sorted(HOOD_OUTLINE)
+    if x <= pts[0][0]:
+        return pts[0][1]
+    for (x0, y0), (x1, y1) in zip(pts[:-1], pts[1:]):
+        if x <= x1:
+            return y0 + (y1 - y0) * (x - x0) / (x1 - x0)
+    return -1.0
+
+def hood_front_x(y):
+    pts = sorted(HOOD_OUTLINE, key=lambda p: p[1])
+    y = abs(y)
+    for (x0, y0), (x1, y1) in zip(pts[:-1], pts[1:]):
+        if y <= y1 and y1 > y0:
+            return x0 + (x1 - x0) * (y - y0) / (y1 - y0)
+    return pts[-1][0]
+
+def build_damage(M, col, surf, body, details, seams, hi):
+    M["glasscracked"] = make_mat("GlassCracked", (0.62, 0.66, 0.68), rough=0.35, alpha=0.9 if hi else 1.0)
+    M["lampbroken"] = make_mat("LampBroken", (0.03, 0.03, 0.035), rough=0.6)
+    M["baremetal"] = make_mat("BareMetal", (0.42, 0.43, 0.45), metallic=0.7, rough=0.45)
+    B, D = Src(body), Src(details)
+    S = Src(seams) if seams is not None else None
+    want = (lambda n: True) if hi else (lambda n: n in DAMAGE_PARTS_LOW)
+
+    # ---- korin pintojen luokittelu osiin
+    groups = {}
+    for f, (idx, nrm, mat, c, n) in enumerate(B.P):
+        mn, side = mat.name, ("L" if c.y > 0 else "R")
+        part = "Body"
+        if mn == "Glass" and c.x > 0.15 and abs(n.y) < 0.6 and c.z > 0.9:
+            part = "Windshield"
+        elif mn in ("Headlight", "Glass", "BlackTrim") and c.x > 1.55 and abs(c.y) > 0.503 and 0.57 < c.z < 0.95:
+            part = "Headlight" + side
+        elif mn in ("Taillight", "BlackTrim") and c.x < -1.75 and abs(c.y) > 0.40 and c.z < 0.97:
+            part = "Taillight" + side
+        elif mn == "CarPaint" and c.x > 0.9 and n.z > 0.3 and abs(c.y) < hood_half_width(c.x):
+            part = "Hood"
+        elif c.x > 1.80:
+            part = "BumperF"
+        elif c.x < -1.74 and c.z < 0.585:
+            part = "BumperR"
+        elif mn == "CarPaint" and 0.80 < c.x <= 1.80 and abs(c.y) > 0.35:
+            part = "FenderF" + side
+        elif mn == "CarPaint" and -1.12 < c.x <= 0.80 and abs(c.y) > 0.55 and 0.24 < c.z < 0.905 and abs(n.y) > 0.35:
+            part = "Side" + side
+        if not want(part):
+            part = "Body"
+        groups.setdefault(part, []).append(f)
+    P = {k: [piece(B, v)] for k, v in groups.items()}
+
+    # ---- pienosat (Details) ja saumat (Seams) mukaan niihin osiin, joiden mukana niiden pitaa liikkua
+    plate = []
+    rest_d = []
+    for fids, c, names in D.islands():
+        side = "L" if c.y > 0 else "R"
+        tgt = None
+        if c.x > 1.85:
+            tgt = "BumperF"
+        elif abs(c.y) > 0.84 and 0.70 < c.x < 0.90 and c.z > 0.92:
+            tgt = "Mirror" + side
+        elif abs(c.y) > 0.80 and 0.85 < c.x < 1.80 and c.z < 0.80:
+            tgt = "FenderF" + side
+        elif abs(c.y) > 0.85 and -1.15 < c.x < 0.0 and 0.80 < c.z < 0.93:
+            tgt = "Side" + side
+        elif c.x < -1.90 and c.z < 0.50:
+            tgt = "BumperR"
+        if tgt is None or not want(tgt):
+            rest_d += fids
+            continue
+        pc = piece(D, fids)
+        if tgt == "BumperF" and abs(c.y) < 0.30 and 0.47 < c.z < 0.61:
+            plate.append(pc)                               # rekisterikilpi pidikkeineen (irtoaa portaalla 3)
+        elif tgt.startswith("Mirror"):
+            P.setdefault(tgt, []).append(pc)
+            if names == {"BlackTrim"}:
+                P.setdefault(tgt + "_stub", []).append(pc)     # pelkka kiinnitysjalka
+        else:
+            P.setdefault(tgt, []).append(pc)
+    rest_s = []
+    if S is not None:
+        for fids, c, names in S.islands():
+            side = "L" if c.y > 0 else "R"
+            tgt = None
+            if c.x > 0.95 and c.z > 0.70 and abs(c.y) < 0.45:
+                tgt = "Hood"                                # konepellin reunasauma
+            elif abs(c.y) > 0.80 and -1.25 < c.x < 0.85 and c.z < 0.95:
+                tgt = "Side" + side                         # ovien saumat
+            if tgt is None or not want(tgt):
+                rest_s += fids
+            else:
+                P.setdefault(tgt, []).append(piece(S, fids))
+
+    # ---- piiloon jaavat taytteet: moottoritila konepellin alla ja palkki etupuskurin takana
+    bay = bmesh.new()
+    NG = 9
+    grid = []
+    for iy in range(NG):
+        y = -0.72 + 1.44 * iy / (NG - 1)
+        x0 = 1.0 + 0.11 * (1 - (y / 0.80) ** 2) + 0.03
+        x1 = min(hood_front_x(y), 2.085) - 0.04
+        row = []
+        for ix in range(NG):
+            x = x0 + (x1 - x0) * ix / (NG - 1)
+            loc, _ = surf.cast("top", x, y)
+            row.append(bay.verts.new((x, y, (loc.z if loc is not None and loc.z < 1.0 else 0.9) - 0.04)))
+        grid.append(row)
+    for iy in range(NG - 1):
+        for ix in range(NG - 1):
+            bay.faces.new((grid[iy][ix], grid[iy][ix + 1], grid[iy + 1][ix + 1], grid[iy + 1][ix]))
+    add_box(bay, (0.08, 1.56, 0.44), (1.86, 0, 0.50))
+    P["Body"].append(bm_piece(bay, M["under"]))
+
+    out = []
+    def node(name, pieces, angle=40):
+        if not any(pc["F"] for pc in pieces):
+            print("VAROITUS: osa jai tyhjaksi:", name)
+            return
+        ob = bpy.data.objects.new(name, make_mesh(name, pieces, angle))
+        col.objects.link(ob)
+        out.append(ob)
+    def strips(specs, mode, mat, only, sgn=1):
+        bm = bmesh.new()
+        for pts, w in specs:
+            project_strip(bm, surf, pts, mode, sgn, width=w, lift=0.0025, mat=0, step=0.03, only=only)
+        return bm_piece(bm, mat)
+
+    # ---- vauriomuodot (auton koordinaatit: x eteen, y vasemmalle, z ylos)
+    def hood_fn(level):
+        dent, push, wr, ang, tw, shift = {1: (0.040, 0.0, 0.0, 0.0, 0.0, 0.0), 2: (0.065, 0.07, 0.022, 2.6, 1.2, 0.01),
+                                          3: (0.075, 0.14, 0.040, 9.0, 3.0, 0.035)}[level]
+        def fn(v):
+            x, y, z = v
+            t = math.hypot(x - 1.70, y - 0.34) / 0.32
+            if t < 1:
+                z -= dent * (1 - t * t) ** 2                                  # lommo
+            wf = sm((x - 1.22) / 0.80)
+            z += wr * wf * (sin(27 * (x - 1.2) + 2.6 * y) + 0.5 * sin(49 * x - 7 * y)) # rypyt
+            x -= push * wf * wf
+            y += shift * wf
+            a = radians(ang + tw * y / 0.75)                                  # sarana takareunassa
+            dx, dz = x - 1.02, z - 0.955
+            return Vector((1.02 + dx * cos(a) - dz * sin(a), y, 0.955 + dx * sin(a) + dz * cos(a)))
+        return fn
+    def bumper_f1(v):
+        x, y, z = v
+        w = sm((y - 0.27) / 0.5)
+        z -= 0.035 * w
+        x -= 0.025 * w
+        t = (Vector((x, y, z)) - Vector((2.03, 0.60, 0.46))).length / 0.30
+        if t < 1:
+            k = (1 - t * t) ** 2
+            x -= 0.075 * k
+            y -= 0.02 * k
+        return Vector((x, y, z))
+    def bumper_f3(v):                                       # kiinni oikeasta paasta, vasen paa roikkuu
+        v = bumper_f1(v)
+        py, a, b = -0.80, radians(6.4), radians(7.0)
+        dy = v.y - py
+        return Vector((v.x + dy * sin(b) * 0.9, py + dy * cos(a), v.z - dy * sin(a) + 0.012 * sin(9 * v.y)))
+    def bumper_r2(v):
+        x, y, z = v
+        w = sm((-y - 0.2) / 0.6)
+        t = (Vector((x, y, z)) - Vector((-2.0, -0.62, 0.45))).length / 0.28
+        k = (1 - t * t) ** 2 if t < 1 else 0.0
+        return Vector((x - 0.03 * w + 0.05 * k, y + 0.015 * k, z - 0.065 * w))
+    def fender_l2(v):
+        x, y, z = v
+        t = math.hypot(x - 1.50, z - 0.62) / 0.42
+        k = (1 - t * t) ** 2 if t < 1 and y > 0.5 else 0.0
+        return Vector((x - 0.03 * sm((x - 1.5) / 0.3), y - 0.075 * k - 0.008 * k * sin(34 * z), z))
+    def side_fn(dents):
+        def fn(v):
+            x, y, z = v
+            sg = 1 if y > 0 else -1
+            for cx, cz, r, d in dents:
+                t = math.hypot(x - cx, z - cz) / r
+                if t < 1:
+                    k = (1 - t * t) ** 2
+                    y -= sg * (d * k + 0.006 * k * sin(31 * x + 9 * z))
+            return Vector((x, y, z))
+        return fn
+    lamp_in = lambda v: Vector((v.x - 0.012, v.y, v.z))
+    broken = {"Headlight": M["lampbroken"], "Taillight": M["lampbroken"], "Glass": M["lampbroken"]}
+    def lamp_cracks(sg):                                    # sarot rikkoutuneen ajovalon linssissa
+        return deform(strips([([(0.56, 0.665), (0.66, 0.700), (0.74, 0.672)], 0.005), ([(0.62, 0.712), (0.66, 0.700), (0.69, 0.640)], 0.004),
+                              ([(0.72, 0.690), (0.80, 0.705)], 0.004)], "front", M["glasscracked"], (M_HEAD, M_GLASS, M_TRIM), sg), lamp_in)
+
+    def cracks(impacts, long_cracks, seed):
+        rng = __import__("random").Random(seed)
+        specs = []
+        for cx, cy, n, lmax in impacts:
+            for k in range(n):
+                a = 2 * pi * (k + rng.uniform(-0.3, 0.3)) / n
+                L = rng.uniform(0.35, 1.0) * lmax
+                pts, nseg = [(cx, cy)], rng.randint(3, 5)
+                for j in range(1, nseg + 1):
+                    r = L * j / nseg
+                    a2 = a + rng.uniform(-0.22, 0.22)
+                    pts.append((cx + r * cos(a2) * 0.8, cy + r * sin(a2)))
+                specs.append((pts, rng.uniform(0.0035, 0.006)))
+            for rr in (0.045, 0.10):
+                a0 = rng.uniform(0, 6.28)
+                ring = [(cx + rr * rng.uniform(0.85, 1.15) * cos(a0 + 0.6 * j) * 0.8, cy + rr * rng.uniform(0.85, 1.15) * sin(a0 + 0.6 * j))
+                        for j in range(rng.randint(5, 9))]
+                specs.append((ring, 0.004))
+        for pts in long_cracks:
+            specs.append((pts, 0.0045))
+        return strips(specs, "top", M["glasscracked"], (M_GLASS,))
+    def shatter(cx, cy, r, seed):                           # samea murskakohta iskukohdassa
+        rng = __import__("random").Random(seed)
+        bm = bmesh.new()
+        ring = []
+        for j in range(12):
+            a = 2 * pi * j / 12
+            rr = r * rng.uniform(0.7, 1.15)
+            loc, nor = surf.cast("top", cx + rr * cos(a) * 0.8, cy + rr * sin(a))
+            if loc is not None and surf.last_mat == M_GLASS:
+                ring.append(bm.verts.new(loc + nor * 0.002))
+        loc, nor = surf.cast("top", cx, cy)
+        if loc is not None and len(ring) >= 3:
+            c = bm.verts.new(loc + nor * 0.002)
+            for a, b in zip(ring, ring[1:] + ring[:1]):
+                bm.faces.new((c, a, b))
+        return bm_piece(bm, M["glasscracked"])
+
+    # ---- solmut portaittain
+    node("Hood_d0", P["Hood"])
+    for lv in (1, 2, 3):
+        node("Hood_d%d" % lv, [deform(pc, hood_fn(lv)) for pc in P["Hood"]])
+    scratch = []
+    for sg in (1, -1):
+        scratch.append(strips([([(0.50 + 0.04 * k, 0.40 + 0.03 * k), (0.78, 0.47 + 0.035 * k)], 0.008 + 0.003 * (k % 2)) for k in range(4)]
+                              + [([(0.62, 0.30), (0.80, 0.36)], 0.012)], "front", M["baremetal"], (M_PAINT,), sg))
+    node("BumperF_d0", P["BumperF"] + plate)
+    node("BumperF_d1", [deform(pc, bumper_f1) for pc in P["BumperF"] + scratch] + plate)
+    node("BumperF_d3", [deform(pc, bumper_f3) for pc in P["BumperF"] + scratch])
+    node("Windshield_d0", P["Windshield"])
+    node("Windshield_d2", P["Windshield"] + [cracks([(0.74, 0.30, 11, 0.30)], [], 3)])
+    node("Windshield_d3", P["Windshield"] + [cracks([(0.74, 0.30, 15, 0.42), (0.58, -0.28, 12, 0.34)],
+                                                    [[(0.95, -0.55), (0.80, -0.20), (0.72, 0.05), (0.60, 0.50)],
+                                                     [(0.38, -0.50), (0.45, -0.10), (0.40, 0.30)]], 7),
+                                             shatter(0.74, 0.30, 0.10, 1), shatter(0.58, -0.28, 0.075, 2)])
+    for sd in "LR":
+        node("Headlight%s_d0" % sd, P["Headlight" + sd])
+    node("HeadlightL_d1", [remat(deform(pc, lamp_in, True), broken) for pc in P["HeadlightL"]] + [lamp_cracks(1)])
+    node("HeadlightR_d3", [remat(deform(pc, lamp_in, True), broken) for pc in P["HeadlightR"]] + [lamp_cracks(-1)])
+    if hi:
+        node("BumperR_d0", P["BumperR"])
+        node("BumperR_d2", [deform(pc, bumper_r2) for pc in P["BumperR"]])
+        for sd in "LR":
+            node("FenderF%s_d0" % sd, P["FenderF" + sd])
+            node("Taillight%s_d0" % sd, P["Taillight" + sd])
+            node("Mirror%s_d0" % sd, P["Mirror" + sd], 50)
+            node("Side%s_d0" % sd, P["Side" + sd])
+        node("FenderFL_d2", [deform(pc, fender_l2) for pc in P["FenderFL"]])
+        node("MirrorL_d2", P.get("MirrorL_stub", []), 50)                     # peili irronnut, jalka jaljella
+        node("TaillightR_d3", [remat(pc, broken) for pc in P["TaillightR"]])
+        node("SideL_d3", [deform(pc, side_fn([(0.27, 0.56, 0.40, 0.065), (-0.70, 0.50, 0.33, 0.05)])) for pc in P["SideL"]])
+        node("SideR_d3", [deform(pc, side_fn([(-0.05, 0.60, 0.46, 0.075), (-0.82, 0.48, 0.28, 0.04)])) for pc in P["SideR"]])
+
+    # ---- alkuperaisiin solmuihin jaa vain se, mika ei vaurioidu
+    for ob, pieces, angle in ((body, P["Body"], 40), (details, [piece(D, rest_d)], 50),
+                              (seams, [piece(S, rest_s)] if S is not None else None, 40)):
+        if ob is None:
+            continue
+        old = ob.data
+        ob.data = make_mesh(ob.name, pieces, angle)
+        bpy.data.meshes.remove(old)
+    return out
+
+def set_stage(n):
+    """Nayttaa renderoinnissa portaan n osat samalla saannolla kuin peli."""
+    best = {}
+    for o in bpy.data.objects:
+        if "_d" in o.name and o.name[-1].isdigit() and o.name[-3:-1] == "_d":
+            base, lv = o.name[:-3], int(o.name[-1])
+            if lv <= n and lv >= best.get(base, -1):
+                best[base] = lv
+    for o in bpy.data.objects:
+        if o.name[-3:-1] == "_d" and o.name[-1].isdigit():
+            o.hide_render = int(o.name[-1]) != best.get(o.name[:-3])
+        elif o.name == "PlateText_front":
+            o.hide_render = n >= 3                         # kilpi irtoaa etupuskurin mukana
+
+# ----------------------------------------------------------------------------
 # STUDIO (ei viedä peliin)
 # ----------------------------------------------------------------------------
 CAMS = {   # Blenderin koordinaatit (keula -Y)
@@ -936,6 +1332,7 @@ def main():
         parts += build_sticker(M, car_col, surf)
         parts.append(build_seams(M, car_col, surf))
         parts += build_plate_text(M, car_col, surf)
+    parts += build_damage(M, car_col, surf, body, parts[1], next((o for o in parts if o.name == "Seams"), None), hi)
     wheels = []
     for nm, ax, left in (("Wheel_FL", AXLE_F, True), ("Wheel_FR", AXLE_F, False),
                          ("Wheel_RL", AXLE_R, True), ("Wheel_RR", AXLE_R, False)):
@@ -962,6 +1359,7 @@ def main():
 
     build_studio(studio_col, args.cam, args.samples, args.res)
 
+    set_stage(0)                                           # .blend avautuu ehjana; GLB:ssa ovat kaikki portaat
     if EXPORT_GLB and not args.no_glb:
         try:
             bpy.ops.preferences.addon_enable(module="io_scene_gltf2")
@@ -977,7 +1375,19 @@ def main():
         path = os.path.join(out_dir, name + ".blend")
         bpy.ops.wm.save_as_mainfile(filepath=path)
         print("BLEND:", path)
+    for shot in [x for x in args.shots.split(",") if x]:
+        cam_name, stage = shot.split(":")
+        set_stage(int(stage))
+        loc, tgt, lens = CAMS[cam_name]
+        scn.camera.location = loc
+        scn.camera.rotation_euler = (Vector(tgt) - Vector(loc)).to_track_quat('-Z', 'Y').to_euler()
+        scn.camera.data.lens = lens
+        path = os.path.join(out_dir, "%s_vaurio%s_%s.png" % (name, stage, cam_name))
+        scn.render.filepath = path
+        bpy.ops.render.render(write_still=True)
+        print("RENDER:", path)
     if args.render:
+        set_stage(0)
         path = os.path.join(out_dir, "%s_%s.png" % (name, args.cam))
         scn.render.filepath = path
         bpy.ops.render.render(write_still=True)

@@ -1554,3 +1554,21 @@ index.html, haku `HALL`: `inHall` / `hallZ` / muutokset `carBlocked`, `carGround
 - Tarkistettu renderöimällä kaikki kuusi edestä ja sivusta; tukijalan liukuma < 1 mm. Pelissä ei testattu.
 - VAROITUS (tiedostosilta): `device_commit_files` kirjoitti kerran saman stagedPath-polun VANHAN sisällön (index.html palasi hetkeksi versioon ilman
   20.11 klo 00 -automuutoksia; korjattu heti, nyt mukana). Käytä jokaisella tallennuksella uutta polkua ja tarkista koko jälkikäteen.
+
+---
+
+## 20.11.2026 klo 01 – Auton vaurioportaat näkyviin (c26)
+
+**Tehty (viety koneelle, EI pushattu):**
+- `auto.js` ja `auto_m.js` vaihdettu mallichatin uusiin GLB:ihin, joissa osat ovat portaittain: `Osa_d0 … Osa_d3`
+  (Hood, BumperF/R, FenderFL/FR, HeadlightL/R, TaillightL/R, MirrorL/R, SideL/R, Windshield – 14 osaa).
+  Lähde: `tools/vehicles/porikopteri_auto.py`, raportti `tools/vehicles/porikopteri_auto_vauriot.md`.
+- `index.html`, `loadCar`: `CAR.setDmg(st)` kerää osat nimestä `/^(.+)_d([0-3])$/` ja näyttää kustakin osasta
+  **korkeimman portaan, joka on ≤ nykyinen** (kaikilla osilla ei ole joka porrasta). `PlateText_front` piiloon portaalla 3.
+- Auton askeleessa porras kunnosta: hp < 60 → 1, < 45 → 2, < 30 → 3 (samat rajat kuin nopeusrajoitus ja savu).
+- Törmäyslaatikkoa ei muutettu, vaikka portaan 3 puskuri on 8 cm pidempi.
+
+**Tarkistettu:** headless-kuva pelin sisältä portaista 0–3 (`Claude outputs`-tyyppinen koekuva `auton_vauriot_19_11.jpg`), ei konsolivirheitä.
+**EI testattu:** ajaminen ja törmäys selaimessa (headless ei pysty `begin()`iin) – omistaja kokeilee. Korjautuuko malli, kun kunto palautuu
+(uusi auto / respawn): `setDmg` kutsutaan aina kun porras muuttuu, myös alaspäin, joten pitäisi.
+**Huomio:** osia on enemmän → hieman enemmän piirtokutsuja; jos kännykällä nykii, kevytmallista (`auto_m.js`) voi pudottaa portaat 1–2.

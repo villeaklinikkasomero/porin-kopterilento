@@ -1589,6 +1589,10 @@ const loadCar = () => { if (carLoading) return; carLoading = true; loadModel(isT
   root0.traverse(q => { if (q.isMesh) { const m = q.material; if (m && m.isMeshStandardMaterial) { m.envMap = envTex; m.envMapIntensity = 1.0; m.needsUpdate = true; } q.frustumCulled = false; } });
   wheels = ['Wheel_FL', 'Wheel_FR', 'Wheel_RL', 'Wheel_RR'].map(n => root0.getObjectByName(n)).filter(Boolean);
   for (const w of wheels) { w.rotation.order = 'YXZ'; w.userData.front = /F[LR]$/.test(w.name); }
+  // damage steps (20.11.2026, model: tools/vehicles/porikopteri_auto.py): parts named Part_d0..d3 share origin and pose; of each part the highest step that is
+  // not above the car's step is shown, the others hidden. Step 3 also hides the front plate text (the plate goes with the hanging bumper).
+  { const parts = {}; root0.traverse(q => { const m = /^(.+)_d([0-3])$/.exec(q.name || ''); if (m) (parts[m[1]] || (parts[m[1]] = []))[+m[2]] = q; }); const plate = root0.getObjectByName('PlateText_front');
+    CAR.setDmg = st => { CAR.dmg = st; for (const k in parts) { let best = -1; for (let i = 0; i <= st; i++) if (parts[k][i]) best = i; parts[k].forEach((q, i) => { if (q) q.visible = i === best; }); } if (plate) plate.visible = st < 3; }; CAR.setDmg(0); }
   carG.clear(); carG.add(root);
 }); };   // loaded only when the car is chosen
 // ---- drive-through parking hall, TEST (owner 19.11.2026): 164 Itsenäisyydenkatu 45 - in from Itsenäisyydenkatu, out to Mikonkatu.
@@ -1660,7 +1664,8 @@ function stepCar(dt, live) {
   // steering: less lock at speed
   const lock = 0.58 / (1 + Math.abs(CAR.v) / 11);
   CAR.steer += (t * lock - CAR.steer) * Math.min(1, dt * 6);
-  { const lim = S.hp < 30 ? 14 : S.hp < 60 ? 22 : 1e9; if (CAR.v > lim) CAR.v += (lim - CAR.v) * Math.min(1, dt * 2);          // a damaged car is slower
+  { const ds = S.hp < 30 ? 3 : S.hp < 45 ? 2 : S.hp < 60 ? 1 : 0; if (CAR.setDmg && CAR.dmg !== ds) CAR.setDmg(ds);                 // the body shows the damage step
+    const lim = S.hp < 30 ? 14 : S.hp < 60 ? 22 : 1e9; if (CAR.v > lim) CAR.v += (lim - CAR.v) * Math.min(1, dt * 2);          // a damaged car is slower
     if (S.hp < 60 && !S.dead) { CAR.smT = (CAR.smT || 0) - dt; if (CAR.smT <= 0) { CAR.smT = S.hp < 30 ? 0.12 : 0.3; const P = CAR.smoke || (CAR.smoke = []);
         let m = P.find(q => q.life <= 0); if (!m && P.length < 14) { m = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 6), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false })); m.userData.noT = true; m.material.userData.noT = true; m.life = 0; scene.add(m); P.push(m); }
         if (m) { m.life = 1; m.material.color.setHex(S.hp < 30 ? 0x1b1b1b : 0x9a9a9a); m.position.set(CAR.x + Math.sin(CAR.yaw) * 1.5 + (Math.random() - 0.5) * 0.4, CAR.z + 0.95, -(CAR.y + Math.cos(CAR.yaw) * 1.5)); m.scale.setScalar(0.6); m.visible = true; } } }
