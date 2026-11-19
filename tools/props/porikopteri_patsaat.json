@@ -1,0 +1,439 @@
+{
+ "kuvaus": "Porikopteri: Porin tärkeimmät patsaat ja muistomerkit kartalle (ei muistolaattoja, muraaleja eikä reliefejä)",
+ "lahde": "https://fi.wikipedia.org/wiki/Luettelo_Porin_julkisista_taideteoksista_ja_muistomerkeist%C3%A4",
+ "lisenssi": "Wikipedia, CC BY-SA 4.0 (nimet, sijainnit, tekijät ja vuodet poimittu luettelosta)",
+ "poimittu": "2026-11-19",
+ "kohteet": [
+  {
+   "id": "patsas_001",
+   "nimi": "Satakunnan karhu",
+   "paikka": "Raatihuoneenpuisto, Hallituskatu 9 vastapäätä",
+   "alue": "Linna",
+   "lat": 61.489289,
+   "lon": 21.793704,
+   "tekija": "Emil Cedercreutz",
+   "vuosi": "1938",
+   "tyyppi": "patsas",
+   "taso": 1,
+   "malli": "karhu jalustalla",
+   "suunta_asteet": 90,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_karhu.glb",
+   "huom": "Mallin asentoa ja jalustaa ei ole verrattu oikeaan patsaaseen.",
+   "sijainti_lahde": "OpenStreetMap 19.11.2026"
+  },
+  {
+   "id": "patsas_002",
+   "nimi": "Vapaussodan v. 1918 valkoisten muistomerkki",
+   "paikka": "Keski-Porin kirkon puisto, Hallituskatu 1a",
+   "alue": "Linna",
+   "lat": 61.4894,
+   "lon": 21.8002,
+   "tekija": "Emil Cedercreutz",
+   "vuosi": "1920",
+   "tyyppi": "muistomerkki",
+   "taso": 1,
+   "malli": "yleismalli: muistomerkki (väliaikainen)",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_muistomerkki.glb",
+   "huom": "Oma malli odottaa viitekuvaa."
+  },
+  {
+   "id": "patsas_003",
+   "nimi": "Juhana-herttuan patsas",
+   "paikka": "Hallituskatu 9a, Raatihuoneen edusta",
+   "alue": "Linna",
+   "lat": 61.4894,
+   "lon": 21.7944,
+   "tekija": "Sofia Saari",
+   "vuosi": "2008",
+   "tyyppi": "patsas",
+   "taso": 1,
+   "malli": "yleismalli: seisova hahmo jalustalla",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_hahmo.glb",
+   "huom": ""
+  },
+  {
+   "id": "patsas_004",
+   "nimi": "Porin portti",
+   "paikka": "Eteläpuisto",
+   "alue": "Karhunpää",
+   "lat": 61.485222,
+   "lon": 21.791747,
+   "tekija": "Per Kirkeby",
+   "vuosi": "1993",
+   "tyyppi": "veistos",
+   "taso": 1,
+   "malli": "yleismalli: tiilirakennelma",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_tiiliportti.glb",
+   "huom": "",
+   "sijainti_lahde": "OpenStreetMap 19.11.2026"
+  },
+  {
+   "id": "patsas_005",
+   "nimi": "Toriparlamentti",
+   "paikka": "Kauppatori",
+   "alue": "Linna",
+   "lat": 61.4866,
+   "lon": 21.7972,
+   "tekija": "Pertti Mäkinen",
+   "vuosi": "2008",
+   "tyyppi": "patsas",
+   "taso": 1,
+   "malli": "yleismalli: kolmen hahmon ryhmä, yksi karhukävelee",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_hahmoryhma.glb",
+   "huom": ""
+  },
+  {
+   "id": "patsas_006",
+   "nimi": "Eetu Salinin muistomerkki",
+   "paikka": "Itäpuisto, Isolinnankadun risteyksen lähellä",
+   "alue": "Karhunpää",
+   "lat": 61.48504,
+   "lon": 21.799079,
+   "tekija": "Aimo Tukiainen",
+   "vuosi": "1955",
+   "tyyppi": "patsas",
+   "taso": 1,
+   "malli": "yleismalli: seisova hahmo jalustalla",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_hahmo.glb",
+   "huom": "",
+   "sijainti_lahde": "OpenStreetMap 19.11.2026"
+  },
+  {
+   "id": "patsas_007",
+   "nimi": "Akseli Gallen-Kallelan patsas",
+   "paikka": "Pohjoispuisto",
+   "alue": "Linna",
+   "lat": 61.48731,
+   "lon": 21.792656,
+   "tekija": "Heikki Nieminen",
+   "vuosi": "1965",
+   "tyyppi": "patsas",
+   "taso": 1,
+   "malli": "yleismalli: seisova hahmo jalustalla",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_hahmo.glb",
+   "huom": "",
+   "sijainti_lahde": "OpenStreetMap 19.11.2026"
+  },
+  {
+   "id": "patsas_008",
+   "nimi": "Taiteen tammi",
+   "paikka": "Keskusaukio",
+   "alue": "Riihiketo",
+   "lat": 61.481514,
+   "lon": 21.796979,
+   "tekija": "Terho Sakki",
+   "vuosi": "1968",
+   "tyyppi": "veistos",
+   "taso": 1,
+   "malli": "yleismalli: abstrakti veistos A",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_abstrakti_a.glb",
+   "huom": "",
+   "sijainti_lahde": "OpenStreetMap 19.11.2026"
+  },
+  {
+   "id": "patsas_009",
+   "nimi": "Selim Palmgrenin rintakuva",
+   "paikka": "Raatihuoneenpuisto, Valtakadun ja Pohjoispuiston risteyksen lähellä",
+   "alue": "Linna",
+   "lat": 61.4884,
+   "lon": 21.7936,
+   "tekija": "Lauri Leppänen",
+   "vuosi": "1955",
+   "tyyppi": "rintakuva",
+   "taso": 1,
+   "malli": "yleismalli: rintakuva jalustalla",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_rintakuva.glb",
+   "huom": ""
+  },
+  {
+   "id": "patsas_010",
+   "nimi": "Sukkula",
+   "paikka": "Pohjoisranta 11C–11D vastapäätä",
+   "alue": "Isosanta",
+   "lat": 61.492054,
+   "lon": 21.799047,
+   "tekija": "Kain Tapper",
+   "vuosi": "1958",
+   "tyyppi": "veistos",
+   "taso": 1,
+   "malli": "yleismalli: abstrakti veistos B",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_abstrakti_b.glb",
+   "huom": "",
+   "sijainti_lahde": "OpenStreetMap 19.11.2026"
+  },
+  {
+   "id": "patsas_011",
+   "nimi": "Sankarihautamuistomerkki, Keski-Porin kirkko",
+   "paikka": "Keski-Porin kirkon puisto, Hallituskatu 1a",
+   "alue": "Linna",
+   "lat": 61.4889,
+   "lon": 21.8,
+   "tekija": "Aimo Tukiainen",
+   "vuosi": "1952",
+   "tyyppi": "muistomerkki",
+   "taso": 1,
+   "malli": "yleismalli: muistomerkki",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_muistomerkki.glb",
+   "huom": ""
+  },
+  {
+   "id": "patsas_012",
+   "nimi": "Ankkuri, Porilaisen merenkulun ja satamien muistomerkki",
+   "paikka": "Kirjurinluodon kärki",
+   "alue": "Kirjurinluoto",
+   "lat": 61.491841,
+   "lon": 21.793726,
+   "tekija": "",
+   "vuosi": "1994",
+   "tyyppi": "muistomerkki",
+   "taso": 1,
+   "malli": "yleismalli: ankkuri",
+   "suunta_asteet": null,
+   "siirto_m": [
+    -14,
+    1
+   ],
+   "malli_tiedosto": "porikopteri_patsas_ankkuri.glb",
+   "huom": " siirto_m: pelin jokiraja on tässä idempänä kuin OSM:n piste, ilman siirtoa ankkuri jäi veteen (19.11.2026).",
+   "sijainti_lahde": "OpenStreetMap 19.11.2026"
+  },
+  {
+   "id": "patsas_013",
+   "nimi": "Kirjurinluodon edustan suihkulähde",
+   "paikka": "Kirjurinluodon kärjen edusta (joessa)",
+   "alue": "Kokemäenjoki",
+   "lat": 61.491628,
+   "lon": 21.794319,
+   "tekija": "",
+   "vuosi": "1969",
+   "tyyppi": "suihkulähde",
+   "taso": 1,
+   "malli": "yleismalli: suihkulähde vedessä",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_suihkulahde.glb",
+   "huom": "",
+   "sijainti_lahde": "OpenStreetMap 19.11.2026"
+  },
+  {
+   "id": "patsas_014",
+   "nimi": "Bass String Wings",
+   "paikka": "Jyrki Kankaan aukio, Kapellimestarinkatu",
+   "alue": "Kirjurinluoto",
+   "lat": 61.492199,
+   "lon": 21.787468,
+   "tekija": "Pekka ja Teija Isorättyä",
+   "vuosi": "2022",
+   "tyyppi": "veistos",
+   "taso": 1,
+   "malli": "yleismalli: abstrakti veistos C",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_abstrakti_c.glb",
+   "huom": "",
+   "sijainti_lahde": "OpenStreetMap 19.11.2026"
+  },
+  {
+   "id": "patsas_015",
+   "nimi": "Porin VPK:n 150-vuotismuistomerkki",
+   "paikka": "Porin VPK:n talon (Itäpuisto 13) edusta",
+   "alue": "Karhunpää",
+   "lat": 61.4858,
+   "lon": 21.7932,
+   "tekija": "Sofia Saari",
+   "vuosi": "2013",
+   "tyyppi": "muistomerkki",
+   "taso": 2,
+   "malli": "yleismalli: muistomerkki",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_muistomerkki.glb",
+   "huom": ""
+  },
+  {
+   "id": "patsas_016",
+   "nimi": "Porin entisten kirkkojen muistomerkki",
+   "paikka": "Satakunnan Museon edusta, Hallituskatu 11",
+   "alue": "Teljä",
+   "lat": 61.4898,
+   "lon": 21.7914,
+   "tekija": "",
+   "vuosi": "1938",
+   "tyyppi": "muistomerkki",
+   "taso": 2,
+   "malli": "yleismalli: muistomerkki",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_muistomerkki.glb",
+   "huom": ""
+  },
+  {
+   "id": "patsas_017",
+   "nimi": "Punaisten uhrien muistomerkki",
+   "paikka": "Keski-Porin kirkon puisto, Hallituskatu 1a",
+   "alue": "Linna",
+   "lat": 61.4893,
+   "lon": 21.7998,
+   "tekija": "Heino (etunimi lähteissä Mollu tai Marjo)",
+   "vuosi": "2018",
+   "tyyppi": "muistomerkki",
+   "taso": 2,
+   "malli": "yleismalli: muistomerkki",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_muistomerkki.glb",
+   "huom": ""
+  },
+  {
+   "id": "patsas_018",
+   "nimi": "Siluetti",
+   "paikka": "Kiertoliittymä Valajankatu–Vanhasahankatu–Hyväntuulentie",
+   "alue": "",
+   "lat": 61.4982,
+   "lon": 21.8036,
+   "tekija": "Tapani Söderberg",
+   "vuosi": "2019",
+   "tyyppi": "veistos",
+   "taso": 2,
+   "malli": "yleismalli: abstrakti veistos A",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_abstrakti_a.glb",
+   "huom": ""
+  },
+  {
+   "id": "patsas_019",
+   "nimi": "Dioriittiperhe",
+   "paikka": "Kuninkaanhaan koulun piha, Kuninkaanhaanaukio 8",
+   "alue": "Kuninkaanhaka",
+   "lat": 61.4796,
+   "lon": 21.8075,
+   "tekija": "Jussi Koivusalo",
+   "vuosi": "1961",
+   "tyyppi": "veistos",
+   "taso": 2,
+   "malli": "yleismalli: abstrakti veistos B",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_abstrakti_b.glb",
+   "huom": ""
+  },
+  {
+   "id": "patsas_020",
+   "nimi": "Aurinkolähde",
+   "paikka": "Asuntomessualue (sijainti likimääräinen)",
+   "alue": "Karjaranta",
+   "lat": 61.492308,
+   "lon": 21.757736,
+   "tekija": "Mirja Vallinoja",
+   "vuosi": "2018",
+   "tyyppi": "veistos",
+   "taso": 2,
+   "malli": "yleismalli: abstrakti veistos C",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_abstrakti_c.glb",
+   "huom": "",
+   "sijainti_lahde": "OpenStreetMap 19.11.2026"
+  },
+  {
+   "id": "patsas_021",
+   "nimi": "Vampire-suihkuhävittäjien muistomerkki",
+   "paikka": "Porin lentoasema",
+   "alue": "Tiilimäki",
+   "lat": 61.4688,
+   "lon": 21.793,
+   "tekija": "Marko Tienhaara",
+   "vuosi": "2013",
+   "tyyppi": "muistomerkki",
+   "taso": 2,
+   "malli": "yleismalli: muistomerkki",
+   "suunta_asteet": null,
+   "siirto_m": [
+    0,
+    0
+   ],
+   "malli_tiedosto": "porikopteri_patsas_muistomerkki.glb",
+   "huom": ""
+  }
+ ],
+ "mallit_paivitetty": "2026-11-19"
+}

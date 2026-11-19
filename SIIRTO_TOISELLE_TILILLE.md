@@ -974,7 +974,7 @@ Mitattu julkisivu (facades.json) tehdään ensin näille 15:lle. **Tee vain rivi
 | 164 | 569:n länsipuolella | c051 | TEKEMÄTTÄ |
 | 7 | Itsenäisyydenkatu 54 (1956) | c048 | VALMIS 19.11 (f7.py; itäiset 4 akselia peilattu, näkemättä) |
 | 166 | Itsenäisyydenkatu 47, okrankeltainen 3 krs | c048 | VALMIS 19.11 (f166.py; koko katujulkisivu nähty) |
-| 167 | Itsenäisyydenkatu 58, 8 krs, lasitetut parvekkeet (SPEC 13.11) | c048 | VALMIS 19.11 (f167.py; vain Itsenäisyydenkadun pääty, Otavankadun ja pihan sivut mittaamatta) |
+| 167 | Itsenäisyydenkatu 58, 8 krs, lasitetut parvekkeet (SPEC 13.11) | c048 | VALMIS 19.11 (f167.py; Itsenäisyydenkadun pääty + Eteläpuiston länsisivu, katutaso sisäänvedetty; länsisivun s < 4,5 ja pihan sivut mittaamatta) |
 
 Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–693, länteen 141–265), viimeisenä puutalot.
 
@@ -1246,4 +1246,31 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
   räystään alla. Pano Itsenäisyydenkatu 58 (61.4824474, 21.7909043 → x −271.53, y −395.87; h 13 p 30), mittakaava 1,0, z = z − 0,17, + PV.
   Yksinkertaistettu: länsiparvekkeiden alla oleva avoin pylväikkö on piirretty umpiseinänä; parvekepinot 0,3 m ulkonevina. `nobrick` (lautavyö).
   Vertailukuva `Claude outputs/itsenaisyydenkatu_167_vertailu_19_11.jpg`. c048 testipoltettu (24 405 kärkeä).
+- **167 täydennetty (omistaja: "miksi ei voi leikata?"):** katutaso on nyt sisäänvedetty facades.jsonin valmiilla seinäavaimella
+  `"recess": [gh, sb, h]` (zones.py `_bare_w`: liikekerros gh korkea, sb metriä seinälinjan takana, generoitu näyteikkunalasitus + alapinta + päätypilarit):
+  eteläpääty sb 1,0, länsisivu sb 1,5 → lounaiskulma on avoin lovi kulmapilarin takana (oikeasti n. 2,2 m syvä pylväikkö pyöreällä pylväällä).
+  Pilarit ovat `box`eja d −sb…0; osa seinästä ilman sisäänvetoa täytetään `box`illa d −sb…0 koko katutason korkeudelta (länsisivu s 0–12,5).
+  **Länsisivu = Eteläpuisto 20 (ei Otavankatu), 35,0 m**, seinä (−266.251,−351.094)→(−274.232,−385.193): 8 ikkuna-akselia harmain alapaneelein,
+  ulkoneva lasitettu parvekepino s 15,5–18,9 (1,5 m), kulmapino s 31,15–34,37, lippanauha ja pilarit s 12,5→, pohjoisosassa 2 katutason ikkunaa ja
+  graniittisokkeli. Panot: kaukaa Eteläpuisto 19 (61.4827021, 21.7903007 → x −303.63, y −367.47; h 103 p 22; s suoraan, z oli 1,068-kertainen) ja
+  läheltä Eteläpuisto 20 (61.4827418, 21.7908179 → x −276.07, y −363.05; h 103 p 30). s < 4,5 puiden takana → jätetty paljaaksi.
+  Länsiseinä leipoutuu varjoon ja näkyy 8 näytteen testissä tummana ja läikikkäänä (seinän väri vaalennettu `#cdc7bb`) – tarkista 64 näytteen Modal-poltosta.
+  c048 testipoltettu (27 017 kärkeä). Vertailukuva päivitetty (3 paria + kulmanäkymä).
 - Jäljellä taulukosta: 600, 601, 585, 1228, 164 (+113 auki, 115 mittaamatta). 164:n kadunpuoleinen seinä raw.pkl:stä: (−216.063,−398.788)→(−190.378,−404.806), 26,4 m, räystäs 7,9.
+
+### 19.11 klo 20: patsaat ja muistomerkit kartalle (omistajan zip porikopteri_kaikki.zip)
+- Lähde: `tools/props/porikopteri_patsaat.json` (21 kohdetta, Wikipedia CC BY-SA 4.0), `porikopteri_patsaat.py` (mallit) ja `porikopteri_siirto_patsaat.md` (mallichatin ohje).
+- **Sijainnit:** 10 kohteelle tarkka paikka OpenStreetMapista (tourism=artwork / historic=memorial, haettu api/0.6/map.json-ruuduilla): 001 karhu, 004 Portti,
+  006 Eetu Salin, 007 Gallen-Kallela, 008 Taiteen tammi, 010 Sukkula, 012 Ankkuri, 013 suihkulähde, 014 Bass String Wings (= OSM "Jyrki Kankaan muistomerkki"),
+  020 Aurinkolähde (siirtyi ~300 m). JSONiin kenttä `sijainti_lahde`. Loput 11 ovat luettelon 4 desimaalin koordinaateilla (virhe 5–10 m). 011:lle OSM:ssä
+  on "Hautamuistomerkit 1939-40 & 1941-44" 100 m etelämpänä (61.487985, 21.799381) – ei käytetty, koska en varmistanut että se on sama teos.
+- **Peli:** `patsaat.js` = {k: kohteet pelikoordinaatteina, m: 11 GLB:tä base64}. index.html-lohko "statues and memorials" ennen `window.__game`-riviä:
+  rakennukseen/ajoradalle osuva piste siirretään lähimpään vapaaseen kohtaan (spiraali ≤30 m; 003 siirtyi 4 m, 015 8 m), suunta = lähin katu jos
+  `suunta_asteet` puuttuu, korkeus carGround/TZs + `noT`-liput (muuten maaston nosto tulee kahdesti → patsas leijuu). 20/21 kartalla; 021 Vampire
+  (lentoasema) on pelialueen ulkopuolella. Lähellä (kävellen 14 m, autolla 20 m, kopterilla 32 m) toast "🗿 nimi – tekijä, vuosi". `window.__statues`.
+- Tekemättä ohjeen listalta: minikartan merkit, valokeila/merkki ilmasta, keräily, tekijätiedot (Wikipedia/OSM) pelin tietoihin, omistajan tarkistuslento ja suunnat.
+- 19.11 klo 20.30: patsaiden asettelu tarkistettu pelikuvista (kaikki 20). Korjattu: sijoitussääntöön 3 m väli rakennuksiin ja joenpohjan esto
+  (016 irtosi museon seinästä 2 m), 012 Ankkuri käsin `siirto_m: [-14, 1]` (pelin jokiraja on idempänä kuin OSM:n piste, ankkuri oli vedessä).
+  Tarkistuskuvat lähetetty chatissa. Auki omistajalle: 003 Juhana-herttua seisoo jalkakäytävän kulmassa (luettelon koordinaatti, ei varmistettu),
+  004 Portin suunta (aukko kohti katua, puistokäytävä ei kulje sen läpi), 005 Toriparlamentti keskellä toria, 019 vieressä ilmakuvatalon vino seinä.
+- 19.11 klo 20.45 (omistaja): 001 Satakunnan karhu katsoo itään (`suunta_asteet: 90`; patsaat.js-kenttä h). Muut suunnat edelleen arvauksia (lähin katu).
