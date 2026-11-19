@@ -307,14 +307,15 @@ def modern(wall, h, floors, base=4.6, capc='dark'):
     ledge(P, 0.3, h - 0.5, h + 0.3, capc); ledge(P, 0.3, base - 0.25, base + 0.15, capc)
 
 
-def mml_shell(cidx, wallm, roofm, deco=None, rest_ok=True):
+def mml_shell(cidx, wallm, roofm, deco=None, rest_ok=True, zoff=0.0):
     """measured LoD2 shell (Maanmittauslaitos Rakennukset 3D) of city building cidx in the local frame; deco(pts, nrm, u, us, zb, ztop) decorates walls"""
     import pickle
     RAW = pickle.load(open('/home/claude/mmlproc/raw.pkl', 'rb'))[cidx]
     for k, r, ins in RAW:
         if k == 'G' or len(r) < 3: continue
-        pts = [Vector((p[0] - AX, p[1] - AY, max(0.0, p[2]))) for p in r]
-        mesh(pts, [tuple(range(len(pts)))], roofm if k == 'R' else wallm, recalc=False)
+        pts = [Vector((p[0] - AX, p[1] - AY, max(0.0, p[2] - zoff))) for p in r]
+        if zoff and max(q.z for q in pts) < 0.05: continue
+        mesh(pts, [tuple(range(len(pts)))], (roofm(pts) if callable(roofm) else roofm) if k == 'R' else (wallm(pts) if callable(wallm) else wallm), recalc=False)
         if k != 'W' or deco is None: continue
         nrm = Vector((0, 0, 0))
         for i in range(len(pts)):
@@ -508,7 +509,63 @@ elif KEY == 'kaupungintalo':
             for f in range(2): gothic_pair(a + u * (step * (k + 0.5)), u, nrm, 0.62, 2.15, 6.2 + f * 5.2 + 1.0)
     hip(P, 3.0, h, 0.9, 'roofdark', eave=0.75)
 elif KEY == 'teatteri':
-    M('plaster', '#ecd9a0'); classic('plaster', 12.5, 2, 3.6, 1.35, 3.3, True, pil=True)
+    # Porin Teatteri (19.11.2026, owner: "teatterin ulkoasu pitää päivittää"): measured LoD2 shell (Maanmittauslaitos, building 1358) dressed after
+    # Street View (pano 61.4895954, 21.7923958, heading 193, April 2026; read for sizes and colours only). The OLD theatre (1884) is the east part:
+    # Hallituskatu front 23.8 m with an 8.9 m centre risalit - white rusticated ground storey with three round-arched brown doors up a flight of
+    # steps, three tall round-arched windows between white columns above, white entablature and a white attic with a plaque (left blank: no name
+    # plates) - and two yellow wings with two window axes each (plain white frames below, white frames with a cap above), white storey band and
+    # cornice, grey plinth. The 1974 extension (west, along Teatterikatu) is grey concrete with ribbon windows.
+    # NOT seen / assumed: the Teatterikatu and rear fronts of the extension (ribbons repeated from its north end), the old part's east and rear walls
+    # (window axes repeated from the front wings), lanterns, flagpoles and the low glazed link are left out.
+    M('ty', '#e7c886'); M('tw', '#efeadb'); M('tgran', '#8d8a85', rough=0.9); M('tconc', '#8f8273', rough=0.9); M('troof', '#4d4845', rough=0.6); M('tdoor', '#8a5a34'); M('tglass', '#1e2932', rough=0.2); M('tplq', '#565c55')
+    ROOF_IN_MODEL = True; TEX = 4096
+    TF = Vector((-197.05 - AX, 385.55 - AY, 0)); TEX_ = Vector((-0.2236, -0.9747, 0)); TEY = Vector((0.9747, -0.2236, 0))   # front centre, axis into the building, axis east
+    def tloc(pts):
+        c = sum((Vector((q.x, q.y, 0)) for q in pts), Vector()) / len(pts) - TF; return c.dot(TEY), c.dot(TEX_)
+    told = lambda pts: tloc(pts)[0] > -12.6
+    def tdeco(pts, nrm, u, us, zb, ztop):
+        u0, u1 = min(us), max(us); L_ = u1 - u0
+        if L_ < 3.0 or zb > 0.5: return
+        zt = min(ztop(u0 + L_ * f) for f in (0.03, 0.5, 0.97))
+        if zt - zb < 5: return
+        lat, d_ = tloc(pts); base = pts[0] + nrm * 0.01; base.z = 0; mid = (base + u * ((u0 + u1) / 2)).to_2d(); n2 = nrm.to_2d(); at = lambda k: Vector((mid.x + n2.x * k, mid.y + n2.y * k))
+        W = lambda uu: base + u * uu; um = (u0 + u1) / 2
+        if not told(pts):                                                      # extension (owner's photo 19.11: brownish rendered blocks, mostly blank walls); ribbon windows only on the Hallituskatu end seen in Street View
+            for z_ in () if not (nrm.dot(-TEX_) > 0.9 and d_ < 1) else ((1.2, 2.6), (zt - 3.0, zt - 1.6)) if zt > 6.5 else ((1.2, 2.6),):
+                extrude(shape(W(um), u, L_ - 1.6, z_[1] - z_[0], z_[0], False, -0.03, nrm), nrm * 0.08, 'tglass')
+                for k in range(int((L_ - 1.6) / 2.4) + 1): extrude([W(u0 + 0.8 + 2.4 * k) + u * s_ + Vector((0, 0, z)) for s_, z in ((-0.04, z_[0]), (0.04, z_[0]), (0.04, z_[1]), (-0.04, z_[1]))], nrm * 0.13, 'tconc')
+            obox(at(0.06), u, L_ / 2 + 0.06, 0.07, zt - 0.5, zt, 'troof')
+            return
+        obox(at(0.07), u, L_ / 2 + 0.07, 0.08, 0, 0.8, 'tgran')               # plinth
+        if nrm.dot(-TEX_) > 0.9 and abs(lat) < 1.5 and d_ < -0.8:               # centre risalit (heights measured from the Street View frame: depth 14.1 m, base 1.64 m under the camera)
+            obox(at(0.05), u, L_ / 2 + 0.03, 0.06, 0.8, 4.3, 'tw')
+            for z_ in (1.5, 2.2, 2.9, 3.6): obox(at(0.115), u, L_ / 2 + 0.03, 0.006, z_, z_ + 0.05, 'tgran')      # rustication joints
+            for k in (-1, 0, 1):
+                window(W(um + 2.1 * k) + nrm * 0.1, u, nrm, 1.4, 2.65, 0.75, arch=True, frame='tw', glass='tdoor', fw=0.18, sill=False)
+                window(W(um + 2.06 * k), u, nrm, 1.45, 3.1, 5.0, arch=True, frame='tw', glass='tglass', fw=0.18, sill=False)
+            for k in (-1.5, -0.5, 0.5, 1.5): obox((W(um + 2.06 * k) + nrm * 0.14).to_2d(), u, 0.15, 0.15, 4.9, 7.3, 'tw')               # columns between the windows
+            obox(at(0.1), u, L_ / 2 + 0.1, 0.12, 4.3, 4.95, 'tw'); obox(at(0.08), u, L_ / 2 + 0.06, 0.09, 8.6, 9.1, 'tw'); obox(at(0.08), u, L_ / 2 + 0.06, 0.09, 9.9, 10.3, 'tw')
+            obox(at(0.25), u, L_ / 2 + 0.3, 0.27, 10.3, 11.1, 'tw'); obox(at(0.05), u, L_ / 2 + 0.03, 0.06, 11.1, zt, 'tw'); obox(at(0.12), u, L_ / 2 + 0.12, 0.13, zt - 0.2, zt, 'tw')
+            obox(at(0.13), u, 1.3, 0.03, 11.35, 11.95, 'tplq')                                                                          # plaque, left blank
+            for k in range(5): obox(at(0.45 + 0.15 * k), u, 3.3 + 0.1 * k, 0.45 + 0.15 * k, 0, 0.75 - 0.15 * k, 'tgran')                 # five steps up to the doors
+            return
+        obox(at(0.08), u, L_ / 2 + 0.08, 0.09, 4.3, 5.3, 'tw'); obox(at(0.22), u, L_ / 2 + 0.22, 0.24, zt - 0.75, zt, 'tw'); obox(at(0.08), u, L_ / 2 + 0.08, 0.09, zt - 1.15, zt - 0.75, 'tw')
+        n = max(1, round(L_ / 3.6))
+        for k in range(n):
+            o = W(u0 + L_ * (k + 0.5) / n)
+            window(o, u, nrm, 1.0, 2.1, 1.35, frame='tw', glass='tglass', fw=0.16)
+            if zt > 8.6:
+                window(o, u, nrm, 1.0, 2.3, 5.4, frame='tw', glass='tglass', fw=0.18, sill=False)
+                obox((o + nrm * 0.15).to_2d(), u, 0.95, 0.16, 8.0, 8.16, 'tw')                                                             # cap over the upper window
+                extrude([o + u * (0.85 * math.cos(t)) + Vector((0, 0, 8.16 + 0.42 * math.sin(t))) for t in [i * math.pi / 8 for i in range(9)]], nrm * 0.2, 'tw')   # segmental pediment
+        for uu in (u0 + 0.3, u1 - 0.3): obox((W(uu) + nrm * 0.07).to_2d(), u, 0.3, 0.08, 0.8, zt - 1.15, 'tw')                              # corner strips
+    # the shell's base is the lowest ground of the whole block (sunken yard of the extension): 3.1 m under the Hallituskatu pavement (eave 13.3 in the
+    # shell, 10.2 m in the Street View frame) -> the whole shell is lowered by 3.1 m
+    mml_shell(1358, lambda pts: 'ty' if told(pts) else 'tconc', 'troof', tdeco, zoff=3.1)
+    # in the game the pavement stands about 0.6 m above the model's zero here (steps and plinth were buried, eave 0.5 m low against Street View): lift the
+    # dressed shell and close the gap with a plain plinth on the city footprint
+    for o_ in objs: o_.location.z += 0.6
+    walls(offset(P, -0.05), 0, 0.65, 'tgran')
 elif KEY == 'taidemuseo':
     M('plaster', '#d9d3c4', tex='rust'); classic('plaster', 8.2, 1, 6.2, 2.9, 5.0, True, cornice=0.5, frame='white')
 elif KEY == 'kauppahalli':

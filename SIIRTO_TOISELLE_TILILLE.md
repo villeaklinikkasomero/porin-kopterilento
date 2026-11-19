@@ -1147,6 +1147,25 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
   keskellä kattoa on pyöreä ritilä punaisine kehineen (nyt mukana kuvassa).
 - index.html: #credit-riville lähdemaininta. Pushattavat lisäksi: `blender/tex_art/teatteri_katto_dia4374.jpg`. Kuva `Claude outputs/teatteri_sisa_19_11/katto_vertailu.jpg`.
 
+### 19.11.2026 klo 22 – Porin Teatterin ULKOASU uusittu (omistaja: "teatterin ulkoasu pitää päivittää", 5 valokuvaa chatissa + "tarkista että portaat tulevat ovelle")
+- **Tila:** kansiossa, pushaamatta. `blender/lm.py` (haara `teatteri` + `mml_shell(..., zoff=)` ja materiaali funktiona), `bl_teatteri.js` (paikallinen leivonta 4096², 20 näytettä,
+  2,6 Mt), `index.html` (teatterin oven kohta portaiden juureen: `probe: [-15.8, …]`). Kuva `Claude outputs/teatteri_sisa_19_11/teatteri_ulko_vertailu.jpg` (sisältää SV:tä, vain paikallisesti).
+- **Ennen:** koko jalanjälki yhtenä keltaisena laatikkona (`classic`, h 12,5). **Nyt:** MML:n LoD2-kuori (rakennus 1358) puettuna: vanha teatteri (itäosa) keltainen `#e7c886`,
+  keskirisaliitti (8,9 m): valkoinen rustikoitu alakerta, kolme ruskeaa kaariovea, viisi askelmaa, yläkerrassa kolme korkeaa kaari-ikkunaa ja pylväät, valkoinen palkisto ja
+  attika + tyhjä kilpi (nimikilpiä ei kopioida); siivet: 2 ikkuna-akselia, alhaalla suorat valkoiset kehykset, ylhäällä kehys + kaaripääty, valkoinen kerrosvyö ja räystäs, harmaa sokkeli.
+  Laajennus (1974, länsi): ruskeanharmaa `#8f8273`, seinät paljaat, nauhaikkunat vain Hallituskadun päädyssä (SV).
+- **Mitat Street View -kuvasta** (pano 61.4895954, 21.7923958 → x −192,0 y 400,7, h 193 p 8, huhti 2026; syvyys siipiin 15,9 m, risaliittiin 14,1 m, seinän juuri 1,64 m kameran alla):
+  siiven räystäs 10,2 m, attikan yläreuna 12,2 m, kerrosvyö 4,3–5,3, alaikkuna 1,35–3,45, yläikkuna 5,4–7,7, ovet 0,75–3,4 (jako 2,1 m), isot ikkunat 5,0–8,1 (jako 2,06 m).
+- **Kaksi korkeusoppia:** (1) LoD2-kuoren nolla on koko korttelin alin maanpinta (laajennuksen syvennetty piha): Hallituskadulla kuori oli **3,1 m liian korkea** (räystäs 13,3 vs 10,2)
+  → `zoff=3.1`. (2) Pelissä jalkakäytävä on tässä n. 0,6 m mallin nollan yläpuolella (portaat ja sokkeli jäivät piiloon) → koko malli nostettu 0,6 m ja alle tasainen sokkelihelma.
+  Sama tarkistus kannattaa tehdä muille `mml_shell`-maamerkeille.
+- **Portaat ja ovi:** viisi askelmaa nousee oville; pelaajan ovipiste (−196,0, 390,2) on portaiden juurella ovien edessä (testattu: vihje näkyy, sisään pääsee). Portaille ei nousta
+  (ulkona ei ole porrastörmäystä) – sisään mennään juurelta.
+- **Näkemättä / oletettu:** vanhan osan itä- ja takaseinän sekä näyttämötornin ikkunat (toistettu siipien akseleilla), laajennuksen Teatterikadun ja takapuolen seinät, lasikäytävä
+  ja terassi lipunmyynnin edessä (omistajan kuvissa näkyy – tekemättä), lyhdyt, lipputangot, katon rautakoriste. Katto tummanruskea pelti (omistajan kuva).
+- **Sisätila vs. kuori:** vanhan osan salilohkon ulkoseinä on kuoressa 9,2 m akselista, sisätilan kiertokäytävä ulottuu 9,9 m:iin → sisätila on n. 0,7 m liian leveä (korjaamatta).
+- **Modal (valinnainen):** paikallinen leivonta on kansiossa ja riittää; tarkempi saadaan komennolla `landmarks teatteri` pushin jälkeen.
+
 ## ILLAN MODAL-JONO (omistaja polttaa illalla – PÄIVITÄ TÄTÄ LISTAA, älä tee uutta)
 (Sisätilat ja jalankulku eivät kuulu tähän jonoon: ne eivät tarvitse polttoa, vain pushin – ks. edellinen luku "SISÄTILAT JA JALANKULKU".)
 Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 mennessä viedyn). Sen jälkeen kertyneet:

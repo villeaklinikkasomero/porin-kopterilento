@@ -2078,7 +2078,7 @@ const TEAT = { cx: -199.62, cy: 374.34, ex: [-0.2236, -0.9747], ey: [0.9747, -0.
 const PLACES = [
   { key: 'kirkko', file: 'kirkko_sisa', name: 'Keski-Porin kirkko', room: 'kirkkosali', label: '⛪ Sisään kirkkoon', hint: 'astu Keski-Porin kirkkoon', ok: () => !!CHURCH.map, map: (x, y) => CHURCH.map(x, -y), probe: [-34, 0, -1, 0], markH: 8.2 },
   { key: 'mausoleumi', file: 'mausoleumi_sisa', name: 'Juseliuksen mausoleumi', room: 'halli ja krypta', label: '🕯 Sisään mausoleumiin', hint: 'astu Juseliuksen mausoleumiin', ok: () => true, map: (x, y) => [MAUS.cx + MAUS.ex[0] * x + MAUS.ey[0] * y, MAUS.cy + MAUS.ex[1] * x + MAUS.ey[1] * y], probe: [-5.0, 0, -1, 0], markH: 5.2 },
-  { key: 'teatteri', file: 'teatteri_sisa', name: 'Porin Teatteri', room: 'aula, päänäyttämö ja kahvila', label: '🎭 Sisään teatteriin', hint: 'astu Porin Teatteriin', ok: () => true, map: (x, y) => { if (x > 50) x -= 100; return [TEAT.cx + TEAT.ex[0] * x + TEAT.ey[0] * y, TEAT.cy + TEAT.ex[1] * x + TEAT.ey[1] * y]; }, probe: [-11.3, 0, -1, 0], markH: 6 } ];
+  { key: 'teatteri', file: 'teatteri_sisa', name: 'Porin Teatteri', room: 'aula, päänäyttämö ja kahvila', label: '🎭 Sisään teatteriin', hint: 'astu Porin Teatteriin', ok: () => true, map: (x, y) => { if (x > 50) x -= 100; return [TEAT.cx + TEAT.ex[0] * x + TEAT.ey[0] * y, TEAT.cy + TEAT.ex[1] * x + TEAT.ey[1] * y]; }, probe: [-15.8, 0, -1, 0], markH: 6 } ];
 const IN = PLACES[0];
 let walkMix = null, walkCur = '', walkLoading = false; const walkAct = {};
 function loadWalker() { if (walkLoading) return; walkLoading = true;
