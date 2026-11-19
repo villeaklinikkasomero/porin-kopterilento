@@ -1781,7 +1781,7 @@ const cars = [];
   const m4 = new THREE.Matrix4(), q4 = new THREE.Quaternion(), p3 = new THREE.Vector3(), s3 = new THREE.Vector3(1, 1, 1), UP = new THREE.Vector3(0, 1, 0);
   cars.update = dt => {
     if (dt > 0) sigT += dt; const Q = new Map();                                             // cars by street segment, the front one first
-    for (let i = 0; i < N; i++) { const c = cars[i], k = c.a.id * 65536 + c.b.id; let q = Q.get(k); if (!q) Q.set(k, q = []); q.push(c);
+    for (let i = 0; i < N; i++) { const c = cars[i], k = c.a.id * 65536 + c.b.id; let q = Q.get(k); if (!q) Q.set(k, q = []); if (c.pk) c.mv = 0; else q.push(c); if (c.lat === undefined) c.lat = 1.7;
       c.len = Math.hypot(c.b.x - c.a.x, c.b.y - c.a.y) || 1; c.pos = c.t * c.len; if (c.s === undefined) c.s = c.v; }
     for (const q of Q.values()) { if (q.length > 1) q.sort((m, n) => n.pos - m.pos); let lead = null;
       for (const c of q) { let room = 1e9; const g = c.b.sig;
@@ -1793,10 +1793,22 @@ const cars = [];
         c.mv = Math.min(c.s * dt, room); c.pos += c.mv; lead = c; } }
     for (let i = 0; i < N; i++) { const c = cars[i]; let dx = c.b.x - c.a.x, dy = c.b.y - c.a.y, len = Math.hypot(dx, dy) || 1;
       c.t += c.mv / len;
+      if (c.pk) { const P = c.pk;                                                // 0 pulling in, 1 parked, 2 pulling out
+        if (P.ph === 0) { const rem = (P.t1 - c.t) * len, tv = Math.min(c.v, Math.sqrt(Math.max(0, 5 * rem)) + 0.2); c.s += Math.max(-6 * dt, Math.min(2 * dt, tv - c.s)); c.t = Math.min(P.t1, c.t + c.s * dt / len); if (rem < 14) c.lat += (P.lat - c.lat) * Math.min(1, dt * 1.6);
+          if (rem < 0.25) { c.s = 0; c.lat = P.lat; P.ph = 1; P.T = 35 + rnd() * 50; if (window.__npc && window.__npc.arrive) window.__npc.arrive(P.x, P.y); } }
+        else if (P.ph === 1) { if ((P.T -= dt) < 0) P.ph = 2; }
+        else { c.lat += (1.7 - c.lat) * Math.min(1, dt * 1.2) - 0.02 * dt; if (c.lat <= 1.75) { c.lat = 1.7; c.pk = null; c.s = 0; } } }
       if (c.t >= 1) { let opts = c.b.nb.filter(n => n !== c.a && may(c.b, n)); if (!opts.length) opts = c.b.nb.filter(n => may(c.b, n)); const nx = opts.length ? pickRoad(c.b, opts) : c.a; c.a = c.b; c.b = nx; c.t = 0;
         if (c.yr && busyRd(c.a, c.b) === 1 && Math.hypot(c.a.x - S.x, c.a.y - S.y) > 170) { const e = yrE[Math.floor(rnd() * yrE.length)]; if (Math.hypot(e[0].x - S.x, e[0].y - S.y) > 120) { c.a = e[0]; c.b = e[1]; c.s = c.v; } }   // a Yrjönkatu regular that has strayed returns there, out of sight
+        // parking (19.11.2026): now and then a car near the player pulls in to the kerb half-way along the new street (if there is a kerb 3.8-9 m from the
+        // lane centre line and no parked car in the spot), people get out (window.__npc.arrive) and it drives on after 35-85 s
+        if (!c.pk && !c.yr && ROAD.on && typeof PARKED !== 'undefined' && rnd() < 0.06) { const ex = c.b.x - c.a.x, ey = c.b.y - c.a.y, el = Math.hypot(ex, ey), mx = c.a.x + ex * 0.55, my = c.a.y + ey * 0.55;
+          if (el > 30 && !c.b.sig && inCore(mx, my) && Math.hypot(mx - S.x, my - S.y) < 170) { const vx = ex / el, vy = ey / el; let dk = 0, seen = false; for (let q = 0.5; q <= 9; q += 0.5) { if (ROAD.asphAt(mx + vy * q, my - vx * q)) { seen = true; continue; } if (seen) dk = q; break; }
+            const tx = mx + vy * (dk - 1.2), ty = my - vx * (dk - 1.2); let free = dk >= 3.8; if (free) for (let k = 0; k < PARKED.length; k += 4) if (Math.hypot(PARKED[k] / 10 - tx, PARKED[k + 1] / 10 - ty) < 5.5) { free = false; break; }
+            if (free) for (const o of cars) if (o.pk && Math.hypot(o.pk.x - tx, o.pk.y - ty) < 9) { free = false; break; }
+            if (free) c.pk = { ph: 0, t1: 0.55, lat: dk - 1.2, x: mx + vy * (dk + 1.0), y: my - vx * (dk + 1.0), T: 0 }; } }
         dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
-      const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * 1.7, y = c.a.y + dy * c.t - ux * 1.7;        // keep to the right-hand lane
+      const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * c.lat, y = c.a.y + dy * c.t - ux * c.lat;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
       const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
     for (const q of parts) q.instanceMatrix.needsUpdate = true;
@@ -2496,7 +2508,12 @@ setTarget();
     try { huEl = huEl || new Audio(); huEl.src = './radio/huuto_' + v + '_' + String(i + 1).padStart(2, '0') + '.mp3'; huEl.volume = soundOn ? 0.9 : 0; huEl.play().catch(() => {}); } catch (e) {} };
   $('thei').addEventListener('pointerdown', e => { e.preventDefault(); if (WALK.on && !WALK.in) greet(false); });
   let acc = 0;
-  window.__npc = { parties, greet: () => greet(false), update: dt => { if (!net || dt <= 0) return; const px = S.x, py = S.y;
+  window.__npc = { parties, greet: () => greet(false),
+    arrive: (x, y) => { if (!net || count() > NMAX + 6) return; let b = null, bd = 30; for (const q of net) { const d = Math.hypot(q.x - x, q.y - y); if (d < bd) { bd = d; b = q; } } if (!b) return;   // people getting out of a car that has just parked: they walk to the nearest footway
+      const r = rnd(), ks = r < 0.5 ? [adult()] : r < 0.8 ? [adult(), adult()] : [guard(), child()]; if (ks.some(k => !MOD[k])) return;
+      const p = { a: { x, y, nb: [{ n: b, c: 0 }] }, b, c: 0, pc: 0, t: 0, v: 1.2, wait: false, lat: (rnd() - 0.5) * 7, m: ks.map(mkChar) };
+      p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.x = x; c.y = y; c.z = carGround(x, y) ?? 0; c.new = true; }); parties.push(p); },
+    update: dt => { if (!net || dt <= 0) return; const px = S.x, py = S.y;
     acc += dt; if (acc > 0.25) { acc = 0; if (WALK.on && !WALK.in) greet(true);       /* walking up to somebody (2.6 m) makes them speak; H still calls from further away */
       if (count() < NMAX) spawn(px, py);
       else { let w = null, wd = 85; for (const q of parties) { const d = Math.hypot(q.m[0].x - px, q.m[0].y - py); if (d > wd) { wd = d; w = q; } } if (w) w.m[0].x = 1e6; }   /* full: the farthest party (over 85 m away) makes room, so the people gather where the player is */
