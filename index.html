@@ -512,8 +512,8 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const SRW = { 1417694311: 1, 89689073: 1, 89689074: 1, 1555668839: 1, 173062122: 1, 173062127: 1, 173062123: 1, 173062124: 1, 89689063: 1, 42972643: 1, 1555668980: 2, 100026585: 3 }, SRBRICK = [0x9a4634, 0x8f4232, 0xa24c38, 0x934536];
   const col = new THREE.Color(), col2 = new THREE.Color(), rc = new THREE.Color(), LHIDE = new Set(LOD2.hide);
   const liftParts = [];
-  const L2OLD = new Set([572, 70]);   // Kulturhuset Fiini (2025) stands where the scanned 1880/1900 houses were; Eteläpuisto 13: the scan set back the top storey, the house has one flat roof
-  const HFIX = { 70: 24.0 };   // roof height of the L2OLD houses built on their footprint in Blender
+  const L2OLD = new Set([572, 70, 136]);   // Kulturhuset Fiini (2025) stands where the scanned 1880/1900 houses were; Eteläpuisto 13: the scan set back the top storey, the house has one flat roof
+  const HFIX = { 70: 24.0, 136: 7.7 };   // roof height of the L2OLD houses built on their footprint in Blender
   const wpick = (L, r) => { let t = 0; for (const e of L) t += e[1]; let k = r * t; for (const e of L) { k -= e[1]; if (k <= 0) return e[0]; } return L.length ? L[0][0] : '#e6dcc2'; };
   const ROOFZ = new Set(['kivi0', 'kivi1', 'kivi2', 'kivi3', 'kivi4', 'kivi5', 'kl0', 'kl1'].map(n => KN.indexOf(n)));   // blocks whose roofs are in the Blender model
   for (const b of CITY.b) {

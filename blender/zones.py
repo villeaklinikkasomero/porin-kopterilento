@@ -57,6 +57,13 @@ SPEC[1726] = dict(P=_hopP, layout=lay(27, 'punched', gh=4.4, bw=3.3, fh=3.2, P=d
 # 1600 Antinkatu 8 (SV 19.11.2026): one-storey restaurant under a green sheet-metal mansard; the street front is in facades.json
 SPEC[1600] = dict(P=dict(wall=M('#98a28d')), layout=dict(bw=3.0, rows=[(4.7, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True),
                   roof=dict(kind='hip', inset=2.0, rise=0.6, ov=0.05, mat=M('#82937d', 0.5)))
+# 136 Antinkatu 21a (1979, SV 19.11.2026): the LoD2 shell is far smaller than the house (east wall 16.3 m of 21.9 m), so it stands on its footprint;
+# the glazed street floor is set back 1.5 m under the upper floor on every side, the upper floor is drawn in facades.json (tools/rautalanka/facades/f136.py)
+_c136 = MT('#9a958c', 'plaster', 0.9)
+SPEC[136] = dict(h=7.7, footprint=True, P=dict(wall=_c136, gwall=M('#2c2f31', 0.6), fascia=M('#2c2f31', 0.6), piermat=_c136),
+                 layout=dict(bw=2.43, rows=[(3.5, 'shop', 'G'), (4.2, 'plain', 'P')], cols=lambda c, nb: 'W', P={},
+                             rowP={'G': dict(setback=1.5, piers=(0, 0.3), soffit=M('#35383b'), fasc_h=0.2, gpier=0.04)}),
+                 roof=dict(kind='flat', mat=SHEET))
 B[1725]['h'] = 6.7                                       # eaves measured on the rectified SV (19.11.2026); city.js has 10
 SPEC[1725] = dict(P=dict(_hopP), layout=lay(6.7, 'punched', gh=3.4, bw=3.3, fh=3.3, P=dict(ww=1.6, wh=1.4)))      # two-storey shop wing on Antinkatu (street front: facades.json)
 SPEC[1727] = dict(P=dict(wall=M('#d8d0bd')), layout=lay(4.7, plain=True))                                           # banking hall in the yard
@@ -982,20 +989,23 @@ def _f570(Z, pts, h, P):
     for k in range(7):
         z0 = 2.9 + 3.05 * k
         for s0, s1 in ((2.3, 3.6), (4.8, 6.3), (6.9, 7.8)): _a31win(Z, W, s0, s1, z0, z0 + 1.7, fr, gl)
-    W = _a31wall(Z, *_E570M); L = 21.35; lv = tuple(3.6 + 3.05 * k for k in range(6))
+    # 19.11.2026 (SV Antinkatu 22 pano, rectified): the first balcony slab is at 5.6 m, over a white band above the glazed street floor, storeys 2.75 m;
+    # the north 3.3 m of the front is plain white with one column of narrow windows
+    W = _a31wall(Z, *_E570M); L = 21.35; lv = tuple(5.6 + 2.75 * k for k in range(6)); N0 = 17.6
     _a31q(Z, W, 0.7, 3.3, 0.0, 3.4, 0.02, M('#3f4a42', 0.3)); _a31q(Z, W, 0.8, 3.2, 0.0, 2.6, 0.03, gl)        # entrance: glass doors, green frame
-    _a31q(Z, W, 4.6, L - 0.3, 0.3, 3.4, 0.02, M('#55606a', 0.2, 0.3))                          # recessed glazed ground floor
-    for s_ in (4.6, 8.4, 12.2, 16.0, 19.8): _a31q(Z, W, s_ - 0.06, s_ + 0.06, 0.3, 3.4, 0.03, M('#8fbf4a', 0.6))   # green mullions
-    for s_ in (4.4, 12.2, 19.6): _a31bx(Z, W, s_ - 0.3, s_ + 0.3, 0.0, 3.6, 1.0, 1.6, _a31WH)  # round white columns (square here)
-    _a31balc(Z, W, 0.7, 4.3, lv, 22.0, 1.4, M('#b9c6cc', 0.1, 0.3), M('#c9d4d8', 0.1, 0.3), _a31WH, r=0.0)
-    _a31balc(Z, W, 4.6, 12.6, lv, 22.0, 1.4, M('#b9c6cc', 0.1, 0.3), M('#c9d4d8', 0.1, 0.3), _a31WH, r=0.0)
-    _a31balc(Z, W, 12.9, L, lv, 22.0, 1.4, M('#b9c6cc', 0.1, 0.3), M('#c9d4d8', 0.1, 0.3), _a31WH, r=0.0)
-    for s0 in (4.3, 12.6): _a31bx(Z, W, s0, s0 + 0.3, 3.4, 22.0, 0.0, 1.4, org)               # orange panels between the runs
+    _a31q(Z, W, 4.6, N0, 0.3, 3.4, 0.02, M('#55606a', 0.2, 0.3))                          # recessed glazed ground floor
+    for s_ in (4.6, 8.4, 12.2, 16.0, N0): _a31q(Z, W, s_ - 0.06, s_ + 0.06, 0.3, 3.4, 0.03, M('#8fbf4a', 0.6))   # green mullions
+    for s_ in (4.4, 12.2, 17.3): _a31bx(Z, W, s_ - 0.3, s_ + 0.3, 0.0, 5.4, 1.0, 1.6, _a31WH)  # round white columns (square here)
+    _a31balc(Z, W, 0.7, 4.3, lv, 21.9, 1.4, M('#b9c6cc', 0.1, 0.3), M('#c9d4d8', 0.1, 0.3), _a31WH, r=0.0)
+    _a31balc(Z, W, 4.6, 12.6, lv, 21.9, 1.4, M('#b9c6cc', 0.1, 0.3), M('#c9d4d8', 0.1, 0.3), _a31WH, r=0.0)
+    _a31balc(Z, W, 12.9, N0, lv, 21.9, 1.4, M('#b9c6cc', 0.1, 0.3), M('#c9d4d8', 0.1, 0.3), _a31WH, r=0.0)
+    for s0 in (4.3, 12.6, N0): _a31bx(Z, W, s0, s0 + 0.3, 5.4, 21.9, 0.0, 1.4, org)
+    for k in range(6): _a31win(Z, W, 19.0, 20.1, 6.0 + 2.75 * k, 7.5 + 2.75 * k, fr, gl)             # narrow windows of the white north strip               # orange panels between the runs
 _on570 = lambda x, y: (_on_line(x, y, (-126.9, -388.7), (-141.0, -385.5)) or _on_line(x, y, *_E570S) or _on_line(x, y, *_E570M))
 RUNALT = {570: lambda x, y: _b570 if _on570(x, y) else None}
 EXTRA = {570: [_f570]}
 # 415  It.k./Antinkatu corner: white 5 storeys, stacks of glazed balconies
-SPEC[415] = dict(P=_svP(M('#ecebe6')), layout=_sv_lay(17.6, 0, 3.0, _stk(3), _GL), roof=dict(kind='flat', mat=SHEET))
+SPEC[415] = dict(P=_svP(M('#ecebe6')), layout=_sv_lay(13.2, 0, 3.3, _stk(3), _GL), roof=dict(kind='flat', mat=SHEET))   # 19.11.2026: 4 storeys (eave 13.2 m), street fronts in facades.json
 # 665  new block (c077): white and dark grey panels, glazed balcony stacks, dark grey ground floor
 SPEC[665] = dict(P=_svP(M('#e6e6e2')), layout=_sv_lay(23.0, 3.6, 3.1, _stk(3), _GL, gP=dict(wall=_DK, ww=1.6)), roof=dict(kind='flat', mat=SHEET))
 # 1204 / 1206  new blocks: orange-brown / red brick upper floors, dark grey ground floor, glass balcony stacks

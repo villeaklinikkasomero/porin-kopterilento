@@ -892,3 +892,28 @@ Testi: `python3 -m http.server 8765` + playwright (`/opt/npm-tools/node_modules/
 - Muut kohteet samalla tekniikalla: sisätila omaksi `blender/<kohde>_sisa.py`:ksi, ovi `CHURCH`-tyyliin; `walkNear`/`walkAction` yleistettävä ovilistaksi.
 - Valokartan pakkaus on väljä (tuhansia saarekkeita); 4096² tai parempi pakkaus terävöittäisi varjoja. Modalissa leivonta olisi nopeampi, mutta ei tarpeen.
 - Antinkadun jono (toinen istunto teki 1726:n päädyn klo 11.30–12): 136, 409, 570, 276, 415.
+
+## 19.11.2026 klo 12–14 – Antinkadun loput talot 136, 409, 570, 276, 415 – tehty, polttamatta → **ANTINKATU VALMIS**
+Älä aloita näitä uudelleen uudessa chatissa. Jäljellä vain omistajan korjauskierros (alla "Auki") ja Modal-poltot.
+- **136 Antinkatu 21a (c051):** `f136.py` + `SPEC[136]` (zones.py). LoD2-kuori on paljon taloa pienempi (itäseinä 16,3 m / 21,9 m) → rakennetaan
+  **jalanjäljelle** (`footprint=True`, h 7,7) ja index.html: `L2OLD` + `HFIX {136: 7.7}`. Katutaso 1,5 m sisäänvedetty lasi (SPEC), yläkerta facades.json:
+  elementtiräystäs reliefipaneeleineen (moduuli 2,43 m), ikkunanauha 2/moduuli, punainen kylttinauha (Liisankadulla länsiosa oranssi), `nobrick`.
+  Panot: Antinkatu 21 (61.484163, 21.7946236 → x −73.33, y −204.7), Liisankatu 10 (61.484379, 21.7941287). Oikaisu: s = (s+1,5)·0,879, z = (z−0,1)·0,92.
+- **409 Antinkatu 22 (c051):** `f409.py`: 6 krs, kaksi ikkunasaraketta + lasitettu parvekepino pylväällä + kaksi saraketta + parvekepino porttikäytävän päällä,
+  valkoiset paneelit ikkunoiden alla, harmaa sokkeli. styles.json 409: `w #dccfb6` (kermanvaalea; oli harmaa). Tiilimateriaali (`kind brick`) tummui pelissä
+  harmaaksi → käytössä `plaster`. Pano Antinkatu 22 (61.4827469, 21.7938609 → x −113.96, y −362.5), mittakaava ~1,0, jalkakäytävä z 0,3.
+- **570 Antinkatu 27 B (c051):** oli tehty 18.11 (`_f570` zones.py); korjattu vain: parveketasot 5,6 + 2,75·k (ennen 3,6 + 3,05·k: katutason lasin ja
+  parvekkeiden välissä on valkoinen vyö), pylväät 5,4 m, pohjoispään 3,3 m valkoinen kaista + kapea ikkunasarake (parvekkeet päättyvät s 17,6).
+- **276 Antinkatu 20 (p1):** `f276.py`: keltainen puutalo, 1,7 m rapattu sokkeli, 6 korkeaa T-ikkunaa valkoisin vuorilaudoin, friisissä 4 ullakkoikkunaa,
+  ei ovea Antinkadulla (pelissä oli keksitty ovi). Pano Antinkatu 22 (61.4830179, 21.793986 → x −107.3, y −332.3). Mikonkadun sivu mittaamatta.
+- **415 Antinkatu 26 / Itsenäisyydenkatu 52 (c048):** `f415.py`: valkoinen rappaus, liiketila + 3 krs (SPEC 17,6 → 13,2 m, styles f 5 → 4), Antinkadulle pääty:
+  2 näyteikkunaa, ikkunasarakkeet, kulman lasitettu parvekepino; Itsenäisyydenkatu: porrashuoneen lasi + katos, 3 saraketta, keltaiset paneelit, harmaa sokkeli.
+  Panot Antinkatu 26 (61.4820247, 21.7935952 → x −128.1, y −442.9) ja Itsenäisyydenkatu 52 (61.482181, 21.7931281 → x −153.0, y −425.6).
+- **Opit:** (1) LoD2-kuorelle piirrettävän seinän `a`/`b` pitää ottaa **raw.pkl:stä** (lod2.js pyöristää 0,1 m: 4 cm kuoren takana oleva linja piilotti
+  kaikki alle 5 cm paksut itemit – 415). (2) c-lohkon poltto: `tar xzf pipeline/data/porikit_data.tgz` → siirrä `data/mmlproc/*` → `/home/claude/mmlproc/`,
+  sitten `cd blender; PYTHONPATH=/home/claude python3 city.py c051 8` (~140 s). (3) gshot: `ZONE=-` striimatuille c-lohkoille (ZONE=c051 jäi odottamaan 180 s/kuva).
+  (4) Länteen/pohjoiseen katsovat seinät jäävät poltossa varjoon – vaalea väri näyttää harmaalta, ei ole materiaalivirhe.
+- **Modal:** ei uusia lohkoja – c048, c051 ja p1 ovat jo jonossa (`city 64 c048,c051,c052,c067`, `bake p1 …`).
+- **Auki omistajalle (korjauskierros):** 1726:n korkeus (24,2 → ~20,5 m); 136:n LoD2/jalanjälki-ratkaisu ja katto; 409:n ylin 2 m umpiseinää (kuori 21,9 m,
+  ikkunat loppuvat 19,6 m); 415:n näkemättömät osat (Antinkatu s < 1,9, Itsenäisyydenkatu s < 8,5 ja > 24); 276:n Mikonkadun sivu; 570:n eteläkappaleen
+  ikkunat tarkistamatta; aiemmat: 1600:n tekstipalkit, portin vaalea maalaatta 1492/1493, tummina piirretyt portit.
