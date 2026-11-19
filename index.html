@@ -1712,6 +1712,8 @@ const cars = [];
     for (let i = 0; i + 3 < r.p.length; i += 2) { const ax = r.p[i], ay = r.p[i + 1], bx = r.p[i + 2], by = r.p[i + 3];
       if (!inb(ax, ay) || !inb(bx, by) || (ax === bx && ay === by)) continue; const a = node(ax, ay), b = node(bx, by);
       if (!a.nb.includes(b)) { a.nb.push(b); (a.ow || (a.ow = new Map())).set(b, [ri, i / 2, true]); } if (!b.nb.includes(a)) { b.nb.push(a); (b.ow || (b.ow = new Map())).set(a, [ri, i / 2, false]); } } });
+  const busyRd = (a, b) => { const e = a.ow && a.ow.get(b); return e && CITY.r[e[0]].n === 'Yrjönkatu' ? 30 : 1; };             // owner: Yrjönkatu is the busiest street
+  const pickRoad = (a, opts) => { const w = opts.map(n => busyRd(a, n)); let r = rnd() * w.reduce((x, y) => x + y, 0); for (let i = 0; i < opts.length; i++) if ((r -= w[i]) <= 0) return opts[i]; return opts[0]; };
   const may = (a, b) => { const e = a.ow && a.ow.get(b); return !e || owOk(e[0], e[1], e[2]); };   // one-way streets (filled when roads.js loads)
   const list = [...nodes.values()].filter(n => n.nb.length); list.forEach((n, i) => n.id = i);
   // traffic lights (19.11.2026): signalled junctions from OpenStreetMap (tools/roads/traffic_signals.json, game metres). Every graph node with
@@ -1735,8 +1737,10 @@ const cars = [];
   const body = new THREE.InstancedMesh(bodyG, new THREE.MeshLambertMaterial(), N), cab = new THREE.InstancedMesh(cabG, new THREE.MeshLambertMaterial({ color: 0x1c242c }), N), base = new THREE.InstancedMesh(baseG, new THREE.MeshLambertMaterial({ color: 0x15171a }), N);
   const PAINT = [0xf2f2f0, 0xf2f2f0, 0xc9cdd1, 0xc9cdd1, 0x8b9096, 0x2c2f33, 0x2c2f33, 0x2f4f7c, 0xa3231f, 0x5b6a4d, 0xd8d2c2], col = new THREE.Color();
   let sd = 77; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  const yrE = []; for (const a of list) for (const b of a.nb) if (busyRd(a, b) > 1) yrE.push([a, b]);
   for (let i = 0; i < N; i++) { const a = list[Math.floor(rnd() * list.length)], b = a.nb[Math.floor(rnd() * a.nb.length)];
-    cars.push({ a, b, t: rnd(), v: 7 + rnd() * 6, yaw: Math.atan2(b.x - a.x, b.y - a.y) }); body.setColorAt(i, col.setHex(PAINT[Math.floor(rnd() * PAINT.length)])); }
+    cars.push({ a, b, t: rnd(), v: 7 + rnd() * 6, yaw: Math.atan2(b.x - a.x, b.y - a.y) });
+    if (i < 22 && yrE.length) { const e = yrE[Math.floor(rnd() * yrE.length)], c = cars[i]; c.a = e[0]; c.b = e[1]; c.yr = true; c.yaw = Math.atan2(c.b.x - c.a.x, c.b.y - c.a.y); }   /* twenty-two regulars start on Yrjönkatu */ body.setColorAt(i, col.setHex(PAINT[Math.floor(rnd() * PAINT.length)])); }
   scene.add(body, cab, base); let parts = [body, cab, base], typed = false;
   const m4 = new THREE.Matrix4(), q4 = new THREE.Quaternion(), p3 = new THREE.Vector3(), s3 = new THREE.Vector3(1, 1, 1), UP = new THREE.Vector3(0, 1, 0);
   cars.update = dt => {
@@ -1753,7 +1757,9 @@ const cars = [];
         c.mv = Math.min(c.s * dt, room); c.pos += c.mv; lead = c; } }
     for (let i = 0; i < N; i++) { const c = cars[i]; let dx = c.b.x - c.a.x, dy = c.b.y - c.a.y, len = Math.hypot(dx, dy) || 1;
       c.t += c.mv / len;
-      if (c.t >= 1) { let opts = c.b.nb.filter(n => n !== c.a && may(c.b, n)); if (!opts.length) opts = c.b.nb.filter(n => may(c.b, n)); const nx = opts.length ? opts[Math.floor(rnd() * opts.length)] : c.a; c.a = c.b; c.b = nx; c.t = 0; dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
+      if (c.t >= 1) { let opts = c.b.nb.filter(n => n !== c.a && may(c.b, n)); if (!opts.length) opts = c.b.nb.filter(n => may(c.b, n)); const nx = opts.length ? pickRoad(c.b, opts) : c.a; c.a = c.b; c.b = nx; c.t = 0;
+        if (c.yr && busyRd(c.a, c.b) === 1 && Math.hypot(c.a.x - S.x, c.a.y - S.y) > 170) { const e = yrE[Math.floor(rnd() * yrE.length)]; if (Math.hypot(e[0].x - S.x, e[0].y - S.y) > 120) { c.a = e[0]; c.b = e[1]; c.s = c.v; } }   // a Yrjönkatu regular that has strayed returns there, out of sight
+        dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
       const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * 1.7, y = c.a.y + dy * c.t - ux * 1.7;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
       const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
@@ -2390,42 +2396,51 @@ setTarget();
 // Parties are spawned around the player and dropped when far. Owner's rules: a child (tytto, poika) always walks with at least one of mies_a,
 // nainen_a, nainen_b; other adults walk alone or in pairs; mies_b is rare. At a signalled crossing they wait for the green man (window.__sig.ped).
 {
-  const KIND = ['nainen_a', 'nainen_b', 'mies_a', 'mies_b', 'tytto', 'poika'], MOD = {}, NMAX = matchMedia('(pointer: coarse)').matches ? 14 : 30, parties = [];
-  let net = null, sd = 4711; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  const KIND = ['nainen_a', 'nainen_b', 'mies_a', 'mies_b', 'tytto', 'poika'], MOD = {}, NMAX = matchMedia('(pointer: coarse)').matches ? 18 : 46, parties = [];
+  let net = null, busy = [], busyE = [], sd = 4711; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   const pickW = (ks, ws) => { let r = rnd() * ws.reduce((a, b) => a + b, 0); for (let i = 0; i < ks.length; i++) if ((r -= ws[i]) <= 0) return ks[i]; return ks[0]; };
   const adult = () => pickW(['nainen_a', 'nainen_b', 'mies_a', 'mies_b'], [0.31, 0.31, 0.31, 0.07]), guard = () => pickW(['nainen_a', 'nainen_b', 'mies_a'], [1, 1, 1]), child = () => rnd() < 0.5 ? 'tytto' : 'poika';
   const cloneSk = src => { const map = new Map(), c = src.clone(); const wk = (a, b) => { map.set(a, b); for (let i = 0; i < a.children.length; i++) wk(a.children[i], b.children[i]); }; wk(src, c);
     src.traverse(o => { if (o.isSkinnedMesh) { const d = map.get(o); d.skeleton = new THREE.Skeleton(o.skeleton.bones.map(b => map.get(b)), o.skeleton.boneInverses); d.bind(d.skeleton, o.bindMatrix); } }); return c; };
   import('./walk.js').then(K => { const n = K.default.n, e = K.default.e, N = [];
     for (let i = 0; i < n.length; i += 2) N.push({ x: n[i] / 10, y: n[i + 1] / 10, nb: [] });
-    for (let i = 0; i < e.length; i += 3) { const a = N[e[i]], b = N[e[i + 1]], ok = p => p.x > OX0 + 8 && p.x < OX1 - 8 && p.y > OY0 + 8 && p.y < OY1 - 8; if (!ok(a) || !ok(b)) continue;
+    for (const i of K.default.b || []) N[i].busy = true;                          // pedestrian streets and Kauppatori: Yrjönkatu is the liveliest street in Pori (owner)
+    for (const i of K.default.g || []) { N[i].grid = true; if (bldTopAt(N[i].x, N[i].y) > TZs(N[i].x, N[i].y) + 1.5) N[i].dead = true; }   // square grid nodes inside the market pavilion
+    for (let i = 0; i < e.length; i += 3) { const a = N[e[i]], b = N[e[i + 1]], ok = p => p.x > OX0 + 8 && p.x < OX1 - 8 && p.y > OY0 + 8 && p.y < OY1 - 8; if (!ok(a) || !ok(b) || a.dead || b.dead) continue;
       a.nb.push({ n: b, c: e[i + 2] }); b.nb.push({ n: a, c: e[i + 2] }); }
-    net = N.filter(p => p.nb.length); }).catch(() => {});
+    net = N.filter(p => p.nb.length); busy = net.filter(p => p.busy);
+    for (const a of busy) if (!a.grid) for (const e of a.nb) if (e.n.busy && !e.n.grid) busyE.push({ a, e, w: Math.hypot(e.n.x - a.x, e.n.y - a.y) }); }).catch(() => {});
   KIND.forEach(k => import(`./npc_${k}.js`).then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
     new GLTFLoader().parse(buf.buffer, '', gl => { gl.scene.rotation.y = Math.PI; gl.scene.traverse(q => { q.userData.noT = true; if (q.isMesh) { q.frustumCulled = false; q.material.userData.noT = true; } }); MOD[k] = gl; }, () => {}); }).catch(() => {}));
   const mkChar = k => { const g = new THREE.Group(), root = cloneSk(MOD[k].scene); g.add(root); g.userData.noT = true; scene.add(g); const mix = new THREE.AnimationMixer(root), act = {};
     for (const c of MOD[k].animations) act[c.name] = mix.clipAction(c); if (act.Walk) act.Walk.play(); return { k, g, mix, act, cur: 'Walk', x: 0, y: 0, z: 0, yaw: 0, kid: k === 'tytto' || k === 'poika' }; };
   const setAnim = (c, name) => { if (c.cur === name || !c.act[name]) return; c.act[name].reset().play(); if (c.act[c.cur]) c.act[c.cur].crossFadeTo(c.act[name], 0.25, false); c.cur = name; };
   const count = () => parties.reduce((a, p) => a + p.m.length, 0);
-  const spawn = (px, py) => { const a = net[Math.floor(rnd() * net.length)], d = Math.hypot(a.x - px, a.y - py); if (d < 45 || d > 150) return;
+  const spawn = (px, py) => { let a = net[Math.floor(rnd() * net.length)], e = null, t = rnd(); const far = (x, y) => { const d = Math.hypot(x - px, y - py); return d > 18 && d < 95; };
+    if (rnd() < 0.75) {                                                          // most new parties start on a pedestrian street or the square near the player:
+      const ed = busyE.filter(q => far(q.a.x + (q.e.n.x - q.a.x) * t, q.a.y + (q.e.n.y - q.a.y) * t)), gr = parties.filter(q => q.b.grid).length < NMAX / 6 ? busy.filter(q => q.grid && far(q.x, q.y)) : [];   // a street by its length, so the long Yrjönkatu gets most
+      if (ed.length && (rnd() < 0.75 || !gr.length)) { const q = pickW(ed, ed.map(q => q.w)); a = q.a; e = q.e; } else if (gr.length) a = gr[Math.floor(rnd() * gr.length)]; }
+    if (!e) { e = a.nb[Math.floor(rnd() * a.nb.length)]; if (Math.hypot(a.x - px, a.y - py) > 150 || (!a.busy && Math.hypot(a.x - px, a.y - py) < 45)) return; }
     const r = rnd(); let ks;                                                   // 45 % alone, 20 % two adults, 35 % a family
     if (r < 0.45) ks = [adult()]; else if (r < 0.65) ks = [adult(), adult()];
     else { ks = [guard()]; if (rnd() < 0.3) ks.push(adult()); ks.push(child()); if (rnd() < 0.4) ks.push(child()); }
-    if (ks.some(k => !MOD[k])) return; const e = a.nb[Math.floor(rnd() * a.nb.length)];
-    const p = { a, b: e.n, c: e.c, pc: 0, t: rnd(), v: ks.length > 2 ? 1.0 : 1.15 + rnd() * 0.3, wait: false, m: ks.map(mkChar) };
-    p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.x = a.x; c.y = a.y; c.new = true; }); parties.push(p); };
+    if (ks.some(k => !MOD[k])) return;
+    const p = { a, b: e.n, c: e.c, pc: 0, t, v: ks.length > 2 ? 1.0 : 1.15 + rnd() * 0.3, wait: false, lat: (rnd() - 0.5) * 7, m: ks.map(mkChar) };          /* lat: on a pedestrian street the party keeps its own line, not the centre line */
+    p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.new = true; }); parties.push(p); };
   const sigFor = (a, b) => { const S_ = window.__sig; if (!S_ || !S_.poles.length) return undefined; const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, L = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x) / L, uy = (b.y - a.y) / L;
     let best = null, bd = 16; for (const q of S_.poles) { const d = Math.hypot(q.x - mx, q.y - my); if (d < bd && Math.abs(ux * q.ux + uy * q.uy) < 0.6) { bd = d; best = q; } } return best; };
   let acc = 0;
   window.__npc = { parties, update: dt => { if (!net || dt <= 0) return; const px = S.x, py = S.y;
     acc += dt; if (acc > 0.25) { acc = 0; if (count() < NMAX) spawn(px, py);
-      for (let i = parties.length - 1; i >= 0; i--) { const p = parties[i]; if (Math.hypot(p.m[0].x - px, p.m[0].y - py) > 185) { for (const c of p.m) { scene.remove(c.g); c.mix.stopAllAction(); } parties.splice(i, 1); } } }
+      else { let w = null, wd = 85; for (const q of parties) { const d = Math.hypot(q.m[0].x - px, q.m[0].y - py); if (d > wd) { wd = d; w = q; } } if (w) w.m[0].x = 1e6; }   /* full: the farthest party (over 85 m away) makes room, so the people gather where the player is */
+      for (let i = parties.length - 1; i >= 0; i--) { const p = parties[i]; if (Math.hypot(p.m[0].x - px, p.m[0].y - py) > 150) { for (const c of p.m) { scene.remove(c.g); c.mix.stopAllAction(); } parties.splice(i, 1); } } }
     for (const p of parties) { let dx = p.b.x - p.a.x, dy = p.b.y - p.a.y, len = Math.hypot(dx, dy) || 1;
       if (p.c && !p.pc && p.t < 0.02) { if (p.sg === undefined) p.sg = sigFor(p.a, p.b); p.wait = !!p.sg && !window.__sig.ped(p.sg.n, p.sg.a); } else p.wait = false;   // at the kerb of a signalled crossing
       if (!p.wait) p.t += p.v * dt / len;
-      if (p.t >= 1) { let o = p.b.nb.filter(e => e.n !== p.a); if (!o.length) o = p.b.nb; const e = o[Math.floor(rnd() * o.length)]; p.a = p.b; p.b = e.n; p.pc = p.c; p.c = e.c; p.sg = undefined; p.t = 0; dx = p.b.x - p.a.x; dy = p.b.y - p.a.y; len = Math.hypot(dx, dy) || 1; }
+      if (p.t >= 1) { const o = p.b.nb, gb = p.b.grid, e = pickW(o, o.map(q => q.n === p.a ? (o.length === 1 ? 1 : q.n.busy && !q.n.grid ? 2 : 0.02) : q.n.grid ? (gb ? 1 : 0.25) : q.n.busy ? 12 : gb ? 4 : 1)); p.a = p.b;   /* stay on the pedestrian streets; cross the square, do not circle in it */ p.b = e.n; p.pc = p.c; p.c = e.c; p.sg = undefined; p.t = 0; dx = p.b.x - p.a.x; dy = p.b.y - p.a.y; len = Math.hypot(dx, dy) || 1; }
       const ux = dx / len, uy = dy / len, lx = p.a.x + dx * p.t, ly = p.a.y + dy * p.t, near = Math.hypot(lx - px, ly - py) < 110;
-      for (const c of p.m) { const tx = lx + uy * c.off - ux * c.back, ty = ly - ux * c.off - uy * c.back, k = c.new ? 1 : Math.min(1, dt * 4); c.new = false;
+      const lt = p.a.busy && p.b.busy && !p.a.grid && !p.b.grid ? p.lat : 0;
+      for (const c of p.m) { const tx = lx + uy * (c.off + lt) - ux * c.back, ty = ly - ux * (c.off + lt) - uy * c.back, k = c.new ? 1 : Math.min(1, dt * 4); c.new = false;
         const mx = (tx - c.x) * k, my = (ty - c.y) * k, sp = Math.hypot(mx, my) / Math.max(dt, 1e-3); c.x += mx; c.y += my;
         if (sp > 0.15) { let d = Math.atan2(mx, my) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 8); }
         const g = carGround(c.x, c.y); if (g !== null) c.z += (g - c.z) * Math.min(1, dt * 10);

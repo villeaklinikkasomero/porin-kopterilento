@@ -1089,7 +1089,26 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
 - 19.11 klo 18.30 (omistaja: kappaleet ovat pitkiä): Radio Porikopterissa nyt **kolme** spiikki + mainos -paria ennen tunnusta ja kappaletta
   (`PAIRS = 3` speak.py:ssä). 22 spiikkiä, 18 mainosta (4 kahdesti), 8 kappaleen soittoa: 60 riviä, 37,4 min. Vain radio.json ja speak.py.
 
+## SISÄTILAT JA JALANKULKU – ALOITA TÄSTÄ (kooste 19.11.2026; yksityiskohdat luvuissa "klo 12–13 Jalankulku", "klo 14–15 Juseliuksen mausoleumi", "klo 15.30" ja "klo 16 oikeat maalaukset")
+
+- **Tila:** kaikki on omistajan kansiossa, pushaamatta. **Ei Modal-polttoa** – näkyy heti pushin jälkeen.
+  Pushattavat: `index.html`, `hahmo.js`, `kirkko_sisa.js`, `mausoleumi_sisa.js`, `blender/kirkko_sisa.py`, `blender/mausoleumi_sisa.py`, `blender/tex_art/*.jpg`,
+  `tools/sisa_to_js.py`, `tools/glb_swap_images.py`, `tools/hahmo/porikopteri_hahmo.py`.
+- **Pelissä:** Enter (F autossa/jalan, kosketuksella 🚶) = ulos pysähtyneestä autosta tai maahan laskeutuneesta kopterista, takaisin kyytiin, ovesta sisään/ulos.
+  W/S, A/D, Q/E, Shift juoksu, C kamera. Kierroksen kello seisoo jalan. Koodi: index.html, haku `WALK` ja `PLACES`.
+- **Valmiit sisätilat:** Keski-Porin kirkko (tornin länsiovi) ja Juseliuksen mausoleumi (itäsivun kuisti). Kumpikin on oma moduulinsa (GLB + valokartta + törmäykset),
+  ladataan kun kävelijä on alle 90 m ovesta.
+- **Uusi kohde:** 1) `blender/<nimi>_sisa.py` (malli: mausoleumi_sisa.py, käyttää kirkko_sisa.py:n työkaluja), 2) `python3 blender/<nimi>_sisa.py --out DIR --lm 2048 --samples 32`,
+  3) pelikansiossa `python3 tools/sisa_to_js.py DIR <nimi>_sisa`, 4) yksi rivi `PLACES`-listaan (map = paikallinen → karttametrit, probe = oven kohta ja suunta ulos).
+  Pelkkä tekstuurin vaihto ilman leivontaa: `tools/glb_swap_images.py`. Ympäristö: `pip install bpy pillow numpy opencv-python-headless --break-system-packages`.
+- **Taideteokset (omistajan päätökset 19.11):** mausoleumissa Gallen-Kallelan esityöt (public domain, Commons), kirkossa Ekmanin alttaritaulun luonnos (Kansallisgalleria, CC0);
+  lähdemaininta on #credit-rivillä. Enckellin lasimaalauksista ei löytynyt vapaata kuvaa → kuorin ikkunoissa muistuttava oma piirros.
+  Pilvi ei pääse Wikimediaan/Finnaan: kuvat sovelluksen selaimen kuvakaappauksina. Lataukset edelleen vain luvalla.
+- **Auki (omistaja päättää):** seuraava kohde; kirkon lehterit ja eteinen; mausoleumin kryptaan kävely; freskojen oikea järjestys seinillä; Tuonelan joella -työn alastomat
+  hahmot (pidetäänkö); Enckellin ikkunat omista valokuvista; hahmo näkyviin kulkuneuvoon (Sit-animaatio), askeläänet, ovien avautuminen.
+
 ## ILLAN MODAL-JONO (omistaja polttaa illalla – PÄIVITÄ TÄTÄ LISTAA, älä tee uutta)
+(Sisätilat ja jalankulku eivät kuulu tähän jonoon: ne eivät tarvitse polttoa, vain pushin – ks. edellinen luku "SISÄTILAT JA JALANKULKU".)
 Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 mennessä viedyn). Sen jälkeen kertyneet:
 
 | Lohko | Talot | Lisätty |
@@ -1098,3 +1117,69 @@ Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 m
 | c064 | 107 (Yrjönkatu 25) | 19.11 klo 17 |
 
 Ajettava illalla (push ensin, odota "porikit image" vihreäksi): `city 64 c048,c064`
+
+## 19.11.2026 klo 17 – ALOITA TÄSTÄ (uusi chat: JULKISIVUINVENTAARIO, Itsenäisyydenkatu jatkuu)
+
+Vastaa suomeksi, lyhyesti, kuva jokaisesta muutoksesta (Street View vasemmalla, peli oikealla). Tämä luku riittää aloitukseen; yksityiskohdat ovat
+ylempänä luvuissa "ITSENÄISYYDENKATU, keskustan erä" (taulukko), "MODAL-POLTOISTA PUUTTUIVAT…", "Antinkadun loput talot" ja "ILLAN MODAL-JONO".
+
+### Tilanne
+- **Antinkatu VALMIS.** Itsenäisyydenkadun keskustan 15 talosta valmiina 415, 118, 116, 119, 121, 107, 7. **Tekemättä: 600 (Bepop), 601, 585 (vanha
+  linja-autoasema), 1228, 164, 166, 167.** 113 auki (vaatii jalanjälkiratkaisun kuten 136), 115 vain väri korjattu, 569 jätetty (aidan takana).
+  Päivitä taulukon Tila-sarake jokaisen talon jälkeen – valmiita ei tehdä uudelleen.
+- Kaikki koodi on käyttäjän kansiossa (takaisinluvulla tarkistettu). Modal toimii (PR #62). **Omistaja polttaa illalla:** lisää jokainen uusi lohko
+  lukuun "ILLAN MODAL-JONO" (nyt `city 64 c048,c064`).
+- **Auki omistajalta:** "katot irti seinistä keskustassa" – ei toistunut pilvessä, odottaa kuvakaappausta ja paikkaa. Korjauskierroksen lista on luvussa
+  "Antinkadun loput talot" (1726:n korkeus ym.).
+
+### Säännöt (omistaja)
+- Push ja Modal-ajot tekee omistaja; avaimia/salaisuuksia ei käsitellä. Lataukset ja poistot vain luvalla.
+- Street View -kuvia ei viedä peliin eikä GitHubiin: niistä luetaan vain mitat, värit, materiaalit. Vertailukuvat vain kansioon `Claude outputs/` (gitignore).
+- Tunnista talo ID:stä ja osoitteesta ennen muutosta. Älä keksi olemattomia: näkemätön osa jätetään paljaaksi tai merkitään "peilattu/symmetria" skriptiin
+  ja taulukkoon. Logoja, nimikilpiä ja taideteoksia ei kopioida (kyltit tyhjinä väripintoina). Lukittuja (KARHU-värit, 603/602/604) ei muuteta.
+- **Toinen chat muokkaa samaa kansiota (radio, jalankulku, sisätilat):** stage `index.html`, `SIIRTO_TOISELLE_TILILLE.md`, `zones.py`, `facades.json`,
+  `styles.json` AINA juuri ennen vientiä, tee muutos laitteen versioon ja käytä `expectedMtimeMs`. Tämä tiedosto on kerran ylikirjoitettu vanhalla pohjalla.
+
+### Ympäristö (pilvi alkaa tyhjänä, ~5 min)
+```
+git clone https://github.com/villeaklinikkasomero/porin-kopterilento.git /home/claude/pori      # + stage koneelta GitHubia uudemmat tiedostot
+pip install bpy shapely opencv-python-headless scipy pillow --break-system-packages
+mkdir -p /home/claude/mmlproc /home/claude/out && cd /home/claude/mmlproc && tar xzf /home/claude/pori/pipeline/data/porikit_data.tgz && mv data/mmlproc/* .
+cd /home/claude/pori && nohup python3 -m http.server 8765 &        # kuolee vuorojen välissä: käynnistä uudelleen ennen gshotia
+sed -i "s#/home/claude/.npm-global/lib/node_modules/#/opt/npm-tools/node_modules/#" tools/rautalanka/gshot_sv.mjs     # ÄLÄ vie tätä muutosta kansioon
+```
+Poltto (YKSI kerrallaan, 8 Gt muisti – kaksi yhtä aikaa kaatuu): c-lohko `cd blender; PYTHONPATH=/home/claude python3 city.py c048 8` (~140 s),
+nimetty lohko `python3 run.py tori0 8`. Tulos `/home/claude/out/bl_<lohko>.js` → kopioi `/home/claude/pori/` testiä varten (EI kansioon; Modal tekee 64 näytettä).
+Pelikuva: `ZONE=- node tools/rautalanka/gshot_sv.mjs index.html out/ views.json` (`[{"k":"a","x":..,"y":..,"h":..,"p":..,"fov":90}]`).
+
+### Yhden talon työtapa (15–20 min)
+1. **Seinälinja:** kadunpuoleinen seinä `lod2.js`:stä (apuri: lue W-kolmiot, tulosta janat joissa z alkaa 0:sta), päätepisteet tarkennetaan `raw.pkl`:stä
+   (3 desimaalia). `a`→`b` niin että katu on oikealla. lod2.js pyöristää 0,1 m: 4 cm kuoren takana oleva linja piilottaa itemit.
+2. **Street View** sovelluksen selaimella: `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=LAT,LON&heading=H&pitch=P&fov=90`, missä
+   lat = 61.486 + y/111437, lon = 21.796 + x/53278 (pano kadun keskilinjalta seinän kohdalta, heading kohtisuoraan seinään). Yksi erä = navigate + 4×10 s
+   odotus (erän raja 50 s), sitten ERILLINEN screenshot; jos sumea, odota 15–25 s ja ota uusi. Lue panon todellinen paikka URL:sta (`@lat,lon`).
+   Kuva tallentuu pilveen `/tmp/claude-tool-results/*/…jpg` (743×1026, pysty-FOV 90).
+3. **Oikaisu:** `python3 tools/rautalanka/rectify.py kuva.jpg cx cy heading pitch Ax,Ay Bx,By s0 s1 z0 z1 out.png 36`. Tarkista mittakaava: julkisivun
+   pituus vs. seinälinja ja räystäs vs. LoD2 `e`; jalkakäytävän z (0–1 m) vähennetään. Jos poikkeaa, skaalaa s ja z ja kirjaa kaava skriptin alkuun.
+4. **Skripti** `tools/rautalanka/facades/f<ID>.py` (mallit f7.py, f121.py, f116.py, f409.py, f136.py): itemit `box`, `winp`, `glass`, `door`, `balc`;
+   seinälle `bare` + `kind` (plaster / brick / wood). `box` ikkunan alla enintään 2,5 cm paksu (winp-kehys on 3 cm). Punainen/oranssi pinta: `"nobrick": True`.
+   Toistuva julkisivu: mittaa yksi moduuli ja toista. Kuori taloa pienempi → `footprint=True` SPEC + index.html `L2OLD`/`HFIX` (136).
+5. **Testipoltto 8 näytettä**, pelikuva samasta panosta, vertailukuva rinnakkain. Pohjois- ja länsiseinät jäävät poltossa varjoon (tummuvat) – ei vika.
+6. **Vienti:** stage → muutos laitteen versioon → `device_commit_files` (expectedMtimeMs) → stage uudelleen ja `cmp`. `node --check` index.html:n
+   module-skriptille jos sitä muutettiin. Päivitä taulukko ja ILLAN MODAL-JONO.
+
+### Modal (omistaja)
+Push → odota Actions "porikit image" vihreäksi → Actions "porikit run": `city 64 <lohkot>` / `bake <nimetyt> --samples 64` → "porikit collect" → yhdistä PR.
+Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n POSITION-count); Modal-lokissa rivi `facades.json: <polku>`.
+
+### 19.11 klo 19: lisää väkeä kävelykadulle ja torille, lisää autoja Yrjönkadulle (omistaja: Yrjönkatu on Porin vilkkain katu)
+- `build_walk.py` → walk.js: uudet listat `b` (vilkkaat solmut = OSM highway=pedestrian: Yrjönkadun kävelykatu, Kauppatori, Itäpuisto ym.) ja `g`
+  (Kauppatorin 9 m ruudukko, 39 solmua, 8-naapurit; peli pudottaa rakennuksen sisään osuvat = paviljonki).
+- Kävelijät (index.html): enintään 46 hahmoa (kosketus 18); 75 % uusista ryhmistä syntyy vilkkaalle väylälle 18–95 m pelaajasta (kävelykadun särmä
+  pituuden mukaan painotettuna, tori enint. 1/6 ryhmistä); solmuvalinnassa vilkas väylä paino 4, toriruudukkoon sisään 0,25; kävelykadulla ryhmällä oma
+  sivusiirtymä (±3,5 m) eikä kaikki kulje keskiviivaa; poisto >150 m.
+- Autot: 22 "Yrjönkadun vakioautoa" (`c.yr`) aloittaa Yrjönkadulta ja palaa sinne näkymättömissä (>170 m pelaajasta), jos on eksynyt muualle;
+  lisäksi risteyksessä Yrjönkadun haaran paino 30. Simulaatio 5 min: Yrjönkadulla 16–21 autoa (ennen 0–2).
+- Lopullinen kävelijälogiikka: solmuvalinnassa vilkas väylä paino 12, paluu samaa kävelykatua 2 (muuten 0,02), toriruudukkoon sisään 0,25; ja kun hahmoja on
+  täysi määrä, kauimmainen ryhmä (>85 m pelaajasta) poistetaan 0,25 s välein → väki kerääntyy sinne missä pelaaja on. Simulaatio 5 min pelaaja
+  kävelykadulla: 33/48 hahmoa kävelykadulla (ennen 0–3). Torilla seistessä sama logiikka tuo väen torille ja sen laidoille.
