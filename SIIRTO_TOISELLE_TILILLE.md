@@ -1033,3 +1033,15 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
   kirkko_sisa.py tuottaa samat tekstuurit seuraavassa täydessä ajossa.
 - **index.html:** tekijätietoriville (#credit) lisätty maalausten lähdemaininta. Pushattavat: index.html, kirkko_sisa.js, mausoleumi_sisa.js, blender/tex_art/*,
   blender/kirkko_sisa.py, blender/mausoleumi_sisa.py, tools/glb_swap_images.py. Kuva `Claude outputs/mausoleumi_sisa_19_11/oikeat_maalaukset.jpg`.
+
+### 19.11 klo 16: bottikävelijät (index.html + walk.js + npc_*.js, ei polttoa)
+- Mallit omistajalta: `npc_nainen_a/nainen_b/mies_a/mies_b/tytto/poika.js` (GLB base64:nä kuten hahmo.js; Idle 3 s, Walk 1 s, 53 luuta, ~11–12k kolmiota).
+- Verkko: `python3 tools/roads/build_walk.py` → `walk.js` (OSM footway, sidewalk, pedestrian, path, steps, cycleway; 3970 solmua, 4522 särmää;
+  särmä joka ylittää tai päättyy ajoradan keskiviivaan = suojatien puolikas, lippu 1). Kävelijät liikkuvat VAIN tässä verkossa.
+- index.html: lohko "people on foot" ennen `window.__game`-riviä, `window.__npc` (`update(dt)` pääsilmukassa cars.update:n jälkeen). Enintään 30 hahmoa
+  (kosketuslaitteella 14), ryhmät syntyvät 45–150 m pelaajasta ja poistuvat >185 m; animaatio vain <110 m.
+- **Omistajan säännöt:** lapsi (tytto/poika) kulkee aina vähintään yhden huoltajan kanssa (mies_a, nainen_a tai nainen_b); muut aikuiset yksin tai pareittain;
+  mies_b harvoin (paino 0,07). Jako: 45 % yksin, 20 % kaksi aikuista, 35 % perhe (huoltaja, 30 % +toinen aikuinen, 1–2 lasta).
+- Valot: suojatien reunalla ryhmä etsii lähimmän valopylvään (<16 m, kadun suunta poikittain) ja odottaa `__sig.ped`-vihreää; valottomat suojatiet
+  ylitetään suoraan (autot eivät väistä kävelijöitä, eivätkä kävelijät autoja). Simuloitu 5 min: ei virheitä, ei lapsia ilman huoltajaa, pisin odotus 20 s.
+- Auki: OSM-polku voi olla pari metriä sivussa pelin kivetyksestä (puistossa nurmella); kävelijät eivät väistä pelaajaa eivätkä toisiaan.
