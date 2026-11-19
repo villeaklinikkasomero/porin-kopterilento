@@ -1623,6 +1623,10 @@ function carGround(x, y) {
 }
 function carBlocked(x, y, yaw) {   // a corner of the car inside a house or over open water
   const sn = Math.sin(yaw), cs = Math.cos(yaw), g = TZs(x, y);
+  // a traffic car in the way (19.11.2026): three circles along each car; only a move that brings the two closer is refused, so the player can always back away
+  if (window.__sig && window.__sig.cars && VEH === 'car') { const C = window.__sig.cars; for (let i = 0; i < C.length; i++) { const o = C[i]; if (o.wx === undefined) continue; const dx = o.wx - x, dy = o.wy - y, d2 = dx * dx + dy * dy; if (d2 > 30) continue;
+      const os = Math.sin(o.yaw), oc = Math.cos(o.yaw); let hit = false; for (const f of [1.4, 0, -1.4]) for (const h of [1.4, 0, -1.4]) { const ex = (x + sn * f) - (o.wx + os * h), ey = (y + cs * f) - (o.wy + oc * h); if (ex * ex + ey * ey < 3.06) hit = true; }
+      if (hit && d2 < (o.wx - S.x) ** 2 + (o.wy - S.y) ** 2 - 1e-4) return true; } }
   if (x > HALL.bb[0] - 3 && x < HALL.bb[2] + 3 && y > HALL.bb[1] - 3 && y < HALL.bb[3] + 3) for (let f = -2.1; f < 2.11; f += 0.3) for (const r of [0.9, -0.9]) {   // near the hall: both sides sampled every 0.3 m, so its 0.4 m walls cannot slip between the corner points
     const px = x + sn * f + cs * r, py = y + cs * f - sn * r; if (!inHall(px, py) && bldTopAt(px, py) > Math.max(g, TZg(px, py)) + 1.4) return true; }
   for (const [f, r] of [[2.1, 0.9], [2.1, -0.9], [-2.1, 0.9], [-2.1, -0.9], [0, 0.95], [0, -0.95]]) {
@@ -1776,11 +1780,18 @@ const cars = [];
   const yrE = []; for (const a of list) for (const b of a.nb) if (busyRd(a, b) > 1) yrE.push([a, b]);
   for (let i = 0; i < N; i++) { const a = list[Math.floor(rnd() * list.length)], b = a.nb[Math.floor(rnd() * a.nb.length)];
     cars.push({ a, b, t: rnd(), v: 7 + rnd() * 6, yaw: Math.atan2(b.x - a.x, b.y - a.y) });
-    if (i < 22 && yrE.length) { const e = yrE[Math.floor(rnd() * yrE.length)], c = cars[i]; c.a = e[0]; c.b = e[1]; c.yr = true; c.yaw = Math.atan2(c.b.x - c.a.x, c.b.y - c.a.y); }   /* twenty-two regulars start on Yrjönkatu */ body.setColorAt(i, col.setHex(PAINT[Math.floor(rnd() * PAINT.length)])); }
+    if (i < 22 && yrE.length) { const e = yrE[Math.floor(rnd() * yrE.length)], c = cars[i]; c.a = e[0]; c.b = e[1]; c.yr = true; c.yaw = Math.atan2(c.b.x - c.a.x, c.b.y - c.a.y); }   /* twenty-two regulars start on Yrjönkatu */ { const hx = PAINT[Math.floor(rnd() * PAINT.length)]; cars[i].paint = hx; body.setColorAt(i, col.setHex(hx)); } }
   scene.add(body, cab, base); let parts = [body, cab, base], typed = false;
   const m4 = new THREE.Matrix4(), q4 = new THREE.Quaternion(), p3 = new THREE.Vector3(), s3 = new THREE.Vector3(1, 1, 1), UP = new THREE.Vector3(0, 1, 0);
+  // doors for a car that has parked (19.11.2026): the car models are one piece, so a door leaf in the car's paint is hinged on the front door seam over the
+  // body and a dark panel shows the opening behind it. Two sets are enough (pool); cars only (types 0-2), vans and lorries do not park.
+  const doorPool = [], mkDoor = () => { const g = new THREE.Group(), mat = new THREE.MeshLambertMaterial({ color: 0x888888 }), dk = new THREE.MeshLambertMaterial({ color: 0x14171a }), D = { g, mat };
+    for (const [side, k] of [[1, 'R'], [-1, 'L']]) { const h = new THREE.Group(); h.position.set(side * 0.93, 0, 0.58); const lg = new THREE.BoxGeometry(0.05, 0.6, 1.04); lg.translate(0, 0.68, -0.52); const wg = new THREE.BoxGeometry(0.04, 0.36, 1.0); wg.translate(0, 1.16, -0.52);   /* the car's nose is +z: hinge on the front seam, leaf towards the tail */
+      h.add(new THREE.Mesh(lg, mat), new THREE.Mesh(wg, dk)); const og = new THREE.BoxGeometry(0.03, 0.92, 1.0); og.translate(side * 0.925, 0.84, 0.06); const o = new THREE.Mesh(og, dk); g.add(h, o); D[k] = h; D['o' + k] = o; }
+    g.visible = false; scene.add(g); return D; };
   cars.update = dt => {
-    if (dt > 0) sigT += dt; const Q = new Map();                                             // cars by street segment, the front one first
+    if (dt < 0) dt = 0; sigT += dt; const Q = new Map(); let plc = false; try { plc = VEH === 'car' && !WALK.on; } catch (e) {}      // the player is driving: the traffic queues behind his car too
+                                                // cars by street segment, the front one first
     for (let i = 0; i < N; i++) { const c = cars[i], k = c.a.id * 65536 + c.b.id; let q = Q.get(k); if (!q) Q.set(k, q = []); if (c.pk) c.mv = 0; else q.push(c); if (c.lat === undefined) c.lat = 1.7;
       c.len = Math.hypot(c.b.x - c.a.x, c.b.y - c.a.y) || 1; c.pos = c.t * c.len; if (c.s === undefined) c.s = c.v; }
     for (const q of Q.values()) { if (q.length > 1) q.sort((m, n) => n.pos - m.pos); let lead = null;
@@ -1788,6 +1799,7 @@ const cars = [];
         if (g && !(c.a.sig && c.a.sig.j === g.j)) { const sp = Math.max(c.len - SR, 0), st = sigState(c.b, c.a);          // red, or a yellow it can still stop for
           if (c.pos <= sp + 0.3 && (st === 2 || (st === 1 && sp - c.pos > c.s * 1.2))) room = sp - c.pos; }
         if (lead) room = Math.min(room, lead.pos - 6.5 - c.pos);
+        if (plc) { const ux = (c.b.x - c.a.x) / c.len, uy = (c.b.y - c.a.y) / c.len, rx = S.x - c.a.x, ry = S.y - c.a.y, ps = rx * ux + ry * uy, la = rx * uy - ry * ux; if (ps > c.pos + 1 && ps - c.pos < 45 && Math.abs(la - c.lat) < 2.0) room = Math.min(room, ps - c.pos - 6.5); }
         room = Math.max(room, 0); const tv = Math.min(c.v, Math.sqrt(7 * room));
         c.s = tv > c.s ? Math.min(tv, c.s + 2.5 * dt) : Math.max(tv, c.s - 7 * dt); if (room < 0.02) c.s = 0;
         c.mv = Math.min(c.s * dt, room); c.pos += c.mv; lead = c; } }
@@ -1795,14 +1807,17 @@ const cars = [];
       c.t += c.mv / len;
       if (c.pk) { const P = c.pk;                                                // 0 pulling in, 1 parked, 2 pulling out
         if (P.ph === 0) { const rem = (P.t1 - c.t) * len, tv = Math.min(c.v, Math.sqrt(Math.max(0, 5 * rem)) + 0.2); c.s += Math.max(-6 * dt, Math.min(2 * dt, tv - c.s)); c.t = Math.min(P.t1, c.t + c.s * dt / len); if (rem < 14) c.lat += (P.lat - c.lat) * Math.min(1, dt * 1.6);
-          if (rem < 0.25) { c.s = 0; c.lat = P.lat; P.ph = 1; P.T = 35 + rnd() * 50; if (window.__npc && window.__npc.arrive) window.__npc.arrive(P.x, P.y); } }
-        else if (P.ph === 1) { if ((P.T -= dt) < 0) P.ph = 2; }
+          if (rem < 0.25) { c.s = 0; c.lat = P.lat; P.ph = 1; P.T = 35 + rnd() * 50; P.e = 0; P.two = rnd() < 0.4; P.door = doorPool.pop() || mkDoor(); P.door.mat.color.setHex(c.paint || 0x8b9096); } }
+        else if (P.ph === 1) { P.e += dt; P.ang = P.e < 0.6 ? P.e / 0.6 : P.e < 2.6 ? 1 : P.e < 3.2 ? (3.2 - P.e) / 0.6 : 0;                 // door opens 0.6 s, people out, closes after 2.6 s
+          if (P.e >= 0.6 && !P.out) { P.out = true; if (window.__npc && window.__npc.arrive) window.__npc.arrive(P.x, P.y); }
+          if (P.e > 3.2 && P.door) { P.door.g.visible = false; doorPool.push(P.door); P.door = null; }
+          if ((P.T -= dt) < 0) P.ph = 2; }
         else { c.lat += (1.7 - c.lat) * Math.min(1, dt * 1.2) - 0.02 * dt; if (c.lat <= 1.75) { c.lat = 1.7; c.pk = null; c.s = 0; } } }
       if (c.t >= 1) { let opts = c.b.nb.filter(n => n !== c.a && may(c.b, n)); if (!opts.length) opts = c.b.nb.filter(n => may(c.b, n)); const nx = opts.length ? pickRoad(c.b, opts) : c.a; c.a = c.b; c.b = nx; c.t = 0;
         if (c.yr && busyRd(c.a, c.b) === 1 && Math.hypot(c.a.x - S.x, c.a.y - S.y) > 170) { const e = yrE[Math.floor(rnd() * yrE.length)]; if (Math.hypot(e[0].x - S.x, e[0].y - S.y) > 120) { c.a = e[0]; c.b = e[1]; c.s = c.v; } }   // a Yrjönkatu regular that has strayed returns there, out of sight
         // parking (19.11.2026): now and then a car near the player pulls in to the kerb half-way along the new street (if there is a kerb 3.8-9 m from the
         // lane centre line and no parked car in the spot), people get out (window.__npc.arrive) and it drives on after 35-85 s
-        if (!c.pk && !c.yr && ROAD.on && typeof PARKED !== 'undefined' && rnd() < 0.06) { const ex = c.b.x - c.a.x, ey = c.b.y - c.a.y, el = Math.hypot(ex, ey), mx = c.a.x + ex * 0.55, my = c.a.y + ey * 0.55;
+        if (!c.pk && !c.yr && !(c.k > 2) && ROAD.on && typeof PARKED !== 'undefined' && rnd() < 0.06) { const ex = c.b.x - c.a.x, ey = c.b.y - c.a.y, el = Math.hypot(ex, ey), mx = c.a.x + ex * 0.55, my = c.a.y + ey * 0.55;
           if (el > 30 && !c.b.sig && inCore(mx, my) && Math.hypot(mx - S.x, my - S.y) < 170) { const vx = ex / el, vy = ey / el; let dk = 0, seen = false; for (let q = 0.5; q <= 9; q += 0.5) { if (ROAD.asphAt(mx + vy * q, my - vx * q)) { seen = true; continue; } if (seen) dk = q; break; }
             const tx = mx + vy * (dk - 1.2), ty = my - vx * (dk - 1.2); let free = dk >= 3.8; if (free) for (let k = 0; k < PARKED.length; k += 4) if (Math.hypot(PARKED[k] / 10 - tx, PARKED[k + 1] / 10 - ty) < 5.5) { free = false; break; }
             if (free) for (const o of cars) if (o.pk && Math.hypot(o.pk.x - tx, o.pk.y - ty) < 9) { free = false; break; }
@@ -1810,7 +1825,8 @@ const cars = [];
         dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
       const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * c.lat, y = c.a.y + dy * c.t - ux * c.lat;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
-      const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
+      const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); c.wx = x; c.wy = y;
+      if (c.pk && c.pk.door) { const D = c.pk.door, a = (c.pk.ang || 0) * 1.15; D.g.position.copy(p3); D.g.quaternion.copy(q4); D.g.visible = true; D.R.rotation.y = -a; D.L.rotation.y = c.pk.two ? a : 0; D.oR.visible = a > 0.02; D.oL.visible = c.pk.two && a > 0.02; } }
     for (const q of parts) q.instanceMatrix.needsUpdate = true;
     if (sigUpd) sigUpd();
   };
@@ -2234,7 +2250,7 @@ function stepWalk(dt) {
   S.alt = WALK.z + SKID; S.vx = Math.sin(S.yaw) * WALK.v; S.vy = Math.cos(S.yaw) * WALK.v; S.vz = 0;
   if (walkMix) { const sp = Math.max(Math.abs(WALK.v), Math.abs(WALK.vs)), want = sp < 0.15 ? 'Idle' : sp < 2.8 ? 'Walk' : 'Run';
     if (want !== walkCur && walkAct[want]) { const a = walkAct[want], b = walkAct[walkCur]; a.reset().play(); if (b) a.crossFadeFrom(b, 0.22, false); walkCur = want; }
-    if (walkAct[walkCur]) walkAct[walkCur].timeScale = walkCur === 'Walk' ? Math.max(0.5, sp / 1.45) * (WALK.v < -0.05 ? -1 : 1) : walkCur === 'Run' ? sp / 4.3 : 1;
+    if (walkAct[walkCur]) walkAct[walkCur].timeScale = walkCur === 'Walk' ? Math.max(0.5, sp / 1.36) * (WALK.v < -0.05 ? -1 : 1) : walkCur === 'Run' ? sp / 4.65 : 1;   // clip strides (tools/hahmo/porikopteri_hahmo.py WALK/RUN): 1.36 m in 1 s, 3.10 m in 0.667 s -> the planted foot does not slide
     walkMix.update(dt); }
   walkG.visible = camMode !== 1;
   if (VEH !== 'car') { S.rotorSpd += (0 - S.rotorSpd) * Math.min(1, dt * 0.6); rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt; }

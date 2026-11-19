@@ -1506,3 +1506,40 @@ index.html, haku `HALL`: `inHall` / `hallZ` / muutokset `carBlocked`, `carGround
 - Pysähtyessä `window.__npc.arrive(x, y)`: 50 % yksi aikuinen, 30 % kaksi, 20 % huoltaja + lapsi syntyy reunakiven taakse ja kävelee lähimpään
   kävelyverkon solmuun (<30 m). Ovet eivät aukea eikä hahmoa näy autossa ennen pysähdystä. Auto lähtee tyhjänä; kukaan ei palaa siihen.
 - Simulaatio 400 s pelaaja keskustassa: 6 pysäköintiä, 6 ulosnousua, kaikki autot lähtivät, ei virheitä. Lisäksi `cars.update`: negatiivinen dt nollataan.
+
+### 19.11 klo 23.30: pysäköivän auton ovi aukeaa + törmäykset liikenteen kanssa
+- **Ovi:** automallit ovat yksi kappale (blender/cars.py piirtää ovisaumat vain viivoina), joten mallia ei muutettu. Pelissä pysäköineen auton päälle
+  asetetaan auton värinen ovilehti (sarana etuoven etusaumassa, auton nokka = paikallinen +z) ja tumma aukkopaneeli; `mkDoor`/`doorPool` liikennelohkossa.
+  Jalkakäytävän puolen ovi aukeaa aina, kadun puolen 40 %:ssa (`P.two`). Aikajana `P.e`: 0–0,6 s aukeaa, 0,6 s ihmiset ulos (`__npc.arrive`),
+  2,6–3,2 s sulkeutuu. Vain henkilöautot (tyypit 0–2) pysäköivät. Mitat on tehty viistoperälle; farmarissa ja muissa ovi voi olla hieman sivussa saumasta.
+- **Törmäys:** `carBlocked` estää pelaajan autoa ajamasta liikenteen auton sisään (kolme ympyrää/auto, säde 1,75 m; vain lähentävä liike estetään, joten
+  peruuttaa voi aina). Botit jarruttavat ja jonottavat pelaajan auton taakse, kun se on samalla katuosuudella niiden kaistalla (<45 m edessä).
+  Botit tallentavat sijaintinsa `c.wx, c.wy`. Tekemättä: botti–botti-väistö risteyksissä (ajavat yhä ristiin toistensa läpi valottomissa risteyksissä),
+  botin sivutörmäys pelaajaan, kopteri ja kävelijät eivät vaikuta autoihin. Törmäystä ei testattu ajamalla (headless ei käynnistä peliä).
+- Huom: laitteen index.html:ssä oli c23:n jälkeen taas vanha rivi `if (dt > 0) sigT += dt` – korvattu uudelleen muotoon `if (dt < 0) dt = 0; sigT += dt`.
+
+### 20.11 klo 00: bottien väistäminen, ruuhkien purku, pelaajan auton asteittainen vaurio
+- **Risteykset ilman valoja:** solmu (≥3 haaraa) on kerrallaan yhden botin varaama (`n.res`, `n.resT`; varaus <12 m ennen solmua, muut pysähtyvät 7 m ennen;
+  vapautuu 0,9 s ylityksen jälkeen tai 5 s kuluttua). Ensin tullut ajaa ensin – ei oikealta tulevan sääntöä.
+- **Pinoutuminen:** botti ei aja seuraavalle osuudelle, jos sen alussa (<6,5 m) on auto (odottaa kulmassa enint. 8 s, `c.blk`). Yrjönkadun paino 30 → 8
+  (paino 30 + 22 vakioautoa teki lyhyelle osuudelle pysyvän ruuhkan: 4–6 autoa päällekkäin yli 4 min). Botti, joka seisoo >30 s yli 120 m pelaajasta,
+  siirretään satunnaiseen solmuun (`c.st`). Simulaatio 6 min: päällekkäisiä autopareja 18 → 2,3 / näyte, pisin seisonta 346 s → 30 s.
+- **Pelaajan auto:** kolhun vahinko (|v|−4)·2,2 (ennen (|v|−5)·4): 50 km/h ≈ 22 %. Kunto <60: huippunopeus 22 m/s + harmaa savu; <45: ohjaus vetää
+  oikealle (0,03 rad); <30: 14 m/s + musta savu; 0 = hajoaa kuten ennen. Savu = `CAR.smoke` (≤14 läpikuultavaa palloa, noT). Ei korjaantumista ajon aikana.
+  Ei testattu ajamalla (headless ei käynnistä peliä).
+
+### 19.11 klo 24: pelaajan kävely ja juoksu uusiksi (länkisääret pois) – hahmo.js, index.html, tools/hahmo/
+- **Syy:** vanha askellus heilutti lonkkaa ja polvea siniaalloilla; nilkat kulkivat 26 cm toisistaan (lonkkanivelet 23 cm), jalat olivat ilmassa
+  kaksoistukivaiheessa ja liukuivat maata pitkin. Sama klippi on yhä NPC:illä (`npc_*.js`) – niitä EI muutettu.
+- **Uusi askellus** (`Poser.gait` + `_foot`, parametrit `Poser.WALK` / `Poser.RUN`): jalkaterän rata määrätään ensin (kantaisku → koko pohja →
+  päkiäponnistus → heilahdus), lonkka ja polvi ratkaistaan siitä kahden luun IK:lla, polvi osoittaa menosuuntaan. Nilkat 12 cm (kävely) / 8 cm
+  (juoksu) toisistaan, varpaat 6° ulos, varvasluu (`ball_*`) taipuu ponnistuksessa. Lantio: kierto, kallistus, sivuttaisliike tukijalan päälle,
+  pystyliike; hartiat kiertyvät vastaan; juoksussa lentovaihe. Mitattu: tukijalan päkiä pysyy paikallaan < 1 mm (kävely ja juoksu).
+- Idle: `LEG_IN` 4,5 → 7,0 (nilkat 26 → 19 cm), ettei asento levene pysähtyessä. Sit ennallaan (4,5).
+- **index.html:** `timeScale` vastaa klippien askelpituutta: Walk `sp / 1.36` (ennen 1.45), Run `sp / 4.65` (ennen 4.3). Jos WALK/RUN `stride`
+  muuttuu, muuta nämä: Walk = stride, Run = stride / 0,667.
+- **Uusi työkalu `tools/hahmo/kavely_glb.py`** (`pip install mathutils`): lukee `Poser`-luokan porikopteri_hahmo.py:stä ja leipoo Idle/Walk/Run/Sit
+  suoraan hahmo.js:n GLB:hen ilman Blenderia (verkko ja tekstuurit eivät muutu). `--check` vertaa skriptiä ja GLB:tä (0 = samat). hahmo.js on
+  tehty tällä; Blender-skriptiä EI ajettu uudelleen (sama Poser-koodi, `bake_action` hyväksyy nyt myös siirtymävektorin).
+- Tarkistettu pilvessä renderöimällä klipit edestä ja sivusta (three.js headless); pelissä ei testattu (begin() ei käynnisty headless).
+- Auki: sama askellus NPC:ille (mallit eri mittaisia → kavely_glb.py pitää ajaa kullekin npc_*.js:lle ja tarkistaa); sivuaskel (Q/E) käyttää Walk-klippiä.

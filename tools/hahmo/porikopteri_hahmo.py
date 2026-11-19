@@ -12,7 +12,7 @@ Ajo: blender --background --python porikopteri_hahmo.py -- --data <mpfb2>/src/mp
 GLB:ssa hahmo katsoo +Z-suuntaan (three.js), Y on ylos, origo maassa jalkojen valissa, pituus 1,80 m.
 """
 import bpy, bmesh, math, os, sys, json, gzip
-from math import sin, cos, pi, radians, acos
+from math import sin, cos, pi, radians, acos, sqrt
 from mathutils import Vector, Matrix, Quaternion
 from mathutils.bvhtree import BVHTree
 
@@ -707,15 +707,20 @@ def build_armature(base, col):
 # ----------------------------------------------------------------------------
 # ANIMAATIOT  (kierrot maailman akselien ympari lepoasennosta; eteenpain = negatiivinen X)
 # ----------------------------------------------------------------------------
-LEG_IN = 4.5        # pohjamalli seisoo haara-asennossa; jalkoja tuodaan sisaan (astetta)
+LEG_IN = 7.0        # pohjamalli seisoo haara-asennossa; jalkoja tuodaan sisaan (astetta) -> nilkat n. 18 cm toisistaan
 
 class Poser:
     def __init__(self, arm):
         b = arm.data.bones
         self.dU, self.dF = {}, {}
+        self.H = {n: b[n].head_local.copy() for n in ("pelvis", "thigh_l", "calf_l", "foot_l", "ball_l", "thigh_r", "calf_r", "foot_r", "ball_r")}
         for sd, s in (("l", 1), ("r", -1)):
             self.dU[s] = (b["upperarm_" + sd].tail_local - b["upperarm_" + sd].head_local).normalized()
             self.dF[s] = (b["lowerarm_" + sd].tail_local - b["lowerarm_" + sd].head_local).normalized()
+        a, bl = self.H["foot_l"], self.H["ball_l"]
+        self.ank_h = a.z                                   # nilkan korkeus maasta, kun jalkapohja on maassa
+        self.ball = (a.y - bl.y, a.z - bl.z)               # nilkka -> pakia: (eteen, alas)
+        self.heel = (0.055, a.z)                           # nilkka -> kantapaan maakosketus: (taakse, alas)
 
     def arm(self, P, sd, s, fwd, bend, out=7.0):
         """Olkavarsi roikkumaan (out astetta sivulle), heilautus eteen fwd, kyynarpaan koukistus bend."""
@@ -741,31 +746,118 @@ class Poser:
             P["foot_" + sd] = Q(Y, -s * LEG_IN)
         return self.common(P), 0.0
 
-    def gait(self, t, hip_a, knee0, knee_a, arm_a, elbow0, elbow_a, bob, lean, twist):
+    # --- askellus: jalkatera kulkee maassa suoraan taaksepain, lonkka ja polvi ratkaistaan siita (kahden luun IK) ---
+    @staticmethod
+    def _frame(d, xh):
+        ey = d.normalized()
+        ex = (xh - ey * xh.dot(ey)).normalized()
+        return Matrix((ex, ey, ex.cross(ey))).transposed()
+
+    def _foot(self, u, g):
+        """Nilkan paikka (eteen, ylos) vartalon suhteen ja jalkateran kallistus (astetta, + = varpaat ylos) askelvaiheessa u.
+        u = 0 kantaisku, u < st tukivaihe (kanta -> koko pohja -> pakia), sen jalkeen heilahdus."""
+        st, V = g["st"], g["stride"]
+        bf, bd = self.ball
+        hb, hd = self.heel
+        def ankle(pivot_f, pivot_h, th, from_ball):
+            c, s_ = cos(radians(th)), sin(radians(th))
+            f, h = (-bf, bd) if from_ball else (hb, hd)
+            return pivot_f + f * c - h * s_, pivot_h + f * s_ + h * c
+        def ease(x):
+            x = clamp(x)
+            return x * x * (3 - 2 * x)
+        def stance(s):
+            body = V * st * (g["mid"] - s)                 # maahan kiinnitetyn pisteen paikka vartalon suhteen
+            if s < g["s1"]:                                # kantakeinu
+                th = g["hs"] * (1 - ease(s / g["s1"]))
+                f, h = ankle(-hb, 0.0, th, False)
+            elif s < g["s2"]:                              # koko pohja maassa
+                th, f, h = 0.0, 0.0, hd
+            else:                                          # paikiakeinu: kanta nousee, ponnistus
+                th = -g["to"] * ((s - g["s2"]) / (1 - g["s2"])) ** 1.6
+                f, h = ankle(bf, hd - bd, th, True)
+            return body + f, h, th
+        if u < st:
+            return stance(u / st)
+        s = (u - st) / (1 - st)
+        e = 1e-3
+        f0, h0, t0 = stance(1.0)
+        f1, h1, t1 = stance(0.0)
+        v0 = (stance(1.0)[0] - stance(1.0 - e)[0]) / e * (1 - st) / st      # nopeus jatkuu tukivaiheesta
+        v1 = (stance(e)[0] - stance(0.0)[0]) / e * (1 - st) / st
+        s2, s3 = s * s, s * s * s
+        f = (2 * s3 - 3 * s2 + 1) * f0 + (s3 - 2 * s2 + s) * v0 + (-2 * s3 + 3 * s2) * f1 + (s3 - s2) * v1
+        lift = g["lift"] * sin(pi * s ** g["lift_p"]) ** 2 + g["clear"] * sin(pi * s)
+        h = h0 + (h1 - h0) * ease(s) + lift
+        th = t0 + (t1 - t0) * ease((s - g["sw0"]) / (1 - g["sw0"])) - g["curl"] * sin(pi * clamp(s / g["sw0"]) * 0.5) * (1 - ease((s - g["sw0"]) / (1 - g["sw0"])))
+        return f, h, th
+
+    def gait(self, t, g):
         ph = 2 * pi * t
-        P = {"pelvis": Q(Z, -twist * sin(ph)), "spine_01": Q(Z, 0.7 * twist * sin(ph)) @ Q(X, lean * 0.5),
-             "spine_02": Q(Z, 0.6 * twist * sin(ph)) @ Q(X, lean * 0.5), "spine_03": Q(Z, 0.5 * twist * sin(ph)),
-             "head": Q(Z, -0.8 * twist * sin(ph)) @ Q(X, -lean * 0.6)}
-        for sd, s, off in (("l", 1, 0.0), ("r", -1, pi)):
-            psi = ph + off
-            hip = hip_a * sin(psi)
-            knee = knee0 + knee_a * max(0.0, cos(psi)) ** 1.4
-            P["thigh_" + sd] = Q(X, -hip) @ Q(Y, s * LEG_IN)
-            P["calf_" + sd] = Q(X, knee)
-            P["foot_" + sd] = Q(X, clamp(0.6 * (hip - knee), -35.0, 30.0)) @ Q(Y, -s * LEG_IN)
-            self.arm(P, sd, s, -arm_a * sin(psi), elbow0 + elbow_a * max(0.0, -sin(psi)))
-        return self.common(P, 22), -bob * sin(ph) ** 2
+        c1, s1 = cos(ph), sin(ph - g["lag"])
+        # lantio: kierto askeleen mukana, kallistus heilahtavan jalan puolelle, sivuttaisliike tukijalan paalle, pystyliike
+        a_p = -g["twist"] * c1
+        qp = Q(Z, a_p) @ Q(Y, -g["list"] * s1) @ Q(X, g["tilt"])
+        off = Vector((g["sway"] * s1, 0.0, -g["drop"] + g["bob"] * cos(2 * (ph - g["bob_ph"]))))
+        a_s = g["shoulder"] * c1                           # hartiat kiertyvat lantiota vastaan
+        dz = a_s - a_p
+        P = {"pelvis": qp,
+             "spine_01": Q(Z, 0.4 * dz) @ Q(Y, 0.7 * g["list"] * s1) @ Q(X, g["lean"] * 0.5 - g["tilt"]),
+             "spine_02": Q(Z, 0.35 * dz) @ Q(Y, 0.3 * g["list"] * s1) @ Q(X, g["lean"] * 0.5),
+             "spine_03": Q(Z, 0.25 * dz),
+             "neck_01": Q(Z, -0.4 * a_s) @ Q(X, -g["lean"] * 0.3),
+             "head": Q(Z, -0.6 * a_s) @ Q(X, -g["lean"] * 0.3)}
+        H = self.H
+        for sd, s, du in (("l", 1, 0.0), ("r", -1, 0.5)):
+            u = (t + du) % 1.0
+            f, h, th = self._foot(u, g)
+            hip = H["pelvis"] + off + qp @ (H["thigh_" + sd] - H["pelvis"])
+            swing = clamp((u - g["st"]) / (1 - g["st"]))
+            A = Vector((s * (g["width"] + g["swing_out"] * sin(pi * swing)), -f, h))
+            d1, d2 = H["calf_" + sd] - H["thigh_" + sd], H["foot_" + sd] - H["calf_" + sd]
+            L1, L2 = d1.length, d2.length
+            n = A - hip
+            D = min(n.length, (L1 + L2) * 0.9985)
+            n.normalize()
+            pole = Vector((s * g["knee_out"], -1.0, 0.0))  # polvi osoittaa menosuuntaan
+            fw = (pole - n * pole.dot(n)).normalized()
+            a = (L1 * L1 - L2 * L2 + D * D) / (2 * D)
+            knee = hip + n * a + fw * sqrt(max(0.0, L1 * L1 - a * a))
+            ank = hip + n * D
+            ax = fw.cross(n)
+            if ax.x < 0:
+                ax.negate()
+            qt = (self._frame(knee - hip, ax) @ self._frame(d1, X).transposed()).to_quaternion()
+            qc = (self._frame(ank - knee, ax) @ self._frame(d2, X).transposed()).to_quaternion()
+            qf = Q(Z, s * g["toe_out"]) @ Q(X, -th)
+            P["thigh_" + sd] = qp.inverted() @ qt
+            P["calf_" + sd] = qt.inverted() @ qc
+            P["foot_" + sd] = qc.inverted() @ qf
+            P["ball_" + sd] = Q(X, -clamp(-th, 0.0, 50.0) * (1 - swing) ** 2)   # varpaat pysyvat maassa ponnistuksessa
+            sw = -cos(2 * pi * u - g["arm_lag"])           # kasi heilahtaa vastakkaisen jalan tahdissa
+            self.arm(P, sd, s, g["arm_f"] * sw if sw > 0 else g["arm_b"] * sw,
+                     g["elbow"] + g["elbow_a"] * max(0.0, sw), g["arm_out"])
+        return self.common(P, g["curl_f"]), off
+
+    WALK = dict(stride=1.36, st=0.61, mid=0.50, s1=0.16, s2=0.52, hs=15.0, to=52.0, lift=0.035, lift_p=0.8, clear=0.012, sw0=0.25, curl=6.0,
+                width=0.062, swing_out=0.012, toe_out=6.0, knee_out=0.0, twist=5.0, list=3.0, tilt=0.0, sway=0.016, lag=0.5,
+                drop=0.024, bob=-0.019, bob_ph=0.25, shoulder=4.0, lean=2.5,
+                arm_f=20.0, arm_b=18.0, arm_lag=0.25, elbow=13.0, elbow_a=16.0, arm_out=7.0, curl_f=20)
+    RUN = dict(stride=3.10, st=0.30, mid=0.36, s1=0.10, s2=0.42, hs=6.0, to=62.0, lift=0.30, lift_p=0.75, clear=0.03, sw0=0.45, curl=18.0,
+               width=0.038, swing_out=0.01, toe_out=4.0, knee_out=0.03, twist=8.0, list=2.0, tilt=4.0, sway=0.008, lag=0.5,
+               drop=0.075, bob=0.035, bob_ph=2.5, shoulder=10.0, lean=9.0,
+               arm_f=38.0, arm_b=42.0, arm_lag=0.2, elbow=82.0, elbow_a=14.0, arm_out=9.0, curl_f=34)
 
     def walk(self, t):
-        return self.gait(t, 27, 4, 55, 22, 16, 14, 0.022, 2, 5)
+        return self.gait(t, self.WALK)
 
     def run(self, t):
-        return self.gait(t, 42, 18, 85, 45, 80, 10, 0.04, 10, 8)
+        return self.gait(t, self.RUN)
 
     def sit(self, t):
         P = {"spine_01": Q(X, -6), "head": Q(X, 5)}
         for sd, s in (("l", 1), ("r", -1)):
-            P["thigh_" + sd] = Q(X, -82) @ Q(Y, s * LEG_IN)
+            P["thigh_" + sd] = Q(X, -82) @ Q(Y, s * 4.5)
             P["calf_" + sd] = Q(X, 78)
             P["foot_" + sd] = Q(X, 6)
             self.arm(P, sd, s, 50, 30, 10)
@@ -788,7 +880,7 @@ def bake_action(arm, name, nframes, posefn):
             prev[pb.name] = ql.copy()
             pb.rotation_quaternion = ql
             pb.keyframe_insert("rotation_quaternion", frame=f)
-        hips.location = hips.bone.matrix_local.to_3x3().inverted() @ Vector((0, 0, dz))
+        hips.location = hips.bone.matrix_local.to_3x3().inverted() @ (Vector((0, 0, dz)) if isinstance(dz, (int, float)) else dz)
         hips.keyframe_insert("location", frame=f)
     tr = ad.nla_tracks.new()
     tr.name = name
