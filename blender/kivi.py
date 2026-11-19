@@ -502,6 +502,29 @@ SPECK[1578]['extra'] = [facade_bits((57.6, 327.4), (51.8, 302.6), [('vents', 1.0
 SPEC[1581]['P'] = dict(SPEC[1581]['P'], wall=M('#5c7377', 0.35, 0.1), spandrel=M('#4b6266', 0.35, 0.1))   # Valtakatu 7 tower: blue-green glass mosaic since the renovation (Street View 2026, 16.11; the white/orange note of 13.11 was older imagery)
 RAW[1579] = [(k, [(q[0], q[1], 20.6 + (q[2] - 20.6) * 0.15 if q[1] > 280.0 and q[0] > 60.0 and q[2] > 20.6 else q[2]) for q in r], h) for k, r, h in RAW.get(1579, [])]   # Hallituskatu 6 (1963): 5 floors over an open ground floor - the scan stood a storey too high (SV 2026, 16.11)
 RAW[1579] = [(k, [(q[0], q[1], 21.6 + (q[2] - 21.6) * 0.1 if q[1] < 240.0 and q[0] > 95.0 and q[2] > 21.6 else q[2]) for q in r], h) for k, r, h in RAW.get(1579, [])]   # Valtakatu 5 (1603): five floors over the shops, ~21.5 m - the scan stood two storeys too high (SV 2026, 16.11)
+def _kk_north():
+    """Keskuskartano (2), the long north face (owner 19.11.2026: "seiniä puuttuu", "julkisivu aaltoilee"). The scan draws the face as loose
+    bays 1.1 .. 1.6 m in front of a back plane, and that plane has no wall above 5.5 m at s 78.8 .. 86.4 and s 92 .. 101.3 (holes through the
+    slab); the bays' depths wander (the wave). Rebuilt: one flat face 1.3 m in front of the back plane over the whole 101.3 m and a roof strip. The four stair
+    towers of the scan are left out. Whether the face really is flush was NOT checked from a photo."""
+    i = 2; A = (-37.209, -574.936); B = (61.62, -597.3); L = math.hypot(B[0] - A[0], B[1] - A[1])
+    t = ((B[0] - A[0]) / L, (B[1] - A[1]) / L); n = (-t[1], t[0])
+    sd = lambda q: ((q[0] - A[0]) * t[0] + (q[1] - A[1]) * t[1], (q[0] - A[0]) * n[0] + (q[1] - A[1]) * n[1])
+    P = lambda s_, d_, z: (A[0] + t[0] * s_ + n[0] * d_, A[1] + t[1] * s_ + n[1] * d_, z)
+    out = []
+    for k, r, h in RAW.get(i, []):
+        if k in ('W', 'R') and max(q[2] for q in r) > 30.0:
+            S = [sd(q) for q in r]; dmin = min(d for _, d in S); dmax = max(d for _, d in S)
+            if dmin > -0.3 and dmax < 5.0 and (dmax > 0.2 or k == 'W'): continue           # the bays, their roofs and the holed back plane
+        out.append((k, r, h))
+    D = 1.3; ZB = 4.2; ZT = 34.5
+    # One flat polygon and NO stair towers: with the towers (2.1 m out, roof 33.7 m) every stretch fitted its own window rows and the
+    # bands stepped from stretch to stretch (owner 19.11.2026: "rikki tässäkin").
+    out.append(('W', [P(0, D, ZB), P(L, D, ZB), P(L, D, ZT), P(0, D, ZT)], None))
+    for s_ in (0.0, L): out.append(('W', [P(s_, 0, ZB), P(s_, D, ZB), P(s_, D, ZT), P(s_, 0, ZT)], None))
+    out.append(('R', [P(0, 0, ZT), P(L, 0, ZT), P(L, D, ZT), P(0, D, ZT)], None))
+    RAW[i] = out
+_kk_north()
 import zones as _zn; _V5P = _zn._V5P
 _zn._SPEC_Y2B['P'].update(wall=MT('#ebe8e0', 'plaster'), spandrel=MT('#ebe8e0', 'plaster'), fascia=M('#ebe8e0'), joints=M('#d9d5cb'), frame=M('#3a3f44', 0.5))   # Yrjönkatu 2 b (1618) reads white in Street View 2026 (17.11), not brick
 SPEC[_zn.VALT3]['P'].update(wall=M('#e9e6de'), spandrel=M('#cdb98e'), fascia=M('#e9e6de'))   # Valtakatu 3: white with beige bands under the windows (SV 2026, 17.11)

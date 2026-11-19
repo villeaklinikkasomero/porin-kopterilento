@@ -1,0 +1,24 @@
+{
+  "id": 1,
+  "nimi": "Karhu katsoo väärään suuntaan",
+  "patsas": "Satakunnan karhu",
+  "selko": "Satakunnan karhu -patsas, Raatihuoneenpuisto (Hallituskatu). Kävele patsaan luo.",
+  "soitto": [
+    {"v": "j", "k": "Juontaja", "t": "Radio Porikopteri, suora lähetys. Linjalla on kuulija. Olkaa hyvä."},
+    {"v": "s", "k": "Kuulija", "t": "No päivää. Mää soita tält Raatihuaneen puistost. Se karhu. Se o ain kattonu ittää päi. Ny se kattoo mnuu. Mää ole siirtyny kolme kertaa, ja ain se kattoo."},
+    {"v": "j", "k": "Juontaja", "t": "Selvä. Reportterimme lähtee paikalle. Mene karhun luo jalan ja pidä nauhuri päällä."}
+  ],
+  "neuvot": {
+    "m": ["Karhuu ettit? Tualpäi se o.", "Se karhu vai? Tonnepäi. Ei se kauas ol menny."],
+    "n": ["Karhuu ettit? Tualpäi se o.", "Raatihuaneen puistos se o. Tonnepäi."],
+    "l": ["Karhu o tual! Se kattoo sunt!"]
+  },
+  "otsikot": [
+    {"k": "a", "tyyli": "Asiallinen", "o": "Karhupatsaan suunta muuttunut", "arvio": "Kyl mar.", "kuulijat": 3,
+     "t": "Uutisia. Satakunnan karhun suunta on muuttunut. Reportterimme totesi asian paikan päällä. Karhu ei liikkunut katsottaessa. Kaupunki ei kommentoi. Toimituksen arvio jutusta: kyl mar."},
+    {"k": "b", "tyyli": "Liioiteltu", "o": "KARHU HERÄSI – KAUPUNKI PAINEEN ALLA", "arvio": "No jaa.", "kuulijat": 17,
+     "t": "Nyt se on tapahtunut! Karhu on herännyt, ja kaupunki on paineen alla! Reportterimme katsoi karhua silmiin ja selvisi hengissä. Toimituksen arvio jutusta: no jaa."},
+    {"k": "c", "tyyli": "Porilainen", "o": "Karhu katto vähä muual", "arvio": "Ei huano.", "kuulijat": 1,
+     "t": "Karhu katto vähä muual. Reportteri kävi kattomas. Kyl se siäl o. Toimituksen arvio jutusta: ei huano."}
+  ]
+}

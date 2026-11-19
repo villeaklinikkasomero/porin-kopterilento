@@ -1175,8 +1175,9 @@ Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 m
 | c048 | 7 (Itsenäisyydenkatu 54), 166 (Itsenäisyydenkatu 47), 167 (Itsenäisyydenkatu 58) | 19.11 klo 17; 166 lisätty myöhemmin 19.11 |
 | c064 | 107 (Yrjönkatu 25), 585 (vanha linja-autoasema, pohjoispääty + länsisivu), 1228 (kulmatorni, kuori 1229), 111 + 109 (Rautatienpuistokatu 3) | 19.11 klo 17; 585 lisätty myöhemmin 19.11 |
 | c051 | 164 (Itsenäisyydenkatu 45, pysäköintitalo) | 19.11 |
+| c063 | 124 (Rautatienpuistokatu 5, lounaissiipi) | 19.11 |
 
-Ajettava illalla (push ensin, odota "porikit image" vihreäksi): `city 64 c048,c051,c064` **ja** `bake bepop --samples 64` (600 ja 601)
+Ajettava illalla (push ensin, odota "porikit image" vihreäksi): `city 64 c048,c051,c063,c064` **ja** `bake bepop --samples 64` (600 ja 601)
 
 ## 19.11.2026 klo 17 – (VANHA aloitusluku; korvattu tiedoston LOPUN luvulla "19.11.2026 ilta – ALOITA TÄSTÄ") JULKISIVUINVENTAARIO, Itsenäisyydenkatu jatkuu
 
@@ -1188,7 +1189,7 @@ ylempänä luvuissa "ITSENÄISYYDENKATU, keskustan erä" (taulukko), "MODAL-POLT
   **Omistaja 19.11: kun Itsenäisyydenkatu on tehty, jatketaan RAUTATIENPUISTOKADULLE.** 113 auki (vaatii jalanjälkiratkaisun kuten 136), 115 vain väri korjattu, 569 jätetty (aidan takana).
   Päivitä taulukon Tila-sarake jokaisen talon jälkeen – valmiita ei tehdä uudelleen.
 - Kaikki koodi on käyttäjän kansiossa (takaisinluvulla tarkistettu). Modal toimii (PR #62). **Omistaja polttaa illalla:** lisää jokainen uusi lohko
-  lukuun "ILLAN MODAL-JONO" (nyt `city 64 c048,c051,c064`).
+  lukuun "ILLAN MODAL-JONO" (nyt `city 64 c048,c051,c063,c064`).
 - **Auki omistajalta:** "katot irti seinistä keskustassa" – ei toistunut pilvessä, odottaa kuvakaappausta ja paikkaa. Korjauskierroksen lista on luvussa
   "Antinkadun loput talot" (1726:n korkeus ym.).
 
@@ -1281,7 +1282,7 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
   nosto-ovi kahdella lasirivillä, 4,9 m ajoaukko (tumma levy – aukkoa ei leikattu) keltaisten tyhjien kylttien alla. Pano Itsenäisyydenkatu 45
   (61.4822881, 21.792202 → x −202.35, y −413.44; h 345 ja 45, p 8); mittakaava 1,1 → kamera (−202.60, −414.52), ch 2.03. LoD2-kuori seuraa torneja oikein.
   Pois jätetty: valaisimet, vino betonilapa, kannen ilmanvaihtorumpu. Vertailukuva `Claude outputs/itsenaisyydenkatu_164_vertailu_19_11.jpg`.
-  c051 testipoltettu (18 321 kärkeä). **Modal-jono nyt `city 64 c048,c051,c064`.**
+  c051 testipoltettu (18 321 kärkeä). **Modal-jono nyt `city 64 c048,c051,c063,c064`.**
 - Jäljellä taulukosta: 600 (maamerkkilohko bepop), 601 ja 1228 (ei lohkoa – selvitä ensin missä ne poltetaan), 585 (c064) (+113 auki, 115 mittaamatta).
 
 ### 19.11 klo 20: patsaat ja muistomerkit kartalle (omistajan zip porikopteri_kaikki.zip)
@@ -1317,7 +1318,7 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
   autoja); kopteri/kävelijä/liikenneautot eivät tunne hallia; katolta katsoen ei muutosta. Jos testi kelpaa: sisus Blender-moduuliksi (kuten sisätilat),
   oikeat mitat omistajan kuvista, ja sama `gate` + `HALL`-rakenne muihin halleihin.
 - **Viety kansioon:** `index.html`, `blender/gen.py`, `blender/kivi.py`, `blender/zones.py`, `blender/facades.json`, `tools/rautalanka/facades/f164.py`,
-  kuva `Claude outputs/pysakointihalli_164_testi_19_11.jpg`. Modal-jono ennallaan `city 64 c048,c051,c064` (c051 = 164 aukkoineen); gen.py/kivi.py/zones.py
+  kuva `Claude outputs/pysakointihalli_164_testi_19_11.jpg`. Modal-jono ennallaan `city 64 c048,c051,c063,c064` (c051 = 164 aukkoineen); gen.py/kivi.py/zones.py
   muuttuivat → push ja "porikit image" vihreäksi ennen ajoa. **Ennen Modal-polttoa aukot eivät näy pelissä** (vanha bl_c051.js: umpiseinä), mutta läpi voi jo ajaa.
 
 ### 19.11 klo 21: kävelijät upposivat kivetykseen + porilaiset huudahdukset (H)
@@ -1402,9 +1403,9 @@ Länsi-/luoteispuoli = parittomat, itä-/kaakkoispuoli = parilliset. **Tee vain 
 |---|---|---|---|---|---|---|
 | 109 | Rautatienpuistokatu 3 / Yrjönkatu 27, valkoinen funkis + kulmatorni | luode | c064 | **kuoren 111 pätkä** (lod2 hide), s 31,1–43,2 | sama seinä kuin 111 | VALMIS 19.11 (f111.py; Yrjönkadun sivu 17,5 m mittaamatta) |
 | 111 | kermanvärinen 2 krs klassistinen talo (Rautatienpuistokatu 3:n eteläpuoli) | luode | c064 | oma | (−60.156,−555.791)→(−30.901,−523.977) 43,2 m | VALMIS 19.11 (f111.py; lounaispääty 12 m mittaamatta) |
-| 2 | iso kortteli kadun itäpuolella, 10 krs torni + matala 4,2 m siipi | kaakko | c064 | oma | matalat siivet (−37.2,−574.9)→(−20.3,−551.6) murtoviivana; torni (−40.4,−589.3)→(−37.2,−574.9) 14,7 m | TEKEMÄTTÄ (tunnista ensin: osoite, mikä talo) |
+| 2 | **Keskuskartano** (Keskusaukio 2, 1962; SPEC KKART zones.py) + Hotel Amado -siipi; kadulle näkyy lamellin peltipääty ja matalat liikesiivet | kaakko | c064 | oma | matalat siivet (−37.2,−574.9)→(−20.3,−551.6) murtoviivana; torni (−40.4,−589.3)→(−37.2,−574.9) 14,7 m | POHJOISSIVU KORJATTU 19.11 (kivi.py `_kk_north`, ks. alla); mitattu julkisivu TEKEMÄTTÄ |
 | 122 | pieni piharakennus 51 m² | kaakko | c064 | ei kuorta | – | JÄTETÄÄN |
-| 124 | Rautatienpuistokatu 5, ent. Teljän ammattikoulu (1938), valkoinen 3 krs | luode | c063 | oma | (−114.398,−609.46)→(−80.242,−572.33) 50,5 m ja (−135.486,−639.38)→(−110.914,−612.67) 36,3 m | TEKEMÄTTÄ |
+| 124 | Rautatienpuistokatu 5, ent. Teljän ammattikoulu (1938), valkoinen 3 krs | luode | c063 | oma | (−114.398,−609.46)→(−80.242,−572.33) 50,5 m ja (−135.486,−639.38)→(−110.914,−612.67) 36,3 m | OSITTAIN 19.11 (f124.py: lounaissiipi 36,3 m VALMIS; **koillissiipi 50,5 m TEKEMÄTTÄ** – selainyhteys katkesi) |
 | 13 | 4 krs lamelli | kaakko | c061 | oma | (−114.441,−655.249)→(−61.531,−596.099) 79,4 m | TEKEMÄTTÄ |
 | 23 | Rautatienpuistokatu 6 (1954) | kaakko | c061 | oma | (−164.549,−710.867)→(−138.006,−680.88) 40,0 m + (−136.824,−681.927)→(−128.432,−672.444) 12,7 m | TEKEMÄTTÄ |
 | 15 | iso koulurakennus (Rautatienpuistokatu 7, ent. poikien ammattikoulu?) | luode | c047 | oma | ei seinää alle 22 m kadusta (puiston takana) | TARKISTA näkyykö kadulle |
@@ -1415,6 +1416,31 @@ Länsi-/luoteispuoli = parittomat, itä-/kaakkoispuoli = parilliset. **Tee vain 
 
 Seinät on annettu raw.pkl:n päätepisteinä; **käännä suunta niin että katu on oikealla** (luoteispuolen taloilla a = lounaispää, kaakkoispuolella a = koillispää).
 6, 8, 10 ja 12 ovat saman sarjan taloja (1954): mittaa yksi huolella ja tarkista muista erot.
+
+### 124 Rautatienpuistokatu 5, lounaissiipi (testipoltettu, c063)
+- Katujulkisivu on kaksi siipeä loivassa V:ssä. `f124.py` sisältää VAIN lounaissiiven (−135.486,−639.38)→(−110.914,−612.67): valkoinen rappaus,
+  15 ikkuna-akselia (jako 2,07 m) kolmessa kerroksessa punaruskein puittein, tiilinen kellarikerros ikkunoineen, sillinauha, räystäslista.
+- **Pano** "5 Rautatienpuistokatu" 61.4803068, 21.7938141 (→ x −116.46, y −634.75; h 313, p 18), huhti 2026. Kalibrointi kuoresta:
+  s = 0,3 + (s − 2,0)·1,082, z = 1,114·z − 0,75.
+- **Uusi kikka: leveä kuva.** `resize_window` 1500×900 ennen navigointia → screenshot 800×480, pystykuvakulma yhä 90°, vaakaan ±60°: koko 36 m siipi
+  yhdellä kuvalla 11 m päästä (16 px/m – riittää säännölliseen ruudukkoon, ei pieniin yksityiskohtiin). Ensimmäinen screenshot on sumea: odota
+  vielä 10 s ja ota `zoom` koko alueesta. Palauta lopuksi `preset: desktop`.
+- **Koillissiipi** (−114.398,−609.46)→(−80.242,−572.33): panot noin 61.480525, 21.794199 ja 61.480697, 21.794529 (h 313, p 18); lisää toinen
+  seinä samaan merkintään (id 124) ja katso siipien välinen sisäänkäyntikatos (näkyi kuvan oikeassa reunassa).
+- Vertailukuva `Claude outputs/rautatienpuistokatu_124_lounaissiipi_vertailu_19_11.jpg`. c063 testipoltettu (3 668 kärkeä). **Modal-jonoon lisättävä c063.**
+
+### Keskuskartano (2): pohjoissivun reiät ja "aaltoilu" korjattu (omistaja 19.11: kuvakaappaus + "julkisivu aaltoilee", "totaalisen rikki")
+- **Syy (toistui pilvessä, ei GPU/CRLF):** keilaus piirtää pitkän pohjoissivun irrallisina ulokkeina 1,1–1,6 m taustatason edessä, ja taustatasossa
+  ei ole seinää 5,5 m yläpuolella kohdissa s 78,8–86,4 ja s 92–101,3 (reiät lamellin läpi itäpäässä). Ulokkeiden syvyys vaihteli = aaltoilu.
+- **Korjaus `blender/kivi.py` `_kk_north()`** (RAW[2] paikataan ennen polttoa): pohjoissivun ulokkeet, niiden katot ja reikäinen taustataso poistetaan;
+  tilalle YKSI suora seinä 1,3 m taustatason edessä koko 101,3 m:n matkalle (z 4,2–34,5) ja kattokaista. **Ei torneja.**
+- **1. yritys hylätty (omistaja: "sun poltossakin rikki"):** keilauksen 4 porrastornia (2,1 m ulkona, katto 33,7 m) säilytettiin → jokainen
+  seinäpätkä sovitti omat ikkunarivinsä (eri korkeus/alareuna) ja nauhat porrastuivat pätkästä toiseen. Opit: (1) saman julkisivun pätkillä pitää
+  olla sama alareuna ja räystäs, muuten `_kk_fit` jakaa kerrokset eri tavoin; (2) seinämonikulmio, jonka keskipisteen edessä on korkeampi katto,
+  hylätään "sisäseinänä" (zones2 build_lod2:n roofz-testi).
+- **EI tarkistettu valokuvasta:** onko pohjoissivu oikeasti täysin sileä (keilauksessa 4 porrastornia s 12,8–17,7 / 49,6–54,7 / 68,4–78,8 / 86,5–92,1).
+- c064 testipoltettu (19 371 kärkeä), nauhat tasaiset koko matkalla kuten eteläsivulla. Kuva `Claude outputs/keskuskartano_pohjoissivu_ennen_jalkeen_19_11.jpg`. **kivi.py muuttui → push ja "porikit image"
+  vihreäksi ennen Modal-ajoa** (c064 on jonossa).
 
 ### 111 + 109 (testipoltettu, c064)
 - **Rakenne:** 109 on lod2 `hide` -listalla; se on kuoren 111 Rautatienpuistokadun seinän pohjoispää. Kuoren seinä on YKSI monikulmio (s 0–31,1 räystäs 10,0;
@@ -1443,9 +1469,9 @@ Vastaa suomeksi, lyhyesti, kuva jokaisesta muutoksesta (Street View vasemmalla, 
 - **OMISTAJAN OHJE 19.11 (uusin): Itsenäisyydenkadun loput (585:n muut sivut, 113, 115) jätetään myöhemmäksi – NYT RAUTATIENPUISTOKATU**, pohjoispäästä
   (keskusta) etelään. Talotaulukko on luvussa "RAUTATIENPUISTOKATU – talotaulukko": tee vain rivit joissa lukee TEKEMÄTTÄ.
 - Kaikki 19.11 tehty on omistajan kansiossa (takaisinluvulla tarkistettu) ja **Modal-polttamatta**. GitHubin commit `itsenäisyydenkatu` (19.11 klo 16.33)
-  sisältää julkisivutyöt 1228:aa edeltävään asti; **pushaamatta: 1228, 585:n länsisivu, 111/109 (f1228.py, f585.py, f111.py, facades.json) ja tämä tiedosto**. Päivitä taulukon Tila-sarake ja
+  sisältää julkisivutyöt 1228:aa edeltävään asti; **pushaamatta: 1228, 585:n länsisivu, 111/109, Keskuskartanon korjaus (f1228.py, f585.py, f111.py, facades.json, kivi.py) ja tämä tiedosto**. Päivitä taulukon Tila-sarake ja
   ILLAN MODAL-JONO jokaisen talon jälkeen – valmiita ei tehdä uudelleen.
-- **Modal-jono nyt:** `city 64 c048,c051,c064` ja `bake bepop --samples 64` (c064:ssä nyt myös 111/109). zones.py, zones2.py, gen.py, kivi.py muuttuivat 19.11 → push ja Actions
+- **Modal-jono nyt:** `city 64 c048,c051,c063,c064` ja `bake bepop --samples 64` (c064:ssä nyt myös 111/109). zones.py, zones2.py, gen.py, kivi.py muuttuivat 19.11 → push ja Actions
   "porikit image" vihreäksi ENNEN ajoa. Tarkistus: lohkon kärkimäärä kasvaa; Modal-lokissa rivi `facades.json: <polku>`.
 - **Auki omistajalta:** (1) pysäköintihallin 164 läpiajotesti – omistaja ei ole vielä ajanut; ennen c051:n Modal-polttoa aukot eivät näy (auto ajaa umpiseinän
   läpi). Jos kelpaa: sisus Blender-moduuliksi omistajan kuvista. (2) "katot irti seinistä keskustassa" – ei toistunut, odottaa kuvakaappausta.
@@ -1587,3 +1613,24 @@ index.html, haku `HALL`: `inHall` / `hallZ` / muutokset `carBlocked`, `carGround
 
 **Tarkistettu:** headless-kuva (`savu_ja_pilvet_19_11.jpg`), ei konsolivirheitä. **EI testattu:** savu ajossa (päivittyy vain auton askeleessa, kuten ennenkin –
 jos pelaaja nousee autosta, pöllähdykset jäätyvät paikoilleen; korjaus olisi kutsua `smokeStep(dt, 0)` pääsilmukasta).
+
+---
+
+## 20.11.2026 klo 03 – Uusi pelikonsepti + pilottitapaus "Karhu katsoo väärään suuntaan" (c28)
+
+**Konsepti (omistaja hyväksyi):** "Outojen asioiden toimitus". Pelaaja on Radio Porikopterin kenttäreportteri; Porin slogan "Todella outo, ehdottoman uniikki".
+Suunnitelma: https://claude.ai/artifact/TMz2BXrs6MPJaUxXA6bXwA (12 tapausta, outousasteet, viisi mekaniikkaa). Omistaja: murteesta ja sloganin luvasta ei tarvitse huolehtia.
+
+**Tehty (viety koneelle, EI pushattu):**
+- `index.html`: lohko `window.__case` / `window.__caseTick` (heti `window.__smoke`-rivin jälkeen), kutsu pääsilmukassa `__statueTick`in perässä, koukku kävelijöiden `greet`issä (`__case.ask(v)`).
+  Tilat `st`: 0 odottaa (40 s aloituksesta) → 1 soitto soi (3 leikettä, tekstitys kortissa, radio vaimenee) → 2 etsintä (ei karttamerkkiä; ohikulkija neuvoo nuolella
+  kameran suhteen; **K** = selkosuomi, **L** = soitto uudestaan) → 3 nauhuri (jalan < 11 m karhusta: 1/2 = katso 3 s; karhu kääntyy pelaajaa kohti 55°/s VAIN kun
+  sitä ei katsota; 2/2 = katso uudelleen kun asento muuttunut > 25°) → 4 otsikon valinta (napit tai **1–3**) → 5 juontaja lukee jutun → 9 valmis:
+  tallennus `localStorage['pori-tapaus-1'] = {k, n, plain}`, juttu lisätään Radio Porikopterin soittolistaan, karhu vilkuilee pysyvästi. Kuulijat 14 + 3 / 17 / 1.
+  Testaus: `__case.reset()` nollaa, `__case.test = true` ohittaa `started`-ehdon.
+- Tekstit `tools/radio/tapaus1.json` → `tools/radio/tapaukset.py <onnx> radio/ 1` → `radio/tapaus1.json` + 11 mp3:ää (`tapaus1_soitto_1–3`, `_neuvo_{m,n,l}_N`, `_juttu_{a,b,c}`).
+  Soittaja = naisääni 1,22x + puhelinsuodin. Uusi tapaus = uusi `tapausN.json` + oma lohko tai moottorin yleistys (nyt karhun logiikka on kovakoodattu).
+
+**Tarkistettu:** headless-simulaatio koko ketjusta (kuva `tapaus1_karhu_19_11.jpg`), tallennus ja soittolistalisäys toimivat, ei konsolivirheitä.
+**EI testattu:** oikea pelaaminen (kävely karhulle, katseen tunnistus pelin omalla kameralla, äänet). Nauhurin rivi (oikea yläkulma, top 74 px) voi mennä muun HUDin päälle.
+**Seuraavaksi:** omistajan koepeluu → säädöt → tapausmoottorin yleistys ja tapaukset 2–4 (lokki, aina vihreä, kanava jota ei ole).
