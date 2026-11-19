@@ -971,7 +971,7 @@ Mitattu julkisivu (facades.json) tehdään ensin näille 15:lle. **Tee vain rivi
 | 585 | vanha linja-autoasema | c064 | TEKEMÄTTÄ |
 | 1228 | valkoinen 6 krs | ei lohkoa | TEKEMÄTTÄ |
 | 569 | Antinkatu 27 A | c048 | EI KADUN VARRESSA: eteläsivu on 10 m sisäänvedetty lautaaidan takana (aita tehty 18.11) – jätetään |
-| 164 | 569:n länsipuolella | c051 | TEKEMÄTTÄ |
+| 164 | Itsenäisyydenkatu 45, pysäköintitalo (569:n länsipuolella) | c051 | VALMIS 19.11 (f164.py; vain katujulkisivu, ajoaukko tummana levynä) |
 | 7 | Itsenäisyydenkatu 54 (1956) | c048 | VALMIS 19.11 (f7.py; itäiset 4 akselia peilattu, näkemättä) |
 | 166 | Itsenäisyydenkatu 47, okrankeltainen 3 krs | c048 | VALMIS 19.11 (f166.py; koko katujulkisivu nähty) |
 | 167 | Itsenäisyydenkatu 58, 8 krs, lasitetut parvekkeet (SPEC 13.11) | c048 | VALMIS 19.11 (f167.py; Itsenäisyydenkadun pääty + Eteläpuiston länsisivu, katutaso sisäänvedetty; länsisivun s < 4,5 ja pihan sivut mittaamatta) |
@@ -1174,8 +1174,9 @@ Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 m
 |---|---|---|
 | c048 | 7 (Itsenäisyydenkatu 54), 166 (Itsenäisyydenkatu 47), 167 (Itsenäisyydenkatu 58) | 19.11 klo 17; 166 lisätty myöhemmin 19.11 |
 | c064 | 107 (Yrjönkatu 25) | 19.11 klo 17 |
+| c051 | 164 (Itsenäisyydenkatu 45, pysäköintitalo) | 19.11 |
 
-Ajettava illalla (push ensin, odota "porikit image" vihreäksi): `city 64 c048,c064`
+Ajettava illalla (push ensin, odota "porikit image" vihreäksi): `city 64 c048,c051,c064`
 
 ## 19.11.2026 klo 17 – ALOITA TÄSTÄ (uusi chat: JULKISIVUINVENTAARIO, Itsenäisyydenkatu jatkuu)
 
@@ -1183,11 +1184,11 @@ Vastaa suomeksi, lyhyesti, kuva jokaisesta muutoksesta (Street View vasemmalla, 
 ylempänä luvuissa "ITSENÄISYYDENKATU, keskustan erä" (taulukko), "MODAL-POLTOISTA PUUTTUIVAT…", "Antinkadun loput talot" ja "ILLAN MODAL-JONO".
 
 ### Tilanne
-- **Antinkatu VALMIS.** Itsenäisyydenkadun keskustan 15 talosta valmiina 415, 118, 116, 119, 121, 107, 7, 166, 167. **Tekemättä: 600 (Bepop), 601, 585 (vanha
-  linja-autoasema), 1228, 164.** 113 auki (vaatii jalanjälkiratkaisun kuten 136), 115 vain väri korjattu, 569 jätetty (aidan takana).
+- **Antinkatu VALMIS.** Itsenäisyydenkadun keskustan 15 talosta valmiina 415, 118, 116, 119, 121, 107, 7, 166, 167, 164. **Tekemättä: 600 (Bepop), 601, 585 (vanha
+  linja-autoasema), 1228.** 113 auki (vaatii jalanjälkiratkaisun kuten 136), 115 vain väri korjattu, 569 jätetty (aidan takana).
   Päivitä taulukon Tila-sarake jokaisen talon jälkeen – valmiita ei tehdä uudelleen.
 - Kaikki koodi on käyttäjän kansiossa (takaisinluvulla tarkistettu). Modal toimii (PR #62). **Omistaja polttaa illalla:** lisää jokainen uusi lohko
-  lukuun "ILLAN MODAL-JONO" (nyt `city 64 c048,c064`).
+  lukuun "ILLAN MODAL-JONO" (nyt `city 64 c048,c051,c064`).
 - **Auki omistajalta:** "katot irti seinistä keskustassa" – ei toistunut pilvessä, odottaa kuvakaappausta ja paikkaa. Korjauskierroksen lista on luvussa
   "Antinkadun loput talot" (1726:n korkeus ym.).
 
@@ -1258,7 +1259,7 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
 - **Uusi: `"nobrick": true` toimii nyt myös taloille ilman SPECiä** (c-lohkojen automaattitalot): `zones.py` kerää ne joukkoon `NOBRICK`, `zones2.spec_for`
   asettaa `sp['nobrick']` → shells `nb` → peli ei piirrä tiilisaumaa punaiseen pintaan (166:n graniitti näkyi tiilenä). Muutos 3 riviä, c048 testipoltettu
   (23 329 kärkeä).
-- **Modal:** jono ennallaan `city 64 c048,c064` (c048 sisältää nyt myös 166:n). zones.py ja zones2.py muuttuivat → push ja "porikit image" vihreäksi ennen ajoa.
+- **Modal:** ks. ILLAN MODAL-JONO (c048 sisältää nyt myös 166:n ja 167:n; c051 lisätty 164:n takia). zones.py ja zones2.py muuttuivat → push ja "porikit image" vihreäksi ennen ajoa.
 - **167 Itsenäisyydenkatu 58 (c048, Otavankadun kulma – SPEC-kommentin "Antinkatu corner" on väärin):** `f167.py`, eteläpääty 14,3 m, seinä
   (−274.232,−385.193)→(−260.311,−388.447): harmaanbeige roiskerappaus, 2 akselia leveitä tummapuitteisia ikkunoita 7 kerroksessa (kerrosväli 2,78 m),
   lasitettu kulmaparvekepino kummassakin päässä, lasitettu liikekerros betonipilarien välissä + harmaa lippanauha, punaruskea lautavyö leveän tumman
@@ -1275,7 +1276,13 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
   läheltä Eteläpuisto 20 (61.4827418, 21.7908179 → x −276.07, y −363.05; h 103 p 30). s < 4,5 puiden takana → jätetty paljaaksi.
   Länsiseinä leipoutuu varjoon ja näkyy 8 näytteen testissä tummana ja läikikkäänä (seinän väri vaalennettu `#cdc7bb`) – tarkista 64 näytteen Modal-poltosta.
   c048 testipoltettu (27 017 kärkeä). Vertailukuva päivitetty (3 paria + kulmanäkymä).
-- Jäljellä taulukosta: 600, 601, 585, 1228, 164 (+113 auki, 115 mittaamatta). 164:n kadunpuoleinen seinä raw.pkl:stä: (−216.063,−398.788)→(−190.378,−404.806), 26,4 m, räystäs 7,9.
+- **164 Itsenäisyydenkatu 45, pysäköintitalo (c051):** `f164.py`, eteläjulkisivu 26,4 m, seinä (−216.063,−398.788)→(−190.378,−404.806): vaaleanharmaat
+  betonielementit, matala muuri 4,3 m kahden porrastornin välissä (länsi 7,2 m + tumma lasinauha, itä 6,0 m + lasiovi ja ikkunanauha), harmaansininen ovi,
+  nosto-ovi kahdella lasirivillä, 4,9 m ajoaukko (tumma levy – aukkoa ei leikattu) keltaisten tyhjien kylttien alla. Pano Itsenäisyydenkatu 45
+  (61.4822881, 21.792202 → x −202.35, y −413.44; h 345 ja 45, p 8); mittakaava 1,1 → kamera (−202.60, −414.52), ch 2.03. LoD2-kuori seuraa torneja oikein.
+  Pois jätetty: valaisimet, vino betonilapa, kannen ilmanvaihtorumpu. Vertailukuva `Claude outputs/itsenaisyydenkatu_164_vertailu_19_11.jpg`.
+  c051 testipoltettu (18 321 kärkeä). **Modal-jono nyt `city 64 c048,c051,c064`.**
+- Jäljellä taulukosta: 600 (maamerkkilohko bepop), 601 ja 1228 (ei lohkoa – selvitä ensin missä ne poltetaan), 585 (c064) (+113 auki, 115 mittaamatta).
 
 ### 19.11 klo 20: patsaat ja muistomerkit kartalle (omistajan zip porikopteri_kaikki.zip)
 - Lähde: `tools/props/porikopteri_patsaat.json` (21 kohdetta, Wikipedia CC BY-SA 4.0), `porikopteri_patsaat.py` (mallit) ja `porikopteri_siirto_patsaat.md` (mallichatin ohje).
