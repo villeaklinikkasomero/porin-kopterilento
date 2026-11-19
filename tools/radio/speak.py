@@ -33,15 +33,16 @@ for s in P['seg']:
         subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', w, '-af', 'adelay=600,apad=pad_dur=0.8,loudnorm=I=-16:TP=-1.5', '-ac', '1', '-ar', '44100', '-b:a', '64k', mp], check=True)
     s['d'] = round(dur(mp), 2); print(s['id'], s['d'])
 
-# Radio Porikopteri (19.11.2026, omistaja): spiikki, mainos, spiikki, mainos, tunnus + kappale ja sama alusta. Spiikit käydään järjestyksessä kerran;
+# Radio Porikopteri (19.11.2026, omistaja): kolme kertaa spiikki + mainos, sitten tunnus + kappale ja sama alusta. Spiikit käydään järjestyksessä kerran;
 # mainoksia on vähemmän, joten ne kiertävät (loppupäässä kuullaan alun mainoksia uudelleen). Kappaleet pop_1..3 vuorotellen.
 songs = [x for x in R.get('pop', R.get('porikopteri', [])) if x['f'].startswith('pop_')]; songs = list({x['f']: x for x in songs}.values())
 row = lambda s: {'f': f"puhe_{s['id']}.mp3", 'd': s['d'], 't': s['t']}
 T = [s for s in P['seg'] if s['k'] == 't']; M = [s for s in P['seg'] if s['k'] == 'm']
+PAIRS = 3                                    # spiikki + mainos -pareja ennen kappaletta (omistaja 19.11: kappaleet ovat pitkiä, 2 -> 3)
 L = []; ns = 0
 for n, s in enumerate(T):
     L.append(row(s))
     if M: L.append(row(M[n % len(M)]))
-    if (n % 2 == 1 or n == len(T) - 1) and songs: L.append({'f': 'jingle_1.mp3', 'd': 3.71, 't': 'Radio Porikopteri'}); L.append(songs[ns % len(songs)]); ns += 1
+    if (n % PAIRS == PAIRS - 1 or n == len(T) - 1) and songs: L.append({'f': 'jingle_1.mp3', 'd': 3.71, 't': 'Radio Porikopteri'}); L.append(songs[ns % len(songs)]); ns += 1
 R.pop('puhe', None); R.pop('pop', None); R = {'porikopteri': L, **{k: v for k, v in R.items() if k != 'porikopteri'}}
 open(rj, 'w').write(json.dumps(R, ensure_ascii=False, indent=1)); print('yht', round(sum(x['d'] for x in L) / 60, 1), 'min')

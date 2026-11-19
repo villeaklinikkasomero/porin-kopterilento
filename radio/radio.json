@@ -21,16 +21,6 @@
    "t": "Mainos: Reunakivi-Rengas"
   },
   {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "pop_1.mp3",
-   "d": 136.65,
-   "t": "Kauppatorin kesä"
-  },
-  {
    "f": "puhe_palo.mp3",
    "d": 30.77,
    "t": "Palon jälkeen"
@@ -41,6 +31,16 @@
    "t": "Mainos: Yyterin Tuulipesu"
   },
   {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_1.mp3",
+   "d": 136.65,
+   "t": "Kauppatorin kesä"
+  },
+  {
    "f": "puhe_jazz.mp3",
    "d": 26.75,
    "t": "Jazzin kaupunki"
@@ -49,16 +49,6 @@
    "f": "puhe_kaksisiivua.mp3",
    "d": 23.38,
    "t": "Mainos: Grilli Kaksi Siivua"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "pop_2.mp3",
-   "d": 141.61,
-   "t": "Yrjönkadun valot"
   },
   {
    "f": "puhe_yyteri.mp3",
@@ -86,9 +76,9 @@
    "t": "Radio Porikopteri"
   },
   {
-   "f": "pop_3.mp3",
-   "d": 152.45,
-   "t": "Kirjurinluodon ilta"
+   "f": "pop_2.mp3",
+   "d": 141.61,
+   "t": "Yrjönkadun valot"
   },
   {
    "f": "puhe_murre.mp3",
@@ -111,16 +101,6 @@
    "t": "Mainos: Luotokioski"
   },
   {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "pop_1.mp3",
-   "d": 136.65,
-   "t": "Kauppatorin kesä"
-  },
-  {
    "f": "puhe_puuvilla.mp3",
    "d": 24.22,
    "t": "Tehtaiden kaupunki"
@@ -131,6 +111,16 @@
    "t": "Mainos: Lokkivakuutus"
   },
   {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_3.mp3",
+   "d": 152.45,
+   "t": "Kirjurinluodon ilta"
+  },
+  {
    "f": "puhe_meri.mp3",
    "d": 21.6,
    "t": "Meren suunnassa"
@@ -139,16 +129,6 @@
    "f": "puhe_vastatuuli.mp3",
    "d": 21.42,
    "t": "Mainos: Parturi-Kampaamo Vastatuuli"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "pop_2.mp3",
-   "d": 141.61,
-   "t": "Yrjönkadun valot"
   },
   {
    "f": "puhe_liikenne.mp3",
@@ -176,9 +156,9 @@
    "t": "Radio Porikopteri"
   },
   {
-   "f": "pop_3.mp3",
-   "d": 152.45,
-   "t": "Kirjurinluodon ilta"
+   "f": "pop_1.mp3",
+   "d": 136.65,
+   "t": "Kauppatorin kesä"
   },
   {
    "f": "puhe_assat.mp3",
@@ -201,16 +181,6 @@
    "t": "Mainos: Pyörähuolto Ketjut Kireellä"
   },
   {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "pop_1.mp3",
-   "d": 136.65,
-   "t": "Kauppatorin kesä"
-  },
-  {
    "f": "puhe_marssi.mp3",
    "d": 27.17,
    "t": "Porilaisten marssi"
@@ -221,16 +191,6 @@
    "t": "Mainos: Patja-Pori"
   },
   {
-   "f": "puhe_suisto.mp3",
-   "d": 26.44,
-   "t": "Joki kohtaa meren"
-  },
-  {
-   "f": "puhe_karhunkammen.mp3",
-   "d": 19.04,
-   "t": "Mainos: Kuntosali Karhunkämmen"
-  },
-  {
    "f": "jingle_1.mp3",
    "d": 3.71,
    "t": "Radio Porikopteri"
@@ -239,6 +199,16 @@
    "f": "pop_2.mp3",
    "d": 141.61,
    "t": "Yrjönkadun valot"
+  },
+  {
+   "f": "puhe_suisto.mp3",
+   "d": 26.44,
+   "t": "Joki kohtaa meren"
+  },
+  {
+   "f": "puhe_karhunkammen.mp3",
+   "d": 19.04,
+   "t": "Mainos: Kuntosali Karhunkämmen"
   },
   {
    "f": "puhe_ilmailu.mp3",
@@ -291,16 +261,6 @@
    "t": "Mainos: Reunakivi-Rengas"
   },
   {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "pop_1.mp3",
-   "d": 136.65,
-   "t": "Kauppatorin kesä"
-  },
-  {
    "f": "puhe_jokiranta.mp3",
    "d": 25.44,
    "t": "Iltakävely joen rannassa"
@@ -309,6 +269,16 @@
    "f": "puhe_tuulipesu.mp3",
    "d": 21.37,
    "t": "Mainos: Yyterin Tuulipesu"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_1.mp3",
+   "d": 136.65,
+   "t": "Kauppatorin kesä"
   },
   {
    "f": "puhe_loppu2.mp3",

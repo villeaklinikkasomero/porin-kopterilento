@@ -964,15 +964,15 @@ Mitattu julkisivu (facades.json) tehdään ensin näille 15:lle. **Tee vain rivi
 | 119 | Itsenäisyydenkatu 41 | c063 | VALMIS 19.11 (f119.py) |
 | 113 | matala keltainen talo 116:n itäpuolella | c063 | AUKI: LoD2-kuoressa on vain eteläosa, kadulle näkyvä matala lasikuistiosa puuttuu → vaatii jalanjälkiratkaisun (kuten 136) |
 | 115 | kioskipaviljonki | c063 | VÄRI KORJATTU 19.11 (keltainen), julkisivu mittaamatta |
-| 107 | Yrjönkatu 25 (1927) | c064 | TEKEMÄTTÄ |
+| 107 | Yrjönkatu 25 (1927) | c064 | VALMIS 19.11 (f107.py; vain Itsenäisyydenkadun pääty, Yrjönkadun pitkä sivu mittaamatta) |
 | 121 | Palojoenkulma, Yrjönkatu 23 | c064 | VALMIS 19.11 (f121.py) |
 | 600 | Hotelli Bepop, Itsenäisyydenkatu 37 | bepop (maamerkki) | TEKEMÄTTÄ |
 | 601 | Itsenäisyydenkatu 35 (1959) | ei lohkoa (maamerkki) | TEKEMÄTTÄ |
 | 585 | vanha linja-autoasema | c064 | TEKEMÄTTÄ |
 | 1228 | valkoinen 6 krs | ei lohkoa | TEKEMÄTTÄ |
-| 569 | Antinkatu 27 A (pohjoissivu Itsenäisyydenkadulle) | c048 | TEKEMÄTTÄ (parvekepino tehty 18.11) |
+| 569 | Antinkatu 27 A | c048 | EI KADUN VARRESSA: eteläsivu on 10 m sisäänvedetty lautaaidan takana (aita tehty 18.11) – jätetään |
 | 164 | 569:n länsipuolella | c051 | TEKEMÄTTÄ |
-| 7 | Itsenäisyydenkatu 54 (1956) | c048 | TEKEMÄTTÄ |
+| 7 | Itsenäisyydenkatu 54 (1956) | c048 | VALMIS 19.11 (f7.py; itäiset 4 akselia peilattu, näkemättä) |
 | 166 | okrankeltainen | c048 | TEKEMÄTTÄ |
 | 167 | 8 krs, lasitetut parvekkeet (SPEC 13.11) | c048 | TEKEMÄTTÄ |
 
@@ -1076,3 +1076,25 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
   (luokka `ride-only`: näkyy autossa ja kopterissa, ei kävellessä; kopterissa 📻 on ▲▼🚶-painikkeiden yläpuolella, bottom 232 px). Ei testattu selaimessa.
 - 19.11 klo 18.15 (omistaja): Radio Porikopterin järjestys on nyt **spiikki, mainos, spiikki, mainos, tunnus + kappale**, ja sama alusta. 23 spiikkiä käydään
   järjestyksessä kerran, 17 mainosta kiertää (6 kuullaan kahdesti), pop_1..3 vuorotellen: 66 riviä, 44,8 min. Vain radio.json ja speak.py muuttuivat.
+
+## 19.11.2026 klo 16–17 – Itsenäisyydenkatu jatkuu: 107 ja 7 (testipoltettu, Modal-polttamatta)
+- **Modal toimii nyt** (PR #62: facades.json mukana, c051 17 977 kärkeä). Omistaja ilmoitti "katot irti seinistä keskustassa" – EI toistunut pilvessä
+  (GitHubin versio c3af284, 9 näkymää; vanhat vs uudet lohkot identtiset katoiltaan; shells-nostot samat). Odottaa omistajan kuvakaappausta.
+- **107 Yrjönkatu 25:** `f107.py`, pohjoispääty 12,1 m: harmaanbeige rappaus, profiloitu räystäslista, 3 kuusiruutuista ikkunaa, 2 näyteikkunaa, pariovi + portaat.
+  Pano Itsenäisyydenkatu 46 (61.4819137, 21.7955776 → x −22.5, y −455.4; h 165 p 8). Länsiakseli symmetrian perusteella.
+- **7 Itsenäisyydenkatu 54:** `f7.py`, 25,3 m: keltainen roiskerappaus, 3 krs, valkopuitteiset ikkunat 2,3 m välein + harmaanvihreä kivirouhepaneeli alla,
+  kellari-ikkunat, tiilisokkeli, porrashuonesyvennys vihrein parvekelevyin. Pano Itsenäisyydenkatu 54 (61.4822671, 21.792381 → x −192.8, y −416.0; h 193 p 14).
+- Kaksi c-lohkon polttoa yhtä aikaa kaatuu muistiin (8 Gt) – aja peräkkäin. **Modal:** `city 64 c048,c064` (107 ja 7 lisätty).
+- Jäljellä taulukosta: 600, 601, 585, 1228, 164, 166, 167 (+113 auki, 115 mittaamatta).
+- 19.11 klo 18.30 (omistaja: kappaleet ovat pitkiä): Radio Porikopterissa nyt **kolme** spiikki + mainos -paria ennen tunnusta ja kappaletta
+  (`PAIRS = 3` speak.py:ssä). 22 spiikkiä, 18 mainosta (4 kahdesti), 8 kappaleen soittoa: 60 riviä, 37,4 min. Vain radio.json ja speak.py.
+
+## ILLAN MODAL-JONO (omistaja polttaa illalla – PÄIVITÄ TÄTÄ LISTAA, älä tee uutta)
+Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 mennessä viedyn). Sen jälkeen kertyneet:
+
+| Lohko | Talot | Lisätty |
+|---|---|---|
+| c048 | 7 (Itsenäisyydenkatu 54) | 19.11 klo 17 |
+| c064 | 107 (Yrjönkatu 25) | 19.11 klo 17 |
+
+Ajettava illalla (push ensin, odota "porikit image" vihreäksi): `city 64 c048,c064`
