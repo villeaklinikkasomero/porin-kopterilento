@@ -83,7 +83,7 @@
   #radio { left:14px; bottom:84px; padding:6px 10px; font-size:13px; display:flex; gap:8px; align-items:baseline; color:var(--ink); }
   #radio #rsong { color:var(--dim); font-size:12px; }
   .touch #radio { bottom:auto; top:178px; }
-  #tradio { bottom:22px; } body:not(.car) #tradio { bottom:232px; } body.walk .ride-only { display:none !important; }   /* radio: car and helicopter, not on foot */
+  #thei { bottom:162px; } #tradio { bottom:22px; } body:not(.car) #tradio { bottom:232px; } body.walk .ride-only { display:none !important; }   /* radio: car and helicopter, not on foot */
   #vehs { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0 6px; }
   .veh { pointer-events:auto; position:relative; padding:0; border:2px solid var(--line); border-radius:10px; overflow:hidden; background:#0e161e; cursor:pointer; color:var(--ink); font:inherit; text-align:left; }
   .veh video, .veh img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; }
@@ -143,7 +143,7 @@
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
-  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb ride-only" id="tradio">📻</div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta">🚶</div><div class="tb walk-only" id="trun" aria-label="Juokse">🏃</div>
+  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb ride-only" id="tradio">📻</div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta">🚶</div><div class="tb walk-only" id="thei" aria-label="Tervehdi kävelijää">💬</div><div class="tb walk-only" id="trun" aria-label="Juokse">🏃</div>
 </div>
 
 <div id="start">
@@ -1266,7 +1266,7 @@ import('./roads.js').then(mod => {
   if (R.tadd && TREES.add) TREES.add(dec(R.tadd));
   { // 1 m raster of the pavements for the car: driving over a kerb lifts it onto the pavement
     const [x0, y0, x1, y1] = R.bb, nx = Math.ceil(x1 - x0), ny = Math.ceil(y1 - y0), M = new Uint8Array(nx * ny);          // bit 1 pavement, bit 2 carriageway (for the signal posts: where the kerb is)
-    for (const [T, bit] of [[dec(R.pave), 1], [dec(R.asph), 2]]) for (let i = 0; i < T.length; i += 6) { const ax = T[i] / 10, ay = T[i + 1] / 10, bx = T[i + 2] / 10, by = T[i + 3] / 10, cx = T[i + 4] / 10, cy = T[i + 5] / 10;
+    for (const [T, bit] of [[dec(R.pave), 1], ...(R.kivi ? [[dec(R.kivi), 1]] : []), [dec(R.asph), 2]])   /* the stone paving lies at pavement height too (19.11: walkers sank into it) */ for (let i = 0; i < T.length; i += 6) { const ax = T[i] / 10, ay = T[i + 1] / 10, bx = T[i + 2] / 10, by = T[i + 3] / 10, cx = T[i + 4] / 10, cy = T[i + 5] / 10;
       const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy); if (Math.abs(d) < 1e-6) continue;
       for (let gy = Math.floor(Math.min(ay, by, cy) - y0); gy <= Math.ceil(Math.max(ay, by, cy) - y0); gy++) for (let gx = Math.floor(Math.min(ax, bx, cx) - x0); gx <= Math.ceil(Math.max(ax, bx, cx) - x0); gx++) {
         if (gx < 0 || gy < 0 || gx >= nx || gy >= ny) continue; const px = x0 + gx + 0.5, py = y0 + gy + 0.5;
@@ -1934,6 +1934,7 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyT') LB.show(!LB.open);
   if (e.code === 'KeyM') toggleSound();
   if (e.code === 'KeyR' && !WALK.on) RADIO.next();
+  if (e.code === 'KeyH' && WALK.on && !WALK.in && window.__npc) window.__npc.greet();
   if (e.code === 'KeyN') newTour();
 });
 addEventListener('keyup', e => keys.delete(e.code));
@@ -2464,20 +2465,32 @@ setTarget();
     p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.new = true; }); parties.push(p); };
   const sigFor = (a, b) => { const S_ = window.__sig; if (!S_ || !S_.poles.length) return undefined; const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, L = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x) / L, uy = (b.y - a.y) / L;
     let best = null, bd = 16; for (const q of S_.poles) { const d = Math.hypot(q.x - mx, q.y - my); if (d < bd && Math.abs(ux * q.ux + uy * q.uy) < 0.6) { bd = d; best = q; } } return best; };
+  // H on foot: the nearest walker within 8 m stops, turns to the player and says something in the Pori dialect (radio/huuto_*.mp3, tools/radio/huudot.py;
+  // m = man, n = woman, l = child; the text is shown too). The party stands for the length of the line.
+  let HU = null, huEl = null, huT = 0; fetch('./radio/huudot.json').then(r => r.json()).then(j => { HU = j; }).catch(() => {});
+  const greet = () => { if (!HU || performance.now() < huT) return; let best = null, bp = null, bd = 8;
+    for (const p of parties) for (const c of p.m) { const d = Math.hypot(c.x - WALK.x, c.y - WALK.y); if (d < bd) { bd = d; best = c; bp = p; } }
+    if (!best) { toast('Ei ketään kuuloetäisyydellä', 1.4); return; }
+    const kid = best.kid, L = kid ? HU.l : HU.a, i = Math.floor(Math.random() * L.length), v = kid ? 'l' : best.k.startsWith('mies') ? 'm' : 'n';
+    bp.hold = 3.2; huT = performance.now() + 2500; toast('💬 ' + L[i], 3);
+    try { huEl = huEl || new Audio(); huEl.src = './radio/huuto_' + v + '_' + String(i + 1).padStart(2, '0') + '.mp3'; huEl.volume = soundOn ? 0.9 : 0; huEl.play().catch(() => {}); } catch (e) {} };
+  $('thei').addEventListener('pointerdown', e => { e.preventDefault(); if (WALK.on && !WALK.in) greet(); });
   let acc = 0;
-  window.__npc = { parties, update: dt => { if (!net || dt <= 0) return; const px = S.x, py = S.y;
+  window.__npc = { parties, greet, update: dt => { if (!net || dt <= 0) return; const px = S.x, py = S.y;
     acc += dt; if (acc > 0.25) { acc = 0; if (count() < NMAX) spawn(px, py);
       else { let w = null, wd = 85; for (const q of parties) { const d = Math.hypot(q.m[0].x - px, q.m[0].y - py); if (d > wd) { wd = d; w = q; } } if (w) w.m[0].x = 1e6; }   /* full: the farthest party (over 85 m away) makes room, so the people gather where the player is */
       for (let i = parties.length - 1; i >= 0; i--) { const p = parties[i]; if (Math.hypot(p.m[0].x - px, p.m[0].y - py) > 150) { for (const c of p.m) { scene.remove(c.g); c.mix.stopAllAction(); } parties.splice(i, 1); } } }
     for (const p of parties) { let dx = p.b.x - p.a.x, dy = p.b.y - p.a.y, len = Math.hypot(dx, dy) || 1;
       if (p.c && !p.pc && p.t < 0.02) { if (p.sg === undefined) p.sg = sigFor(p.a, p.b); p.wait = !!p.sg && !window.__sig.ped(p.sg.n, p.sg.a); } else p.wait = false;   // at the kerb of a signalled crossing
+      if (p.hold > 0) { p.hold -= dt; p.wait = true; }                         // greeted: stand and face the player
       if (!p.wait) p.t += p.v * dt / len;
       if (p.t >= 1) { const o = p.b.nb, gb = p.b.grid, e = pickW(o, o.map(q => q.n === p.a ? (o.length === 1 ? 1 : q.n.busy && !q.n.grid ? 2 : 0.02) : q.n.grid ? (gb ? 1 : 0.25) : q.n.busy ? 12 : gb ? 4 : 1)); p.a = p.b;   /* stay on the pedestrian streets; cross the square, do not circle in it */ p.b = e.n; p.pc = p.c; p.c = e.c; p.sg = undefined; p.t = 0; dx = p.b.x - p.a.x; dy = p.b.y - p.a.y; len = Math.hypot(dx, dy) || 1; }
       const ux = dx / len, uy = dy / len, lx = p.a.x + dx * p.t, ly = p.a.y + dy * p.t, near = Math.hypot(lx - px, ly - py) < 110;
       const lt = p.a.busy && p.b.busy && !p.a.grid && !p.b.grid ? p.lat : 0;
       for (const c of p.m) { const tx = lx + uy * (c.off + lt) - ux * c.back, ty = ly - ux * (c.off + lt) - uy * c.back, k = c.new ? 1 : Math.min(1, dt * 4); c.new = false;
         const mx = (tx - c.x) * k, my = (ty - c.y) * k, sp = Math.hypot(mx, my) / Math.max(dt, 1e-3); c.x += mx; c.y += my;
-        if (sp > 0.15) { let d = Math.atan2(mx, my) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 8); }
+        if (p.hold > 0) { let d = Math.atan2(px - c.x, py - c.y) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6); }
+        else if (sp > 0.15) { let d = Math.atan2(mx, my) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 8); }
         const g = carGround(c.x, c.y); if (g !== null) c.z += (g - c.z) * Math.min(1, dt * 10);
         c.g.position.set(c.x, c.z, -c.y); c.g.rotation.y = -c.yaw; c.g.visible = near;
         if (near) { setAnim(c, sp > 0.3 ? 'Walk' : 'Idle'); if (c.act.Walk) c.act.Walk.timeScale = (c.kid ? 1.25 : 1) * Math.max(0.6, sp / 1.25); c.mix.update(dt); } } } } };

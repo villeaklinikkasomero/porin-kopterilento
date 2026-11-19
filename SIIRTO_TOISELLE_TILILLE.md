@@ -1319,3 +1319,12 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
 - **Viety kansioon:** `index.html`, `blender/gen.py`, `blender/kivi.py`, `blender/zones.py`, `blender/facades.json`, `tools/rautalanka/facades/f164.py`,
   kuva `Claude outputs/pysakointihalli_164_testi_19_11.jpg`. Modal-jono ennallaan `city 64 c048,c051,c064` (c051 = 164 aukkoineen); gen.py/kivi.py/zones.py
   muuttuivat → push ja "porikit image" vihreäksi ennen ajoa. **Ennen Modal-polttoa aukot eivät näy pelissä** (vanha bl_c051.js: umpiseinä), mutta läpi voi jo ajaa.
+
+### 19.11 klo 21: kävelijät upposivat kivetykseen + porilaiset huudahdukset (H)
+- **Uppoaminen:** kävelykadun ja torin kivetys (R.kivi) piirretään jalkakäytävän korkeudelle (ROAD.pave 0,26), mutta korkeusmaskissa oli vain R.pave →
+  `carGround` antoi asfaltin tason (0,13) ja kävelijät, pelaaja ja autot upposivat 13 cm. Korjaus: R.kivi mukaan maskin bittiin 1 (index.html, roads-rasteri).
+- **Huudahdukset:** kävellessä **H** (kosketus 💬) → lähin kävelijä (<8 m) pysähtyy 3 s, kääntyy pelaajaan ja sanoo repliikin (ääni + toast). `window.__npc.greet`.
+  Tekstit `tools/radio/huudot.json` (12 aikuisten, 4 lasten), generaattori `tools/radio/huudot.py` → `radio/huuto_{m,n,l}_NN.mp3` + `radio/huudot.json`.
+  Piperissä on suomeksi vain miesääni: naisääni = sama 1,22× sävelkorkeus, lapsi 1,45× (asetrate+atempo). Ei kuunneltu pilvessä; murreasu on Clauden arvio.
+- **Auki:** omistajan kuvakaappaus (Liisankatu-kyltti, harmaa talo jonka kulmassa näkyy läpi puistoon) – kohtaa ei löytynyt Liisankadun ja Eteläpuiston
+  kulmasta (talot 65, 70, 253, 158); tarvitaan tarkempi paikka. Ei liity tämän päivän muutoksiin (bl_*.js-polttoja ei ole viety).
