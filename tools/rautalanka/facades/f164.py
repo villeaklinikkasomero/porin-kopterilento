@@ -5,8 +5,10 @@ import json, sys
 # (z from the pavement). PV: the game's pavement lies 0.26 m above the block's ground, everything is drawn PV higher (as f166.py).
 # Light grey concrete panels, a low wall 4.3 m high between two stair towers (west 7.2 m with a dark glazed strip, east 6.0 m with a glazed
 # door and a dark window strip); a grey-blue door, a sectional door with two glazed rows, and the 4.9 m wide drive-in under yellow signs.
-# Simplified: the drive-in is a dark panel (no opening is cut); the signs are blank yellow boards; lamps, the concrete fin and the
-# ventilation drum on the deck are left out.
+# The drive-in is a real opening ("gate": [s0, s1, gh, depth, h], owner 19.11.2026: drive-through test) and so is the exit on Mikonkatu.
+# The signs are blank yellow boards; lamps, the concrete fin and the ventilation drum on the deck are left out.
+# North (Mikonkatu 10) face, 25.9 m: pano 61.4834211, 21.7927058 -> x -175.51 y -287.40, heading 193, pitch 8; scale NOT calibrated
+# (read as it is, z - 0.48): exit 14.2 .. 19.0, glazed door of the stair tower next to it, a sectional door at s 8 .. 9. Rest plain.
 A = (-216.063, -398.788); B = (-190.378, -404.806); L = 26.38
 CON = '#b9b7b0'; JNT = '#9c9a94'; DK = '#3c4650'; YEL = '#e2b53a'
 it = []; PV = 0.26
@@ -22,13 +24,19 @@ it.append(['door', 4.23, 5.0, PV, 2.3 + PV, '#5f7080'])
 it.append(['door', 7.27, 10.98, PV, 2.23 + PV, '#8d9094']); it.append(['winp', 7.27, 10.98, 1.2 + PV, 2.23 + PV, 5, '#8d9094', '#6b7780'])
 box(7.27, 10.98, 1.68, 1.74, 0.04, 0.06, '#8d9094')
 # drive-in and its signs
-it.append(['door', 16.05, 20.95, PV, 2.3 + PV, '#191b1d'])
 box(16.1, 18.0, 2.35, 2.7, 0.0, 0.04, YEL); box(18.4, 19.9, 2.35, 2.7, 0.0, 0.04, YEL)
 # east stair tower
 it.append(['winp', 21.45, 22.8, PV, 2.27 + PV, 2, '#4a5056', '#4f5d68']); it.append(['glass', 25.45, 26.3, 3.2 + PV, 5.7 + PV, DK, 0.03])
 box(21.0, L, 5.85, 5.95, 0.0, 0.06, '#a9a7a0')
+south = {"a": list(A), "b": list(B), "bare": CON, "kind": "plaster", "gate": [16.05, 20.95, 2.3 + PV, 0.4, 4.3], "items": it}
+A2 = (-161.577, -304.078); B2 = (-186.75, -298.116); it = []
+box(14.2, 19.0, 2.5, 2.57, 0.0, 0.03, '#a9a7a0')                                           # lintel line over the exit
+box(15.9, 17.3, 2.65, 3.0, 0.0, 0.04, YEL)                                                 # sign board over the exit (blank)
+it.append(['winp', 19.4, 21.4, PV, 2.4 + PV, 2, '#4a5056', '#4f5d68'])                     # glazed door of the stair tower
+it.append(['door', 8.0, 9.05, PV, 2.6 + PV, '#8d9094']); it.append(['winp', 8.0, 9.05, 1.3 + PV, 2.6 + PV, 2, '#8d9094', '#6b7780'])
+north = {"a": list(A2), "b": list(B2), "bare": CON, "kind": "plaster", "gate": [14.2, 19.0, 2.5 + PV, 0.4, 4.7], "items": it}
 e = {"id": 164, "note": "Itsenäisyydenkatu 45, parking house: light grey concrete panels, low wall between two stair towers, grey-blue door, "
-     "sectional door, drive-in (dark panel) under blank yellow signs (SV Itsenäisyydenkatu 45 pano, rectified, 19.11.2026; only the street face)",
-     "walls": [{"a": list(A), "b": list(B), "bare": CON, "kind": "plaster", "items": it}]}
+     "sectional door, open drive-in under blank yellow signs (SV Itsenäisyydenkatu 45 pano, rectified, 19.11.2026). Mikonkatu end: open exit, "
+     "glazed door, sectional door (SV Mikonkatu 10 pano, scale not calibrated). Long sides not measured", "walls": [south, north]}
 p = sys.argv[1] if len(sys.argv) > 1 else '/home/claude/pori/blender/facades.json'; F = json.load(open(p))
-F = [f for f in F if f['id'] != 164] + [e]; open(p, 'w').write(json.dumps(F, indent=0)); print(len(it))
+F = [f for f in F if f['id'] != 164] + [e]; open(p, 'w').write(json.dumps(F, indent=0)); print(len(south['items']), len(north['items']))

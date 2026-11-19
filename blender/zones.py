@@ -1356,6 +1356,13 @@ def _bare_w(w):
     rl = dict(bw=w.get('shop_bw', 2.0), rows=[(gh, 'shop', 'G'), (max(1.0, h - gh), 'plain', 'P')], cols=lambda c, nb: 'W', P={},
               rowP={'G': dict(setback=sb, piers=(0, 0.3), soffit=M('#35383b'), fasc_h=0.2, gpier=0.04)})
     return dict(P=dict(wall=wm, gwall=M('#2c2f31', 0.6), fascia=M('#2c2f31', 0.6), piermat=wm), layout=rl, upper=_bare_lay)
+def _gate_w(w):
+    """the runalt spec of the gateway stretch of a facades.json wall ("gate": [s0, s1, gh, depth, h]): an opening gh high through a wall
+    'depth' thick - reveals and a soffit, no back wall; kivi.py cuts the shell wall at s0 and s1 so that the stretch is a run of its own"""
+    s0, s1, gh, dp, h = w['gate']; wm = _bare_mat(w)
+    rl = dict(bw=60.0, rows=[(gh, 'plain', 'G'), (max(0.5, h - gh), 'plain', 'P')], cols=lambda c, nb: 'W', P={},
+              rowP={'G': dict(setback=dp, piers=(0, 0.04), soffit=wm, noback=True)})
+    return dict(P=dict(wall=wm, piermat=wm), layout=rl, upper=_bare_lay)
 WALLS = {}; FEXTRA = {}; NOBRICK = set()   # NOBRICK: houses without a SPEC whose entry says "nobrick" (19.11.2026, 166: red granite, not brick)
 FACADES = {e['id']: e for e in (_json_f.load(open(_FJ)) if _os_f.path.exists(_FJ) else [])}
 for _i, _e in FACADES.items():
@@ -1363,6 +1370,9 @@ for _i, _e in FACADES.items():
     def _ra(x, y, _bw=_bw):
         for w in _bw:
             if _on_line(x, y, tuple(w['a']), tuple(w['b'])):
+                if 'gate' in w:                            # the run between the two cuts is the gateway
+                    a_, b_ = w['a'], w['b']; Lw = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); u = ((x - a_[0]) * (b_[0] - a_[0]) + (y - a_[1]) * (b_[1] - a_[1])) / Lw
+                    if w['gate'][0] <= u <= w['gate'][1]: return _gate_w(w)
                 if 'bare_s' in w:                          # only the runs whose middle lies in this stretch of the wall (s from a)
                     a_, b_ = w['a'], w['b']; Lw = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); u = ((x - a_[0]) * (b_[0] - a_[0]) + (y - a_[1]) * (b_[1] - a_[1])) / Lw
                     if not (w['bare_s'][0] <= u <= w['bare_s'][1]): continue

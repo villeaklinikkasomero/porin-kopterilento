@@ -28017,7 +28017,7 @@
 },
 {
 "id": 164,
-"note": "Itsen\u00e4isyydenkatu 45, parking house: light grey concrete panels, low wall between two stair towers, grey-blue door, sectional door, drive-in (dark panel) under blank yellow signs (SV Itsen\u00e4isyydenkatu 45 pano, rectified, 19.11.2026; only the street face)",
+"note": "Itsen\u00e4isyydenkatu 45, parking house: light grey concrete panels, low wall between two stair towers, grey-blue door, sectional door, open drive-in under blank yellow signs (SV Itsen\u00e4isyydenkatu 45 pano, rectified, 19.11.2026). Mikonkatu end: open exit, glazed door, sectional door (SV Mikonkatu 10 pano, scale not calibrated). Long sides not measured",
 "walls": [
 {
 "a": [
@@ -28030,6 +28030,13 @@
 ],
 "bare": "#b9b7b0",
 "kind": "plaster",
+"gate": [
+16.05,
+20.95,
+2.5599999999999996,
+0.4,
+4.3
+],
 "items": [
 [
 "box",
@@ -28187,14 +28194,6 @@
 "#8d9094"
 ],
 [
-"door",
-16.05,
-20.95,
-0.26,
-2.5599999999999996,
-"#191b1d"
-],
-[
 "box",
 16.1,
 18.0,
@@ -28242,6 +28241,75 @@
 0.0,
 0.06,
 "#a9a7a0"
+]
+]
+},
+{
+"a": [
+-161.577,
+-304.078
+],
+"b": [
+-186.75,
+-298.116
+],
+"bare": "#b9b7b0",
+"kind": "plaster",
+"gate": [
+14.2,
+19.0,
+2.76,
+0.4,
+4.7
+],
+"items": [
+[
+"box",
+14.2,
+19.0,
+2.76,
+2.83,
+0.0,
+0.03,
+"#a9a7a0"
+],
+[
+"box",
+15.9,
+17.3,
+2.91,
+3.26,
+0.0,
+0.04,
+"#e2b53a"
+],
+[
+"winp",
+19.4,
+21.4,
+0.26,
+2.66,
+2,
+"#4a5056",
+"#4f5d68"
+],
+[
+"door",
+8.0,
+9.05,
+0.26,
+2.8600000000000003,
+"#8d9094"
+],
+[
+"winp",
+8.0,
+9.05,
+1.56,
+2.8600000000000003,
+2,
+"#8d9094",
+"#6b7780"
 ]
 ]
 }

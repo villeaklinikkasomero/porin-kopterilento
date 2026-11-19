@@ -679,6 +679,7 @@ def build_wall(Z, p, q, z0, z1, layout, P, seed, bid):
         for ck, cs in groups.items():
             rep = min(cs, key=lambda c: abs(c - (nb - 1) / 2) + (0.01 * c))
             Pm = dict(P); Pm.update(layout.get('P', {})); Pm.update(layout.get('rowP', {}).get(rkey, {}))
+            if Pm.get('noback'): continue                 # a set-back row without its back wall: an open gateway (facades.json "gate", 19.11.2026)
             mname = Pm.get('colmod', {}).get(ck, mod) if mod not in ('shop', 'plain') else mod
             mb = MB(bw, fh, seed * 131 + ri * 17 + hash(ck) % 97)
             MODS[mname](mb, ck, Pm)

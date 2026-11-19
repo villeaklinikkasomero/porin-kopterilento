@@ -971,7 +971,7 @@ Mitattu julkisivu (facades.json) tehdään ensin näille 15:lle. **Tee vain rivi
 | 585 | vanha linja-autoasema | c064 | TEKEMÄTTÄ |
 | 1228 | valkoinen 6 krs | ei lohkoa | TEKEMÄTTÄ |
 | 569 | Antinkatu 27 A | c048 | EI KADUN VARRESSA: eteläsivu on 10 m sisäänvedetty lautaaidan takana (aita tehty 18.11) – jätetään |
-| 164 | Itsenäisyydenkatu 45, pysäköintitalo (569:n länsipuolella) | c051 | VALMIS 19.11 (f164.py; vain katujulkisivu, ajoaukko tummana levynä) |
+| 164 | Itsenäisyydenkatu 45, pysäköintitalo (569:n länsipuolella) | c051 | VALMIS 19.11 (f164.py; katujulkisivu + Mikonkadun pää, ajoaukot oikeina aukkoina, läpiajotesti – ks. luku "PYSÄKÖINTIHALLI 164") |
 | 7 | Itsenäisyydenkatu 54 (1956) | c048 | VALMIS 19.11 (f7.py; itäiset 4 akselia peilattu, näkemättä) |
 | 166 | Itsenäisyydenkatu 47, okrankeltainen 3 krs | c048 | VALMIS 19.11 (f166.py; koko katujulkisivu nähty) |
 | 167 | Itsenäisyydenkatu 58, 8 krs, lasitetut parvekkeet (SPEC 13.11) | c048 | VALMIS 19.11 (f167.py; Itsenäisyydenkadun pääty + Eteläpuiston länsisivu, katutaso sisäänvedetty; länsisivun s < 4,5 ja pihan sivut mittaamatta) |
@@ -1300,3 +1300,22 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
   Tarkistuskuvat lähetetty chatissa. Auki omistajalle: 003 Juhana-herttua seisoo jalkakäytävän kulmassa (luettelon koordinaatti, ei varmistettu),
   004 Portin suunta (aukko kohti katua, puistokäytävä ei kulje sen läpi), 005 Toriparlamentti keskellä toria, 019 vieressä ilmakuvatalon vino seinä.
 - 19.11 klo 20.45 (omistaja): 001 Satakunnan karhu katsoo itään (`suunta_asteet: 90`; patsaat.js-kenttä h). Muut suunnat edelleen arvauksia (lähin katu).
+
+## PYSÄKÖINTIHALLI 164 – LÄPIAJOTESTI (omistaja 19.11: "tehdään testi, ulos taitaa päästä Mikonkadun päästä")
+- **Mitä:** autolla voi ajaa Itsenäisyydenkadun ajoaukosta halliin ja ulos Mikonkadun päästä (Street View: Mikonkadun aukossa kielletty ajosuunta -merkki,
+  eli oikeasti sisään etelästä, ulos pohjoisesta; pelissä kumpaankin suuntaan). Testipoltettu ja ajolinja tarkistettu pilvessä; **omistaja ei ole vielä ajanut**.
+- **Poltto (uusi seinäavain facades.jsonissa): `"gate": [s0, s1, gh, depth, h]`** = oikea aukko seinässä (pielet + alapinta, ei takaseinää).
+  `kivi.py` jakaa kuoren seinän aukon pielistä (`cut_walls`), `zones.py` `_gate_w` antaa aukkopätkälle sisäänvedetyn rivin, `gen.py`: rivi jolla
+  `noback` jätetään piirtämättä. 164: etelä s 16,05–20,95 (h 2,3) ja Mikonkatu s 14,2–19,0 (h 2,5; **mittakaava kalibroimatta**, pano Mikonkatu 10:
+  61.4834211, 21.7927058 → x −175.51, y −287.40, h 193 p 8). Mikonkadun seinä (−161.577,−304.078)→(−186.75,−298.116) on nyt paljas betoni + lasiovi + nosto-ovi.
+- **Peli (index.html, haku `HALL`):** hallin sisus piirretään three.js:llä ilman leivontaa (lattia, katto, seinät, 12 pilaria keskilinjalla, ruutuviivat) –
+  **vain aukot on mitattu, hallin koko = kuoren jalanjälki 0,4 m sisäänvedettynä, pilarit ja ruudut arvioita.** `inHall()` vapauttaa auton talotörmäyksestä
+  hallin sisällä ja aukkokaistoilla (pilarit pysäyttävät; seinät otetaan 0,3 m välein auton kyljistä), `carGround` palauttaa hallin lattian
+  (`hallZ`: tasainen luiska etelän jalkakäytävän tasosta pohjoisen tasoon, 3,97 → 3,77), seurantakamera laskeutuu katon alle (4,6 m taakse, 1,9 m ylös).
+  Testikoukku `window.__hallTest`. Hallin geometria on laskettu pilvessä jalanjäljestä (shapely) ja upotettu `HALL`-vakioon.
+- **Tiedossa / auki:** länsiseinän juuressa maasto pilkistää lattian läpi vihreänä kaistana; sisus on tasaväristä (ei valoja, ei varjoja, ei pysäköityjä
+  autoja); kopteri/kävelijä/liikenneautot eivät tunne hallia; katolta katsoen ei muutosta. Jos testi kelpaa: sisus Blender-moduuliksi (kuten sisätilat),
+  oikeat mitat omistajan kuvista, ja sama `gate` + `HALL`-rakenne muihin halleihin.
+- **Viety kansioon:** `index.html`, `blender/gen.py`, `blender/kivi.py`, `blender/zones.py`, `blender/facades.json`, `tools/rautalanka/facades/f164.py`,
+  kuva `Claude outputs/pysakointihalli_164_testi_19_11.jpg`. Modal-jono ennallaan `city 64 c048,c051,c064` (c051 = 164 aukkoineen); gen.py/kivi.py/zones.py
+  muuttuivat → push ja "porikit image" vihreäksi ennen ajoa. **Ennen Modal-polttoa aukot eivät näy pelissä** (vanha bl_c051.js: umpiseinä), mutta läpi voi jo ajaa.

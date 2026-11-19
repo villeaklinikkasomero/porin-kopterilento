@@ -660,6 +660,11 @@ SPECK[1604]['extra'] = [facade_bits((51.8, 302.6), (39.0, 248.0), [('gable', 1.9
                         facade_bits((39.0, 248.0), (51.5, 245.0), [('box', -0.05, 12.85, -0.5, 8.2, 0.0, 0.1, M('#3e544e', 0.6))])]   # owner 16.11: the south end of the 1960s house 1580 is a blank dark-green panel wall, no windows   # second turret mid-facade
 RAW[1576] = [(k, [(q[0], q[1], 6.3 if 5.5 < q[2] < 7.4 else q[2]) for q in r], h) for k, r, h in RAW.get(1576, [])]   # the scan's eave wobbles 6.0-7.0 m: a strip of red wall stood above the cornice (owner 15.11.2026). One eave at 6.3 m.
 cut_walls(1284, (-170.4, 407.5), (0.204, 0.981))     # Heinen talo: the two street walls are cut 2.4 m from the corner; the round corner bay
+for _gi, _ge in zones2.FACADES.items():               # facades.json "gate": [s0, s1, gh, depth, h] - split the wall at both jambs (19.11.2026, 164)
+    for _gw in _ge['walls']:
+        if 'gate' in _gw:
+            _ga, _gb = _gw['a'], _gw['b']; _gl = math.hypot(_gb[0] - _ga[0], _gb[1] - _ga[1]); _gt = ((_gb[0] - _ga[0]) / _gl, (_gb[1] - _ga[1]) / _gl)
+            for _gs in _gw['gate'][:2]: cut_walls(_gi, (_ga[0] + _gt[0] * _gs, _ga[1] + _gt[1] * _gs), _gt)
 cut_walls(1284, (-173.3, 405.5), (-0.986, 0.168))    # stands there, so those stretches stay blank (owner 15.11.2026: windows and clutter behind the tower)
 _b1284 = classic_spec(1284, wall='#e4dcc6', trim='#f3eee2', rust=True, garch=False, hood=None, pil=False, lay=dict(cols=lambda c, nb: 'N'))
 _b1284['yard'] = _b1284['layout']
