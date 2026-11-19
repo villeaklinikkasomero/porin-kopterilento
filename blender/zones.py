@@ -54,6 +54,9 @@ _hopP = dict(wall=M('#d8d0bd'), surround=WHITE, rail=M('#3a3f45'), corr=True, li
 SPEC[1726] = dict(P=_hopP, layout=lay(27, 'punched', gh=4.4, bw=3.3, fh=3.2, P=dict(ww=1.3, wh=1.4)),
                   dirs={'S': (lay(27, 'punched', gh=4.4, bw=3.4, fh=3.2, cols=lambda c, nb: 'L' if c % 3 != 1 else 'W', P=dict(colmod={'L': 'loggia'}, ww=1.3, wh=1.4)), 8)},
                   roof=dict(kind='flat', mat=SHEET, pent=(3.5, 2.4)))
+# 1600 Antinkatu 8 (SV 19.11.2026): one-storey restaurant under a green sheet-metal mansard; the street front is in facades.json
+SPEC[1600] = dict(P=dict(wall=M('#98a28d')), layout=dict(bw=3.0, rows=[(4.7, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True),
+                  roof=dict(kind='hip', inset=2.0, rise=0.6, ov=0.05, mat=M('#82937d', 0.5)))
 B[1725]['h'] = 6.7                                       # eaves measured on the rectified SV (19.11.2026); city.js has 10
 SPEC[1725] = dict(P=dict(_hopP), layout=lay(6.7, 'punched', gh=3.4, bw=3.3, fh=3.3, P=dict(ww=1.6, wh=1.4)))      # two-storey shop wing on Antinkatu (street front: facades.json)
 SPEC[1727] = dict(P=dict(wall=M('#d8d0bd')), layout=lay(4.7, plain=True))                                           # banking hall in the yard

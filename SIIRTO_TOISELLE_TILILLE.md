@@ -802,3 +802,12 @@ Aiemmin: 118, 126, 133, 135, 290, 274, 137, 255, 216, 221, 215, 564, 163.
 - **Modal:** tori0 on jo jonossa. Vertailukuva `Claude outputs/antinkatu10_1725_vertailu_19_11.jpg`.
 - **Havaittu, tekemättä:** 1726:n Antinkadun pääty on oikeasti tummanpunaista laattaa, 2 ikkunasaraketta, tumma liiketila (pelissä beige parvekepääty);
   1600 (Dante-baari, vihreä mansardikatto, pyöreät kattoikkunat) on pelissä pelkkä laatikko. Seuraavaksi nämä, sitten 136, 409, 570, 276, 415.
+
+### 19.11 klo 10–11: 1600 Antinkatu 8 (Dante-ravintola) – tehty, polttamatta
+- `tools/rautalanka/facades/f1600.py` + facades.json: harmaanvihreät rappauspilarit, 4 tummaa näyteikkunaa (ruudutettu yläosa), sisäänvedetty ovi
+  säleportilla, tumma markiisilaatikko, vihreän peltimansardin juuri + 3 kattolyhtyä (pyöreät ikkunat piirretty neliöinä).
+- zones.py: `SPEC[1600]` (muut seinät paljaat, vihreä aumakatto); **1600 lisätty index.html:n ZROOFiin**. 1725:n rappauskenttää vaalennettu.
+- Panot Antinkatu 9: (61.4876768, 21.7963367 → x 17.94, y 186.8) ja (61.4875892, 21.7962959 → x 15.76, y 177.04). Jalkakäytävä z 1,0, pituus 14,9/15,7 m
+  → s = 1,054·s, z = 1,054·(z − 1,0). Street View -ruudut latautuvat hitaasti: odota 15–25 s ennen kuvakaappausta (muuten sumea/musta).
+- Huom: index.html muuttuu myös toisessa istunnossa (radio) – stage aina juuri ennen muokkausta. Modal: tori0 jonossa.
+- Vertailukuva `Claude outputs/antinkatu8_1600_vertailu_19_11.jpg`. Seuraavaksi: 1726:n punainen laattapääty Antinkadulle, sitten 136, 409, 570, 276, 415.

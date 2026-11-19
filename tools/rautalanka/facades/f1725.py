@@ -17,7 +17,7 @@ for a, b in bays:                                                           # up
     box(a, b, 3.37, 4.12, 0.0, 0.02, BROWN)
     for f0, f1 in ((0.02, 0.225), (0.265, 0.735), (0.775, 0.98)): it.append(['winp', round(a + f0 * w, 2), round(a + f1 * w, 2), 4.18, 6.0, 1, FR, GL])
 # north bay: rough render panel with one window over the gateway to the yard
-box(0.42, 3.67, 3.37, 6.05, 0.0, 0.02, '#8d8873')
+box(0.42, 3.67, 3.37, 6.05, 0.0, 0.02, '#a5a18f')
 it.append(['winp', 1.42, 2.68, 4.26, 5.6, 1, FR, GL])
 it.append(['door', 0.42, 3.67, 0.0, 2.93, '#1b1c1d'])                       # the gateway (drawn dark) and its bar gate
 k = 0.9
