@@ -30,6 +30,7 @@ def args():
     return p.parse_args(argv)
 A = args()
 OUT = A.out
+NAME = "kirkko_sisa"                     # tulostiedostojen nimi; muut sisätilat (mausoleumi_sisa.py) vaihtavat tämän
 os.makedirs(OUT + "/tex", exist_ok=True)
 
 # ---------------------------------------------------------------- mitat
@@ -704,12 +705,12 @@ def make_scene(LAMPS):
     except Exception: pass
     return objs
 
-def shots(tag=""):
+def shots(tag="", V=None):
     scn = bpy.context.scene
     cam = bpy.data.cameras.new("c"); co = bpy.data.objects.new("c", cam); scn.collection.objects.link(co); scn.camera = co
     scn.render.resolution_x, scn.render.resolution_y = 960, 600
     scn.view_settings.view_transform = "Standard"; scn.view_settings.exposure = 0.0
-    V = dict(alttarille=((-17.5, 0.0, 1.7), (20, 0, 5.5), 20), uruille=((14, 0.5, 1.7), (-20, 0, 7.5), 20), sivulaiva=((-10, 8.2, 1.7), (20, 5, 4.0), 22),
+    V = V or dict(alttarille=((-17.5, 0.0, 1.7), (20, 0, 5.5), 20), uruille=((14, 0.5, 1.7), (-20, 0, 7.5), 20), sivulaiva=((-10, 8.2, 1.7), (20, 5, 4.0), 22),
              kuori=((17.5, 0.0, 2.2), (30, 0, 4.6), 24), lehteri=((0, -3.0, 1.7), (12, 9, 6.5), 20))
     for k, (loc, tgt, lens) in V.items():
         co.location = loc; co.rotation_euler = (Vector(tgt) - Vector(loc)).to_track_quat("-Z", "Y").to_euler(); cam.lens = lens; cam.clip_start = 0.1
@@ -745,26 +746,27 @@ def bake(objs):
         nt = m.node_tree; nt.nodes.remove(nt.nodes["LMNODE"]); nt.nodes.active = nt.nodes["albedo"]
     return a
 
+LM_REF = 0.62                            # valokartan 80. prosenttipisteen tavoitetaso
 def finish_lm(a):
     a = np.nan_to_num(a)
     """Valokartan viimeistely: kohinanpoisto (pehmeä valo kestää sen), mitoitus ja sRGB-pakkaus alueelle 0..LMAX."""
     import cv2
     lum = a.mean(-1); ok = lum > 1e-5
-    ref = float(np.percentile(lum[ok], 80)); k = 0.62 / ref; LMAX = 2.0
+    ref = float(np.percentile(lum[ok], 80)); k = LM_REF / ref; LMAX = 2.0
     b = np.clip(a * k, 0, LMAX * 2).astype(np.float32)
     try: b = cv2.medianBlur(b, 3); b = cv2.bilateralFilter(b, 9, 0.30, 3.5)
     except Exception as e: print("ei kohinanpoistoa:", e)
     n8 = int(len(b) * 0.009); b[len(b) - n8:, :n8] = (0.85, 0.80, 0.70)               # pikkuosien vakiovalo (kuvan alareuna = v 0)
     b = np.clip(b / LMAX, 0, 1) ** (1 / 2.2)
-    Image.fromarray((b * 255 + 0.5).astype(np.uint8)).save(OUT + "/kirkko_sisa_lm.jpg", quality=90)
+    Image.fromarray((b * 255 + 0.5).astype(np.uint8)).save("%s/%s_lm.jpg" % (OUT, NAME), quality=90)
     return LMAX
 
 def export(objs):
     for o in bpy.data.objects: o.select_set(o.type == "MESH")
     bpy.context.view_layer.objects.active = objs["lit"]
-    bpy.ops.export_scene.gltf(filepath=OUT + "/kirkko_sisa.glb", export_format="GLB", use_selection=True, export_yup=True, export_apply=True,
+    bpy.ops.export_scene.gltf(filepath="%s/%s.glb" % (OUT, NAME), export_format="GLB", use_selection=True, export_yup=True, export_apply=True,
                               export_image_format="JPEG", export_image_quality=88, export_animations=False, export_normals=False, export_lights=False, export_cameras=False)
-    print("GLB %.0f kt" % (os.path.getsize(OUT + "/kirkko_sisa.glb") / 1024))
+    print("GLB %.0f kt" % (os.path.getsize("%s/%s.glb" % (OUT, NAME)) / 1024))
 
 if __name__ == "__main__":
     make_textures()

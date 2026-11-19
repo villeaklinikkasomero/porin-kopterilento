@@ -149,7 +149,7 @@
 <div id="start">
   <div id="card" class="panel">
     <h1>Pori<span>kopteri</span></h1>
-    <p>Lennä helikopterilla tai aja autolla Porin keskustassa. Joka päivä arvotaan uusi kierros: lähde Kauppatorilta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja palaa torille. Voit myös nousta ulos ja kävellä: Keski-Porin kirkkoon pääsee sisälle tornin ovesta. Nopeimmat ajat pääsevät päivän top-10:een – kopterille ja autolle on omat listansa.</p>
+    <p>Lennä helikopterilla tai aja autolla Porin keskustassa. Joka päivä arvotaan uusi kierros: lähde Kauppatorilta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja palaa torille. Voit myös nousta ulos ja kävellä: Keski-Porin kirkkoon (tornin ovi) ja Juseliuksen mausoleumiin pääsee sisälle. Nopeimmat ajat pääsevät päivän top-10:een – kopterille ja autolle on omat listansa.</p>
     <div id="vehs" role="group" aria-label="Valitse kulkuneuvo">
       <button class="veh" id="vheli" aria-pressed="true"><video poster="./veh_heli.jpg" autoplay muted loop playsinline><source src="./veh_heli.webm" type="video/webm"><source src="./veh_heli.mp4" type="video/mp4"></video><span>Helikopteri</span></button>
       <button class="veh" id="vcar" aria-pressed="false"><video poster="./veh_auto.jpg" autoplay muted loop playsinline><source src="./veh_auto.webm" type="video/webm"><source src="./veh_auto.mp4" type="video/mp4"></video><span>Auto</span></button>
@@ -1356,7 +1356,8 @@ function loadModel(name, done) {
     LIST.push({ x, y, k, sc, sy: sc * (0.9 + r2() * 0.25), rot: r2() * 6.28, c: [0.84 + 0.16 * t, 0.88 + 0.12 * r2(), 0.8 + 0.16 * t], fc: 0.85 + r2() * 0.3 }); };
   for (let i = 0; i < CITY.t.length / 2; i++) { const v = r2(), tx = CITY.t[i * 2], ty = CITY.t[i * 2 + 1];
     if (v < 0.1 && inCore(tx, ty)) continue;   // owner 18.11.2026: no spruces in the centre (they were random picks, not real spruces)
-    addTree(tx, ty, v < 0.1 ? 2 : v < 0.38 ? 1 : 0, false); LIST[LIST.length - 1].i = i; }
+    addTree(tx, ty, v < 0.1 ? 2 : v < 0.38 ? 1 : 0, false); LIST[LIST.length - 1].i = i;
+    if (Math.hypot(tx + 1942.5, ty - 191.85) < 4.5) LIST.pop(); }   // no tree in the mausoleum doorway (popped after the random draws, so the other trees keep theirs)
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), UPV = THREE.Object3D.DEFAULT_UP;
   // far crowns: deciduous = squashed icosahedron on a short trunk, spruce = two stacked cones (about 30 triangles each)
   const BG = (() => { const g = new THREE.IcosahedronGeometry(1, 0); g.scale(3.2, 3.4, 3.2); g.translate(0, 6.6, 0); const t = new THREE.CylinderGeometry(0.22, 0.3, 3.6, 5); t.translate(0, 1.8, 0);
@@ -2008,7 +2009,13 @@ const walkG = new THREE.Group(); walkG.userData.noT = true; walkG.visible = fals
 const sceneIn = new THREE.Scene(); sceneIn.background = new THREE.Color(0x0b0a09);
 sceneIn.add(new THREE.HemisphereLight(0xfff0dc, 0x8a7458, 2.3)); { const d = new THREE.DirectionalLight(0xfff2e0, 0.8); d.position.set(-0.4, 1, 0.3); sceneIn.add(d); }   // only the player is lit; the hall is baked
 const blobIn = new THREE.Mesh(new THREE.CircleGeometry(0.42, 20).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: blob.material.map, transparent: true, depthWrite: false, opacity: 0.8 })); blobIn.renderOrder = 5; sceneIn.add(blobIn);
-const IN = { ready: false, loading: false, meta: null };
+// interiors (owner 19.11.2026: the church first, then Juseliuksen mausoleumi): each place is a group in sceneIn drawn in its own local frame.
+// map(x, y): local -> map metres; probe: a local point just inside the outer door and the outward direction (the first free spot becomes the door)
+const MAUS = { cx: -1947.81, cy: 193.18, ex: [-0.9703, 0.2419], ey: [-0.2419, -0.9703] };   // bl_mausoleumi.js: hall centre, local x runs from the east door inwards (166 deg)
+const PLACES = [
+  { key: 'kirkko', file: 'kirkko_sisa', name: 'Keski-Porin kirkko', room: 'kirkkosali', label: '⛪ Sisään kirkkoon', hint: 'astu Keski-Porin kirkkoon', ok: () => !!CHURCH.map, map: (x, y) => CHURCH.map(x, -y), probe: [-34, 0, -1, 0], markH: 8.2 },
+  { key: 'mausoleumi', file: 'mausoleumi_sisa', name: 'Juseliuksen mausoleumi', room: 'halli ja krypta', label: '🕯 Sisään mausoleumiin', hint: 'astu Juseliuksen mausoleumiin', ok: () => true, map: (x, y) => [MAUS.cx + MAUS.ex[0] * x + MAUS.ey[0] * y, MAUS.cy + MAUS.ex[1] * x + MAUS.ey[1] * y], probe: [-5.0, 0, -1, 0], markH: 5.2 } ];
+const IN = PLACES[0];
 let walkMix = null, walkCur = '', walkLoading = false; const walkAct = {};
 function loadWalker() { if (walkLoading) return; walkLoading = true;
   import('./hahmo.js').then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
@@ -2016,17 +2023,19 @@ function loadWalker() { if (walkLoading) return; walkLoading = true;
       root.traverse(q => { q.userData.noT = true; if (q.isMesh) { q.frustumCulled = false; q.material.userData.noT = true; if (q.material.map) q.material.map.anisotropy = 4; } });
       walkG.add(root); walkMix = new THREE.AnimationMixer(root); for (const c of gl.animations) walkAct[c.name] = walkMix.clipAction(c);
       if (walkAct.Idle) { walkAct.Idle.play(); walkCur = 'Idle'; } window.__walker = root; }, () => {}); }).catch(() => { walkLoading = false; }); }
-function loadInterior() { if (IN.loading) return; IN.loading = true;
-  import('./kirkko_sisa.js').then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+function loadInterior(P) { if (P.loading) return; P.loading = true;
+  import(`./${P.file}.js`).then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
     const lm = new THREE.TextureLoader().load(K.lm); lm.flipY = false; lm.colorSpace = THREE.SRGBColorSpace; lm.channel = 1;
     new GLTFLoader().parse(buf.buffer, '', gl => {
       gl.scene.traverse(q => { if (!q.isMesh) return; const map = q.material.map, glow = /^glow_/.test(q.material.name); if (map) map.anisotropy = 8;
         q.material = new THREE.MeshBasicMaterial({ map, side: THREE.DoubleSide }); if (!glow) { q.material.lightMap = lm; q.material.lightMapIntensity = Math.PI * K.meta.lmax; } });
-      sceneIn.add(gl.scene); IN.meta = K.meta; IN.ready = true; }, () => {}); }).catch(() => { IN.loading = false; }); }
-// the tower door in map metres, and the heading out of it
-const churchDoor = () => { if (!CHURCH.map) return null;
-  if (!CHURCH.door) { let a = CHURCH.map(-34.4, 0); const b = CHURCH.map(-30, 0); for (let lx = -34.0; lx > -42; lx -= 0.3) { a = CHURCH.map(lx, 0); if (walkFree(a[0], a[1])) { a = CHURCH.map(lx - 0.5, 0); break; } }   // first free spot in front of the door
-    CHURCH.door = { x: a[0], y: a[1], out: Math.atan2(a[0] - b[0], a[1] - b[1]) }; } return CHURCH.door; };
+      gl.scene.visible = false; sceneIn.add(gl.scene); P.group = gl.scene; P.meta = K.meta; P.ready = true; }, () => {}); }).catch(() => { P.loading = false; }); }
+// a place's outer door in map metres, and the heading out of it
+const placeDoor = P => { if (!P.ok()) return null;
+  if (!P.door) { const [sx, sy, dx, dy] = P.probe, b = P.map(sx - dx * 4, sy - dy * 4); let a = P.map(sx, sy);
+    for (let t = 0; t < 9; t += 0.3) { a = P.map(sx + dx * t, sy + dy * t); if (walkFree(a[0], a[1])) { a = P.map(sx + dx * (t + 0.5), sy + dy * (t + 0.5)); break; } }   // first free spot in front of the door
+    P.door = { x: a[0], y: a[1], out: Math.atan2(a[0] - b[0], a[1] - b[1]) }; } return P.door; };
+const churchDoor = () => placeDoor(PLACES[0]);
 function walkFree(x, y) {
   const g = carGround(x, y); if (g === null) return false; const tb = Math.max(TZs(x, y), TZg(x, y));
   if (onPorinsilta(x, y) !== null) return true;
@@ -2053,8 +2062,8 @@ function walkBoard() {
 function walkReset() { if (WALK.on) { scene.add(walkG); walkBoard(); } }
 function fadeDo(fn) { if (WALK.busy) return; WALK.busy = true; $('fade').classList.add('on'); setTimeout(() => { fn(); $('fade').classList.remove('on'); WALK.busy = false; }, 240); }
 function walkNear() {   // what Enter would do here: 'in' (church door), 'out' (leave the church), 'veh' (board), or ''
-  if (WALK.in) { const M = IN.meta; return WALK.ix < M.exit[0] + 1.6 && Math.abs(WALK.iy) < M.exit[1] + 0.6 ? 'out' : ''; }
-  const d = churchDoor(); if (d && Math.hypot(WALK.x - d.x, WALK.y - d.y) < 4.2) return 'in';
+  if (WALK.in) { const M = WALK.in.meta; return WALK.ix < M.exit[0] + 1.6 && Math.abs(WALK.iy) < M.exit[1] + 0.6 ? 'out' : ''; }
+  for (const P of PLACES) { const d = placeDoor(P); if (d && Math.hypot(WALK.x - d.x, WALK.y - d.y) < 4.2) { WALK.at = P; return 'in'; } }
   const v = WALK.veh; return v && Math.hypot(WALK.x - v.x, WALK.y - v.y) < (VEH === 'car' ? 4.2 : 6) ? 'veh' : '';
 }
 function walkAction() {
@@ -2062,34 +2071,34 @@ function walkAction() {
   if (!WALK.on) { walkExit(); return; }
   const k = walkNear();
   if (k === 'veh') walkBoard();
-  else if (k === 'in') { if (!IN.ready) { loadInterior(); toast('Kirkon sisätila latautuu…', 1.5); return; }
-    fadeDo(() => { const M = IN.meta; WALK.in = true; WALK.ix = M.spawn[0]; WALK.iy = M.spawn[1]; WALK.iyaw = Math.PI / 2; WALK.z = 0; WALK.v = 0; sceneIn.add(walkG);
-      camPos.set(WALK.ix - 2.5, 2, 0); camLook.set(WALK.ix + 3, 1.5, 0); camera.near = 0.12; camera.updateProjectionMatrix(); toast('Keski-Porin kirkko', 2.2); }); }
-  else if (k === 'out') fadeDo(() => { const d = churchDoor(); WALK.in = false; WALK.x = d.x; WALK.y = d.y; WALK.yaw = d.out; WALK.v = 0; WALK.z = carGround(d.x, d.y) || 0; scene.add(walkG);
+  else if (k === 'in') { const P = WALK.at; if (!P.ready) { loadInterior(P); toast(P.name + ' latautuu…', 1.5); return; }
+    fadeDo(() => { const M = P.meta; for (const Q of PLACES) if (Q.group) Q.group.visible = Q === P; WALK.in = P; WALK.ix = M.spawn[0]; WALK.iy = M.spawn[1]; WALK.iyaw = Math.PI / 2; WALK.z = 0; WALK.v = 0; sceneIn.add(walkG);
+      camPos.set(WALK.ix - 1, 2, 0); camLook.set(WALK.ix + 3, 1.5, 0); camera.near = 0.12; camera.updateProjectionMatrix(); toast(P.name, 2.2); }); }
+  else if (k === 'out') fadeDo(() => { const d = placeDoor(WALK.in); WALK.in = false; WALK.x = d.x; WALK.y = d.y; WALK.yaw = d.out; WALK.v = 0; WALK.z = carGround(d.x, d.y) || 0; scene.add(walkG);
       camPos.set(WALK.x - Math.sin(d.out) * 3, WALK.z + 2, -WALK.y + Math.cos(d.out) * 3); camera.near = 0.25; camera.updateProjectionMatrix(); });
   else toast(VEH === 'car' ? 'Auto on liian kaukana' : 'Kopteri on liian kaukana', 1.4);
 }
 function walkCollide(p) {   // push the player's circle out of the hall's walls, columns, pews and rails
-  const C = IN.meta.col, R = 0.32;
+  const C = WALK.in.meta.col, R = 0.32;
   for (let it = 0; it < 2; it++) {
     for (const g of C.seg) { const dx = g[2] - g[0], dy = g[3] - g[1], t = Math.max(0, Math.min(1, ((p.x - g[0]) * dx + (p.y - g[1]) * dy) / (dx * dx + dy * dy || 1)));
       let ex = p.x - g[0] - dx * t, ey = p.y - g[1] - dy * t; const d = Math.hypot(ex, ey), m = R + g[4]; if (d < m && d > 1e-6) { p.x += ex / d * (m - d); p.y += ey / d * (m - d); } }
     for (const c of C.circ) { const ex = p.x - c[0], ey = p.y - c[1], d = Math.hypot(ex, ey), m = R + c[2]; if (d < m && d > 1e-6) { p.x += ex / d * (m - d); p.y += ey / d * (m - d); } }
   }
 }
-const inFloor = (x, y) => { const M = IN.meta; return Math.abs(y) < M.py && x > M.xs0 - 0.15 ? Math.min(M.flz, 0.15 * (Math.floor((x - M.xs0 + 0.15) / 0.4) + 1)) : 0; };
+const inFloor = (x, y) => { const M = WALK.in.meta; return Math.abs(y) < M.py && x > M.xs0 - 0.15 ? Math.min(M.flz, 0.15 * (Math.floor((x - M.xs0 + 0.15) / 0.4) + 1)) : 0; };
 function stepWalk(dt) {
   const run = keys.has('ShiftLeft') || keys.has('ShiftRight') || touchIn.run, f = input.f, t = input.t, sd = input.s;
   const tv = f > 0 ? f * (run ? 5.4 : 1.75) : f * 1.2; WALK.v += (tv - WALK.v) * Math.min(1, dt * 9); WALK.vs += (sd * 1.3 - WALK.vs) * Math.min(1, dt * 9);
   const tr = t * (run && f > 0 ? 2.0 : 2.5) * dt, moving = Math.abs(WALK.v) > 0.05 || Math.abs(WALK.vs) > 0.05;
-  if (WALK.in && IN.ready) {
+  if (WALK.in) {
     WALK.iyaw += tr; const sn = Math.sin(WALK.iyaw), cs = Math.cos(WALK.iyaw), p = { x: WALK.ix + (sn * WALK.v + cs * WALK.vs) * dt, y: WALK.iy + (cs * WALK.v - sn * WALK.vs) * dt };
     const ox = WALK.ix, oy = WALK.iy; walkCollide(p);
     if (inFloor(p.x, p.y) - WALK.z > 0.25) { p.x = ox; p.y = oy; }                        // no climbing the side of the chancel platform
-    if (!pip(p.x, p.y, IN.meta.room)) { p.x = ox; p.y = oy; }
+    if (!pip(p.x, p.y, WALK.in.meta.room)) { p.x = ox; p.y = oy; }
     WALK.ix = p.x; WALK.iy = p.y; WALK.z += (inFloor(p.x, p.y) - WALK.z) * Math.min(1, dt * 12);
     walkG.position.set(WALK.ix, WALK.z, -WALK.iy); walkG.rotation.y = -WALK.iyaw; blobIn.position.set(WALK.ix, WALK.z + 0.02, -WALK.iy);
-    const m0 = CHURCH.map(WALK.ix, -WALK.iy), m1 = CHURCH.map(WALK.ix + sn, -(WALK.iy + cs)); S.x = WALK.x = m0[0]; S.y = WALK.y = m0[1]; S.yaw = WALK.yaw = Math.atan2(m1[0] - m0[0], m1[1] - m0[1]);
+    const m0 = WALK.in.map(WALK.ix, WALK.iy), m1 = WALK.in.map(WALK.ix + sn, WALK.iy + cs); S.x = WALK.x = m0[0]; S.y = WALK.y = m0[1]; S.yaw = WALK.yaw = Math.atan2(m1[0] - m0[0], m1[1] - m0[1]);
   } else {
     WALK.yaw += tr; const sn = Math.sin(WALK.yaw), cs = Math.cos(WALK.yaw), dx = (sn * WALK.v + cs * WALK.vs) * dt, dy = (cs * WALK.v - sn * WALK.vs) * dt;
     if (moving) { if (walkFree(WALK.x + dx, WALK.y + dy)) { WALK.x += dx; WALK.y += dy; } else if (walkFree(WALK.x + dx, WALK.y)) WALK.x += dx; else if (walkFree(WALK.x, WALK.y + dy)) WALK.y += dy; else WALK.v *= 0.5; }
@@ -2100,7 +2109,9 @@ function stepWalk(dt) {
     S.x = WALK.x; S.y = WALK.y; S.yaw = WALK.yaw;
     if (performance.now() - HR.last > 500) { HR.last = performance.now(); hrUpdate(S.x, S.y); TEXLOD.update(S.x, S.y); streamUpdate(S.x, S.y); TREES.update(S.x, S.y); GRASS.update(); }
     GRASS.tick(performance.now() / 1000);
-    const d = churchDoor(); if (d && !IN.loading && Math.hypot(WALK.x - d.x, WALK.y - d.y) < 90) loadInterior();
+    for (const P of PLACES) { const d = placeDoor(P); if (!d) continue; if (!P.loading && Math.hypot(WALK.x - d.x, WALK.y - d.y) < 90) loadInterior(P);
+      if (!P.mark) { const t = textCanvas(P.label, { size: 40, color: '#16110a', bg: 'rgba(255,201,40,.95)', pad: 18 }); P.mark = new THREE.Sprite(new THREE.SpriteMaterial({ map: t.tex, transparent: true, depthWrite: false, fog: false }));
+        P.mark.scale.set(1.5 * t.aspect, 1.5, 1); P.mark.renderOrder = 3; P.mark.position.set(d.x, (carGround(d.x, d.y) || TZs(d.x, d.y)) + P.markH, -d.y); scene.add(P.mark); } }
   }
   S.alt = WALK.z + SKID; S.vx = Math.sin(S.yaw) * WALK.v; S.vy = Math.cos(S.yaw) * WALK.v; S.vz = 0;
   if (walkMix) { const sp = Math.max(Math.abs(WALK.v), Math.abs(WALK.vs)), want = sp < 0.15 ? 'Idle' : sp < 2.8 ? 'Walk' : 'Run';
@@ -2110,19 +2121,16 @@ function stepWalk(dt) {
   walkG.visible = camMode !== 1;
   if (VEH !== 'car') { S.rotorSpd += (0 - S.rotorSpd) * Math.min(1, dt * 0.6); rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt; }
   if (actx && sGain) sGain.gain.value += ((VEH !== 'car' && soundOn && !WALK.in ? 0.05 * S.rotorSpd : 0) - sGain.gain.value) * Math.min(1, dt * 4);
-  const k = walkNear(), h = $('hint'), msg = k === 'in' ? 'astu Keski-Porin kirkkoon' : k === 'out' ? 'ulos kirkosta' : k === 'veh' ? (VEH === 'car' ? 'nouse autoon' : 'nouse kopteriin') : '';
+  const k = walkNear(), h = $('hint'), msg = k === 'in' ? WALK.at.hint : k === 'out' ? 'ulos' : k === 'veh' ? (VEH === 'car' ? 'nouse autoon' : 'nouse kopteriin') : '';
   if (msg) { if (h.dataset.m !== msg) { h.dataset.m = msg; h.innerHTML = (isTouch ? '🚶 ' : '<kbd>Enter</kbd> ') + msg; } h.classList.add('on'); } else h.classList.remove('on');
-  doorMark.visible = !WALK.in && !!churchDoor(); if (doorMark.visible && !doorMark.userData.set) { const d = churchDoor(); doorMark.position.set(d.x, (carGround(d.x, d.y) || TZs(d.x, d.y)) + 8.2, -d.y); doorMark.userData.set = true; }
 }
-const doorMark = (() => { const t = textCanvas('⛪ Sisään kirkkoon', { size: 40, color: '#16110a', bg: 'rgba(255,201,40,.95)', pad: 18 });
-  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t.tex, transparent: true, depthWrite: false, fog: false })); s.scale.set(1.5 * t.aspect, 1.5, 1); s.renderOrder = 3; s.visible = false; scene.add(s); return s; })();
 function walkCamera(dt) {
-  const ins = WALK.in && IN.ready, px = ins ? WALK.ix : WALK.x, py = ins ? WALK.iy : WALK.y, yaw = ins ? WALK.iyaw : WALK.yaw, sn = Math.sin(yaw), cs = Math.cos(yaw);
+  const ins = WALK.in, px = ins ? WALK.ix : WALK.x, py = ins ? WALK.iy : WALK.y, yaw = ins ? WALK.iyaw : WALK.yaw, sn = Math.sin(yaw), cs = Math.cos(yaw);
   if (camMode === 1) { camera.position.set(px + sn * 0.1, WALK.z + 1.68, -(py + cs * 0.1)); camera.rotation.order = 'YXZ'; camera.rotation.set(-0.02, -yaw, 0); camPos.copy(camera.position); return; }
   if (camMode === 2 && !ins) { tmp.set(px, WALK.z + 38, -py + 0.5); camPos.lerp(tmp, Math.min(1, dt * 4)); camera.position.copy(camPos); camera.up.set(sn, 0, -cs); camera.lookAt(px, WALK.z, -py); camera.up.set(0, 1, 0); return; }
   let ok = 0.5;
   for (const back of [3.6, 2.7, 1.9, 1.2, 0.7]) { const cx = px - sn * back, cy = py - cs * back;
-    const free = ins ? pip(cx, cy, IN.meta.room) && !IN.meta.col.circ.some(c => Math.hypot(cx - c[0], cy - c[1]) < c[2] + 0.25) && cx > IN.meta.xw + 0.3 : walkFree(cx, cy);
+    const free = ins ? pip(cx, cy, WALK.in.meta.room) && !WALK.in.meta.col.circ.some(c => Math.hypot(cx - c[0], cy - c[1]) < c[2] + 0.25) && cx > WALK.in.meta.xw + 0.3 : walkFree(cx, cy);
     if (free) { ok = back; break; } }
   tmp.set(px - sn * ok, WALK.z + 1.55 + ok * 0.17, -(py - cs * ok)); camPos.lerp(tmp, 1 - Math.exp(-dt * 8));
   tmp2.set(px + sn * 3, WALK.z + 1.45, -(py + cs * 3)); camLook.lerp(tmp2, 1 - Math.exp(-dt * 10));
@@ -2180,7 +2188,7 @@ function hud(dt) {
   $('sp').textContent = pl && pl !== st ? pl : '';
   const tg = target(), d = Math.hypot(tg.x - S.x, tg.y - S.y);
   if (VEH === 'car' && !WALK.on) navHud(); else $('nav').style.display = 'none';
-  if (WALK.in) { $('sn').textContent = 'Keski-Porin kirkko'; $('sp').textContent = 'kirkkosali'; }
+  if (WALK.in) { $('sn').textContent = WALK.in.name; $('sp').textContent = WALK.in.room; }
   $('md').textContent = tourDone ? '–' : d < 1000 ? Math.round(d / 5) * 5 + ' m' : (d / 1000).toFixed(1) + ' km';
   $('mtime').textContent = fmtT(tourT) + (best ? '' : ''); $('mk').textContent = 'Päivän kierros ' + DAY.label + (best ? ' · paras ' + fmtT(best) : '');
   // minimap (north up, 700 m across)
@@ -2322,7 +2330,7 @@ for (const id of ['mission', 'mapwrap', 'gauges', 'street', 'help', 'radio']) $(
   img.src = './orto.jpg';
 }
 setTarget();
-window.__game = { WALK, IN, walkAction, sceneIn, door: churchDoor, S, begin, keys, camera, renderer, scene, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
+window.__game = { WALK, IN, PLACES, placeDoor, walkAction, sceneIn, door: churchDoor, S, begin, keys, camera, renderer, scene, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
 terrainizeScene(); setInterval(terrainizeScene, 1000);
 requestAnimationFrame(frame);
 </script>

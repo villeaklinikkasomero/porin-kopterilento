@@ -917,3 +917,22 @@ Testi: `python3 -m http.server 8765` + playwright (`/opt/npm-tools/node_modules/
 - **Auki omistajalle (korjauskierros):** 1726:n korkeus (24,2 → ~20,5 m); 136:n LoD2/jalanjälki-ratkaisu ja katto; 409:n ylin 2 m umpiseinää (kuori 21,9 m,
   ikkunat loppuvat 19,6 m); 415:n näkemättömät osat (Antinkatu s < 1,9, Itsenäisyydenkatu s < 8,5 ja > 24); 276:n Mikonkadun sivu; 570:n eteläkappaleen
   ikkunat tarkistamatta; aiemmat: 1600:n tekstipalkit, portin vaalea maalaatta 1492/1493, tummina piirretyt portit.
+
+## 19.11.2026 klo 14–15 – Juseliuksen mausoleumin sisätila + sisätilat listaksi (omistaja: "juseliuksen mauselium")
+
+- **index.html:** sisätilat ovat nyt lista `PLACES` (haku `PLACES`): `{ key, file, name, room, label, hint, ok(), map(x, y), probe, markH }`. `WALK.in` = paikka (tai false),
+  `WALK.at` = ovi jonka luona ollaan. `placeDoor(P)` etsii oven edestä ensimmäisen vapaan kohdan (`probe` = paikallinen piste oven sisäpuolella + suunta ulos),
+  `loadInterior(P)` lataa `P.file + '.js'` omaksi ryhmäkseen `sceneIn`:iin (näkyvissä vain se, jossa ollaan). Kyltti (`P.mark`) syntyy kun kävelijä on alle 90 m ovesta.
+  **Uusi kohde = yksi rivi PLACES-listaan + `blender/<nimi>_sisa.py` + `tools/sisa_to_js.py DIR <nimi>_sisa`.**
+- **Mausoleumi:** ovi on ulkomallin (bl_mausoleumi.js) itäsivun kuistissa; hallin keskipiste kartalla (−1947.81, 193.18), sisätilan x-akseli suuntaan 166°
+  (`MAUS`). Oven edessä ollut kuusi poistettu (`LIST.pop()` puusilmukassa satunnaislukujen jälkeen, muut puut ennallaan).
+- **`blender/mausoleumi_sisa.py`** (käyttää kirkko_sisa.py:n työkaluja: `import kirkko_sisa as K`, `K.NAME`, `K.MATDEF` vaihdetaan): kahdeksankulmainen halli
+  (seinän etäisyys 4,4 m, holvin kanta 9 m, laki 13,2 m), 6 korkeaa ruusukeikkunaa + ikkuna oven päällä, marmoriseinät ja kulmapylväät, maalauskentät ikkunoiden alla,
+  vastapäinen syvennys (portaali, risti, korkea maalauskenttä), pronssiovet, keskellä pyöreä aukko (r 1,9 m) kaiteineen, alla krypta (lattia −3,4 m) ja valkoinen
+  sarkofagi, kahdeksanlohkoinen holvi ruoteineen. 2 400 pintaa, valokartta 2048² (leivonta 6 min, 32 näytettä) → `mausoleumi_sisa.js` 1,3 Mt.
+  **Freskoja (Gallen-Kallela, Halonen) ja pronssiovien reliefejä EI kopioitu** – kentissä omat abstraktit väripinnat. Huom. omistajalle: taiteilijat kuolivat
+  1931/1933/1939, joten teosten tekijänoikeus on Suomessa päättynyt; jos halutaan oikeat aiheet, tarvitaan omat tai vapaasti lisensoidut valokuvat ja omistajan päätös.
+- kirkko_sisa.py: lisätty `NAME` ja `LM_REF` (tulosnimet ja valokartan taso), `shots(V=...)`; tools/sisa_to_js.py sai nimiargumentin. Kirkon tulos ei muuttunut.
+- Rakenne luettu kuvista (jalkipeli.net ym. kuvahaun kautta), kuvia ei tallennettu. Kryptaan ei pääse kävellen (näkyy aukosta); eteinen puuttuu.
+- Testattu pilvessä: ovelle, sisään, ulos, sen jälkeen kirkkoon sisään (vain oikea ryhmä näkyvissä). Kuvat `Claude outputs/mausoleumi_sisa_19_11/`.
+- Ei Modal-polttoa. Pushattavat: index.html, mausoleumi_sisa.js, blender/mausoleumi_sisa.py, blender/kirkko_sisa.py, tools/sisa_to_js.py (+ aiemmat hahmo.js, kirkko_sisa.js).

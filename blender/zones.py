@@ -163,7 +163,7 @@ SPEC[116] = dict(P=_al, nogrid=True,
                                    'F': dict(ww=1.3, wh=1.8, sill=0.6, wh_fixed=True, wmarg=0.3, surround=0.18, apron=True, apron_mat=MT('#8c8a5e', None, 0.8)),
                                    'T': dict(ww=1.3, wh=1.9, sill=0.2, wh_fixed=True, wmarg=0.3, surround=0.18, dentils=True, dentil_mat=MT('#6d4a38', None, 0.8))}, plain=False),
                  cornice=(0.45, 0.6, MT('#6d4a38', None, 0.8)),
-                 extra=[_al_gable, _al_pil])
+                 extra=[_al_gable])   # 19.11.2026: _al_pil dropped - the columned portal is on Itsenäisyydenkatu (facades.json, f116.py), not on this Antinkatu wall
 _al_g = dict(P=dict(_al, wall=M('#ebeae4')), layout=dict(bw=14.1, rows=[(14.0, 'plain', 'P')], cols=lambda c, nb: 'W', P={}, rowP={}, plain=True))
 def _al_on_gable(x, y, a=(-130.0, -478.4), b=(-116.3, -481.9)):   # the LoD2 shell has no edge list: pick the fire wall by its line
     dx, dy = b[0] - a[0], b[1] - a[1]; L2 = dx * dx + dy * dy; u = ((x - a[0]) * dx + (y - a[1]) * dy) / L2
@@ -1377,7 +1377,7 @@ for _i, _e in FACADES.items():
         SPEC[_i] = dict(SPEC[_i])
         if _e.get('nobrick'): SPEC[_i]['nobrick'] = True        # red but not brick: the game draws no brick bond on it (shells 'nb')
         SPEC[_i]['extra'] = list(SPEC[_i].get('extra', [])) + [FEXTRA[_i]]
-        if _bw: SPEC[_i]['runalt'] = _ra
+        if _bw: SPEC[_i]['runalt'] = (lambda x, y, _n=_ra, _o=SPEC[_i]['runalt']: _n(x, y) or _o(x, y)) if SPEC[_i].get('runalt') else _ra   # keep a hand-made runalt for the other walls (116 gable, 19.11.2026)
         if _wk: SPEC[_i]['walls'] = {**SPEC[_i].get('walls', {}), **{k: v for k, v in _wk.items()}}; SPEC[_i]['P'] = dict(SPEC[_i]['P'], wall=_bare_mat(_bw[0]))
     else:
         RUNALT[_i] = _ra; EXTRA[_i] = EXTRA.get(_i, []) + [FEXTRA[_i]]
