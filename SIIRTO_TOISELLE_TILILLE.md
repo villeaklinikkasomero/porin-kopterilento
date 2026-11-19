@@ -1045,3 +1045,16 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
 - Valot: suojatien reunalla ryhmä etsii lähimmän valopylvään (<16 m, kadun suunta poikittain) ja odottaa `__sig.ped`-vihreää; valottomat suojatiet
   ylitetään suoraan (autot eivät väistä kävelijöitä, eivätkä kävelijät autoja). Simuloitu 5 min: ei virheitä, ei lapsia ilman huoltajaa, pisin odotus 20 s.
 - Auki: OSM-polku voi olla pari metriä sivussa pelin kivetyksestä (puistossa nurmella); kävelijät eivät väistä pelaajaa eivätkä toisiaan.
+
+### 19.11 klo 16.30: valopylväät jalkakäytävän reunaan
+- `sigBuild` odottaa roads.js:ää (`window.__roads`) ja hakee pysäytysviivalta oikealle ensimmäisen jalkakäytäväruudun (`ROAD.paveAt`, 0,5 m askelin, enint. 25 m),
+  pylväs 0,7 m sen sisään ja jalkakäytävän korkeudelle. Testissä (haku 15 m) 49/96 osui jalkakäytävälle; loput ovat pääosin katugeometrian
+  ydinalueen ulkopuolella, missä jalkakäytävämaskia ei ole → vanha arvaus 4,6 m keskiviivasta. Keskustassa arvaukselle jäi 7 (Itsenäisyydenkatu, Mikonkatu).
+
+### 19.11 klo 17: liikennevalot omistajan Blender-malleilla
+- `liikennevalot.js` = {yhdistelma, uloke, jalankulkija}: GLB:t base64:nä (lähde `tools/props/porikopteri_liikennevalot.py`, ajo
+  `blender --background --python … -- --type yhdistelma|jalankulkija|uloke`; origo tolpan juuressa, ajoneuvo-opastin +Z, ajorata −X).
+- index.html `sigBuild`: laatikkopylväät poistettu. Jokainen mallin mesh on InstancedMesh; lamppusolmut (Veh_/Over_/Ped_*, Button_Light) saavat
+  MeshBasicMaterialin ja pylväskohtaisen värin solmun extras onColor/offColor -arvoista (`sigUpd` joka ruudulla).
+- Tyypit: oikean reunan pylväs `yhdistelma`, tai `uloke` kun jalkakäytävä on >6,2 m kaistan keskiviivasta; lisäksi vastakkaiselle reunalle `jalankulkija`
+  (180° käännettynä), jos sieltä löytyy jalkakäytävä. Yhteensä 144 pylvästä. Painonapin valo palaa, kun jalankulkijalla on punainen.

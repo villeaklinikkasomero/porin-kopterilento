@@ -1756,31 +1756,35 @@ const cars = [];
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
       const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); }
     for (const q of parts) q.instanceMatrix.needsUpdate = true;
-    if (sigL) { const ON = [0xff2a1c, 0xffb400, 0x22e060], OFF = [0x3a0d0a, 0x3a2c06, 0x083818];
-      sigPoles.forEach((p, i) => { const st = sigState(p.n, p.a), go = pedGo(p.n, p.a);
-        sigL[0].setColorAt(i, col.setHex(st === 2 ? ON[0] : OFF[0])); sigL[1].setColorAt(i, col.setHex(st === 1 ? ON[1] : OFF[1])); sigL[2].setColorAt(i, col.setHex(st === 0 ? ON[2] : OFF[2]));
-        sigL[3].setColorAt(i, col.setHex(go ? OFF[0] : ON[0])); sigL[4].setColorAt(i, col.setHex(go ? ON[2] : OFF[2])); });
-      for (const m of sigL) m.instanceColor.needsUpdate = true; }
+    if (sigUpd) sigUpd();
   };
   // the signal posts: one on the right-hand kerb at each stop line (lamps face the arriving cars; a red/green pair faces across the street
   // for people on foot). Built a little after the start, when roads.js has told which streets are one-way.
-  let sigL = null;
-  setTimeout(() => {
+  let sigUpd = null, sigTry = 0;
+  const sigBuild = () => { if (!window.__roads && ++sigTry < 12) { setTimeout(sigBuild, 3000); return; }      // wait for roads.js: the pavement mask says where the kerb is
     for (const n of list) { if (!n.sig) continue;
       for (const a of n.nb) { if ((a.sig && a.sig.j === n.sig.j) || (!n.sig.mid && !may(a, n))) continue;
         const dx = n.x - a.x, dy = n.y - a.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, b = Math.min(SR, len);
-        sigPoles.push({ n, a, x: n.x - ux * b + uy * 4.6, y: n.y - uy * b - ux * 4.6, ux, uy }); } }
-    const P = sigPoles.length; if (!P) return;
-    const mk = (g, m) => { const im = new THREE.InstancedMesh(g, m, P); scene.add(im); return im; }, dark = new THREE.MeshLambertMaterial({ color: 0x25282b });
-    const pg = new THREE.BoxGeometry(0.12, 3.3, 0.12); pg.translate(0, 1.65, 0); const hg = new THREE.BoxGeometry(0.36, 1.02, 0.3); hg.translate(0, 2.72, 0);
-    const fg = new THREE.BoxGeometry(0.28, 0.56, 0.28); fg.translate(-0.18, 1.98, 0);
-    const pole = mk(pg, new THREE.MeshLambertMaterial({ color: 0x6f7477 })), head = mk(hg, dark), foot = mk(fg, dark);
-    const lamp = (x, h, z) => { const g = new THREE.BoxGeometry(x ? 0.06 : 0.2, 0.2, x ? 0.18 : 0.06); g.translate(x, h, z); return mk(g, new THREE.MeshBasicMaterial({ color: 0xffffff })); };
-    const L5 = [lamp(0, 3.04, 0.17), lamp(0, 2.72, 0.17), lamp(0, 2.4, 0.17), lamp(-0.34, 2.11, 0), lamp(-0.34, 1.86, 0)];
-    sigPoles.forEach((p, i) => { const bz = bridgeZ(p.x, p.y); p3.set(p.x, 0.09 + bz + (bz ? 0 : roadDZ(p.x, p.y)), -p.y); q4.setFromAxisAngle(UP, -Math.atan2(p.ux, p.uy)); m4.compose(p3, q4, s3);
-      for (const m of [pole, head, foot, ...L5]) m.setMatrixAt(i, m4); for (const m of L5) m.setColorAt(i, col.setHex(0x222222)); });
-    sigL = L5;
-  }, 9000);
+        const sx = n.x - ux * b, sy = n.y - uy * b; let d = 4.6, pv = false;                  // from the stop line to the right until the pavement begins, then 0.7 m onto it
+        for (let q = 1.5; q <= 25; q += 0.5) if (ROAD.paveAt(sx + uy * q, sy - ux * q)) { d = q + 0.7; pv = true; break; }
+        sigPoles.push({ n, a, x: sx + uy * d, y: sy - ux * d, ux, uy, pv, ty: pv && d > 6.2 ? 'uloke' : 'yhdistelma' });    // wide carriageway: the mast-arm post
+        for (let q = 1.5; q <= 25; q += 0.5) if (ROAD.paveAt(sx - uy * q, sy + ux * q)) {         // across the street a short post for people walking the other way
+          sigPoles.push({ n, a, x: sx - uy * (q + 0.7), y: sy + ux * (q + 0.7), ux: -ux, uy: -uy, pv: true, ty: 'jalankulkija' }); break; } } }
+    if (!sigPoles.length) return;
+    // the owner's Blender posts (tools/props/porikopteri_liikennevalot.py -> liikennevalot.js): origin at the foot, the vehicle head faces +Z (the
+    // arriving car), the carriageway is on -X. Every lamp is its own node with onColor / offColor: one instanced mesh per lamp, coloured per post.
+    import('./liikennevalot.js').then(K => { const TY = Object.keys(K.default), sets = {}; let left = TY.length;
+      TY.forEach(ty => { const bin = atob(K.default[ty]), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+        new GLTFLoader().parse(buf.buffer, '', gl => { const ps = sigPoles.filter(p => p.ty === ty), lamps = []; gl.scene.updateMatrixWorld(true);
+          if (ps.length) gl.scene.traverse(o => { if (!o.isMesh) return; const g = o.geometry.clone(); g.applyMatrix4(o.matrixWorld); const lm = /^(Veh|Over|Ped)_(Red|Yellow|Green)$|^Button_Light$/.test(o.name);
+            const im = new THREE.InstancedMesh(g, lm ? new THREE.MeshBasicMaterial({ color: 0xffffff }) : o.material, ps.length); scene.add(im);
+            ps.forEach((p, i) => { const bz = bridgeZ(p.x, p.y); p3.set(p.x, (p.pv ? ROAD.pave - ROAD.asph : 0) + 0.09 + bz + (bz ? 0 : roadDZ(p.x, p.y)), -p.y); q4.setFromAxisAngle(UP, -Math.atan2(p.ux, p.uy)); m4.compose(p3, q4, s3); im.setMatrixAt(i, m4); });
+            if (lm) { const u = o.userData, k = o.name.split('_'); lamps.push({ im, on: new THREE.Color().setRGB(...u.onColor), off: new THREE.Color().setRGB(...u.offColor), ped: k[0] === 'Ped' || k[0] === 'Button', want: k[0] === 'Button' ? 3 : k[1] === 'Red' ? 2 : k[1] === 'Yellow' ? 1 : 0 }); } });
+          sets[ty] = { ps, lamps }; if (!--left) sigUpd = () => { for (const ty in sets) { const { ps, lamps } = sets[ty]; if (!lamps.length) continue;
+            ps.forEach((p, i) => { const jk = p.ty === 'jalankulkija', st = sigState(p.n, p.a), go = pedGo(p.n, p.a);
+              for (const L of lamps) L.im.setColorAt(i, (L.ped ? (L.want === 0 ? go : !go) : (!jk && st === L.want)) ? L.on : L.off); });
+            for (const L of lamps) L.im.instanceColor.needsUpdate = true; } }; }, () => { left--; }); }); }).catch(() => {});
+  }; setTimeout(sigBuild, 6000);
   cars.update(0);
   // Blender-made car models: the traffic switches to them, and one is parked on top of every car found in the aerial image
   // car models car0..car6 (hatchback, saloon, SUV, van, box lorry, flatbed lorry, refuse lorry); types missing from cars.js are skipped
