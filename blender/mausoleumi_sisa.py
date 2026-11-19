@@ -9,8 +9,9 @@ Käyttää kirkko_sisa.py:n työkaluja (Geo, wall, valokartan leivonta, vienti).
 
 Koordinaatit: X = ovelta kohti vastapäistä syvennystä, Y = vasemmalle, Z = ylös, origo hallin keskellä lattialla.
 Pelissä: ulkomallin (bl_mausoleumi.js) keskipiste (-1947.81, 193.18), X-akseli suuntaan 166° (ovi on mallin itäsivulla).
-Sisäkuvista (jalkipeli.net ym.) on luettu vain rakenne, värit ja materiaalit. FRESKOJA EI OLE KOPIOITU (Gallen-Kallela, Halonen):
-kentissä on omat abstraktit väripinnat. Pronssiovien reliefejä ei myöskään ole jäljitelty.
+Sisäkuvista (jalkipeli.net ym.) on luettu vain rakenne, värit ja materiaalit. Maalauskentissä on alkuperäisiä freskoja MUISTUTTAVAT
+omat piirrokset (omistajan lupa 19.11.2026: "näissä voidaan tehdä muistuttavia freskoja"), ei valokuvia eikä jäljennöksiä.
+Pronssiovien reliefejä ei ole jäljitelty.
 """
 import os, sys, json, math
 import numpy as np
@@ -28,7 +29,7 @@ RH = 1.9                                 # lattia-aukon säde
 ZC = -3.4                                # kryptan lattia
 
 MAT = dict(marble=(2.0, 0), mdado=(1.1, 0), vaultm=(1.5, 0), ribm=(1.0, 0), mfloor=(2.0, 0), cfloor=(1.5, 0), crypt=(1.5, 0), balu=(1, 0),
-           portal=(1, 0), bronze=(1, 0), fresco1=(1, 0), fresco2=(1, 0), fresco3=(1, 0), frescot=(1, 0), gold=(1.0, 0), sarco=(1.5, 0),
+           portal=(1, 0), bronze=(1, 0), fresco1=(1, 0), fresco2=(1, 0), fresco3=(1, 0), fresco4=(1, 0), fresco5=(1, 0), fresco6=(1, 0), frescot=(1, 0), gold=(1.0, 0), sarco=(1.5, 0),
            glass_m=(1, 5.0), reveal=(2.0, 0.5))
 K.MATDEF.clear(); K.MATDEF.update(MAT); K.MI.clear(); K.MI.update({k: i for i, k in enumerate(MAT)})
 
@@ -36,6 +37,108 @@ def marble(n, base, seed, vein=0.10):
     a = flat(n, base, seed, 0.03, 4)
     v = np.abs(fnoise(n, seed + 7, 5, 9) + 0.6 * fnoise(n, seed + 8, 16)); v = np.clip(1 - v / 0.22, 0, 1) ** 2
     return a * (1 - vein * v[..., None] * np.array([1.0, 0.95, 0.85])[None, None, :] * 3)
+
+def frescoes():
+    """Kuusi maalauskenttää ja syvennyksen korkea kenttä. Piirretään 2x koossa tasaisin väripinnoin ja tummin ääriviivoin, päälle rakeisuus."""
+    W, H, S = 480, 304, 2
+    OL = (38, 30, 24)
+    def canvas(w=W, h=H): im = Image.new("RGB", (w * S, h * S)); return im, ImageDraw.Draw(im)
+    def P(pts): return [(x * S, y * S) for x, y in pts]
+    def poly(d, pts, fill, ol=OL, w=2): d.polygon(P(pts), fill=fill); d.line(P(pts) + P(pts[:1]), fill=ol, width=w * S) if ol else None
+    def ell(d, x0, y0, x1, y1, fill, ol=OL, w=2): d.ellipse([x0 * S, y0 * S, x1 * S, y1 * S], fill=fill, outline=ol, width=w * S if ol else 0)
+    def band(d, y0, y1, c0, c1, w=W):
+        for y in range(int(y0 * S), int(y1 * S)):
+            t = (y / S - y0) / max(1e-6, y1 - y0); d.line([(0, y), (w * S, y)], fill=tuple(int(a + (b - a) * t) for a, b in zip(c0, c1)))
+    def person(d, x, y, h, skin, cloth, lean=0.0, sit=False, arm=0.0, legs=None, hair=(60, 40, 25)):
+        """Yksinkertainen hahmo: jalat maassa (x, y), pituus h; lean = kumarrus, arm = käden kohotus."""
+        u = h / 8.0; legs = legs or cloth; hx = x + lean * 3 * u; top = y - (5.2 * u if sit else 7 * u)
+        if sit: poly(d, [(x - 1.2 * u, y - 2.2 * u), (x + 2.6 * u, y - 2.4 * u), (x + 2.9 * u, y), (x + 1.8 * u, y), (x + 1.5 * u, y - 1.2 * u), (x - 1.0 * u, y - 0.9 * u)], legs)
+        else: poly(d, [(x - 0.9 * u, y - 3.6 * u), (x + 0.9 * u, y - 3.6 * u), (x + 1.0 * u, y), (x + 0.2 * u, y), (x, y - 2.4 * u), (x - 0.3 * u, y), (x - 1.1 * u, y)], legs)
+        by = y - (2.2 * u if sit else 3.6 * u)
+        poly(d, [(x - 1.0 * u, by), (x + 1.0 * u, by), (hx + 1.1 * u, top + 1.2 * u), (hx - 1.1 * u, top + 1.2 * u)], cloth)
+        ax, ay = hx + (1.0 + 1.6 * abs(lean) + 0.6) * u * (1 if lean >= 0 else -1), top + (3.2 - 2.6 * arm) * u
+        d.line(P([(hx + 0.8 * u * (1 if lean >= 0 else -1), top + 1.5 * u), (ax, ay)]), fill=OL, width=int(0.75 * u * S)); d.line(P([(hx + 0.8 * u * (1 if lean >= 0 else -1), top + 1.5 * u), (ax, ay)]), fill=skin, width=int(0.5 * u * S))
+        ell(d, hx - 0.62 * u, top - 0.1 * u, hx + 0.62 * u, top + 1.25 * u, skin); d.pieslice([(hx - 0.68 * u) * S, (top - 0.2 * u) * S, (hx + 0.68 * u) * S, (top + 1.1 * u) * S], 180, 360, fill=hair)
+    def finish(im, w=W, h=H, seed=1, frame=True):
+        im = im.resize((w, h), Image.LANCZOS)
+        a = np.asarray(im).astype(np.float32) / 255; g = fnoise(512, seed, 40)[:h, :w, None] * 0.035 + fnoise(512, seed + 3, 6)[:h, :w, None] * 0.03
+        a = np.clip(a * (0.94 + g) + 0.01, 0, 1); im = Image.fromarray((a * 255).astype(np.uint8)); d = ImageDraw.Draw(im)
+        if frame: d.rectangle([0, 0, w - 1, h - 1], outline=(52, 38, 22), width=9); d.rectangle([9, 9, w - 10, h - 10], outline=(150, 118, 52), width=3)
+        return im
+    R = {}
+    skin, skin2, white, blue = (214, 170, 132), (196, 150, 112), (226, 220, 204), (62, 84, 120)
+    # 1 Kevät: vaalea niitty, koivut, valkopukuiset naiset ja lapsi kukkia poimimassa
+    im, d = canvas(); band(d, 0, 120, (176, 204, 220), (222, 230, 214)); band(d, 120, H, (150, 188, 96), (96, 142, 66))
+    poly(d, [(0, 128), (120, 104), (260, 118), (400, 100), (W, 116), (W, 140), (0, 146)], (104, 148, 110), None)
+    rng = np.random.default_rng(4)
+    for x in (40, 118, 300, 372, 446):
+        poly(d, [(x - 6, H), (x - 3, 0), (x + 4, 0), (x + 7, H)], (232, 230, 220))
+        for y in range(14, H, 30): d.line(P([(x - 4, y + rng.integers(0, 12)), (x + 3, y + rng.integers(0, 12))]), fill=(40, 36, 32), width=3 * S)
+        for k in range(26): cx, cy = x + rng.integers(-46, 46), rng.integers(0, 84); ell(d, cx - 7, cy - 4, cx + 7, cy + 4, (176, 204, 92) if k % 3 else (140, 180, 70), None)
+    for k in range(70): cx, cy = rng.integers(10, W - 10), rng.integers(170, H - 14); ell(d, cx - 2, cy - 2, cx + 2, cy + 2, [(246, 226, 110), (250, 250, 240), (226, 150, 170)][k % 3], None)
+    person(d, 196, 270, 150, skin, white, lean=0.25, arm=0.2, hair=(120, 84, 40)); person(d, 262, 262, 136, skin, (236, 226, 190), lean=-0.5, arm=-0.2, hair=(90, 60, 30)); person(d, 150, 276, 78, skin, (200, 214, 226), lean=0.6, hair=(190, 150, 80))
+    R["fresco1"] = finish(im, seed=1)
+    # 2 Rakennus: hirsikehikko, vasemmalla äiti ja lapsi, oikealla veistäjät, taustalla mäntymetsä
+    im, d = canvas(); band(d, 0, 110, (150, 160, 150), (120, 136, 110)); band(d, 110, H, (150, 124, 78), (120, 96, 60))
+    for x in range(-10, W, 34): poly(d, [(x, 110), (x + 17, 18 + (x * 7) % 30), (x + 34, 110)], (52, 76, 56), None)
+    for i in range(6):                                  # hirsikerrat viistossa perspektiivissä
+        y = 214 - i * 27; poly(d, [(150, y), (392, y - 18), (392, y - 42), (150, y - 25)], (212, 172, 96) if i % 2 else (198, 156, 84))
+        ell(d, 138, y - 27, 162, y + 2, (226, 190, 116)); poly(d, [(392, y - 18), (470, y - 2), (470, y - 26), (392, y - 42)], (176, 136, 72))
+    for k in range(40): cx, cy = rng.integers(120, 470), rng.integers(232, 290); poly(d, [(cx, cy), (cx + 9, cy - 3), (cx + 11, cy + 2)], (232, 204, 140), None)
+    person(d, 62, 286, 150, skin, (150, 60, 46), sit=True, legs=blue, lean=0.15, hair=(50, 34, 24)); ell(d, 84, 196, 110, 220, skin); poly(d, [(80, 214), (116, 210), (122, 236), (84, 240)], white)
+    person(d, 428, 282, 156, skin2, white, lean=-0.6, arm=-0.1, legs=(96, 90, 80), hair=(70, 50, 30)); d.line(P([(380, 208), (350, 250)]), fill=(70, 56, 40), width=4 * S)
+    person(d, 300, 116, 110, skin2, white, lean=0.5, arm=0.5, legs=(110, 100, 86)); 
+    R["fresco2"] = finish(im, seed=2)
+    # 3 Tuonelan joella: tumma virta, vene etualalla, rannalla vaalea ihmisjoukko astumassa veneeseen
+    im, d = canvas(); band(d, 0, 96, (120, 124, 130), (158, 150, 140)); poly(d, [(0, 96), (160, 80), (330, 92), (W, 76), (W, 120), (0, 120)], (44, 52, 50), None)
+    band(d, 112, H, (40, 54, 70), (16, 22, 34))
+    for k in range(26): y = 124 + k * 7; d.line(P([(rng.integers(0, 200), y), (rng.integers(240, W), y + rng.integers(-3, 3))]), fill=(60, 78, 98), width=S)
+    poly(d, [(250, H), (300, 196), (W, 168), (W, H)], (116, 100, 78))
+    pale = (222, 200, 172)
+    for i, (x, y, h, ln) in enumerate(((330, 262, 150, -0.35), (380, 244, 150, -0.15), (424, 232, 144, 0.0), (456, 222, 132, 0.1), (300, 280, 120, -0.75))):
+        person(d, x, y, h, pale, (206, 186, 160) if i % 2 else (190, 168, 146), lean=ln, arm=0.1 * i, legs=(196, 176, 150), hair=[(60, 40, 26), (150, 110, 60), (40, 30, 24)][i % 3])
+    poly(d, [(18, 250), (60, 286), (236, 290), (286, 240), (262, 236), (226, 262), (70, 258), (40, 238)], (112, 66, 36)); poly(d, [(60, 286), (236, 290), (226, 262), (70, 258)], (84, 48, 28))
+    person(d, 150, 262, 138, (206, 176, 146), (120, 100, 84), lean=0.7, arm=-0.2, hair=(40, 30, 24)); d.line(P([(196, 190), (120, 300)]), fill=(60, 44, 30), width=4 * S)
+    R["fresco3"] = finish(im, seed=3)
+    # 4 Hävitys: palanut metsä, kaatuneet rungot ja juurakot, punainen taivas
+    im, d = canvas(); band(d, 0, 150, (120, 36, 26), (232, 132, 52)); band(d, 150, H, (92, 84, 78), (52, 48, 46))
+    poly(d, [(0, 150), (100, 132), (240, 146), (380, 126), (W, 142), (W, 164), (0, 166)], (58, 40, 36), None)
+    for x, h in ((36, 150), (96, 96), (210, 170), (330, 120), (410, 186), (452, 104)):
+        poly(d, [(x - 7, 200), (x - 3, 200 - h), (x + 2, 196 - h), (x + 8, 200)], (26, 22, 22)); d.line(P([(x, 200 - h * 0.6), (x + 26, 200 - h * 0.8)]), fill=(26, 22, 22), width=3 * S)
+    poly(d, [(40, 262), (330, 214), (338, 232), (48, 284)], (44, 36, 32)); poly(d, [(210, 290), (452, 244), (458, 262), (216, 302)], (36, 30, 28))
+    for an in range(0, 360, 36): d.line(P([(44, 272), (44 + 40 * cos(radians(an)), 272 + 34 * sin(radians(an)))]), fill=(30, 24, 22), width=5 * S)
+    for k in range(18): cx, cy = rng.integers(0, W), rng.integers(170, H); ell(d, cx - 8, cy - 3, cx + 8, cy + 3, (120, 112, 104), None)
+    for k in range(9): cx = rng.integers(20, W - 20); poly(d, [(cx - 6, 150), (cx, 120 - rng.integers(0, 30)), (cx + 6, 150)], (246, 178, 60), None)
+    R["fresco4"] = finish(im, seed=4)
+    # 5 Talvi: lumiset kuuset, sinivalkoinen hiljaisuus
+    im, d = canvas(); band(d, 0, 140, (108, 132, 168), (190, 204, 220)); band(d, 140, H, (226, 232, 240), (176, 192, 214))
+    for x, base, hh in ((70, 250, 230), (190, 236, 190), (300, 262, 250), (410, 244, 210), (140, 214, 120), (360, 210, 110)):
+        for i in range(6):
+            y = base - hh + i * hh / 6; wd = 14 + i * hh / 22
+            poly(d, [(x - wd, y + hh / 6), (x, y - 6), (x + wd, y + hh / 6)], (44, 70, 70), None)
+            ell(d, x - wd * 0.9, y + hh / 6 - 16, x + wd * 0.9, y + hh / 6 + 2, (236, 240, 246), (150, 168, 196), 1)
+        ell(d, x - 12, base - hh - 12, x + 12, base - hh + 10, (240, 244, 250), (150, 168, 196), 1)
+    for (x0, x1, y) in ((0, 190, 270), (150, 400, 284), (330, W, 266)): ell(d, x0, y - 22, x1, y + 40, (240, 244, 250), (160, 178, 204), 1)
+    R["fresco5"] = finish(im, seed=5)
+    # 6 Syksy: järvimaisema korkealta, ruskan värit, etualalla viisi ristiä
+    im, d = canvas(); band(d, 0, 104, (132, 140, 150), (214, 196, 160)); band(d, 104, 190, (70, 92, 116), (112, 128, 140))
+    for (x0, x1, y, c) in ((30, 170, 128, (60, 70, 52)), (220, 330, 146, (72, 76, 50)), (360, W + 20, 120, (56, 66, 50)), (-20, 110, 164, (80, 72, 44))): ell(d, x0, y - 9, x1, y + 9, c, None)
+    poly(d, [(0, 104), (90, 92), (200, 100), (330, 88), (W, 98), (W, 110), (0, 112)], (74, 80, 84), None)
+    poly(d, [(0, 190), (120, 174), (260, 188), (380, 170), (W, 184), (W, H), (0, H)], (176, 120, 46))
+    for k in range(60): cx, cy = rng.integers(0, W), rng.integers(186, H); ell(d, cx - 12, cy - 6, cx + 12, cy + 6, [(206, 150, 50), (186, 92, 40), (150, 110, 44), (222, 180, 70)][k % 4], None)
+    for i, x in enumerate((132, 186, 240, 294, 348)):
+        y = 276 - (i % 2) * 10; poly(d, [(x - 4, y), (x - 4, y - 70), (x + 4, y - 70), (x + 4, y)], (48, 38, 30)); poly(d, [(x - 18, y - 54), (x + 18, y - 54), (x + 18, y - 46), (x - 18, y - 46)], (48, 38, 30))
+    R["fresco6"] = finish(im, seed=6)
+    # syvennyksen korkea kenttä: vihreä rinnemaisema, kiemurteleva vaalea polku kohti valoa
+    w, h = 200, 420; im, d = canvas(w, h); band(d, 0, 150, (214, 222, 190), (170, 200, 160), w); band(d, 150, h, (96, 140, 92), (52, 96, 62), w)
+    ell(d, 70, 30, 130, 90, (246, 240, 204), None)
+    poly(d, [(0, 170), (70, 132), (140, 150), (200, 124), (200, 190), (0, 200)], (120, 160, 110), None)
+    path = [(88, 420), (120, 360), (70, 310), (118, 260), (84, 216), (104, 182), (98, 160)]
+    for (a, b), wd in zip(zip(path, path[1:]), (26, 22, 18, 13, 9, 6)): d.line(P([a, b]), fill=(226, 224, 200), width=wd * S)
+    for x, y in ((30, 250), (160, 290), (40, 350), (168, 210)):
+        poly(d, [(x - 3, y), (x - 1, y - 60), (x + 2, y - 60), (x + 4, y)], (232, 230, 220)); ell(d, x - 20, y - 86, x + 20, y - 48, (120, 170, 96), None)
+    R["frescot"] = finish(im, w, h, seed=7)
+    return R
 
 def textures():
     n = 256; lead = (38, 42, 48)
@@ -92,20 +195,8 @@ def textures():
             d.rectangle([14 + i * 128, 12 + j * 62, 114 + i * 128, 62 + j * 62], outline=srgb((0.32, 0.23, 0.09)), width=4); d.rectangle([24 + i * 128, 20 + j * 62, 104 + i * 128, 54 + j * 62], fill=srgb((0.20, 0.15, 0.07)))
     d.line([(128, 0), (128, n)], fill=srgb((0.03, 0.02, 0.01)), width=5); d.ellipse([112, 120, 124, 132], fill=srgb((0.55, 0.42, 0.15))); d.ellipse([132, 120, 144, 132], fill=srgb((0.55, 0.42, 0.15)))
     save_tex("bronze", im)
-    # freskojen paikat: abstraktit väripinnat (maa, taivas, vesi), tumma kehys. EI kopioita.
-    def field(seed, cols, w=384, h=224):
-        yy = np.linspace(0, 1, h)[:, None]; nz = fnoise(512, seed, 3, 6)[:h, :w]; nz2 = fnoise(512, seed + 1, 9)[:h, :w]
-        t = np.clip(yy + 0.16 * nz, 0, 1); a = np.zeros((h, w, 3))
-        for k in range(len(cols) - 1):
-            lo, hi = k / (len(cols) - 1), (k + 1) / (len(cols) - 1); m = np.clip((t - lo) / (hi - lo), 0, 1)[..., None] * ((t >= lo)[..., None])
-            a = np.where((t >= lo)[..., None], np.array(cols[k]) * (1 - m) + np.array(cols[k + 1]) * m, a)
-        a *= (1 + 0.10 * nz2)[..., None]
-        im = to_img(a).filter(ImageFilter.GaussianBlur(1.2)); d = ImageDraw.Draw(im); d.rectangle([0, 0, w - 1, h - 1], outline=srgb((0.16, 0.11, 0.06)), width=9); d.rectangle([9, 9, w - 10, h - 10], outline=srgb((0.50, 0.38, 0.14)), width=3)
-        return im
-    save_tex("fresco1", field(41, [(0.42, 0.50, 0.58), (0.62, 0.60, 0.50), (0.50, 0.36, 0.20), (0.24, 0.20, 0.13)]))
-    save_tex("fresco2", field(43, [(0.55, 0.45, 0.30), (0.60, 0.50, 0.32), (0.30, 0.36, 0.24), (0.16, 0.20, 0.16)]))
-    save_tex("fresco3", field(47, [(0.30, 0.38, 0.50), (0.50, 0.52, 0.52), (0.42, 0.40, 0.30), (0.20, 0.16, 0.12)]))
-    save_tex("frescot", field(53, [(0.50, 0.58, 0.50), (0.36, 0.48, 0.34), (0.26, 0.38, 0.26), (0.16, 0.26, 0.18)], 192, 384))
+    # maalauskentät: alkuperäisiä (Gallen-Kallela 1901-03) MUISTUTTAVAT omat piirrokset - aihe, sommittelun pääpiirteet ja väriala, ei jäljennöksiä
+    for k, im in frescoes().items(): save_tex(k, im)
     # ikkunat: kaksi lansettia vinoruutulasilla, kärjessä kolme pyörölasia, kiviristikko
     W, H = 224, 640; a = np.ones((H, W, 3)) * np.array((0.74, 0.80, 0.84))[None, None, :] * (1 + 0.10 * fnoise(640, 31, 14)[:H, :W, None])
     im = to_img(a); d = ImageDraw.Draw(im); st = (206, 206, 198)
@@ -143,12 +234,12 @@ def build():
         elif k == 4:                                           # sisäänkäynti: pronssiovet, yläpuolella ikkuna
             wall(p0, p1, top, (0, 0), [Win(L / 2, 1.5, 4.8, 7.2, 1.0, "glass_m")], bands=bands)
             G.face([P(L / 2 - 1.0, 0, 0.04), P(L / 2 + 1.0, 0, 0.04), P(L / 2 + 1.0, 3.0, 0.04), P(L / 2 - 1.0, 3.0, 0.04)], "bronze", uv=[(0, 0), (1, 0), (1, 1), (0, 1)], toward=(0, 0, 1.5))
-            for s0, s1, za, zb in ((L / 2 - 1.18, L / 2 - 1.0, 0, 3.2), (L / 2 + 1.0, L / 2 + 1.18, 0, 3.2), (L / 2 - 1.18, L / 2 + 1.18, 3.0, 3.2)):
+            for s0, s1, za, zb in ((L / 2 - 1.18, L / 2 - 1.0, 0, 3.0), (L / 2 + 1.0, L / 2 + 1.18, 0, 3.0), (L / 2 - 1.18, L / 2 + 1.18, 3.0, 3.2)):
                 q = [P(s0, za, 0.1), P(s1, za, 0.1), P(s1, zb, 0.1), P(s0, zb, 0.1)]; G.face(q, "marble", toward=(0, 0, 1.5))
         else:                                                  # ikkunaseinät: korkea ikkuna, alla maalauskenttä
             wall(p0, p1, top, (0, 0), [Win(L / 2, 1.9, 4.1, 7.5, 1.35, "glass_m")], bands=bands)
-            fm = "fresco%d" % (1 + (k % 3))
-            G.face([P(L / 2 - 1.5, 1.55, 0.03), P(L / 2 + 1.5, 1.55, 0.03), P(L / 2 + 1.5, 3.45, 0.03), P(L / 2 - 1.5, 3.45, 0.03)], fm, uv=[(0, 0), (1, 0), (1, 1), (0, 1)], toward=(0, 0, 2.5))
+            fm = "fresco%d" % {1: 1, 2: 2, 3: 3, 5: 4, 6: 5, 7: 6}[k]         # Kevät, Rakennus, Tuonelan joella, Hävitys, Talvi, Syksy
+            G.face([P(L / 2 - 1.5, 1.55, 0.03), P(L / 2 + 1.5, 1.55, 0.03), P(L / 2 + 1.5, 3.45, 0.03), P(L / 2 - 1.5, 3.45, 0.03)], fm, uv=[(1, 0), (0, 0), (0, 1), (1, 1)], toward=(0, 0, 2.5))   # s kasvaa katsojan oikealta vasemmalle
         cx, cy = p0; ang = math.atan2(-cy, -cx)                # kulmapylväs
         G.cyl(cx, cy, 0, 1.1, 0.24, 8, "mdado", ang - 1.9, ang + 1.9); G.cyl(cx, cy, 1.1, ZS - 0.3, 0.15, 8, "ribm", ang - 1.9, ang + 1.9)
         G.cyl(cx, cy, ZS - 0.3, ZS + 0.05, 0.16, 8, "gold", ang - 1.9, ang + 1.9, r1=0.3)

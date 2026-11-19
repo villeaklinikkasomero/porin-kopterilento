@@ -943,3 +943,10 @@ Testi: `python3 -m http.server 8765` + playwright (`/opt/npm-tools/node_modules/
   sininennuotti). Yhteensä 40 osaa, silmukka 17,1 min. Uudet radio/puhe_*.mp3 (4,5 Mt) ja radio.json viety käyttäjän kansioon; ei kuunneltu pilvessä.
 - `tools/radio/speak.py` tekee nyt vain osat, joita ei ole radio.jsonin "puhe"-listassa (`--all` tekee kaikki). Malli haetaan koneelta stagella
   (`radio/voice/fi_FI-harri-medium.onnx`, 63 Mt), `pip install "piper-tts>=1.5"`.
+
+### 19.11.2026 klo 15.30 – mausoleumin maalauskentät: alkuperäisiä muistuttavat piirrokset (omistaja: "näissä voidaan tehdä muistuttavia freskoja")
+- `blender/mausoleumi_sisa.py` `frescoes()`: kuusi kenttää (Kevät, Rakennus, Tuonelan joella, Hävitys, Talvi, Syksy) + syvennyksen korkea kenttä piirretään PIL:llä
+  (tasaiset väripinnat, tummat ääriviivat, rakeisuus): aihe, sommittelun pääpiirteet ja väriala alkuperäisistä, ei valokuvia eikä jäljennöksiä.
+  Seinät: k=1,2,3 → fresco1–3, k=5,6,7 → fresco4–6 (oikea järjestys hallissa tarkistamatta). Uudelleenleivottu (6 min) → `mausoleumi_sisa.js` 1,5 Mt.
+- Lupa koskee mausoleumia; kirkon alttaritaulu ja lasimaalaukset ovat edelleen abstrakteja. Tyyli on pelkistetty – tarkempi jälki vaatisi käsin maalatut tekstuurit.
+- index.html ei muuttunut. Kuva `Claude outputs/mausoleumi_sisa_19_11/maus_freskot.jpg`.
