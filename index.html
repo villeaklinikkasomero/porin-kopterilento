@@ -1660,11 +1660,18 @@ function stepCar(dt, live) {
   // steering: less lock at speed
   const lock = 0.58 / (1 + Math.abs(CAR.v) / 11);
   CAR.steer += (t * lock - CAR.steer) * Math.min(1, dt * 6);
-  const yr = CAR.v / WB * Math.tan(CAR.steer) * (hb ? 1.25 : 1);
+  { const lim = S.hp < 30 ? 14 : S.hp < 60 ? 22 : 1e9; if (CAR.v > lim) CAR.v += (lim - CAR.v) * Math.min(1, dt * 2);          // a damaged car is slower
+    if (S.hp < 60 && !S.dead) { CAR.smT = (CAR.smT || 0) - dt; if (CAR.smT <= 0) { CAR.smT = S.hp < 30 ? 0.12 : 0.3; const P = CAR.smoke || (CAR.smoke = []);
+        let m = P.find(q => q.life <= 0); if (!m && P.length < 14) { m = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 6), new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false })); m.userData.noT = true; m.material.userData.noT = true; m.life = 0; scene.add(m); P.push(m); }
+        if (m) { m.life = 1; m.material.color.setHex(S.hp < 30 ? 0x1b1b1b : 0x9a9a9a); m.position.set(CAR.x + Math.sin(CAR.yaw) * 1.5 + (Math.random() - 0.5) * 0.4, CAR.z + 0.95, -(CAR.y + Math.cos(CAR.yaw) * 1.5)); m.scale.setScalar(0.6); m.visible = true; } } }
+    if (CAR.smoke) for (const m of CAR.smoke) if (m.life > 0) { m.life -= dt * 0.55; m.position.y += dt * 1.4; m.scale.setScalar(0.6 + (1 - m.life) * 2.2); m.material.opacity = Math.max(0, m.life) * 0.55; if (m.life <= 0) m.visible = false; } }
+  const yr = CAR.v / WB * Math.tan(CAR.steer + (S.hp < 45 ? 0.03 : 0)) * (hb ? 1.25 : 1);
   const nyaw = CAR.yaw + yr * dt, sn = Math.sin(nyaw), cs = Math.cos(nyaw);
   const nx = CAR.x + sn * CAR.v * dt * fw, ny = CAR.y + cs * CAR.v * dt * fw;
   if (carBlocked(nx, ny, nyaw)) {
-    if (Math.abs(CAR.v) > 5) { damage((Math.abs(CAR.v) - 5) * 4); toast('Kolari!', 1); }
+    // 19.11.2026 (owner): a knock dents the car instead of wrecking it: from 4 m/s up, 2.2 points per m/s (50 km/h = 22 of the 100). Under 60 the car is
+    // slower and smokes, under 45 it pulls to the right, under 30 it limps (50 km/h) under black smoke; only 0 ends the drive.
+    if (Math.abs(CAR.v) > 4) { const h0 = S.hp; damage((Math.abs(CAR.v) - 4) * 2.2); if (S.hp > 0) toast(S.hp < 30 && h0 >= 30 ? 'Auto on pahasti romuna – se kulkee enää hiljaa' : S.hp < 60 && h0 >= 60 ? 'Kolari! Moottori savuaa' : 'Kolhu! Kunto ' + Math.max(0, Math.round(S.hp)) + ' %', 1.6); }
     CAR.v *= -0.25;
   } else { CAR.x = nx; CAR.y = ny; CAR.yaw = nyaw; }
   if (!tourOn && !tourDone && Math.abs(CAR.v) > 0.5) tourOn = true;
@@ -1752,7 +1759,7 @@ const cars = [];
     for (let i = 0; i + 3 < r.p.length; i += 2) { const ax = r.p[i], ay = r.p[i + 1], bx = r.p[i + 2], by = r.p[i + 3];
       if (!inb(ax, ay) || !inb(bx, by) || (ax === bx && ay === by)) continue; const a = node(ax, ay), b = node(bx, by);
       if (!a.nb.includes(b)) { a.nb.push(b); (a.ow || (a.ow = new Map())).set(b, [ri, i / 2, true]); } if (!b.nb.includes(a)) { b.nb.push(a); (b.ow || (b.ow = new Map())).set(a, [ri, i / 2, false]); } } });
-  const busyRd = (a, b) => { const e = a.ow && a.ow.get(b); return e && CITY.r[e[0]].n === 'Yrjönkatu' ? 30 : 1; };             // owner: Yrjönkatu is the busiest street
+  const busyRd = (a, b) => { const e = a.ow && a.ow.get(b); return e && CITY.r[e[0]].n === 'Yrjönkatu' ? 8 : 1; };             // owner: Yrjönkatu is the busiest street
   const pickRoad = (a, opts) => { const w = opts.map(n => busyRd(a, n)); let r = rnd() * w.reduce((x, y) => x + y, 0); for (let i = 0; i < opts.length; i++) if ((r -= w[i]) <= 0) return opts[i]; return opts[0]; };
   const may = (a, b) => { const e = a.ow && a.ow.get(b); return !e || owOk(e[0], e[1], e[2]); };   // one-way streets (filled when roads.js loads)
   const list = [...nodes.values()].filter(n => n.nb.length); list.forEach((n, i) => n.id = i);
@@ -1798,6 +1805,9 @@ const cars = [];
       for (const c of q) { let room = 1e9; const g = c.b.sig;
         if (g && !(c.a.sig && c.a.sig.j === g.j)) { const sp = Math.max(c.len - SR, 0), st = sigState(c.b, c.a);          // red, or a yellow it can still stop for
           if (c.pos <= sp + 0.3 && (st === 2 || (st === 1 && sp - c.pos > c.s * 1.2))) room = sp - c.pos; }
+        if (!g && c.b.nb.length >= 3) { const n = c.b, sp = Math.max(c.len - 7, 0);                    // junction without lights: the node is held by one car at a time
+          if (n.res && n.res !== c && sigT < n.resT) { if (c.pos <= sp + 0.3) room = Math.min(room, sp - c.pos); }      // (first come first served; freed 0.9 s after the holder has crossed, or after 5 s)
+          else if (c.len - c.pos < 12) { n.res = c; n.resT = sigT + 5; } }
         if (lead) room = Math.min(room, lead.pos - 6.5 - c.pos);
         if (plc) { const ux = (c.b.x - c.a.x) / c.len, uy = (c.b.y - c.a.y) / c.len, rx = S.x - c.a.x, ry = S.y - c.a.y, ps = rx * ux + ry * uy, la = rx * uy - ry * ux; if (ps > c.pos + 1 && ps - c.pos < 45 && Math.abs(la - c.lat) < 2.0) room = Math.min(room, ps - c.pos - 6.5); }
         room = Math.max(room, 0); const tv = Math.min(c.v, Math.sqrt(7 * room));
@@ -1813,7 +1823,9 @@ const cars = [];
           if (P.e > 3.2 && P.door) { P.door.g.visible = false; doorPool.push(P.door); P.door = null; }
           if ((P.T -= dt) < 0) P.ph = 2; }
         else { c.lat += (1.7 - c.lat) * Math.min(1, dt * 1.2) - 0.02 * dt; if (c.lat <= 1.75) { c.lat = 1.7; c.pk = null; c.s = 0; } } }
-      if (c.t >= 1) { let opts = c.b.nb.filter(n => n !== c.a && may(c.b, n)); if (!opts.length) opts = c.b.nb.filter(n => may(c.b, n)); const nx = opts.length ? pickRoad(c.b, opts) : c.a; c.a = c.b; c.b = nx; c.t = 0;
+      if (c.t >= 1) { let opts = c.b.nb.filter(n => n !== c.a && may(c.b, n)); if (!opts.length) opts = c.b.nb.filter(n => may(c.b, n)); const nx = opts.length ? pickRoad(c.b, opts) : c.a, tq = Q.get(c.b.id * 65536 + nx.id);
+        if (tq && (c.blk = (c.blk || 0) + dt) < 8 && tq.some(o => o !== c && o.a === c.b && o.pos < 6.5)) { c.t = 1; c.s = 0; }      // the start of the next street is taken: wait at the corner (at most 8 s) instead of driving into that car
+        else { c.blk = 0; c.a = c.b; c.b = nx; c.t = 0; if (c.a.res === c) c.a.resT = sigT + 0.9;
         if (c.yr && busyRd(c.a, c.b) === 1 && Math.hypot(c.a.x - S.x, c.a.y - S.y) > 170) { const e = yrE[Math.floor(rnd() * yrE.length)]; if (Math.hypot(e[0].x - S.x, e[0].y - S.y) > 120) { c.a = e[0]; c.b = e[1]; c.s = c.v; } }   // a Yrjönkatu regular that has strayed returns there, out of sight
         // parking (19.11.2026): now and then a car near the player pulls in to the kerb half-way along the new street (if there is a kerb 3.8-9 m from the
         // lane centre line and no parked car in the spot), people get out (window.__npc.arrive) and it drives on after 35-85 s
@@ -1822,10 +1834,11 @@ const cars = [];
             const tx = mx + vy * (dk - 1.2), ty = my - vx * (dk - 1.2); let free = dk >= 3.8; if (free) for (let k = 0; k < PARKED.length; k += 4) if (Math.hypot(PARKED[k] / 10 - tx, PARKED[k + 1] / 10 - ty) < 5.5) { free = false; break; }
             if (free) for (const o of cars) if (o.pk && Math.hypot(o.pk.x - tx, o.pk.y - ty) < 9) { free = false; break; }
             if (free) c.pk = { ph: 0, t1: 0.55, lat: dk - 1.2, x: mx + vy * (dk + 1.0), y: my - vx * (dk + 1.0), T: 0 }; } }
-        dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; }
+        dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; } }
       const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * c.lat, y = c.a.y + dy * c.t - ux * c.lat;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
-      const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); c.wx = x; c.wy = y;
+      const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); c.wx = x; c.wy = y; c.st = c.s < 0.05 && !c.pk ? (c.st || 0) + dt : 0;
+      if (c.st > 30 && Math.hypot(x - S.x, y - S.y) > 120) { const a = list[Math.floor(rnd() * list.length)]; if (Math.hypot(a.x - S.x, a.y - S.y) > 150) { c.a = a; c.b = a.nb[Math.floor(rnd() * a.nb.length)]; c.t = 0; c.st = 0; c.blk = 0; c.s = c.v; } }   /* stood 30 s in a jam out of the player's sight: start again somewhere else */
       if (c.pk && c.pk.door) { const D = c.pk.door, a = (c.pk.ang || 0) * 1.15; D.g.position.copy(p3); D.g.quaternion.copy(q4); D.g.visible = true; D.R.rotation.y = -a; D.L.rotation.y = c.pk.two ? a : 0; D.oR.visible = a > 0.02; D.oL.visible = c.pk.two && a > 0.02; } }
     for (const q of parts) q.instanceMatrix.needsUpdate = true;
     if (sigUpd) sigUpd();
@@ -2471,6 +2484,7 @@ setTarget();
 // Parties are spawned around the player and dropped when far. Owner's rules: a child (tytto, poika) always walks with at least one of mies_a,
 // nainen_a, nainen_b; other adults walk alone or in pairs; mies_b is rare. At a signalled crossing they wait for the green man (window.__sig.ped).
 {
+  const STRIDE = { nainen_a: 1.213, nainen_b: 1.173, mies_a: 1.344, mies_b: 1.414, tytto: 0.926, poika: 1.006 };   // metres per Walk cycle of each model (printed by tools/hahmo/kavely_glb.py): the planted foot does not slide
   const KIND = ['nainen_a', 'nainen_b', 'mies_a', 'mies_b', 'tytto', 'poika'], MOD = {}, NMAX = matchMedia('(pointer: coarse)').matches ? 18 : 46, parties = [];
   let net = null, busy = [], busyE = [], sd = 4711; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   const pickW = (ks, ws) => { let r = rnd() * ws.reduce((a, b) => a + b, 0); for (let i = 0; i < ks.length; i++) if ((r -= ws[i]) <= 0) return ks[i]; return ks[0]; };
@@ -2547,7 +2561,7 @@ setTarget();
         else if (sp > 0.15) { let d = Math.atan2(mx, my) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 8); }
         const g = carGround(c.x, c.y); if (g !== null) c.z += (g - c.z) * Math.min(1, dt * 10);
         c.g.position.set(c.x, c.z, -c.y); c.g.rotation.y = -c.yaw; c.g.visible = near;
-        if (near) { setAnim(c, sp > 0.3 ? 'Walk' : 'Idle'); if (c.act.Walk) c.act.Walk.timeScale = (c.kid ? 1.25 : 1) * Math.max(0.6, sp / 1.25); c.mix.update(dt); } } } } };
+        if (near) { setAnim(c, sp > 0.3 ? 'Walk' : 'Idle'); if (c.act.Walk) c.act.Walk.timeScale = Math.max(0.6, sp / STRIDE[c.k]); c.mix.update(dt); } } } } };
 }
 
 // ---------- statues and memorials (19.11.2026): patsaat.js = the owner's list (21 works, Wikipedia; ten positions refined from OpenStreetMap) and his Blender

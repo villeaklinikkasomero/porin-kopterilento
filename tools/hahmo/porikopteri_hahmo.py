@@ -709,6 +709,8 @@ def build_armature(base, col):
 # ----------------------------------------------------------------------------
 LEG_IN = 7.0        # pohjamalli seisoo haara-asennossa; jalkoja tuodaan sisaan (astetta) -> nilkat n. 18 cm toisistaan
 
+LEG_REF = 0.8897    # pelaajahahmon jalan pituus lonkasta nilkkaan (m)
+
 class Poser:
     def __init__(self, arm):
         b = arm.data.bones
@@ -720,7 +722,12 @@ class Poser:
         a, bl = self.H["foot_l"], self.H["ball_l"]
         self.ank_h = a.z                                   # nilkan korkeus maasta, kun jalkapohja on maassa
         self.ball = (a.y - bl.y, a.z - bl.z)               # nilkka -> pakia: (eteen, alas)
-        self.heel = (0.055, a.z)                           # nilkka -> kantapaan maakosketus: (taakse, alas)
+        # askelluksen pituusmitat on annettu pelaajahahmon jalalle (LEG_REF); muun mittaisella luustolla (NPC:t) ne skaalataan
+        self.k = ((self.H["calf_l"] - self.H["thigh_l"]).length + (self.H["foot_l"] - self.H["calf_l"]).length) / LEG_REF
+        self.heel = (0.055 * self.k, a.z)
+
+    def scaled(self, g):
+        return dict(g, **{n: g[n] * self.k for n in ("stride", "lift", "clear", "width", "swing_out", "sway", "drop", "bob")})
 
     def arm(self, P, sd, s, fwd, bend, out=7.0):
         """Olkavarsi roikkumaan (out astetta sivulle), heilautus eteen fwd, kyynarpaan koukistus bend."""
@@ -849,10 +856,10 @@ class Poser:
                arm_f=38.0, arm_b=42.0, arm_lag=0.2, elbow=82.0, elbow_a=14.0, arm_out=9.0, curl_f=34)
 
     def walk(self, t):
-        return self.gait(t, self.WALK)
+        return self.gait(t, self.scaled(self.WALK))
 
     def run(self, t):
-        return self.gait(t, self.RUN)
+        return self.gait(t, self.scaled(self.RUN))
 
     def sit(self, t):
         P = {"spine_01": Q(X, -6), "head": Q(X, 5)}

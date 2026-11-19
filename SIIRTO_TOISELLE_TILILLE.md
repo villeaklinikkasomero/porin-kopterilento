@@ -1542,4 +1542,15 @@ index.html, haku `HALL`: `inHall` / `hallZ` / muutokset `carBlocked`, `carGround
   suoraan hahmo.js:n GLB:hen ilman Blenderia (verkko ja tekstuurit eivät muutu). `--check` vertaa skriptiä ja GLB:tä (0 = samat). hahmo.js on
   tehty tällä; Blender-skriptiä EI ajettu uudelleen (sama Poser-koodi, `bake_action` hyväksyy nyt myös siirtymävektorin).
 - Tarkistettu pilvessä renderöimällä klipit edestä ja sivusta (three.js headless); pelissä ei testattu (begin() ei käynnisty headless).
-- Auki: sama askellus NPC:ille (mallit eri mittaisia → kavely_glb.py pitää ajaa kullekin npc_*.js:lle ja tarkistaa); sivuaskel (Q/E) käyttää Walk-klippiä.
+- Auki: sivuaskel (Q/E) käyttää Walk-klippiä. (NPC:t korjattu, ks. seuraava merkintä.)
+
+### 20.11 klo 00.30: sama askellus bottikävelijöille (npc_*.js, index.html, tools/hahmo/)
+- Kaikkien kuuden mallin Walk ja Idle leivottu uudestaan `kavely_glb.py`:llä (sama `Poser` kuin pelaajalla; NPC:iden vanhat klipit olivat täsmälleen
+  vanhan Poserin tulos, tarkistettu `--check`). Verkot ja tekstuurit ennallaan. Nilkat kävellessä 8–13 cm toisistaan (ennen 21–34 cm).
+- `Poser` skaalaa askelluksen pituusmitat jalan pituuteen (`LEG_REF` 0,8897 m = pelaaja, `Poser.scaled`). Tämän takia myös hahmo.js leivottiin
+  uudestaan (ero < 0,1 mm). `kavely_glb.py` ohittaa puuttuvat klipit, `--clips Walk,Idle` rajaa, ja tulostaa askelparin pituuden pelin mittakaavassa.
+- **index.html:** bottien `timeScale = max(0.6, sp / STRIDE[c.k])` (ennen `(kid ? 1.25 : 1) * sp / 1.25`); `STRIDE` = nainen_a 1,213, nainen_b 1,173,
+  mies_a 1,344, mies_b 1,414, tytto 0,926, poika 1,006 m. Jos mallin skaala tai WALK.stride muuttuu, aja työkalu ja päivitä taulukko.
+- Tarkistettu renderöimällä kaikki kuusi edestä ja sivusta; tukijalan liukuma < 1 mm. Pelissä ei testattu.
+- VAROITUS (tiedostosilta): `device_commit_files` kirjoitti kerran saman stagedPath-polun VANHAN sisällön (index.html palasi hetkeksi versioon ilman
+  20.11 klo 00 -automuutoksia; korjattu heti, nyt mukana). Käytä jokaisella tallennuksella uutta polkua ja tarkista koko jälkikäteen.

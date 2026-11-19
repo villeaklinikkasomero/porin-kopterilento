@@ -4,8 +4,11 @@ Leipoo porikopteri_hahmo.py:n Poser-luokan animaatiot (Idle, Walk, Run, Sit) suo
 Verkko, materiaalit ja tekstuurit sailyvat tavu tavulta; vain animaatioraidat kirjoitetaan uudestaan.
 
 Ajo:  pip install mathutils
-      python tools/hahmo/kavely_glb.py hahmo.js [ulos.js] [--check]
+      python tools/hahmo/kavely_glb.py hahmo.js [ulos.js] [--check] [--clips Walk,Idle]
+Kay myos NPC-malleille (npc_*.js: sama luusto, eri mitat): askelluksen mitat skaalautuvat jalan pituuteen. Klipit, joita
+tiedostossa ei ole, ohitetaan. Tulostaa kavelyn askelparin pituuden pelin mittakaavassa (= index.html:n timeScale-jakaja).
 --check: leipoo klipit mutta ei kirjoita; tulostaa eron tiedoston nykyisiin raitoihin (0 = Poser ja GLB ovat samat).
+--clips: leipoo vain luetellut klipit.
 """
 import sys, os, re, json, struct, base64
 from math import sin, cos, pi, radians, acos, sqrt
@@ -129,14 +132,21 @@ def bake(arm, posefn, nframes):
     return rot, loc
 
 def main():
-    args = [a for a in sys.argv[1:] if not a.startswith("--")]; check = "--check" in sys.argv
+    argv = sys.argv[1:]; only = None
+    if "--clips" in argv:
+        i = argv.index("--clips"); only = argv[i + 1].split(","); del argv[i:i + 2]
+    args = [a for a in argv if not a.startswith("--")]; check = "--check" in argv
     src = args[0]; dst = args[1] if len(args) > 1 else src
     text = open(src, encoding="utf-8").read()
     m = re.search(r'"([A-Za-z0-9+/=]{1000,})"', text)
     g = Glb(base64.b64decode(m.group(1))); arm = _Arm(g); po = load_poser()(arm)
     names = {i: n["name"] for i, n in enumerate(g.j["nodes"])}
+    sc = next((n.get("scale", [1])[0] for n in g.j["nodes"] if n["name"] == "Player"), 1.0)
+    print("%s: jalka %.3f m, mallin skaala %.3f, askelpari pelissa: Walk %.3f m, Run %.3f m" % (
+        os.path.basename(src), po.k * 0.8897, sc, po.scaled(po.WALK)["stride"] * sc, po.scaled(po.RUN)["stride"] * sc))
     for clip, nfr, fn in CLIPS:
-        an = next(a for a in g.j["animations"] if a["name"] == clip)
+        an = next((a for a in g.j["animations"] if a["name"] == clip), None)
+        if an is None or (only and clip not in only): continue
         rot, loc = bake(arm, getattr(po, fn), nfr)
         if check:
             worst = 0.0
