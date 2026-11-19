@@ -28314,5 +28314,85 @@
 ]
 }
 ]
+},
+{
+"id": 585,
+"note": "Former bus station (1955), Itsen\u00e4isyydenkatu end: ochre-beige render, three large white-framed windows, a louvred long window upstairs, dark slate plinth (SV Itsen\u00e4isyydenkatu 44 pano, rectified, 19.11.2026; other sides not measured)",
+"walls": [
+{
+"a": [
+124.425,
+-502.046
+],
+"b": [
+111.751,
+-499.126
+],
+"bare": "#cdbd96",
+"kind": "plaster",
+"items": [
+[
+"box",
+0,
+13.01,
+0.0,
+1.16,
+0.0,
+0.05,
+"#3c3d40"
+],
+[
+"winp",
+0.9,
+3.14,
+2.3,
+4.16,
+1,
+"#eeece4",
+"#566269"
+],
+[
+"winp",
+3.66,
+5.92,
+2.3,
+4.16,
+1,
+"#eeece4",
+"#566269"
+],
+[
+"winp",
+6.44,
+8.64,
+2.3,
+4.16,
+1,
+"#eeece4",
+"#566269"
+],
+[
+"winp",
+3.64,
+8.66,
+5.8999999999999995,
+7.76,
+24,
+"#eeece4",
+"#4f5354"
+],
+[
+"box",
+6.1,
+6.2,
+5.9,
+7.76,
+0.04,
+0.07,
+"#eeece4"
+]
+]
+}
+]
 }
 ]

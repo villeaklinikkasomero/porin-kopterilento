@@ -968,7 +968,7 @@ Mitattu julkisivu (facades.json) tehdään ensin näille 15:lle. **Tee vain rivi
 | 121 | Palojoenkulma, Yrjönkatu 23 | c064 | VALMIS 19.11 (f121.py) |
 | 600 | Hotelli Bepop, Itsenäisyydenkatu 37 | bepop (maamerkki) | TEKEMÄTTÄ |
 | 601 | Itsenäisyydenkatu 35 (1959) | ei lohkoa (maamerkki) | TEKEMÄTTÄ |
-| 585 | vanha linja-autoasema | c064 | TEKEMÄTTÄ |
+| 585 | vanha linja-autoasema | c064 | OSITTAIN 19.11 (f585.py: vain Itsenäisyydenkadun pääty 13 m; länsi-, koillis- ja muut sivut mittaamatta) |
 | 1228 | valkoinen 6 krs | ei lohkoa | TEKEMÄTTÄ |
 | 569 | Antinkatu 27 A | c048 | EI KADUN VARRESSA: eteläsivu on 10 m sisäänvedetty lautaaidan takana (aita tehty 18.11) – jätetään |
 | 164 | Itsenäisyydenkatu 45, pysäköintitalo (569:n länsipuolella) | c051 | VALMIS 19.11 (f164.py; katujulkisivu + Mikonkadun pää, ajoaukot oikeina aukkoina, läpiajotesti – ks. luku "PYSÄKÖINTIHALLI 164") |
@@ -1173,7 +1173,7 @@ Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 m
 | Lohko | Talot | Lisätty |
 |---|---|---|
 | c048 | 7 (Itsenäisyydenkatu 54), 166 (Itsenäisyydenkatu 47), 167 (Itsenäisyydenkatu 58) | 19.11 klo 17; 166 lisätty myöhemmin 19.11 |
-| c064 | 107 (Yrjönkatu 25) | 19.11 klo 17 |
+| c064 | 107 (Yrjönkatu 25), 585 (vanha linja-autoasema, pohjoispääty) | 19.11 klo 17; 585 lisätty myöhemmin 19.11 |
 | c051 | 164 (Itsenäisyydenkatu 45, pysäköintitalo) | 19.11 |
 
 Ajettava illalla (push ensin, odota "porikit image" vihreäksi): `city 64 c048,c051,c064`
@@ -1184,8 +1184,8 @@ Vastaa suomeksi, lyhyesti, kuva jokaisesta muutoksesta (Street View vasemmalla, 
 ylempänä luvuissa "ITSENÄISYYDENKATU, keskustan erä" (taulukko), "MODAL-POLTOISTA PUUTTUIVAT…", "Antinkadun loput talot" ja "ILLAN MODAL-JONO".
 
 ### Tilanne
-- **Antinkatu VALMIS.** Itsenäisyydenkadun keskustan 15 talosta valmiina 415, 118, 116, 119, 121, 107, 7, 166, 167, 164. **Tekemättä: 600 (Bepop), 601, 585 (vanha
-  linja-autoasema), 1228.** 113 auki (vaatii jalanjälkiratkaisun kuten 136), 115 vain väri korjattu, 569 jätetty (aidan takana).
+- **Antinkatu VALMIS.** Itsenäisyydenkadun keskustan 15 talosta valmiina 415, 118, 116, 119, 121, 107, 7, 166, 167, 164 ja 585:n pohjoispääty. **Tekemättä: 600 (Bepop), 601, 1228 ja 585:n muut sivut.**
+  **Omistaja 19.11: kun Itsenäisyydenkatu on tehty, jatketaan RAUTATIENPUISTOKADULLE.** 113 auki (vaatii jalanjälkiratkaisun kuten 136), 115 vain väri korjattu, 569 jätetty (aidan takana).
   Päivitä taulukon Tila-sarake jokaisen talon jälkeen – valmiita ei tehdä uudelleen.
 - Kaikki koodi on käyttäjän kansiossa (takaisinluvulla tarkistettu). Modal toimii (PR #62). **Omistaja polttaa illalla:** lisää jokainen uusi lohko
   lukuun "ILLAN MODAL-JONO" (nyt `city 64 c048,c051,c064`).
@@ -1328,3 +1328,15 @@ Tarkistus: lohkon kärkimäärä kasvaa (git show origin/main:bl_cXXX.js, glb:n 
   Piperissä on suomeksi vain miesääni: naisääni = sama 1,22× sävelkorkeus, lapsi 1,45× (asetrate+atempo). Ei kuunneltu pilvessä; murreasu on Clauden arvio.
 - **Auki:** omistajan kuvakaappaus (Liisankatu-kyltti, harmaa talo jonka kulmassa näkyy läpi puistoon) – kohtaa ei löytynyt Liisankadun ja Eteläpuiston
   kulmasta (talot 65, 70, 253, 158); tarvitaan tarkempi paikka. Ei liity tämän päivän muutoksiin (bl_*.js-polttoja ei ole viety).
+
+## 19.11.2026 – 585 vanha linja-autoasema, pohjoispääty (testipoltettu) + SEURAAVA KATU
+- **585 (c064):** `f585.py`, Itsenäisyydenkadun puoleinen pääty 13,0 m, seinä (124.425,−502.046)→(111.751,−499.126): okranbeige rappaus pulpettikaton alla
+  (räystäs laskee n. 0,9 m itään – kuoren oma yläreuna), 3 isoa valkopuitteista ikkunaa katutasossa, yläkerrassa pitkä ikkuna valkoisten pystysäleiden
+  takana, tumma liuskekivisokkeli. Pano Itsenäisyydenkatu 44 (61.4815792, 21.7982185 → x 118.21, y −492.56; h 193 p 12; itänurkka h 140).
+  Mittakaava 1,0 räystäästä, s = s − 0,7, z = z − 0,1, + PV. Vertailukuva `Claude outputs/itsenaisyydenkatu_585_vertailu_19_11.jpg`. c064 testipoltettu (16 962 kärkeä).
+  **Muut sivut mittaamatta** (SPEC-asettelu: näyteikkunat + ikkunanauha): länsi (111.798,−499.282)→(107.797,−516.889) 18,1 m, koillinen
+  (148.262,−528.19)→(122.247,−511.786) 30,8 m ym. – seinälista raw.pkl:stä.
+- **Jäljellä Itsenäisyydenkadun keskustan erästä:** 600 (Bepop, maamerkkilohko `bepop`), 601 ja 1228 (ei lohkoa – selvitä ensin missä ne poltetaan),
+  585:n muut sivut, 113 (auki), 115 (mittaamatta).
+- **OMISTAJAN OHJE 19.11: Itsenäisyydenkadun jälkeen jatketaan Rautatienpuistokadulle.** (Talolistaa ei ole vielä tehty: poimi kadun varren talot
+  city.js/lod2.js:stä kuten Itsenäisyydenkadulla ja tee taulukko ID / osoite / lohko / tila ennen ensimmäistä taloa.)
