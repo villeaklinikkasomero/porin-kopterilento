@@ -54,7 +54,8 @@ _hopP = dict(wall=M('#d8d0bd'), surround=WHITE, rail=M('#3a3f45'), corr=True, li
 SPEC[1726] = dict(P=_hopP, layout=lay(27, 'punched', gh=4.4, bw=3.3, fh=3.2, P=dict(ww=1.3, wh=1.4)),
                   dirs={'S': (lay(27, 'punched', gh=4.4, bw=3.4, fh=3.2, cols=lambda c, nb: 'L' if c % 3 != 1 else 'W', P=dict(colmod={'L': 'loggia'}, ww=1.3, wh=1.4)), 8)},
                   roof=dict(kind='flat', mat=SHEET, pent=(3.5, 2.4)))
-SPEC[1725] = dict(P=dict(_hopP), layout=lay(10, 'punched', gh=4.4, bw=3.3, fh=2.8, P=dict(ww=1.6, wh=1.4)))      # two-storey shop wing on Antinkatu
+B[1725]['h'] = 6.7                                       # eaves measured on the rectified SV (19.11.2026); city.js has 10
+SPEC[1725] = dict(P=dict(_hopP), layout=lay(6.7, 'punched', gh=3.4, bw=3.3, fh=3.3, P=dict(ww=1.6, wh=1.4)))      # two-storey shop wing on Antinkatu (street front: facades.json)
 SPEC[1727] = dict(P=dict(wall=M('#d8d0bd')), layout=lay(4.7, plain=True))                                           # banking hall in the yard
 # 1729/1730  Juseliuksenkulma, Yrjönkatu 7: 3-storey rendered house (Finnilä 1940) + 6-storey block (1961)
 SPEC[1730] = dict(P=dict(wall=M('#e9e3d2'), sign=SIGNS, band=M('#f4f1e8')), layout=lay(10, 'punched', gh=3.6, bw=3.2, fh=3.2, P=dict(ww=1.7, wh=1.4, nx=3)))

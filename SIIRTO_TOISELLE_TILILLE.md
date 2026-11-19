@@ -792,3 +792,13 @@ Aiemmin: 118, 126, 133, 135, 290, 274, 137, 255, 216, 221, 215, 564, 163.
   gshot_sv.mjs: playwright on polussa `/opt/npm-tools/node_modules/`. tori1 8 näytteellä ~135 s.
 - **Modal:** tori1 on jo jonossa (`bake tori0 tori1 tori4 kivi2`) – ei uusia lohkoja. Vertailukuva: `Claude outputs/cafe_anton_vertailu_19_11.jpg`.
 - **Auki:** portin kohdalla maassa vaalea laatta (pelin puolen pohja vanhasta jalanjäljestä?) – tarkista Modal-polton jälkeen. Seuraavaksi lista: 1725, 1726, 1600, 136, 409, 570, 276, 415.
+
+### 19.11 klo 9–10: 1725 Antinkatu 10 (Royal Mustang -siipi) – tehty, polttamatta
+- `tools/rautalanka/facades/f1725.py` + facades.json: beiget laattapilarit ja -vyöt, 4 aukkoa (kolmijakoinen ikkuna + ruskea rintapaneeli),
+  pohjoispäässä roiskerappauskenttä + yksi ikkuna portin päällä (portti piirretty tummana + säleportti), punaiset kyltit, valkoinen kylttilevy.
+- **Korkeus 6,7 m** (city.js 10): `B[1725]['h'] = 6.7` zones.py:ssä ja **1725 lisätty index.html:n ZROOFiin** (ilmakuvakatto leijui 10 m:ssä).
+- Pano Antinkatu 11 (61.4874992, 21.7962552 → x 13.63, y 167.06) on vain 6 m seinästä: oikaisu antoi 18,5 m ja jalkakäytävän z 0,9 → kamera 10 %
+  kauempana; korjaus s = (s−0,06)·1,1, z = 1,1·z − 0,99 (päät osuvat jalanjäljen kulmiin). Läheltä otetuissa panoissa tarkista aina maan z ja pituus.
+- **Modal:** tori0 on jo jonossa. Vertailukuva `Claude outputs/antinkatu10_1725_vertailu_19_11.jpg`.
+- **Havaittu, tekemättä:** 1726:n Antinkadun pääty on oikeasti tummanpunaista laattaa, 2 ikkunasaraketta, tumma liiketila (pelissä beige parvekepääty);
+  1600 (Dante-baari, vihreä mansardikatto, pyöreät kattoikkunat) on pelissä pelkkä laatikko. Seuraavaksi nämä, sitten 136, 409, 570, 276, 415.
