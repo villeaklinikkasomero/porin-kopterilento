@@ -16,7 +16,7 @@ tmp = '/tmp/puhe'; os.makedirs(tmp, exist_ok=True)
 def dur(f): return float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]))
 
 rj = os.path.join(out, 'radio.json'); R = json.load(open(rj))
-old = {} if '--all' in sys.argv else {x['f']: x['d'] for x in R.get('puhe', [])}
+old = {} if '--all' in sys.argv else {x['f']: x['d'] for x in R.get('porikopteri', R.get('puhe', []))}
 beds = ['pop_1.mp3', 'pop_2.mp3', 'pop_3.mp3']; nb = 0
 for s in P['seg']:
     if f"puhe_{s['id']}.mp3" in old:
@@ -33,9 +33,15 @@ for s in P['seg']:
         subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', w, '-af', 'adelay=600,apad=pad_dur=0.8,loudnorm=I=-16:TP=-1.5', '-ac', '1', '-ar', '44100', '-b:a', '64k', mp], check=True)
     s['d'] = round(dur(mp), 2); print(s['id'], s['d'])
 
-L = []
-for n, s in enumerate(P['seg']):
-    L.append({'f': f"puhe_{s['id']}.mp3", 'd': s['d'], 't': s['t']})
-    if n % 4 == 3: L.append({'f': 'jingle_1.mp3', 'd': 3.71, 't': 'Radio Porikopteri'})
-R['puhe'] = L
+# Radio Porikopteri (19.11.2026, omistaja): spiikki, mainos, spiikki, mainos, tunnus + kappale ja sama alusta. Spiikit käydään järjestyksessä kerran;
+# mainoksia on vähemmän, joten ne kiertävät (loppupäässä kuullaan alun mainoksia uudelleen). Kappaleet pop_1..3 vuorotellen.
+songs = [x for x in R.get('pop', R.get('porikopteri', [])) if x['f'].startswith('pop_')]; songs = list({x['f']: x for x in songs}.values())
+row = lambda s: {'f': f"puhe_{s['id']}.mp3", 'd': s['d'], 't': s['t']}
+T = [s for s in P['seg'] if s['k'] == 't']; M = [s for s in P['seg'] if s['k'] == 'm']
+L = []; ns = 0
+for n, s in enumerate(T):
+    L.append(row(s))
+    if M: L.append(row(M[n % len(M)]))
+    if (n % 2 == 1 or n == len(T) - 1) and songs: L.append({'f': 'jingle_1.mp3', 'd': 3.71, 't': 'Radio Porikopteri'}); L.append(songs[ns % len(songs)]); ns += 1
+R.pop('puhe', None); R.pop('pop', None); R = {'porikopteri': L, **{k: v for k, v in R.items() if k != 'porikopteri'}}
 open(rj, 'w').write(json.dumps(R, ensure_ascii=False, indent=1)); print('yht', round(sum(x['d'] for x in L) / 60, 1), 'min')

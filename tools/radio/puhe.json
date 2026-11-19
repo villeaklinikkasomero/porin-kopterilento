@@ -1,11 +1,11 @@
 {
- "note": "Radio Porikopterin puhekanava: Pori-aiheiset puheet (t) ja keksittyjen yritysten mainokset (m). Teksti on kirjoitettu puhesyntetisaattorille: numerot auki. Kaikki mainosten yritykset ovat keksittyjä.",
+ "note": "Radio Porikopteri (ent. puhekanava + Pop): Pori-aiheiset puheet (t) ja keksittyjen yritysten mainokset (m); speak.py lomittaa väliin pop_*.mp3-kappaleet. Teksti on kirjoitettu puhesyntetisaattorille: numerot auki. Kaikki mainosten yritykset ovat keksittyjä.",
  "seg": [
   {
    "k": "t",
-   "id": "avaus",
-   "t": "Puhekanava – avaus",
-   "s": "Hyvää päivää, ja tervetuloa Radio Porikopterin puhekanavalle. Täällä puhutaan Porista: kaupungin historiasta, kesästä ja meren tuulista, ja välillä kuullaan myös paikallisten yritysten terveisiä. Pysy kyydissä, ja muista katsoa peiliin ennen kaistanvaihtoa."
+   "id": "avaus2",
+   "t": "Radio Porikopteri",
+   "s": "Hyvää päivää, ja tervetuloa kuuntelemaan Radio Porikopteria. Täällä puhutaan Porista: kaupungin historiasta, kesästä ja meren tuulista. Välillä soitetaan musiikkia, ja välillä kuullaan paikallisten yritysten terveisiä. Pysy kyydissä, ja muista katsoa peiliin ennen kaistanvaihtoa."
   },
   {
    "k": "t",
@@ -237,9 +237,9 @@
   },
   {
    "k": "t",
-   "id": "loppu",
-   "t": "Puhekanava – kiitos",
-   "s": "Kiitos, että kuuntelit Radio Porikopterin puhekanavaa. Jos haluat musiikkia, vaihda kanavaa ärrä-näppäimellä. Me jatketaan täällä Porin tarinoilla hetken päästä uudelleen."
+   "id": "loppu2",
+   "t": "Radio Porikopteri – kiitos",
+   "s": "Kuuntelet Radio Porikopteria. Jos haluat pelkkää musiikkia, vaihda kanavaa ärrä-näppäimellä. Me jatketaan täällä Porin tarinoilla ja musiikilla ihan kohta."
   }
  ]
 }

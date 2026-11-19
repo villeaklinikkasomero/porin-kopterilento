@@ -1,9 +1,54 @@
 {
- "pop": [
+ "porikopteri": [
+  {
+   "f": "puhe_avaus2.mp3",
+   "d": 23.56,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "puhe_roottori.mp3",
+   "d": 19.1,
+   "t": "Mainos: Kahvila Roottori"
+  },
+  {
+   "f": "puhe_synty.mp3",
+   "d": 29.28,
+   "t": "Kaupunki joen suulla"
+  },
+  {
+   "f": "puhe_reunakivi.mp3",
+   "d": 22.07,
+   "t": "Mainos: Reunakivi-Rengas"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
   {
    "f": "pop_1.mp3",
    "d": 136.65,
    "t": "Kauppatorin kesä"
+  },
+  {
+   "f": "puhe_palo.mp3",
+   "d": 30.77,
+   "t": "Palon jälkeen"
+  },
+  {
+   "f": "puhe_tuulipesu.mp3",
+   "d": 21.37,
+   "t": "Mainos: Yyterin Tuulipesu"
+  },
+  {
+   "f": "puhe_jazz.mp3",
+   "d": 26.75,
+   "t": "Jazzin kaupunki"
+  },
+  {
+   "f": "puhe_kaksisiivua.mp3",
+   "d": 23.38,
+   "t": "Mainos: Grilli Kaksi Siivua"
   },
   {
    "f": "jingle_1.mp3",
@@ -16,7 +61,27 @@
    "t": "Yrjönkadun valot"
   },
   {
-   "f": "jingle_2.mp3",
+   "f": "puhe_yyteri.mp3",
+   "d": 24.01,
+   "t": "Hiekkaa ja dyynejä"
+  },
+  {
+   "f": "puhe_siipi.mp3",
+   "d": 22.02,
+   "t": "Mainos: Kopterikoulu Pyörivä Siipi"
+  },
+  {
+   "f": "puhe_porilainen.mp3",
+   "d": 27.35,
+   "t": "Leipä, jolla on kaupungin nimi"
+  },
+  {
+   "f": "puhe_kalatori.mp3",
+   "d": 21.19,
+   "t": "Mainos: Jokisuun Kalatiski"
+  },
+  {
+   "f": "jingle_1.mp3",
    "d": 3.71,
    "t": "Radio Porikopteri"
   },
@@ -26,9 +91,244 @@
    "t": "Kirjurinluodon ilta"
   },
   {
+   "f": "puhe_murre.mp3",
+   "d": 23.88,
+   "t": "Mää ja sää"
+  },
+  {
+   "f": "puhe_vihreaaalto.mp3",
+   "d": 21.73,
+   "t": "Mainos: Autokoulu Vihreä Aalto"
+  },
+  {
+   "f": "puhe_juselius.mp3",
+   "d": 32.37,
+   "t": "Juseliuksen mausoleumi"
+  },
+  {
+   "f": "puhe_luotokioski.mp3",
+   "d": 22.8,
+   "t": "Mainos: Luotokioski"
+  },
+  {
    "f": "jingle_1.mp3",
    "d": 3.71,
    "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_1.mp3",
+   "d": 136.65,
+   "t": "Kauppatorin kesä"
+  },
+  {
+   "f": "puhe_puuvilla.mp3",
+   "d": 24.22,
+   "t": "Tehtaiden kaupunki"
+  },
+  {
+   "f": "puhe_lokkivakuutus.mp3",
+   "d": 19.49,
+   "t": "Mainos: Lokkivakuutus"
+  },
+  {
+   "f": "puhe_meri.mp3",
+   "d": 21.6,
+   "t": "Meren suunnassa"
+  },
+  {
+   "f": "puhe_vastatuuli.mp3",
+   "d": 21.42,
+   "t": "Mainos: Parturi-Kampaamo Vastatuuli"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_2.mp3",
+   "d": 141.61,
+   "t": "Yrjönkadun valot"
+  },
+  {
+   "f": "puhe_liikenne.mp3",
+   "d": 25.23,
+   "t": "Liikennetiedote"
+  },
+  {
+   "f": "puhe_hiekkalinna.mp3",
+   "d": 25.63,
+   "t": "Mainos: Hiekkalinna-Kiinteistöt"
+  },
+  {
+   "f": "puhe_kirjurinluoto.mp3",
+   "d": 27.19,
+   "t": "Puistosaari keskellä kaupunkia"
+  },
+  {
+   "f": "puhe_yksisuuntainen.mp3",
+   "d": 27.27,
+   "t": "Mainos: Navigaattoriliike Yksisuuntainen"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_3.mp3",
+   "d": 152.45,
+   "t": "Kirjurinluodon ilta"
+  },
+  {
+   "f": "puhe_assat.mp3",
+   "d": 30.96,
+   "t": "Punamusta pata"
+  },
+  {
+   "f": "puhe_loylykopteri.mp3",
+   "d": 23.17,
+   "t": "Mainos: Tilaussauna Löylykopteri"
+  },
+  {
+   "f": "puhe_raatihuone.mp3",
+   "d": 32.13,
+   "t": "Raatihuone joen rannalla"
+  },
+  {
+   "f": "puhe_ketjut.mp3",
+   "d": 25.7,
+   "t": "Mainos: Pyörähuolto Ketjut Kireellä"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_1.mp3",
+   "d": 136.65,
+   "t": "Kauppatorin kesä"
+  },
+  {
+   "f": "puhe_marssi.mp3",
+   "d": 27.17,
+   "t": "Porilaisten marssi"
+  },
+  {
+   "f": "puhe_patjapori.mp3",
+   "d": 20.79,
+   "t": "Mainos: Patja-Pori"
+  },
+  {
+   "f": "puhe_suisto.mp3",
+   "d": 26.44,
+   "t": "Joki kohtaa meren"
+  },
+  {
+   "f": "puhe_karhunkammen.mp3",
+   "d": 19.04,
+   "t": "Mainos: Kuntosali Karhunkämmen"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_2.mp3",
+   "d": 141.61,
+   "t": "Yrjönkadun valot"
+  },
+  {
+   "f": "puhe_ilmailu.mp3",
+   "d": 26.2,
+   "t": "Lentäjien kaupunki"
+  },
+  {
+   "f": "puhe_mutteri.mp3",
+   "d": 25.0,
+   "t": "Mainos: Rautakauppa Mutteri ja Mää"
+  },
+  {
+   "f": "puhe_tori.mp3",
+   "d": 26.49,
+   "t": "Torilla tavataan"
+  },
+  {
+   "f": "puhe_sininennuotti.mp3",
+   "d": 26.33,
+   "t": "Mainos: Soitinliike Sininen Nuotti"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_3.mp3",
+   "d": 152.45,
+   "t": "Kirjurinluodon ilta"
+  },
+  {
+   "f": "puhe_saa.mp3",
+   "d": 28.32,
+   "t": "Kopterisää"
+  },
+  {
+   "f": "puhe_roottori.mp3",
+   "d": 19.1,
+   "t": "Mainos: Kahvila Roottori"
+  },
+  {
+   "f": "puhe_muistilista.mp3",
+   "d": 30.12,
+   "t": "Lentäjän muistilista"
+  },
+  {
+   "f": "puhe_reunakivi.mp3",
+   "d": 22.07,
+   "t": "Mainos: Reunakivi-Rengas"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_1.mp3",
+   "d": 136.65,
+   "t": "Kauppatorin kesä"
+  },
+  {
+   "f": "puhe_jokiranta.mp3",
+   "d": 25.44,
+   "t": "Iltakävely joen rannassa"
+  },
+  {
+   "f": "puhe_tuulipesu.mp3",
+   "d": 21.37,
+   "t": "Mainos: Yyterin Tuulipesu"
+  },
+  {
+   "f": "puhe_loppu2.mp3",
+   "d": 13.09,
+   "t": "Radio Porikopteri – kiitos"
+  },
+  {
+   "f": "puhe_kaksisiivua.mp3",
+   "d": 23.38,
+   "t": "Mainos: Grilli Kaksi Siivua"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "pop_2.mp3",
+   "d": 141.61,
+   "t": "Yrjönkadun valot"
   }
  ],
  "electric": [
@@ -88,258 +388,6 @@
    "f": "rock_3.mp3",
    "d": 120.37,
    "t": "Porinsilta Riff"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  }
- ],
- "puhe": [
-  {
-   "f": "puhe_avaus.mp3",
-   "d": 21.52,
-   "t": "Puhekanava – avaus"
-  },
-  {
-   "f": "puhe_synty.mp3",
-   "d": 29.28,
-   "t": "Kaupunki joen suulla"
-  },
-  {
-   "f": "puhe_roottori.mp3",
-   "d": 19.1,
-   "t": "Mainos: Kahvila Roottori"
-  },
-  {
-   "f": "puhe_palo.mp3",
-   "d": 30.77,
-   "t": "Palon jälkeen"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "puhe_reunakivi.mp3",
-   "d": 22.07,
-   "t": "Mainos: Reunakivi-Rengas"
-  },
-  {
-   "f": "puhe_jazz.mp3",
-   "d": 26.75,
-   "t": "Jazzin kaupunki"
-  },
-  {
-   "f": "puhe_tuulipesu.mp3",
-   "d": 21.37,
-   "t": "Mainos: Yyterin Tuulipesu"
-  },
-  {
-   "f": "puhe_yyteri.mp3",
-   "d": 24.01,
-   "t": "Hiekkaa ja dyynejä"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "puhe_kaksisiivua.mp3",
-   "d": 23.38,
-   "t": "Mainos: Grilli Kaksi Siivua"
-  },
-  {
-   "f": "puhe_porilainen.mp3",
-   "d": 27.35,
-   "t": "Leipä, jolla on kaupungin nimi"
-  },
-  {
-   "f": "puhe_siipi.mp3",
-   "d": 22.02,
-   "t": "Mainos: Kopterikoulu Pyörivä Siipi"
-  },
-  {
-   "f": "puhe_murre.mp3",
-   "d": 23.88,
-   "t": "Mää ja sää"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "puhe_kalatori.mp3",
-   "d": 21.19,
-   "t": "Mainos: Jokisuun Kalatiski"
-  },
-  {
-   "f": "puhe_juselius.mp3",
-   "d": 32.37,
-   "t": "Juseliuksen mausoleumi"
-  },
-  {
-   "f": "puhe_vihreaaalto.mp3",
-   "d": 21.73,
-   "t": "Mainos: Autokoulu Vihreä Aalto"
-  },
-  {
-   "f": "puhe_puuvilla.mp3",
-   "d": 24.22,
-   "t": "Tehtaiden kaupunki"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "puhe_luotokioski.mp3",
-   "d": 22.8,
-   "t": "Mainos: Luotokioski"
-  },
-  {
-   "f": "puhe_meri.mp3",
-   "d": 21.6,
-   "t": "Meren suunnassa"
-  },
-  {
-   "f": "puhe_liikenne.mp3",
-   "d": 25.23,
-   "t": "Liikennetiedote"
-  },
-  {
-   "f": "puhe_kirjurinluoto.mp3",
-   "d": 27.19,
-   "t": "Puistosaari keskellä kaupunkia"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "puhe_lokkivakuutus.mp3",
-   "d": 19.49,
-   "t": "Mainos: Lokkivakuutus"
-  },
-  {
-   "f": "puhe_assat.mp3",
-   "d": 30.96,
-   "t": "Punamusta pata"
-  },
-  {
-   "f": "puhe_vastatuuli.mp3",
-   "d": 21.42,
-   "t": "Mainos: Parturi-Kampaamo Vastatuuli"
-  },
-  {
-   "f": "puhe_raatihuone.mp3",
-   "d": 32.13,
-   "t": "Raatihuone joen rannalla"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "puhe_hiekkalinna.mp3",
-   "d": 25.63,
-   "t": "Mainos: Hiekkalinna-Kiinteistöt"
-  },
-  {
-   "f": "puhe_marssi.mp3",
-   "d": 27.17,
-   "t": "Porilaisten marssi"
-  },
-  {
-   "f": "puhe_yksisuuntainen.mp3",
-   "d": 27.27,
-   "t": "Mainos: Navigaattoriliike Yksisuuntainen"
-  },
-  {
-   "f": "puhe_suisto.mp3",
-   "d": 26.44,
-   "t": "Joki kohtaa meren"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "puhe_loylykopteri.mp3",
-   "d": 23.17,
-   "t": "Mainos: Tilaussauna Löylykopteri"
-  },
-  {
-   "f": "puhe_ilmailu.mp3",
-   "d": 26.2,
-   "t": "Lentäjien kaupunki"
-  },
-  {
-   "f": "puhe_ketjut.mp3",
-   "d": 25.7,
-   "t": "Mainos: Pyörähuolto Ketjut Kireellä"
-  },
-  {
-   "f": "puhe_tori.mp3",
-   "d": 26.49,
-   "t": "Torilla tavataan"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "puhe_patjapori.mp3",
-   "d": 20.79,
-   "t": "Mainos: Patja-Pori"
-  },
-  {
-   "f": "puhe_saa.mp3",
-   "d": 28.32,
-   "t": "Kopterisää"
-  },
-  {
-   "f": "puhe_karhunkammen.mp3",
-   "d": 19.04,
-   "t": "Mainos: Kuntosali Karhunkämmen"
-  },
-  {
-   "f": "puhe_muistilista.mp3",
-   "d": 30.12,
-   "t": "Lentäjän muistilista"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "puhe_mutteri.mp3",
-   "d": 25.0,
-   "t": "Mainos: Rautakauppa Mutteri ja Mää"
-  },
-  {
-   "f": "puhe_jokiranta.mp3",
-   "d": 25.44,
-   "t": "Iltakävely joen rannassa"
-  },
-  {
-   "f": "puhe_sininennuotti.mp3",
-   "d": 26.33,
-   "t": "Mainos: Soitinliike Sininen Nuotti"
-  },
-  {
-   "f": "puhe_loppu.mp3",
-   "d": 13.92,
-   "t": "Puhekanava – kiitos"
   },
   {
    "f": "jingle_1.mp3",

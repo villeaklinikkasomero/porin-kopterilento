@@ -83,7 +83,7 @@
   #radio { left:14px; bottom:84px; padding:6px 10px; font-size:13px; display:flex; gap:8px; align-items:baseline; color:var(--ink); }
   #radio #rsong { color:var(--dim); font-size:12px; }
   .touch #radio { bottom:auto; top:178px; }
-  #tradio { bottom:22px; }
+  #tradio { bottom:22px; } body:not(.car) #tradio { bottom:232px; } body.walk .ride-only { display:none !important; }   /* radio: car and helicopter, not on foot */
   #vehs { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0 6px; }
   .veh { pointer-events:auto; position:relative; padding:0; border:2px solid var(--line); border-radius:10px; overflow:hidden; background:#0e161e; cursor:pointer; color:var(--ink); font:inherit; text-align:left; }
   .veh video, .veh img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; }
@@ -127,13 +127,13 @@
   <div class="g heli-only"><div class="v" id="ga">0</div><div class="u">korkeus m</div></div>
   <div class="g"><div class="v" id="gh">P</div><div class="u">suunta</div></div>
   <div class="g hpg"><div id="hp"><i></i></div><div class="u">kunto</div></div>
-  <div class="g car-only" id="gradio"><div id="rctl"><button id="rprev" aria-label="Edellinen kanava">◀</button><div id="rinfo"><b id="rch2">Radio pois</b><span id="rsong2"></span></div><button id="rnext" aria-label="Seuraava kanava">▶</button><input id="rvol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Radion äänenvoimakkuus"></div><div class="u">radio · R</div></div>
+  <div class="g ride-only" id="gradio"><div id="rctl"><button id="rprev" aria-label="Edellinen kanava">◀</button><div id="rinfo"><b id="rch2">Radio pois</b><span id="rsong2"></span></div><button id="rnext" aria-label="Seuraava kanava">▶</button><input id="rvol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Radion äänenvoimakkuus"></div><div class="u">radio · R</div></div>
 </div>
 <div id="street" class="hud"><div class="s" id="sn"></div><div class="p" id="sp"></div></div>
 <div id="nav" class="hud panel"><canvas id="navc" width="116" height="116"></canvas><div><div class="nd" id="navd"></div><div class="nn" id="navn"></div></div></div>
 <div id="toast" class="hud panel"></div>
 <div id="hint" class="hud panel"></div><div id="fade"></div>
-<div id="radio" class="hud panel car-only"><span id="rch">📻 Radio pois</span><span id="rsong"></span></div>
+<div id="radio" class="hud panel ride-only"><span id="rch">📻 Radio pois</span><span id="rsong"></span></div>
 <div id="board" class="hud panel"><h2>Päivän top-10</h2><div class="sub" id="bsub"></div><div id="nickrow" style="display:none;margin:10px 0 4px"><label for="nick">Pääsit listalle! Nimimerkki</label><input id="nick" maxlength="5" autocomplete="off" spellcheck="false" placeholder="5 merkkiä"><button id="nicksave" >Tallenna</button><span style="font-size:12px;width:100%">Älä käytä oikeaa nimeäsi.</span></div><ol class="top" id="top1"></ol><div class="topnote" id="note1"></div></div>
 <div id="help" class="hud panel">
   <span class="heli-only"><kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
@@ -143,7 +143,7 @@
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
-  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb car-only" id="tradio">📻</div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta">🚶</div><div class="tb walk-only" id="trun" aria-label="Juokse">🏃</div>
+  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb ride-only" id="tradio">📻</div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta">🚶</div><div class="tb walk-only" id="trun" aria-label="Juokse">🏃</div>
 </div>
 
 <div id="start">
@@ -160,6 +160,7 @@
       <div><kbd>Q</kbd> <kbd>E</kbd></div><div>liu'u sivulle</div>
       <div><kbd>Väli</kbd> / <kbd>Shift</kbd></div><div>ylös ja alas</div>
       <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään (maassa) ja takaisin kyytiin</div>
+      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Electric, Rock, pois</div>
       <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
     </div>
     <div id="keys2" class="car-only" style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0;font-size:14px;align-items:center">
@@ -167,7 +168,7 @@
       <div><kbd>S</kbd> / <kbd>↓</kbd></div><div>jarru ja peruutus</div>
       <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>ohjaus</div>
       <div><kbd>Väli</kbd></div><div>käsijarru</div>
-      <div><kbd>R</kbd></div><div>autoradio: Pop, Electric, Rock, Puhe, pois</div>
+      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Electric, Rock, pois</div>
       <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään ja takaisin kyytiin</div>
       <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
     </div>
@@ -1157,7 +1158,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
 // traffic islands and zebra crossings. The surfaces are procedural; the aerial photo only darkens them where it is dark (building shadows).
 // heights above the true ground: the aerial-photo ground is drawn as 6 m triangles that bulge a few cm above the true ground on curved terrain,
 // so the street surface needs a margin or the photo pokes through it near the camera (owner 18.11: 'asphalt vanishes under the car')
-const ROAD = { asph: 0.13, pave: 0.26, mark: 0.145, on: true, paveAt: () => false };
+const ROAD = { asph: 0.13, pave: 0.26, mark: 0.145, on: true, paveAt: () => false, asphAt: () => false };
 // top of the drawn ground at (x, y): the true ground, or the 6 m triangles of the core ground mesh / the sharper aerial tiles when they bulge above it
 function gridTop(x, y, x0, y0, st, dy) { const fx = (x - x0) / st, fy = (y - y0) / st, i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j;
   const X = a => x0 + a * st, Y = b => y0 + b * st, z00 = TZg(X(i), Y(j)), z10 = TZg(X(i + 1), Y(j)), z11 = TZg(X(i + 1), Y(j + 1)), z01 = TZg(X(i), Y(j + 1));
@@ -1264,14 +1265,15 @@ import('./roads.js').then(mod => {
   if (R.path) add(withUV(flat(dec(R.path), 0.07), 0.6), mGravel);
   if (R.tadd && TREES.add) TREES.add(dec(R.tadd));
   { // 1 m raster of the pavements for the car: driving over a kerb lifts it onto the pavement
-    const [x0, y0, x1, y1] = R.bb, nx = Math.ceil(x1 - x0), ny = Math.ceil(y1 - y0), M = new Uint8Array(nx * ny), T = dec(R.pave);
-    for (let i = 0; i < T.length; i += 6) { const ax = T[i] / 10, ay = T[i + 1] / 10, bx = T[i + 2] / 10, by = T[i + 3] / 10, cx = T[i + 4] / 10, cy = T[i + 5] / 10;
+    const [x0, y0, x1, y1] = R.bb, nx = Math.ceil(x1 - x0), ny = Math.ceil(y1 - y0), M = new Uint8Array(nx * ny);          // bit 1 pavement, bit 2 carriageway (for the signal posts: where the kerb is)
+    for (const [T, bit] of [[dec(R.pave), 1], [dec(R.asph), 2]]) for (let i = 0; i < T.length; i += 6) { const ax = T[i] / 10, ay = T[i + 1] / 10, bx = T[i + 2] / 10, by = T[i + 3] / 10, cx = T[i + 4] / 10, cy = T[i + 5] / 10;
       const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy); if (Math.abs(d) < 1e-6) continue;
       for (let gy = Math.floor(Math.min(ay, by, cy) - y0); gy <= Math.ceil(Math.max(ay, by, cy) - y0); gy++) for (let gx = Math.floor(Math.min(ax, bx, cx) - x0); gx <= Math.ceil(Math.max(ax, bx, cx) - x0); gx++) {
         if (gx < 0 || gy < 0 || gx >= nx || gy >= ny) continue; const px = x0 + gx + 0.5, py = y0 + gy + 0.5;
         const u = ((by - cy) * (px - cx) + (cx - bx) * (py - cy)) / d, v = ((cy - ay) * (px - cx) + (ax - cx) * (py - cy)) / d;
-        if (u >= -0.05 && v >= -0.05 && u + v <= 1.05) M[gy * nx + gx] = 1; } }
-    ROAD.paveAt = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny && M[gy * nx + gx] === 1; };
+        if (u >= -0.05 && v >= -0.05 && u + v <= 1.05) M[gy * nx + gx] |= bit; } }
+    ROAD.paveAt = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny && (M[gy * nx + gx] & 1) === 1; };
+    ROAD.asphAt = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny && M[gy * nx + gx] === 2; };
   }
   if (R.ow) { const O = dec(R.ow); for (let i = 0; i < O.length; i += 3) ONEWAY.set(O[i] + ',' + O[i + 1], O[i + 2]); }
   if (R.tmv && TREES.move) { const s0 = atob(R.tmv), u8 = new Uint8Array(s0.length); for (let i = 0; i < s0.length; i++) u8[i] = s0.charCodeAt(i); TREES.move(new Int32Array(u8.buffer)); }
@@ -1765,11 +1767,12 @@ const cars = [];
     for (const n of list) { if (!n.sig) continue;
       for (const a of n.nb) { if ((a.sig && a.sig.j === n.sig.j) || (!n.sig.mid && !may(a, n))) continue;
         const dx = n.x - a.x, dy = n.y - a.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, b = Math.min(SR, len);
-        const sx = n.x - ux * b, sy = n.y - uy * b; let d = 4.6, pv = false;                  // from the stop line to the right until the pavement begins, then 0.7 m onto it
-        for (let q = 1.5; q <= 25; q += 0.5) if (ROAD.paveAt(sx + uy * q, sy - ux * q)) { d = q + 0.7; pv = true; break; }
-        sigPoles.push({ n, a, x: sx + uy * d, y: sy - ux * d, ux, uy, pv, ty: pv && d > 6.2 ? 'uloke' : 'yhdistelma' });    // wide carriageway: the mast-arm post
-        for (let q = 1.5; q <= 25; q += 0.5) if (ROAD.paveAt(sx - uy * q, sy + ux * q)) {         // across the street a short post for people walking the other way
-          sigPoles.push({ n, a, x: sx - uy * (q + 0.7), y: sy + ux * (q + 0.7), ux: -ux, uy: -uy, pv: true, ty: 'jalankulkija' }); break; } } }
+        let sx = n.x - ux * SR, sy = n.y - uy * SR;                                              // from the stop line sideways across the asphalt: the post stands
+        const kerb = sg => { let seen = false; for (let q = 0.5; q <= 25; q += 0.5) { if (ROAD.asphAt(sx + sg * uy * q, sy - sg * ux * q)) { seen = true; continue; } if (seen && q >= 2) return q + 0.7; } return 0; };   // 0.7 m past the kerb (pavement, a grass median or an island)
+        let dr = kerb(1); if (!dr) { sx -= ux * 5; sy -= uy * 5; dr = kerb(1); }                // still inside the junction: look 5 m further back
+        const dl = kerb(-1), d = dr || 4.6, px = sx + uy * d, py = sy - ux * d;
+        sigPoles.push({ n, a, x: px, y: py, ux, uy, pv: ROAD.paveAt(px, py), ty: dr > 6.2 ? 'uloke' : 'yhdistelma' });      // wide carriageway: the mast-arm post
+        if (dl) { const qx = sx - uy * dl, qy = sy + ux * dl; sigPoles.push({ n, a, x: qx, y: qy, ux: -ux, uy: -uy, pv: ROAD.paveAt(qx, qy), ty: 'jalankulkija' }); } } }   // across the street a short post for people walking the other way
     if (!sigPoles.length) return;
     // the owner's Blender posts (tools/props/porikopteri_liikennevalot.py -> liikennevalot.js): origin at the foot, the vehicle head faces +Z (the
     // arriving car), the carriageway is on -X. Every lamp is its own node with onColor / offColor: one instanced mesh per lamp, coloured per post.
@@ -1899,7 +1902,7 @@ addEventListener('keydown', e => {
   if (e.code === 'Enter' || e.code === 'NumpadEnter' || (e.code === 'KeyF' && (WALK.on || VEH === 'car'))) walkAction();
   if (e.code === 'KeyT') LB.show(!LB.open);
   if (e.code === 'KeyM') toggleSound();
-  if (e.code === 'KeyR' && VEH === 'car' && !WALK.on) RADIO.next();
+  if (e.code === 'KeyR' && !WALK.on) RADIO.next();
   if (e.code === 'KeyN') newTour();
 });
 addEventListener('keyup', e => keys.delete(e.code));
@@ -1927,9 +1930,9 @@ function readInput() {
   for (const a of ['f', 't', 's', 'l']) input[a] = Math.max(-1, Math.min(1, input[a]));
 }
 
-// ---------- car radio: Radio Porikopteri, three channels of our own songs (tools/radio/compose.py, FluidSynth + FluidR3_GM) ----------
+// ---------- radio (car and helicopter, 19.11.2026): Radio Porikopteri = talk, mock adverts and the pop songs in one channel, first in the row; then Electric and Rock. Our own songs (tools/radio/compose.py, FluidSynth + FluidR3_GM) ----------
 // The channels run 'live': the place in a channel's playlist comes from the clock, so switching away and back finds it further on.
-const RADIO = { ch: 0, names: ['pois', 'Pop', 'Electric', 'Rock', 'Puhe'], list: null, el: null, idx: -1, vol: 0.6 }; window.__radio = RADIO;
+const RADIO = { ch: 0, names: ['pois', 'Porikopteri', 'Electric', 'Rock'], list: null, el: null, idx: -1, vol: 0.6 }; window.__radio = RADIO;
 fetch('./radio/radio.json').then(r => r.json()).then(j => { RADIO.list = j; }).catch(() => {});
 RADIO.pos = ch => {   // [track index, seconds into it] for channel ch now
   const L = RADIO.list[RADIO.names[ch].toLowerCase()]; const tot = L.reduce((a, t) => a + t.d, 0);
@@ -1942,14 +1945,14 @@ RADIO.play = (ch, startAt) => {
 RADIO.load = (L, i, x) => { const el = RADIO.el, t = L[i]; el.src = './radio/' + t.f; el.volume = soundOn ? RADIO.vol : 0;
   const go = () => { try { el.currentTime = x; } catch (e) {} el.play().catch(() => {}); el.removeEventListener('loadedmetadata', go); };
   el.addEventListener('loadedmetadata', go); RADIO.cur = t; RADIO.show(); };
-RADIO.next = () => { do { RADIO.ch = (RADIO.ch + 1) % RADIO.names.length; } while (RADIO.ch && RADIO.list && !RADIO.list[RADIO.names[RADIO.ch].toLowerCase()]); RADIO.play(RADIO.ch); toast('📻 Radio Porikopteri – ' + RADIO.names[RADIO.ch], 1.4); };
+RADIO.next = () => { do { RADIO.ch = (RADIO.ch + 1) % RADIO.names.length; } while (RADIO.ch && RADIO.list && !RADIO.list[RADIO.names[RADIO.ch].toLowerCase()]); RADIO.play(RADIO.ch); toast('📻 ' + (RADIO.ch ? 'Radio ' + RADIO.names[RADIO.ch] : 'Radio pois'), 1.4); };
 RADIO.show = () => { const n = RADIO.ch ? 'Radio ' + RADIO.names[RADIO.ch] : 'Radio pois', t = RADIO.ch && RADIO.cur ? RADIO.cur.t : '';
   $('rch').textContent = '📻 ' + n; $('rsong').textContent = t; $('rch2').textContent = n; $('rsong2').textContent = t; };
 RADIO.prev = () => { do { RADIO.ch = (RADIO.ch + RADIO.names.length - 1) % RADIO.names.length; } while (RADIO.ch && RADIO.list && !RADIO.list[RADIO.names[RADIO.ch].toLowerCase()]); RADIO.play(RADIO.ch); };
-for (const [id, f] of [['rprev', () => RADIO.prev()], ['rnext', () => RADIO.next()]]) $(id).addEventListener('click', e => { e.preventDefault(); e.currentTarget.blur(); if (VEH === 'car' && started) f(); });
+for (const [id, f] of [['rprev', () => RADIO.prev()], ['rnext', () => RADIO.next()]]) $(id).addEventListener('click', e => { e.preventDefault(); e.currentTarget.blur(); if (started) f(); });
 $('rvol').addEventListener('input', e => { RADIO.vol = +e.target.value; RADIO.mute(); }); $('rvol').addEventListener('change', e => e.target.blur());
 RADIO.mute = () => { if (RADIO.el) RADIO.el.volume = soundOn && !WALK.on ? RADIO.vol : 0; };
-$('tradio').addEventListener('pointerdown', e => { e.preventDefault(); if (VEH === 'car' && started) RADIO.next(); });
+$('tradio').addEventListener('pointerdown', e => { e.preventDefault(); if (started && !WALK.on) RADIO.next(); });
 $('tact').addEventListener('pointerdown', e => { e.preventDefault(); if (started) walkAction(); });
 { const el = $('trun'); el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); touchIn.run = 1; el.classList.add('on'); }); const up = () => { touchIn.run = 0; el.classList.remove('on'); }; el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); }
 
@@ -2370,7 +2373,7 @@ function begin() {
   if (VEH === 'car') { BESTKEY = 'pori-auto-best-' + DAY.key; try { best = parseFloat(localStorage.getItem(BESTKEY)) || null; } catch (e) { best = null; } LB.useField('c' + DAY.key); }
   camPos.copy(camera.position); camLook.set(HOME.x, 5, -HOME.y);
   initSound(); newTour();
-  if (VEH === 'car') { const go = () => { if (RADIO.list) { RADIO.ch = 1; RADIO.play(1); } else setTimeout(go, 500); }; go(); }
+  { const go = () => { if (RADIO.list) { RADIO.ch = 1; RADIO.play(1); } else setTimeout(go, 500); }; go(); }   // Radio Porikopteri is on at the start, in the helicopter too
 }
 $('go').addEventListener('click', begin);
 for (const id of ['mission', 'mapwrap', 'gauges', 'street', 'help', 'radio']) $(id).style.visibility = 'visible';

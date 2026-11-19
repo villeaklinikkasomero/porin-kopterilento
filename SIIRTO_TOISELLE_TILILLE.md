@@ -1058,3 +1058,21 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
   MeshBasicMaterialin ja pylväskohtaisen värin solmun extras onColor/offColor -arvoista (`sigUpd` joka ruudulla).
 - Tyypit: oikean reunan pylväs `yhdistelma`, tai `uloke` kun jalkakäytävä on >6,2 m kaistan keskiviivasta; lisäksi vastakkaiselle reunalle `jalankulkija`
   (180° käännettynä), jos sieltä löytyy jalkakäytävä. Yhteensä 144 pylvästä. Painonapin valo palaa, kun jalankulkijalla on punainen.
+
+### 19.11 klo 17.30: valopylväät reunakiven taakse myös keskikaistoilla (Mikonkatu)
+- Syy: pylväs haki oikealta JALKAKÄYTÄVÄÄ; puistokadun keskikaistalla (nurmi) sitä ei ole → jäi arvaukseen 4,6 m = keskelle ajorataa.
+- Korjaus: roads-rasteri `M` on nyt bittimaski (1 jalkakäytävä, 2 ajorata), uusi `ROAD.asphAt`. `sigBuild` kulkee pysäytysviivalta (aina 9 m ennen solmua,
+  tarvittaessa 14 m) sivulle asfaltin yli ja panee pylvään 0,7 m ensimmäisen ei-asfalttiruudun taakse (jalkakäytävä, nurmikeskikaista tai saareke);
+  sama vasemmalle jalankulkijapylväälle. Ytimen 54 pääpylväästä arvaukselle jäi 2: (-312,-379) Itsenäisyydenkatu/Eteläpuisto ja (206,-514)
+  Itsenäisyydenkatu/Vähälinnankatu. Yhteensä 150 pylvästä (52 yhdistelmä, 44 uloke, 54 jalankulkija).
+
+### 19.11 klo 18: Radio Porikopteri = puhe + pop, radio myös kopteriin
+- Kanavat nyt: **Radio Porikopteri** (1., käynnistyy alussa sekä autossa että kopterissa), Electric, Rock, pois. Pop-kanava ja erillinen Puhe poistettu.
+- radio.json: avaimet `porikopteri`, `electric`, `rock`. `porikopteri` = 40 puheosaa, joka neljännen jälkeen tunnus + pop_1..3 vuorotellen (60 riviä, 40,9 min).
+  `tools/radio/speak.py` rakentaa lomituksen (kappaleet luetaan vanhasta pop-listasta tai porikopteri-listan pop_*-riveistä).
+- puhe.json: avaus ja loppu kirjoitettu uudelleen (id:t `avaus2`, `loppu2`; ei enää "puhekanava"). Vanhat radio/puhe_avaus.mp3 ja puhe_loppu.mp3 jäivät
+  kansioon käyttämättöminä (poisto vain omistajan luvalla).
+- index.html: `RADIO.names = ['pois', 'Porikopteri', 'Electric', 'Rock']`; R-näppäin, ◀▶-painikkeet ja 📻-kosketuspainike toimivat myös kopterissa
+  (luokka `ride-only`: näkyy autossa ja kopterissa, ei kävellessä; kopterissa 📻 on ▲▼🚶-painikkeiden yläpuolella, bottom 232 px). Ei testattu selaimessa.
+- 19.11 klo 18.15 (omistaja): Radio Porikopterin järjestys on nyt **spiikki, mainos, spiikki, mainos, tunnus + kappale**, ja sama alusta. 23 spiikkiä käydään
+  järjestyksessä kerran, 17 mainosta kiertää (6 kuullaan kahdesti), pop_1..3 vuorotellen: 66 riviä, 44,8 min. Vain radio.json ja speak.py muuttuivat.
