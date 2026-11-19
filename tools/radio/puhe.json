@@ -117,6 +117,126 @@
   },
   {
    "k": "t",
+   "id": "kirjurinluoto",
+   "t": "Puistosaari keskellä kaupunkia",
+   "s": "Aivan Porin keskustan vastapäätä, joen toisella puolella, on Kirjurinluoto. Se on puistosaari, jonne kävellään siltaa pitkin muutamassa minuutissa. Siellä on nurmikenttiä, vanhoja puita, uimaranta ja lasten oma Pelle Hermannin puisto. Kesällä siellä pidetään konsertteja, ja talvella siellä hiihdetään. Harvassa kaupungissa on näin iso puisto näin lähellä toria."
+  },
+  {
+   "k": "m",
+   "id": "lokkivakuutus",
+   "t": "Mainos: Lokkivakuutus",
+   "s": "Veikö lokki taas torilla lihapiirakkasi? Lokkivakuutus korvaa! Otamme vastaan vahinkoilmoitukset jäätelöistä, munkeista ja ranskalaisista. Omavastuu on yksi haukkaus. Lokkivakuutus – koska lokki ei kysy lupaa."
+  },
+  {
+   "k": "t",
+   "id": "assat",
+   "t": "Punamusta pata",
+   "s": "Kun Porissa puhutaan jääkiekosta, puhutaan Ässistä. Porin Ässät perustettiin vuonna tuhatyhdeksänsataakuusikymmentäseitsemän, kun kaksi porilaista seuraa yhdistyi. Paita on punamusta, ja rinnassa on pata. Kotiottelut pelataan Isomäessä, ja kun siellä tehdään maali, se kuuluu kauas. Porilainen kannattaja on uskollinen: hyvänä vuonna juhlitaan, ja huonona vuonna sanotaan, että ens vuan sit."
+  },
+  {
+   "k": "m",
+   "id": "vastatuuli",
+   "t": "Mainos: Parturi-Kampaamo Vastatuuli",
+   "s": "Onko tukka sekaisin merituulesta? Parturi-Kampaamo Vastatuuli leikkaa mallin, joka kestää Yyterin puhurit ja kopterin roottorin. Tarjoamme kolme tyyliä: myötätuuli, sivutuuli ja täysi myrsky. Parturi-Kampaamo Vastatuuli – tukka hyvin, vaikka tuulis."
+  },
+  {
+   "k": "t",
+   "id": "raatihuone",
+   "t": "Raatihuone joen rannalla",
+   "s": "Etelärannassa, joen partaalla, seisoo Porin vanha Raatihuone. Sen suunnitteli arkkitehti Carl Ludvig Engel, sama mies, joka piirsi Helsingin Senaatintorin rakennukset. Raatihuone valmistui vuonna tuhatkahdeksansataakolmekymmentäyksi, ja se säästyi suuressa palossa parikymmentä vuotta myöhemmin. Siksi se on yksi keskustan vanhimmista taloista. Sen vieressä alkaa Kivi-Pori, palon jälkeen rakennettujen kivitalojen rivi."
+  },
+  {
+   "k": "m",
+   "id": "hiekkalinna",
+   "t": "Mainos: Hiekkalinna-Kiinteistöt",
+   "s": "Haaveiletko omasta linnasta meren rannalla? Hiekkalinna-Kiinteistöt välittää Yyterin parhaat hiekkalinnat! Tarjolla yksiöitä, kaksioita ja torneja vallihaudalla. Huomioithan, että kohteet ovat tarjolla vain seuraavaan nousuveteen asti. Hiekkalinna-Kiinteistöt – koti, joka on rakennettu hiekalle."
+  },
+  {
+   "k": "t",
+   "id": "marssi",
+   "t": "Porilaisten marssi",
+   "s": "Porin nimi soi koko maassa aina, kun soitetaan Porilaisten marssi. Se on Suomen puolustusvoimien kunniamarssi, ja se kuullaan juhlavissa tilaisuuksissa. Sanat siihen kirjoitti Johan Ludvig Runeberg, ja ne löytyvät Vänrikki Stoolin tarinoista. Marssi on reipas ja ylväs. Jos se alkaa soida, kun ajat torin ohi, saat luvan suoristaa selkäsi."
+  },
+  {
+   "k": "m",
+   "id": "yksisuuntainen",
+   "t": "Mainos: Navigaattoriliike Yksisuuntainen",
+   "s": "Ajoitko taas korttelin ympäri kolme kertaa? Navigaattoriliike Yksisuuntainen myy laitteen, joka tuntee Porin keskustan jokaisen yksisuuntaisen kadun. Laite sanoo rauhallisesti: käänny, ei sinne, vaan sinne. Kaupan päälle kärsivällisyyttä. Navigaattoriliike Yksisuuntainen – perille pääsee, kun tietää suunnan."
+  },
+  {
+   "k": "t",
+   "id": "suisto",
+   "t": "Joki kohtaa meren",
+   "s": "Kokemäenjoki laskee mereen Porin kohdalla, ja sen suisto on yksi Pohjoismaiden laajimmista. Maa kohoaa täällä joka vuosi muutaman millimetrin, joten suisto kasvaa koko ajan merelle päin. Matalat lahdet ja ruovikot ovat lintujen paratiisi. Keväällä ja syksyllä siellä lepää tuhansia muuttolintuja, ja lintutorneista niitä voi katsella kiikarilla."
+  },
+  {
+   "k": "m",
+   "id": "loylykopteri",
+   "t": "Mainos: Tilaussauna Löylykopteri",
+   "s": "Tylsät saunaillat? Tilaa Löylykopteri! Lämmitämme saunan, nostamme sen ilmaan ja heitämme löylyt Porin kattojen yllä. Vihdat kuuluvat hintaan, laskuvarjot eivät. No ei sentään, sauna pysyy maassa, mutta tunnelma on korkealla. Tilaussauna Löylykopteri – löylyä, joka nostaa."
+  },
+  {
+   "k": "t",
+   "id": "ilmailu",
+   "t": "Lentäjien kaupunki",
+   "s": "Tiesitkö, että Porissa koulutetaan oikeita lentäjiä? Porin lentoasemalla toimii Suomen Ilmailuopisto, jossa opiskellaan liikennelentäjiksi. Harjoituskoneita näkee usein kaupungin taivaalla. Kun siis lennät kopterilla keskustan yllä, olet hyvässä seurassa. Muista kuitenkin, että oikeat lentäjät eivät laskeudu torille."
+  },
+  {
+   "k": "m",
+   "id": "ketjut",
+   "t": "Mainos: Pyörähuolto Ketjut Kireellä",
+   "s": "Natiseeko pyörä, ja vinkuvatko jarrut? Pyörähuolto Ketjut Kireellä rasvaa, kiristää ja oikoo. Korjaamme myös vanteet, jotka ovat tutustuneet raitiovaunukiskoon, vaikka Porissa ei ole raitiovaunuja. Emme kysy, miten se tapahtui. Pyörähuolto Ketjut Kireellä – me ei hermoilla, me huolletaan."
+  },
+  {
+   "k": "t",
+   "id": "tori",
+   "t": "Torilla tavataan",
+   "s": "Porin kauppatori on kaupungin olohuone. Aamulla siellä juodaan torikahvit ja ostetaan perunat, marjat ja kukat. Torin laidalla on kauppahalli, josta saa kalaa, leipää ja lämpimän lounaan. Kesällä tori on täynnä kojuja, ja talvella sinne nostetaan joulukuusi. Jos et tiedä, missä porilainen kaverisi on, katso ensin torilta."
+  },
+  {
+   "k": "m",
+   "id": "patjapori",
+   "t": "Mainos: Patja-Pori",
+   "s": "Nukutko huonosti? Patja-Porista löydät patjan, joka on pehmeä kuin Yyterin dyyni, mutta ilman hiekkaa. Kokeile rauhassa, meillä saa nukahtaa myymälään. Herätämme sinut ennen sulkemisaikaa. Patja-Pori – hyvää yötä, ja huomenta."
+  },
+  {
+   "k": "t",
+   "id": "saa",
+   "t": "Kopterisää",
+   "s": "Ja sitten Radio Porikopterin sää. Porissa tuulee tänään lännestä, kuten melkein aina. Joen yllä näkyvyys on hyvä, ja torin yllä lentää lokkeja kohtalaisesti. Iltapäivällä on odotettavissa auringonpaistetta tai sadetta, mahdollisesti molempia. Kopterilentäjille suosittelemme rauhallista nousua, ja autoilijoille tuulilasinpyyhkijöitä varmuuden vuoksi."
+  },
+  {
+   "k": "m",
+   "id": "karhunkammen",
+   "t": "Mainos: Kuntosali Karhunkämmen",
+   "s": "Haluatko olla vahva kuin Porin karhu? Kuntosali Karhunkämmen tekee sinusta sellaisen! Nosta painoja, vedä leukoja ja murise peilille. Ensimmäinen murina on ilmainen. Kuntosali Karhunkämmen – täällä ei nukuta talviunta."
+  },
+  {
+   "k": "t",
+   "id": "muistilista",
+   "t": "Lentäjän muistilista",
+   "s": "Ja nyt lentäjän muistilista. Yksi: tarkista, että roottori pyörii, ennen kuin nouset. Kaksi: katso, missä Porin sillat ovat, ja lennä niiden yli, älä ali. Kolme: kirkon torni on korkeampi kuin miltä se näyttää. Neljä: laskeudu pehmeästi, sillä tori on kovaa kiveä. Ja viisi: jos eksyt, seuraa jokea. Se vie aina merelle."
+  },
+  {
+   "k": "m",
+   "id": "mutteri",
+   "t": "Mainos: Rautakauppa Mutteri ja Mää",
+   "s": "Puuttuuko ruuvi? Rautakauppa Mutteri ja Mää myy ruuvit, mutterit ja prikat, yksitellen tai ämpärillä. Me kysytään aina, mitä sää oot tekemässä, ja kerrotaan sitten, miten se oikeesti kannattaa tehdä. Neuvo on ilmainen, ja se tulee joka tapauksessa. Rautakauppa Mutteri ja Mää – kyl me tiedetään."
+  },
+  {
+   "k": "t",
+   "id": "jokiranta",
+   "t": "Iltakävely joen rannassa",
+   "s": "Kesäiltana porilainen lähtee joen rantaan. Etelärannassa kävellään vanhojen kivitalojen ohi, ja vastarannalla näkyvät Kirjurinluodon puut. Sillalta voi katsoa, kuinka vesi virtaa hitaasti kohti merta, ja kalastajat seisovat rannalla vavat kädessä. Mitään erityistä ei tarvitse tehdä. Riittää, että ollaan."
+  },
+  {
+   "k": "m",
+   "id": "sininennuotti",
+   "t": "Mainos: Soitinliike Sininen Nuotti",
+   "s": "Aiotko soittaa ensi kesänä jazzia Kirjurinluodossa? Aloita ajoissa! Soitinliike Sininen Nuotti myy saksofonit, rummut ja kontrabassot, ja naapureille korvatulpat. Opetamme myös, miten sanotaan uskottavasti: tää on improvisaatiota. Soitinliike Sininen Nuotti – väärää nuottia ei ole, on vain rohkea."
+  },
+  {
+   "k": "t",
    "id": "loppu",
    "t": "Puhekanava – kiitos",
    "s": "Kiitos, että kuuntelit Radio Porikopterin puhekanavaa. Jos haluat musiikkia, vaihda kanavaa ärrä-näppäimellä. Me jatketaan täällä Porin tarinoilla hetken päästä uudelleen."

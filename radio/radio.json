@@ -212,6 +212,131 @@
    "t": "Liikennetiedote"
   },
   {
+   "f": "puhe_kirjurinluoto.mp3",
+   "d": 27.19,
+   "t": "Puistosaari keskellä kaupunkia"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "puhe_lokkivakuutus.mp3",
+   "d": 19.49,
+   "t": "Mainos: Lokkivakuutus"
+  },
+  {
+   "f": "puhe_assat.mp3",
+   "d": 30.96,
+   "t": "Punamusta pata"
+  },
+  {
+   "f": "puhe_vastatuuli.mp3",
+   "d": 21.42,
+   "t": "Mainos: Parturi-Kampaamo Vastatuuli"
+  },
+  {
+   "f": "puhe_raatihuone.mp3",
+   "d": 32.13,
+   "t": "Raatihuone joen rannalla"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "puhe_hiekkalinna.mp3",
+   "d": 25.63,
+   "t": "Mainos: Hiekkalinna-Kiinteistöt"
+  },
+  {
+   "f": "puhe_marssi.mp3",
+   "d": 27.17,
+   "t": "Porilaisten marssi"
+  },
+  {
+   "f": "puhe_yksisuuntainen.mp3",
+   "d": 27.27,
+   "t": "Mainos: Navigaattoriliike Yksisuuntainen"
+  },
+  {
+   "f": "puhe_suisto.mp3",
+   "d": 26.44,
+   "t": "Joki kohtaa meren"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "puhe_loylykopteri.mp3",
+   "d": 23.17,
+   "t": "Mainos: Tilaussauna Löylykopteri"
+  },
+  {
+   "f": "puhe_ilmailu.mp3",
+   "d": 26.2,
+   "t": "Lentäjien kaupunki"
+  },
+  {
+   "f": "puhe_ketjut.mp3",
+   "d": 25.7,
+   "t": "Mainos: Pyörähuolto Ketjut Kireellä"
+  },
+  {
+   "f": "puhe_tori.mp3",
+   "d": 26.49,
+   "t": "Torilla tavataan"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "puhe_patjapori.mp3",
+   "d": 20.79,
+   "t": "Mainos: Patja-Pori"
+  },
+  {
+   "f": "puhe_saa.mp3",
+   "d": 28.32,
+   "t": "Kopterisää"
+  },
+  {
+   "f": "puhe_karhunkammen.mp3",
+   "d": 19.04,
+   "t": "Mainos: Kuntosali Karhunkämmen"
+  },
+  {
+   "f": "puhe_muistilista.mp3",
+   "d": 30.12,
+   "t": "Lentäjän muistilista"
+  },
+  {
+   "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "puhe_mutteri.mp3",
+   "d": 25.0,
+   "t": "Mainos: Rautakauppa Mutteri ja Mää"
+  },
+  {
+   "f": "puhe_jokiranta.mp3",
+   "d": 25.44,
+   "t": "Iltakävely joen rannassa"
+  },
+  {
+   "f": "puhe_sininennuotti.mp3",
+   "d": 26.33,
+   "t": "Mainos: Soitinliike Sininen Nuotti"
+  },
+  {
    "f": "puhe_loppu.mp3",
    "d": 13.92,
    "t": "Puhekanava – kiitos"

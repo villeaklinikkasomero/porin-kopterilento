@@ -936,3 +936,10 @@ Testi: `python3 -m http.server 8765` + playwright (`/opt/npm-tools/node_modules/
 - Rakenne luettu kuvista (jalkipeli.net ym. kuvahaun kautta), kuvia ei tallennettu. Kryptaan ei pääse kävellen (näkyy aukosta); eteinen puuttuu.
 - Testattu pilvessä: ovelle, sisään, ulos, sen jälkeen kirkkoon sisään (vain oikea ryhmä näkyvissä). Kuvat `Claude outputs/mausoleumi_sisa_19_11/`.
 - Ei Modal-polttoa. Pushattavat: index.html, mausoleumi_sisa.js, blender/mausoleumi_sisa.py, blender/kirkko_sisa.py, tools/sisa_to_js.py (+ aiemmat hahmo.js, kirkko_sisa.js).
+
+### 19.11 klo 12: puhekanavaan 20 uutta osaa
+- `tools/radio/puhe.json`: +10 Pori-puhetta (kirjurinluoto, assat, raatihuone, marssi, suisto, ilmailu, tori, saa, muistilista, jokiranta) ja
+  +10 keksityn yrityksen mainosta (lokkivakuutus, vastatuuli, hiekkalinna, yksisuuntainen, loylykopteri, ketjut, patjapori, karhunkammen, mutteri,
+  sininennuotti). Yhteensä 40 osaa, silmukka 17,1 min. Uudet radio/puhe_*.mp3 (4,5 Mt) ja radio.json viety käyttäjän kansioon; ei kuunneltu pilvessä.
+- `tools/radio/speak.py` tekee nyt vain osat, joita ei ole radio.jsonin "puhe"-listassa (`--all` tekee kaikki). Malli haetaan koneelta stagella
+  (`radio/voice/fi_FI-harri-medium.onnx`, 63 Mt), `pip install "piper-tts>=1.5"`.

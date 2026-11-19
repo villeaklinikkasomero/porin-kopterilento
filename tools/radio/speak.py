@@ -1,5 +1,6 @@
 """Radio Porikopterin puhekanava: puhe.json -> radio/puhe_*.mp3 + radio.json-kanava "puhe".
-usage: python3 tools/radio/speak.py tools/radio/voice/fi_FI-harri-medium.onnx radio/
+usage: python3 tools/radio/speak.py radio/voice/fi_FI-harri-medium.onnx radio/ [--all]
+Jo radio.jsonin "puhe"-listassa olevia osia ei tehdä uudelleen (kesto luetaan sieltä); --all tekee kaikki. Jos muutat vanhan osan tekstiä, käytä --all tai vaihda id.
 Ääni: Piper (MIT), malli fi_FI-harri-medium (MIT, aineisto CC0). pip install "piper-tts>=1.5"; ffmpeg.
 Mainoksiin kevyt taustamusiikki radio/pop_*.mp3:sta (oma sävellys), puheisiin ei taustaa."""
 import json, os, subprocess, sys, wave
@@ -14,8 +15,12 @@ tmp = '/tmp/puhe'; os.makedirs(tmp, exist_ok=True)
 
 def dur(f): return float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]))
 
+rj = os.path.join(out, 'radio.json'); R = json.load(open(rj))
+old = {} if '--all' in sys.argv else {x['f']: x['d'] for x in R.get('puhe', [])}
 beds = ['pop_1.mp3', 'pop_2.mp3', 'pop_3.mp3']; nb = 0
 for s in P['seg']:
+    if f"puhe_{s['id']}.mp3" in old:
+        s['d'] = old[f"puhe_{s['id']}.mp3"]; nb += s['k'] == 'm'; continue
     w = f"{tmp}/{s['id']}.wav"
     with wave.open(w, 'wb') as wf: v.synthesize_wav(s['s'], wf, syn_config=cfg)
     mp = os.path.join(out, f"puhe_{s['id']}.mp3")
@@ -32,5 +37,5 @@ L = []
 for n, s in enumerate(P['seg']):
     L.append({'f': f"puhe_{s['id']}.mp3", 'd': s['d'], 't': s['t']})
     if n % 4 == 3: L.append({'f': 'jingle_1.mp3', 'd': 3.71, 't': 'Radio Porikopteri'})
-rj = os.path.join(out, 'radio.json'); R = json.load(open(rj)); R['puhe'] = L
+R['puhe'] = L
 open(rj, 'w').write(json.dumps(R, ensure_ascii=False, indent=1)); print('yht', round(sum(x['d'] for x in L) / 60, 1), 'min')
