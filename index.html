@@ -95,6 +95,11 @@
   #touch { display:none; }
   .touch #touch { display:block; }
   .touch #help { display:none; }
+  body.walk .heli-only, body.walk .car-only { display:none !important; } body:not(.walk) .walk-only { display:none !important; }
+  #hint { left:50%; top:31%; transform:translateX(-50%); font-size:18px; font-weight:700; padding:9px 18px; opacity:0; transition:opacity .25s; text-align:center; white-space:nowrap; }
+  #hint.on { opacity:1; } #hint kbd { font:700 15px ui-monospace, Menlo, Consolas, monospace; border:1px solid var(--line); border-radius:4px; padding:1px 7px; background:rgba(255,255,255,.1); }
+  #fade { position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; transition:opacity .22s; z-index:5; } #fade.on { opacity:1; }
+  #tact { bottom:162px; font-size:26px; } body.walk #tact { bottom:22px; } #trun { bottom:92px; }
   .touch #gauges { bottom:auto; top:118px; left:14px; gap:12px; padding:8px 10px; }
   .touch .g .v { font-size:19px; }
   .touch #street { bottom:150px; }
@@ -127,23 +132,24 @@
 <div id="street" class="hud"><div class="s" id="sn"></div><div class="p" id="sp"></div></div>
 <div id="nav" class="hud panel"><canvas id="navc" width="116" height="116"></canvas><div><div class="nd" id="navd"></div><div class="nn" id="navn"></div></div></div>
 <div id="toast" class="hud panel"></div>
+<div id="hint" class="hud panel"></div><div id="fade"></div>
 <div id="radio" class="hud panel car-only"><span id="rch">📻 Radio pois</span><span id="rsong"></span></div>
 <div id="board" class="hud panel"><h2>Päivän top-10</h2><div class="sub" id="bsub"></div><div id="nickrow" style="display:none;margin:10px 0 4px"><label for="nick">Pääsit listalle! Nimimerkki</label><input id="nick" maxlength="5" autocomplete="off" spellcheck="false" placeholder="5 merkkiä"><button id="nicksave" >Tallenna</button><span style="font-size:12px;width:100%">Älä käytä oikeaa nimeäsi.</span></div><ol class="top" id="top1"></ol><div class="topnote" id="note1"></div></div>
 <div id="help" class="hud panel">
   <span class="heli-only"><kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
-  <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · </span><span class="car-only"><kbd>W</kbd> kaasu · <kbd>S</kbd> jarru/peruutus · <kbd>A</kbd><kbd>D</kbd> ohjaus · <kbd>Väli</kbd> käsijarru · <kbd>R</kbd> radio<br></span><kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
+  <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>Enter</kbd> nouse ulos<br></span><span class="car-only"><kbd>W</kbd> kaasu · <kbd>S</kbd> jarru/peruutus · <kbd>A</kbd><kbd>D</kbd> ohjaus · <kbd>Väli</kbd> käsijarru · <kbd>R</kbd> radio · <kbd>Enter</kbd> nouse ulos<br></span><span class="walk-only"><kbd>W</kbd><kbd>S</kbd> kävele · <kbd>A</kbd><kbd>D</kbd> käänny · <kbd>Q</kbd><kbd>E</kbd> sivuaskel · <kbd>Shift</kbd> juokse<br><kbd>Enter</kbd> kyytiin / ovesta · </span><kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
 </div>
 <div id="credit">Ilmakuva © Maanmittauslaitos, ortokuva 2025 (CC BY 4.0) · Kartta-aineisto © OpenStreetMapin tekijät · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0) · valokuvat © Porin kaupunki</div>
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
-  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb car-only" id="tradio">📻</div>
+  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb car-only" id="tradio">📻</div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta">🚶</div><div class="tb walk-only" id="trun" aria-label="Juokse">🏃</div>
 </div>
 
 <div id="start">
   <div id="card" class="panel">
     <h1>Pori<span>kopteri</span></h1>
-    <p>Lennä helikopterilla tai aja autolla Porin keskustassa. Joka päivä arvotaan uusi kierros: lähde Kauppatorilta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja palaa torille. Nopeimmat ajat pääsevät päivän top-10:een – kopterille ja autolle on omat listansa.</p>
+    <p>Lennä helikopterilla tai aja autolla Porin keskustassa. Joka päivä arvotaan uusi kierros: lähde Kauppatorilta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja palaa torille. Voit myös nousta ulos ja kävellä: Keski-Porin kirkkoon pääsee sisälle tornin ovesta. Nopeimmat ajat pääsevät päivän top-10:een – kopterille ja autolle on omat listansa.</p>
     <div id="vehs" role="group" aria-label="Valitse kulkuneuvo">
       <button class="veh" id="vheli" aria-pressed="true"><video poster="./veh_heli.jpg" autoplay muted loop playsinline><source src="./veh_heli.webm" type="video/webm"><source src="./veh_heli.mp4" type="video/mp4"></video><span>Helikopteri</span></button>
       <button class="veh" id="vcar" aria-pressed="false"><video poster="./veh_auto.jpg" autoplay muted loop playsinline><source src="./veh_auto.webm" type="video/webm"><source src="./veh_auto.mp4" type="video/mp4"></video><span>Auto</span></button>
@@ -153,6 +159,7 @@
       <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>käännä</div>
       <div><kbd>Q</kbd> <kbd>E</kbd></div><div>liu'u sivulle</div>
       <div><kbd>Väli</kbd> / <kbd>Shift</kbd></div><div>ylös ja alas</div>
+      <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään (maassa) ja takaisin kyytiin</div>
       <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
     </div>
     <div id="keys2" class="car-only" style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0;font-size:14px;align-items:center">
@@ -161,6 +168,7 @@
       <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>ohjaus</div>
       <div><kbd>Väli</kbd></div><div>käsijarru</div>
       <div><kbd>R</kbd></div><div>autoradio: Pop, Electric, Rock, Puhe, pois</div>
+      <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään ja takaisin kyytiin</div>
       <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
     </div>
     <div id="daily">
@@ -465,7 +473,7 @@ function hrUpdate(x, y) {
 const PAL = [0xe9dcc0, 0xd9c7a2, 0xf0ead9, 0xcdb593, 0xb9805e, 0xa8563f, 0xd8d5cc, 0xbfc4c6, 0xe6cf9a, 0xc7a988, 0x9aa3a8, 0xe3d6c4, 0xb46a4c, 0xdcd0b8];
 const blds = [];           // {pts:[[x,y]..], h, minx,maxx,miny,maxy}
 const LMAT = { kirkko: [293.4, 369.7], raati: [-115.6, 394.1], kaupungintalo: [-57.7, 331.2], teatteri: [-201, 378], taidemuseo: [-94.8, 462.6], kauppahalli: [150, -32.8], vesitorni: [-835, -135], puuvilla: [230, 1000], promenadi: [9.2, -238.7], bepop: [58.3, -382.3], kirjasto: [-258, 114], museo: [-264.8, 455.9], tehdas: [160.2, 763.6], kehraamo: [85, 834], tori: [31, 81], lava: [90, 61], lokki: [-389, 998], isokarhu: [120.9, -179.4], mausoleumi: [-1946, 198.1], areena: [-1615.1, -1391.6], isokappeli: [-1809.2, 141.6], pienikappeli: [-2008.2, 191.1], harjoitushalli: [-1614.9, -1120.8], asema: [-443.0, -954.0], samk: [-268.0, -992.0], cygnaeus: [-321.0, -491.0] };
-const LMB = {};
+const LMB = {}, CHURCH = {};
 const GRID = 40, grid = new Map();
 const gkey = (i, j) => i * 4096 + j;
 const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: THREE.DoubleSide });
@@ -495,7 +503,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const SB = STY.map(() => ({ p: [], n: [], u: [], c: [] }));
   // photo facades from Porin kaupunki street photos: one bay-wide strip from street to eave per building (photos/build_ph.py)
   // building index -> styles; 'west' picks the second style for walls west of that x (one footprint, two facades)
-  let PHS = { 603: [{ t: 'ph_603', bw: 10.16 }], 604: [{ t: 'ph_604y', bw: 4.81 }, { t: 'ph_604b', bw: 4.59, cut: 10.4 }], 1726: [{ t: 'ph_1726', bw: 8.12 }], 1599: [{ t: 'ph_1599', bw: 12.11 }], 602: [{ t: 'ph_602', bw: 2.23, g: 0.224, n: 5, wide: 4, shop: 3 }] };   // g, n: the photo shows the ground floor (share g of its height) and n upper storeys; wide, shop: the strip is laid out 'wide' bays side by side and its ground floor redrawn as 'shop' wide shop windows between piers
+  let PHS = { 603: [{ t: 'ph_603', bw: 10.16 }], 604: [{ t: 'ph_604y', bw: 4.81 }, { t: 'ph_604b', bw: 4.59, cut: 10.4 }], 1726: [{ t: 'ph_1726', bw: 8.12 }, { t: 'ph_1726g', bw: 12.59, cut: -17.612 }], 1599: [{ t: 'ph_1599', bw: 12.11 }], 602: [{ t: 'ph_602', bw: 2.23, g: 0.224, n: 5, wide: 4, shop: 3 }] };   // g, n: the photo shows the ground floor (share g of its height) and n upper storeys; wide, shop: the strip is laid out 'wide' bays side by side and its ground floor redrawn as 'shop' wide shop windows between piers
   Object.assign(PHS, PHSJ);
   const PB = {};
   const hsh = (i, k) => { let x = (i * 2654435761 + k * 40503) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
@@ -597,6 +605,12 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
             if (u >= 0) B.u.push(u / (S.bw * (S.wide || 1)), Math.min(0.995, z / (S === S0 ? Ev : E))); else B.u.push(0.5, 0.997);
             const ao = 0.8 + 0.2 * Math.min(1, z / 3); B.c.push(ao, ao, ao); } }
       }
+      if (bIdx === 1726 && PB.ph_1726g) {   // Antinkatu gable (SV 19.11.2026): the tiled end wall is 12.2 m wide, the scanned shell 11.1 m, which left a slot against Antinkatu 10 (1725). A thin end-wall fin continues the gable plane 1.42 m north; ph_1726g.jpg (tools/rautalanka/facades/f1726.py) is drawn 12.59 m wide for it
+        const Bq = PB.ph_1726g, g0 = [17.2, 152.8], g1 = [17.52, 154.18], h0 = [17.59, 152.71], h1 = [17.91, 154.09];
+        const fq = (a, b, ua, ub) => { const nx = b[1] - a[1], ny = a[0] - b[0], nl = Math.hypot(nx, ny);
+          for (const [q, z, u] of [[a, 0, ua], [b, 0, ub], [b, E, ub], [a, 0, ua], [b, E, ub], [a, E, ua]]) { Bq.p.push(q[0], z, -q[1]); Bq.n.push(nx / nl, 0, -ny / nl); Bq.u.push(u / Bq.s.bw, Math.min(0.995, z / E)); const ao = 0.8 + 0.2 * Math.min(1, z / 3); Bq.c.push(ao, ao, ao); } };
+        fq(g1, g0, -1.42, 0); fq(h1, g1, 6.4, 6.8); fq(h0, h1, 6.4, 7.8);
+        for (const q of [g0, h0, h1, g0, h1, g1]) { Bq.p.push(q[0], E, -q[1]); Bq.n.push(0, 1, 0); Bq.u.push(0.5, 0.997); Bq.c.push(1, 1, 1); } }
       const R = L2.r;
       for (let k = 0; k < R.length; k += 3) { const q = [(R[k] + ox) / 10, (R[k + 1] + oy) / 10]; RP.push(q[0], R[k + 2] / 10 + 0.03, -q[1]); const uv = ruv(q); RU.push(uv[0], uv[1]); }
       continue;
@@ -931,6 +945,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   if (LMB.kirkko) {
     const procStart = scene.children.length;
     const L = LMB.kirkko, pts = L.pts, o = obb(pts), g = frame(o), a = o.a, b = o.b, eave = 15, ridge = 27.5;
+    CHURCH.map = (lx, lz) => toMap(o, lx, lz);   // model-local (x along the nave towards the altar, z across) -> map metres
     const BR = 0x9a4a36, brick = lam(BR), slate = lam(0x79a892, DS), copper = lam(0x79a892, DS), iron = lam(0x2a3331, { flatShading: true }), pale = lam(0x8a4030);
     add(wallGeo(offset(pts, 0.2), 0, 1.4), STONE);
     add(wallGeo(pts, 1.4, eave, 5.6, 1), facade({ wall: '#9a4a36', trim: '#d8ccb6', brick: true, arch: true, course: false, win: [0.36, 0.14, 0.28, 0.7] }));
@@ -1788,7 +1803,7 @@ const fmtT = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart
 const fmtT1 = s => fmtT(s) + '.' + Math.floor(s * 10 % 10);
 
 function resetHeli() { Object.assign(S, { x: HOME.x, y: HOME.y, alt: SKID, vx: 0, vy: 0, vz: 0, yaw: 0, yawRate: 0, hp: 100, landed: true, dead: 0 }); heli.visible = true; }
-function newTour() { LB.show(false); tourIdx = 0; tourT = 0; tourOn = false; tourDone = false; NAV.route = null; NAV.tgt = null;
+function newTour() { walkReset(); LB.show(false); tourIdx = 0; tourT = 0; tourOn = false; tourDone = false; NAV.route = null; NAV.tgt = null;
   if (VEH === 'car') { heli.visible = false; resetCar(); } else { carG.visible = false; resetHeli(); }
   setTarget(); toast(VEH === 'car' ? 'Aja valopylvään luo – navigaattori näyttää käännökset' : 'Nouse ilmaan ja lennä valopylvääseen'); }
 function target() { return tourIdx < TOUR.length ? TOUR[tourIdx] : { n: VEH === 'car' ? 'Pysähdy Kauppatorille' : 'Laskeudu Kauppatorille', x: HOME.x, y: HOME.y, h: 0, land: true }; }
@@ -1827,9 +1842,10 @@ addEventListener('keydown', e => {
   if (e.repeat) return; keys.add(e.code);
   if (!started) { if (e.code === 'Enter' && !$('go').disabled) begin(); return; }
   if (e.code === 'KeyC') camMode = (camMode + 1) % 3;
+  if (e.code === 'Enter' || e.code === 'NumpadEnter' || (e.code === 'KeyF' && (WALK.on || VEH === 'car'))) walkAction();
   if (e.code === 'KeyT') LB.show(!LB.open);
   if (e.code === 'KeyM') toggleSound();
-  if (e.code === 'KeyR' && VEH === 'car') RADIO.next();
+  if (e.code === 'KeyR' && VEH === 'car' && !WALK.on) RADIO.next();
   if (e.code === 'KeyN') newTour();
 });
 addEventListener('keyup', e => keys.delete(e.code));
@@ -1878,8 +1894,10 @@ RADIO.show = () => { const n = RADIO.ch ? 'Radio ' + RADIO.names[RADIO.ch] : 'Ra
 RADIO.prev = () => { do { RADIO.ch = (RADIO.ch + RADIO.names.length - 1) % RADIO.names.length; } while (RADIO.ch && RADIO.list && !RADIO.list[RADIO.names[RADIO.ch].toLowerCase()]); RADIO.play(RADIO.ch); };
 for (const [id, f] of [['rprev', () => RADIO.prev()], ['rnext', () => RADIO.next()]]) $(id).addEventListener('click', e => { e.preventDefault(); e.currentTarget.blur(); if (VEH === 'car' && started) f(); });
 $('rvol').addEventListener('input', e => { RADIO.vol = +e.target.value; RADIO.mute(); }); $('rvol').addEventListener('change', e => e.target.blur());
-RADIO.mute = () => { if (RADIO.el) RADIO.el.volume = soundOn ? RADIO.vol : 0; };
+RADIO.mute = () => { if (RADIO.el) RADIO.el.volume = soundOn && !WALK.on ? RADIO.vol : 0; };
 $('tradio').addEventListener('pointerdown', e => { e.preventDefault(); if (VEH === 'car' && started) RADIO.next(); });
+$('tact').addEventListener('pointerdown', e => { e.preventDefault(); if (started) walkAction(); });
+{ const el = $('trun'); el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); touchIn.run = 1; el.classList.add('on'); }); const up = () => { touchIn.run = 0; el.classList.remove('on'); }; el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); }
 
 // ---------- sound ----------
 let actx = null, sGain = null, sFilt = null, sLfo = null, soundOn = true;
@@ -1902,6 +1920,7 @@ const DIRS = ['P', 'KO', 'I', 'KA', 'E', 'LO', 'L', 'LU'];
 function step(dt) {
   readInput();
   if (S.dead > 0) { S.dead -= dt; if (S.dead <= 0) (VEH === 'car' ? resetCar : resetHeli)(); return; }
+  if (WALK.on) { stepWalk(dt); return; }
   const live = started;
   if (VEH === 'car') {
     stepCar(dt, live);
@@ -1979,6 +1998,137 @@ function tourTick(dt) {
   }
 }
 
+
+// ---------- on foot (owner 19.11.2026): Enter steps out of the parked car or the landed helicopter; the player walks the streets and
+// goes into Keski-Porin kirkko through the tower door. The tour clock stops while on foot. Character: hahmo.js (Blender, MakeHuman base, CC0)
+// with Idle / Walk / Run clips. The church hall is its own scene (kirkko_sisa.js: blender/kirkko_sisa.py, light baked into a lightmap), drawn
+// in the model's local frame: x along the nave towards the altar, y across (left of the altar-facing visitor), floor at 0.
+const WALK = { on: false, x: 0, y: 0, z: 0, yaw: 0, v: 0, vs: 0, in: false, ix: 0, iy: 0, iyaw: 0, veh: null, busy: false }; window.__walk = WALK;
+const walkG = new THREE.Group(); walkG.userData.noT = true; walkG.visible = false; scene.add(walkG);
+const sceneIn = new THREE.Scene(); sceneIn.background = new THREE.Color(0x0b0a09);
+sceneIn.add(new THREE.HemisphereLight(0xfff0dc, 0x8a7458, 2.3)); { const d = new THREE.DirectionalLight(0xfff2e0, 0.8); d.position.set(-0.4, 1, 0.3); sceneIn.add(d); }   // only the player is lit; the hall is baked
+const blobIn = new THREE.Mesh(new THREE.CircleGeometry(0.42, 20).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ map: blob.material.map, transparent: true, depthWrite: false, opacity: 0.8 })); blobIn.renderOrder = 5; sceneIn.add(blobIn);
+const IN = { ready: false, loading: false, meta: null };
+let walkMix = null, walkCur = '', walkLoading = false; const walkAct = {};
+function loadWalker() { if (walkLoading) return; walkLoading = true;
+  import('./hahmo.js').then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    new GLTFLoader().parse(buf.buffer, '', gl => { const root = gl.scene; root.rotation.y = Math.PI;   // glTF faces +z, the game frame -z
+      root.traverse(q => { q.userData.noT = true; if (q.isMesh) { q.frustumCulled = false; q.material.userData.noT = true; if (q.material.map) q.material.map.anisotropy = 4; } });
+      walkG.add(root); walkMix = new THREE.AnimationMixer(root); for (const c of gl.animations) walkAct[c.name] = walkMix.clipAction(c);
+      if (walkAct.Idle) { walkAct.Idle.play(); walkCur = 'Idle'; } window.__walker = root; }, () => {}); }).catch(() => { walkLoading = false; }); }
+function loadInterior() { if (IN.loading) return; IN.loading = true;
+  import('./kirkko_sisa.js').then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    const lm = new THREE.TextureLoader().load(K.lm); lm.flipY = false; lm.colorSpace = THREE.SRGBColorSpace; lm.channel = 1;
+    new GLTFLoader().parse(buf.buffer, '', gl => {
+      gl.scene.traverse(q => { if (!q.isMesh) return; const map = q.material.map, glow = /^glow_/.test(q.material.name); if (map) map.anisotropy = 8;
+        q.material = new THREE.MeshBasicMaterial({ map, side: THREE.DoubleSide }); if (!glow) { q.material.lightMap = lm; q.material.lightMapIntensity = Math.PI * K.meta.lmax; } });
+      sceneIn.add(gl.scene); IN.meta = K.meta; IN.ready = true; }, () => {}); }).catch(() => { IN.loading = false; }); }
+// the tower door in map metres, and the heading out of it
+const churchDoor = () => { if (!CHURCH.map) return null;
+  if (!CHURCH.door) { let a = CHURCH.map(-34.4, 0); const b = CHURCH.map(-30, 0); for (let lx = -34.0; lx > -42; lx -= 0.3) { a = CHURCH.map(lx, 0); if (walkFree(a[0], a[1])) { a = CHURCH.map(lx - 0.5, 0); break; } }   // first free spot in front of the door
+    CHURCH.door = { x: a[0], y: a[1], out: Math.atan2(a[0] - b[0], a[1] - b[1]) }; } return CHURCH.door; };
+function walkFree(x, y) {
+  const g = carGround(x, y); if (g === null) return false; const tb = Math.max(TZs(x, y), TZg(x, y));
+  if (onPorinsilta(x, y) !== null) return true;
+  for (const [dx, dy] of [[0.3, 0], [-0.3, 0], [0, 0.3], [0, -0.3]]) if (bldTopAt(x + dx, y + dy) > tb + 0.7) return false;
+  return true;
+}
+function walkExit() {
+  if (VEH === 'car' ? Math.abs(CAR.v) > 1.5 : !S.landed) { toast(VEH === 'car' ? 'Pysäytä auto ensin' : 'Laskeudu ensin maahan', 1.6); return; }
+  if (VEH !== 'car' && bldTopAt(S.x, S.y) > TZs(S.x, S.y) + 1.5) { toast('Katolta ei pääse kävellen alas – laskeudu maahan', 2); return; }
+  const sn = Math.sin(S.yaw), cs = Math.cos(S.yaw), w = VEH === 'car' ? 1.55 : 2.3; let spot = null;
+  for (const [f, r] of [[0.2, -w], [0.2, w], [-1.2, -w], [-1.2, w], [-3.6, 0], [3.6, 0], [1.5, -w - 1], [1.5, w + 1]]) { const x = S.x + sn * f + cs * r, y = S.y + cs * f - sn * r; if (walkFree(x, y)) { spot = [x, y]; break; } }
+  if (!spot) { toast('Tässä ei mahdu nousemaan ulos', 1.6); return; }
+  if (VEH === 'car') CAR.v = 0;
+  Object.assign(WALK, { on: true, in: false, x: spot[0], y: spot[1], z: carGround(spot[0], spot[1]), yaw: S.yaw, v: 0, vs: 0, veh: { x: S.x, y: S.y, alt: S.alt, yaw: S.yaw } });
+  document.body.classList.add('walk'); scene.add(walkG); walkG.visible = true; loadWalker(); RADIO.mute();
+  camera.near = 0.25; camera.updateProjectionMatrix(); if (camMode === 2) camMode = 0;
+  toast('Jalan – Enter vie takaisin kyytiin', 2.2);
+}
+function walkBoard() {
+  const v = WALK.veh; WALK.on = false; WALK.in = false; walkG.visible = false; document.body.classList.remove('walk'); $('hint').classList.remove('on');
+  if (v) Object.assign(S, { x: v.x, y: v.y, alt: v.alt, yaw: v.yaw, vx: 0, vy: 0, vz: 0, landed: true });
+  camera.near = 1; camera.updateProjectionMatrix(); RADIO.mute(); blob.rotation.y = 0; blob.scale.setScalar(1);
+}
+function walkReset() { if (WALK.on) { scene.add(walkG); walkBoard(); } }
+function fadeDo(fn) { if (WALK.busy) return; WALK.busy = true; $('fade').classList.add('on'); setTimeout(() => { fn(); $('fade').classList.remove('on'); WALK.busy = false; }, 240); }
+function walkNear() {   // what Enter would do here: 'in' (church door), 'out' (leave the church), 'veh' (board), or ''
+  if (WALK.in) { const M = IN.meta; return WALK.ix < M.exit[0] + 1.6 && Math.abs(WALK.iy) < M.exit[1] + 0.6 ? 'out' : ''; }
+  const d = churchDoor(); if (d && Math.hypot(WALK.x - d.x, WALK.y - d.y) < 4.2) return 'in';
+  const v = WALK.veh; return v && Math.hypot(WALK.x - v.x, WALK.y - v.y) < (VEH === 'car' ? 4.2 : 6) ? 'veh' : '';
+}
+function walkAction() {
+  if (!started || S.dead > 0 || WALK.busy) return;
+  if (!WALK.on) { walkExit(); return; }
+  const k = walkNear();
+  if (k === 'veh') walkBoard();
+  else if (k === 'in') { if (!IN.ready) { loadInterior(); toast('Kirkon sisätila latautuu…', 1.5); return; }
+    fadeDo(() => { const M = IN.meta; WALK.in = true; WALK.ix = M.spawn[0]; WALK.iy = M.spawn[1]; WALK.iyaw = Math.PI / 2; WALK.z = 0; WALK.v = 0; sceneIn.add(walkG);
+      camPos.set(WALK.ix - 2.5, 2, 0); camLook.set(WALK.ix + 3, 1.5, 0); camera.near = 0.12; camera.updateProjectionMatrix(); toast('Keski-Porin kirkko', 2.2); }); }
+  else if (k === 'out') fadeDo(() => { const d = churchDoor(); WALK.in = false; WALK.x = d.x; WALK.y = d.y; WALK.yaw = d.out; WALK.v = 0; WALK.z = carGround(d.x, d.y) || 0; scene.add(walkG);
+      camPos.set(WALK.x - Math.sin(d.out) * 3, WALK.z + 2, -WALK.y + Math.cos(d.out) * 3); camera.near = 0.25; camera.updateProjectionMatrix(); });
+  else toast(VEH === 'car' ? 'Auto on liian kaukana' : 'Kopteri on liian kaukana', 1.4);
+}
+function walkCollide(p) {   // push the player's circle out of the hall's walls, columns, pews and rails
+  const C = IN.meta.col, R = 0.32;
+  for (let it = 0; it < 2; it++) {
+    for (const g of C.seg) { const dx = g[2] - g[0], dy = g[3] - g[1], t = Math.max(0, Math.min(1, ((p.x - g[0]) * dx + (p.y - g[1]) * dy) / (dx * dx + dy * dy || 1)));
+      let ex = p.x - g[0] - dx * t, ey = p.y - g[1] - dy * t; const d = Math.hypot(ex, ey), m = R + g[4]; if (d < m && d > 1e-6) { p.x += ex / d * (m - d); p.y += ey / d * (m - d); } }
+    for (const c of C.circ) { const ex = p.x - c[0], ey = p.y - c[1], d = Math.hypot(ex, ey), m = R + c[2]; if (d < m && d > 1e-6) { p.x += ex / d * (m - d); p.y += ey / d * (m - d); } }
+  }
+}
+const inFloor = (x, y) => { const M = IN.meta; return Math.abs(y) < M.py && x > M.xs0 - 0.15 ? Math.min(M.flz, 0.15 * (Math.floor((x - M.xs0 + 0.15) / 0.4) + 1)) : 0; };
+function stepWalk(dt) {
+  const run = keys.has('ShiftLeft') || keys.has('ShiftRight') || touchIn.run, f = input.f, t = input.t, sd = input.s;
+  const tv = f > 0 ? f * (run ? 5.4 : 1.75) : f * 1.2; WALK.v += (tv - WALK.v) * Math.min(1, dt * 9); WALK.vs += (sd * 1.3 - WALK.vs) * Math.min(1, dt * 9);
+  const tr = t * (run && f > 0 ? 2.0 : 2.5) * dt, moving = Math.abs(WALK.v) > 0.05 || Math.abs(WALK.vs) > 0.05;
+  if (WALK.in && IN.ready) {
+    WALK.iyaw += tr; const sn = Math.sin(WALK.iyaw), cs = Math.cos(WALK.iyaw), p = { x: WALK.ix + (sn * WALK.v + cs * WALK.vs) * dt, y: WALK.iy + (cs * WALK.v - sn * WALK.vs) * dt };
+    const ox = WALK.ix, oy = WALK.iy; walkCollide(p);
+    if (inFloor(p.x, p.y) - WALK.z > 0.25) { p.x = ox; p.y = oy; }                        // no climbing the side of the chancel platform
+    if (!pip(p.x, p.y, IN.meta.room)) { p.x = ox; p.y = oy; }
+    WALK.ix = p.x; WALK.iy = p.y; WALK.z += (inFloor(p.x, p.y) - WALK.z) * Math.min(1, dt * 12);
+    walkG.position.set(WALK.ix, WALK.z, -WALK.iy); walkG.rotation.y = -WALK.iyaw; blobIn.position.set(WALK.ix, WALK.z + 0.02, -WALK.iy);
+    const m0 = CHURCH.map(WALK.ix, -WALK.iy), m1 = CHURCH.map(WALK.ix + sn, -(WALK.iy + cs)); S.x = WALK.x = m0[0]; S.y = WALK.y = m0[1]; S.yaw = WALK.yaw = Math.atan2(m1[0] - m0[0], m1[1] - m0[1]);
+  } else {
+    WALK.yaw += tr; const sn = Math.sin(WALK.yaw), cs = Math.cos(WALK.yaw), dx = (sn * WALK.v + cs * WALK.vs) * dt, dy = (cs * WALK.v - sn * WALK.vs) * dt;
+    if (moving) { if (walkFree(WALK.x + dx, WALK.y + dy)) { WALK.x += dx; WALK.y += dy; } else if (walkFree(WALK.x + dx, WALK.y)) WALK.x += dx; else if (walkFree(WALK.x, WALK.y + dy)) WALK.y += dy; else WALK.v *= 0.5; }
+    WALK.x = Math.max(OX0 - 100, Math.min(OX1 + 100, WALK.x)); WALK.y = Math.max(OY0 - 100, Math.min(OY1 + 100, WALK.y));
+    const g = carGround(WALK.x, WALK.y); if (g !== null) WALK.z += (g - WALK.z) * Math.min(1, dt * 14);
+    walkG.position.set(WALK.x, WALK.z, -WALK.y); walkG.rotation.y = -WALK.yaw;
+    blob.position.set(WALK.x, WALK.z + 0.04, -WALK.y); blob.scale.set(0.075, 1, 0.075); blob.material.opacity = 0.8;
+    S.x = WALK.x; S.y = WALK.y; S.yaw = WALK.yaw;
+    if (performance.now() - HR.last > 500) { HR.last = performance.now(); hrUpdate(S.x, S.y); TEXLOD.update(S.x, S.y); streamUpdate(S.x, S.y); TREES.update(S.x, S.y); GRASS.update(); }
+    GRASS.tick(performance.now() / 1000);
+    const d = churchDoor(); if (d && !IN.loading && Math.hypot(WALK.x - d.x, WALK.y - d.y) < 90) loadInterior();
+  }
+  S.alt = WALK.z + SKID; S.vx = Math.sin(S.yaw) * WALK.v; S.vy = Math.cos(S.yaw) * WALK.v; S.vz = 0;
+  if (walkMix) { const sp = Math.max(Math.abs(WALK.v), Math.abs(WALK.vs)), want = sp < 0.15 ? 'Idle' : sp < 2.8 ? 'Walk' : 'Run';
+    if (want !== walkCur && walkAct[want]) { const a = walkAct[want], b = walkAct[walkCur]; a.reset().play(); if (b) a.crossFadeFrom(b, 0.22, false); walkCur = want; }
+    if (walkAct[walkCur]) walkAct[walkCur].timeScale = walkCur === 'Walk' ? Math.max(0.5, sp / 1.45) * (WALK.v < -0.05 ? -1 : 1) : walkCur === 'Run' ? sp / 4.3 : 1;
+    walkMix.update(dt); }
+  walkG.visible = camMode !== 1;
+  if (VEH !== 'car') { S.rotorSpd += (0 - S.rotorSpd) * Math.min(1, dt * 0.6); rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt; }
+  if (actx && sGain) sGain.gain.value += ((VEH !== 'car' && soundOn && !WALK.in ? 0.05 * S.rotorSpd : 0) - sGain.gain.value) * Math.min(1, dt * 4);
+  const k = walkNear(), h = $('hint'), msg = k === 'in' ? 'astu Keski-Porin kirkkoon' : k === 'out' ? 'ulos kirkosta' : k === 'veh' ? (VEH === 'car' ? 'nouse autoon' : 'nouse kopteriin') : '';
+  if (msg) { if (h.dataset.m !== msg) { h.dataset.m = msg; h.innerHTML = (isTouch ? '🚶 ' : '<kbd>Enter</kbd> ') + msg; } h.classList.add('on'); } else h.classList.remove('on');
+  doorMark.visible = !WALK.in && !!churchDoor(); if (doorMark.visible && !doorMark.userData.set) { const d = churchDoor(); doorMark.position.set(d.x, (carGround(d.x, d.y) || TZs(d.x, d.y)) + 8.2, -d.y); doorMark.userData.set = true; }
+}
+const doorMark = (() => { const t = textCanvas('⛪ Sisään kirkkoon', { size: 40, color: '#16110a', bg: 'rgba(255,201,40,.95)', pad: 18 });
+  const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t.tex, transparent: true, depthWrite: false, fog: false })); s.scale.set(1.5 * t.aspect, 1.5, 1); s.renderOrder = 3; s.visible = false; scene.add(s); return s; })();
+function walkCamera(dt) {
+  const ins = WALK.in && IN.ready, px = ins ? WALK.ix : WALK.x, py = ins ? WALK.iy : WALK.y, yaw = ins ? WALK.iyaw : WALK.yaw, sn = Math.sin(yaw), cs = Math.cos(yaw);
+  if (camMode === 1) { camera.position.set(px + sn * 0.1, WALK.z + 1.68, -(py + cs * 0.1)); camera.rotation.order = 'YXZ'; camera.rotation.set(-0.02, -yaw, 0); camPos.copy(camera.position); return; }
+  if (camMode === 2 && !ins) { tmp.set(px, WALK.z + 38, -py + 0.5); camPos.lerp(tmp, Math.min(1, dt * 4)); camera.position.copy(camPos); camera.up.set(sn, 0, -cs); camera.lookAt(px, WALK.z, -py); camera.up.set(0, 1, 0); return; }
+  let ok = 0.5;
+  for (const back of [3.6, 2.7, 1.9, 1.2, 0.7]) { const cx = px - sn * back, cy = py - cs * back;
+    const free = ins ? pip(cx, cy, IN.meta.room) && !IN.meta.col.circ.some(c => Math.hypot(cx - c[0], cy - c[1]) < c[2] + 0.25) && cx > IN.meta.xw + 0.3 : walkFree(cx, cy);
+    if (free) { ok = back; break; } }
+  tmp.set(px - sn * ok, WALK.z + 1.55 + ok * 0.17, -(py - cs * ok)); camPos.lerp(tmp, 1 - Math.exp(-dt * 8));
+  tmp2.set(px + sn * 3, WALK.z + 1.45, -(py + cs * 3)); camLook.lerp(tmp2, 1 - Math.exp(-dt * 10));
+  camera.position.copy(camPos); camera.lookAt(camLook);
+}
+
 // ---------- camera ----------
 const camPos = new THREE.Vector3(HOME.x, 60, -HOME.y + 120), camLook = new THREE.Vector3(HOME.x, 5, -HOME.y), tmp = new THREE.Vector3(), tmp2 = new THREE.Vector3();
 let introA = 0;
@@ -1987,6 +2137,7 @@ function updateCamera(dt) {
   if (!started) { // slow orbit around the square
     introA += dt * 0.12; camera.position.set(HOME.x + Math.sin(introA) * 210, 120, -HOME.y + Math.cos(introA) * 210); camera.lookAt(HOME.x, 10, -HOME.y); return;
   }
+  if (WALK.on) return walkCamera(dt);
   if (VEH === 'car') {
     if (camMode === 1) { // driver's seat (left-hand drive)
       const rx = Math.cos(S.yaw), ry = -Math.sin(S.yaw);
@@ -2028,7 +2179,8 @@ function hud(dt) {
   if (!pl && S.y > 470 && S.y < 640 && Math.abs(S.x) < HW) pl = 'Kokemäenjoki';
   $('sp').textContent = pl && pl !== st ? pl : '';
   const tg = target(), d = Math.hypot(tg.x - S.x, tg.y - S.y);
-  if (VEH === 'car') navHud(); else $('nav').style.display = 'none';
+  if (VEH === 'car' && !WALK.on) navHud(); else $('nav').style.display = 'none';
+  if (WALK.in) { $('sn').textContent = 'Keski-Porin kirkko'; $('sp').textContent = 'kirkkosali'; }
   $('md').textContent = tourDone ? '–' : d < 1000 ? Math.round(d / 5) * 5 + ' m' : (d / 1000).toFixed(1) + ' km';
   $('mtime').textContent = fmtT(tourT) + (best ? '' : ''); $('mk').textContent = 'Päivän kierros ' + DAY.label + (best ? ' · paras ' + fmtT(best) : '');
   // minimap (north up, 700 m across)
@@ -2079,7 +2231,7 @@ function frame(now) {
   const r1 = beacon.getObjectByName('ring'), r2 = beacon.getObjectByName('ring2'); const pu = 1 + Math.sin(bt * 3) * 0.06; r1.scale.setScalar(pu); r2.scale.setScalar(0.72 + (bt * 0.5 % 1) * 0.5); r2.material.opacity = 0.8 - (bt * 0.5 % 1) * 0.8;
   for (const sp of sprites) { const d = sp.position.distanceTo(camera.position), far = sp.userData.big ? 2600 : 1100;
     const o = Math.min(1, Math.max(0, (d - 70) / 110)) * Math.min(1, Math.max(0, (far - d) / 250)); sp.visible = o > 0.02; sp.material.opacity = o; }
-  renderer.render(scene, camera);
+  renderer.render(WALK.in ? sceneIn : scene, camera);
   requestAnimationFrame(frame);
 }
 
@@ -2170,7 +2322,7 @@ for (const id of ['mission', 'mapwrap', 'gauges', 'street', 'help', 'radio']) $(
   img.src = './orto.jpg';
 }
 setTarget();
-window.__game = { S, begin, keys, camera, renderer, scene, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
+window.__game = { WALK, IN, walkAction, sceneIn, door: churchDoor, S, begin, keys, camera, renderer, scene, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
 terrainizeScene(); setInterval(terrainizeScene, 1000);
 requestAnimationFrame(frame);
 </script>

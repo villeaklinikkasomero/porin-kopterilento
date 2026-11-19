@@ -829,3 +829,66 @@ tämän päivän työt ja opit: sen alaluvut "19.11 aamu: Cafe Anton", "klo 9–
   stage koneelta GitHubia uudemmat tiedostot (yllä luetellut + styles.json) → `pip install bpy shapely opencv-python-headless scipy pillow --break-system-packages`
   → `python3 -m http.server 8765` (kuolee vuorojen välissä, käynnistä uudelleen) → gshot_sv.mjs: vaihda playwright-polku `/opt/npm-tools/node_modules/`.
   Poltto `cd blender; python3 run.py tori0 8` ~130 s. Laiteyhteys ja selain voivat katketa hetkeksi: vie tiedostot heti kun talo on valmis.
+
+### 19.11 klo 11.30–12: 1726 Antinkadun pääty (punainen laatta) – tehty, EI tarvitse polttoa
+- **1726 ei ole polttolohkossa:** se on pelin itse piirtämä valokuvajulkisivutalo (index.html `PHS[1726]`, kuvakaista `ph_1726.jpg` toistui joka seinällä,
+  myös päädyssä → "beige parvekepääty"). Siksi pääty on **piirretty tekstuuri**, ei facades.json: `python3 tools/rautalanka/facades/f1726.py [pelikansio]`
+  → `ph_1726g.jpg` (512×1024, koko pääty kerran, 12,59 × 24,2 m; mitoista ja väreistä piirretty, SV-kuvaa ei käytetä).
+- **index.html:** `1726: [{ t: 'ph_1726', bw: 8.12 }, { t: 'ph_1726g', bw: 12.59, cut: -17.612 }]` (cut = sama mekanismi kuin 604:llä: leikkauslinjan
+  länsipuoliset seinät eli vain pääty saavat toisen tyylin) + lohko `if (bIdx === 1726 && PB.ph_1726g)`: **ohut päätyseinän jatke** (1,42 m pohjoiseen,
+  0,4 m paksu, koko korkeus), koska LoD2-kuoren pääty on 11,09 m ja jätti 1,5 m raon 1725:n ja 1726:n väliin (pihalle näki läpi). SV:ssä laattapääty on 12,2 m.
+- **Mitat (panot Antinkatu 10: 8.93,146.5 h85 p42 / h55 p3 / h103 p5 ja 6.51,136.01 h40 p25):** raaka s −1,0…11,2, jalkakäytävä z 0,85, laatan alareuna 3,65,
+  yläreuna 21,4; 6 riviä × 2 ikkunaa pohjoispäässä (raaka s 0,56–1,60 ja 2,6–4,14, korkeus 1,3, kerrosväli 2,87), eteläiset 60 % umpilaattaa;
+  laatat 12 rinnakkain, 7 riviä/kerros. Katutaso: musta pubin julkisivu (otsapanta, 3 ikkunakenttää, mustat rintapaneelit), kulmassa avoin arkadi ja
+  mustalaattainen pyöreä pylväs. Pystysuunta on sovitettu valokuvakaistan kerroslinjoihin (4,48 + 3,287·i), jotta rivit jatkuvat kulman ympäri.
+- **Havainto, ei muutettu:** talo on pelissä 24,2 m (LoD2-räystäs), mutta oikaistuissa SV-kuvissa laattaseinä on vain n. 20,5 m (kerrosväli 2,9 m, ei 3,25).
+  Kaksi eri panoa antaa saman → koko 1726 on pelissä luultavasti ~3,5 m liian korkea. Omistajan päätettävä (vaikuttaa myös torin puolen valokuvakaistaan).
+- Ei Modal-polttoa: näkyy heti pushin jälkeen (index.html + ph_1726g.jpg). Vertailukuva `Claude outputs/antinkatu_1726_paaty_vertailu_19_11.jpg`.
+- Ympäristöhuomio: Street View -kuvakaappaus tallentuu pilveen polkuun `/tmp/claude-tool-results/…/*.jpg` (743×1026) – kopioi sieltä rectify.py:lle.
+  Selaimen browser_batch katkeaa 50 s:ssa: yksi pano per erä (navigate + 2×10 s odotus + screenshot).
+- **Seuraavaksi:** 136 (Antinkatu 21a), 409, 570, 276, 415.
+
+## 19.11.2026 klo 12–13 – Jalankulku ja Keski-Porin kirkon sisätila (uusi ominaisuus, omistajan pyyntö)
+
+Omistaja: "autosta tai helikopterista voi nousta pelaajana ulos ja tiettyihin rakennuksiin pääsee tutustumaan sisälle kävellen. Aloitetaan kirkosta."
+
+### Mitä tehtiin (kaikki käyttäjän kansiossa, pushaamatta; EI vaadi Modal-polttoa)
+- **Jalankulku (index.html, lohko "on foot", haku `WALK`)**: **Enter** (tai F autossa/jalan, kosketuksella 🚶-nappi) nousee ulos pysähtyneestä autosta tai
+  maahan laskeutuneesta kopterista (katolta ei pääse). W/S kävely, A/D käännös, Q/E sivuaskel, Shift juoksu (kosketuksella 🏃), C vaihtaa kameran
+  (takaa / silmistä / ylhäältä). Enter kulkuneuvon vieressä (auto 4,2 m, kopteri 6 m) vie takaisin kyytiin. Kierroksen kello seisoo jalan. N palauttaa kyytiin.
+  Törmäys: talot (`bldTopAt`), joki (`carGround` null); maan korkeus = `carGround`. Kamera `walkCamera`, near 0,25 (sisällä 0,12), kyydissä 1.
+- **Hahmo `hahmo.js`** = omistajan `porikopteri_hahmo.glb` base64-moduulina (skripti talteen: `tools/hahmo/porikopteri_hahmo.py`). Animaatiot Idle/Walk/Run
+  vaihtuvat nopeuden mukaan (AnimationMixer, ristihäivytys 0,22 s); Sit on mallissa mutta ei vielä käytössä. Ladataan vasta ensimmäisellä ulosnousulla.
+- **Kirkon sisätila `kirkko_sisa.js`** (5 Mt, ladataan kun kävelijä on alle 90 m ovesta): oma kohtaus `sceneIn`, piirretään mallin paikalliskoordinaateissa
+  (x alttarille päin, y poikittain, lattia 0). Sisään tornin länsiovesta (keltainen kyltti "Sisään kirkkoon", vihje "Enter astu Keski-Porin kirkkoon"),
+  ulos sisäoven edestä; siirtymässä 0,24 s häivytys. Minikartta ja kadunnimi seuraavat (`CHURCH.map` = ulkomallin kehys → karttametrit).
+- **Malli `blender/kirkko_sisa.py`** (Blender/bpy, ~25 000 pintaa): kolmilaivainen halli 8 holvijaksoa (jako 5,54 m = ulkomallin tukipilarit), suippokaariset
+  ristiholvit ruoteineen, 18 kimppupylvästä koristekenttineen, sivulehterit ja urkulehteri, urut (3 tornia + pillikentät), penkit 4 korttelia, saarnatuoli
+  katoksineen, kuori (5 monikulmion sivua, 5 ikkunaa), koroke + portaat, alttari ja kehys, alttarikaide, 4 kattokruunua, virsitaulut, ovet.
+  Mitat ulkomallista (kirkko.js: runko x −22…24,3, leveys ±11, kuori x > 24,3); rakenne ja värit luettu seurakunnan ja Ylen sisäkuvista
+  (kirkkoporissa.fi kirkkosalikuva, rondo.fi urkukuva) – kuvia ei tallennettu. **Alttaritaulua (Ekman) ja lasimaalauksia (Enckell) EI kopioitu**: tilalla
+  omat abstraktit pinnat (sääntö: taideteoksia ei kopioida).
+- **Valo**: Cycles-leivonta valokartaksi (`kirkko_sisa_lm.jpg` 2048², UV1; DIFFUSE suora + epäsuora ilman väriä; ikkunat ja kruunut valaisevat),
+  pintakuviot toistuvina tekstuureina UV0:ssa (kaikki itse piirrettyjä, PIL). Pelissä `MeshBasicMaterial({ map, lightMap })`,
+  `lightMapIntensity = π · meta.lmax` (three r160 jakaa π:llä). `glow_`-materiaalit (lasit, kynttilät, ikkunasyvennykset) ilman valokarttaa.
+  Pikkuosat (kruunut, kaide, pillit) ovat omassa `sisa_small`-verkossa ja käyttävät valokartan vasemman alakulman vakioväriä.
+- **Törmäykset sisällä**: `meta.col` = janat [x0,y0,x1,y1,r] ja ympyrät [x,y,r] (seinät, pylväät, penkkikorttelit, kaide, alttari, saarnatuoli), `meta.room` = huoneen
+  monikulmio; pelaaja r 0,32 työnnetään ulos (`walkCollide`). Kuorikorokkeelle noustaan vain portaista.
+
+### Uudelleenajo
+```
+pip install bpy pillow numpy opencv-python-headless --break-system-packages
+python3 blender/kirkko_sisa.py --out /home/claude/out_sisa --lm 2048 --samples 40      # ~12 min kahdella ytimellä (leivonta 10 min)
+python3 tools/sisa_to_js.py /home/claude/out_sisa                                       # -> kirkko_sisa.js (aja pelikansiossa)
+# esikatselu ilman leivontaa: --nobake --shots --samples 24 (5 kuvaa, 1,5 min / kuva)
+```
+Testi: `python3 -m http.server 8765` + playwright (`/opt/npm-tools/node_modules/`), `window.__game.walkAction()`, `window.__walk` (x, y, in, ix, iy, iyaw),
+`window.__game.door()`, `window.__game.IN.ready`. Kuvat: `Claude outputs/kirkko_sisa_19_11/`.
+
+### Auki / seuraavaksi (omistaja päättää)
+- Lehtereille ei vielä pääse (portaat ja kaksitasoinen törmäys puuttuvat). Eteinen/torni puuttuu: ovesta tullaan suoraan saliin.
+- Ulkomallin ikkunat ovat yksi korkea ikkuna / jakso, sisällä ala- ja yläikkuna (kuten oikeasti) – ulkomallia ei muutettu.
+- Hahmo ei istu autossa/kopterissa näkyvästi (Sit-animaatio on valmiina), ovet eivät aukea, askelääniä ei ole.
+- Muut kohteet samalla tekniikalla: sisätila omaksi `blender/<kohde>_sisa.py`:ksi, ovi `CHURCH`-tyyliin; `walkNear`/`walkAction` yleistettävä ovilistaksi.
+- Valokartan pakkaus on väljä (tuhansia saarekkeita); 4096² tai parempi pakkaus terävöittäisi varjoja. Modalissa leivonta olisi nopeampi, mutta ei tarpeen.
+- Antinkadun jono (toinen istunto teki 1726:n päädyn klo 11.30–12): 136, 409, 570, 276, 415.
