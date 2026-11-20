@@ -21,7 +21,7 @@ from scipy.ndimage import gaussian_filter
 from shapely.geometry import Polygon
 
 LITE = os.environ.get("LITE") == "1"          # lighter mesh for touch devices (hyppykone_m)
-OUT = "/home/claude/hyppykone/out/" + ("lite/" if LITE else ""); os.makedirs(OUT, exist_ok=True)
+OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "out/") + ("lite/" if LITE else ""); os.makedirs(OUT, exist_ok=True)
 random.seed(7); np.random.seed(7)
 REG = "OH-HPX"                      # fictional registration
 YEL = (232, 172, 22); GREY = (58, 60, 64); WHITE = (238, 238, 234)
@@ -63,6 +63,7 @@ M = {
     "navred":   pbr("nav_red", (255, 40, 30), 0.0, 0.2, emissive=(255, 30, 20)),
     "navgrn":   pbr("nav_green", (40, 240, 80), 0.0, 0.2, emissive=(20, 220, 60)),
     "strobe":   pbr("strobe_white", (250, 250, 250), 0.0, 0.2, emissive=(160, 160, 160)),
+    "beacon":   pbr("beacon_red", (255, 40, 30), 0.0, 0.2, emissive=(255, 30, 20)),
     "soot":     pbr("exhaust_soot", (30, 28, 26), 0.6, 0.7),
     "jumplight_r": pbr("jumplight_red", (255, 30, 20), 0.0, 0.3, emissive=(255, 20, 10)),
     "jumplight_g": pbr("jumplight_green", (40, 255, 80), 0.0, 0.3, emissive=(10, 120, 30)),
@@ -108,10 +109,10 @@ ST = np.array([
     [3.20, 1.00, 0.95, 1.25],
     [2.40, 1.10, 0.92, 1.24],
     [2.00, 1.13, 0.94, 1.25],
-    [1.50, 1.18, 1.30, 1.43],
-    [1.00, 1.18, 1.30, 1.43],
-    [-1.00, 1.18, 1.30, 1.43],
-    [-2.00, 0.95, 1.00, 1.55],
+    [1.50, 1.18, 1.40, 1.48],
+    [1.00, 1.18, 1.40, 1.48],
+    [-1.00, 1.18, 1.40, 1.48],
+    [-2.00, 0.95, 1.06, 1.58],
     [-3.60, 0.55, 0.62, 1.70],
     [-5.20, 0.20, 0.30, 1.83],
 ])[::-1]
@@ -180,13 +181,13 @@ inner = loft(np.arange(-2.2, 2.30, 0.05 * _k), inset=0.035)
 fus = outer.difference(inner)
 
 # ---- openings
-DOOR_Z0, DOOR_Z1, DOOR_Y0, DOOR_Y1 = -0.80, 0.22, 0.93, 1.98
+DOOR_Z0, DOOR_Z1, DOOR_Y0, DOOR_Y1 = -0.80, 0.22, 0.93, 2.06
 doorbox = trimesh.creation.box(bounds=[[-1.0, DOOR_Y0, DOOR_Z0], [-0.2, DOOR_Y1, DOOR_Z1]])
 WS_X = 0.43
 ws_prism = prism_zy([(1.995, 1.645), (1.46, 1.645), (1.46, 2.40), (1.995, 2.40)], -WS_X, WS_X)
-SIDE_FRONT = [(1.70, 1.63), (1.47, 1.95), (0.36, 1.95), (0.36, 1.60)]
-SIDE_MID = [(0.12, 1.95), (-0.70, 1.95), (-0.70, 1.60), (0.12, 1.60)]
-SIDE_REAR = [(-0.90, 1.95), (-1.62, 1.92), (-1.86, 1.73), (-0.90, 1.60)]
+SIDE_FRONT = [(1.72, 1.63), (1.47, 2.03), (0.36, 2.03), (0.36, 1.60)]
+SIDE_MID = [(0.12, 2.03), (-0.70, 2.03), (-0.70, 1.60), (0.12, 1.60)]
+SIDE_REAR = [(-0.90, 2.03), (-1.62, 1.98), (-1.86, 1.76), (-0.90, 1.60)]
 cutters = [ws_prism]
 for sx in (1, -1):
     xa, xb = (0.40, 1.0) if sx > 0 else (-1.0, -0.40)
@@ -483,7 +484,7 @@ def surface_tex(Wd, Hd, u_of, v_of, ribs_u, spars_v, extra=None, stripe=None, na
 
 
 # wing: u = (x + HS) / 2HS (span), v = (z - (LE-1.7)) / 1.75 (chord)
-WY = 2.07; DIH = math.radians(1.7); HS = 5.5
+WY = 2.17; DIH = math.radians(1.7); HS = 5.5
 WZ0, WZ1 = -0.35, 1.50
 
 
@@ -672,10 +673,10 @@ add("fin_tip", mat(fintip, M["vtailpaint"], vtail_uv(fintip.vertices)))
 rud = surface([fsec(y, afs_a)[0] for y in np.linspace(1.80, 2.85, 7)]); mat(rud, M["vtailpaint"], vtail_uv(rud.vertices))
 _, chm, lem = fsec(2.35, afs_a)
 RU_PIVOT = np.array([0.0, 2.35, lem - 0.715 * chm]); rud.apply_translation(-RU_PIVOT)
-dors = surface([sec_v(afs_full, 0.10, -1.6 + TZ, 2.03), sec_v(afs_full, 1.30, -2.0 + TZ, 2.04), sec_v(afs_full, 0.10, -3.2 + TZ, 2.15)])
+dors = surface([sec_v(afs_full, 0.10, -1.6 + TZ, 2.09), sec_v(afs_full, 1.30, -2.0 + TZ, 2.07), sec_v(afs_full, 0.10, -3.2 + TZ, 2.15)])
 add("dorsal_fin", mat(dors, M["vtailpaint"], vtail_uv(dors.vertices)))
 bc = revolve([(0, 0.035), (0.03, 0.035), (0.06, 0.025), (0.075, 0.0)], 24); bc.apply_transform(TM.rotation_matrix(-math.pi / 2, [1, 0, 0]))
-bc.apply_translation([0, 2.88, -5.38]); add("beacon", mat(bc, M["navred"]))
+bc.apply_translation([0, 2.88, -5.38]); add("beacon", mat(bc, M["beacon"]))
 tail_tr = trimesh.creation.torus(0.03, 0.007, major_sections=20, minor_sections=8); tail_tr.apply_transform(TM.rotation_matrix(math.pi / 2, [0, 1, 0]))
 tail_tr.apply_translation([0, surf_y(-4.6, 0, top=False) - 0.04, -4.6]); add("tail_tiedown", mat(tail_tr, M["metal"]))
 add("tail_tiedown_mount", tube([0, surf_y(-4.6, 0, top=False) + 0.01, -4.6], [0, surf_y(-4.6, 0, top=False) - 0.012, -4.6], 0.008, M["metal"], 8))
@@ -747,28 +748,28 @@ for n_, m_ in wheel_set([0, 0.18, 3.05], 0.18, 0.11, "nose_wheel"): add(n_, m_)
 add("nosegear_pant", pant([0, 0.18, 3.05]))
 for sx in (1, -1):
     s_ = "port" if sx > 0 else "stbd"
-    leg_top, leg_bot = [sx * 0.42, 0.82, -0.05], [sx * 1.14, 0.22, -0.10]
+    leg_top, leg_bot = [sx * 0.42, 0.82, 0.46], [sx * 1.14, 0.22, 0.40]
     add(f"maingear_leg_{s_}", tube(leg_top, leg_bot, 0.05, M["white"], 20, flat=0.38))
     add(f"maingear_leg_fairing_{s_}", tube(leg_top, np.array(leg_top) + (np.array(leg_bot) - leg_top) * 0.25, 0.06, M["white"], 20, flat=0.45))
-    for n_, m_ in wheel_set([sx * 1.22, 0.20, -0.10], 0.20, 0.12, f"main_wheel_{s_}"): add(n_, m_)
-    add(f"brake_disc_{s_}", disc([sx * 1.135, 0.20, -0.10], [1, 0, 0], 0.11, 0.008, M["metal"]))
-    add(f"brake_caliper_{s_}", box([sx * 1.12 - 0.02, 0.24, -0.20], [sx * 1.12 + 0.02, 0.31, -0.12], M["dark"]))
-    add(f"maingear_pant_{s_}", pant([sx * 1.22, 0.20, -0.10]))
+    for n_, m_ in wheel_set([sx * 1.22, 0.20, 0.40], 0.20, 0.12, f"main_wheel_{s_}"): add(n_, m_)
+    add(f"brake_disc_{s_}", disc([sx * 1.135, 0.20, 0.40], [1, 0, 0], 0.11, 0.008, M["metal"]))
+    add(f"brake_caliper_{s_}", box([sx * 1.12 - 0.02, 0.24, 0.30], [sx * 1.12 + 0.02, 0.31, 0.38], M["dark"]))
+    add(f"maingear_pant_{s_}", pant([sx * 1.22, 0.20, 0.40]))
 
 # ---- jump hardware (starboard)
-add("jump_step_plate", box([-0.99, 0.565, -0.13], [-0.69, 0.585, 0.21], M["metal"]))
-for z in np.arange(-0.10, 0.20, 0.04):
+add("jump_step_plate", box([-0.99, 0.565, 0.18], [-0.69, 0.585, 0.52], M["metal"]))
+for z in np.arange(0.21, 0.51, 0.04):
     add(f"jump_step_tread_{z:+.2f}", box([-0.985, 0.585, z], [-0.695, 0.592, z + 0.012], M["dark"]))
-add("jump_step_brace", tube([-0.84, 0.575, 0.05], [-0.95, 0.40, -0.05], 0.018, M["metal"], 12))
-_sx = surf_x(-0.3, 2.0)
-add("grab_handle", tube([-_sx - 0.045, 2.00, -0.65], [-_sx - 0.045, 2.00, 0.05], 0.013, M["chrome"], 14))
-for z in (-0.65, 0.05): add(f"grab_mount_{z:+.2f}", tube([-_sx + 0.01, 2.00, z], [-_sx - 0.05, 2.00, z], 0.011, M["chrome"], 10))
+add("jump_step_brace", tube([-0.84, 0.575, 0.36], [-0.95, 0.40, 0.42], 0.018, M["metal"], 12))
+_sx = surf_x(-0.3, 2.08)
+add("grab_handle", tube([-_sx - 0.045, 2.08, -0.65], [-_sx - 0.045, 2.08, 0.05], 0.013, M["chrome"], 14))
+for z in (-0.65, 0.05): add(f"grab_mount_{z:+.2f}", tube([-_sx + 0.01, 2.08, z], [-_sx - 0.05, 2.08, z], 0.011, M["chrome"], 10))
 xh = surf_x(-0.3, DOOR_Y1)
 add("door_piano_hinge", tube([-xh - 0.008, DOOR_Y1 + 0.005, DOOR_Z0 + 0.03], [-xh - 0.008, DOOR_Y1 + 0.005, DOOR_Z1 - 0.03], 0.009, M["metal"], 10))
 # jump lights inside above the door
-add("jumplight_box", box([-0.42, 1.92, 0.25], [-0.34, 1.98, 0.40], M["black"]))
-add("jumplight_red", disc([-0.38, 1.915, 0.29], [0, -1, 0], 0.016, 0.006, M["jumplight_r"]))
-add("jumplight_green", disc([-0.38, 1.915, 0.36], [0, -1, 0], 0.016, 0.006, M["jumplight_g"]))
+add("jumplight_box", box([-0.42, 2.00, 0.25], [-0.34, 2.06, 0.40], M["black"]))
+add("jumplight_red", disc([-0.38, 1.995, 0.29], [0, -1, 0], 0.016, 0.006, M["jumplight_r"]))
+add("jumplight_green", disc([-0.38, 1.995, 0.36], [0, -1, 0], 0.016, 0.006, M["jumplight_g"]))
 
 # ---- interior
 FLOOR_Y = 0.92
@@ -784,8 +785,8 @@ add("pilot_seat_headrest", rbox([0.14, FLOOR_Y + 0.98, 0.88], [0.38, FLOOR_Y + 1
 add("pilot_seat_frame", box([0.10, FLOOR_Y, 1.0], [0.42, FLOOR_Y + 0.22, 1.36], M["dark"]))
 for sx_ in (0.10, 0.42): add(f"seat_rail_{sx_}", box([sx_ - 0.015, FLOOR_Y, 0.8], [sx_ + 0.015, FLOOR_Y + 0.02, 1.55], M["metal"]))
 # instrument panel with a gauge texture
-PW, PH = 1.0, 0.32
-pi_ = Image.new("RGB", (1024, 330), (30, 31, 33)); dp = ImageDraw.Draw(pi_)
+PW, PH = 1.0, 0.38
+pi_ = Image.new("RGB", (1024, 390), (30, 31, 33)); dp = ImageDraw.Draw(pi_)
 for row in range(2):
     for col in range(3):
         cx, cy = 140 + col * 120, 90 + row * 140
@@ -799,21 +800,30 @@ dp.text((535, 60), "COM 118.300", fill=(80, 230, 120), font=ImageFont.truetype(F
 dp.text((535, 110), "ALT 13500", fill=(80, 230, 120), font=ImageFont.truetype(FONT, 26))
 M["panel"] = pbr("instrument_panel", tex=pi_, rough=0.6)
 pq = trimesh.Trimesh([[PW / 2, 0, 0], [-PW / 2, 0, 0], [-PW / 2, PH, 0], [PW / 2, PH, 0]], [[0, 1, 2], [0, 2, 3]], process=False)
-pq.apply_translation([0, 1.22, 1.675]); add("instrument_panel_face", mat(pq, M["panel"], np.array([[0, 0], [1, 0], [1, 1], [0, 1]], float)))
-add("instrument_panel_body", box([-0.50, 1.22, 1.68], [0.50, 1.54, 1.80], M["black"]))
-add("glareshield", rbox([-0.52, 1.52, 1.64], [0.52, 1.58, 1.84], M["black"]))
+pq.apply_translation([0, 1.24, 1.695]); add("instrument_panel_face", mat(pq, M["panel"], np.array([[0, 0], [1, 0], [1, 1], [0, 1]], float)))
+add("instrument_panel_body", box([-0.50, 1.24, 1.70], [0.50, 1.62, 1.82], M["black"]))
+add("glareshield", rbox([-0.42, 1.60, 1.62], [0.42, 1.68, 1.80], M["black"]))
 # yoke (T-shaped), throttle quadrant, pedals
-add("yoke_shaft", tube([0.25, 1.36, 1.68], [0.25, 1.36, 1.46], 0.014, M["chrome"], 12))
-add("yoke_bar", tube([0.12, 1.39, 1.46], [0.38, 1.39, 1.46], 0.018, M["black"], 12))
-for xg in (0.12, 0.38): add(f"yoke_grip_{xg}", tube([xg, 1.30, 1.46], [xg, 1.42, 1.46], 0.02, M["black"], 12))
-for k, col in enumerate(((20, 20, 20), (30, 60, 160), (170, 25, 25))):
-    knob = trimesh.creation.icosphere(2, radius=0.018); knob.apply_translation([-0.02 + k * 0.05, 1.27, 1.60])
-    add(f"engine_knob_{k}", mat(knob, pbr(f"knob_{k}", col, 0.0, 0.4)))
-    add(f"engine_knob_rod_{k}", tube([-0.02 + k * 0.05, 1.27, 1.675], [-0.02 + k * 0.05, 1.27, 1.61], 0.004, M["chrome"], 6))
+MOVE = {}      # cockpit controls that the game moves: name -> (meshes in node frame, pivot)
+YOKE_P = np.array([0.25, 1.36, 1.68])
+_y = [tube([0.25, 1.36, 1.68], [0.25, 1.36, 1.40], 0.014, M["chrome"], 12), tube([0.10, 1.39, 1.46], [0.40, 1.39, 1.46], 0.018, M["black"], 12),
+      tube([0.25, 1.36, 1.46], [0.25, 1.39, 1.46], 0.03, M["black"], 12)]
+for xg in (0.10, 0.40): _y.append(tube([xg, 1.28, 1.46], [xg, 1.43, 1.46], 0.021, M["black"], 12))
+_y.append(disc([0.25, 1.39, 1.452], [0, 0, 1], 0.03, 0.006, M["chrome"]))
+MOVE["yoke"] = (_y, YOKE_P)                       # slides aft (pull) along +z... game: position.z, rotation.z for roll
+for k, (nm, col) in enumerate((("throttle_knob", (20, 20, 20)), ("prop_knob", (30, 60, 160)), ("mixture_knob", (170, 25, 25)))):
+    x = -0.03 + k * 0.06; piv = np.array([x, 1.27, 1.675])
+    knob = trimesh.creation.icosphere(2, radius=0.019); knob.apply_scale([1, 1, 0.8]); knob.apply_translation([x, 1.27, 1.60])
+    if k == 1:   # prop knob: ribbed (a short cylinder)
+        knob = trimesh.creation.cylinder(radius=0.018, height=0.024, sections=12); knob.apply_translation([x, 1.27, 1.60])
+    if k == 2:   # mixture: red with a ridged rim
+        knob = trimesh.creation.cylinder(radius=0.017, height=0.018, sections=10); knob.apply_translation([x, 1.27, 1.60])
+    MOVE[nm] = ([mat(knob, pbr(f"knob_{nm}", col, 0.0, 0.4)), tube([x, 1.27, 1.675], [x, 1.27, 1.605], 0.004, M["chrome"], 6)], piv)
+add("throttle_quadrant_plate", box([-0.08, 1.235, 1.672], [0.13, 1.305, 1.68], M["black"]))
 for xp in (0.15, 0.35):
     add(f"rudder_pedal_{xp}", rbox([xp - 0.05, 0.98, 1.95], [xp + 0.05, 1.16, 1.99], M["dark"]))
 # headliner panel & side wall trim
-add("headliner_panel", box([-0.30, 2.00, -1.0], [0.30, 2.015, 1.42], M["headliner"]))
+add("headliner_panel", box([-0.30, 2.10, -1.0], [0.30, 2.115, 1.42], M["headliner"]))
 
 # =================================================================== scene graph
 scene = trimesh.Scene()
@@ -835,6 +845,10 @@ for nm, (m, piv) in CS.items():
 node("elevator", EL_PIVOT)
 for i, m in enumerate(el_parts): scene.add_geometry(m, node_name=f"elevator_mesh{i}", geom_name=f"elevator_mesh{i}", parent_node_name="elevator")
 node("rudder", RU_PIVOT)
+for nm, (meshes, piv) in MOVE.items():
+    node(nm, piv)
+    for i, m in enumerate(meshes):
+        m.apply_translation(-piv); scene.add_geometry(m, node_name=f"{nm}_part{i}", geom_name=f"{nm}_part{i}", parent_node_name=nm)
 scene.add_geometry(rud, node_name="rudder_mesh", geom_name="rudder_mesh", parent_node_name="rudder")
 for name, m, parent in parts:
     scene.add_geometry(m, node_name=name, geom_name=name, parent_node_name=parent)
@@ -842,7 +856,7 @@ for name, m, parent in parts:
 def empty(name, pos, yaw_deg=0.0):
     T = TM.rotation_matrix(math.radians(yaw_deg), [0, 1, 0]); T[:3, 3] = pos
     scene.graph.update(frame_from=root, frame_to=name, matrix=T)
-empty("exit_point", [-0.84, 0.59, 0.02])
+empty("exit_point", [-0.84, 0.59, 0.36])
 empty("pilot_seat", [0.26, FLOOR_Y + 0.36, 1.15])
 for n_, p_ in (("seat_00", [-0.20, FLOOR_Y + 0.04, 0.70]), ("seat_01", [-0.20, FLOOR_Y + 0.04, -0.25]),
                ("seat_02", [0.20, FLOOR_Y + 0.04, 0.25]), ("seat_03", [0.05, FLOOR_Y + 0.04, -0.85])):
