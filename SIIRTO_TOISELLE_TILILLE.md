@@ -1,4 +1,4 @@
-# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 15.11.2026; UUSIN TILA: osio "15.11.2026 – ALOITA TÄSTÄ" aivan lopussa)
+# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 20.11.2026; UUSIN TILA: osio "20.11.2026 iltapäivä–ilta" aivan lopussa, sitä ennen "20.11.2026 klo 14 – KONSEPTI VAIHTUU")
 
 Liitä tämä tiedosto uuden keskustelun alkuun. Pyydä Claudea lukemaan myös repon `SIIRTO.md`, `pipeline/README.md` ja `HANDOFF_Y-PAKKI.md` (jos repossa).
 Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
@@ -2054,3 +2054,59 @@ bottilohkon ryhmä- ja hahmosilmukka), `npc_*.js` ja `hahmo.js` (uudet klipit `D
   - **Puuttuvat ominaisuudet prioriteetteineen: `tarvittavat_ominaisuudet/README.md`** (repon juuressa). Aloita sen kohdasta 10 (Luku 1 pystysuorana siivuna).
 - **Tapaus 1 ("Karhu katsoo väärään suuntaan") poistetaan pelistä**, mutta sen tekniikka (soitto + tekstitys, valintanapit, localStorage-tallennus, radion soittolistalisäys) on tehtävämoottorin pohja. Ei vielä poistettu koodista eikä tiedostoista – tee se tehtävämoottorin yhteydessä.
 - Auki: radion nimi tarinassa (pelissä "Radio Porikopteri", käsikirjoituksessa "Radio Kirjuri").
+
+## 20.11.2026 iltapäivä–ilta – Hahmokonseptit, Meshy-mallit, elävä joki, torikojut, sillat, Eteläranta ja rantakivikko (yksi pitkä istunto)
+
+Kaikki alla oleva on kirjoitettu käyttäjän kansioon ja tarkistettu pilven testisivuilla (Playwright + swiftshader). **Ei testattu oikeassa pelissä**:
+Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-lohko, ei testisivulla) – katso ne ensimmäisenä.
+
+### Hahmot ja mallit
+- **Konseptit:** `hahmot/konseptit/` (arkit, muotokuvat, mallikortit, rivikuva, README) 1960–70-lukujen sarjakuvatyyliin; generaattori `tools/hahmo/konseptit/`.
+  Harju ja Varjo päivitetty nykyaikaan, ei alleviivattua pahuutta (omistaja). Ei tunnistettavia diktaattorityylejä (viikset/jakaus poistettu).
+- **Meshy-hahmot riggattu peliin:** `npc_myyja.js`, `npc_tapsa.js`, `npc_terttu.js`, `npc_varjo.js`, `npc_lumi.js`, `npc_vartija.js` – työkalu
+  `tools/hahmo/rigaa/` (`rigaa.py`, `gltf.py`, README): 53 luun UE-mannekiiniluuranko, painot KD-puulla, animaatiot npc_mies_a/nainen_a/b + Run hahmo.js:stä.
+- **Moottorivene + perämoottori:** `vene.js`, `peramoottori.js` (`tools/kulkuneuvot/tee_vene.py`). Ajoa ei vielä tehty. Lähteet `hahmot/konseptit/3d_lahde/`.
+- Auki: vartijan variantit B/C, Harju- ja kuriirimallit, veneellä ajo.
+
+### Elävä Kokemäenjoki – `vesi/` (vesi.js, kokeilu.html, README.md)
+- Hybridivesi: ilmakuvan vesi korvataan omalla pinnalla, kirkkaat kuvapikselit (laiturit, veneet) säilyvät; virtauskenttä merta kohti.
+  API `window.__vesi` (inRiver, virtaus, syvyys, rannalle, korkeus, paalla, asetus). Ladataan index.html:n lopussa `<script type="module" src="vesi/vesi.js">`.
+- Tiedossa: ilmakuvan vanhat Etelärannan laiturit näkyvät vaaleina läikkinä uusien laitureiden vieressä – poistettava vesi.js:n kirkkaiden pikselien säilytyksestä.
+
+### Kauppatori – `tori/` (torikojut.js, torikojut_mallit.js, kokeilu.html)
+- 8 Meshy-torikojua pieninä ryhminä ympäri toria (omistaja: "levittää eri paikkoihin"), `PAIKAT` = karttametrit + suunta (N/S/W/E/SW…), kierto `KULMA`.
+- **Kivetys koko torille** (index.html, roads-lohkon `toriFill`): täyttö myös x > 80 torin ääriviivan `TP` sisällä. Tumma pyöreäkulmainen alue on 2022 paviljongin katto (oikein).
+
+### Lähtöpaikka
+- `HOME = { x: -862, y: 1222 }` Kirjurinluodon areenan asfaltilla (tekstit "Laskeudu Kirjurinluotoon" yms.).
+
+### Sillat (index.html)
+- `PSIL_NOUSU = 2.8` Porinsillan kaari (≈4 m vapaata vedestä), `psilDeck(t)` absoluuttinen; RIV.br-sillat suoralla kannella + kaarella (`brLine`, `brDeckZ`).
+- **Kummut pois:** heti `TZg`-määrittelyn jälkeen lohko laskee THG-ruudukon kaikkien siltojen alla kannen alle (−0,12 m), päiden yli 12 m kadun tasossa,
+  sitten 1:6 ylös; sivuilla 1:2. `window.__siltaKummut` = muutettujen solmujen määrä. (Laserkorkeusmallissa oli maatuet/rampit 2–3 m kumpuina.)
+- **Puut pois silloilta:** puulohkon `onBridgeT` / `dropBridgeTrees` (myös `TREES.move` ja `TREES.add` jälkeen).
+- **Porinsillan eteläpää jatkettu:** roads.js jätti 32 m tyhjää (OSM-silta pidempi kuin malli). Roads-lohkossa `toriFill`in jälkeen ajorata 9,2 m + jalkakäytävät
+  + reunakivet t = −48 … −13,3, viimeiset 8 m nousevat kannen etureunaan. **Kolmiot vastapäivään kartalla = ylöspäin** (ensimmäinen versio oli väärin päin ja näkymätön).
+- **Alikulku Porinsillan eteläpään ali** (omistaja): Etelärannan alempi kävelytaso jatkuu x 193 → 260 (`UPS` Eteläranta-lohkossa), tukimuuri, kaide,
+  vesivärinen pohja, maan leikkaus `quayCut`. Vapaa korkeus ~2,8 m.
+
+### Eteläranta (index.html, Eteläranta-lohko) ja `ranta/`
+- `QUAY_MODEL = true`. Rakennettu **absoluuttisille korkeuksille (noT) oikean maan päälle**: alempi kävelytaso `QUAY_WALK = TER.wl + 1,05`, neljä istuinporrasta
+  katutasoon (TZg 11 m sisämaahan), yläkiveys 18 m asti. Sahalaitainen rantaviiva käsitellään ajoina (`RUN`), hammasten päät suljetaan. Pensaat pois (omistaja).
+- Ilmakuvamaa leikataan (`tSkip` → `quayCut`: vain rannan kohdalla, ei päiden yli + alikulun suorakulmio).
+- **Pelaaja/auto eivät vajoa:** `window.__quayZ(x, y)` → `roofAt` ja `carGround` (jokimaski 4 m ruuduissa ulottui kävelytasolle → pelaaja oli vedenpinnassa);
+  `groundTop` käyttää sitä portaille asti (8,2 m). Laiturit: `window.__laituriZ` (ranta.js).
+- **Etelärannan aukio** (x 140–196, y 434–468, ilmakuvassa vaalea kiveys): roads-lohkossa täyttö 1 m soluina (ei nurmelle, ei rannan alle), `ROAD.etFill`.
+- **`ranta/ranta.js`** (ladataan index.html:n lopussa):
+  - Laiturit mitattu ilmakuvasta: kolme ponttonilaituria, neliölava (81.6, 501.5), itäpään laituri (166.6→170.2); kulkusillat `QUAY_WALK`ista. Vanhat laatikkoveneet pois.
+  - **Rantakivikko**: omistajan saumaton jokikivitekstuuri + lasketut kartat (`rantakivi_albedo/normal/orm.jpg`, toisto 2,6 m, toiston rikkominen), märkä vesirajassa.
+    Korkeus `rantaZ`: enintään 1:2,5 vedestä ylös (omistaja: "kivet korkeammalla kuin veden pinta"). Rajaukset `poisRajattu`: Eteläranta, sillat, alikulku,
+    **Kirjurinluodon uimaranta** (x −372…−212, y 598…668; Porin uimavesiprofiilin koordinaatit), kartan reuna. Rantaviivan reunat pilkotaan ≤ 4 m paloiksi.
+  - **Lohkareet**: `rantakivet_mallit.js` (omistajan rantakivet_blender.obj, 12 muotoa harvennettuna ~140 kolmioon, kuhmurointi), ~5 200 instanssia
+    (keskusta 1 / 2 m, ulkoalue 1 / 7 m), värit .mtl:n BeachStone-sävyistä, graniittirae tekstuurista kolmitasoprojektiolla.
+  - Tiedossa: korkealla penkalla ilmakuvamaa peittää kivikaistan yläosan (6 m ruudukko) → kiviä näkyy vähemmän. Hiekka- ja kaislarannoilla (esim. hiekkasärkkä
+    x −760…−640, y 510…545) on yhä kiviä.
+
+### Testisivut (pilvi, eivät repossa)
+- `/home/claude/peli/ranta_testi.html` (+ `shot.js`, `ODOTA=ms`): maa + vesi + Porinsilta + Etelärannan lohko kopioituna index.html:stä + ranta.js.
+  Kopioi Eteläranta-lohko uudelleen index.html:stä aina muutoksen jälkeen. Kysy käyttäjältä kuvakaappaus oikeasta pelistä ennen kuin julistat valmiiksi.

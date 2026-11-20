@@ -191,6 +191,8 @@ const LAITURIT = [
   { a: [21.3, 503.3], b: [28.3, 537.5], w: 2.3 },
   { a: [166.6, 480.2], b: [170.2, 521.8], w: 2.2 },
 ];
+// Levennys (m) mitattuun leveyteen: peittää ilmakuvan vanhat vaaleat laiturit uusien vierestä (omistaja 20.11.2026). Kulkusillat ennallaan.
+const LEVENNYS = 1.4;
 const LAVA = { c: [81.6, 501.5], koko: [16.0, 12.5], kulma: -0.05, silta: [[81.4, 489.4], [81.4, 495.6]] };   // neliönmuotoinen ponttonilava
 
 function lautaTekstuuri() {
@@ -212,7 +214,8 @@ function laiturit(ryhma) {
     lisaa(g, puu, cx, z, cy, rot);
     lisaa(new THREE.BoxGeometry(W * 0.86, 0.5, L * 0.98), kelluke, cx, z - 0.33, cy, rot);           // kellukkeet
   };
-  for (const l of LAITURIT) {
+  for (const l0 of LAITURIT) {
+    const l = { ...l0, w: l0.w + LEVENNYS };
     const [ax, ay] = l.a, [bx, by] = l.b, L = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / L, uy = (by - ay) / L, rot = Math.atan2(ux, -uy);
     const silta = 6.5, sx = ax + ux * silta, sy = ay + uy * silta;                                  // kulkusilta muurilta ponttonille
     const pL = L - silta, pcx = sx + ux * pL / 2, pcy = sy + uy * pL / 2;
@@ -226,8 +229,9 @@ function laiturit(ryhma) {
       lisaa(new THREE.CylinderGeometry(0.07, 0.09, 0.28, 8), musta, x, DECK + 0.23, y, 0); }
   }
   // neliön muotoinen lava
-  kansi(LAVA.c[0], LAVA.c[1], LAVA.koko[1], LAVA.koko[0], LAVA.kulma, DECK);
-  { const c = Math.cos(LAVA.kulma), sn = Math.sin(LAVA.kulma), h = LAVA.koko[1] / 2; pinta(LAVA.c[0] + sn * h, LAVA.c[1] - c * h, LAVA.c[0] - sn * h, LAVA.c[1] + c * h, LAVA.koko[0], DECK + 0.09, DECK + 0.09); }
+  const lvL = LAVA.koko[1] + LEVENNYS, lvW = LAVA.koko[0] + LEVENNYS;
+  kansi(LAVA.c[0], LAVA.c[1], lvL, lvW, LAVA.kulma, DECK);
+  { const c = Math.cos(LAVA.kulma), sn = Math.sin(LAVA.kulma), h = lvL / 2; pinta(LAVA.c[0] + sn * h, LAVA.c[1] - c * h, LAVA.c[0] - sn * h, LAVA.c[1] + c * h, lvW, DECK + 0.09, DECK + 0.09); }
   { const [[ax, ay], [bx, by]] = LAVA.silta, L = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / L, uy = (by - ay) / L, rot = Math.atan2(ux, -uy);
     const top = QUAY_WALK + 0.02, drop = top - DECK, len = Math.hypot(L, drop); pinta(ax, ay, bx, by, 1.6, top + 0.06, DECK + 0.06);
     const s = lisaa(new THREE.BoxGeometry(1.6, 0.12, len), teras, (ax + bx) / 2, (top + DECK) / 2, (ay + by) / 2, rot); s.rotation.order = 'YXZ'; s.rotation.x = Math.atan2(drop, L); }
