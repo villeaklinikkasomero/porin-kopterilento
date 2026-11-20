@@ -2162,3 +2162,42 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
   ääni, hyppy kopterista (ei tehty), loppuvedon ajoitus käsin (testissä veto tuli liian myöhään → "kova alastulo" 3,7 m/s).
 - **Tiedossa:** kuvun lysähtäessä katon reunalla kangas voi mennä reunan yli. Tuulta ei ole. Varavarjoa ei ole. Kameran tila 1 = hyppääjän silmistä
   vapaapudotuksessa, tila 2 = ylhäältä.
+
+## 21.11.2026 – Neljä uutta tarinahahmoa riggattu: Harju, Kuriiri, Vartija B ja Vartija C (omistaja: "lisää käsikirjoituksessa olevia hahmoja, liitä peliin ja tarkasta luurangot")
+
+- **Lähteet:** omistajan neljä Meshy-mallia (pelkkä verkko + tekstuuri, **ei luurankoa**). Tunnistus ulkonäöstä konseptikortteja vasten: "The Seafarer" = HARJU,
+  "Backpack Boy" = KURIIRI, "Stoic Station Guard" = VARTIJA B (viiksekäs mies), "Vigilant Station Guard" = VARTIJA C (nainen).
+- **Tehty:** `npc_harju.js`, `npc_kuriiri.js`, `npc_vartija_b.js`, `npc_vartija_c.js` samalla työkalulla ja samassa muodossa kuin `npc_vartija.js` ym.
+  (53 luun luuranko, klipit Idle, Walk, Run, Chair, Dance, Dance2, Passenger, PassengerLeanL/R). Lähteet ja riggatut GLB:t `hahmot/konseptit/3d_lahde/<id>/`.
+  Pituudet skaalattu konseptien mukaan: Harju 1,84 · Kuriiri 1,76 · Vartija B 1,68 · Vartija C 1,72 (Meshyn mallit olivat 1,69–1,73).
+  Vartija C:n painot ja klipit `npc_nainen_a`:sta, muiden `npc_mies_a`:sta.
+- **`tools/hahmo/rigaa/rigaa.py`:** uudet valinnat `--pituus` ja `--reppu` (README:ssä), ja nollapituiset normaalit korjataan (kuriirin mallissa oli niitä → NaN).
+  Ilman uusia valintoja tulos on sama kuin ennen.
+- **Luurankojen tarkistus (kaikki neljä):** 53 luuta, nimet ja järjestys samat kuin `npc_mies_a`:ssa; painosumma 1,0 joka pisteessä, ei NaN-arvoja; ei yhtään
+  vasemman puolen pistettä oikean puolen luulla tai päinvastoin; vasen ja oikea raaja saman pituiset (ero alle 1 mm); 9 klippiä. Renderöity luuranko verkon
+  päällä edestä ja sivulta sekä asennot Walk, Run, Chair, Dance, Dance2, Idle (lähikuvat hartioista edestä ja takaa). Harjun malli oli T-asennossa – kädet
+  laskeutuvat siististi. Kuriirin reppu seuraa selkää; ilman `--reppu`-valintaa selkäranka jäi 10 cm liian taakse.
+- **Tiedossa:** uloimmilla sormiluilla ei ole painoja Harjulla ja Kuriirilla (sormet liikkuvat kämmenen mukana, kuten README:n rajoituksissa). Walk-klipin
+  askel on lähdemallin jalanpituudelle, joten jalka voi liukua hieman. Kuriirin kortissa on olkalaukku ja polvihousut, mallissa reppu ja shortsit.
+- **Ei tehty:** hahmoja ei ole sijoitettu pelimaailmaan – kuten aiemmatkin tarinahahmot (`npc_tapsa.js` ym.), ne odottavat tehtävämoottoria. `index.html`iin ei koskettu.
+  Ei testattu oikeassa pelissä, vain erillisellä three.js-katselusivulla.
+
+## 21.11.2026 – Tarinatila kytketty peliin ja uudet hahmot maailmaan (omistaja: "lisätään hahmot pelimaailmaan käsikirjoituksen mukaan")
+
+- **Käsikirjoitusartifaktia ei voitu lukea tästäkään istunnosta** (toisen tilin artifakti → "not found"). Sijoitukset on tehty repon datan mukaan
+  (`tarina/data/tehtavat/M01–M06.json`, konseptikortit). Luvut 2–5 (M07–M26) puuttuvat reposta.
+- **`index.html`:** loppuun `<script type="module" src="tarina/peli.js"></script>` – omistaja valitsi pysyvän kytkennän. Tarinatila on nyt aina päällä:
+  keltaiset tehtävämerkit, X / P / 1–3, päivän kierroksen majakka piilossa (takaisin P-valikosta).
+- **`tarina/data/hahmot.json`:** HARJU → `npc_harju`, KURIIRI → `npc_kuriiri`.
+- **`tarina/data/maailma.json`:** Harju aina Etelärannan toisella ponttonilaiturilla (-21.4, 520), katse joelle. **Paikka on omistajan valinta** ("Etelärannan
+  laiturille") konseptikortin oletuksen pohjalta, merkitty `tarkista: true`.
+- **M04:** kolme vartijaa ovat nyt muunnelmat A, B ja C (`"malli": "npc_vartija_b"` / `"npc_vartija_c"` sijoituksessa; hahmo-ID pysyy VARTIJA).
+- **M05:** kuriiri lähtee korjaamon ovelta juosten (4,6 m/s) ja katoaa noin 10 s päästä ("jättää laatikon ja katoaa"). Suunta länteen on arvio, korjaamo on keksitty paikka.
+- **Moottori / hahmot.js:** sijoitukseen uudet kentät `malli` (mallin vaihto) ja `mene` + `nopeus` (hahmo kulkee suoraan kohteeseen ja katoaa perillä).
+  **peli.js:** X, P ja O eivät ohjaa tarinaa hyppykoneessa eivätkä laskuvarjohypyssä (koneen potkuri, seisontajarru, päävirta).
+- **Testattu:** `node tarina/testi.mjs` 15/15. Oikea peli headless tarinatila kytkettynä: Terttu torilla, Harju laiturilla (laiturin korkeudella), Tapsa
+  M01:n merkillä, M04 pakotettuna → kolme eri vartijaa + Tapsa ovella, M05 pakotettuna → kuriiri juoksee ja liikkuu; ei konsolivirheitä.
+- **Ei testattu:** tehtävien pelaaminen käsin oikeassa pelissä (X-näppäin, dialogit, kilpa), kosketusnäyttö, tarinatilan vaikutus suorituskykyyn,
+  kuriirin katoaminen loppuun asti (headless-ajossa aika kului liian hitaasti). Paikat `tarkista: true` ovat yhä arvioita.
+- **Tiedossa:** Harju seisoo vain paikallaan; hänellä ei ole tehtävää eikä repliikkejä. Kuriiri juoksee suoraa viivaa eikä väistä taloja. Hahmojen mallit
+  ladataan heti pelin alussa (Terttu, Harju, Tapsa = noin 6,5 Mt lisää).

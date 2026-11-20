@@ -119,7 +119,8 @@
     "dy": -1
    },
    "suunta": 45,
-   "asti": 1
+   "asti": 1,
+   "malli": "npc_vartija_b"
   },
   {
    "h": "VARTIJA",
@@ -129,7 +130,9 @@
     "dy": -5
    },
    "suunta": "pelaaja",
-   "asti": 1
+   "asti": 1,
+   "malli": "npc_vartija_c"
   }
- ]
+ ],
+ "_huom_hahmot": "Kolme vartijaa = konseptin muunnelmat A (npc_vartija), B (npc_vartija_b) ja C (npc_vartija_c)."
 }

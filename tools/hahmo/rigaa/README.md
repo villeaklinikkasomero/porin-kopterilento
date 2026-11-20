@@ -18,3 +18,14 @@ Meshyn asetukset: Smart Topology, 15–20k kolmiota, Texture päällä, **Pose: 
 
 Rajoitukset: sormet seuraavat kättä jäykästi (NPC:n sormiasento). Ruutukuvio venyy nivelissä hieman.
 Naishahmoille käytä lähteenä `npc_nainen_a`:ta tai `npc_nainen_b`:tä (`--lahde`). Hameelle tai pitkälle helmalle lisää `--hame`, joka jakaa reisien välisen kankaan painot tasaisesti, jottei helma revi kahdeksi lahkeeksi.
+
+Lisävalinnat (21.11.2026): `--pituus 1.84` skaalaa mallin annettuun pituuteen (m) ennen sovitusta. `--reppu` on hahmolle, jolla on reppu tai muu iso
+kantamus selässä: vartalon syvyyskeskikohta mitataan reisistä, ettei selkäranka siirry repun sisään. `--nimi` = materiaalin nimi.
+
+```
+python rigaa.py harju_meshy.glb harju_rig.glb --lahde npc_mies_a.glb --lisaklipit hahmo.glb:Run --nimi harju --pituus 1.84
+python rigaa.py kuriiri_meshy.glb kuriiri_rig.glb --lahde npc_mies_a.glb --lisaklipit hahmo.glb:Run --nimi kuriiri --pituus 1.76 --reppu
+python rigaa.py vartija_b_meshy.glb vartija_b_rig.glb --lahde npc_mies_a.glb --lisaklipit hahmo.glb:Run --nimi vartija_b --pituus 1.68
+python rigaa.py vartija_c_meshy.glb vartija_c_rig.glb --lahde npc_nainen_a.glb --lisaklipit hahmo.glb:Run --nimi vartija_c --pituus 1.72
+```
+T-asennossa tehty malli (Harju) toimii myös: käsivarren akseli haetaan verkosta ja painot siirretään uuteen sidosasentoon.

@@ -18,6 +18,8 @@ ap.add_argument("--tex", type=int, default=1024)
 ap.add_argument("--nimi", default="Hahmo")
 ap.add_argument("--hame", action="store_true", help="hame tai pitka helma: tasaiset painot reisien valilla")
 ap.add_argument("--ei_mr", action="store_true", default=True)
+ap.add_argument("--reppu", action="store_true", help="reppu tai muu iso kantamus selassa: vartalon syvyyskeskikohta mitataan reisista eika ylavartalosta")
+ap.add_argument("--pituus", type=float, default=0, help="skaalaa malli tahan pituuteen (m); 0 = mallin oma pituus")
 A = ap.parse_args()
 
 # ------------------------------------------------------------------ lahde (NPC)
@@ -52,8 +54,10 @@ mpos = (np.c_[mpos, np.ones(len(mpos))] @ Mt.T)[:, :3]
 mnrm = M.acc(mp["attributes"]["NORMAL"]) @ Mt[:3, :3].T
 muv = M.acc(mp["attributes"]["TEXCOORD_0"])
 mind = M.acc(mp["indices"]).astype(np.uint32).ravel()
-Hm = mpos[:, 1].max() - mpos[:, 1].min()
 mpos[:, 1] -= mpos[:, 1].min()
+if A.pituus > 0:
+    mpos *= A.pituus / mpos[:, 1].max()
+Hm = mpos[:, 1].max()
 s = Hm / Hn
 print("korkeus: lahde %.3f, kohde %.3f, skaala %.3f" % (Hn, Hm, s))
 
@@ -64,6 +68,11 @@ def torso_c(pts, H):
     m = (pts[:, 1] > 0.5 * H) & (pts[:, 1] < 0.8 * H) & (np.abs(pts[:, 0]) < 0.12 * H / 1.8)
     return 0.5 * (np.percentile(pts[m, 2], 3) + np.percentile(pts[m, 2], 97))
 dz = torso_c(mpos, Hm) - torso_c(npos * s, Hm)
+if A.reppu:
+    def thigh_c(pts, H):
+        m = (pts[:, 1] > 0.36 * H) & (pts[:, 1] < 0.46 * H) & (np.abs(pts[:, 0]) < 0.2 * H / 1.8)
+        return 0.5 * (np.percentile(pts[m, 2], 3) + np.percentile(pts[m, 2], 97))
+    dz = thigh_c(mpos, Hm) - thigh_c(npos * s, Hm)
 P[:, 2] += dz
 P[:, 0] -= P[idx["pelvis"], 0]
 
@@ -282,7 +291,8 @@ def add_acc(arr, ctype, typ, target=None, minmax=False, norm=False):
     accs.append(a); return len(accs) - 1
 
 a_pos = add_acc(mpos.astype(np.float32), 5126, "VEC3", 34962, True)
-nn_ = mnrm / np.linalg.norm(mnrm, axis=1, keepdims=True)
+nl_ = np.linalg.norm(mnrm, axis=1, keepdims=True)
+nn_ = np.where(nl_ > 1e-8, mnrm / np.maximum(nl_, 1e-8), [0.0, 1.0, 0.0])   # nollanormaalit (Meshyn surkastuneet kolmiot) ylospain
 a_nrm = add_acc(nn_.astype(np.float32), 5126, "VEC3", 34962)
 a_uv = add_acc(muv.astype(np.float32), 5126, "VEC2", 34962)
 a_j = add_acc(top.astype(np.uint8), 5121, "VEC4", 34962)

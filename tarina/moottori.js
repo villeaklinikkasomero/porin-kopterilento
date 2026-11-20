@@ -315,9 +315,12 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
   // ---------- hahmot maailmassa ----------
   // Lähteet: (1) data/maailma.json `aina`-sijoitukset (ehto valinnainen), (2) saatavilla olevan tehtävän antaja merkillä (`antaja`, `antajaPaikka`),
   // (3) käynnissä olevan tehtävän `hahmot` (valinnaiset `alkaen`/`asti` = vaiheindeksit), (4) nykyisen vaiheen `hahmot`.
-  // Sijoitus: { h: 'TAPSA', paikka, suunta: asteet (0 = pohjoinen, myötäpäivään) | 'pelaaja', anim: 'Idle' }
+  // Sijoitus: { h: 'TAPSA', paikka, suunta: asteet (0 = pohjoinen, myötäpäivään) | 'pelaaja', anim: 'Idle', malli?: 'npc_vartija_b', mene?: paikka, nopeus?: m/s }
   let maailma = sijoitukset, viimeHahmot = '';
-  function sijoita(id, q) { const p = paikka(q.paikka); return p ? { id, h: q.h, x: p.x, y: p.y, suunta: q.suunta ?? 'pelaaja', anim: q.anim || 'Idle' } : null; }
+  function sijoita(id, q) { const p = paikka(q.paikka); if (!p) return null; const r = { id, h: q.h, x: p.x, y: p.y, suunta: q.suunta ?? 'pelaaja', anim: q.anim || 'Idle' };
+    if (q.malli) r.malli = q.malli;                                             // muunnelma (esim. vartija B/C): ohittaa data/hahmot.json:n mallin
+    if (q.mene) { const m = paikka(q.mene); if (m) { r.mx = m.x; r.my = m.y; r.nopeus = q.nopeus || 1.4; } }   // kävelee tai juoksee suoraan kohteeseen ja katoaa perillä
+    return r; }
   function hahmolista() {
     const r = [];
     maailma.forEach((q, i) => { if (tayttyy(q.ehto) && !(K && (K.t.piilota || []).includes(q.h))) r.push(sijoita('maailma:' + i, q)); });

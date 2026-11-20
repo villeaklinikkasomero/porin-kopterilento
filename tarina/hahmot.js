@@ -1,7 +1,8 @@
 // Satamakaupunki – tarinan hahmot pelimaailmaan. Moottori kertoo 'hahmot'-tapahtumalla, kuka seisoo missä (tehtävädatan `hahmot`,
 // `antaja`, data/maailma.json); tämä tiedosto lataa mallit (repon juuren npc_*.js, sama muoto kuin pelin kävelijöillä: base64-GLB,
 // klipit Idle/Walk/Run/Dance…) ja pitää ne paikallaan, kääntää puhujan pelaajaa kohti ja soittaa Idle-animaatiota.
-// Ei koske index.html:ään. Mallin puuttuessa (data/hahmot.json malli: null) hahmo vain puhuu ruudulla.
+// Mallin puuttuessa (data/hahmot.json malli: null) hahmo vain puhuu ruudulla. Sijoituksen `malli` ohittaa hahmon oletusmallin
+// (vartijan muunnelmat B ja C), ja `mene` + `nopeus` panee hahmon kävelemään tai juoksemaan kohteeseen, jossa se katoaa.
 
 import * as THREE from '../three.module.min.js';
 import { GLTFLoader } from '../GLTFLoader.js';
@@ -23,8 +24,9 @@ export function luoHahmot(scene, { hahmot = {}, korkeus = () => 0 } = {}) {
   }
 
   function luo(id, q) {
-    const malli = (hahmot[q.h] || {}).malli; if (!malli) return null;
-    const e = { h: q.h, x: q.x, y: q.y, suunta: q.suunta, anim: q.anim, yaw: null, root: null, mixer: null, poistettu: false };
+    const malli = q.malli || (hahmot[q.h] || {}).malli; if (!malli) return null;
+    const e = { h: q.h, x: q.x, y: q.y, suunta: q.suunta, anim: q.anim, yaw: null, root: null, mixer: null, poistettu: false, kohde: q.mx !== undefined ? { x: q.mx, y: q.my } : null, nopeus: q.nopeus || 1.4, poissa: false };
+    if (e.kohde && (!q.anim || q.anim === 'Idle')) e.anim = e.nopeus > 2.4 ? 'Run' : 'Walk';
     puskuri(malli).then(buf => new Promise((ok, ei) => new GLTFLoader().parse(buf.slice(0), '', ok, ei))).then(gl => {
       if (e.poistettu) return;
       const root = gl.scene;
@@ -51,8 +53,8 @@ export function luoHahmot(scene, { hahmot = {}, korkeus = () => 0 } = {}) {
     for (const q of lista) {
       const e = elossa.get(q.id);
       if (!e) { const n = luo(q.id, q); if (n) elossa.set(q.id, n); continue; }
-      if (e.x !== q.x || e.y !== q.y) { e.x = q.x; e.y = q.y; asetaPaikka(e); }
-      e.suunta = q.suunta; if (q.anim && q.anim !== e.anim) { e.anim = q.anim; soita(e, q.anim); }
+      if (!e.kohde && (e.x !== q.x || e.y !== q.y)) { e.x = q.x; e.y = q.y; asetaPaikka(e); }
+      if (!e.kohde) e.suunta = q.suunta; if (q.anim && q.anim !== e.anim) { e.anim = q.anim; soita(e, q.anim); }
     }
   }
 
@@ -61,9 +63,16 @@ export function luoHahmot(scene, { hahmot = {}, korkeus = () => 0 } = {}) {
     for (const e of elossa.values()) {
       if (!e.root) continue;
       const d = pelaaja ? Math.hypot(pelaaja.x - e.x, pelaaja.y - e.y) : 0;
-      e.root.visible = d < NAKYY; if (!e.root.visible) continue;
+      // liikkuva hahmo (sijoituksen `mene`): suoraan kohteeseen Walk/Run-klipillä, perillä pois näkyvistä (esim. kuriiri, joka katoaa)
+      if (e.kohde && !e.poissa) {
+        const kx = e.kohde.x - e.x, ky = e.kohde.y - e.y, km = Math.hypot(kx, ky), askel = e.nopeus * dt;
+        if (km <= askel) { e.x = e.kohde.x; e.y = e.kohde.y; e.poissa = true; }
+        else { e.x += kx / km * askel; e.y += ky / km * askel; e.suunta = Math.atan2(kx, ky) * 180 / Math.PI; }
+        asetaPaikka(e);
+      }
+      e.root.visible = d < NAKYY && !e.poissa; if (!e.root.visible) continue;
       let tavoite;
-      if (pelaaja && (e.suunta === 'pelaaja' || puhuja === e.h) && d > 0.5 && d < 40) tavoite = Math.atan2(pelaaja.x - e.x, pelaaja.y - e.y);
+      if (pelaaja && !e.kohde && (e.suunta === 'pelaaja' || puhuja === e.h) && d > 0.5 && d < 40) tavoite = Math.atan2(pelaaja.x - e.x, pelaaja.y - e.y);
       else if (typeof e.suunta === 'number') tavoite = e.suunta * Math.PI / 180;
       if (tavoite !== undefined) {
         if (e.yaw === null) e.yaw = tavoite;

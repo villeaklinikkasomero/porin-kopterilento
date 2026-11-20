@@ -26,7 +26,7 @@
  "HARJU": {
   "nimi": "Harju",
   "vari": "#9fe0c0",
-  "malli": null
+  "malli": "npc_harju"
  },
  "VARJO": {
   "nimi": "Varjo",
@@ -46,12 +46,12 @@
  "KURIIRI": {
   "nimi": "Kuriiri",
   "vari": "#d0d0a0",
-  "malli": null
+  "malli": "npc_kuriiri"
  },
  "RADIO": {
   "nimi": "Radio",
   "vari": "#ffe08a",
   "malli": null
  },
- "_ohje": "malli = repon juuren npc_*.js (Idle/Walk/Run/Dance…). null = mallia ei vielä ole (Harju, kuriiri) → hahmo puhuu vain ruudulla. RAMI = pelaajan oma hahmo.js."
+ "_ohje": "malli = repon juuren npc_*.js (Idle/Walk/Run/Dance…). null = mallia ei ole → hahmo puhuu vain ruudulla. RAMI = pelaajan oma hahmo.js. Vartijan muunnelmat B ja C: sijoituksessa \"malli\": \"npc_vartija_b\" / \"npc_vartija_c\" (hahmo pysyy VARTIJAna)."
 }

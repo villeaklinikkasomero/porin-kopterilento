@@ -121,6 +121,7 @@ export async function kaynnista() {
         navigator.clipboard && navigator.clipboard.writeText(s).catch(() => {}); UI.ilmoita('■ Reitti kopioitu: ' + NAUHA.length + ' pistettä', 4000); NAUHA = null; }
       e.preventDefault(); return; }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if ((window.__plane && window.__plane.on) || (window.__jump && window.__jump.on)) return;   // hyppykoneessa X, P ja O ovat koneen omia (potkuri, seisontajarru, päävirta)
     if (e.code === 'KeyX') { M.toiminta(); return; }
     if (e.code === 'KeyP') { if (UI.ruutuAuki) M.luovuta(); else UI.valikko(); return; }
     if (/^Digit[1-3]$/.test(e.code) && UI.valitseNro(+e.code.slice(5) - 1)) { e.stopPropagation(); return; }

@@ -9,6 +9,16 @@
    ],
    "suunta": 0,
    "_huom": "Tertun koju = torikojut.js eteläreunan keltainen hedelmäkoju (53, 47), myyntipuoli pohjoiseen"
+  },
+  {
+   "h": "HARJU",
+   "paikka": [
+    -21.4,
+    520.0
+   ],
+   "suunta": 10,
+   "tarkista": true,
+   "_huom": "Etelärannan toinen ponttonilaituri (ranta.js LAITURIT[1]), noin 11 m rannasta, katse joelle. Paikka on omistajan valinta 21.11.2026 konseptikortin oletuksen mukaan – Harjun kohtauksia (M07–M26) ei ole repossa, tarkista käsikirjoituksesta."
   }
  ]
 }

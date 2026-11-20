@@ -73,5 +73,24 @@
  },
  "palkinto": {
   "teksti": "Uusi yhteystieto: Lumi"
- }
+ },
+ "hahmot": [
+  {
+   "h": "KURIIRI",
+   "paikka": {
+    "paikka": "LOC_KORJAAMO_OVI",
+    "dx": -1.5,
+    "dy": -1.5
+   },
+   "mene": {
+    "paikka": "LOC_KORJAAMO_OVI",
+    "dx": -46,
+    "dy": -14
+   },
+   "nopeus": 4.6,
+   "anim": "Run",
+   "asti": 1,
+   "_huom": "Kuriiri jätti laatikon ovelle ja juoksee pois ennen kuin kukaan ehtii kysyä (katoaa 10 s päästä). Suunta on arvio – korjaamo on keksitty paikka, tarkista pelissä."
+  }
+ ]
 }

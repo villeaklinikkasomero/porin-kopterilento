@@ -1,8 +1,8 @@
 # tarina/ – Satamakaupungin tehtävämoottori
 
 Tämä kansio on Satamakaupunki-tarinan (PEGI 7) tehtävämoottori Porin kopterilentoon. Tehty 20.11.2026.
-**`index.html`:ää ei ole muutettu.** Moottori lukee pelin tilan jo olemassa olevista `window.__*`-olioista
-ja piirtää oman käyttöliittymänsä pelin päälle.
+**Kytketty peliin 21.11.2026:** `index.html`:n lopussa on `<script type="module" src="tarina/peli.js"></script>` (omistajan päätös). Muuten moottori
+lukee pelin tilan jo olemassa olevista `window.__*`-olioista ja piirtää oman käyttöliittymänsä pelin päälle.
 
 - Käsikirjoitus: https://claude.ai/artifact/YYef6VTmqtmEmZJPU8M6mN
 - Puuttuvat ominaisuudet: `../tarvittavat_ominaisuudet/README.md`
@@ -124,8 +124,8 @@ export const VESILETKU = {
 ## Hahmot maailmassa (`hahmot.js`)
 
 Tarinan hahmot seisovat pelissä omilla malleillaan: `npc_tapsa`, `npc_lumi`, `npc_terttu`, `npc_varjo`, `npc_vartija` ja `npc_myyja`
-(repon juuri, klipit Idle/Walk/Run/Dance…). Malli määritellään tiedostossa `data/hahmot.json` (`malli`). **Harjulla ja kuriirilla ei vielä ole mallia** (`malli: null`):
-he puhuvat vain ruudulla. Rami on pelaajan oma `hahmo.js`.
+(repon juuri, klipit Idle/Walk/Run/Dance…), ja 21.11.2026 alkaen myös `npc_harju`, `npc_kuriiri`, `npc_vartija_b` ja `npc_vartija_c`. Malli määritellään
+tiedostossa `data/hahmot.json` (`malli`). Rami on pelaajan oma `hahmo.js`.
 
 Mistä hahmot tulevat (moottorin `hahmolista()` → tapahtuma `hahmot`):
 1. `data/maailma.json` `aina`: aina paikalla, esim. Terttu kojullaan torilla. Valinnainen `ehto`.
@@ -134,6 +134,11 @@ Mistä hahmot tulevat (moottorin `hahmolista()` → tapahtuma `hahmot`):
 4. Vaiheen `hahmot` ovat paikalla vain sen vaiheen ajan.
 
 Sijoitus: `{ "h": "TAPSA", "paikka": { "paikka": "LOC_KORJAAMO_OVI", "dx": 2 }, "suunta": "pelaaja" | asteet (0 = pohjoinen), "anim": "Idle" }`.
+Lisäkentät: `"malli": "npc_vartija_b"` vaihtaa mallin tälle sijoitukselle (vartijan muunnelmat; hahmo pysyy VARTIJAna, joten repliikit ja testit eivät muutu).
+`"mene": paikka` ja `"nopeus": m/s` panevat hahmon kulkemaan suoraan kohteeseen (Walk, yli 2,4 m/s Run), ja perillä se katoaa – näin M05:n kuriiri juoksee pois ovelta.
+
+Missä uudet hahmot ovat: **Harju** seisoo aina Etelärannan toisella ponttonilaiturilla (`maailma.json`, paikka on omistajan valinta, tarkista käsikirjoituksesta M07–M26),
+**vartijat A, B ja C** korjaamon ovella M04:n alussa, **kuriiri** juoksee korjaamon ovelta M05:n alussa.
 Puhuva hahmo kääntyy pelaajaa kohti. Korkeus tulee pelin `roofAt`-funktiosta (katu, laituri, silta). Mallit ladataan vasta tarvittaessa, kerran per malli.
 Kokeilusivulla **Z** vaihtaa lähikuvaan, jossa hahmot näkyvät.
 
@@ -151,9 +156,9 @@ Kokeilusivulla **Z** vaihtaa lähikuvaan, jossa hahmot näkyvät.
 ## Tila ja rajoitukset
 
 - **Testattu:** `node tarina/testi.mjs` (14/14), joka pelaa Luvun 1 läpi ja kokeilee epäonnistumiset, tarkistuspisteet, tallennuksen ja luovutuksen. Lisäksi `kokeilu.html` headless-selaimessa: merkit, dialogi, cut, kilpa, epäonnistumis- ja läpäisyruutu sekä valikko toimivat ilman konsolivirheitä.
-- **Ei testattu oikeassa pelissä.** Sovitin olettaa, että `window.__walk.on`, `window.__car.type`, body-luokka `car` ja `__game.S.{x, y, alt, hp, dead}` toimivat kuten 20.11. koodissa.
+- **Oikeassa pelissä testattu vain headless 21.11.2026** (hahmot paikoillaan, M04:n vartijat, M05:n kuriiri, ei konsolivirheitä); tehtäviä ei ole pelattu käsin. Sovitin olettaa, että `window.__walk.on`, `window.__car.type`, body-luokka `car` ja `__game.S.{x, y, alt, hp, dead}` toimivat kuten 20.11. koodissa.
 - **Paikat ovat arvioita** (`tarkista: true`), samoin M02:n kilpaportit. Mittaa ne pelissä kehittäjätilassa (Ctrl+Shift+K).
-- Tapsa, Lumi ja muut hahmot eivät vielä näy maailmassa: repliikit tulevat ruudulle, ja Tapsan kilpa on aikaraja. Hahmot tarvitsevat mallit (ks. puuttuvat ominaisuudet).
+- Hahmot seisovat paikoillaan (Idle) tai kulkevat suoraa viivaa (`mene`); reitinhakua ei ole, ja Tapsan kilpa on yhä aikaraja. Hyppykoneessa ja laskuvarjohypyssä X, P ja O ovat koneen omia eivätkä ohjaa tarinaa.
 - **Puuttuvat toiminnot:** hiiviskely, vesiletku, drooni ja Varjo-mittarin varsinainen jahtaus. Ne ohitetaan automaattisesti. `varjo_mittari` näyttää nyt vain tähdet.
 - **Merkkien korkeus:** pilari ulottuu 6 m maan alle ja 64 m ylös, joten maaston korkeus ei haittaa. Rengas on tasolla 0.
 - **Kun index.html pilkotaan:** `peli.js`:n `maailma()` ja `siirra()` ovat ainoat kohdat, jotka lukevat pelin sisäistä tilaa.
