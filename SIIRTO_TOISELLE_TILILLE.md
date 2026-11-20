@@ -1980,3 +1980,9 @@ bottilohkon ryhmä- ja hahmosilmukka), `npc_*.js` ja `hahmo.js` (uudet klipit `D
   konsolivirheitä; `solid_test.js` läpi. **EI kuunneltu** (pilvessä ei ääntä): osuuko liike korvakuulolta iskuun, ja iskunhaun mahdollinen puoli-/tuplatempo.
 - **Tiedossa:** tahdin "ykkönen" on arvaus (4 iskun jakso alkaa ensimmäisestä löydetystä iskusta); istujat eivät reagoi musiikkiin; musiikki ei kuulu
   muille paikoista (ei etäisyysvaimennusta, se on pelaajan oma soitin).
+
+## 20.11.2026 – Pohjoiskauppatorin puut ja penkit pois (omistaja: "penkit ja puut pohjoiskauppatorilta voi poistaa, siellä ei ole penkkejä")
+- `index.html`, puulohko: viisi OSM-puuta torin pohjoisreunasta (n. 12 m Pohjoiskauppatorin keskilinjasta etelään) poistetaan `LIST`istä arvontojen jälkeen:
+  (107.1, 99), (97.2, 101.1), (89.5, 102.8), (81.4, 104.5), (30.5, 116.8). Rengaspenkit seuraavat `window.__treeList`iä, joten nekin jäivät pois (4 kpl).
+- Torin itäreunan (Yrjönkadun puoli) kaksi puuta (104.7, 88.3) ja (102.6, 78.9) rengaspenkkeineen ovat yhä paikallaan – omistaja ei maininnut niitä.
+- Tarkistettu headless: rengaspenkkejä 14 (ennen 18), ei yhtään 15 m lähempänä Pohjoiskauppatoria; ei konsolivirheitä.

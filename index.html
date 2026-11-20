@@ -1397,6 +1397,7 @@ function loadModel(name, done) {
     if (v < 0.1 && inCore(tx, ty)) continue;   // owner 18.11.2026: no spruces in the centre (they were random picks, not real spruces)
     addTree(tx, ty, v < 0.1 ? 2 : v < 0.38 ? 1 : 0, false); LIST[LIST.length - 1].i = i;
     if (Math.hypot(tx + 1942.5, ty - 191.85) < 4.5) LIST.pop(); }   // no tree in the mausoleum doorway (popped after the random draws, so the other trees keep theirs)
+  for (const [tx, ty] of [[107.1, 99], [97.2, 101.1], [89.5, 102.8], [81.4, 104.5], [30.5, 116.8]]) { const i = LIST.findIndex(t => Math.hypot(t.x - tx, t.y - ty) < 0.6); if (i >= 0) LIST.splice(i, 1); }      // owner 20.11.2026: no trees (and so no ring benches) on Pohjoiskauppatori, the north edge of the square: "siellä ei ole penkkejä". Taken out after the random draws, so the other trees keep theirs
   LIST.push({ x: 93.3, y: -32.0, k: 0, sc: 1.12, sy: 1.2, rot: 2.1, c: [0.92, 0.94, 0.88], fc: 1 });      // owner 20.11.2026: one more street tree (with its ring bench) on Yrjönkatu between Itäpuisto and Nortamonkatu, in line with the others (2 m east of the centre line); fixed values, so the random draws of the other trees stay as they were
   window.__treeList = LIST;      // the ring benches (people on foot: places to sit) stand round these
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), UPV = THREE.Object3D.DEFAULT_UP;
