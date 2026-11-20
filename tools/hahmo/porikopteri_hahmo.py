@@ -870,6 +870,24 @@ class Poser:
             self.arm(P, sd, s, 50, 30, 10)
         return self.common(P, 30), 0.0
 
+    def chair(self, t):
+        """Istuu tuolilla tai penkilla (bottikavelijat): reidet vaakasuorassa, saaret alas, jalkapohjat maassa, kadet reisilla, hengitys ja hidas
+        paan kaanto. Origo on istuinpinnan tasossa lantion alla (istuinpinta = lonkkanivel - 0,075 m), joten pelissa hahmo asetetaan istuimen korkeudelle."""
+        b, b2 = sin(2 * pi * t), sin(4 * pi * t)
+        qp = Q(X, -9)                                      # lantio kallistuu taakse
+        P = {"pelvis": qp, "spine_01": Q(X, 5), "spine_02": Q(X, 5 + 0.6 * b2), "spine_03": Q(X, 3 + 0.8 * b2),
+             "neck_01": Q(Z, 7 * b) @ Q(X, -1), "head": Q(Z, 9 * b) @ Q(X, -2 - 0.5 * b2)}
+        H = self.H
+        for sd, s in (("l", 1), ("r", -1)):
+            qt = Q(X, -85) @ Q(Y, s * 5.5)                 # reisi eteen, polvet lonkan leveydella
+            qc = qt @ Q(X, 82)                             # saari lahes pystyyn, jalkatera hieman polven edessa
+            P["thigh_" + sd] = qp.inverted() @ qt
+            P["calf_" + sd] = Q(X, 82)
+            P["foot_" + sd] = qc.inverted() @ Q(Z, s * 9)
+            self.arm(P, sd, s, 3 + 0.5 * b2, 57, 9)        # kammenet reisilla
+        hip = H["pelvis"] + qp @ (H["thigh_l"] - H["pelvis"])
+        return self.common(P, 26), Vector((0.0, 0.0, 0.075 - hip.z))
+
 def bake_action(arm, name, nframes, posefn):
     act = bpy.data.actions.new(name)
     ad = arm.animation_data or arm.animation_data_create()

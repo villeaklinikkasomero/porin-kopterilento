@@ -1841,3 +1841,32 @@ pyörän `Crank`/`Wheel_*`/`Steering` ohjeen mukaan; lainaus samalla tavalla kui
 - **Tekemättä / tiedossa:** kävelijät eivät väistä toisiaan; polkupyörät (c33) ja patsaat eivät ole esteitä; kopteri ei ole este liikenteelle; pelaajan auto
   ei pysähdy kävelijään (omistajan toive: botti väistää) – jos kävelijä on seinän ja auton välissä, auto voi yhä mennä läpi; liikenteen auto, joka kääntyy
   kulmasta pelaajan auton kylkeen, menee yhä läpi (vanha rajoitus).
+
+## 20.11.2026 klo 13 – Istumapaikat ulos: penkit, terassit ja istuvat botit (omistaja: "saadaanko botit istumaan tuolille", "kartoita minkälaisia penkkejä kävelykadulla on")
+
+**Muutettu:** `index.html` (lohko "places to sit" bottilohkossa ennen `let acc = 0`, 5 koukkua bottilohkossa, `SOLID.parked` lukee myös `window.__furn`in,
+puulohkoon `window.__treeList`), `npc_*.js` (uusi klippi `Chair`), `hahmo.js` (Walk/Run leivottu uudestaan, ks. alla), `tools/hahmo/porikopteri_hahmo.py`
+(`Poser.chair`), `tools/hahmo/kavely_glb.py` (`--add Chair`).
+
+- **Kartoitus** (Street View kesä 2019, Yrjönkatu 12–16; uudempaa kuvaa ei katsottu): (1) Eetunaukiolla tummat selkänojattomat lankkupenkit, (2) katupuiden
+  ympärillä punaruskeat rengaspenkit ja puunsuoja, (3) kahviloiden terassit: punaiset tolpat ja köysi, vaaleat käsinojatuolit, pienet pyöreät pöydät.
+  OSM:ssä kävelykadulla ei ole penkkejä (vain 7 penkkiä puistoissa), mutta kahvilat ja ravintolat ovat (`POI`-lista koodissa, 24 kpl).
+- **Kalusteet** tehdään koodissa laatikoista ja sylintereistä (ei mallitiedostoa), yksi InstancedMesh / laji, korkeus `carGround`. Paikat lasketaan pelin
+  omista tiedoista käynnistyksen jälkeen (`seatBuild`, kun walk.js, roads.js, puut ja bottimallit on ladattu): rengaspenkki jokaisen puun ympärille, joka on
+  <4 m kävelykadun keskilinjasta; terassi OSM-kahvilan eteen (pisteestä ulos talosta kohti katua, 1–3 pöytää seinän suuntaisesti, enint. 12 terassia, ei
+  11 m lähempänä toisiaan); lankkupenkki n. 40 m välein kävelykatujen varteen; selkänojallinen puistonpenkki OSM-penkkien paikoille. Pilvessä tuli
+  17 rengaspenkkiä, 28 lankkupenkkiä, 5 puistonpenkkiä, 9 terassia (27 pöytää, 66 tuolia), 228 istumapaikkaa.
+- **Esteet:** kaikki kalusteet ovat `window.__furn`issa ja `SOLID`in ruudukossa: pelaaja, kävelijät ja autot eivät pääse läpi (köysikin on este).
+- **Istujat:** (a) osa paikoista on varattu, kun pelaaja on <75 m (`SITTERS`, enint. 16, kosketuslaitteella 6; terassituoleista 50 %, penkeistä n. 20 %);
+  (b) ohi kulkeva 1–2 hengen ryhmä istahtaa vapaalle penkille 14–40 s (`p.sit`, `seatMove`: penkin eteen, käännös, istuu, nousee, jatkaa; sama ryhmä
+  aikaisintaan 3 min päästä). Istuvaa ei voi kävellä läpi. Asento = `Chair`-klippi (origo istuinpinnan tasossa; hahmo nostetaan 0,45 m).
+- **hahmo.js:** c34:n uusi malli (Cycle) oli tuonut VANHAN Walk/Run-askelluksen takaisin (länkisääret). Leivottu uudestaan:
+  `python tools/hahmo/kavely_glb.py hahmo.js --clips Walk,Run` (Cycle, Idle ja Sit koskemattomia). **Jos mallichat tekee hahmon uudestaan, sen pitää käyttää
+  tämän kansion `porikopteri_hahmo.py`:tä tai ajaa tuo komento perään.**
+- **Tarkistettu oikeassa pelissä headless** (pilveen haettu pelin ydintiedostot ilman bl_-lohkoja; `__npc.update` ajettu käsin, kamera asetettu itse):
+  kalusteet paikoillaan Yrjönkadulla, istujat terassilla ja penkillä, ohikulkija istui ja jatkoi matkaa, ei konsolivirheitä; `solid_test.js` läpi.
+- **EI tehty vielä (omistaja valitsi myös nämä):** botit sisätiloihin – teatterin kahvilan tuolit, teatterin sali, jäähallin katsomo, kirkon penkit.
+  Jäähallin sisätilaa muokattiin samaan aikaan toisessa istunnossa, joten tämä jätettiin omaksi vaiheekseen.
+- **Tiedossa:** torilla ei ole omia penkkejä (vain terassit ja reunan puiden rengaspenkit); penkin paikka on laskettu, ei mitattu (voi olla keskellä
+  kulkuväylää); terassi tulee jokaisen listatun kahvilan eteen, jos tilaa on – oikeasti kaikilla ei ole terassia; pelaaja ei voi itse istua;
+  lapset eivät istu yksin (vain aikuiset varatuilla paikoilla), mutta perheet eivät istahda penkille (vain 1–2 hengen ryhmät).

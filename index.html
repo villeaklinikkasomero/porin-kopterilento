@@ -1389,6 +1389,7 @@ function loadModel(name, done) {
     if (v < 0.1 && inCore(tx, ty)) continue;   // owner 18.11.2026: no spruces in the centre (they were random picks, not real spruces)
     addTree(tx, ty, v < 0.1 ? 2 : v < 0.38 ? 1 : 0, false); LIST[LIST.length - 1].i = i;
     if (Math.hypot(tx + 1942.5, ty - 191.85) < 4.5) LIST.pop(); }   // no tree in the mausoleum doorway (popped after the random draws, so the other trees keep theirs)
+  window.__treeList = LIST;      // the ring benches (people on foot: places to sit) stand round these
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), UPV = THREE.Object3D.DEFAULT_UP;
   // far crowns: deciduous = squashed icosahedron on a short trunk, spruce = two stacked cones (about 30 triangles each)
   const BG = (() => { const g = new THREE.IcosahedronGeometry(1, 0); g.scale(3.2, 3.4, 3.2); g.translate(0, 6.6, 0); const t = new THREE.CylinderGeometry(0.22, 0.3, 3.6, 5); t.translate(0, 1.8, 0);
@@ -1657,6 +1658,7 @@ function carGround(x, y) {
 // ---------- solid cars and people (owner 20.11.2026: "bottien läpi ei kuuluisi päästä kävelemään, eikä myöskään autojen") ----------
 // Every car is a box (centre, heading, half length, half width), every walker a circle. One list per rendered frame: the traffic and race cars, the
 // player's own vehicle, the car or helicopter left behind, the player on foot; the aerial-photo parked cars come from an 8 m grid (window.__parked).
+//    The street furniture (window.__furn: benches, terrace tables, chairs and fences) is in the same grid.
 //  - on foot the player cannot step into a car or a walker (walkHit); only a move that brings them closer is refused, so nobody gets stuck
 //  - driving, the player's car cannot enter a parked car (carHit, called by carBlocked; the moving traffic was already there)
 //  - a walker (npcStep) waits for a moving car, walks round a standing one by its corners, walks round the player, and steps aside from the
@@ -1664,7 +1666,7 @@ function carGround(x, y) {
 //  - the traffic brakes for people on its lane (cars.update asks walkers()), and a party waits at the kerb while a car is coming (coming)
 const SOLID = (() => {
   const DIM = [[2.1, 0.95], [2.3, 0.97], [2.1, 0.95], [2.45, 1.1], [2.45, 1.1], [2.45, 1.1], [2.45, 1.1]], PR = 0.3, NR = 0.35, out = [0, 0], ME = { x: 0, y: 0 };   // DIM: cars.js car0..car3 (mirrors left out)
-  let dyn = [], wk = [], lastF = -1, pg = null, pn = -1;
+  let dyn = [], wk = [], lastF = -1, pg = null, pn = -1, pA = null, pF = null; const NONE = [];
   // kind: 0 standing, 1 traffic, 2 the player's car when driven or a race car (people step aside), 3 the player on foot
   const mk = (x, y, yaw, hl, hw, v, kind) => ({ x, y, sn: Math.sin(yaw), cs: Math.cos(yaw), hl, hw, v, kind, me: false });
   const frame = () => { const f = renderer.info.render.frame; if (f === lastF) return; lastF = f; dyn = []; wk = [];
@@ -1676,9 +1678,9 @@ const SOLID = (() => {
       if (TAKE.left) { const l = TAKE.left, y = CARTY[l.type] || CARTY.hatch; dyn.push(mk(l.x, l.y, l.yaw, y.hl, y.hw, 0, 0)); }
       if (TAKE.heli && VEH === 'car') dyn.push(mk(TAKE.heli.x, TAKE.heli.y, TAKE.heli.yaw, 2.6, 1.0, 0, 0));
       if (foot && !WALK.in) { ME.x = WALK.x; ME.y = WALK.y; wk.push(ME); dyn.push(mk(WALK.x, WALK.y, 0, 0.12, 0.12, 0, 3)); }
-      if (window.__npc) for (const p of window.__npc.parties) for (const c of p.m) if (c.g.visible) wk.push(c);
+      if (window.__npc) { for (const p of window.__npc.parties) for (const c of p.m) if (c.g.visible) wk.push(c); for (const c of window.__npc.sitters || []) if (c.g.visible) wk.push(c); }
     } catch (e) {} };
-  const parked = (x, y, L) => { const P = window.__parked; if (!P) return; if (pn !== P.length) { pg = new Map(); pn = P.length; for (const p of P) { const k = Math.floor(p.x / 8) * 4096 + Math.floor(p.y / 8); let l = pg.get(k); if (!l) pg.set(k, l = []); if (!p.box) { const d = DIM[p.k] || DIM[0]; p.box = mk(p.x, p.y, p.yaw, d[0] * 0.97, d[1] * 0.97, 0, 0); } l.push(p); } }
+  const parked = (x, y, L) => { const P0 = window.__parked || NONE, F = window.__furn || NONE; if (pn !== P0.length + F.length || pA !== P0 || pF !== F) { pg = new Map(); pn = P0.length + F.length; pA = P0; pF = F; for (const p of P0.concat(F)) {      /* parked cars and the street furniture (benches, terraces) */ const k = Math.floor(p.x / 8) * 4096 + Math.floor(p.y / 8); let l = pg.get(k); if (!l) pg.set(k, l = []); if (!p.box) { const d = DIM[p.k] || DIM[0]; p.box = p.hl ? mk(p.x, p.y, p.yaw, p.hl, p.hw, 0, 0) : mk(p.x, p.y, p.yaw, d[0] * 0.97, d[1] * 0.97, 0, 0); } l.push(p); } }
     const cx = Math.floor(x / 8), cy = Math.floor(y / 8); for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const l = pg.get((cx + i) * 4096 + cy + j); if (l) for (const p of l) if (!p.gone) L.push(p.box); } };
   const near = (x, y, r) => { frame(); const L = []; for (const b of dyn) if (Math.abs(b.x - x) < r + b.hl && Math.abs(b.y - y) < r + b.hl) L.push(b); parked(x, y, L); return L; };
   const sd = (b, x, y) => { const dx = x - b.x, dy = y - b.y, qx = Math.abs(dx * b.sn + dy * b.cs) - b.hl, qy = Math.abs(dx * b.cs - dy * b.sn) - b.hw; return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0); };
@@ -2660,26 +2662,131 @@ setTarget();
     bp.hold = 3.2; huT = Math.max(huT, performance.now() + 2500); if (window.__case && window.__case.ask && window.__case.ask(v)) return; toast('💬 ' + L[i], 3);
     try { huEl = huEl || new Audio(); huEl.src = './radio/huuto_' + v + '_' + String(i + 1).padStart(2, '0') + '.mp3'; huEl.volume = soundOn ? 0.9 : 0; huEl.play().catch(() => {}); } catch (e) {} };
   $('thei').addEventListener('pointerdown', e => { e.preventDefault(); if (WALK.on && !WALK.in) greet(false); });
+  // ---------- places to sit (owner 20.11.2026: "saadaanko botit istumaan tuolille"; "kartoita minkälaisia penkkejä kävelykadulla on") ----------
+  // Street View (summer 2019) shows on the pedestrian street: dark backless plank benches (Eetunaukio), red-brown ring benches round the street trees
+  // with a tree guard, and café terraces fenced with red posts and rope (light armchairs, small round tables). Built here from boxes and cylinders
+  // (no model file): one instanced mesh per kind, heights from carGround. Terraces stand in front of the cafés and restaurants OpenStreetMap has
+  // on the pedestrian streets and the square (POI below), park benches where OpenStreetMap has a bench. Everything goes to window.__furn, so
+  // SOLID keeps the player, the walkers and the cars out of it.
+  // People: some seats are taken while the player is near (SITTERS, own models with the Chair clip of npc_*.js), and a passing party of one or
+  // two sits down on a free bench for a while (p.sit) and walks on.
+  const SEATS = [], SITTERS = [], FURN = [], SMAX = matchMedia('(pointer: coarse)').matches ? 6 : 16; let seatsOn = false, seatTry = 0;
+  const POI = [['Caffé Locale', 61.4854, 21.797822], ['Ice Cream House', 61.48524, 21.797974], ['Shots', 61.485212, 21.797929], ['Torrero', 61.485591, 21.797877], ['Petras Café', 61.4859, 21.797531], ['Kalevi', 61.485969, 21.797576],
+    ['Pub Jussikka', 61.485887, 21.798099], ['Kotipizza', 61.486147, 21.796471], ['Espresso House', 61.48428, 21.797214], ['Burger King', 61.484327, 21.797255], ['Burger Company', 61.484498, 21.797339], ['Seoul Crunch', 61.484628, 21.79739],
+    ['Coffee House', 61.483856, 21.797007], ['Café Teljäntori', 61.484429, 21.795921], ['Jätskibaari Vohveli', 61.484254, 21.796111], ['Cafe Anton', 61.487372, 21.795937], ['Hesburger', 61.486847, 21.796544], ['Galle', 61.487235, 21.796972],
+    ['Borg', 61.48521, 21.79697], ['Cafe Europa', 61.486387, 21.798313], ['Mäkilän Leipomo', 61.486539, 21.795482], ['Päre', 61.486635, 21.795531], ['06 Tori Pizzeria', 61.48727, 21.796554], ['Rosso', 61.487186, 21.795847]];
+  const OSMB = [[61.485126, 21.799022, 0], [61.485048, 21.791777, 2], [61.485078, 21.791571, 2], [61.48535, 21.791701, 2], [61.485327, 21.791918, 2], [61.482949, 21.790774, 0], [61.482973, 21.790539, 2]];      // OpenStreetMap amenity=bench: lat, lon, kind (2 = with a backrest)
+  const hs = (a, b) => { let x = (Math.imul(a | 0, 73856093) ^ Math.imul(b | 0, 19349663)) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
+  const seatBuild = () => {
+    const V3 = THREE.Vector3, M4 = THREE.Matrix4, QQ = THREE.Quaternion, one = new V3(1, 1, 1), E3 = new THREE.Euler();
+    const bx = (w, h, d, x, y, z, c, ry = 0, rx = 0) => [new THREE.BoxGeometry(w, h, d), new M4().compose(new V3(x, y, z), new QQ().setFromEuler(E3.set(rx, ry, 0, 'YXZ')), one), c];
+    const cy = (r0, r1, h, x, y, z, c, n = 10) => [new THREE.CylinderGeometry(r0, r1, h, n), new M4().makeTranslation(x, y, z), c];
+    const merge = parts => { let n = 0; const G = parts.map(([g, m, c]) => { const q = g.index ? g.toNonIndexed() : g; q.applyMatrix4(m); n += q.attributes.position.count; return [q, new THREE.Color(c)]; });
+      const P = new Float32Array(n * 3), Nn = new Float32Array(n * 3), C = new Float32Array(n * 3); let o = 0;
+      for (const [q, c] of G) { const k = q.attributes.position.count; P.set(q.attributes.position.array, o * 3); Nn.set(q.attributes.normal.array, o * 3); for (let i = 0; i < k; i++) { C[(o + i) * 3] = c.r; C[(o + i) * 3 + 1] = c.g; C[(o + i) * 3 + 2] = c.b; } o += k; q.dispose(); }
+      const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('normal', new THREE.BufferAttribute(Nn, 3)); g.setAttribute('color', new THREE.BufferAttribute(C, 3)); return g; };
+    // the models: y up, the sitter faces -z, width along x
+    const DK = 0x2c2e30, RD = 0x7d3026, RD2 = 0x8e3028, IR = 0x2a211f, GN = 0x1f3a2a, WD = 0x8a5a33, CH = 0xcbc8c0, TB = 0xd9d6cd, BK = 0x1c1c1c, ring = [];
+    for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, s = Math.sin(a), c = Math.cos(a); ring.push(bx(0.70, 0.06, 0.44, s * 0.80, 0.42, c * 0.80, RD, a), bx(0.06, 0.39, 0.36, s * 0.80, 0.195, c * 0.80, IR, a), bx(0.30, 0.55, 0.02, s * 0.36, 0.74, c * 0.36, RD, a),
+      cy(0.013, 0.013, 1.5, Math.sin(a + 0.39) * 0.39, 1.2, Math.cos(a + 0.39) * 0.39, IR, 5), bx(0.32, 0.03, 0.03, s * 0.37, 1.93, c * 0.37, IR, a), bx(0.32, 0.03, 0.03, s * 0.37, 1.25, c * 0.37, IR, a)); }
+    const GEO = [
+      merge([bx(1.8, 0.07, 0.13, 0, 0.415, -0.15, DK), bx(1.8, 0.07, 0.13, 0, 0.415, 0, DK), bx(1.8, 0.07, 0.13, 0, 0.415, 0.15, DK), bx(0.10, 0.38, 0.40, -0.62, 0.19, 0, DK), bx(0.10, 0.38, 0.40, 0.62, 0.19, 0, DK), bx(1.24, 0.08, 0.06, 0, 0.30, 0, DK)]),      // 0 plank bench
+      merge(ring),                                                                                                                                                                                                                                  // 1 ring bench round a tree
+      merge([bx(1.6, 0.035, 0.10, 0, 0.44, -0.14, WD), bx(1.6, 0.035, 0.10, 0, 0.44, -0.02, WD), bx(1.6, 0.035, 0.10, 0, 0.44, 0.10, WD), bx(1.6, 0.10, 0.03, 0, 0.62, 0.20, WD, 0, -0.2), bx(1.6, 0.10, 0.03, 0, 0.78, 0.235, WD, 0, -0.2),
+        bx(0.05, 0.44, 0.05, -0.7, 0.22, -0.16, GN), bx(0.05, 0.44, 0.05, 0.7, 0.22, -0.16, GN), bx(0.05, 0.86, 0.05, -0.7, 0.43, 0.21, GN, 0, -0.1), bx(0.05, 0.86, 0.05, 0.7, 0.43, 0.21, GN, 0, -0.1), bx(0.05, 0.04, 0.42, -0.7, 0.42, 0.02, GN), bx(0.05, 0.04, 0.42, 0.7, 0.42, 0.02, GN)]),      // 2 park bench
+      merge([bx(0.46, 0.05, 0.44, 0, 0.425, 0, CH), bx(0.46, 0.42, 0.04, 0, 0.68, 0.225, CH, 0, -0.14), bx(0.04, 0.04, 0.40, -0.25, 0.63, 0.02, CH), bx(0.04, 0.04, 0.40, 0.25, 0.63, 0.02, CH), bx(0.035, 0.63, 0.035, -0.25, 0.315, -0.18, CH), bx(0.035, 0.63, 0.035, 0.25, 0.315, -0.18, CH),
+        bx(0.035, 0.45, 0.035, -0.22, 0.225, 0.2, CH), bx(0.035, 0.45, 0.035, 0.22, 0.225, 0.2, CH)]),                                                                                                                                            // 3 terrace armchair
+      merge([cy(0.36, 0.36, 0.03, 0, 0.735, 0, TB, 16), cy(0.03, 0.03, 0.70, 0, 0.37, 0, BK, 8), cy(0.20, 0.23, 0.03, 0, 0.015, 0, BK, 12)]),                                                                                                      // 4 table
+      merge([cy(0.055, 0.075, 0.82, 0, 0.41, 0, RD2, 4), cy(0.0, 0.06, 0.08, 0, 0.86, 0, RD2, 4)]),                                                                                                                                                // 5 fence post
+      merge([bx(1, 0.03, 0.03, 0, 0.70, 0, BK)]) ];                                                                                                                                                                                                // 6 rope (1 m, scaled)
+    const BOX = [[0.25, 0.9], [1.05, 1.05], [0.26, 0.82], [0.25, 0.25], [0.36, 0.36], [0.08, 0.08], [0.04, 0.5]], g2 = (lat, lon) => [(lon - 21.796) * 53278, (lat - 61.486) * 111437];
+    const asph = (x, y) => ROAD.on && ROAD.asphAt && ROAD.asphAt(x, y), inB = (x, y) => bldTopAt(x, y) > TZs(x, y) + 1.0, pad = (x, y) => Math.hypot(x - HOME.x, y - HOME.y) < 16;
+    const clear = (x, y, r) => { for (const f of FURN) if (Math.hypot(f.x - x, f.y - y) < r + (f.r || 0)) return false; if (window.__bikes) for (const b of window.__bikes) if (Math.hypot(b.x - x, b.y - y) < r) return false; return true; };
+    const ok = (x, y) => walkFree(x, y) && !asph(x, y) && !pad(x, y) && inCore(x, y);
+    const put = (k, x, y, yaw, o = {}) => { const f = { k, x, y, yaw, sx: o.sx || 1, r: o.r || 0, hl: BOX[k][0], hw: BOX[k][1] * (o.sx || 1), gone: false }; FURN.push(f); return f; };
+    const seat = (f, lx, lz, dyaw, kind) => { const sn = Math.sin(f.yaw), cs = Math.cos(f.yaw); SEATS.push({ x: f.x + cs * lx + sn * lz, y: f.y - sn * lx + cs * lz, yaw: f.yaw + dyaw, h: 0.45, kind, f, occ: null, st: false }); };      // lx to the sitter's right, lz forward
+    // 1. ring benches round the trees that stand on a pedestrian street
+    const E = busyE.map(q => [q.a, q.e.n]), near = (x, y) => { let bd = 1e9, bq = null; for (const [a, b] of E) { const ex = b.x - a.x, ey = b.y - a.y, u = Math.max(0, Math.min(1, ((x - a.x) * ex + (y - a.y) * ey) / (ex * ex + ey * ey || 1))), qx = a.x + ex * u, qy = a.y + ey * u, d = Math.hypot(x - qx, y - qy); if (d < bd) { bd = d; bq = [qx, qy, ex, ey]; } } return bq && [bd, ...bq]; };
+    for (const t of window.__treeList || []) { const n = near(t.x, t.y); if (!n || n[0] > 4 || !ok(t.x, t.y) || !clear(t.x, t.y, 3)) continue; const f = put(1, t.x, t.y, Math.atan2(n[3], n[4]), { r: 1.1 });
+      for (let i = 0; i < 4; i++) { const a = f.yaw + Math.PI / 4 + i * Math.PI / 2, sx = t.x + Math.sin(a) * 1.5, sy = t.y + Math.cos(a) * 1.5; if (ok(sx, sy)) SEATS.push({ x: t.x + Math.sin(a) * 0.80, y: t.y + Math.cos(a) * 0.80, yaw: a, h: 0.45, kind: 1, f, occ: null, st: false }); } }
+    // 2. terraces in front of the cafés: from the map point out of the house towards the street, tables along the wall
+    let nt = 0; const TC = [];
+    for (const [nm, la, lo] of POI) { if (nt >= 12) break; const [px, py] = g2(la, lo); let tq = near(px, py); for (const q of busy) if (q.grid) { const d = Math.hypot(q.x - px, q.y - py); if (!tq || d < tq[0]) tq = [d, q.x, q.y, 0, 0]; }
+      if (!tq || tq[0] > 24 || tq[0] < 2) continue; const dx = (tq[1] - px) / tq[0], dy = (tq[2] - py) / tq[0]; let w = -1;
+      for (let t = 0; t < tq[0] - 2; t += 0.25) if (!inB(px + dx * t, py + dy * t) && !inB(px + dx * (t + 0.6), py + dy * (t + 0.6)) && !inB(px + dx * (t + 1.2), py + dy * (t + 1.2))) { w = t; break; }
+      if (w < 0 || tq[0] - w < 5.5) continue; const ox = px + dx * (w + 1.55), oy = py + dy * (w + 1.55), ax = dy, ay = -dx, yw = Math.atan2(dx, dy); if (TC.some(q => Math.hypot(q[0] - ox, q[1] - oy) < 11)) continue;
+      const tabs = []; for (const i of [0, -1, 1]) { const tx = ox + ax * i * 2.3, ty = oy + ay * i * 2.3; if (ok(tx, ty) && ok(tx + ax * 0.8, ty + ay * 0.8) && ok(tx - ax * 0.8, ty - ay * 0.8) && ok(tx + dx * 1.3, ty + dy * 1.3) && !inB(tx - dx * 0.9, ty - dy * 0.9) && clear(tx, ty, 1.6)) tabs.push(i); }
+      if (tabs.length < 2 && !tabs.includes(0)) continue; TC.push([ox, oy]); nt++; const lo_ = Math.min(...tabs), hi = Math.max(...tabs);
+      for (const i of tabs) { const tx = ox + ax * i * 2.3, ty = oy + ay * i * 2.3; put(4, tx, ty, yw, { r: 1.2 });
+        for (const s of [1, -1]) seat(put(3, tx + ax * s * 0.78, ty + ay * s * 0.78, Math.atan2(-ax * s, -ay * s)), 0, 0.02, 0, 3);
+        if (hs(nt, i + 5) < 0.5) seat(put(3, tx - dx * 0.80, ty - dy * 0.80, yw), 0, 0.02, 0, 3); }
+      const a0 = lo_ * 2.3 - 1.45, a1 = hi * 2.3 + 1.45, fr = 1.45, bk = -1.25, P = (a, d) => [ox + ax * a + dx * d, oy + ay * a + dy * d], rope = (p, q) => { const L = Math.hypot(q[0] - p[0], q[1] - p[1]); put(6, (p[0] + q[0]) / 2, (p[1] + q[1]) / 2, Math.atan2(q[0] - p[0], q[1] - p[1]) + Math.PI / 2, { sx: L }); };
+      const n = Math.max(2, Math.round((a1 - a0) / 1.6)), fp = []; for (let i = 0; i <= n; i++) fp.push(P(a0 + (a1 - a0) * i / n, fr)); const gap = Math.floor(n / 2);      // the fence: posts along the street side with a gap to walk in, a rope back to the wall at both ends
+      fp.forEach((p, i) => { put(5, p[0], p[1], yw); if (i && i - 1 !== gap) rope(fp[i - 1], p); }); for (const a of [a0, a1]) { const q = P(a, bk); put(5, q[0], q[1], yw); rope(P(a, fr), q); } }
+    // 3. plank benches along the pedestrian streets, about every 40 m, beside the walking line and facing it
+    let nb = 0; for (const [a, b] of E) { const L = Math.hypot(b.x - a.x, b.y - a.y), ux = (b.x - a.x) / L, uy = (b.y - a.y) / L; if (L < 12 || a.x > b.x || (a.x === b.x && a.y > b.y)) continue;      /* busyE has every edge both ways */
+      for (let s = 8 + hs(a.x * 10, a.y * 10) * 20; s < L - 6 && nb < 44; s += 40) { const cx = a.x + ux * s, cy_ = a.y + uy * s, s0 = hs(cx * 10, cy_ * 10) < 0.5 ? 1 : -1;
+        for (const sd of [s0, -s0]) { let done = false; for (const lat of [3.4, 4.6, 2.6]) { const x = cx + uy * lat * sd, y = cy_ - ux * lat * sd;
+            if (ok(x, y) && ok(x + ux * 0.9, y + uy * 0.9) && ok(x - ux * 0.9, y - uy * 0.9) && !inB(x + uy * sd * 0.8, y - ux * sd * 0.8) && clear(x, y, 5)) { const f = put(0, x, y, Math.atan2(-uy * sd, ux * sd), { r: 1 }); for (const lx of [-0.6, 0, 0.6]) seat(f, lx, 0.02, 0, 0); nb++; done = true; break; } }
+          if (done) break; } } }
+    // 4. the benches OpenStreetMap knows (parks): facing the nearest footway
+    for (const [la, lo, k] of OSMB) { const [x, y] = g2(la, lo); if (!walkFree(x, y) || !clear(x, y, 2)) continue; let bn = null, bd = 60; for (const q of net) { const d = Math.hypot(q.x - x, q.y - y); if (d < bd && d > 0.5) { bd = d; bn = q; } }
+      const f = put(k, x, y, bn ? Math.atan2(bn.x - x, bn.y - y) : 0, { r: 1 }); for (const lx of k === 2 ? [-0.4, 0.4] : [-0.6, 0, 0.6]) seat(f, lx, 0.02, 0, k); }
+    // draw: one instanced mesh per kind
+    const mat = new THREE.MeshLambertMaterial({ vertexColors: true }); mat.userData.noT = true; const m4 = new M4(), p3 = new V3(), q4 = new QQ(), s3 = new V3(), UPV = new V3(0, 1, 0);
+    GEO.forEach((g, k) => { const L = FURN.filter(f => f.k === k); if (!L.length) return; const im = new THREE.InstancedMesh(g, mat, L.length); im.userData.noT = true; im.frustumCulled = false;
+      L.forEach((f, i) => { f.z = carGround(f.x, f.y) ?? TZs(f.x, f.y); p3.set(f.x, f.z, -f.y); q4.setFromAxisAngle(UPV, -f.yaw); s3.set(f.sx, 1, 1); im.setMatrixAt(i, m4.compose(p3, q4, s3)); }); scene.add(im); });
+    SEATS.forEach((s, i) => { s.z = carGround(s.x, s.y) ?? TZs(s.x, s.y); s.st = hs(i, 7) < [0.2, 0.18, 0.3, 0.5][s.kind]; });
+    window.__furn = FURN; seatsOn = true; };
+  const sitDown = (c, s) => { c.x = s.x; c.y = s.y; c.z = s.z; c.yaw = s.yaw; c.g.position.set(s.x, s.z + s.h, -s.y); c.g.rotation.y = -s.yaw; };
+  const freeChar = c => { scene.remove(c.g); c.mix.stopAllAction(); for (const m of c.g.mats || []) m.dispose(); if (c.seat) c.seat.occ = null; };
+  const seatTick = (px, py) => {      // four times a second
+    if (!seatsOn) { if (net && KIND.every(k => MOD[k]) && (window.__roads || ++seatTry > 40) && (window.__treeList || seatTry > 40)) { try { seatBuild(); } catch (e) { seatsOn = true; console.warn('seats', e); } } return; }
+    if (!MOD.mies_a.animations.some(a => a.name === 'Chair')) return;
+    for (let i = SITTERS.length - 1; i >= 0; i--) { const c = SITTERS[i]; if (Math.hypot(c.x - px, c.y - py) > 95) { freeChar(c); SITTERS.splice(i, 1); } }
+    if (SITTERS.length < SMAX) for (let i = 0; i < SEATS.length; i++) { const s = SEATS[i]; if (!s.st || s.occ || Math.hypot(s.x - px, s.y - py) > 75) continue;
+        const r = hs(i, 11), k = r < 0.32 ? 'nainen_a' : r < 0.62 ? 'nainen_b' : r < 0.93 ? 'mies_a' : 'mies_b', c = mkChar(k); c.seat = s; s.occ = c; sitDown(c, s);
+        if (c.act.Walk) c.act.Walk.stop(); c.act.Chair.play(); c.act.Chair.time = hs(i, 13) * 6; c.cur = 'Chair'; SITTERS.push(c); break; }      /* one new sitter per tick */
+    for (const p of parties) { if (p.sit || p.m.length > 2 || p.hold > 0 || p.wait || performance.now() < (p.satT || 0) || rnd() > 0.03) continue; const l = p.m[0]; if (Math.hypot(l.x - px, l.y - py) > 70) continue;
+      let bf = null, bd = 6; for (const s of SEATS) { if (s.occ || s.kind === 3) continue; const d = Math.hypot(s.x - l.x, s.y - l.y); if (d < bd && SEATS.filter(q => q.f === s.f && !q.occ).length >= p.m.length) { bd = d; bf = s.f; } }
+      if (!bf) continue; const fr = SEATS.filter(q => q.f === bf && !q.occ).sort((a, b) => Math.hypot(a.x - l.x, a.y - l.y) - Math.hypot(b.x - l.x, b.y - l.y));
+      p.sit = { T: 14 + rnd() * 26, ph: 0, e: 0 }; p.m.forEach((c, i) => { c.seat = fr[i]; fr[i].occ = c; c.sat = false; c.at2 = false; }); } };
+  const seatFrame = (dt, px, py) => { for (const c of SITTERS) { const v = Math.hypot(c.x - px, c.y - py) < 70; c.g.visible = v; if (v) c.mix.update(dt); }
+    for (const p of parties) { const s = p.sit; if (!s) continue;
+      if (s.ph === 0) { if (p.m.every(c => c.sat)) s.ph = 1; else if ((s.e += dt) > 25) s.ph = 2; }      // 0 walking to the bench (25 s at most), 1 sitting, 2 getting up
+      else if (s.ph === 1) { if ((s.T -= dt) < 0) s.ph = 2; }
+      else if (p.m.every(c => !c.seat)) { p.sit = null; p.satT = performance.now() + 180000; } } };
+  const seatMove = (p, c, dt, vis) => { const s = c.seat, fx = s.x + Math.sin(s.yaw) * 0.7, fy = s.y + Math.cos(s.yaw) * 0.7, up = p.sit && p.sit.ph === 2; let gx = fx, gy = fy, sp = 0;      // (fx, fy): standing in front of the seat
+    if (up) { if (c.sat) { c.sat = false; c.at2 = true; setAnim(c, 'Idle'); c.e = 0; } if ((c.e = (c.e || 0) + dt) < 0.45) { gx = s.x; gy = s.y; } }
+    else if (c.at2) { gx = s.x; gy = s.y; }
+    if (!c.sat) { const dx = gx - c.x, dy = gy - c.y, d = Math.hypot(dx, dy), st = Math.min(d, (c.at2 ? 0.7 : 1.25) * dt); if (d > 1e-4) { c.x += dx / d * st; c.y += dy / d * st; sp = st / Math.max(dt, 1e-3); }
+      let ty = c.at2 ? s.yaw : Math.atan2(dx, dy), a = ty - c.yaw; a = Math.atan2(Math.sin(a), Math.cos(a)); c.yaw += a * Math.min(1, dt * 7);
+      if (d < 0.06) { if (up) { if (c.e >= 0.45) { s.occ = null; c.seat = null; c.at2 = false; c.zo = 0; } } else if (!c.at2) c.at2 = true; else { c.sat = true; setAnim(c, 'Chair'); } } }
+    const g = carGround(c.x, c.y); if (g !== null) c.z += (g - c.z) * Math.min(1, dt * 10); c.zo = (c.zo || 0) + ((c.sat ? s.h : 0) - (c.zo || 0)) * Math.min(1, dt * 6);
+    c.g.position.set(c.x, c.z + c.zo, -c.y); c.g.rotation.y = -c.yaw; c.g.visible = vis;
+    if (vis) { if (!c.sat) setAnim(c, sp > 0.3 ? 'Walk' : 'Idle'); if (c.act.Walk) c.act.Walk.timeScale = Math.max(0.6, sp / STRIDE[c.k]); c.mix.update(dt); } };
   let acc = 0;
-  window.__npc = { parties, greet: () => greet(false),
+  window.__npc = { parties, sitters: SITTERS, seats: SEATS, greet: () => greet(false),
     arrive: (x, y) => { if (!net || count() > NMAX + 6) return; let b = null, bd = 30; for (const q of net) { const d = Math.hypot(q.x - x, q.y - y); if (d < bd) { bd = d; b = q; } } if (!b) return;   // people getting out of a car that has just parked: they walk to the nearest footway
       const r = rnd(), ks = r < 0.5 ? [adult()] : r < 0.8 ? [adult(), adult()] : [guard(), child()]; if (ks.some(k => !MOD[k])) return;
       const p = { a: { x, y, nb: [{ n: b, c: 0 }] }, b, c: 0, pc: 0, t: 0, v: 1.2, wait: false, lat: (rnd() - 0.5) * 7, m: ks.map(mkChar) };
       p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.x = x; c.y = y; c.z = carGround(x, y) ?? 0; c.new = true; }); parties.push(p); },
     update: dt => { if (!net || dt <= 0) return; const px = S.x, py = S.y;
-    acc += dt; if (acc > 0.25) { acc = 0; if (WALK.on && !WALK.in) greet(true);       /* walking up to somebody (2.6 m) makes them speak; H still calls from further away */
+    seatFrame(dt, px, py);
+    acc += dt; if (acc > 0.25) { acc = 0; seatTick(px, py); if (WALK.on && !WALK.in) greet(true);       /* walking up to somebody (2.6 m) makes them speak; H still calls from further away */
       if (count() < NMAX) spawn(px, py);
       else { let w = null, wd = 85; for (const q of parties) { const d = Math.hypot(q.m[0].x - px, q.m[0].y - py); if (d > wd) { wd = d; w = q; } } if (w) w.m[0].x = 1e6; }   /* full: the farthest party (over 85 m away) makes room, so the people gather where the player is */
-      for (let i = parties.length - 1; i >= 0; i--) { const p = parties[i]; if (Math.hypot(p.m[0].x - px, p.m[0].y - py) > 150) { for (const c of p.m) { scene.remove(c.g); c.mix.stopAllAction(); for (const m of c.g.mats || []) m.dispose(); } parties.splice(i, 1); } } }
+      for (let i = parties.length - 1; i >= 0; i--) { const p = parties[i]; if (Math.hypot(p.m[0].x - px, p.m[0].y - py) > 150) { for (const c of p.m) freeChar(c); parties.splice(i, 1); } } }
     for (const p of parties) { let dx = p.b.x - p.a.x, dy = p.b.y - p.a.y, len = Math.hypot(dx, dy) || 1;
       if (p.c && !p.pc && p.t < 0.02) { if (p.sg === undefined) p.sg = sigFor(p.a, p.b); p.wait = !!p.sg && !window.__sig.ped(p.sg.n, p.sg.a); } else p.wait = false;   // at the kerb of a signalled crossing
       if (p.hold > 0) { p.hold -= dt; p.wait = true; }                         // greeted: stand and face the player
+      if (p.sit) p.wait = true;                                                // sitting on a bench, or on the way to it
       if (p.c && !p.pc && p.t < 0.02) { if (!p.wait && (p.gw || 0) < 6 && SOLID.coming(p.a.x, p.a.y, p.b.x, p.b.y)) { p.gw = (p.gw || 0) + dt; p.wait = true; } } else p.gw = 0;      // 20.11.2026: at the kerb while a car is coming (at most 6 s; then the cars brake)
       if (!p.wait) p.t += p.v * dt / len;
       if (p.t >= 1) { const o = p.b.nb, gb = p.b.grid, e = pickW(o, o.map(q => q.n === p.a ? (o.length === 1 ? 1 : q.n.busy && !q.n.grid ? 2 : 0.02) : q.n.grid ? (gb ? 1 : 0.25) : q.n.busy ? 12 : gb ? 4 : 1)); p.a = p.b;   /* stay on the pedestrian streets; cross the square, do not circle in it */ p.b = e.n; p.pc = p.c; p.c = e.c; p.sg = undefined; p.t = 0; dx = p.b.x - p.a.x; dy = p.b.y - p.a.y; len = Math.hypot(dx, dy) || 1; }
       const ux = dx / len, uy = dy / len, lx = p.a.x + dx * p.t, ly = p.a.y + dy * p.t, near = Math.hypot(lx - px, ly - py) < 110;
       const lt = p.a.busy && p.b.busy && !p.a.grid && !p.b.grid ? p.lat : 0;
-      for (const c of p.m) { const tx = lx + uy * (c.off + lt) - ux * c.back, ty = ly - ux * (c.off + lt) - uy * c.back, fresh = c.new, k = fresh ? 1 : Math.min(1, dt * 4); c.new = false;
+      for (const c of p.m) { if (c.seat) { seatMove(p, c, dt, near); continue; } const tx = lx + uy * (c.off + lt) - ux * c.back, ty = ly - ux * (c.off + lt) - uy * c.back, fresh = c.new, k = fresh ? 1 : Math.min(1, dt * 4); c.new = false;
         let mx = (tx - c.x) * k, my = (ty - c.y) * k; if (!fresh && near) { const q = SOLID.npcStep(c, mx, my, tx, ty, p.v, dt); mx = q[0]; my = q[1]; }      // 20.11.2026: cars and the player are solid
         const sp = Math.hypot(mx, my) / Math.max(dt, 1e-3); c.x += mx; c.y += my;
         if (p.hold > 0) { let d = Math.atan2(px - c.x, py - c.y) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6); }

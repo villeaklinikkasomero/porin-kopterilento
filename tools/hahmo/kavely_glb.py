@@ -9,13 +9,14 @@ Kay myos NPC-malleille (npc_*.js: sama luusto, eri mitat): askelluksen mitat ska
 tiedostossa ei ole, ohitetaan. Tulostaa kavelyn askelparin pituuden pelin mittakaavassa (= index.html:n timeScale-jakaja).
 --check: leipoo klipit mutta ei kirjoita; tulostaa eron tiedoston nykyisiin raitoihin (0 = Poser ja GLB ovat samat).
 --clips: leipoo vain luetellut klipit.
+--add Chair: lisaa klipin, jota tiedostossa ei viela ole (esim. bottien istuma-asento Chair). Ilman tata puuttuvat klipit ohitetaan.
 """
 import sys, os, re, json, struct, base64
 from math import sin, cos, pi, radians, acos, sqrt
 from mathutils import Vector, Matrix, Quaternion
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CLIPS = (("Idle", 90, "idle"), ("Walk", 30, "walk"), ("Run", 20, "run"), ("Sit", 30, "sit"))
+CLIPS = (("Idle", 90, "idle"), ("Walk", 30, "walk"), ("Run", 20, "run"), ("Sit", 30, "sit"), ("Chair", 180, "chair"))
 FPS = 30
 
 def load_poser():
@@ -135,6 +136,9 @@ def main():
     argv = sys.argv[1:]; only = None
     if "--clips" in argv:
         i = argv.index("--clips"); only = argv[i + 1].split(","); del argv[i:i + 2]
+    add = []
+    if "--add" in argv:
+        i = argv.index("--add"); add = argv[i + 1].split(","); del argv[i:i + 2]
     args = [a for a in argv if not a.startswith("--")]; check = "--check" in argv
     src = args[0]; dst = args[1] if len(args) > 1 else src
     text = open(src, encoding="utf-8").read()
@@ -146,6 +150,11 @@ def main():
         os.path.basename(src), po.k * 0.8897, sc, po.scaled(po.WALK)["stride"] * sc, po.scaled(po.RUN)["stride"] * sc))
     for clip, nfr, fn in CLIPS:
         an = next((a for a in g.j["animations"] if a["name"] == clip), None)
+        if an is None and clip in add and not check:      # uusi klippi: kierto joka luulle, siirto lantiolle
+            an = {"name": clip, "channels": [], "samplers": []}; g.j["animations"].append(an)
+            for nm, (ni, _, _) in arm.rest.items():
+                for p in (("rotation", "translation") if nm == "pelvis" else ("rotation",)):
+                    an["channels"].append({"sampler": len(an["samplers"]), "target": {"node": ni, "path": p}}); an["samplers"].append({"input": 0, "output": 0, "interpolation": "LINEAR"})
         if an is None or (only and clip not in only): continue
         rot, loc = bake(arm, getattr(po, fn), nfr)
         if check:
