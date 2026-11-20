@@ -1597,22 +1597,31 @@ const blob = (() => {
 let VEH = 'heli'; try { VEH = localStorage.getItem('pori-veh') === 'car' ? 'car' : 'heli'; } catch (e) {}
 const CAR = { x: 0, y: 0, yaw: 0, v: 0, steer: 0, z: 0, pitch: 0, roll: 0, spin: 0 }, WB = 2.64, CAR_R = 0.325; window.__car = CAR;
 const carG = new THREE.Group(); carG.rotation.order = 'YXZ'; carG.userData.noT = true; carG.visible = false; scene.add(carG);
-let wheels = [], carLoading = false;
-const loadCar = () => { if (carLoading) return; carLoading = true; loadModel(isTouch ? 'auto_m' : 'auto', root0 => {   // glTF: nose +z, wheels Wheel_FL/FR/RL/RR spinning about their local x, ground at y 0
+let wheels = [], carLoading = {};
+// 20.11.2026 (owner: "a van and an estate need proper models when the player drives one"): three drivable models - hatch (the player's own, auto.js),
+// van (auto_van.js) and estate (auto_est.js; tools/vehicles/porikopteri_autot.py), each with its light _m version for touch devices. CARTY = file, half
+// length and width of the collision box, acceleration and top speed, and the driver's eye shift [left, up, forward] from the hatch (steering wheel positions
+// in the model reports). A borrowed parked car picks its model by type: hatch -> hatch, saloon and SUV -> estate, van -> van.
+const CARM = {}, CARTY = { hatch: { f: 'auto', hl: 2.1, hw: 0.9, acc: 4.2, top: 24, cam: [0, 0, 0] }, van: { f: 'auto_van', hl: 2.4, hw: 0.97, acc: 3.3, top: 21, cam: [0.03, 0.3, 0.45] }, estate: { f: 'auto_est', hl: 2.3, hw: 0.91, acc: 4.0, top: 24, cam: [0, 0, 0.06] } };
+let carEnv = null;
+const useCar = t => { const M = CARM[t], Y = CARTY[t]; if (!M) return false; CAR.type = t; CAR.hl = Y.hl; CAR.hw = Y.hw; CAR.acc = Y.acc; CAR.top = Y.top; CAR.cam = Y.cam; wheels = M.wheels; CAR.setDmg = M.setDmg; CAR.dmg = -1; carG.clear(); carG.add(M.root); if (window.__take) window.__take.applied = null; return true; };
+const setCarType = t => { CAR.want = t; if (!useCar(t)) loadCar(t); };
+const loadCar = (t = CAR.want || 'hatch') => { if (CARM[t] || carLoading[t]) return; carLoading[t] = true; loadModel(CARTY[t].f + (isTouch ? '_m' : ''), root0 => {   // glTF: nose +z, wheels Wheel_FL/FR/RL/RR spinning about their local x, ground at y 0
   const root = new THREE.Group(); root.add(root0); root0.rotation.y = Math.PI;   // game frame: nose -z, like the helicopter
   const envS = new THREE.Scene(), eg = new THREE.SphereGeometry(50, 32, 16), ec = [];
   for (let i = 0; i < eg.attributes.position.count; i++) { const y = eg.attributes.position.getY(i) / 50; const c = y > 0 ? new THREE.Color(0xbfd3e6).lerp(new THREE.Color(0xffffff), Math.max(0, 1 - y * 2.5)) : new THREE.Color(0x77736c); ec.push(c.r, c.g, c.b); }
   eg.setAttribute('color', new THREE.Float32BufferAttribute(ec, 3)); envS.add(new THREE.Mesh(eg, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
   const sunB = new THREE.Mesh(new THREE.SphereGeometry(3, 12, 8), new THREE.MeshBasicMaterial({ color: new THREE.Color(8, 7.5, 6.5) })); sunB.position.set(30, 32, 24); envS.add(sunB);
-  const envTex = new THREE.PMREMGenerator(renderer).fromScene(envS, 0.02).texture;
+  const envTex = carEnv || (carEnv = new THREE.PMREMGenerator(renderer).fromScene(envS, 0.02).texture);
   root0.traverse(q => { if (q.isMesh) { const m = q.material; if (m && m.isMeshStandardMaterial) { m.envMap = envTex; m.envMapIntensity = 1.0; m.needsUpdate = true; } q.frustumCulled = false; } });
-  wheels = ['Wheel_FL', 'Wheel_FR', 'Wheel_RL', 'Wheel_RR'].map(n => root0.getObjectByName(n)).filter(Boolean);
-  for (const w of wheels) { w.rotation.order = 'YXZ'; w.userData.front = /F[LR]$/.test(w.name); }
+  const wh = ['Wheel_FL', 'Wheel_FR', 'Wheel_RL', 'Wheel_RR'].map(n => root0.getObjectByName(n)).filter(Boolean);
+  for (const w of wh) { w.rotation.order = 'YXZ'; w.userData.front = /F[LR]$/.test(w.name); }
   // damage steps (20.11.2026, model: tools/vehicles/porikopteri_auto.py): parts named Part_d0..d3 share origin and pose; of each part the highest step that is
   // not above the car's step is shown, the others hidden. Step 3 also hides the front plate text (the plate goes with the hanging bumper).
   { const parts = {}; root0.traverse(q => { const m = /^(.+)_d([0-3])$/.exec(q.name || ''); if (m) (parts[m[1]] || (parts[m[1]] = []))[+m[2]] = q; }); const plate = root0.getObjectByName('PlateText_front');
-    CAR.setDmg = st => { CAR.dmg = st; for (const k in parts) { let best = -1; for (let i = 0; i <= st; i++) if (parts[k][i]) best = i; parts[k].forEach((q, i) => { if (q) q.visible = i === best; }); } if (plate) plate.visible = st < 3; }; CAR.setDmg(0); }
-  carG.clear(); carG.add(root);
+    const setDmg = st => { CAR.dmg = st; for (const k in parts) { let best = -1; for (let i = 0; i <= st; i++) if (parts[k][i]) best = i; parts[k].forEach((q, i) => { if (q) q.visible = i === best; }); } if (plate) plate.visible = st < 3; }; setDmg(0);
+    CARM[t] = { root, wheels: wh, setDmg }; }
+  if ((CAR.want || 'hatch') === t) useCar(t);
 }); };   // loaded only when the car is chosen
 // ---- drive-through parking hall, TEST (owner 19.11.2026): 164 Itsenäisyydenkatu 45 - in from Itsenäisyydenkatu, out to Mikonkatu.
 // The two openings are real holes in the baked shell (blender/facades.json "gate"); the inside is drawn here, unbaked: floor, ceiling,
@@ -1652,7 +1661,8 @@ function carBlocked(x, y, yaw) {   // a corner of the car inside a house or over
       if (hit && d2 < (o.wx - S.x) ** 2 + (o.wy - S.y) ** 2 - 1e-4) return true; } }
   if (x > HALL.bb[0] - 3 && x < HALL.bb[2] + 3 && y > HALL.bb[1] - 3 && y < HALL.bb[3] + 3) for (let f = -2.1; f < 2.11; f += 0.3) for (const r of [0.9, -0.9]) {   // near the hall: both sides sampled every 0.3 m, so its 0.4 m walls cannot slip between the corner points
     const px = x + sn * f + cs * r, py = y + cs * f - sn * r; if (!inHall(px, py) && bldTopAt(px, py) > Math.max(g, TZg(px, py)) + 1.4) return true; }
-  for (const [f, r] of [[2.1, 0.9], [2.1, -0.9], [-2.1, 0.9], [-2.1, -0.9], [0, 0.95], [0, -0.95]]) {
+  const HL = CAR.hl || 2.1, HW = CAR.hw || 0.9;      // the box of the model being driven (van and estate are longer)
+  for (const [f, r] of [[HL, HW], [HL, -HW], [-HL, HW], [-HL, -HW], [0, HW + 0.05], [0, -HW - 0.05]]) {
     const px = x + sn * f + cs * r, py = y + cs * f - sn * r;
     if (carGround(px, py) === null) return true;
     if (inHall(px, py)) { if (HALL.pil.some(q => Math.abs(px - q[0]) < 0.3 && Math.abs(py - q[1]) < 0.3)) return true; continue; }   // inside the parking hall: only its pillars stop the car
@@ -1676,7 +1686,7 @@ function stepCar(dt, live) {
   const f = live ? input.f : 0, t = live ? input.t : 0, hb = live && keys.has('Space');
   // throttle / brake / reverse
   const fw = Math.cos(CAR.steer);
-  if (f > 0) CAR.v += (CAR.v < -0.3 ? 9 : 4.2 * (1 - Math.max(0, CAR.v) / 24)) * f * dt;
+  if (f > 0) CAR.v += (CAR.v < -0.3 ? 9 : (CAR.acc || 4.2) * (1 - Math.max(0, CAR.v) / (CAR.top || 24))) * f * dt;
   else if (f < 0) CAR.v += (CAR.v > 0.3 ? 9 : 2.6 * (1 + CAR.v / 6)) * f * dt;
   CAR.v *= Math.exp(-(f === 0 ? 0.22 : 0.05) * dt); if (f === 0 && Math.abs(CAR.v) < 0.25) CAR.v = 0;
   if (hb) { CAR.v *= Math.exp(-2.2 * dt); if (Math.abs(CAR.v) < 0.4) CAR.v = 0; }
@@ -1918,7 +1928,7 @@ const cars = [];
       ids.forEach((ci, j) => { const yaw = PARKED[ci * 4 + 2] / 100, sc = (k === 3 ? 0.9 : 0.94) + hs(ci, 3) * 0.08;      // heading already faces the traffic (kerbside) or the bay (car parks)
         p3.set(PARKED[ci * 4] / 10, 0.08 + roadDZ(PARKED[ci * 4] / 10, PARKED[ci * 4 + 1] / 10), -PARKED[ci * 4 + 1] / 10); q4.setFromAxisAngle(UP, -yaw); s3.set(sc, sc, sc); im.setMatrixAt(j, m4.compose(p3, q4, s3));
         tc.setHex(PARKED[ci * 4 + 3]); const mxc = Math.max(tc.r, tc.g, tc.b); if (mxc < 0.05) tc.setRGB(0.05, 0.055, 0.06); im.setColorAt(j, tc);
-        (window.__parked || (window.__parked = [])).push({ x: PARKED[ci * 4] / 10, y: PARKED[ci * 4 + 1] / 10, yaw, hex: tc.getHex(), im, j, gone: false }); });      /* for takeCar: the player can borrow a parked car */
+        (window.__parked || (window.__parked = [])).push({ x: PARKED[ci * 4] / 10, y: PARKED[ci * 4 + 1] / 10, yaw, hex: tc.getHex(), im, j, k, gone: false }); });      /* for takeCar: the player can borrow a parked car */
       s3.set(1, 1, 1); im.frustumCulled = false; scene.add(im); });
     window.__cars = n;
   });
@@ -2330,7 +2340,8 @@ function updateCamera(dt) {
   if (VEH === 'car') {
     if (camMode === 1) { // driver's seat (left-hand drive)
       const rx = Math.cos(S.yaw), ry = -Math.sin(S.yaw);
-      camera.position.set(CAR.x - sn * 0.22 - rx * 0.37, CAR.z + 1.17, -(CAR.y - cs * 0.22 - ry * 0.37)); camera.rotation.order = 'YXZ'; camera.rotation.set(CAR.pitch - 0.05, -S.yaw, -CAR.roll * 0.8); return;
+      const cm = CAR.cam || [0, 0, 0], cf = cm[2] - 0.22, cl = 0.37 + cm[0];
+      camera.position.set(CAR.x + sn * cf - rx * cl, CAR.z + 1.17 + cm[1], -(CAR.y + cs * cf - ry * cl)); camera.rotation.order = 'YXZ'; camera.rotation.set(CAR.pitch - 0.05, -S.yaw, -CAR.roll * 0.8); return;
     }
     if (camMode === 2) { tmp.set(CAR.x, CAR.z + 90, -CAR.y + 1); camPos.lerp(tmp, Math.min(1, dt * 4)); camera.position.copy(camPos); camera.up.set(sn, 0, -cs); camera.lookAt(CAR.x, CAR.z, -CAR.y); camera.up.set(0, 1, 0); return; }
     const hl = inHall(CAR.x, CAR.y), back = hl ? 4.6 : 7.8, up = hl ? 1.9 : 2.9; tmp.set(CAR.x - sn * back, CAR.z + up, -CAR.y + cs * back);   // under the hall's ceiling the camera comes down and closer
@@ -2816,26 +2827,28 @@ const KESPA = {"p":[32.6,-339.0,28,-338,20,-336,14,-334,-91,-310,-99,-308,-111,-
 // can be taken back. From the helicopter the game switches to driving; the helicopter waits where it landed (TAKE.heli) and is boarded again on foot -
 // the landmark round pauses meanwhile, so a car cannot finish a helicopter round.
 const TAKE = { left: null, heli: null, hex: null, applied: null, tgt: null }; window.__take = TAKE;
+const takeType = T => T.l ? T.l.type : ['hatch', 'estate', 'estate', 'van'][T.p ? T.p.k : T.c.k] || 'hatch';      /* parked types: hatch, saloon, SUV, van */
 function takeNear() { const x = WALK.x, y = WALK.y; if (TAKE.heli && VEH === 'car' && Math.hypot(TAKE.heli.x - x, TAKE.heli.y - y) < 6) return 'heli';
   let best = null, bd = 3.4; if (TAKE.left && Math.hypot(TAKE.left.x - x, TAKE.left.y - y) < 4.2) { TAKE.tgt = { l: TAKE.left }; return 'take'; }
   if (window.__parked) for (const p of window.__parked) { if (p.gone) continue; const dx = p.x - x; if (dx > 3.4 || dx < -3.4) continue; const d = Math.hypot(dx, p.y - y); if (d < bd) { bd = d; best = { p }; } }
   for (const c of cars) if (c.pk && c.pk.ph === 1 && c.wx !== undefined) { const d = Math.hypot(c.wx - x, c.wy - y); if (d < bd) { bd = d; best = { c }; } }
-  TAKE.tgt = best; if (best && !carG.children.length) loadCar();      /* from the helicopter: fetch the car model as soon as the offer shows */
+  TAKE.tgt = best; if (best) loadCar(takeType(best));      /* fetch that car's model as soon as the offer shows */
   return best ? 'take' : ''; }
 function takeLeave() {      /* the car driven so far stays behind as a copy */
   if (TAKE.left) { scene.remove(TAKE.left.g); TAKE.left = null; } if (!carG.children.length) return;
   const g = new THREE.Group(), body = carG.children[0].clone(true), mats = new Map(); g.rotation.order = 'YXZ'; g.userData.noT = true; g.add(body); let hex = 0x103070;
   body.traverse(q => { if (q.isMesh && q.material && q.material.name === 'CarPaint') { if (!mats.has(q.material)) { const m = q.material.clone(); m.userData.noT = true; mats.set(q.material, m); hex = m.color.getHex(); } q.material = mats.get(q.material); } });
-  g.position.set(CAR.x, CAR.z, -CAR.y); g.rotation.set(0, -CAR.yaw, 0); scene.add(g); TAKE.left = { x: CAR.x, y: CAR.y, yaw: CAR.yaw, hp: S.hp, hex, g }; }
+  g.position.set(CAR.x, CAR.z, -CAR.y); g.rotation.set(0, -CAR.yaw, 0); scene.add(g); TAKE.left = { x: CAR.x, y: CAR.y, yaw: CAR.yaw, hp: S.hp, hex, g, type: CAR.type || 'hatch' }; }
 function takeDo(k) { if (window.__race && (window.__race.st === 1 || window.__race.st === 2)) return;
   if (k === 'heli') { const H = TAKE.heli; takeLeave(); carG.visible = false; VEH = 'heli'; document.body.classList.remove('car'); heli.visible = true; S.hp = H.hp; tourOn = H.tour; TAKE.heli = null; WALK.veh = H; walkBoard(); toast('Takaisin kopterissa', 1.8); return; }
-  const T = TAKE.tgt; if (!T) return; let x, y, yaw, hex, hp = 100;
+  const T = TAKE.tgt; if (!T) return; let x, y, yaw, hex, hp = 100; const ty = takeType(T);
   if (T.l) { ({ x, y, yaw, hex, hp } = T.l); scene.remove(T.l.g); TAKE.left = null; if (VEH === 'car') takeLeave(); }
   else { if (VEH === 'car') takeLeave(); if (T.p) { ({ x, y, yaw, hex } = T.p); T.p.gone = true; T.p.im.setMatrixAt(T.p.j, new THREE.Matrix4().makeScale(0, 0, 0)); T.p.im.instanceMatrix.needsUpdate = true; }
     else { x = T.c.wx; y = T.c.wy; yaw = T.c.yaw; hex = T.c.paint || 0x8b9096; cars.vanish(T.c); } }
-  if (VEH !== 'car') { TAKE.heli = { x: WALK.veh.x, y: WALK.veh.y, alt: WALK.veh.alt, yaw: WALK.veh.yaw, hp: S.hp, tour: tourOn }; tourOn = false; VEH = 'car'; document.body.classList.add('car'); loadCar(); }
+  if (VEH !== 'car') { TAKE.heli = { x: WALK.veh.x, y: WALK.veh.y, alt: WALK.veh.alt, yaw: WALK.veh.yaw, hp: S.hp, tour: tourOn }; tourOn = false; VEH = 'car'; document.body.classList.add('car'); }
+  setCarType(ty);
   carG.visible = true; Object.assign(CAR, { x, y, yaw, v: 0, steer: 0, pitch: 0, roll: 0 }); CAR.z = carGround(x, y) ?? TZs(x, y); S.hp = hp; TAKE.hex = hex; TAKE.tgt = null;
-  WALK.veh = { x, y, alt: CAR.z, yaw }; walkBoard(); toast(T.l ? 'Takaisin omassa autossa' : Math.random() < 0.4 ? '🚗 Lainasit auton – "Hei! Se o mnuu auto!"' : '🚗 Lainasit auton', 2.6); }
+  WALK.veh = { x, y, alt: CAR.z, yaw }; walkBoard(); toast(T.l ? 'Takaisin edellisessä autossa' : (ty === 'van' ? '🚐 Lainasit pakettiauton' : ty === 'estate' ? '🚗 Lainasit farmarin' : '🚗 Lainasit auton') + (Math.random() < 0.4 ? ' – "Hei! Se o mnuu auto!"' : ''), 2.6); }
 TAKE.near = takeNear; TAKE.do = takeDo;
 window.__takeTick = () => { if (TAKE.hex !== TAKE.applied && carG.children.length) { carG.traverse(q => { if (q.isMesh && q.material && q.material.name === 'CarPaint') q.material.color.setHex(TAKE.hex); }); TAKE.applied = TAKE.hex; }
   if (TAKE.heli && VEH === 'car' && !S.dead && !heli.visible) heli.visible = true; };

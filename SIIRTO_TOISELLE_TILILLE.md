@@ -1743,3 +1743,21 @@ lähtöruudukossa. **Ei vielä:** päivän tulostaulu verkossa (LB käyttää ki
 **Tarkistettu:** headless (`auton_lainaus_20_11.jpg`): lainaus kopterista, toinen lainaus (edellinen jää kopioksi hp 55), paluu kopteriin; ei konsolivirheitä.
 **EI testattu:** pelaaminen; N (uusi kierros) ja auton hajoaminen lainatulla autolla kopteri-istunnossa (kopteri pakotetaan näkyviin `__takeTick`issä, mutta kierroksen
 tila voi sekoilla). Pysäköityihin autoihin ei edelleenkään voi törmätä. Omistajan huuto on vain teksti ruudulla, ei ääntä.
+
+---
+
+## 20.11.2026 klo 09 – Pakettiauto ja farmari ajettaviksi (c32)
+
+**Tehty (viety koneelle, EI pushattu):**
+- Uudet mallit mallichatista: `auto_van.js` / `auto_van_m.js` (pakettiauto) ja `auto_est.js` / `auto_est_m.js` (farmari); lähde `tools/vehicles/porikopteri_autot.py`
+  (`--type van|estate`), raportit `tools/vehicles/porikopteri_pakettiauto_raportti.md` ja `…farmari_raportti.md`. Sama rakenne kuin `auto.js` (Wheel_*, `_d0…_d3`, `CarPaint`).
+- `index.html`: `loadCar(t)` lataa tyypin kerrallaan muistiin `CARM[t] = {root, wheels, setDmg}`; `useCar(t)` vaihtaa `carG`:n mallin, renkaat, vauriofunktion ja
+  tyypin arvot `CARTY`: törmäyslaatikon puolipituus/-leveys (`CAR.hl/hw`: viistoperä 2,1/0,9, paku 2,4/0,97, farmari 2,3/0,91), kiihtyvyys ja huippunopeus
+  (`CAR.acc/top`: paku 3,3 ja 21 m/s, muut 4,2/4,0 ja 24), kuljettajakameran siirto (`CAR.cam`, raporttien ohjauspyöräpisteistä). `setCarType(t)` = toive + lataus.
+- Lainaus valitsee mallin pysäköidyn auton tyypistä (`window.__parked[].k`, liikenteen `c.k`): 0 viistoperä → viistoperä, 1 sedan ja 2 katumaasturi → farmari, 3 → pakettiauto.
+  Jätetty auto muistaa tyyppinsä (`TAKE.left.type`).
+
+**Tarkistettu:** headless (`paku_ja_farmari_20_11.jpg`): paku ja farmari lainattu, väri siirtyy, vaurioporras 3 vaihtuu, ei konsolivirheitä.
+**EI testattu:** ajaminen; kuljettajakameran paikka pakussa (laskettu raportin luvuista, kuvassa näyttää olevan ohjaamossa mutta ei varmistettu ajossa); kevytmallit puhelimella.
+**Tiedossa:** kadulla seisovat autot ovat yhä vanhoja kevytmalleja (cars.js), joten katumaasturi muuttuu lainatessa farmariksi. Kespan lenkin botit kloonaavat
+pelaajan senhetkisen mallin (pakulla ajaessa botitkin ovat pakuja).
