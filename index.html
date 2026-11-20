@@ -160,7 +160,7 @@
       <div><kbd>Q</kbd> <kbd>E</kbd></div><div>liu'u sivulle</div>
       <div><kbd>Väli</kbd> / <kbd>Shift</kbd></div><div>ylös ja alas</div>
       <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään (maassa) ja takaisin kyytiin</div>
-      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Electric, Rock, pois</div>
+      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Rock, pois</div>
       <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
     </div>
     <div id="keys2" class="car-only" style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0;font-size:14px;align-items:center">
@@ -168,7 +168,7 @@
       <div><kbd>S</kbd> / <kbd>↓</kbd></div><div>jarru ja peruutus</div>
       <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>ohjaus</div>
       <div><kbd>Väli</kbd></div><div>käsijarru</div>
-      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Electric, Rock, pois</div>
+      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Rock, pois</div>
       <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään ja takaisin kyytiin</div>
       <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
     </div>
@@ -2129,9 +2129,9 @@ function readInput() {
   for (const a of ['f', 't', 's', 'l']) input[a] = Math.max(-1, Math.min(1, input[a]));
 }
 
-// ---------- radio (car and helicopter, 19.11.2026): Radio Porikopteri = talk, mock adverts and the pop songs in one channel, first in the row; then Electric and Rock. Our own songs (tools/radio/compose.py, FluidSynth + FluidR3_GM) ----------
+// ---------- radio (car and helicopter, 19.11.2026; 20.11.2026: two channels): Radio Porikopteri = talk, mock adverts and the pop/electronic songs; Rock = rock songs. Songs made by the owner with Suno Pro (20.11.2026; commercial use rights), lyrics by Claude ----------
 // The channels run 'live': the place in a channel's playlist comes from the clock, so switching away and back finds it further on.
-const RADIO = { ch: 0, names: ['pois', 'Porikopteri', 'Electric', 'Rock'], list: null, el: null, idx: -1, vol: 0.6 }; window.__radio = RADIO;
+const RADIO = { ch: 0, names: ['pois', 'Porikopteri', 'Rock'], list: null, el: null, idx: -1, vol: 0.6 }; window.__radio = RADIO;
 fetch('./radio/radio.json').then(r => r.json()).then(j => { RADIO.list = j; }).catch(() => {});
 RADIO.pos = ch => {   // [track index, seconds into it] for channel ch now
   const L = RADIO.list[RADIO.names[ch].toLowerCase()]; const tot = L.reduce((a, t) => a + t.d, 0);

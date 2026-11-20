@@ -37,8 +37,8 @@
   },
   {
    "f": "pop_1.mp3",
-   "d": 136.65,
-   "t": "Kauppatorin kesä"
+   "d": 139.65,
+   "t": "Kesäyö Kirjurinluodossa"
   },
   {
    "f": "puhe_jazz.mp3",
@@ -77,8 +77,8 @@
   },
   {
    "f": "pop_2.mp3",
-   "d": 141.61,
-   "t": "Yrjönkadun valot"
+   "d": 152.71,
+   "t": "Porilainen sydän"
   },
   {
    "f": "puhe_murre.mp3",
@@ -117,8 +117,8 @@
   },
   {
    "f": "pop_3.mp3",
-   "d": 152.45,
-   "t": "Kirjurinluodon ilta"
+   "d": 210.05,
+   "t": "Neonyö Puuvillassa"
   },
   {
    "f": "puhe_meri.mp3",
@@ -156,9 +156,9 @@
    "t": "Radio Porikopteri"
   },
   {
-   "f": "pop_1.mp3",
-   "d": 136.65,
-   "t": "Kauppatorin kesä"
+   "f": "pop_4.mp3",
+   "d": 182.39,
+   "t": "Roottori yötä vasten"
   },
   {
    "f": "puhe_assat.mp3",
@@ -196,9 +196,9 @@
    "t": "Radio Porikopteri"
   },
   {
-   "f": "pop_2.mp3",
-   "d": 141.61,
-   "t": "Yrjönkadun valot"
+   "f": "pop_5.mp3",
+   "d": 249.89,
+   "t": "Midnight Over Pori"
   },
   {
    "f": "puhe_suisto.mp3",
@@ -236,9 +236,9 @@
    "t": "Radio Porikopteri"
   },
   {
-   "f": "pop_3.mp3",
-   "d": 152.45,
-   "t": "Kirjurinluodon ilta"
+   "f": "pop_6.mp3",
+   "d": 270.71,
+   "t": "Highway Two"
   },
   {
    "f": "puhe_saa.mp3",
@@ -276,9 +276,9 @@
    "t": "Radio Porikopteri"
   },
   {
-   "f": "pop_1.mp3",
-   "d": 136.65,
-   "t": "Kauppatorin kesä"
+   "f": "pop_7.mp3",
+   "d": 188.4,
+   "t": "Soaring A Minor"
   },
   {
    "f": "puhe_loppu2.mp3",
@@ -296,48 +296,16 @@
    "t": "Radio Porikopteri"
   },
   {
-   "f": "pop_2.mp3",
-   "d": 141.61,
-   "t": "Yrjönkadun valot"
-  }
- ],
- "electric": [
-  {
-   "f": "electric_1.mp3",
-   "d": 148.74,
-   "t": "Neon Isolinnankatu"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "electric_2.mp3",
-   "d": 146.52,
-   "t": "Kopteri Pulse"
-  },
-  {
-   "f": "jingle_2.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
-  },
-  {
-   "f": "electric_3.mp3",
-   "d": 153.76,
-   "t": "Kokemäenjoki Flow"
-  },
-  {
-   "f": "jingle_1.mp3",
-   "d": 3.71,
-   "t": "Radio Porikopteri"
+   "f": "pop_1.mp3",
+   "d": 139.65,
+   "t": "Kesäyö Kirjurinluodossa"
   }
  ],
  "rock": [
   {
    "f": "rock_1.mp3",
-   "d": 110.32,
-   "t": "Antinkadun kuningas"
+   "d": 217.23,
+   "t": "Ässät ilmaan"
   },
   {
    "f": "jingle_1.mp3",
@@ -346,8 +314,8 @@
   },
   {
    "f": "rock_2.mp3",
-   "d": 120.32,
-   "t": "Reunakivi"
+   "d": 205.04,
+   "t": "Kokemäenjoen silta"
   },
   {
    "f": "jingle_2.mp3",
@@ -356,11 +324,21 @@
   },
   {
    "f": "rock_3.mp3",
-   "d": 120.37,
-   "t": "Porinsilta Riff"
+   "d": 218.04,
+   "t": "Loudest Little Town"
   },
   {
    "f": "jingle_1.mp3",
+   "d": 3.71,
+   "t": "Radio Porikopteri"
+  },
+  {
+   "f": "rock_4.mp3",
+   "d": 155.72,
+   "t": "Yyterin bileet"
+  },
+  {
+   "f": "jingle_2.mp3",
    "d": 3.71,
    "t": "Radio Porikopteri"
   }
