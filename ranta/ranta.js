@@ -2,8 +2,8 @@
 //
 // Kokeilu:   await import('./ranta/ranta.js')         Pysyvästi: <script type="module" src="ranta/ranta.js"></script>
 //
-// Kivikko: joen rajauksen (river.js, water-kolmiot) reunaan kaista pyöreitä luonnonkiviä, joka alkaa pinnan alta ja nousee penkalle.
-//   Märkä ja tumma vesirajassa, kuiva ylempänä, reuna hajoaa ilmakuvaan. Ei Etelärannan muurin (RIV.quay), siltojen eikä kartan reunan kohdalle.
+// Kivikko: joen rajauksen (river.js, water-kolmiot) reunaan kaista jokikiviä (saumaton tekstuuri + normal/AO/karheus), joka alkaa pinnan alta ja
+//   nousee penkalle, ja sen päällä isompia lohkareita (rantakivet_blender.obj, 12 muotoa). Märkä ja tumma vesirajassa, reuna hajoaa ilmakuvaan. Ei Etelärannan muurin (RIV.quay), siltojen eikä kartan reunan kohdalle.
 // Laiturit: Etelärannan ponttonilaiturit mitattuna MML:n ilmakuvasta (20.11.2026), puukansi kellukkeilla ja kulkusilta muurilta.
 import * as THREE from '../three.module.min.js';
 import RIV from '../river.js';
@@ -37,6 +37,7 @@ function rantaviiva() {
 }
 
 function poisRajattu(mx, my) {
+  if (mx > -372 && mx < -212 && my > 598 && my < 668) return true;                           // Kirjurinluodon uimaranta (hiekkaa, ei kiviä)
   if (polyDist(mx, my, RIV.quay) < 7) return true;                                            // Etelärannan muuri
   if (mx > 186 && mx < 266 && my > 462 && my < 482) return true;                              // alikulku Porinsillan eteläpään ali (index.html)
   for (const b of RIV.br) if (polyDist(mx, my, b.p) < b.w / 2 + 7) return true;               // sillat
@@ -46,9 +47,12 @@ function poisRajattu(mx, my) {
   return false;
 }
 
+// korkeus o m maalle päin: seuraa maata, mutta enintään loivasti (1:2,5) vedenpinnasta ylös. Ennen kaista nousi suoraan maaston (6 m:n ruudukko)
+// korkeudelle ja teki vesirajaan metrin kiviseinämän (omistaja 20.11.2026: "rantakivet vaikuttaa olevan huomattavasti korkeammalla kuin veden pinta").
+const rantaZ = (x, y, o) => Math.min(Math.max(TZg(x, y) + 0.05, WL + 0.06 + o * 0.1), WL + 0.06 + o * 0.4);
 const RIVIT = [-1.4, 0, 0.9, 1.9, 2.8];   // etäisyys rantaviivasta maalle päin (m); negatiivinen = veden alla
 function kivikkoGeometria() {
-  const P = [], D = [], I = [];
+  const P = [], D = [], I = [], U = [];
   let n = 0;
   for (const e of rantaviiva()) {
     const mx = (e.a[0] + e.b[0]) / 2, my = (e.a[1] + e.b[1]) / 2;
@@ -63,8 +67,8 @@ function kivikkoGeometria() {
       let z;
       if (o < 0) z = WL - 0.55;
       else if (o === 0) z = WL + 0.03;
-      else z = Math.max(TZg(x, y) + 0.05, WL + 0.08 + o * 0.12);
-      P.push(x, z, -y); D.push(o); n++;
+      else z = rantaZ(x, y, o);
+      P.push(x, z, -y); U.push(x / TOISTO, y / TOISTO); D.push(o); n++;
     }
     const R = RIVIT.length;
     for (let k = 0; k < R - 1; k++) { const p0 = base + k, p1 = base + k + 1, q0 = base + R + k, q1 = base + R + k + 1; I.push(p0, q0, p1, p1, q0, q1); }
@@ -72,57 +76,111 @@ function kivikkoGeometria() {
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
   g.setAttribute('aRanta', new THREE.Float32BufferAttribute(D, 1));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
   g.setIndex(I);
+  g.computeVertexNormals();
   g.computeBoundingSphere();
   return g;
 }
 
+// Pintakivikko: saumaton jokikivitekstuuri (Jokikivien saumaton tekstuuri, 20.11.2026) + siitä lasketut normal-, AO- ja karheuskartat
+// (rantakivi_*.jpg). Yksi toisto = TOISTO m, toinen kierretty ja eri kokoinen näyte rikkoo toiston; märkä ja tumma vesirajassa, sammalta yläreunassa.
+const TOISTO = 2.6;
+const tx = (f, srgb = true) => { const t = new THREE.TextureLoader().load(new URL(f, import.meta.url).href); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
+let TEX = null; const tekstuurit = () => TEX || (TEX = { a: tx('./rantakivi_albedo.jpg'), n: tx('./rantakivi_normal.jpg', false), o: tx('./rantakivi_orm.jpg', false) });
+const YHTEINEN = `
+vec2 kh2(vec2 p) { p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))); return fract(sin(p) * 43758.5453); }
+float kh1(vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }
+float kno(vec2 p) { vec2 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f); return mix(mix(kh1(i), kh1(i + vec2(1, 0)), f.x), mix(kh1(i + vec2(0, 1)), kh1(i + vec2(1, 1)), f.x), f.y); }`;
 function kivikkoMateriaali() {
-  const m = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, depthWrite: false, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  const T = tekstuurit();
+  const m = new THREE.MeshStandardMaterial({ map: T.a, normalMap: T.n, aoMap: T.o, roughnessMap: T.o, metalness: 0, roughness: 1, transparent: true, depthWrite: false,
+    side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  m.normalScale.set(1.3, 1.3);
   m.onBeforeCompile = sh => {
     sh.uniforms.uWL = { value: WL };
-    sh.uniforms.uSun = { value: new THREE.Vector3(0.79, 0.81, -0.62).normalize() };
     sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nattribute float aRanta; varying float vR; varying vec3 vWk;')
       .replace('#include <project_vertex>', '#include <project_vertex>\nvR = aRanta; vWk = (modelMatrix * vec4(transformed, 1.0)).xyz;');
     sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
-varying float vR; varying vec3 vWk; uniform float uWL; uniform vec3 uSun;
-vec2 kh2(vec2 p) { p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3))); return fract(sin(p) * 43758.5453); }
-float kh1(vec2 p) { return fract(sin(dot(p, vec2(41.3, 289.1))) * 43758.5453); }
-// voronoi: x = F1, y = F2, zw = solun tunniste ja kiven keskipisteen suunta
-vec4 kvor(vec2 p, out vec2 cell, out vec2 toC) {
-  vec2 i = floor(p), f = fract(p); float d1 = 8.0, d2 = 8.0; cell = vec2(0); toC = vec2(0);
-  for (int y = -1; y <= 1; y++) for (int x = -1; x <= 1; x++) { vec2 g = vec2(x, y), o = 0.15 + 0.7 * kh2(i + g), r = g + o - f; float d = dot(r, r);
-    if (d < d1) { d2 = d1; d1 = d; cell = i + g; toC = r; } else if (d < d2) d2 = d; }
-  return vec4(sqrt(d1), sqrt(d2), 0.0, 0.0);
-}`).replace('#include <map_fragment>', `#include <map_fragment>
-{
+varying float vR; varying vec3 vWk; uniform float uWL;` + YHTEINEN)
+      .replace('#include <map_fragment>', `#include <map_fragment>
   vec2 P = vec2(vWk.x, -vWk.z);
-  vec2 cell, toC; vec4 V = kvor(P * 2.3, cell, toC);
-  float h = kh1(cell), r = 0.42 + 0.18 * h;
-  float edge = V.y - V.x;                                    // kivien välinen rako
-  float dome = sqrt(clamp(1.0 - (V.x / (r + 0.15)) * (V.x / (r + 0.15)), 0.0, 1.0));
-  vec3 N = normalize(vec3(-toC.x * 1.4, dome + 0.35, toC.y * 1.4));
-  float lit = 0.45 + 0.55 * clamp(dot(N, uSun), 0.0, 1.0);
-  vec3 c1 = vec3(0.42, 0.40, 0.37), c2 = vec3(0.47, 0.38, 0.33), c3 = vec3(0.30, 0.29, 0.28), c4 = vec3(0.52, 0.50, 0.46);
-  vec3 col = h < 0.3 ? c1 : h < 0.55 ? c2 : h < 0.8 ? c3 : c4;
-  col *= 0.85 + 0.3 * kh1(cell + 7.1);
-  col *= lit;
-  col *= mix(0.25, 1.0, smoothstep(0.02, 0.12, edge));      // tummat raot
-  // märkä vesirajassa (aallot kastelevat ~0,3 m) ja levää aivan rajassa, kuiva ylempänä
-  float above = vWk.y - uWL;
-  float wet = 1.0 - smoothstep(0.05, 0.35, above);
-  col = mix(col, col * vec3(0.45, 0.47, 0.42) + vec3(0.0, 0.015, 0.0), wet);
-  col += wet * pow(clamp(dot(reflect(-normalize(cameraPosition - vWk), N), uSun), 0.0, 1.0), 30.0) * 0.35;
-  // kuivan kivikon yläreunassa hiukan sammalta ja ruohoa raoissa
-  col = mix(col, vec3(0.20, 0.25, 0.13), smoothstep(1.6, 2.6, vR) * (1.0 - smoothstep(0.02, 0.12, edge)) * 0.8);
-  // reuna sulautuu ilmakuvaan epätasaisesti
-  float jit = kh1(floor(P * 1.3)) * 0.6;
-  float a = 1.0 - smoothstep(1.9 + jit, 2.75, vR);
-  diffuseColor = vec4(col, a);
-}`);
+  float above = vWk.y - uWL, wet = 1.0 - smoothstep(0.05, 0.4, above);
+  {
+    vec2 q = mat2(0.8, -0.6, 0.6, 0.8) * P / ${(TOISTO * 1.37).toFixed(2)} + 0.37;
+    vec3 c2 = texture2D(map, q).rgb;
+    float mixv = smoothstep(0.35, 0.65, kno(P * 0.12));
+    diffuseColor.rgb = mix(diffuseColor.rgb, c2, mixv);
+    diffuseColor.rgb *= 0.85 + 0.3 * kno(P * 0.05 + 3.1);                  // laajempi sävyvaihtelu
+    diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(0.5, 0.52, 0.48) + vec3(0.0, 0.012, 0.0), wet);
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.19, 0.24, 0.12), smoothstep(1.7, 2.7, vR) * smoothstep(0.45, 0.7, kno(P * 0.9)) * 0.75);   // sammal / ruoho
+    float jit = kh1(floor(P * 1.3)) * 0.6;
+    diffuseColor.a = 1.0 - smoothstep(1.9 + jit, 2.75, vR);
+  }`)
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n  roughnessFactor = mix(roughnessFactor, 0.28, wet * 0.85);');
   };
-  m.customProgramCacheKey = () => 'ranta-kivikko-1';
+  m.customProgramCacheKey = () => 'ranta-kivikko-2';
   return m;
+}
+
+// Lohkareet: rantakivet_blender.obj:n 12 muotoa instansseina vesirajaan, osin veden alla. Pinta graniittimaista hienojakoista rakeisuutta
+// samasta tekstuurista hyvin pienessä mittakaavassa (kolmitasoprojektio), väri MTL:n BeachStone_01..04 -sävyistä.
+const KIVIVARIT = [[0.42, 0.40, 0.36], [0.34, 0.38, 0.40], [0.48, 0.43, 0.34], [0.39, 0.36, 0.35]];
+function lohkareMateriaali() {
+  const T = tekstuurit();
+  const m = new THREE.MeshStandardMaterial({ color: 0xffffff, metalness: 0, roughness: 0.85 });
+  m.onBeforeCompile = sh => {
+    sh.uniforms.tKivi = { value: T.a }; sh.uniforms.uWL = { value: WL };
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vWk; varying vec3 vWn;')
+      .replace('#include <project_vertex>', '#include <project_vertex>\nvWk = (modelMatrix * instanceMatrix * vec4(transformed, 1.0)).xyz; vWn = normalize(mat3(modelMatrix * instanceMatrix) * objectNormal);');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vWk; varying vec3 vWn; uniform sampler2D tKivi; uniform float uWL;' + YHTEINEN)
+      .replace('#include <map_fragment>', `#include <map_fragment>
+  float above = vWk.y - uWL, wet = 1.0 - smoothstep(0.03, 0.3, above);
+  {
+    vec3 b = pow(abs(vWn), vec3(4.0)); b /= b.x + b.y + b.z;
+    const float S = 3.2;                                                   // 1 / (0,31 m): tekstuurin kivet ovat ~1 cm:n rakeita
+    vec3 g = texture2D(tKivi, vWk.zy * S).rgb * b.x + texture2D(tKivi, vWk.xz * S).rgb * b.y + texture2D(tKivi, vWk.xy * S).rgb * b.z;
+    float l = dot(g, vec3(0.3, 0.55, 0.15));
+    diffuseColor.rgb *= 0.35 + 1.9 * mix(vec3(l), g, 0.5);
+    diffuseColor.rgb *= 0.85 + 0.3 * kno(vWk.xz * 1.7);
+    diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * vec3(0.48, 0.5, 0.46), wet);
+    diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.2, 0.26, 0.12), smoothstep(0.55, 0.9, vWn.y) * smoothstep(0.6, 0.8, kno(vWk.xz * 2.3)) * 0.6 * (1.0 - wet));   // sammalta päällä
+  }`)
+      .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n  roughnessFactor = mix(roughnessFactor, 0.25, wet * 0.9);');
+  };
+  m.customProgramCacheKey = () => 'ranta-lohkare-1';
+  return m;
+}
+
+async function lohkareet(ryhma) {
+  const { default: MUODOT } = await import('./rantakivet_mallit.js');
+  const geos = MUODOT.map((m, k) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(m.p, 3)); g.setIndex(m.i); g.computeVertexNormals();
+    // epäsäännöllisyyttä: pinta kuprulle normaalin suuntaan (sileät kupolit näyttivät muovisilta)
+    const P = g.attributes.position, N = g.attributes.normal, f = (x, y, z) => Math.sin(x * 9.1 + k) * Math.sin(y * 7.3 + 2 * k) * Math.sin(z * 8.7 - k) + 0.5 * Math.sin(x * 19 + z * 17 + k);
+    for (let i = 0; i < P.count; i++) { const x = P.getX(i), y = P.getY(i), z = P.getZ(i), d = y < 0.02 ? 0 : f(x, y, z) * 0.035; P.setXYZ(i, x + N.getX(i) * d, y + N.getY(i) * d, z + N.getZ(i) * d); }
+    g.computeVertexNormals(); return g; });
+  let sd = 917; const rnd = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  const paikat = geos.map(() => []);
+  const inCore = (x, y) => Math.abs(x) < 1012 && y > -947 && y < 1281;
+  for (const e of rantaviiva()) {
+    const mx = (e.a[0] + e.b[0]) / 2, my = (e.a[1] + e.b[1]) / 2; if (poisRajattu(mx, my)) continue;
+    let tx_ = e.b[0] - e.a[0], ty_ = e.b[1] - e.a[1]; const L = Math.hypot(tx_, ty_); if (L < 0.2) continue; tx_ /= L; ty_ /= L;
+    let nx = ty_, ny = -tx_; if ((e.c[0] - mx) * nx + (e.c[1] - my) * ny > 0) { nx = -nx; ny = -ny; }
+    const tiheys = inCore(mx, my) ? 1 / 2 : 1 / 7;                                     // kiveä / m
+    let n = L * tiheys; while (n > 0) { if (n < 1 && rnd() > n) break; n--;
+      const f = rnd(), o = -0.7 + rnd() * 2.2, x = e.a[0] + tx_ * L * f + nx * o, y = e.a[1] + ty_ * L * f + ny * o;
+      const r = rnd(), s = r < 0.75 ? 0.3 + rnd() * 0.35 : r < 0.95 ? 0.6 + rnd() * 0.35 : 0.95 + rnd() * 0.5;   // halkaisija m
+      const zg = o <= 0 ? WL - 0.55 + (o + 1.4) / 1.4 * 0.58 : rantaZ(x, y, o);
+      const sh = Math.floor(rnd() * geos.length), hy = s * (0.75 + rnd() * 0.35);
+      paikat[sh].push([x, zg - hy * (0.15 + rnd() * 0.2), y, s * (0.85 + rnd() * 0.3), hy, s, rnd() * 6.283, Math.floor(rnd() * 4), 0.85 + rnd() * 0.3]); } }
+  const mat = lohkareMateriaali(), M4 = new THREE.Matrix4(), Qn = new THREE.Quaternion(), E = new THREE.Euler(), V = new THREE.Vector3(), S = new THREE.Vector3(), C = new THREE.Color();
+  let yht = 0;
+  geos.forEach((g, k) => { const P = paikat[k]; if (!P.length) return;
+    const im = new THREE.InstancedMesh(g, mat, P.length);
+    P.forEach((p, i) => { E.set((rnd() - 0.5) * 0.25, p[6], (rnd() - 0.5) * 0.25); Qn.setFromEuler(E); im.setMatrixAt(i, M4.compose(V.set(p[0], p[1], -p[2]), Qn, S.set(p[3], p[4] / 0.45, p[5])));
+      const c = KIVIVARIT[p[7]]; im.setColorAt(i, C.setRGB(c[0] * p[8], c[1] * p[8], c[2] * p[8])); });
+    im.instanceMatrix.needsUpdate = true; im.instanceColor.needsUpdate = true; im.computeBoundingSphere(); im.frustumCulled = false; im.userData.noT = true; ryhma.add(im); yht += P.length; });
+  return yht;
 }
 
 // ------------------------------------------------------------------ laiturit
@@ -181,6 +239,7 @@ export function luoRanta({ scene, laiturit: teeLaiturit = true }) {
   const g = kivikkoGeometria();
   const kivet = new THREE.Mesh(g, kivikkoMateriaali()); kivet.renderOrder = 2; kivet.frustumCulled = false; ryhma.add(kivet);
   if (teeLaiturit) laiturit(ryhma);
+  lohkareet(ryhma).then(n => { ryhma.traverse(o => { o.userData.noT = true; if (o.material) o.material.userData.noT = true; }); if (window.__ranta) window.__ranta.lohkareita = n; console.log(`[ranta] ${n} rantalohkaretta`); }).catch(e => console.log('[ranta] lohkareet', e));
   ryhma.traverse(o => { o.userData.noT = true; if (o.material) o.material.userData.noT = true; });   // absoluuttiset korkeudet, ei pelin maastonostoa
   scene.add(ryhma);
   window.__ranta = { ryhma, kivikkoKolmioita: g.index.count / 3 };

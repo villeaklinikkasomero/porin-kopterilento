@@ -1454,12 +1454,27 @@ import('./roads.js').then(mod => {
       const pt = (t, s) => [PSIL.x + ux * t + wx * s, PSIL.y + uy * t + wy * s];
       const z = (t, s, h) => { const [x, y] = pt(t, s); return groundTop(x, y) + h + ramp(t, s, h); };
       for (let t = T0; t < T1 - 0.01; t += STP) { const t2 = Math.min(T1, t + STP);
-        const q = (arr, s0, s1, h) => { for (const [tt, ss] of [[t, s0], [t2, s0], [t2, s1], [t, s0], [t2, s1], [t, s1]]) { const [x, y] = pt(tt, ss); arr.push(x, groundTop(x, y) + h + ramp(tt, ss, h), -y); } };
+        const q = (arr, s0, s1, h) => { for (const [tt, ss] of [[t, s0], [t2, s1], [t2, s0], [t, s0], [t, s1], [t2, s1]]) {      /* counter-clockwise on the map = facing up (20.11: the first version faced down and was culled) */ const [x, y] = pt(tt, ss); arr.push(x, groundTop(x, y) + h + ramp(tt, ss, h), -y); } };
         q(PA, -CW, CW, ROAD.asph); q(PP, -HWB, -CW, ROAD.pave); q(PP, CW, HWB, ROAD.pave);
         for (const sd of [-CW, CW]) { const [ax, ay] = pt(t, sd), [bx, by] = pt(t2, sd); PK.push(ax, z(t, sd, ROAD.pave), -ay, ax, z(t, sd, -0.05), -ay, bx, z(t2, sd, -0.05), -by, ax, z(t, sd, ROAD.pave), -ay, bx, z(t2, sd, -0.05), -by, bx, z(t2, sd, ROAD.pave), -by); } }
       const mk = A => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(A, 3)); g.computeVertexNormals(); return g; };
       add(mk(PA), mAsph); add(mk(PP), mPave); add(mk(PK), mKerb);
       for (let t = T0; t <= T1; t += 0.5) for (let sd = -HWB; sd <= HWB; sd += 0.5) { const [x, y] = pt(t, sd), gx = Math.floor(x - x0), gy = Math.floor(y - y0); if (gx >= 0 && gy >= 0 && gx < nx && gy < ny) M[gy * nx + gx] = Math.abs(sd) < CW ? 2 : 1; } }
+    /* 20.11.2026 (omistaja: "tarkista etelärantaa kuvista"): the light stone-paved square between the Eteläranta quay and Porinsilta's approach
+       (x 140-196, y 434-468 in the aerial photo, with the planters and the small lawn) had no surface in roads.js: paved per 1 m cell where nothing lies
+       yet, not on the lawn and not under the hand-built quay. */
+    { const LW = dec(R.lawn), lawn = new Uint8Array(60 * 40), LX = 138, LY = 430;
+      for (let i = 0; i < LW.length; i += 6) { const ax = LW[i] / 10, ay = LW[i + 1] / 10, bx = LW[i + 2] / 10, by = LW[i + 3] / 10, cx = LW[i + 4] / 10, cy = LW[i + 5] / 10;
+        if (Math.max(ax, bx, cx) < LX || Math.min(ax, bx, cx) > LX + 60 || Math.max(ay, by, cy) < LY || Math.min(ay, by, cy) > LY + 40) continue; const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy); if (Math.abs(d) < 1e-6) continue;
+        for (let gy = 0; gy < 40; gy++) for (let gx = 0; gx < 60; gx++) { const px = LX + gx + 0.5, py = LY + gy + 0.5, u = ((by - cy) * (px - cx) + (cx - bx) * (py - cy)) / d, v = ((cy - ay) * (px - cx) + (ax - cx) * (py - cy)) / d; if (u >= 0 && v >= 0 && u + v <= 1) lawn[gy * 60 + gx] = 1; } }
+      const SQ = [[140, 434], [184, 434], [197, 446], [197, 470], [140, 470]], inSq = (x, y) => { let c = false; for (let i = 0, j = SQ.length - 1; i < SQ.length; j = i++) { const [xi, yi] = SQ[i], [xj, yj] = SQ[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+      const PS = [];
+      for (let y = LY; y < LY + 40; y++) for (let x = LX; x < LX + 60; x++) { const cx = x + 0.5, cy = y + 0.5, gx = Math.floor(x - x0), gy = Math.floor(y - y0);
+        if (!inSq(cx, cy) || lawn[(y - LY) * 60 + (x - LX)] || (gx >= 0 && gy >= 0 && gx < nx && gy < ny && M[gy * nx + gx]) || (window.__quayZ && window.__quayZ(cx, cy, 18) !== null) || inRiver(cx, cy)) continue;
+        for (const [px, py] of [[x, y], [x + 1, y], [x + 1, y + 1], [x, y], [x + 1, y + 1], [x, y + 1]]) PS.push(px, groundTop(px, py) + ROAD.pave - 0.012, -py);
+        if (gx >= 0 && gy >= 0 && gx < nx && gy < ny) M[gy * nx + gx] |= 1; }
+      if (PS.length) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(PS, 3)); const U = []; for (let i = 0; i < PS.length; i += 3) U.push(PS[i] / 2.2, -PS[i + 2] / 2.2); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.computeVertexNormals(); add(g, ROAD.mK || mPave); }
+      ROAD.etFill = PS.length / 18; }
   }
   if (R.ow) { const O = dec(R.ow); for (let i = 0; i < O.length; i += 3) ONEWAY.set(O[i] + ',' + O[i + 1], O[i + 2]); }
   if (R.tmv && TREES.move) { const s0 = atob(R.tmv), u8 = new Uint8Array(s0.length); for (let i = 0; i < s0.length; i++) u8[i] = s0.charCodeAt(i); TREES.move(new Int32Array(u8.buffer)); }
