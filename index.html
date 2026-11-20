@@ -1214,7 +1214,8 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   // Porinsilta's south end (deck underside about 0.3 m, so 2.8 m headroom) between the bridge's river pier and the abutment, and climbs at 1:9 to the
   // riverside path east of the bridge. A retaining wall holds the land on the south side, a wall with a railing drops into the water on the north side;
   // the photo ground is cut out over the corridor (quayCut) and a capping strip covers the cut south of the wall.
-  const UPS = { x0: 193, x1: 238, x2: 260, x3: 266.5, yN: 475.3, yS: 471.7, cap: 462.5 };
+  const UPS = { x0: 193, x1: 238, x2: 260, x3: 266.5, yN: 475.3, yS: 471.7, cap: 462.5, tun: [197, 216] };   // tun: the arched tunnel under the deck (x)
+  const inTun = x => x > UPS.tun[0] - 0.2 && x < UPS.tun[1] + 0.2;
   const upEnd = TZg(UPS.x2 + 1.5, (UPS.yN + UPS.yS) / 2) + 0.05, upZ = x => x <= UPS.x1 ? ZW : x >= UPS.x2 ? Math.max(ZW, upEnd) : ZW + (Math.max(ZW, upEnd) - ZW) * (x - UPS.x1) / (UPS.x2 - UPS.x1);
   if (QUAY_MODEL) { const topS = (x, y) => Math.max(TZg(x, y) + 0.05, upZ(x) + 0.25);
     for (let x = UPS.x0; x < UPS.x3 - 0.01; x += 1.5) { const x2 = Math.min(UPS.x3, x + 1.5), za = upZ(x), zb = upZ(x2);
@@ -1225,11 +1226,40 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
       quad([x, UPS.yS, topS(x, UPS.yS)], [x2, UPS.yS, topS(x2, UPS.yS)], [x2, UPS.cap, topS(x2, UPS.cap)], [x, UPS.cap, topS(x, UPS.cap)], pave); }     // capping strip
     for (let x = UPS.x0; x < UPS.x3 - 0.01; x += 1.5) { const x2 = Math.min(UPS.x3, x + 1.5); quad([x, UPS.cap, ZW - 0.5], [x2, UPS.cap, ZW - 0.5], [x2, UPS.cap, topS(x2, UPS.cap)], [x, UPS.cap, topS(x, UPS.cap)], riser); }   // skirt: closes the void under the capping strip
     for (const x of [UPS.x0, UPS.x3]) quad([x, UPS.yS, x === UPS.x0 ? ZW : upZ(x)], [x, UPS.cap, x === UPS.x0 ? ZW : upZ(x)], [x, UPS.cap, topS(x, UPS.cap)], [x, UPS.yS, topS(x, UPS.yS)], riser);
-    const rp = []; for (let x = UPS.x0; x < UPS.x2; x += 1.5) { const x2 = Math.min(UPS.x2, x + 1.5); for (const h of [1.05, 0.55]) rp.push(x, upZ(x) + h, -UPS.yN + 0.25, x2, upZ(x2) + h, -UPS.yN + 0.25); }
+    const rp = []; for (let x = UPS.x0; x < UPS.x2; x += 1.5) { const x2 = Math.min(UPS.x2, x + 1.5); if (inTun(x) || inTun(x2)) continue; for (const h of [1.05, 0.55]) rp.push(x, upZ(x) + h, -UPS.yN + 0.25, x2, upZ(x2) + h, -UPS.yN + 0.25); }
     const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); scene.add(noT(new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0x222528 }))));
-    const upPosts = []; for (let x = UPS.x0 + 0.5; x < UPS.x2; x += 2.2) upPosts.push(x);
+    const upPosts = []; for (let x = UPS.x0 + 0.5; x < UPS.x2; x += 2.2) if (!inTun(x)) upPosts.push(x);
     const um = new THREE.InstancedMesh(new THREE.BoxGeometry(0.07, 1.05, 0.07), new THREE.MeshLambertMaterial({ color: 0x2a2d30 }), upPosts.length), m4 = new THREE.Matrix4();
     upPosts.forEach((x, k) => um.setMatrixAt(k, m4.makeTranslation(x, upZ(x) + 0.52, -(UPS.yN - 0.25)))); scene.add(noT(um)); }
+  // 20.11.2026 (omistaja: "alikulku on kaarimallinen, pellillä päällystetty kulku, leveys noin 3 m"): under the deck the corridor is a corrugated-steel
+  // arch 3.0 m wide (vertical sides to 0.9 m, then a half-ellipse), concrete portals at both ends, a concrete cover over it and the abutment face to the
+  // river. The crown follows the bridge: at most 2.7 m, at least 0.45 m below psilDeck over the tunnel (the deck slab) - logged as window.__alikulku.
+  if (QUAY_MODEL) { const [X0, X1] = UPS.tun, yc = (UPS.yN + UPS.yS) / 2, HW = 1.5, HS = 0.9, TH = 0.35, ux = Math.sin(PSIL.head), uy = Math.cos(PSIL.head);
+    let room = 9; for (let x = X0; x <= X1; x += 0.5) for (const y of [yc - HW - TH, yc + HW + TH]) { const t = (x - PSIL.x) * ux + (y - PSIL.y) * uy, sp = (x - PSIL.x) * uy - (y - PSIL.y) * ux;
+      if (Math.abs(sp) < PSIL.half + 0.5) room = Math.min(room, psilDeck(t) - 0.45 - ZW); }
+    const HC = Math.max(2.3, Math.min(2.7, room - TH)), RY = HC - HS;
+    const prof = [[-HW, 0], [-HW, HS]]; for (let i = 1; i < 24; i++) { const a = Math.PI * (1 - i / 24); prof.push([HW * Math.cos(a), HS + RY * Math.sin(a)]); } prof.push([HW, HS], [HW, 0]);
+    // corrugated sheet: one rib per 0.15 m around the arch (texture u along the tunnel), galvanised grey with a little patina
+    const cc = document.createElement('canvas'); cc.width = 32; cc.height = 64; const cx = cc.getContext('2d');
+    for (let i = 0; i < 32; i++) { const l = Math.round(150 + 55 * Math.sin(i / 32 * Math.PI * 2)); cx.fillStyle = `rgb(${l - 4},${l},${l + 2})`; cx.fillRect(i, 0, 1, 64); }
+    for (let k = 0; k < 40; k++) { cx.fillStyle = `rgba(${90 + Math.random() * 40},${80 + Math.random() * 30},60,${0.05 + Math.random() * 0.08})`; cx.fillRect(Math.random() * 32, Math.random() * 64, 1 + Math.random() * 6, 2 + Math.random() * 14); }
+    const ct = new THREE.CanvasTexture(cc); ct.wrapS = ct.wrapT = THREE.RepeatWrapping; ct.colorSpace = THREE.SRGBColorSpace; ct.anisotropy = 8;
+    const AP = [], AU = [], AI = []; let arc = 0;
+    prof.forEach((q, i) => { if (i) arc += Math.hypot(q[0] - prof[i - 1][0], q[1] - prof[i - 1][1]);
+      for (const x of [X0, X1]) { AP.push(x, ZW + q[1], -(yc + q[0])); AU.push((x - X0) / 0.15, arc / 2.0); } });
+    for (let i = 0; i + 1 < prof.length; i++) { const a = i * 2, b = a + 2; AI.push(a, a + 1, b + 1, a, b + 1, b); }
+    const ag = new THREE.BufferGeometry(); ag.setAttribute('position', new THREE.Float32BufferAttribute(AP, 3)); ag.setAttribute('uv', new THREE.Float32BufferAttribute(AU, 2)); ag.setIndex(AI); ag.computeVertexNormals();
+    scene.add(noT(new THREE.Mesh(ag, new THREE.MeshLambertMaterial({ map: ct, side: THREE.DoubleSide }))));
+    const conc = new THREE.MeshLambertMaterial({ color: 0x9c9a95 });
+    // portals: a concrete frame around the arch opening at each end
+    const sh = new THREE.Shape([[-HW - TH, 0], ...prof, [HW + TH, 0], [HW + TH, HC + TH], [-HW - TH, HC + TH]].map(q => new THREE.Vector2(q[0], q[1])));   // a U around the opening (no hole)
+    const pg = new THREE.ExtrudeGeometry(sh, { depth: TH, bevelEnabled: false, curveSegments: 4 });
+    for (const [x, d] of [[X0 - TH, 0], [X1, 0]]) { const m = new THREE.Mesh(pg, conc); m.rotation.y = Math.PI / 2; m.position.set(x + d, ZW, -yc); scene.add(noT(m)); }
+    // cover slab over the arch (between the portals) and the abutment face down to the river on the north side
+    { const cv = new THREE.Mesh(new THREE.BoxGeometry(X1 - X0 + 2 * TH, TH, 2 * (HW + TH)), conc); cv.position.set((X0 + X1) / 2, ZW + HC + TH / 2, -yc); scene.add(noT(cv));
+      const nf = new THREE.Mesh(new THREE.BoxGeometry(X1 - X0 + 2 * TH, HC + TH - (ZB - ZW), 0.3), conc); nf.position.set((X0 + X1) / 2, (ZB + ZW + HC + TH) / 2, -(yc + HW + TH + 0.15)); scene.add(noT(nf)); }
+    window.__alikulku = { x: [X0, X1], leveys: 2 * HW, harja: +HC.toFixed(2), tilaKanteen: +room.toFixed(2) };
+    console.log('[alikulku] kaari', window.__alikulku); }
   // the surface height for walkers and the player (groundTop): the photo ground lies up to 1 m off the walk and the steps
   if (QUAY_MODEL) { const SEG = []; for (const R of RUN) { const PR = R.r.map((_, k) => R.prof(k)); for (let k = 0; k + 1 < R.r.length; k++) { const a = Q[R.r[k]], b = Q[R.r[k + 1]], L = Math.hypot(b[0] - a[0], b[1] - a[1]); SEG.push({ a, ux: (b[0] - a[0]) / L, uy: (b[1] - a[1]) / L, L, n: R.n[k], A: PR[k], B: PR[k + 1] }); } }
     const zAt = (A, o) => { for (let j = A.length - 2; j >= 0; j--) if (o >= A[j][0]) { const [o0, z0] = A[j], [o1, z1] = A[j + 1]; return o1 > o0 + 0.01 ? z0 + (z1 - z0) * Math.min(1, (o - o0) / (o1 - o0)) : z1; } return A[0][1]; };
