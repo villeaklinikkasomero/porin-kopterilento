@@ -420,7 +420,7 @@ for tr in TR:
     for p, z in zip(S, c): flat += [r2(p[0]), r2(p[1]), r2(z)]
     t = tr['t']
     out['t'].append(dict(k=tr['k'], e=int(t.get('e', 0) or 0), v=int(t.get('v', 35) or 35), p=flat,
-                         b=[int(i) for i in np.where(tr['bridge'])[0]], lc=[int(i) for i in np.where(tr['lc'])[0]]))
+                         b=[int(i) for i in np.where(tr['bridge'])[0]], tn=[int(i) for i in np.where(tr.get('tn', np.zeros(0, bool)))[0]], lc=[int(i) for i in np.where(tr['lc'])[0]]))
 for to in TURNOUT:
     out['to'].append(dict(d=to['div'], e=to['end'], th=to['thr'], at=[r2(v) for v in to['at']], t=[round(v, 4) for v in to['t']]))
 for p in PL:
@@ -434,6 +434,41 @@ for ref, (P, Z) in ROUTES.items():
     out['r'][ref] = flat
 json.dump(out, open('rata_data.json', 'w'), separators=(',', ':'))
 print('tracks', len(TR), 'size', len(json.dumps(out, separators=(',', ':'))))
+
+# ---------------------------------------------------------------- Porttaali (omistaja 21.11.2026): bussi- ja kävelytunneli raiteiden ali
+# omistajan suuntima [-411.3, -994.1] -> [-499.9, -1059.3]; korkeusmallin kaivannon pohja on 0-5 m sivussa -> akseli sovitettu kaivantoon
+_TA = np.array([-411.3, -994.1]); _TB = np.array([-499.9, -1059.3]); _tu = (_TB - _TA) / np.linalg.norm(_TB - _TA); _tn = np.array([_tu[1], -_tu[0]]); _TL = float(np.linalg.norm(_TB - _TA))
+TA = _TA + _tn * 4.6; TB = _TB + _tn * (4.6 - 0.047 * _TL); tu = (TB - TA) / np.linalg.norm(TB - TA); tnv = np.array([tu[1], -tu[0]]); TLEN = float(np.linalg.norm(TB - TA))
+TW = 7.6   # sisäleveys: kaksi bussikaistaa + kapea jalkakäytävä
+def tcoord(p): r = np.asarray(p) - TA; return float(r @ tu), float(r @ tnv)
+# katettu osuus: raiteet ja laiturit akselin päällä
+_cov = []
+for tr in TR:
+    for p in tr['S']:
+        t_, l_ = tcoord(p)
+        if abs(l_) < TW / 2 + 2.5 and -40 < t_ < TLEN + 30: _cov.append(t_)
+for P in _PLS:
+    for k in range(len(P)):
+        a, b = P[k], P[(k + 1) % len(P)]
+        for f in np.linspace(0, 1, 30):
+            t_, l_ = tcoord(a + (b - a) * f)
+            if abs(l_) < TW / 2 and -40 < t_ < TLEN + 30: _cov.append(t_)
+T0, T1 = min(_cov) - 2.5, max(_cov) + 3.0
+print('Porttaali katettu', round(T0, 1), round(T1, 1), 'm akselilla, pituus', round(T1 - T0, 1))
+# lattia: kaivannon pohja tasoitettuna
+_ft = np.arange(-40, TLEN + 26, 2.0); _fz = []
+for t_ in _ft:
+    p = TA + tu * t_; _fz.append(min(float(TZg(*(p + tnv * o))) for o in np.arange(-2, 2.1, 0.5)))
+_fz = gaussian_filter1d(median_filter(np.array(_fz), size=5, mode='nearest'), 2, mode='nearest')
+for tr in TR:
+    tn_ = np.zeros(len(tr['S']), bool)
+    for k, p in enumerate(tr['S']):
+        t_, l_ = tcoord(p)
+        if abs(l_) < TW / 2 + 1.5 and T0 - 1 < t_ < T1 + 1: tn_[k] = True
+    tr['tn'] = tn_
+for _i, tr in enumerate(TR): out['t'][_i]['tn'] = [int(i) for i in np.where(tr['tn'])[0]]
+def in_tun(p, m=0.0):
+    t_, l_ = tcoord(p); return abs(l_) < TW / 2 + 0.8 + m and T0 - 26 < t_ < T1 + 26
 
 # ---------------------------------------------------------------- maaston muokkaus (index.html soveltaa ennen maan rakentamista)
 # 1) ratapenkka: ruudukon solmut alle 3,6 m raiteesta painetaan pölkyn yläpinnan alle, jotta maa ei puhkaise sepeliä
@@ -467,12 +502,14 @@ closed = grey_closing(H, size=(7, 7))
 inpl = np.zeros(len(pts), bool)
 for mp in PLP: inpl |= mp.contains_points(pts, radius=4.0)
 fillm = fillbox & ((ok & (d < 5.5)) | inpl | ((pts[:, 0] > -477) & (pts[:, 0] < -431)))
+TUNM = np.array([in_tun(p) for p in pts]) if True else None
+fillm = fillm & ~TUNM
 fl = newH.ravel()
 fl[fillm] = np.maximum(fl[fillm], closed.ravel()[fillm])
 # yksittäiset kuopat raiteiden välissä (laiturin porraskuilu 6 m:n ruudukossa) täytetään myös
 for _ in range(2):
     A = fl.reshape(ny, nx); Nb = np.minimum.reduce([np.roll(A, 1, 0), np.roll(A, -1, 0), np.roll(A, 1, 1), np.roll(A, -1, 1)])
-    m2 = fillbox & (A.ravel() < Nb.ravel() - 1.0)
+    m2 = fillbox & (A.ravel() < Nb.ravel() - 1.0) & ~TUNM
     fl[m2] = np.maximum(fl[m2], closed.ravel()[m2])
 # asema-alueen maa tasaiseksi sepelikentän alta (raiteiden 9 m säde, alle 50 m laitureista), alikulun avoin pää ja asema-aukion puoli jäävät
 if LEVEL is not None:
@@ -480,10 +517,14 @@ if LEVEL is not None:
     idxs = np.where(ok & (d < 9.5))[0][near_pl]
     pit = (pts[idxs, 0] > -432) & (pts[idxs, 0] < -395) & (pts[idxs, 1] > -1005) & (pts[idxs, 1] < -970)
     idxs = idxs[~pit]
+    idxs = idxs[~TUNM[idxs]]
     fl[idxs] = LEVEL - 0.12
     print('asema-alueen tasoitetut maasolmut', len(idxs))
 # penkka
-cm = ok & (d < 3.6)
+cm = ok & (d < 3.6) & ~TUNM
+# Porttaali: tunnelin ja rampin kohdalta maa lattian alle (6 m ruudukko ei muuten anna kaivantoa näkyviin ajoradan päälle)
+for _k in np.where(np.array([in_tun(p, 1.5) for p in pts]))[0]:
+    t_, l_ = tcoord(pts[_k]); fz_ = float(np.interp(t_, _ft, _fz)); fl[_k] = min(fl[_k], fz_ - 0.15)
 zc = np.where(cm, allz[np.minimum(idx, len(allz) - 1)] - 0.35, 1e9)
 fl[cm] = np.minimum(fl[cm], zc[cm])
 newH = fl.reshape(ny, nx)
@@ -497,6 +538,7 @@ openm = fillbox & ~fillm & (H.ravel() < 3.0)
 op = pts[openm]
 print('open pit cells', len(op), op.min(0) if len(op) else None, op.max(0) if len(op) else None)
 out['ter'] = ovr
+out['tun'] = dict(a=[round(float(v), 2) for v in TA], b=[round(float(v), 2) for v in TB], w=TW, t0=round(T0, 2), t1=round(T1, 2), ft0=-40, fz=[round(float(v), 2) for v in _fz])
 json.dump(out, open('rata_data.json', 'w'), separators=(',', ':'))
 
 # ---------------------------------------------------------------- ulkokehän 18 m maaruudukko: raiteiden kohdalta solut pois (rata.js rakentaa niihin 6 m ruudukon)
@@ -511,7 +553,7 @@ for j in range(ony):
     for i in range(onx):
         x = OX0 + (i + 0.5) * OXS; y = OY0 + (j + 0.5) * OXS
         if abs(x) < HW - 9 and YS + 9 < y < YN - 9: continue
-        if kd2.query([x, y])[0] < 17.5: cells.append(j * onx + i)
+        if kd2.query([x, y])[0] < 17.5 or in_tun((x, y), 12): cells.append(j * onx + i)
 print('outer cells', len(cells))
 out['osk'] = cells
 json.dump(out, open('rata_data.json', 'w'), separators=(',', ':'))

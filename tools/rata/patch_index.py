@@ -26,5 +26,10 @@ g = '<script type="module" src="laskuvarjo/hyppy.js"></script>\n'
 rep(g, g + '<!-- 20.11.2026: rataverkko, aseman laiturit ja alikulun portaali (rata/rata.js) sekä IC-juna (juna/juna.js) -->\n<script type="module" src="rata/rata.js"></script>\n<script type="module" src="juna/juna.js"></script>\n', 'src="rata/rata.js"')
 h = "  { const qz = window.__quayZ ? window.__quayZ(x, y) : null; if (qz !== null) return qz; }      // Eteläranta's hand-built quay\n"
 rep(h, h + "  { const rz = window.__rataZ ? window.__rataZ(x, y) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: \"pelaaja uppoaa\"): aseman laiturit ja ratapenkka (rata/rata.js)\n", "window.__rataZ")
+i = "const tSkip = (x, y) => { if (!QUAY_MODEL) return false;"
+rep(i, """// 21.11.2026: Porttaali-tunnelin kohdalta maan ruudukko pois (rata/rata.js rakentaa tunnelin, rampit ja reunat)
+const rataTun = (x, y) => { const T = RATA.tun; if (!T) return false; const ux = T.b[0] - T.a[0], uy = T.b[1] - T.a[1], L = Math.hypot(ux, uy), dx = x - T.a[0], dy = y - T.a[1], t = (dx * ux + dy * uy) / L, l = (dx * uy - dy * ux) / L;
+  return Math.abs(l) < T.w / 2 + 3 && t > T.t0 - 40 && t < T.t1 + 26; };
+const tSkip = (x, y) => { if (rataTun(x, y)) return true; if (!QUAY_MODEL) return false;""", "const rataTun")
 open(sys.argv[2], 'w', encoding='utf-8').write(s)
 print('ok', len(s))

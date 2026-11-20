@@ -24,8 +24,8 @@ const PLAT_EDGE = 1.80;               // laiturin reuna raiteen keskeltä
 const tracks = RATA.t.map((t, i) => {
   const n = t.p.length / 3, P = new Float32Array(n * 2), Z = new Float32Array(n), S = new Float32Array(n);
   for (let k = 0; k < n; k++) { P[k * 2] = t.p[k * 3]; P[k * 2 + 1] = t.p[k * 3 + 1]; Z[k] = t.p[k * 3 + 2]; if (k) S[k] = S[k - 1] + Math.hypot(P[k * 2] - P[k * 2 - 2], P[k * 2 + 1] - P[k * 2 - 1]); }
-  const B = new Uint8Array(n), LC = new Uint8Array(n); for (const j of t.b) B[j] = 1; for (const j of t.lc) LC[j] = 1;
-  return { i, k: t.k, e: t.e, v: t.v, n, P, Z, S, B, LC, L: S[n - 1], wood: t.k === 'x' || t.k === 'p', main: t.k === 'm' || t.k === 'b' };
+  const B = new Uint8Array(n), LC = new Uint8Array(n), TN = new Uint8Array(n); for (const j of t.b) B[j] = 1; for (const j of t.lc) LC[j] = 1; for (const j of t.tn || []) TN[j] = 1;
+  return { i, k: t.k, e: t.e, v: t.v, n, P, Z, S, B, LC, TN, L: S[n - 1], wood: t.k === 'x' || t.k === 'p', main: t.k === 'm' || t.k === 'b' };
 });
 // piste ja suunta kaaren pituudella s
 function at(tr, s) {
@@ -35,7 +35,7 @@ function at(tr, s) {
   const x = P[lo * 2] + (P[hi * 2] - P[lo * 2]) * f, y = P[lo * 2 + 1] + (P[hi * 2 + 1] - P[lo * 2 + 1]) * f, z = tr.Z[lo] + (tr.Z[hi] - tr.Z[lo]) * f;
   // suunta tasoitettuna kolmen pisteen yli (ei nykäyksiä 2 m:n välein)
   const a = Math.max(0, lo - 1), b = Math.min(tr.n - 1, hi + 1); let dx = P[b * 2] - P[a * 2], dy = P[b * 2 + 1] - P[a * 2 + 1]; const l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l;
-  return { x, y, z, dx, dy, i: lo, f, br: tr.B[lo] || tr.B[hi], lc: tr.LC[lo] || tr.LC[hi] };
+  return { x, y, z, dx, dy, i: lo, f, br: tr.B[lo] || tr.B[hi], tn: tr.TN[lo] || tr.TN[hi], lc: tr.LC[lo] || tr.LC[hi] };
 }
 function nearestOn(tr, x, y) { let best = 1e18, bi = 0; for (let k = 0; k < tr.n; k++) { const d = (tr.P[k * 2] - x) ** 2 + (tr.P[k * 2 + 1] - y) ** 2; if (d < best) { best = d; bi = k; } }
   // tarkennus janalle
@@ -164,7 +164,7 @@ function buildTrack(tr) {
     for (const [k, sd] of [[0, -1], [1, 1]]) { let best = 1e9; for (const o of [2.5, 3.5, 4.5, 5.5, 7, 8.5, 10]) { const h = NEARIDX(a.x + nx * sd * o, a.y + ny * sd * o, 1.6, tr); if (h) { const lat = Math.abs((h.a.x - a.x) * nx + (h.a.y - a.y) * ny); if (lat > 2.2 && lat < best) best = lat; } }
       if (best < 12) ext[k] = best / 2 + 0.2;
       else for (const pl of PLPOLY) if (inPoly(a.x + nx * sd * 2.6, a.y + ny * sd * 2.6, pl)) ext[k] = 2.3; }   // laiturin alle asti
-    const prof = ballastProfile(tr, a.br, ext);
+    const prof = ballastProfile(tr, a.br || a.tn, ext);
     const base = B.p.length / 3;
     for (const [o, h, c] of prof) { B.p.push(...W(a.x + nx * o, a.y + ny * o, a.z + h)); const cc = rust ? c * 0.85 : c; B.c.push(cc * (rust ? 1.02 : 1), cc * (rust ? 0.95 : 1), cc * (rust ? 0.85 : 1)); B.u.push(o / 1.6, s1 / 1.6); }
     if (prev && prev.t === t && prev.n === prof.length) for (let k = 0; k + 1 < prof.length; k++) { const a0 = prev.base + k, a1 = prev.base + k + 1, b0 = base + k, b1 = base + k + 1; B.i.push(a0, a1, b0, a1, b1, b0); }
@@ -321,24 +321,64 @@ function buildUnderpass(root, plats, TZg) {
     const pit = new THREE.Mesh(new THREE.BoxGeometry(wid - 0.2, 0.02, len - 0.2), M.dark); pit.position.y = 0.01; o.add(pit);   // portaikon aukko
     root.add(o);
   }
-  // portaali: betoniseinä, aukko 5,2 × 2,7 m, otsapalkki ja tukimuurit avoimen rampin sivuilla kaiteineen
-  const P0 = RATA.portal; const ux = P0.dx, uy = P0.dy, nx = uy, ny = -ux, floor = TZg(P0.x + ux * 3, P0.y + uy * 3);
-  const top = platformZ(P0.x, P0.y).z - 0.05, hw = P0.w / 2, H = top - floor;
-  const o = new THREE.Group(); o.position.set(...W(P0.x, P0.y, floor)); o.rotation.y = Math.atan2(ux, uy) * -1 + 0; root.add(o);
-  // paikallinen: z = tunnelin suunta ulos (aseman aukiolle), x = sivu
-  const conc = M.bridge;
-  const wallT = 0.5, clear = Math.min(2.7, H - 0.6);
-  const add = (w, h, d, x, y, z, m = conc) => { const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); b.position.set(x, y, z); o.add(b); return b; };
-  add(1.4, H, wallT, -(hw + 0.7), H / 2, 0); add(1.4, H, wallT, hw + 0.7, H / 2, 0);   // pielet
-  add(P0.w + 2.8, H - clear, wallT, 0, clear + (H - clear) / 2, 0);                       // otsapalkki
-  add(P0.w, clear, 6, 0, clear / 2, -3.2, M.dark);                                          // tunnelin pimeä sisus
-  add(P0.w + 2.8, 0.06, 0.25, 0, H + 0.03, 0.12, M.frame);                                 // pellitys
-  // rampin tukimuurit (12 m) ja kaiteet
-  for (const sx of [-1, 1]) { add(0.3, H, 12, sx * (hw + 0.15), H / 2, 6.0);
-    const rail = add(0.05, 0.05, 12, sx * (hw + 0.15), H + 1.0, 6.0, M.frame); for (let k = 0; k <= 8; k++) add(0.04, 1.0, 0.04, sx * (hw + 0.15), H + 0.5, k * 1.5, M.frame); }
-  const sign = canvasTex(256, 64, (g, w, h) => { g.fillStyle = '#1d4f91'; g.fillRect(0, 0, w, h); g.fillStyle = '#fff'; g.font = 'bold 34px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('Laiturit 1–3', w / 2, h / 2 + 2); });
-  const sm = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 0.55), new THREE.MeshBasicMaterial({ map: sign })); sm.position.set(0, clear + 0.45, wallT / 2 + 0.01); o.add(sm);
-  o.traverse(c => c.userData.noT = true);
+  // (vanha jalankulkuportaali poistettu 21.11.2026: alikulku on Porttaali-ajotunneli, buildTunnel)
+}
+
+// Porttaali (omistaja 21.11.2026: "menee junaraiteiden alla, täällä kulkee myös citylinjan bussi"): ajotunneli raiteiden ja laitureiden ali.
+// Katettu osa RATA.tun.t0..t1 akselilla, koillispäässä ramppi asema-aukiolle tukimuureineen, lattia korkeusmallin kaivannon pohjasta.
+const TUN = RATA.tun;
+const tunT = (x, y) => { if (!TUN) return null; const ux = TUN.b[0] - TUN.a[0], uy = TUN.b[1] - TUN.a[1], L = Math.hypot(ux, uy), dx = x - TUN.a[0], dy = y - TUN.a[1]; return { t: (dx * ux + dy * uy) / L, l: (dx * uy - dy * ux) / L }; };
+const tunFloor = t => { const k = (t - TUN.ft0) / 2, i = Math.max(0, Math.min(TUN.fz.length - 2, Math.floor(k))), f = Math.max(0, Math.min(1, k - i)); return TUN.fz[i] * (1 - f) + TUN.fz[i + 1] * f; };
+const inTun = (x, y, m = 0) => { const c = tunT(x, y); return c && Math.abs(c.l) < TUN.w / 2 + 0.8 + m && c.t > TUN.t0 - 40 && c.t < TUN.t1 + 26 ? c : null; };
+function buildTunnel(root, G, plats) {
+  if (!TUN) return; const TZ = G.TZg || G.TZs;
+  const ux = (TUN.b[0] - TUN.a[0]), uy = (TUN.b[1] - TUN.a[1]), L = Math.hypot(ux, uy), u = [ux / L, uy / L], nrm = [u[1], -u[0]];
+  const P = (t, l) => [TUN.a[0] + u[0] * t + nrm[0] * l, TUN.a[1] + u[1] * t + nrm[1] * l];
+  let top = 1e9; for (const tr of tracks) for (let k = 0; k < tr.n; k++) if (tr.TN[k]) top = Math.min(top, tr.Z[k]);
+  const slabTop = top - 0.72, ceil = slabTop - 0.45, hw = TUN.w / 2;
+  const asph = new THREE.MeshStandardMaterial({ map: concTex, color: 0x3a3c3f, roughness: 0.9 }), wallM = new THREE.MeshStandardMaterial({ map: concTex, color: 0x9a9a95, roughness: 0.9, side: THREE.DoubleSide }),
+    ceilM = new THREE.MeshStandardMaterial({ map: concTex, color: 0x6d6e6c, roughness: 0.9, side: THREE.DoubleSide }), lampM = new THREE.MeshBasicMaterial({ color: 0xfff1d0 }), lineM = new THREE.MeshBasicMaterial({ color: 0xd9d9d2 });
+  const quads = new Map(); const Q = (m, a, b, c, d) => { let L2 = quads.get(m); if (!L2) quads.set(m, L2 = []); L2.push(a, b, c, a, c, d); };
+  const V = (t, l, z) => { const [x, y] = P(t, l); return W(x, y, z); };
+  const tA = TUN.t0 - 38, tB = TUN.t1 + 22, st = 2;
+  for (let t = tA; t < tB; t += st) { const t2 = Math.min(tB, t + st), f1 = tunFloor(t), f2 = tunFloor(t2), cov = t >= TUN.t0 && t2 <= TUN.t1 + 0.01;
+    // ajorata + jalkakäytävä (1,4 m, +0,15) koillisen puolella
+    Q(asph, V(t, -hw, f1 + 0.04), V(t2, -hw, f2 + 0.04), V(t2, hw - 1.4, f2 + 0.04), V(t, hw - 1.4, f1 + 0.04));
+    Q(wallM, V(t, hw - 1.4, f1 + 0.19), V(t2, hw - 1.4, f2 + 0.19), V(t2, hw, f2 + 0.19), V(t, hw, f1 + 0.19));
+    Q(wallM, V(t, hw - 1.4, f1 + 0.04), V(t2, hw - 1.4, f2 + 0.04), V(t2, hw - 1.4, f2 + 0.19), V(t, hw - 1.4, f1 + 0.19));
+    if (Math.floor(t / 6) % 2 === 0) Q(lineM, V(t, -0.06 - 0.7, f1 + 0.05), V(t2, -0.06 - 0.7, f2 + 0.05), V(t2, 0.06 - 0.7, f2 + 0.05), V(t, 0.06 - 0.7, f1 + 0.05));   // keskiviiva (ajoradan keskellä)
+    // seinät: katetussa osassa kattoon asti, rampeissa maanpinnan tasoon (tukimuuri)
+    for (const sd of [-1, 1]) { const l = sd * (hw + 0.01);
+      const g1 = cov ? ceil : Math.max(f1 + 0.3, TZ(...P(t, sd * (hw + 1.2)))), g2 = cov ? ceil : Math.max(f2 + 0.3, TZ(...P(t2, sd * (hw + 1.2))));
+      Q(wallM, V(t, l, f1), V(t2, l, f2), V(t2, l, g2 + (cov ? 0 : 0.25)), V(t, l, g1 + (cov ? 0 : 0.25)));
+      if (!cov && g1 - f1 > 0.6) Q(wallM, V(t, l, g1 + 0.25), V(t2, l, g2 + 0.25), V(t2, l + sd * 0.3, g2 + 0.25), V(t, l + sd * 0.3, g1 + 0.25)); }
+    if (cov) { Q(ceilM, V(t, -hw - 0.3, ceil), V(t2, -hw - 0.3, ceil), V(t2, hw + 0.3, ceil), V(t, hw + 0.3, ceil));
+      Q(lampM, V(t, -0.12, ceil - 0.02), V(t2 - 0.6, -0.12, ceil - 0.02), V(t2 - 0.6, 0.12, ceil - 0.02), V(t, 0.12, ceil - 0.02)); }
+  }
+  // otsamuurit (portaalit) katetun osan päissä: aukon yläpuolelta kiskojen tasoon ja sivuilta maahan
+  for (const [t0, s] of [[TUN.t0, -1], [TUN.t1, 1]]) { const f = tunFloor(t0);
+    Q(wallM, V(t0, -hw - 1.0, ceil), V(t0, hw + 1.0, ceil), V(t0, hw + 1.0, top + 0.35), V(t0, -hw - 1.0, top + 0.35));
+    Q(wallM, V(t0 + s * 0.6, -hw - 1.0, top + 0.35), V(t0 + s * 0.6, hw + 1.0, top + 0.35), V(t0, hw + 1.0, top + 0.35), V(t0, -hw - 1.0, top + 0.35));
+    for (const sd of [-1, 1]) Q(wallM, V(t0, sd * hw, f - 0.2), V(t0, sd * (hw + 1.0), f - 0.2), V(t0, sd * (hw + 1.0), top + 0.35), V(t0, sd * hw, top + 0.35)); }
+  // kansilaatan yläpinta ja sivut (raiteiden ja laitureiden alla, ei näy ylhäältä)
+  Q(ceilM, V(TUN.t0, -hw - 1, slabTop), V(TUN.t1, -hw - 1, slabTop), V(TUN.t1, hw + 1, slabTop), V(TUN.t0, hw + 1, slabTop));
+  for (const [m, arr] of quads) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(arr.flat(), 3));
+    const uv = []; for (let i = 0; i < arr.length; i++) uv.push(arr[i][0] / 2, (arr[i][1] + arr[i][2]) / 2); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.computeVertexNormals();
+    const me = new THREE.Mesh(g, m); m.side = THREE.DoubleSide; me.userData.noT = true; root.add(me); }
+  // kaide rampin tukimuurien päälle
+  const rails = []; for (const sd of [-1, 1]) { const pts = []; for (let t = tA; t <= TUN.t0; t += 2) { const g = Math.max(tunFloor(t) + 0.3, TZ(...P(t, sd * (hw + 1.2)))); pts.push(new THREE.Vector3(...V(t, sd * (hw + 0.15), g + 1.25))); }
+    if (pts.length > 1) { const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), pts.length * 2, 0.03, 5), M.frame); m.userData.noT = true; root.add(m); } }
+  const sign = canvasTex(512, 96, (g, w, h) => { g.fillStyle = '#1d4f91'; g.fillRect(0, 0, w, h); g.fillStyle = '#fff'; g.font = 'bold 54px sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('Porttaali', w / 2, h / 2 + 3); });
+  const sm = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 0.6), new THREE.MeshBasicMaterial({ map: sign, side: THREE.DoubleSide })); const [sx, sy] = P(TUN.t0 - 0.05, 0); sm.position.set(...W(sx, sy, (ceil + top) / 2)); sm.rotation.y = Math.atan2(u[0], -u[1]) + Math.PI; sm.userData.noT = true; root.add(sm);
+  // maa rampin muurien takana (maan ruudukko on leikattu käytävän kohdalta): 1 m:n kaistat ilmakuvalla
+  const OX0 = -2504.1, OY0 = -3501.6, OXS = 4954.9, OYS = 5396.0, gp = [], gu = [];
+  for (const [ta, tb] of [[tA, TUN.t0], [TUN.t1, tB]]) for (let t = ta; t < tb; t += 2) { const t2 = Math.min(tb, t + 2);
+    for (const sd of [-1, 1]) for (let l = hw + 0.3; l < hw + 4.0; l += 1.2) { const l2 = l + 1.2, pts = [[t, l], [t2, l], [t2, l2], [t, l2]].map(([tt, ll]) => { const [x, y] = P(tt, sd * ll); return [x, y, TZ(x, y) + 0.02]; });
+      for (const k of (sd > 0 ? [0, 1, 2, 0, 2, 3] : [0, 2, 1, 0, 3, 2])) { const [x, y, z] = pts[k]; gp.push(x, z, -y); gu.push((x - OX0) / OXS, (y - OY0) / OYS); } } }
+  { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(gu, 2)); g.computeVertexNormals();
+    const m = new THREE.Mesh(g, G.outerMat || M.grass); m.userData.noT = true; root.add(m); }
+  window.__porttaali = { top, ceil, slabTop };
+  console.log('[rata] Porttaali: lattia', tunFloor(50).toFixed(2), 'katto', ceil.toFixed(2), 'vapaa korkeus', (ceil - tunFloor(50)).toFixed(2), 'm');
 }
 
 // sillat: kansilaatta, reunapalkit ja kaiteet sepelin alle
@@ -466,7 +506,8 @@ function buildOuterGround(root, G) {
   const p = [], u = [], I = []; const TZ = G.TZg || G.TZs;
   for (const c of RATA.osk || []) { const i = c % onx, j = Math.floor(c / onx), x0 = OX0 + i * 18, y0 = OY0 + j * 18, b = p.length / 3;
     for (let b2 = 0; b2 <= 3; b2++) for (let a2 = 0; a2 <= 3; a2++) { const x = x0 + a2 * st, y = y0 + b2 * st; p.push(x, TZ(x, y), -y); u.push((x - OX0) / OXS, (y - OY0) / OYS); }
-    for (let b2 = 0; b2 < 3; b2++) for (let a2 = 0; a2 < 3; a2++) { const k = b + b2 * 4 + a2; I.push(k, k + 1, k + 5, k, k + 5, k + 4); } }
+    for (let b2 = 0; b2 < 3; b2++) for (let a2 = 0; a2 < 3; a2++) { const c = tunT(x0 + (a2 + 0.5) * st, y0 + (b2 + 0.5) * st); if (c && Math.abs(c.l) < TUN.w / 2 + 3 && c.t > TUN.t0 - 40 && c.t < TUN.t1 + 26) continue;   // Porttaali
+      const k = b + b2 * 4 + a2; I.push(k, k + 1, k + 5, k, k + 5, k + 4); } }
   if (!p.length) return;
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(u, 2)); g.setIndex(I);
   const m = new THREE.Mesh(g, G.outerMat || new THREE.MeshBasicMaterial({ color: 0x777777 })); m.userData.noT = true; root.add(m);
@@ -490,13 +531,14 @@ function buildBallastField(root, G, plats) {
   for (const key of clo) { const [i, j] = key.split(',').map(Number), cx = (i + 0.5) * C, cy = (j + 0.5) * C;
     const b = near(cx, cy, 25); if (b && b.a.br && b.d < 6) continue;
     if (LC.some(([x, y]) => Math.hypot(x - cx, y - cy) < 7)) continue;
+    const tc = inTun(cx, cy, 3); if (tc && !(tc.t > TUN.t0 + 0.5 && tc.t < TUN.t1 - 0.5)) continue;
     keep.add(key); }   // myös laiturin alle: reunan alta ei saa näkyä ilmakuvaa
   // reunasolmut läpinäkyviksi: solmu on sisällä, jos kaikki sen neljä solua ovat mukana
   const inner = (i, j) => keep.has((i - 1) + ',' + (j - 1)) && keep.has(i + ',' + (j - 1)) && keep.has((i - 1) + ',' + j) && keep.has(i + ',' + j);
   const chunks = new Map();
   for (const key of keep) { const [i, j] = key.split(',').map(Number), cx = (i + 0.5) * C, cy = (j + 0.5) * C;
     const ck = Math.floor(cx / 400) + ',' + Math.floor(cy / 400); let ch = chunks.get(ck); if (!ch) chunks.set(ck, ch = { p: [], u: [], c: [], i: [], m: new Map() });
-    const v = (vi, vj) => { const k = vi + ',' + vj; let n = ch.m.get(k); if (n === undefined) { const x = vi * C, y = vj * C; n = ch.p.length / 3; ch.m.set(k, n); ch.p.push(x, TZ(x, y) + 0.06, -y); ch.u.push(x / 1.6, y / 1.6);
+    const v = (vi, vj) => { const k = vi + ',' + vj; let n = ch.m.get(k); if (n === undefined) { const x = vi * C, y = vj * C; n = ch.p.length / 3; ch.m.set(k, n); const tq = inTun(x, y, 3), zz = tq && tq.t > TUN.t0 - 0.5 && tq.t < TUN.t1 + 0.5 && window.__porttaali ? window.__porttaali.slabTop + 0.6 : TZ(x, y) + 0.06; ch.p.push(x, zz, -y); ch.u.push(x / 1.6, y / 1.6);
         const d = near(x, y, 25), f = d ? Math.min(1, d.d / 25) : 1, sh = 0.78 - 0.12 * f; ch.c.push(sh, sh * 0.97, sh * 0.93, inner(vi, vj) ? 1 : 0); } return n; };
     const a = v(i, j), b2 = v(i + 1, j), c = v(i + 1, j + 1), d = v(i, j + 1);
     ch.i.push(a, b2, c, a, c, d); }
@@ -519,6 +561,7 @@ function luoRata({ scene, TZg, G }) {
   const plats = buildPlatforms(root);
   buildUnderpass(root, plats, TZg);
   buildCanopy(root, plats);
+  buildTunnel(root, G, plats);
   buildBallastField(root, G, plats);
   buildBridges(root);
   buildCrossings(root);
@@ -540,7 +583,10 @@ function luoRata({ scene, TZg, G }) {
     return h; };
   // kävely ja ajo: laiturin pinta, sepelipenkalla pölkkyjen taso (index.html carGround kysyy window.__rataZ)
   const NZ = trackIndex(1);
-  window.__rataZ = (x, y) => { for (const p of plats) if (inPoly(x, y, p.poly)) return p.z;
+  window.__rataZ = (x, y) => { const c = inTun(x, y);
+    if (c) { const f = tunFloor(c.t) + 0.04, W2 = G.WALK; const up = c.t > TUN.t0 && c.t < TUN.t1 && W2 && W2.on && W2.z > f + 2.2;   // tunnelissa: lattia, paitsi kävelijä ylhäällä laiturilla
+      if (!up) return f + (c.l > TUN.w / 2 - 1.4 ? 0.15 : 0); }
+    for (const p of plats) if (inPoly(x, y, p.poly)) return p.z;
     const b = NZ(x, y, 2.3); if (b && !b.a.lc) return b.a.z + 0.02; return null; };
   window.__rata = { tracks, at, nearestOn, plats, wires: cat.wires, upd, root, RATA, RAIL };
   console.log('[rata] raiteita', tracks.length, 'ruutuja', tiles.size, 'laitureita', plats.length);

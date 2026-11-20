@@ -2219,3 +2219,16 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
 - **Tiedossa / seuraavaksi:** junamallit ovat yksinkertaisia (6 000 kolmiota, bussissa 40 000; Meshy-korit tai lisää yksityiskohtia), ääniä ei ole,
   juna ei ole kiinteä (SOLID), Mäntyluodon ja Aittaluodon radoilla ei ole liikennettä, ajojohtimen pylväät ovat paikoin laiturilla,
   ilmakuvan vaaleita läikkiä näkyy raiteiden ja laiturin välissä.
+
+
+## 21.11.2026 – Rata ja juna, jatko (Meshy-juna VR:n värein, asema-alue, Porttaali)
+- **Juna:** omistajan Meshy-mallit `VR_Sr3_Locomotive_3D`, `VR_IC2_Coach_3D`, `VR_Edo_Control_Car_3D` -> `juna/sr3|ed|edo(.glb, _m.glb)` skriptillä `tools/juna/meshy_juna.py`
+  (telit leikattu pois ja korvattu kääntyvillä, harvennus UV-saumat säilyttäen 104–124 k / 32–38 k kolmiota, tekstuurit `tools/juna/glb_shrink.py` 2048/1024).
+  `juna.js` säätää materiaalit pelin valoon (metalli pois, väri ×0,74), muuten valkoinen puhkesi. Ohjausvaunun ohjaamo Meshyssä -X-päässä (`flip`).
+- **Asema-alue tasainen:** laitureiden kohdalla ja 60 m ympärillä raiteet yhdessä tasossa (build_data.py LEVEL), maa sepelikentän alla tasoitettu.
+  Sepelikenttä vain 45 m laitureista, reuna häivytetty. `carGround` kysyy `window.__rataZ` (laituri, ratapenkka, tunnelin lattia).
+- **Porttaali** (omistaja: "menee junaraiteiden alla, täällä kulkee myös citylinjan bussi … pitäisi saada kaivettua"; suuntima [-411.3, -994.1] -> [-499.9, -1059.3]):
+  akseli sovitettu korkeusmallin kaivantoon (+4,6 m sivuun), katettu osa 88 m (`RATA.tun.t0..t1`), sisäleveys 7,6 m (ajorata + 1,4 m jalkakäytävä),
+  lattia kaivannon pohjasta (~0,8), katto 4,21 -> vapaa korkeus 3,4 m, koillisessa ramppi asema-aukiolle tukimuureineen ja kaiteineen, otsamuurit, kattovalot.
+  Maan ruudukko leikattu käytävän kohdalta (index.html `rataTun` -> `tSkip`; rata.js ulkokehän 6 m ruudukko), rampin reunoille kaistat ilmakuvalla.
+  Vanha jalankulkuportaali poistettu. **Ei vielä:** bussireitin kytkentä tunneliin (citylinja), lounaispään liittymä katuun, tunnelin taideteos (Porisontti).
