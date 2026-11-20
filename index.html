@@ -139,7 +139,7 @@
   <span class="heli-only"><kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
   <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>Enter</kbd> nouse ulos<br></span><span class="car-only"><kbd>W</kbd> kaasu · <kbd>S</kbd> jarru/peruutus · <kbd>A</kbd><kbd>D</kbd> ohjaus · <kbd>Väli</kbd> käsijarru · <kbd>R</kbd> radio · <kbd>Enter</kbd> nouse ulos<br></span><span class="walk-only"><kbd>W</kbd><kbd>S</kbd> kävele · <kbd>A</kbd><kbd>D</kbd> käänny · <kbd>Q</kbd><kbd>E</kbd> sivuaskel · <kbd>Shift</kbd> juokse<br><kbd>Enter</kbd> kyytiin / ovesta · <kbd>H</kbd> tervehdi · <kbd>B</kbd> musiikki ja tanssi · </span><kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
 </div>
-<div id="credit">Ilmakuva © Maanmittauslaitos, ortokuva 2025 (CC BY 4.0) · Kartta-aineisto ja bussipysäkit © OpenStreetMapin tekijät · bussien sijainnit: Digitransit / Waltti (avoin data) · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0) · valokuvat © Porin kaupunki · maalaukset: Akseli Gallen-Kallela (Juseliuksen mausoleumin freskojen esityöt) ja R. W. Ekman (alttaritaulun luonnos), Kansallisgalleria / Wikimedia Commons (public domain, CC0) · Porin Teatterin kattomaalaukset: valokuva Sven Raita 1955, Satakunnan Museo (CC BY 4.0), oikaistu ja värikorjattu</div>
+<div id="credit">Ilmakuva © Maanmittauslaitos, ortokuva 2025 (CC BY 4.0) · Kartta-aineisto, bussipysäkit ja lentoaseman alueet © OpenStreetMapin tekijät · lentoaseman tiedot: AIP Finland (Fintraffic) · bussien sijainnit: Digitransit / Waltti (avoin data) · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0) · valokuvat © Porin kaupunki · maalaukset: Akseli Gallen-Kallela (Juseliuksen mausoleumin freskojen esityöt) ja R. W. Ekman (alttaritaulun luonnos), Kansallisgalleria / Wikimedia Commons (public domain, CC0) · Porin Teatterin kattomaalaukset: valokuva Sven Raita 1955, Satakunnan Museo (CC BY 4.0), oikaistu ja värikorjattu</div>
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
@@ -239,7 +239,8 @@ function terrainize(mat) {
 function terrainizeScene() { const walk = o => { if (o.userData.noT) return; const m = o.material; if (m) for (const q of Array.isArray(m) ? m : [m]) terrainize(q); for (const c of o.children) walk(c); }; walk(scene); }
 const noT = o => { o.traverse(q => { q.userData.noT = true; const m = q.material; if (m) for (const x of Array.isArray(m) ? m : [m]) x.userData.noT = true; }); return o; };
 const RMASK = (() => { const M = RIV.mask, b = atob(M.b), a = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) a[i] = b.charCodeAt(i); return { ...M, a }; })();
-function inRiver(x, y) { const i = Math.floor((x - OX0) / RMASK.g), j = Math.floor((y - OY0) / RMASK.g); if (i < 0 || j < 0 || i >= RMASK.nx || j >= RMASK.ny) return false; const k = j * RMASK.nx + i; return (RMASK.a[k >> 3] >> (7 - (k & 7))) & 1; }
+const RMX0 = -2504.1, RMY0 = -1671.6;      // the river mask keeps the map's original corner (the map grew 1.8 km south for the airport, 20.11.2026)
+function inRiver(x, y) { const i = Math.floor((x - RMX0) / RMASK.g), j = Math.floor((y - RMY0) / RMASK.g); if (i < 0 || j < 0 || i >= RMASK.nx || j >= RMASK.ny) return false; const k = j * RMASK.nx + i; return (RMASK.a[k >> 3] >> (7 - (k & 7))) & 1; }
 function onBridgeDeck(x, y) { for (const b of RIV.br) { const P = b.p; for (let i = 0; i + 3 < P.length; i += 2) { const ax = P[i], ay = P[i + 1], dx = P[i + 2] - ax, dy = P[i + 3] - ay, L2 = dx * dx + dy * dy, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L2));
   if (Math.hypot(ax + dx * t - x, ay + dy * t - y) < b.w / 2 + 0.5) return true; } } return false; }
 const $ = id => document.getElementById(id);
@@ -469,7 +470,8 @@ function waterify(mat) {          // sky reflection grows towards grazing angles
 }
 // ---------- sharper aerial photo near the helicopter: 512 m tiles at 0.25 m/px (Porin kaupunki WMS), loaded by distance ----------
 // 0.25 m/px tiles over the centre (i 0..5, j 0..4), 0.33 m/px tiles over the rest of the map (i -3..7, j -1..6)
-const HR = { S: 512, X0: -1280, Y0: -1280, I0: -3, I1: 7, J0: -1, J1: 6, t: new Map(), loader: new THREE.TextureLoader(), last: -1e9 };
+const HR = { S: 512, X0: -1280, Y0: -1280, I0: -3, I1: 7, J0: -5, J1: 6,      /* J -2..-5: only i 0..4 (the airport, 20.11.2026) */
+  t: new Map(), loader: new THREE.TextureLoader(), last: -1e9 };
 const ROOFT = new Map();   // aerial tile key -> roof meshes that switch to that tile's texture
 function roofTile(k, tex) {
   for (const me of ROOFT.get(k) || []) {
@@ -479,7 +481,7 @@ function roofTile(k, tex) {
   }
 }
 function hrUpdate(x, y) {
-  for (let i = HR.I0; i <= HR.I1; i++) for (let j = HR.J0; j <= HR.J1; j++) {
+  for (let i = HR.I0; i <= HR.I1; i++) for (let j = HR.J0; j <= HR.J1; j++) { if (j < -1 && (i < 0 || i > 4)) continue;
     const k = i + '_' + j, cx = HR.X0 + (i + 0.5) * HR.S, cy = HR.Y0 + (j + 0.5) * HR.S, d = Math.max(Math.abs(cx - x), Math.abs(cy - y)) - HR.S / 2, e = HR.t.get(k);
     if (d < (isTouch ? 200 : 330) && !e) {
       const m = grassify(new THREE.MeshBasicMaterial({ polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2, transparent: true, opacity: 0 }));
@@ -2553,7 +2555,7 @@ function navHud() {
 let lastT = performance.now(), bt = 0;
 function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; bt += dt;
-  step(dt); cars.update(dt); if (window.__npc) window.__npc.update(dt); if (window.__statueTick) window.__statueTick(dt); if (window.__caseTick) window.__caseTick(dt); if (window.__birdTick) window.__birdTick(dt); if (window.__raceTick) window.__raceTick(dt); if (window.__rideTick) window.__rideTick(dt); if (window.__busTick) window.__busTick(dt); window.__takeTick(dt); updateCamera(dt); hud(dt);
+  step(dt); cars.update(dt); if (window.__npc) window.__npc.update(dt); if (window.__statueTick) window.__statueTick(dt); if (window.__caseTick) window.__caseTick(dt); if (window.__birdTick) window.__birdTick(dt); if (window.__raceTick) window.__raceTick(dt); if (window.__rideTick) window.__rideTick(dt); if (window.__busTick) window.__busTick(dt); if (window.__efpoTick) window.__efpoTick(dt); window.__takeTick(dt); updateCamera(dt); hud(dt);
   const r1 = beacon.getObjectByName('ring'), r2 = beacon.getObjectByName('ring2'); const pu = 1 + Math.sin(bt * 3) * 0.06; r1.scale.setScalar(pu); r2.scale.setScalar(0.72 + (bt * 0.5 % 1) * 0.5); r2.material.opacity = 0.8 - (bt * 0.5 % 1) * 0.8;
   for (const sp of sprites) { const d = sp.position.distanceTo(camera.position), far = sp.userData.big ? 2600 : 1100;
     const o = Math.min(1, Math.max(0, (d - 70) / 110)) * Math.min(1, Math.max(0, (far - d) / 250)); sp.visible = o > 0.02; sp.material.opacity = o; }
@@ -3523,6 +3525,178 @@ $('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.tog
     hint: k => k === 'busout' ? 'jää pois' : R.cand ? 'nouse bussiin ' + R.cand.line + (R.cand.head ? ' → ' + R.cand.head : '') : '', cam,
     tick: dt => { if (broken) return; try { tick(dt); } catch (e) { broken = true; window.__bus.err = String(e && e.stack || e); console.warn('bussi', e); el.className = 'hud panel'; } } };
   window.__busTick = dt => window.__bus.tick(dt);
+}
+
+// ---------- Porin lentoasema EFPO (20.11.2026, owner: "the airport becomes an important part of the game: better asphalt on the runway, lights, the
+// terminal modelled"). The map runs 1.8 km further south for it (terrain.js / outer.jpg / mini.jpg / city.js oy0, sharp aerial tiles ot_0..4_-2..-5;
+// the ground there is an estimate between the old map edge and the AIP threshold elevations - no elevation model yet). Geometry: OpenStreetMap aeroway
+// ways (lentoasema.js), thresholds, widths and lighting from AIP Finland EFPO AD 2: RWY 12/30 2351 x 60 m with displaced thresholds, simple approach
+// lights 420 m on 12, CAT I 900 m on 30, PAPI left 3.5 deg (12) / 3 deg (30), green thresholds with wing bars, red ends, blue taxiway edges; 17/35 unlit.
+// Everything here is drawn at its own height (noT) on the true ground TZg.
+{
+  const A = {"rwy":[{"n":"12/30","w":60,"a":[-780.8,-1993.7],"b":[1125.2,-3368.2],"ta":[-703.9,-2048.9],"tb":[845.6,-3166.3],"na":"12","nb":"30","lit":true},{"n":"17/35","w":30,"a":[132.5,-2459.9],"b":[216.5,-3245.0],"ta":[132.5,-2459.9],"tb":[216.5,-3245.0],"na":"17","nb":"35","lit":false,"sa":[106.9,-2219.3],"sb":[233.6,-3405.4]}],"twy":[["A",23,[[-662.7,-2078.4],[-674.1,-2066.7],[-688.5,-2050.6],[-698.3,-2037.7],[-713.2,-2015.6],[-724.8,-1995.3],[-736.8,-1970.6],[-742.5,-1956],[-747,-1941],[-749.7,-1928.3],[-750.7,-1914.7],[-750.5,-1905.7],[-749.5,-1898.6],[-746.9,-1888.8],[-741.8,-1876.9],[-737.1,-1868.8],[-732.7,-1862.5],[-725.4,-1854.7],[-717.1,-1848.3],[-709.1,-1844.4],[-701.5,-1841.8],[-692.3,-1840.2],[-684,-1839.9],[-675,-1840.6],[-667.4,-1842.5],[-659.7,-1845.8],[-653.5,-1849.4]]],["",23,[[-1.6,-2497.4],[-6,-2502.2],[-12.6,-2507.5],[-20.7,-2511.6],[-28,-2513.8],[-36.3,-2515],[-43.5,-2514.9],[-50.7,-2513.9],[-57,-2512],[-64.2,-2508.8],[-73.8,-2503.2]]],["T",23,[[-653.5,-1849.4],[-374.3,-2050.6],[-368,-2055.2],[-336.1,-2078.2],[-301.7,-2103],[-298,-2105.7],[-251.6,-2139.1],[37,-2347.2],[62.1,-2365.3],[104,-2395.5],[114.4,-2403],[127.3,-2412.3],[159.5,-2435.5],[217.8,-2477.5],[534.8,-2706.1],[934.1,-2994]]],["D",23,[[534.8,-2706.1],[541,-2714.6],[545.1,-2722.7],[548.8,-2733.9],[550.9,-2745.3],[550.3,-2759.4],[546.5,-2772.7],[544,-2777.5],[539.8,-2784.2],[531.3,-2794.5],[519.3,-2804.6],[515,-2807.1],[505.3,-2812.2],[496.1,-2815.7],[486.8,-2817.9],[477.1,-2819.5],[466.6,-2820.4],[451.6,-2820.4],[432.2,-2818.7],[408.8,-2815.5],[390.2,-2812.2],[368.3,-2807.4],[349.4,-2800.7],[329.9,-2791.5],[312.2,-2781.6]]],["E",23,[[934.1,-2994],[946.7,-3004.9],[955.7,-3021],[959.4,-3035.2],[958.2,-3055.9],[955.5,-3065],[951.2,-3073.8],[941.5,-3086.3],[934.2,-3093.1],[926.3,-3099.3],[920.4,-3102.9],[910.7,-3107.7],[901.5,-3110.9],[880.2,-3114.4],[855.7,-3114.3],[826.9,-3111.5],[800,-3105.7],[776.5,-3098.8],[749.3,-3088.3],[731.1,-3079.4],[718.6,-3073],[705.9,-3065.6]]],["F",23,[[951.2,-3073.8],[947.5,-3083],[944.3,-3092.6],[939,-3116.4],[938.2,-3123.1],[937.4,-3132.1],[936.8,-3148.9],[940.1,-3175.3],[947.6,-3203.6],[959.1,-3228.8],[976.5,-3253.7],[1000.2,-3278]]],["Y",12,[[-435.3,-2842.9],[-389.8,-2872.6],[-382.4,-2877],[-376.1,-2879.7],[-369.1,-2881],[-360.1,-2881],[-352.3,-2879.7],[-344.6,-2876.6],[-338,-2871.3],[-289.5,-2819.7],[-283.3,-2813.1],[-91.3,-2602.9],[-62.9,-2572]]],["",23,[[-420.7,-2195.7],[-422.9,-2199.4],[-425.7,-2206.3],[-427.2,-2213],[-427.9,-2220.2],[-427.8,-2227.4],[-426.4,-2234.8],[-424.1,-2241.4],[-420.9,-2247.4],[-417.1,-2252.6],[-413.8,-2256.4],[-410,-2260.7]]],["",9,[[-405.3,-2311.6],[-401.3,-2303.1],[-398.5,-2299],[-395.4,-2296.2],[-391.4,-2293.9],[-387.9,-2292.3],[-384.5,-2291.5],[-381.7,-2291],[-377.1,-2291],[-373.2,-2291.5],[-369.7,-2292.4],[-364.7,-2294.5],[-360.9,-2296.1]]],["C",23,[[62.1,-2365.3],[65.8,-2369.9],[68.9,-2375.6],[70.6,-2380.6],[70.9,-2385.3],[70.8,-2390.8],[69.7,-2396.1],[67.1,-2401.9],[45,-2432.8],[24,-2462],[-1.6,-2497.4]]],["W",5,[[-672.9,-2071],[-680.3,-2068.4],[-688.3,-2066.2],[-694.6,-2066.6],[-699.9,-2067.7],[-706.3,-2070.2],[-711.6,-2074.3],[-715.5,-2078.6],[-752.1,-2128.2],[-797.2,-2189.1],[-903.1,-2322.3]]],["",9,[[-435.3,-2842.9],[-439.1,-2841.7],[-444,-2841.2],[-447.9,-2841.4],[-452.6,-2843],[-456.3,-2845.3],[-504.9,-2880.2],[-554.1,-2915.4],[-556.8,-2916.6],[-560.6,-2915.7],[-577.2,-2902.7],[-578.4,-2900.1],[-578.4,-2898.4],[-577.7,-2896.4],[-527.1,-2859.7],[-478.9,-2824.8],[-476.1,-2821.1],[-474.8,-2817.9],[-474.1,-2814.4],[-474,-2810.4],[-474.2,-2806]]],["",9,[[-478.9,-2824.8],[-475.5,-2822.8],[-472,-2822.2],[-468.2,-2822.4],[-464.1,-2823.6]]],["",9,[[-458.1,-2827.7],[-455.1,-2830.7],[-454.1,-2833.8],[-453.7,-2838.3],[-454.1,-2841.1],[-455.1,-2843.4],[-456.3,-2845.3]]],["",15,[[106.9,-2219.3],[104,-2212.2],[95.6,-2202.7],[82,-2192.4],[68.6,-2182.7],[56,-2174.9],[41.3,-2168],[30.6,-2164],[10.9,-2159.3],[-17.3,-2155.2],[-22.8,-2154.4],[-38.2,-2152.3],[-95.3,-2144.5],[-193.7,-2130.6],[-226.1,-2127.9],[-240.2,-2131.2],[-251.6,-2139.1]]],["",12,[[-62.9,-2572],[-59.2,-2565.9],[-56.7,-2560.6],[-55.2,-2552],[-54.9,-2543.5],[-55.5,-2534.4],[-57.6,-2526],[-61.8,-2517.2],[-68.1,-2509.1],[-73.8,-2503.2]]],["",23,[[-368,-2055.2],[-363.5,-2060.1],[-359.4,-2065.9],[-356,-2074.2],[-354.6,-2079.9],[-353.8,-2086.9],[-353.9,-2093.4],[-354.9,-2099.5],[-357,-2105],[-360.1,-2111.2]]],["V",9,[[-405.3,-2311.6],[-420.8,-2366],[-427.5,-2390.1],[-430.8,-2399.8],[-435.9,-2408.9],[-512,-2526.5],[-526.4,-2550.6],[-535,-2567.3],[-540.5,-2581.3],[-544.6,-2594.1],[-546.8,-2603.8],[-547.7,-2615.3],[-547.2,-2624.5],[-546.3,-2631.6],[-543.7,-2643],[-538.5,-2658],[-474.2,-2806]]],["",9,[[-474.2,-2806],[-468.8,-2818.3],[-466.3,-2821.4],[-464.1,-2823.6],[-458.1,-2827.7],[-435.3,-2842.9]]],["B",23,[[-306.2,-2036.2],[-308.8,-2039.7],[-312.3,-2044.5],[-336.1,-2078.2],[-360.1,-2111.2],[-363.8,-2116.2],[-394.8,-2159.4],[-420.7,-2195.7]]],["",12,[[-62.9,-2572],[-54.3,-2563.3],[-47.4,-2558.8],[-37.1,-2555],[-28.4,-2553.6],[-19.3,-2553.5],[-11.6,-2554.8],[-1.5,-2557.9],[8.6,-2562.6]]],["",9,[[-410,-2260.7],[-404.9,-2266.2],[-402.5,-2269.8],[-401.3,-2272.9],[-400.5,-2277.2],[-400.4,-2281.2],[-400.8,-2288.5],[-401.9,-2297.5],[-405.3,-2311.6]]],["",23,[[-1.6,-2497.4],[-5.1,-2504.5],[-7.1,-2510.8],[-8.5,-2519.3],[-8.5,-2527.7],[-7.3,-2535.3],[-5.3,-2542],[-2.7,-2547.3],[1.7,-2554.3],[8.6,-2562.6]]],["C",23,[[67.1,-2401.9],[71.5,-2397.9],[75.3,-2395.6],[79.8,-2393.5],[84.1,-2392.4],[87.7,-2392.2],[91.5,-2392.2],[96,-2392.6],[100,-2393.7],[104,-2395.5]]],["",23,[[114.4,-2403],[119.3,-2407.8],[122.9,-2412.3],[126.9,-2419.8],[129,-2427.2]]],["",23,[[159.5,-2435.5],[153.3,-2432.7],[148.4,-2431.5],[143.4,-2432],[139.9,-2433.6],[137,-2436.1],[134.1,-2440.1],[132.1,-2444.1],[131.2,-2447.7]]],["",23,[[-301.7,-2103],[-306.8,-2097.7],[-309.2,-2094.9],[-311.6,-2091.4],[-314.7,-2085.3],[-316.2,-2081.5],[-317.4,-2076.2],[-318.3,-2070],[-318.1,-2062.2],[-316.8,-2056.3],[-314.7,-2050.1],[-312.3,-2044.5]]],["",23,[[-312.3,-2044.5],[-316.6,-2048.8],[-322,-2053],[-327,-2055.7],[-331.3,-2057.8],[-340.1,-2059.9],[-347.4,-2060.1],[-355.1,-2059.6],[-361.4,-2057.8],[-368,-2055.2]]],["",23,[[-360.1,-2111.2],[-355.1,-2106.9],[-349.8,-2102.9],[-342,-2098.8],[-333.3,-2096.5],[-328.9,-2096.2],[-325.3,-2096.1],[-320.2,-2096.5],[-315.7,-2097.2],[-307.7,-2099.9],[-301.7,-2103]]],["",23,[[-420.7,-2195.7],[-423.4,-2198.7],[-431.5,-2205.1],[-438.6,-2208.9],[-445.1,-2211.3],[-451.9,-2212.6],[-457.7,-2213.1],[-464.2,-2212.9],[-470.8,-2212],[-477.9,-2209.9],[-484.5,-2206.3],[-491.6,-2201.8]]]],"apron":[[[-373.7,-1976.2],[-357.8,-1953.7],[-368.2,-1946.2],[-358.7,-1933],[-351.1,-1923.3],[-332.3,-1896.3],[-323.3,-1886],[-166.3,-1999.3],[-225.2,-2082.2],[-271.8,-2049.8],[-331.7,-2006.4]],[[-419.5,-2865.4],[-448.1,-2882.9],[-475.6,-2903.4],[-448.7,-2925.8],[-466.9,-2964.2],[-486.5,-2962.8],[-514,-2977.5],[-544.3,-2953.7],[-554,-2940.4],[-581.9,-2918.2],[-608,-2950.9],[-632.1,-2933.3],[-629.3,-2912.8],[-608.9,-2892.5],[-601.5,-2896.7],[-597.4,-2891.7],[-593.3,-2894.8],[-549.5,-2862.9],[-527.5,-2847.3],[-497.1,-2824.6],[-492.3,-2819.7],[-489.1,-2811.9],[-486.9,-2804],[-472.5,-2800],[-461.7,-2815.5],[-456.4,-2821.3],[-408.5,-2852.9]],[[-895.4,-2317.4],[-905.4,-2329],[-933.2,-2323.6],[-960.6,-2304.7],[-942.5,-2283.3],[-926.9,-2280.7],[-908.3,-2296.3],[-907,-2309.1]],[[-77.1,-2154.5],[-42.8,-2159.4],[-47.6,-2191.2],[-81.7,-2186.4]]],"hold":[[[43.3,-2338.6],[30.8,-2355.6]],[[211.1,-2486.8],[224.5,-2468.1]],[[36.8,-2426.9],[53.3,-2438.7]],[[33,-2468.6],[14.3,-2455]],[[-738.2,-1900.4],[-760.8,-1896.7]],[[-385.5,-2166],[-404.1,-2152.8]],[[-428.8,-2364],[-413.3,-2367.9]],[[-753.9,-2126.9],[-750.2,-2129.6]],[[-95.9,-2598.8],[-86.9,-2607.1]],[[520.8,-2817],[509.1,-2797]],[[950.3,-3118.3],[926.6,-3114.2]],[[920.4,-3102.9],[914.9,-3093]],[[-300.3,-2045.6],[-317.4,-2033.6]],[[-304.2,-2114.2],[-291.7,-2097.3]],[[-368.2,-2041.6],[-380.3,-2059.2]],[[-372.7,-2109.8],[-355.2,-2122.5]]],"chev":[[[123.6,-2233.3],[110.1,-2249.9],[93.6,-2236.9]],[[130.1,-2293.2],[116.5,-2309.5],[100.3,-2296.3]],[[136.1,-2352.9],[122.8,-2369],[107,-2356.3]],[[248,-3403.7],[232,-3390.7],[219.1,-3406.6]],[[242,-3344.4],[225.7,-3331.2],[212.5,-3347.3]],[[237.5,-3300.5],[221,-3287.3],[208,-3303.5]]],"mark":[[[-494.5,-2210.5],[-458.1,-2236.7],[-461.7,-2242.1],[-498.3,-2215.9]],[[-480.7,-2190.8],[-444.3,-2217.2],[-448,-2222.4],[-484.5,-2196.2]],[[-575,-2126.8],[-556.7,-2139.8],[-558.7,-2142.5],[-577,-2129.3]],[[-587.5,-2143.8],[-569.2,-2156.9],[-571.2,-2159.5],[-589.5,-2146.3]],[[-331.7,-2302.2],[-313.4,-2315.3],[-315.4,-2317.9],[-333.7,-2304.7]],[[-344.2,-2319.2],[-325.9,-2332.3],[-327.9,-2335],[-346.2,-2321.7]],[[-210.1,-2389.5],[-191.7,-2402.6],[-193.8,-2405.2],[-212,-2392]],[[-222.6,-2406.6],[-204.3,-2419.6],[-206.3,-2422.3],[-224.6,-2409.1]],[[348.3,-2792.7],[366.6,-2805.8],[364.6,-2808.4],[346.3,-2795.2]],[[335.7,-2809.7],[354.1,-2822.8],[352,-2825.5],[333.8,-2812.2]],[[469.7,-2880],[488,-2893.1],[486,-2895.8],[467.7,-2882.6]],[[457.1,-2897.1],[475.5,-2910.2],[473.4,-2912.8],[455.2,-2899.6]],[[712.8,-3055.5],[731.2,-3068.6],[729.2,-3071.2],[710.9,-3058]],[[700.3,-3072.6],[718.6,-3085.6],[716.6,-3088.3],[698.3,-3075.1]],[[568.3,-2947.3],[604.8,-2973.6],[601,-2978.9],[564.5,-2952.7]],[[554.6,-2967],[590.9,-2993.2],[587.3,-2998.6],[550.8,-2972.4]]],"stand":[[[-306.2,-2036.2],[-304.9,-2033.2],[-303.8,-2028.4],[-303.8,-2023.8],[-305.4,-2016.3],[-317.4,-1989.9],[-283.3,-1942.1],[-280.3,-1938.1]],[[-306.2,-2036.2],[-302,-2032.1],[-298.1,-2029],[-295.8,-2027.9],[-292.9,-2027],[-290.5,-2026.3],[-283.8,-2025.2],[-279.9,-2025.7],[-273.3,-2027.8],[-265.5,-2030.2],[-257.2,-2031.4],[-252.2,-2031.7],[-239.1,-2030.5],[-233,-2028.9],[-225.5,-2026.5],[-218.7,-2022.9],[-212.9,-2018.9],[-206.1,-2013.2],[-203,-2009.9]],[[-306.2,-2036.2],[-301.4,-2030.1],[-297.9,-2025.9],[-294.9,-2023.6],[-291.7,-2021.6],[-285.7,-2017.7],[-283.1,-2015.7],[-280.7,-2013.3],[-262.5,-1988.1],[-247.9,-1967.8],[-245.1,-1963.5]],[[-317.4,-1989.9],[-327.8,-1966.6],[-328.9,-1962.1],[-329.4,-1957.2],[-328.7,-1952.3],[-327.3,-1947.8],[-324.7,-1943.3],[-306.5,-1917.9]]],"bld":[["terminal",7.5,[[-159,-1987.6],[-167.1,-1981.9],[-163.4,-1976.6],[-217.3,-1938.7],[-210.7,-1929.4],[-201,-1936.3],[-199.3,-1933.9],[-195.3,-1936.7],[-194,-1934.9],[-189.2,-1938.3],[-176.2,-1947.5],[-169.9,-1951.9],[-171.2,-1953.7],[-147.4,-1970.5],[-152.5,-1977.8],[-138.1,-1987.9],[-142.5,-1994.2],[-156.7,-1984.2]]],["hangar",12,[[-395.6,-1892.4],[-376.8,-1865.4],[-346.5,-1886.5],[-332.3,-1896.3],[-351.1,-1923.3],[-364.8,-1913.8]]],["hangar",8,[[-368.2,-1946.2],[-381.2,-1936.9],[-371.7,-1923.7],[-358.7,-1933]]],["hangar",9,[[-566.2,-2983.1],[-545.1,-2954.7],[-544.3,-2953.7],[-512.6,-2977.3],[-534.5,-3006.7]]],["hangar",7,[[-968,-2270.9],[-946.8,-2287.9],[-956.9,-2300.1],[-977.9,-2283.2]]],["hangar",7,[[-913.3,-2264.5],[-896,-2278.2],[-908.1,-2293.6],[-925,-2280.4]]],["hangar",7,[[-856.1,-2329.4],[-839.3,-2308],[-815.3,-2326.8],[-832.2,-2348.2]]],["b",6,[[-222.8,-1865],[-256.4,-1840.8],[-241.6,-1820.3],[-208,-1844.4]]],["b",7,[[-242.1,-1890.8],[-254.6,-1908.4],[-297.3,-1878.1],[-284.8,-1860.4]]],["b",5,[[-122,-1956.4],[-111.2,-1955.3],[-108.9,-1978.9],[-119.7,-1980]]],["carport",3,[[-326.8,-1857.2],[-337.7,-1849.1],[-320.3,-1825.6],[-309.4,-1833.7]]],["b",6,[[-571.4,-2990.9],[-584.5,-3008.4],[-595.8,-2999.9],[-582.7,-2982.5]]],["b",6,[[-553.3,-3024.3],[-573.8,-3008.3],[-562.9,-2994.4],[-542.4,-3010.4]]],["b",8,[[-608,-2950.9],[-581.9,-2918.2],[-554,-2940.4],[-559.7,-2947.6],[-575.5,-2967.3],[-572.1,-2970],[-576.8,-2975.8]]],["b",5,[[-864.8,-2340.3],[-843.5,-2357.3],[-853.4,-2369.9],[-874.5,-2352.9]]],["b",6,[[-483.2,-2911.5],[-454.6,-2934.2],[-473.6,-2958.1],[-502.2,-2935.4]]],["b",5,[[-679.3,-2758.1],[-641.1,-2755.9],[-640.3,-2770.8],[-678.5,-2772.9]]],["b",5,[[-662.9,-2794.5],[-617,-2792.9],[-616.5,-2805.9],[-662.4,-2807.5]]],["b",4,[[-651.9,-2633.3],[-629.3,-2635],[-629.8,-2642.8],[-652.5,-2641.2]]],["b",4,[[-648.7,-2642.4],[-629.8,-2644.1],[-630.6,-2652.6],[-649.5,-2650.9]]],["b",9,[[-396.8,-3367.2],[-378.2,-3367.4],[-377.6,-3320.6],[-379.2,-3320.6],[-379.2,-3309.9],[-394.2,-3309.5],[-394.4,-3320.4],[-396.2,-3320.4],[-396.5,-3344.7],[-396.6,-3351.3]]],["b",7,[[-113.2,-3197.1],[-98.5,-3212.9],[-128.5,-3240.7],[-143.2,-3225]]],["b",6,[[-51.2,-3144.2],[-40.7,-3155],[-44.1,-3158.2],[-36,-3166.6],[-31.7,-3162.4],[-26.9,-3167.4],[-37.3,-3177.4],[-50.2,-3164.2],[-51.6,-3165.6],[-67.3,-3149.4],[-58,-3140.4],[-52.8,-3145.8]]],["b",6,[[-222.9,-3076.8],[-203.2,-3096.6],[-214.2,-3107.6],[-233.9,-3087.8]]],["b",8,[[-200.7,-3037],[-189.4,-3025.8],[-175.2,-3040.1],[-186.5,-3051.3]]],["b",9,[[388.3,-1850.1],[397.2,-1845.1],[405.1,-1836.7],[410.1,-1842.9],[440.3,-1818.8],[416.2,-1788.7],[409.8,-1793.8],[362.2,-1734.2],[297.9,-1785.5],[334.4,-1831.3],[350.7,-1853.4],[359.7,-1846.3],[372.7,-1862.5]]],["b",7,[[295.7,-1901.1],[309.7,-1890.2],[314.8,-1896.8],[322.9,-1890.5],[326.1,-1894.6],[330.2,-1891.4],[336.9,-1900],[332,-1903.8],[334.8,-1907.4],[327.1,-1913.4],[334.2,-1922.4],[320.5,-1933.1]]],["b",6,[[286.4,-1840.3],[305.4,-1864.8],[315.4,-1857.1],[296.5,-1832.6]]],["b",6,[[278.2,-1865.7],[286.9,-1858.8],[296.7,-1871.1],[288,-1878]]],["b",6,[[275.5,-1888.8],[289.8,-1877.4],[297.6,-1887.2],[283.3,-1898.6]]],["b",6,[[288,-1776.5],[296.4,-1770],[274.4,-1742.4],[290.4,-1730.3],[284,-1722.7],[259.7,-1741.3]]]]};
+  const G = (x, y) => TZg(x, y);
+  const ld = f => { const t = new THREE.TextureLoader().load(f); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = renderer.capabilities.getMaxAnisotropy(); t.colorSpace = THREE.SRGBColorSpace; return t; };
+  const tAs = ld('./road_asph.jpg');
+  const surfMat = (tint, rep, off) => { const m = new THREE.MeshStandardMaterial({ map: tAs, color: tint, roughness: 0.93, metalness: 0, polygonOffset: true, polygonOffsetFactor: off, polygonOffsetUnits: off });
+    m.onBeforeCompile = sh => { sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vW;').replace('#include <project_vertex>', '#include <project_vertex>\nvW = (modelMatrix * vec4(transformed, 1.0)).xyz;');
+      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vW;').replace('#include <map_fragment>', `
+        vec2 wp = vec2(vW.x, -vW.z), r2 = mat2(0.8, -0.6, 0.6, 0.8) * wp;
+        vec3 tx = texture2D(map, wp / ${rep.toFixed(2)}).rgb * 0.55 + texture2D(map, r2 / ${(rep * 2.7).toFixed(2)} + 0.31).rgb * 0.45;
+        float mac = texture2D(map, wp * 0.0071).g * 0.5 + texture2D(map, r2 * 0.0023 + 0.4).g * 0.5;      /* laying lanes and worn patches */
+        diffuseColor.rgb *= tx * (1.55 + 0.5 * (mac - 0.5));`); };
+    m.userData.noT = true; return m; };
+  const mRwy = surfMat(0x8c9198, 1.4, -4), mTwy = surfMat(0xa3a8ae, 1.6, -3), mApn = surfMat(0xaeb2b6, 1.8, -2);
+  const flatM = (c, off) => { const m = new THREE.MeshLambertMaterial({ color: c, polygonOffset: true, polygonOffsetFactor: off, polygonOffsetUnits: off }); m.userData.noT = true; return m; };
+  const mWhite = flatM(0xf1f1ec, -7), mYel = flatM(0xe8b923, -7);
+  const B = { rwy: [], twy: [], apn: [], white: [], yel: [] };
+  const push = (k, p) => { const a = B[k]; for (const q of p) a.push(q); };
+  const tri = (k, a, b, c, dz) => { if ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0) { const t = b; b = c; c = t; } push(k, [[a[0], a[1], dz], [b[0], b[1], dz], [c[0], c[1], dz]]); };      /* clockwise in game x/y = counter-clockwise in three's x/-z = facing up */
+  /* split long edges so the surface follows the ground */
+  const tris = (k, T, dz, L = 9) => { const st = [...T]; while (st.length) { const [a, b, c] = st.pop(), ab = Math.hypot(a[0] - b[0], a[1] - b[1]), bc = Math.hypot(b[0] - c[0], b[1] - c[1]), ca = Math.hypot(c[0] - a[0], c[1] - a[1]), m = Math.max(ab, bc, ca);
+      if (m <= L) { tri(k, a, b, c, dz); continue; } const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+      if (m === ab) { const d = mid(a, b); st.push([a, d, c], [d, b, c]); } else if (m === bc) { const d = mid(b, c); st.push([a, b, d], [a, d, c]); } else { const d = mid(c, a); st.push([a, b, d], [d, b, c]); } } };
+  const quad = (k, p, dz, L) => tris(k, [[p[0], p[1], p[2]], [p[0], p[2], p[3]]], dz, L);
+  const poly = (k, P, dz, L) => { const tr = THREE.ShapeUtils.triangulateShape(P.map(q => new THREE.Vector2(q[0], q[1])), []); tris(k, tr.map(f => f.map(i => P[i])), dz, L); };
+  /* a strip along a polyline, half width w, offset o to the right; ends square */
+  const ribbon = (k, P, w, dz, o = 0, L = 9) => { const n = P.map((p, i) => { const a = P[Math.max(0, i - 1)], b = P[Math.min(P.length - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy) || 1; return [dy / l, -dx / l]; });
+    for (let i = 0; i + 1 < P.length; i++) { const a = P[i], b = P[i + 1], na = n[i], nb = n[i + 1];
+      quad(k, [[a[0] + na[0] * (o - w), a[1] + na[1] * (o - w)], [b[0] + nb[0] * (o - w), b[1] + nb[1] * (o - w)], [b[0] + nb[0] * (o + w), b[1] + nb[1] * (o + w)], [a[0] + na[0] * (o + w), a[1] + na[1] * (o + w)]], dz, L); } };
+  const disc = (k, x, y, r, dz) => { const S = 14; for (let i = 0; i < S; i++) { const a0 = i / S * 6.2832, a1 = (i + 1) / S * 6.2832; tri(k, [x, y], [x + Math.sin(a0) * r, y + Math.cos(a0) * r], [x + Math.sin(a1) * r, y + Math.cos(a1) * r], dz); } };
+
+  /* runway frames: s along a->b, t to the right */
+  const RW = A.rwy.map(r => { const dx = r.b[0] - r.a[0], dy = r.b[1] - r.a[1], L = Math.hypot(dx, dy), u = [dx / L, dy / L], n = [u[1], -u[0]];
+    const S = p => (p[0] - r.a[0]) * u[0] + (p[1] - r.a[1]) * u[1]; return { ...r, L, u, n, sa: S(r.ta), sb: S(r.tb), P: (s, t) => [r.a[0] + u[0] * s + n[0] * t, r.a[1] + u[1] * s + n[1] * t] }; });
+  const rect = (k, R, s0, s1, t0, t1, dz, L = 9) => quad(k, [R.P(s0, t0), R.P(s1, t0), R.P(s1, t1), R.P(s0, t1)], dz, L);
+
+  /* pavements */
+  for (const P of A.apron) poly('apn', P, 0.1, 12);
+  for (const [n, w, P] of A.twy) { ribbon('twy', P, w / 2, 0.12); disc('twy', P[0][0], P[0][1], w / 2, 0.12); disc('twy', P[P.length - 1][0], P[P.length - 1][1], w / 2, 0.12); }
+  for (const R of RW) { rect('rwy', R, 0, R.L, -R.w / 2, R.w / 2, 0.15, 10); if (R.sa !== undefined && A.rwy[RW.indexOf(R)].sa) { const r = A.rwy[RW.indexOf(R)]; ribbon('rwy', [r.sa, r.a], R.w / 2, 0.15); ribbon('rwy', [r.b, r.sb], R.w / 2, 0.15); } }
+
+  /* runway markings (ICAO): edge lines, displaced-threshold bar and arrows, threshold stripes, designators, centre line */
+  const dz = 0.17, DIG = {};
+  const digits = s => { if (DIG[s]) return DIG[s]; const c = document.createElement('canvas'); c.width = 256; c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#fff'; g.font = 'bold 128px Arial Narrow, Arial, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.save(); g.translate(128, 66); g.scale(1, 1.05); g.fillText(s, 0, 0); g.restore(); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+    const m = new THREE.MeshLambertMaterial({ map: t, transparent: true, alphaTest: 0.3, polygonOffset: true, polygonOffsetFactor: -8, polygonOffsetUnits: -8 }); m.userData.noT = true; return DIG[s] = m; };
+  const decals = [];
+  const decal = (mat, c, dir, w, l) => { const ux = dir[0], uy = dir[1], nx = uy, ny = -ux, P = [], U = [], S = 6;      /* l along dir (text upright towards dir), w across */
+    for (let j = 0; j < S; j++) for (const [a, b] of [[0, 0], [1, 0], [1, 1], [0, 0], [1, 1], [0, 1]]) { const fa = (a - 0.5) * w, fb = ((j + b) / S - 0.5) * l, x = c[0] + nx * fa + ux * fb, y = c[1] + ny * fa + uy * fb; P.push(x, G(x, y) + dz + 0.01, -y); U.push(a, (j + b) / S); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.computeVertexNormals(); const me = new THREE.Mesh(g, mat); me.userData.noT = true; decals.push(me); };
+  for (const R of RW) {
+    const W = R.w, hw = W / 2, nStr = W >= 45 ? 8 : 4, sp = W >= 45 ? 3.6 : 3;
+    rect('white', R, 0, R.L, hw - 1.4, hw - 0.5, dz, 12); rect('white', R, 0, R.L, -hw + 0.5, -hw + 1.4, dz, 12);
+    for (const [st, sg, nm] of [[R.sa, 1, R.na], [R.sb, -1, R.nb]]) {
+      const end = sg > 0 ? 0 : R.L, disp = Math.abs(st - end) > 20;
+      if (disp) { rect('white', R, st - 0.9, st + 0.9, -hw + 1.4, hw - 1.4, dz);                 /* displaced threshold: bar across and arrows in the pre-threshold area */
+        for (let s = end + sg * 25; sg * (st - s) > 25; s += sg * 40) { rect('white', R, Math.min(s, s + sg * 18), Math.max(s, s + sg * 18), -0.45, 0.45, dz);
+          const h = s + sg * 18; quad('white', [R.P(h, -0.45), R.P(h + sg * 6, 0), R.P(h + sg * 6, 0), R.P(h, 0.45)].map(p => p), dz); tris('white', [[R.P(h - sg * 1, -2.2), R.P(h + sg * 6, 0), R.P(h - sg * 1, 2.2)]], dz); } }
+      const s0 = st + sg * 6;
+      for (let k = 0; k < nStr; k++) for (const side of [1, -1]) { const t = side * (1.8 + k * sp + 0.9); rect('white', R, Math.min(s0, s0 + sg * 30), Math.max(s0, s0 + sg * 30), t - 0.9, t + 0.9, dz); }
+      decal(digits(nm), R.P(st + sg * (6 + 30 + 12 + 4.5), 0), [R.u[0] * sg, R.u[1] * sg], W >= 45 ? 16 : 10, 9);
+      R['c' + sg] = st + sg * (6 + 30 + 12 + 9 + 12); }
+    for (let s = R.c1; s + 30 < R['c-1']; s += 50) rect('white', R, s, s + 30, -0.45, 0.45, dz); }
+  for (const P of A.mark) poly('white', P, dz, 20);
+  /* taxiway centre lines, stand lead-in lines, holding positions (two solid lines on the runway side, two dashed), stopway chevrons */
+  for (const [n, w, P] of A.twy) ribbon('yel', P, 0.15, dz - 0.01, 0, 12);
+  for (const P of A.stand) ribbon('yel', P, 0.15, dz - 0.01, 0, 12);
+  const nearRw = (x, y) => { let b = null, bd = 1e9; for (const R of RW) { const s = (x - R.a[0]) * R.u[0] + (y - R.a[1]) * R.u[1], t = (x - R.a[0]) * R.n[0] + (y - R.a[1]) * R.n[1]; const d = Math.abs(t); if (d < bd) { bd = d; b = { R, s, t }; } } return b; };
+  for (const [p, q] of A.hold) { const dx = q[0] - p[0], dy = q[1] - p[1], l = Math.hypot(dx, dy), nx = dy / l, ny = -dx / l, m = [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], r = nearRw(m[0], m[1]);
+    const toR = r ? Math.sign((r.R.a[0] + r.R.u[0] * r.s - m[0]) * nx + (r.R.a[1] + r.R.u[1] * r.s - m[1]) * ny) || 1 : 1;
+    [0.45, 0.15, -0.3, -0.6].forEach((o, i) => { const oo = o * toR, A0 = [p[0] + nx * oo, p[1] + ny * oo], B0 = [q[0] + nx * oo, q[1] + ny * oo];
+      if (i < 2) ribbon('yel', [A0, B0], 0.08, dz - 0.01, 0, 12); else for (let s = 0; s + 0.9 < l; s += 1.8) ribbon('yel', [[A0[0] + dx / l * s, A0[1] + dy / l * s], [A0[0] + dx / l * (s + 0.9), A0[1] + dy / l * (s + 0.9)]], 0.08, dz - 0.01, 0, 12); }); }
+  for (const P of A.chev) ribbon('yel', P, 0.45, dz - 0.01, 0, 12);
+
+  const build = (k, mat) => { const a = B[k]; if (!a.length) return; const P = new Float32Array(a.length * 3), U = new Float32Array(a.length * 2);
+    a.forEach((q, i) => { P[i * 3] = q[0]; P[i * 3 + 1] = G(q[0], q[1]) + q[2]; P[i * 3 + 2] = -q[1]; U[i * 2] = q[0]; U[i * 2 + 1] = q[1]; });
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.BufferAttribute(U, 2)); g.computeVertexNormals();
+    const me = new THREE.Mesh(g, mat); me.userData.noT = true; me.matrixAutoUpdate = false; scene.add(me); };
+  build('apn', mApn); build('twy', mTwy); build('rwy', mRwy); build('white', mWhite); build('yel', mYel); for (const d of decals) scene.add(d);
+
+  /* lights: a small fitting and a glow sprite each; PAPI units change colour with the viewer's angle */
+  const L = [];      /* [x, y, r, g, b, size, kind] */
+  const lt = (p, c, s = 1, k = 0) => L.push([p[0], p[1], c[0], c[1], c[2], s, k]);
+  const WH = [1, 0.97, 0.85], GR = [0.25, 1, 0.45], RD = [1, 0.15, 0.1], BL = [0.25, 0.45, 1], YE = [1, 0.8, 0.25];
+  const R1 = RW[0], hw1 = R1.w / 2 + 1.5;
+  for (let s = 0; s <= R1.L + 0.1; s += R1.L / Math.round(R1.L / 58)) for (const sd of [1, -1]) lt(R1.P(s, sd * hw1), WH);
+  for (const [st, sg] of [[R1.sa, 1], [R1.sb, -1]]) {
+    for (let t = -R1.w / 2 + 1.5; t <= R1.w / 2 - 1.4; t += 3) lt(R1.P(st, t), GR);                                        /* threshold */
+    for (const sd of [1, -1]) for (let k = 0; k < 5; k++) lt(R1.P(st - sg * 0.5, sd * (R1.w / 2 + 3 + k * 3)), GR);              /* wing bars */
+    const end = sg > 0 ? R1.L : 0; for (let t = -R1.w / 2 + 1.5; t <= R1.w / 2 - 1.4; t += 6) lt(R1.P(end, t), RD); }        /* runway end (of the opposite direction) */
+  /* approach lights: RWY 12 simple 420 m (AIP: red), RWY 30 CAT I 900 m with barrettes and crossbars */
+  for (let d = 30; d <= 420; d += 30) { lt(R1.P(R1.sa - d, 0), RD, 1.2); if (d === 300) for (let t = -15; t <= 15; t += 5) if (t) lt(R1.P(R1.sa - d, t), RD, 1.2); }
+  for (let d = 30; d <= 900; d += 30) { for (let t = -2; t <= 2; t++) lt(R1.P(R1.sb + d, t * 0.9), WH, 1.1); if (d % 150 === 0 && d <= 750) for (let t = -15; t <= 15; t += 3) if (Math.abs(t) > 3) lt(R1.P(R1.sb + d, t), WH, 1.1); }
+  /* PAPI: 4 units on the left of the landing direction, ~300 m in, 15 m from the edge, 9 m apart; the unit nearest the runway has the highest setting */
+  const PAPI = [];
+  for (const [st, sg, gl] of [[R1.sa, 1, 3.5], [R1.sb, -1, 3]]) for (let k = 0; k < 4; k++) { const s = st + sg * 300, side = -sg, t = side * (R1.w / 2 + 15 + k * 9);
+    PAPI.push({ i: L.length, x: R1.P(s, t)[0], y: R1.P(s, t)[1], ang: (gl + 0.5 - k / 3) * Math.PI / 180, dir: [-R1.u[0] * sg, -R1.u[1] * sg] }); lt(R1.P(s, t), RD, 1.6, 1); }
+  /* taxiway edge lights (blue) on A-F and T, not on the runway or the aprons */
+  const onRw = (x, y) => RW.some(R => { const s = (x - R.a[0]) * R.u[0] + (y - R.a[1]) * R.u[1], t = (x - R.a[0]) * R.n[0] + (y - R.a[1]) * R.n[1]; return s > -5 && s < R.L + 5 && Math.abs(t) < R.w / 2 + 6; });
+  const inApn = (x, y) => A.apron.some(P => pip(x, y, P));
+  for (const [n, w, P] of A.twy) { if (!/^[A-FT]$/.test(n)) continue; let acc = 0;
+    for (let i = 0; i + 1 < P.length; i++) { const a = P[i], b = P[i + 1], dx = b[0] - a[0], dy = b[1] - a[1], l = Math.hypot(dx, dy); if (!l) continue; const nx = dy / l, ny = -dx / l;
+      for (let s = (30 - acc) % 30; s < l; s += 30) { const x = a[0] + dx / l * s, y = a[1] + dy / l * s; for (const sd of [1, -1]) { const px = x + nx * sd * (w / 2 + 1), py = y + ny * sd * (w / 2 + 1); if (!onRw(px, py) && !inApn(px, py)) lt([px, py], BL, 0.8); } }
+      acc = (acc + l) % 30; } }
+  { const n = L.length, pos = new Float32Array(n * 3), col = new Float32Array(n * 3), siz = new Float32Array(n);
+    const fit = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.09, 0.12, 0.32, 6), (() => { const m = new THREE.MeshLambertMaterial({ color: 0x4a4d50 }); m.userData.noT = true; return m; })(), n), M4 = new THREE.Matrix4();
+    L.forEach((q, i) => { const z = G(q[0], q[1]) + 0.33; pos.set([q[0], z + 0.12, -q[1]], i * 3); col.set([q[2], q[3], q[4]], i * 3); siz[i] = q[5]; M4.makeTranslation(q[0], z - 0.05, -q[1]); fit.setMatrixAt(i, M4); });
+    fit.userData.noT = true; fit.frustumCulled = false; scene.add(fit);
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3)); g.setAttribute('sz', new THREE.BufferAttribute(siz, 1));
+    const sm = new THREE.ShaderMaterial({ transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, uniforms: { k: { value: 1 } },
+      vertexShader: 'attribute float sz; attribute vec3 color; varying vec3 vC; uniform float k; void main(){ vC = color; vec4 mv = modelViewMatrix * vec4(position, 1.0); gl_Position = projectionMatrix * mv; gl_PointSize = clamp(sz * k * 900.0 / -mv.z, 2.5, 40.0); }',
+      fragmentShader: 'varying vec3 vC; void main(){ vec2 d = gl_PointCoord - 0.5; float r = length(d) * 2.0; if (r > 1.0) discard; float a = exp(-r * r * 5.0) + 0.6 * smoothstep(0.35, 0.0, r); gl_FragColor = vec4(vC * a * 1.6, a); }' });
+    sm.userData.noT = true; const pts = new THREE.Points(g, sm); pts.userData.noT = true; pts.frustumCulled = false; pts.renderOrder = 5; scene.add(pts);
+    /* PAPI colours from the camera's (or helicopter's) angle above each unit, seen from the approach side */
+    let pt = 0; window.__papiTick = dt => { if ((pt += dt) < 0.15) return; pt = 0; const cx = camera.position.x, cy = -camera.position.z, cz = camera.position.y; let ch = false;
+      for (const p of PAPI) { const vx = cx - p.x, vy = cy - p.y, along = vx * p.dir[0] + vy * p.dir[1], z = G(p.x, p.y) + 0.5, a = Math.atan2(cz - z, Math.max(1, along)), w = along > 0 && a > p.ang;
+        const c = w ? WH : RD; if (col[p.i * 3 + 1] !== c[1]) { col.set(c, p.i * 3); ch = true; } }
+      if (ch) g.attributes.color.needsUpdate = true; }; }
+
+  /* buildings: the terminal (two storeys, glass towards the apron, a three-storey middle block with the control tower cab), hangars of ribbed sheet
+     metal with big doors, low service buildings */
+  const wallTex = (kind) => { const c = document.createElement('canvas'); c.width = 256; c.height = 256; const g = c.getContext('2d');
+    if (kind === 'terminal') { g.fillStyle = '#d9d6cf'; g.fillRect(0, 0, 256, 256); for (const y0 of [36, 150]) { g.fillStyle = '#33424d'; g.fillRect(0, y0, 256, 70); g.fillStyle = '#5b7180'; for (let x = 0; x < 256; x += 32) { g.fillRect(x + 2, y0 + 3, 26, 64); } g.fillStyle = '#9aa3a8'; for (let x = 0; x < 256; x += 32) g.fillRect(x, y0, 3, 70); } g.fillStyle = '#7d7f80'; g.fillRect(0, 0, 256, 10); }
+    else if (kind === 'hangar') { g.fillStyle = '#b9bec2'; g.fillRect(0, 0, 256, 256); for (let x = 0; x < 256; x += 8) { g.fillStyle = x % 16 ? '#a9aeb3' : '#c6cacd'; g.fillRect(x, 0, 4, 256); } g.fillStyle = '#80868b'; g.fillRect(0, 0, 256, 8); }
+    else { g.fillStyle = '#cfc6b8'; g.fillRect(0, 0, 256, 256); g.fillStyle = '#4b5862'; for (let x = 20; x < 256; x += 64) g.fillRect(x, 90, 30, 50); g.fillStyle = '#8a8076'; g.fillRect(0, 0, 256, 8); }
+    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t; };
+  const MAT = {}; const wm = k => MAT[k] || (MAT[k] = (() => { const m = new THREE.MeshLambertMaterial({ map: wallTex(k) }); m.userData.noT = true; return m; })());
+  const roofM = (() => { const m = new THREE.MeshLambertMaterial({ color: 0x5f6468 }); m.userData.noT = true; return m; })(), roofH = (() => { const m = new THREE.MeshLambertMaterial({ color: 0x9da3a8 }); m.userData.noT = true; return m; })();
+  const extrude = (P, h, kind, repU, z0) => { const zb = z0 ?? Math.min(...P.map(q => G(q[0], q[1]))) - 0.3, Pw = [], Uw = [], Pr = [];
+    let cw = 0; for (let i = 0; i < P.length; i++) { const a = P[i], b = P[(i + 1) % P.length], l = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      for (const [q, u, v] of [[a, cw, 0], [b, cw + l, 0], [b, cw + l, 1], [a, cw, 0], [b, cw + l, 1], [a, cw, 1]]) { Pw.push(q[0], zb + v * (h + 0.3), -q[1]); Uw.push(u / repU, v); } cw += l; }
+    const tr = THREE.ShapeUtils.triangulateShape(P.map(q => new THREE.Vector2(q[0], q[1])), []); for (const f of tr) { const [a, b, c] = f.map(i => P[i]), o = (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0 ? [a, c, b] : [a, b, c]; for (const q of o) Pr.push(q[0], zb + h + 0.3, -q[1]); }
+    const gw = new THREE.BufferGeometry(); gw.setAttribute('position', new THREE.Float32BufferAttribute(Pw, 3)); gw.setAttribute('uv', new THREE.Float32BufferAttribute(Uw, 2)); gw.computeVertexNormals();
+    const gr = new THREE.BufferGeometry(); gr.setAttribute('position', new THREE.Float32BufferAttribute(Pr, 3)); gr.computeVertexNormals();
+    const mw = new THREE.Mesh(gw, wm(kind)); mw.material.side = THREE.DoubleSide; const mr = new THREE.Mesh(gr, kind === 'hangar' ? roofH : roofM); mr.material.side = THREE.DoubleSide;
+    for (const m of [mw, mr]) { m.userData.noT = true; scene.add(m); } return zb; };
+  for (const [kind, h, P] of A.bld) { const k = kind === 'terminal' ? 'terminal' : kind === 'hangar' ? 'hangar' : 'b'; const zb = extrude(P, h, k, k === 'terminal' ? 8 : k === 'hangar' ? 6 : 10);
+    if (kind === 'terminal') {      /* middle block and tower */
+      const c = [-184.5, -1951], ang = Math.atan2(-217.3 + 147.4, -1938.7 + 1970.5), ca = Math.cos(ang), sa = Math.sin(ang), box = (cx, cy, l, w) => [[-l, -w], [l, -w], [l, w], [-l, w]].map(([a, b]) => [cx + a * sa + b * ca, cy + a * ca - b * sa]);
+      extrude(box(c[0], c[1], 7, 6.5), 11, 'terminal', 8, zb);
+      const cab = new THREE.Group(); cab.position.set(c[0], zb + 11.3, -c[1]); cab.userData.noT = true;
+      const cabM = new THREE.MeshStandardMaterial({ color: 0x2c3e4a, roughness: 0.08, metalness: 0.6 }), frM = new THREE.MeshLambertMaterial({ color: 0xe6e3dc }); cabM.userData.noT = frM.userData.noT = true;
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, 6, 12), frM); shaft.position.y = 3; cab.add(shaft);
+      const glass = new THREE.Mesh(new THREE.CylinderGeometry(4.2, 3.6, 3.2, 8), cabM); glass.position.y = 7.6; cab.add(glass);
+      const deck = new THREE.Mesh(new THREE.CylinderGeometry(3.8, 3.8, 0.5, 8), frM); deck.position.y = 5.9; cab.add(deck);
+      const top = new THREE.Mesh(new THREE.CylinderGeometry(4.6, 4.4, 0.6, 8), frM); top.position.y = 9.5; cab.add(top);
+      const ant = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 4, 4), frM); ant.position.y = 11.6; cab.add(ant);
+      cab.traverse(q => { q.userData.noT = true; }); scene.add(cab);
+      /* sign on the landside facade */
+      const cv = document.createElement('canvas'); cv.width = 512; cv.height = 64; const g2 = cv.getContext('2d'); g2.fillStyle = '#ffffff'; g2.font = 'bold 44px Arial, sans-serif'; g2.textBaseline = 'middle'; g2.fillText('PORIN LENTOASEMA', 8, 34);
+      const st = new THREE.CanvasTexture(cv); st.colorSpace = THREE.SRGBColorSpace; const sm = new THREE.MeshBasicMaterial({ map: st, transparent: true }); sm.userData.noT = true;
+      const sg = new THREE.Mesh(new THREE.PlaneGeometry(12, 1.5), sm); const p = [c[0] + ca * 6.7, c[1] - sa * 6.7]; sg.position.set(p[0], zb + 8.6, -p[1]); sg.rotation.y = Math.atan2(ca, sa); sg.userData.noT = true; scene.add(sg); } }
+
+  /* windsock by threshold 12 */
+  { const p = R1.P(R1.sa + 250, -R1.w / 2 - 70), z = G(p[0], p[1]), g = new THREE.Group(); g.position.set(p[0], z, -p[1]); g.userData.noT = true;
+    const pm = new THREE.MeshLambertMaterial({ color: 0xdedede }); pm.userData.noT = true; const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 6, 6), pm); pole.position.y = 3; g.add(pole);
+    const sock = new THREE.Group(); sock.position.y = 5.8; g.add(sock);
+    for (let i = 0; i < 5; i++) { const m = new THREE.MeshLambertMaterial({ color: i % 2 ? 0xffffff : 0xff5a1f }); m.userData.noT = true; const c = new THREE.Mesh(new THREE.CylinderGeometry(0.42 - i * 0.05, 0.42 - (i + 1) * 0.05, 0.75, 10, 1, true), m); c.material.side = THREE.DoubleSide; c.rotation.z = -Math.PI / 2; c.position.x = 0.4 + i * 0.75; sock.add(c); }
+    g.traverse(q => { q.userData.noT = true; }); scene.add(g); window.__sockG = sock; }
+  /* a welcome when the player first comes over the field */
+  let hi = false; window.__efpoTick = dt => { if (window.__papiTick) window.__papiTick(dt); if (window.__sockG) window.__sockG.rotation.y = 0.6 + Math.sin(performance.now() / 3000) * 0.15;
+    const x = WALK.on ? WALK.x : S.x, y = WALK.on ? WALK.y : S.y, near = Math.hypot(x + 180, y + 1960) < 450 || (y < -2000 && y > -3400 && x > -1000 && x < 1200);
+    if (near && !hi && started) { hi = true; toast('✈ Porin lentoasema · EFPO · kiitotie 12/30, 2351 m', 3); } else if (!near && Math.hypot(x + 180, y + 1960) > 900 && y > -1800) hi = false; };
+  window.__efpo = { RW, PAPI, L, M: { mRwy, mTwy, mApn, mWhite } };
 }
 
 window.__game = { WALK, IN, PLACES, placeDoor, walkAction, sceneIn, door: churchDoor, S, begin, keys, camera, renderer, scene, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
