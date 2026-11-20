@@ -42,6 +42,10 @@ async function luoJuna(G) {
   const loader = new GLTFLoader(), base = new URL('.', import.meta.url).href;
   const load = n => loader.loadAsync(base + n + SUF + '.glb').then(g => g.scene);
   const src = {}; for (const n of ['sr3', 'ed', 'edo']) { const o = await load(n); src[n] = o;
+    // Meshy-korien PBR-materiaalit pelin kirkkaaseen valaistukseen (puolipallovalo 2,65, ei sävykartoitusta): ilman tätä valkoinen puhkesi
+    // ja metallikartta tummensi kyljet laikukkaiksi (ympäristökarttaa ei ole)
+    o.traverse(q => { if (!q.isMesh || !q.material || !q.material.map) return; const m = q.material; m.metalness = 0; m.metalnessMap = null; m.roughness = 0.62;
+      m.color.setRGB(0.74, 0.74, 0.74); if (m.normalScale) m.normalScale.set(0.6, 0.6); m.needsUpdate = true; });
     // staattiset osat yhteen: runko, telit (ilman pyöriä), pyöräkerrat ja ovet kukin omanaan
     o.traverse(q => { if (/^Wheel_[FR]\d$/.test(q.name) || /^Door_[LR]\d$/.test(q.name)) yhdista(q); });
     o.traverse(q => { if (/^Bogie_[FR]$/.test(q.name)) yhdista(q, c => /^Wheel_/.test(c.name)); });

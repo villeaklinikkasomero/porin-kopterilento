@@ -282,6 +282,29 @@ for tr in TR:
     tr['lc'] = lcm
     tr['crest'] = zs + CREST
 
+# asema-alue tasaiseksi (omistaja 21.11.: "asema-alueella korkeus tasaiseksi eikä maaston mukaan"): laitureiden kohdalla ja 60 m ympärillä
+# pölkyn yläpinta = yksi taso (laituriraiteiden mediaani), siitä 200 m:n matkalla liukuen takaisin maaston mukaiseksi
+from matplotlib.path import Path as _MP
+_PLS = [np.array(g, float).reshape(-1, 2) for t, g in D['W'] if t.get('r') == 'platform']
+def _pdist(p):
+    best = 1e9
+    for P in _PLS:
+        if _MP(P).contains_point(p): return 0.0
+        for a, b in zip(P, np.roll(P, -1, 0)):
+            d = b - a; L2 = float(np.dot(d, d)) or 1; u = max(0, min(1, float(np.dot(p - a, d)) / L2)); best = min(best, float(np.linalg.norm(a + d * u - p)))
+    return best
+_lv = []
+for tr in TR:
+    for p, c in zip(tr['S'], tr['crest']):
+        if tr['k'] != 'x' and _pdist(p) < 3: _lv.append(c)
+LEVEL = float(np.median(_lv)) if _lv else None
+print('aseman taso (pölkky)', LEVEL)
+for tr in TR:
+    if LEVEL is None: break
+    w = np.array([1 - min(1, max(0, (_pdist(p) - 60) / 200)) for p in tr['S']]); w = w * w * (3 - 2 * w)
+    tr['crest'] = tr['crest'] * (1 - w) + LEVEL * w
+    tr['st'] = w
+
 # solmujen korkeudet yhteen: poikkeava raide liittyy läpimenevän korkeuteen
 for to in TURNOUT:
     d, t = TR[to['div']], TR[to['thr']]
@@ -451,6 +474,14 @@ for _ in range(2):
     A = fl.reshape(ny, nx); Nb = np.minimum.reduce([np.roll(A, 1, 0), np.roll(A, -1, 0), np.roll(A, 1, 1), np.roll(A, -1, 1)])
     m2 = fillbox & (A.ravel() < Nb.ravel() - 1.0)
     fl[m2] = np.maximum(fl[m2], closed.ravel()[m2])
+# asema-alueen maa tasaiseksi sepelikentän alta (raiteiden 9 m säde, alle 50 m laitureista), alikulun avoin pää ja asema-aukion puoli jäävät
+if LEVEL is not None:
+    near_pl = np.array([_pdist(p) < 50 for p in pts[ok & (d < 9.5)]])
+    idxs = np.where(ok & (d < 9.5))[0][near_pl]
+    pit = (pts[idxs, 0] > -432) & (pts[idxs, 0] < -395) & (pts[idxs, 1] > -1005) & (pts[idxs, 1] < -970)
+    idxs = idxs[~pit]
+    fl[idxs] = LEVEL - 0.12
+    print('asema-alueen tasoitetut maasolmut', len(idxs))
 # penkka
 cm = ok & (d < 3.6)
 zc = np.where(cm, allz[np.minimum(idx, len(allz) - 1)] - 0.35, 1e9)

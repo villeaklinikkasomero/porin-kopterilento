@@ -17,10 +17,11 @@ import juna_blender as J
 
 # lähde, leikkauskorkeus ja katon korkeus (Meshyn y), kohdemitat: korin pituus ilman puskimia, leveys, alareuna, katon korkeus (Sr3: 3,95 m, laskettu virroitin 4,25 m)
 SPEC = {
-    'sr3': dict(src='loco.glb', cut=1.12, roof=3.2, L=18.1, W=3.0, zb=1.08, zt=3.95, bog=4.75, r=0.625, wb=3.0, heavy=True, tris=60000),
-    'ed':  dict(src='dd.glb', cut=1.22, roof=4.6, L=25.9, W=3.18, zb=1.1, zt=5.05, bog=9.5, r=0.46, wb=2.5, heavy=False, tris=50000),
-    'edo': dict(src='horizon.glb', cut=1.18, roof=4.6, flip=True, L=25.9, W=3.18, zb=1.1, zt=5.05, bog=9.5, r=0.46, wb=2.5, heavy=False, tris=50000),
+    'sr3': dict(src='sr3_vr.glb', cut=1.1, roof=4.25, L=18.1, W=3.0, zb=1.08, zt=4.25, bufo=-0.3, bog=4.75, r=0.625, wb=3.0, heavy=True, tris=60000),
+    'ed':  dict(src='ic2.glb', cut=1.25, cutx=6.4, roof=5.1, L=25.9, W=3.18, zb=1.25, zt=5.05, bog=9.5, r=0.46, wb=2.5, heavy=False, tris=50000),
+    'edo': dict(src='edo_vr.glb', cut=1.25, cutx=3.0, roof=5.1, flip=True, L=25.9, W=3.18, zb=1.25, zt=5.05, bog=9.5, r=0.46, wb=2.5, heavy=False, tris=50000),
 }
+ONLY = argv[argv.index('--only') + 1].split(',') if '--only' in argv else None
 TEX = 2048 if DET == 'high' else 1024
 
 def build(name, S):
@@ -38,7 +39,8 @@ def build(name, S):
     me = ob.data
     # Blender: X = pituus, Y = -leveys (glTF z), Z = korkeus
     bm = bmesh.new(); bm.from_mesh(me)
-    dead = [f for f in bm.faces if f.calc_center_median().z < S['cut']]
+    cx0 = S.get('cutx', 0)
+    dead = [f for f in bm.faces if (c := f.calc_center_median()).z < S['cut'] and abs(c.x) > cx0]   # cutx: matala keskiosa (alakerta) säilyy, telit päistä pois
     bmesh.ops.delete(bm, geom=dead, context='FACES')
     xs = [v.co.x for v in bm.verts]; ys = [v.co.y for v in bm.verts]; zs = [v.co.z for v in bm.verts]
     x0, x1, y0, y1, z1 = min(xs), max(xs), min(ys), max(ys), max(zs)
@@ -49,9 +51,9 @@ def build(name, S):
         v.co = Vector((-y, x, z)) if S.get('flip') else Vector((y, -x, z))   # keula -Y (glTF +Z); ohjausvaunun ohjaamo on Meshyssä -X-päässä
     bm.to_mesh(me); bm.free()
     # harvennus
-    n = len(me.polygons); r = min(1.0, S['tris'] * (1 if DET == 'high' else 0.3) / max(1, n))
+    n = len(me.polygons); r = min(1.0, S['tris'] * (2 if DET == 'high' else 0.6) / max(1, n))
     if r < 1:
-        md = ob.modifiers.new('dec', 'DECIMATE'); md.ratio = r; md.use_collapse_triangulate = True
+        md = ob.modifiers.new('dec', 'DECIMATE'); md.ratio = r; md.use_collapse_triangulate = True; md.delimit = {'UV', 'SEAM'}   # UV-saumat säilyvät (ilman tätä tekstuuri levisi ikkunoiden alle)
         bpy.ops.object.modifier_apply(modifier='dec')
     ob.name = name + '_kori'
     for p in me.polygons: p.use_smooth = True
@@ -63,15 +65,17 @@ def build(name, S):
     J.bogie('Bogie_F', -S['bog'], S['r'], S['wb'], root, heavy=S['heavy'])
     J.bogie('Bogie_R', S['bog'], S['r'], S['wb'], root, heavy=S['heavy'])
     ye = S['L'] / 2
-    for s in (-1, 1): J.buffers_coupler(root, s * (ye + 0.12), s, 1.06)
+    bo = S.get('bufo', 0.12)
+    for s in (-1, 1): J.buffers_coupler(root, s * (ye + bo), s, 1.06)
     J.box(name + '_frame', S['W'] - 0.25, S['L'] - 0.6, 0.18, (0, 0, S['zb'] + 0.02), J.BLACK(), root)
     if name == 'sr3':
         J.box('Sr3_tank', 2.2, 4.2, 0.6, (0, 0, S['zb'] - 0.38), J.BLACK(), root, 0.05)
-        for s in (-1, 1): J.box(f'Sr3_plough{s}', 2.5, 0.35, 0.4, (0, s * (ye + 0.02), 0.45), J.BLACK(), root, 0.03)
+        for s in (-1, 1): J.box(f'Sr3_plough{s}', 2.5, 0.35, 0.4, (0, s * (ye + bo - 0.35), 0.45), J.BLACK(), root, 0.03)
     else:
         for y in (-5.0, -1.8, 1.8, 5.0): J.box(f'{name}_box{y}', 2.3, 2.2, 0.32, (0, y, S['zb'] - 0.2), J.BLACK(), root, 0.03)
     return root
 
 os.makedirs(OUTD, exist_ok=True)
 for name, S in SPEC.items():
+    if ONLY and name not in ONLY: continue
     J.export(build(name, S), name)

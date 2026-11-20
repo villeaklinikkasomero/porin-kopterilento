@@ -475,29 +475,37 @@ function buildOuterGround(root, G) {
 // sepelikenttä koko rata-alueelle (omistaja 21.11.: "sepeliä voisi levittää laajemmalle, valkoista vuotaa ilmakuvista"):
 // 2 m:n ruudut alle 7,5 m raiteista maan pinnan päälle; ei laitureille eikä tasoristeyksiin. Tiet (roads.js, +0,12) ja penkat jäävät päälle.
 function buildBallastField(root, G, plats) {
+  // vain asema-alueella (omistaja 21.11.: "tarkoituksena oli vain asema-alueella lisätä seisakkeiden paikalle"): laitureiden kohta ja 45 m niiden ympäriltä.
+  // Reuna häivytetään (pikselikohtainen läpinäkyvyys), ei sahalaitaa.
   const near = trackIndex(2), C = 2, R = 9, TZ = G.TZg || G.TZs, LC = RATA.n.filter(n => n[0] === 'le').map(n => [n[1], n[2]]);
+  const pdist = (x, y) => { let d = 1e9; for (const p of plats) { if (inPoly(x, y, p.poly)) return 0; for (const [px, py] of p.poly) d = Math.min(d, Math.hypot(px - x, py - y)); } return d; };
+  const yard = (x, y) => pdist(x, y) < 45;
+  const ycache = new Map(), isYard = (x, y) => { const k = Math.floor(x / 20) + ',' + Math.floor(y / 20); if (!ycache.has(k)) ycache.set(k, yard((Math.floor(x / 20) + 0.5) * 20, (Math.floor(y / 20) + 0.5) * 20)); return ycache.get(k); };
   const cells = new Set();
-  for (const tr of tracks) for (let s = 0; s <= tr.L; s += 1.5) { const a = at(tr, s); if (a.br) continue;
+  for (const tr of tracks) for (let s = 0; s <= tr.L; s += 1.5) { const a = at(tr, s); if (a.br || !isYard(a.x, a.y)) continue;
     for (let i = Math.floor((a.x - R) / C); i <= Math.floor((a.x + R) / C); i++) for (let j = Math.floor((a.y - R) / C); j <= Math.floor((a.y + R) / C); j++) cells.add(i + ',' + j); }
-  // sulkeminen: raiteiden väliset yli 18 m aukot ratapihalla täyttyvät (laajennus 5 solua, kavennus 5 solua)
   const dil = new Set(cells); for (const k of cells) { const [i, j] = k.split(',').map(Number); for (let a = -5; a <= 5; a++) for (let b = -5; b <= 5; b++) if (a * a + b * b <= 25) dil.add((i + a) + ',' + (j + b)); }
-  const clo = new Set(); for (const k of dil) { const [i, j] = k.split(',').map(Number); let ok = true; for (let a = -5; a <= 5 && ok; a++) for (let b = -5; b <= 5; b++) if (a * a + b * b <= 25 && !dil.has((i + a) + ',' + (j + b))) { ok = false; break; } if (ok) clo.add(k); }
-  for (const k of cells) clo.add(k);
-  const chunks = new Map(), vk = new Map();
+  const clo = new Set(cells); for (const k of dil) { const [i, j] = k.split(',').map(Number); let ok = true; for (let a = -5; a <= 5 && ok; a++) for (let b = -5; b <= 5; b++) if (a * a + b * b <= 25 && !dil.has((i + a) + ',' + (j + b))) { ok = false; break; } if (ok) clo.add(k); }
+  const keep = new Set();
   for (const key of clo) { const [i, j] = key.split(',').map(Number), cx = (i + 0.5) * C, cy = (j + 0.5) * C;
     const b = near(cx, cy, 25); if (b && b.a.br && b.d < 6) continue;
     if (LC.some(([x, y]) => Math.hypot(x - cx, y - cy) < 7)) continue;
-    if (plats.some(p => inPoly(cx, cy, p.poly))) continue;
+    keep.add(key); }   // myös laiturin alle: reunan alta ei saa näkyä ilmakuvaa
+  // reunasolmut läpinäkyviksi: solmu on sisällä, jos kaikki sen neljä solua ovat mukana
+  const inner = (i, j) => keep.has((i - 1) + ',' + (j - 1)) && keep.has(i + ',' + (j - 1)) && keep.has((i - 1) + ',' + j) && keep.has(i + ',' + j);
+  const chunks = new Map();
+  for (const key of keep) { const [i, j] = key.split(',').map(Number), cx = (i + 0.5) * C, cy = (j + 0.5) * C;
     const ck = Math.floor(cx / 400) + ',' + Math.floor(cy / 400); let ch = chunks.get(ck); if (!ch) chunks.set(ck, ch = { p: [], u: [], c: [], i: [], m: new Map() });
-    const v = (x, y) => { const k = x + ',' + y; let n = ch.m.get(k); if (n === undefined) { n = ch.p.length / 3; ch.m.set(k, n); ch.p.push(x, TZ(x, y) + 0.06, -y); ch.u.push(x / 1.6, y / 1.6);
-        const d = near(x, y, 25), f = d ? Math.min(1, d.d / 25) : 1, sh = 0.78 - 0.12 * f; ch.c.push(sh, sh * 0.97, sh * 0.93); } return n; };
-    const a = v(i * C, j * C), b2 = v((i + 1) * C, j * C), c = v((i + 1) * C, (j + 1) * C), d = v(i * C, (j + 1) * C);
+    const v = (vi, vj) => { const k = vi + ',' + vj; let n = ch.m.get(k); if (n === undefined) { const x = vi * C, y = vj * C; n = ch.p.length / 3; ch.m.set(k, n); ch.p.push(x, TZ(x, y) + 0.06, -y); ch.u.push(x / 1.6, y / 1.6);
+        const d = near(x, y, 25), f = d ? Math.min(1, d.d / 25) : 1, sh = 0.78 - 0.12 * f; ch.c.push(sh, sh * 0.97, sh * 0.93, inner(vi, vj) ? 1 : 0); } return n; };
+    const a = v(i, j), b2 = v(i + 1, j), c = v(i + 1, j + 1), d = v(i, j + 1);
     ch.i.push(a, b2, c, a, c, d); }
   const mat = M.ballast.clone(); mat.polygonOffset = true; mat.polygonOffsetFactor = -4; mat.polygonOffsetUnits = -4; mat.userData.noT = true;
+  mat.transparent = true; mat.depthWrite = false; mat.vertexColors = true;
   let n = 0;
   for (const ch of chunks.values()) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(ch.p, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(ch.u, 2));
-    g.setAttribute('color', new THREE.Float32BufferAttribute(ch.c, 3)); g.setIndex(ch.i); g.computeVertexNormals(); const m = new THREE.Mesh(g, mat); m.userData.noT = true; m.userData.field = true; root.add(m); n += ch.i.length / 3; }
-  console.log('[rata] sepelikenttä', n, 'kolmiota');
+    g.setAttribute('color', new THREE.Float32BufferAttribute(ch.c, 4)); g.setIndex(ch.i); g.computeVertexNormals(); const m = new THREE.Mesh(g, mat); m.renderOrder = -1; m.userData.noT = true; m.userData.field = true; root.add(m); n += ch.i.length / 3; }
+  console.log('[rata] sepelikenttä (asema-alue)', n, 'kolmiota');
 }
 
 // ---------------------------------------------------------------- kokoaminen peliin
