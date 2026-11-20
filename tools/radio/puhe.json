@@ -237,6 +237,60 @@
   },
   {
    "k": "t",
+   "id": "yo_teatteri",
+   "t": "Yön tarinat: teatterin vieras",
+   "s": "Radio Porikopterin yön tarinat. Aloitetaan Porin teatterista, joka on yksi Suomen vanhimmista teatteritaloista. Näyttelijät ovat vuosikymmenten ajan kertoneet, että talossa asuu joku, joka ei ole lunastanut lippua. Tunnetuin tarina kertoo päättömästä naisesta. Joillekin ovet aukeavat itsestään, ja toisten edestä ne lukittuvat. Kerran esityksen aikana lukittui ovi, joka on aina auki. Ja ylärivin parvella on tuoli, jossa tuntuu istuvan joku, vaikka sali on tyhjä. Sen istuin kuulemma nousee ylös ihan itsekseen. Jos siis istut teatterissa ja vieruspaikka natisee, ole kohtelias. Hän on ollut siellä kauemmin kuin sinä."
+  },
+  {
+   "k": "t",
+   "id": "yo_pirtu",
+   "t": "Yön tarinat: pirtua rannikolla",
+   "s": "Kieltolain aikaan, vuosina tuhatyhdeksänsataayhdeksäntoista ja tuhatyhdeksänsataakolmekymmentäkaksi, Satakunnan rannikko oli salakuljettajien suosiossa. Pirtua tuotiin meritse, ja kanisterit katosivat saariston kareihin ja rantasaunoihin. Poliisilla oli kova työ, sillä lahtia ja salmia riitti, eikä yöllä näe pitkälle. Toukokuussa tuhatyhdeksänsataakaksikymmentäkuusi Porin poliisi sai käyttöönsä uuden moottoriveneen, ja takaa-ajot siirtyivät vesille. Kerrotaan, että moni rantakylän isäntä oppi silloin kalastamaan erityisen myöhään illalla. Saalis vain ei koskaan ollut kalaa."
+  },
+  {
+   "k": "t",
+   "id": "yo_maakuopat",
+   "t": "Yön tarinat: palon jälkeen maan alla",
+   "s": "Kun suuri palo vuonna tuhatkahdeksansataaviisikymmentäkaksi oli polttanut Porin keskustan, kaikille ei riittänyt kattoa pään päälle. Moni perhe kaivoi itselleen asunnon maahan, ja maakuopissa asuttiin vielä vuosikymmeniä myöhemmin. Pori on palanut historiansa aikana yhdeksän kertaa, ensimmäisen kerran jo vuonna tuhatviisisataaseitsemänkymmentäyksi. Joten jos joskus lennät yöllä keskustan yli ja näet maassa valoa siellä, missä ei pitäisi olla mitään, se on luultavasti vain katulamppu. Luultavasti."
+  },
+  {
+   "k": "t",
+   "id": "yo_pamaus",
+   "t": "Yön tarinat: Porin pamaus",
+   "s": "Syyskuun viidentenätoista päivänä vuonna tuhatyhdeksänsataaneljäkymmentäneljä Porissa kuului jotain, mitä ei ole unohdettu. Saksalaiset joukot lähtivät Suomesta, ja lähtiessään ne räjäyttivät Porin lentokentän. Tapahtumaa kutsutaan Porin pamaukseksi. Aseveljet lähtivät, ja tilalle jäi kraatereita ja hämmennystä. Nykyään samalla kentällä harjoittelevat tulevat liikennelentäjät, ja kun kone nousee illalla meren suuntaan, kentällä on onneksi aika hiljaista."
+  },
+  {
+   "k": "t",
+   "id": "yo_preiviiki",
+   "t": "Yön tarinat: kartanon valokuva",
+   "s": "Porin länsipuolella, Preiviikin suunnalla, on vanhoja kartanoita, ja vanhoista kartanoista liikkuu aina tarinoita. Netin keskustelupalstoilla kerrotaan valokuvasta, johon olisi tallentunut hahmo ikkunaan, vaikka talossa ei ollut ketään. Kukaan ei ole pystynyt todistamaan sitä oikeaksi tai vääräksi. Radio Porikopteri suosittelee: jos otat vanhasta talosta kuvan ja ikkunassa vilkuttaa joku, vilkuta takaisin. Se on porilaista kohteliaisuutta."
+  },
+  {
+   "k": "t",
+   "id": "yo_kello",
+   "t": "Yön tarinat: kello, joka lyö kolmetoista",
+   "s": "Tämä tarina on keksitty, mutta kuuntele silti. Kun Pori paloi vuonna tuhatkahdeksansataaviisikymmentäkaksi, Raatihuone säilyi, mutta sen kellotorni tuhoutui. Uusi torni valmistui vasta vuonna tuhatkahdeksansataayhdeksänkymmentäyksi. Yöpyöräilijät väittävät, että syysöinä, kun joelta nousee sumu, kello lyö kolmetoista kertaa. Kolmannentoista lyönnin aikana kuulemma kaikki liikennevalot keskustassa vaihtuvat vihreäksi. Kukaan ei ole ehtinyt tarkistaa, koska kaikki ajavat silloin kotiin."
+  },
+  {
+   "k": "t",
+   "id": "yo_sumukopteri",
+   "t": "Yön tarinat: sumukopteri",
+   "s": "Ja sitten tarina, jonka Radio Porikopteri on keksinyt ihan itse. Joen yllä lentää kuulemma sumuisina öinä kopteri, jossa ei ole valoja. Roottorin äänen kuulee Kirjurinluodolta, mutta kun katsoo ylös, siellä on vain lokkeja. Sanotaan, että se on lentäjä, joka ei koskaan löytänyt laskeutumispaikkaa torilta, koska siellä oli aina joku myyntikoju tiellä. Joten muista, lentäjä: kun laskeudut, laskeudu kunnolla. Muuten kierrät jokea ikuisesti."
+  },
+  {
+   "k": "t",
+   "id": "yo_makkararyosto",
+   "t": "Yön tarinat: makkararyöstö",
+   "s": "Tämäkin juttu on keksitty. Poliisin keksitty tiedote: yöllä keskustan grillikioskilta katosi kaksikymmentä porilaista. Kassaan ei koskettu, eikä pihveihin. Ainoastaan makkara ja kurkkusalaatti viety. Tekijä jätti jälkeensä yhden sipulinpalan ja vahvan epäilyn. Silminnäkijät näkivät miehen juoksevan kauppatoria kohti, sinappia leuassa. Jos sinulle tarjotaan tänään yllättävän halvalla porilaista, kysy kuitti."
+  },
+  {
+   "k": "t",
+   "id": "yo_dyynit",
+   "t": "Yön tarinat: dyynien kulkija",
+   "s": "Viimeinen yön tarina on keksitty, ja se tulee Yyteristä. Aamulla ensimmäiset rantakävelijät näkevät joskus dyyneillä jalanjälkiä, jotka alkavat keskeltä hiekkaa ja loppuvat meren rantaan. Ei autoa, ei pyörää, ei kopteria. Tuuli pyyhkii jäljet puoleenpäivään mennessä. Me Radio Porikopterissa olemme varmoja, että se on joku, joka unohti pyyhkeensä viime kesänä ja tulee yhä hakemaan sitä. Jos löydät rannalta yksinäisen pyyhkeen, jätä se paikalleen."
+  },
+  {
+   "k": "t",
    "id": "loppu2",
    "t": "Radio Porikopteri – kiitos",
    "s": "Kuuntelet Radio Porikopteria. Jos haluat pelkkää musiikkia, vaihda kanavaa ärrä-näppäimellä. Me jatketaan täällä Porin tarinoilla ja musiikilla ihan kohta."

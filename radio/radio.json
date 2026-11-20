@@ -41,6 +41,11 @@
    "t": "Kesäyö Kirjurinluodossa"
   },
   {
+   "f": "puhe_yo_teatteri.mp3",
+   "d": 50.08,
+   "t": "Yön tarinat: teatterin vieras"
+  },
+  {
    "f": "puhe_jazz.mp3",
    "d": 26.75,
    "t": "Jazzin kaupunki"
@@ -79,6 +84,11 @@
    "f": "pop_2.mp3",
    "d": 152.71,
    "t": "Porilainen sydän"
+  },
+  {
+   "f": "puhe_yo_pirtu.mp3",
+   "d": 43.42,
+   "t": "Yön tarinat: pirtua rannikolla"
   },
   {
    "f": "puhe_murre.mp3",
@@ -121,6 +131,11 @@
    "t": "Neonyö Puuvillassa"
   },
   {
+   "f": "puhe_yo_maakuopat.mp3",
+   "d": 35.42,
+   "t": "Yön tarinat: palon jälkeen maan alla"
+  },
+  {
    "f": "puhe_meri.mp3",
    "d": 21.6,
    "t": "Meren suunnassa"
@@ -159,6 +174,11 @@
    "f": "pop_4.mp3",
    "d": 182.39,
    "t": "Roottori yötä vasten"
+  },
+  {
+   "f": "puhe_yo_pamaus.mp3",
+   "d": 33.15,
+   "t": "Yön tarinat: Porin pamaus"
   },
   {
    "f": "puhe_assat.mp3",
@@ -201,6 +221,11 @@
    "t": "Midnight Over Pori"
   },
   {
+   "f": "puhe_yo_preiviiki.mp3",
+   "d": 34.61,
+   "t": "Yön tarinat: kartanon valokuva"
+  },
+  {
    "f": "puhe_suisto.mp3",
    "d": 26.44,
    "t": "Joki kohtaa meren"
@@ -239,6 +264,11 @@
    "f": "pop_6.mp3",
    "d": 270.71,
    "t": "Highway Two"
+  },
+  {
+   "f": "puhe_yo_kello.mp3",
+   "d": 37.28,
+   "t": "Yön tarinat: kello, joka lyö kolmetoista"
   },
   {
    "f": "puhe_saa.mp3",
@@ -281,6 +311,16 @@
    "t": "Soaring A Minor"
   },
   {
+   "f": "puhe_yo_sumukopteri.mp3",
+   "d": 35.29,
+   "t": "Yön tarinat: sumukopteri"
+  },
+  {
+   "f": "puhe_yo_dyynit.mp3",
+   "d": 36.73,
+   "t": "Yön tarinat: dyynien kulkija"
+  },
+  {
    "f": "puhe_loppu2.mp3",
    "d": 13.09,
    "t": "Radio Porikopteri – kiitos"
@@ -299,6 +339,11 @@
    "f": "pop_1.mp3",
    "d": 139.65,
    "t": "Kesäyö Kirjurinluodossa"
+  },
+  {
+   "f": "puhe_yo_makkararyosto.mp3",
+   "d": 32.78,
+   "t": "Yön tarinat: makkararyöstö"
   }
  ],
  "rock": [
