@@ -15,7 +15,7 @@ const bil = (A, x, y) => { const fx = Math.min(TER.nx - 1.001, Math.max(0, (x - 
   return ((A[k] * (1 - u) + A[k + 1] * u) * (1 - v) + (A[k + TER.nx] * (1 - u) + A[k + TER.nx + 1] * u) * v) / 10; };
 const TZg = (x, y) => bil(THG, x, y), TZs = (x, y) => bil(THS, x, y);
 const WL = TER.wl;
-const QUAY_LOW = -1.05;    // index.html: Etelärannan alempi kävelytaso suhteessa maastonostoon (LOW)
+const QUAY_WALK = TER.wl + 1.05;   // index.html: QUAY_WALK, Etelärannan alempi kävelytaso (absoluuttinen)
 const PSIL = { x: 207.45, y: 477.95, len: 170.04, head: Math.atan2(245.85 - 207.45, 643.6 - 477.95), half: 7.4 };
 
 function segDist(px, py, ax, ay, bx, by) { const dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L2)); return Math.hypot(ax + dx * t - px, ay + dy * t - py); }
@@ -30,12 +30,15 @@ function rantaviiva() {
       const e = E.get(kk); if (e) e.n++; else E.set(kk, { a, b, c, n: 1 }); }
   }
   const out = [];
-  for (const e of E.values()) if (e.n === 1) out.push(e);
+  for (const e of E.values()) if (e.n === 1) {      // pitkät reunat paloiksi (enintään 4 m), jotta rajaukset osuvat oikeaan kohtaan
+    const L = Math.hypot(e.b[0] - e.a[0], e.b[1] - e.a[1]), n = Math.max(1, Math.ceil(L / 4));
+    for (let k = 0; k < n; k++) { const f0 = k / n, f1 = (k + 1) / n; out.push({ a: [e.a[0] + (e.b[0] - e.a[0]) * f0, e.a[1] + (e.b[1] - e.a[1]) * f0], b: [e.a[0] + (e.b[0] - e.a[0]) * f1, e.a[1] + (e.b[1] - e.a[1]) * f1], c: e.c }); } }
   return out;
 }
 
 function poisRajattu(mx, my) {
   if (polyDist(mx, my, RIV.quay) < 7) return true;                                            // Etelärannan muuri
+  if (mx > 186 && mx < 266 && my > 462 && my < 482) return true;                              // alikulku Porinsillan eteläpään ali (index.html)
   for (const b of RIV.br) if (polyDist(mx, my, b.p) < b.w / 2 + 7) return true;               // sillat
   const ux = Math.sin(PSIL.head), uy = Math.cos(PSIL.head), dx = mx - PSIL.x, dy = my - PSIL.y, t = dx * ux + dy * uy, s = dx * uy - dy * ux;
   if (Math.abs(s) < PSIL.half + 8 && t > -20 && t < PSIL.len + 20) return true;              // Porinsilta
@@ -139,6 +142,8 @@ function lautaTekstuuri() {
   const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; return t;
 }
 
+const PINNAT = [];   // kävelypinnat pelaajalle: { cx, cy, ux, uy, hl, hw, z0, z1 } (z0 -> z1 pituussuunnassa)
+function pinta(ax, ay, bx, by, w, z0, z1) { const L = Math.hypot(bx - ax, by - ay); PINNAT.push({ cx: (ax + bx) / 2, cy: (ay + by) / 2, ux: (bx - ax) / L, uy: (by - ay) / L, hl: L / 2, hw: w / 2, z0, z1 }); }
 function laiturit(ryhma) {
   const lauta = lautaTekstuuri();
   const puu = new THREE.MeshLambertMaterial({ map: lauta }), kelluke = new THREE.MeshLambertMaterial({ color: 0x3b3f42 }), teras = new THREE.MeshLambertMaterial({ color: 0x5d6064 }), musta = new THREE.MeshLambertMaterial({ color: 0x1e2022 });
@@ -153,8 +158,8 @@ function laiturit(ryhma) {
     const [ax, ay] = l.a, [bx, by] = l.b, L = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / L, uy = (by - ay) / L, rot = Math.atan2(ux, -uy);
     const silta = 6.5, sx = ax + ux * silta, sy = ay + uy * silta;                                  // kulkusilta muurilta ponttonille
     const pL = L - silta, pcx = sx + ux * pL / 2, pcy = sy + uy * pL / 2;
-    kansi(pcx, pcy, pL, l.w, rot, DECK);
-    const top = TZs(ax, ay) + QUAY_LOW + 0.02, drop = top - DECK, len = Math.hypot(silta, drop);
+    kansi(pcx, pcy, pL, l.w, rot, DECK); pinta(sx, sy, bx, by, l.w, DECK + 0.09, DECK + 0.09);
+    const top = QUAY_WALK + 0.02, drop = top - DECK, len = Math.hypot(silta, drop); pinta(ax, ay, sx, sy, 1.4, top + 0.06, DECK + 0.06);
     const sg = new THREE.BoxGeometry(1.4, 0.12, len); const s = lisaa(sg, teras, ax + ux * silta / 2, (top + DECK) / 2, ay + uy * silta / 2, rot);
     s.rotation.order = 'YXZ'; s.rotation.x = Math.atan2(drop, silta);
     for (const sd of [-1, 1]) { const k = lisaa(new THREE.BoxGeometry(0.05, 0.05, len), musta, ax + ux * silta / 2 + uy * sd * 0.7, (top + DECK) / 2 + 0.9, ay + uy * silta / 2 - ux * sd * 0.7, rot); k.rotation.order = 'YXZ'; k.rotation.x = Math.atan2(drop, silta); }
@@ -164,8 +169,9 @@ function laiturit(ryhma) {
   }
   // neliön muotoinen lava
   kansi(LAVA.c[0], LAVA.c[1], LAVA.koko[1], LAVA.koko[0], LAVA.kulma, DECK);
+  { const c = Math.cos(LAVA.kulma), sn = Math.sin(LAVA.kulma), h = LAVA.koko[1] / 2; pinta(LAVA.c[0] + sn * h, LAVA.c[1] - c * h, LAVA.c[0] - sn * h, LAVA.c[1] + c * h, LAVA.koko[0], DECK + 0.09, DECK + 0.09); }
   { const [[ax, ay], [bx, by]] = LAVA.silta, L = Math.hypot(bx - ax, by - ay), ux = (bx - ax) / L, uy = (by - ay) / L, rot = Math.atan2(ux, -uy);
-    const top = TZs(ax, ay) + QUAY_LOW + 0.02, drop = top - DECK, len = Math.hypot(L, drop);
+    const top = QUAY_WALK + 0.02, drop = top - DECK, len = Math.hypot(L, drop); pinta(ax, ay, bx, by, 1.6, top + 0.06, DECK + 0.06);
     const s = lisaa(new THREE.BoxGeometry(1.6, 0.12, len), teras, (ax + bx) / 2, (top + DECK) / 2, (ay + by) / 2, rot); s.rotation.order = 'YXZ'; s.rotation.x = Math.atan2(drop, L); }
 }
 
@@ -178,6 +184,10 @@ export function luoRanta({ scene, laiturit: teeLaiturit = true }) {
   ryhma.traverse(o => { o.userData.noT = true; if (o.material) o.material.userData.noT = true; });   // absoluuttiset korkeudet, ei pelin maastonostoa
   scene.add(ryhma);
   window.__ranta = { ryhma, kivikkoKolmioita: g.index.count / 3 };
+  window.__laituriZ = (x, y) => { if (x < -80 || x > 180 || y < 475 || y > 565) return null; let best = null;
+    for (const p of PINNAT) { const dx = x - p.cx, dy = y - p.cy, a = dx * p.ux + dy * p.uy, b = dx * p.uy - dy * p.ux;
+      if (Math.abs(a) <= p.hl && Math.abs(b) <= p.hw) { const z = p.z0 + (p.z1 - p.z0) * (a + p.hl) / (2 * p.hl); if (best === null || z > best) best = z; } }
+    return best; };
   console.log(`[ranta] kivikkoa ${Math.round(g.index.count / 3)} kolmiota, ${LAITURIT.length + 1} laituria`);
   return ryhma;
 }

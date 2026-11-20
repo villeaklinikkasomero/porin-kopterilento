@@ -229,7 +229,12 @@ const TZg = (x, y) => tBil(THG, x, y), TZs = (x, y) => tBil(THS, x, y);
       if (THG[k] / 10 > lim) { THG[k] = Math.round(lim * 10); n++; } } }
   window.__siltaKummut = n; }
 const QUAY_MODEL = true;    // 20.11.2026 (omistaja: "Etelärannan pinnat pitänee rakentaa myös itse, ilmakuva ei toimi tuossa"): the hand-built walk, steps, hedges and railing are back and the photo ground is cut out under them (15.11 they were off for the MML 2025 photo)
-const tSkip = (x, y) => { if (!QUAY_MODEL) return false; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
+const QUAY_WALK = TER.wl + 1.05;   // Etelärannan alempi kävelytaso (absoluuttinen), myös ranta/ranta.js:n kulkusillat
+function quayCut(x, y) { if (x > 190 && x < 263 && y > 467 && y < 478) return true;      /* the underpass under Porinsilta (Eteläranta block) */
+  const Q = RIV.quay; let d = 1e9; for (let i = 0; i + 3 < Q.length; i += 2) { const ax = Q[i], ay = Q[i + 1], dx = Q[i + 2] - ax, dy = Q[i + 3] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
+    if (t < -0.05 || t > 1.05) continue; d = Math.min(d, Math.hypot(ax + dx * t - x, ay + dy * t - y)); }      /* beside the quay only: past its ends the cut left holes (20.11) */
+  return d < 13 && !inRiver(x, y); }   // photo ground cells under the hand-built quay (cell centres within 13 m of the quay line, on land)
+const tSkip = (x, y) => { if (!QUAY_MODEL) return false; if (x > -160 && x < 265 && y > 460 && y < 545 && quayCut(x, y)) return true; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
 let gridGeo;
 const WREL = (x, y) => TER.wl - TZs(x, y);          // water level relative to the lifted objects at (x, y)
 const terrainTex = (() => { const n = TER.nx * TER.ny, d = new Uint16Array(n); for (let i = 0; i < n; i++) d[i] = THREE.DataUtils.toHalfFloat(THS[i] / 10);
@@ -1165,40 +1170,96 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   const N = Q.map((p, i) => { const a = Q[Math.max(0, i - 1)], b = Q[Math.min(Q.length - 1, i + 1)], dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy); return [-dy / L, dx / L]; });
   if (inRiver(Q[2][0] + N[2][0] * 3, Q[2][1] + N[2][1] * 3)) for (const n of N) { n[0] = -n[0]; n[1] = -n[1]; }   // N points inland
   const at = (i, o) => [Q[i][0] + N[i][0] * o, Q[i][1] + N[i][1] * o];
+  // 20.11.2026 (omistaja: "siistitään"): rebuilt at absolute heights (noT) on the true ground. The quay line is a saw-tooth - long sections with the
+  // terraces and short jogs of 3-9 m back towards the land; the old build offset every vertex by an averaged normal, so at the jogs the steps folded
+  // over each other, and it stood on the smoothed field, which lies 1-1.5 m off the real ground by the river, so the photo ground showed through it.
+  // Now each run of sections is built on its own with mitred offsets and closed at both ends with its cross-section (the end of a tooth is a wall into
+  // the water); the lower walk is 1.05 m above the water, four seating steps rise from it to the street, whose level is the true ground 11 m inland,
+  // and the top paving runs 18 m inland where the photo ground is cut out (quayCut).
   const P = [], C = [], push = (a, b, c, col) => { for (const v of [a, b, c]) { P.push(v[0], v[2], -v[1]); C.push(col[0], col[1], col[2]); } };
   const quad = (a, b, c, d, col) => { push(a, b, c, col); push(a, c, d, col); };
   const gran = [0.66, 0.65, 0.62], pave = [0.74, 0.73, 0.70], riser = [0.55, 0.54, 0.52], wallc = [0.45, 0.44, 0.42];
-  const LOW = -1.05, steps = [[4.5, LOW], [5.3, LOW + 0.35], [6.1, LOW + 0.7], [7.25, 0]];
-  for (let i = 0; i + 1 < Q.length; i++) {
-    const s2 = (o, z, j) => { const p = at(j, o); return [p[0], p[1], z]; };
-    quad(s2(0, LOW, i), s2(0, LOW, i + 1), s2(4.5, LOW, i + 1), s2(4.5, LOW, i), pave);                     // lower walk
-    for (let k = 0; k < 3; k++) { const [o0, z0] = steps[k], o1 = steps[k + 1][0], z1 = z0 + 0.35;
-      quad(s2(o0, z0, i), s2(o0, z0, i + 1), s2(o0, z1, i + 1), s2(o0, z1, i), riser);                       // riser
-      quad(s2(o0, z1, i), s2(o0, z1, i + 1), s2(o1, z1, i + 1), s2(o1, z1, i), gran); }                      // tread
-    quad(s2(7.25, 0, i), s2(7.25, 0, i + 1), s2(12, 0, i + 1), s2(12, 0, i), pave);                         // top paving out to the edge of the cut-out (6 m cells)
-    quad(s2(0, WREL(Q[i][0], Q[i][1]) - 0.4, i), s2(0, WREL(Q[i + 1][0], Q[i + 1][1]) - 0.4, i + 1), s2(0, LOW, i + 1), s2(0, LOW, i), wallc);      // quay wall into the water
-  }
+  const ZW = QUAY_WALK, ZB = TER.wl - 0.6;                       // lower walk, foot of the wall in the water
+  const sg = N[0][0] * -(Q[1][1] - Q[0][1]) + N[0][1] * (Q[1][0] - Q[0][0]) > 0 ? 1 : -1;
+  const segN = i => { const dx = Q[i + 1][0] - Q[i][0], dy = Q[i + 1][1] - Q[i][1], L = Math.hypot(dx, dy); return [sg * -dy / L, sg * dx / L]; };
+  const runs = []; { let cur = [0], last = 0;
+    for (let i = 0; i + 1 < Q.length; i++) { const dx = Q[i + 1][0] - Q[i][0], dy = Q[i + 1][1] - Q[i][1], L = Math.hypot(dx, dy), n = segN(last);
+      const jog = cur.length > 1 && L < 10 && Math.abs(dx * n[0] + dy * n[1]) / L > 0.8;
+      if (jog) { runs.push(cur); cur = [i + 1]; } else { cur.push(i + 1); last = i; } }
+    if (cur.length > 1) runs.push(cur); }
+  const street = (x, y) => Math.max(ZW + 1.2, TZg(x, y));
+  const RUN = runs.map(r => { const n = r.slice(0, -1).map(i => segN(i)), M = r.map((_, k) => { const a = n[Math.max(0, k - 1)], b = n[Math.min(n.length - 1, k)], d = 1 + a[0] * b[0] + a[1] * b[1]; return [(a[0] + b[0]) / d, (a[1] + b[1]) / d]; });
+    const cum = [0]; for (let k = 0; k + 1 < r.length; k++) cum.push(cum[k] + Math.hypot(Q[r[k + 1]][0] - Q[r[k]][0], Q[r[k + 1]][1] - Q[r[k]][1]));
+    const pt = (k, o) => [Q[r[k]][0] + M[k][0] * o, Q[r[k]][1] + M[k][1] * o];
+    const at2 = (d, o) => { let k = 0; while (k < r.length - 2 && d > cum[k + 1]) k++; const f = Math.max(0, Math.min(1, (d - cum[k]) / (cum[k + 1] - cum[k]))), a = pt(k, o), b = pt(k + 1, o);
+      return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, Math.atan2(Q[r[k + 1]][1] - Q[r[k]][1], Q[r[k + 1]][0] - Q[r[k]][0])]; };
+    // cross-section of column k: [offset, height, colour of the piece that starts here]
+    const prof = k => { const s = pt(k, 11), zs = street(s[0], s[1]), e = pt(k, 18), ze = Math.max(zs, TZg(e[0], e[1]) + 0.03), st = i => ZW + (zs - ZW) * i / 4;
+      return [[0, ZW, pave], [4.5, ZW, riser], [4.5, st(1), gran], [5.3, st(1), riser], [5.3, st(2), gran], [6.1, st(2), riser], [6.1, st(3), gran], [6.9, st(3), riser], [6.9, zs, gran], [8.2, zs, pave], [18, ze, null]]; };
+    return { r, n, M, pt, at: at2, prof, len: cum[cum.length - 1] }; });
+  RUN.forEach((R, ri) => {
+    const PR = R.r.map((_, k) => R.prof(k)), v = (k, o, z) => { const p = R.pt(k, o); return [p[0], p[1], z]; };
+    for (let k = 0; k + 1 < R.r.length; k++) {
+      const A = PR[k], B = PR[k + 1];
+      for (let j = 0; j + 1 < A.length; j++) quad(v(k, A[j][0], A[j][1]), v(k + 1, B[j][0], B[j][1]), v(k + 1, B[j + 1][0], B[j + 1][1]), v(k, A[j + 1][0], A[j + 1][1]), A[j][2]);
+      quad(v(k, 0, ZB), v(k + 1, 0, ZB), v(k + 1, 0, ZW), v(k, 0, ZW), wallc); }
+    // end caps: down into the water as far as the tooth sticks out past the next run (the jog), elsewhere just below the walk
+    for (const [k, nb] of [[0, RUN[ri - 1]], [R.r.length - 1, RUN[ri + 1]]]) { const q = Q[R.r[k]], A = PR[k];
+      let jl = 0; if (nb) { const o = nb.r[k === 0 ? nb.r.length - 1 : 0], m = R.n[k === 0 ? 0 : R.n.length - 1]; jl = Math.abs((Q[o][0] - q[0]) * m[0] + (Q[o][1] - q[1]) * m[1]); }
+      for (let j = 0; j + 1 < A.length; j++) { const [o0, z0] = A[j], [o1, z1] = A[j + 1]; if (o1 <= o0 + 0.01) continue;
+        const b0 = o0 < jl + 0.5 ? ZB : ZW - 0.3, b1 = o1 < jl + 0.5 ? ZB : ZW - 0.3;
+        quad(v(k, o0, b0), v(k, o1, b1), v(k, o1, z1), v(k, o0, z0), j === 0 ? wallc : riser); } }
+  });
+  // 20.11.2026 (omistaja: "tuossa pitäisi olla alikulku sillan ali toiselle puolelle"): the lower walk goes on east from the end of the quay under
+  // Porinsilta's south end (deck underside about 0.3 m, so 2.8 m headroom) between the bridge's river pier and the abutment, and climbs at 1:9 to the
+  // riverside path east of the bridge. A retaining wall holds the land on the south side, a wall with a railing drops into the water on the north side;
+  // the photo ground is cut out over the corridor (quayCut) and a capping strip covers the cut south of the wall.
+  const UPS = { x0: 193, x1: 238, x2: 260, x3: 266.5, yN: 475.3, yS: 471.7, cap: 462.5 };
+  const upEnd = TZg(UPS.x2 + 1.5, (UPS.yN + UPS.yS) / 2) + 0.05, upZ = x => x <= UPS.x1 ? ZW : x >= UPS.x2 ? Math.max(ZW, upEnd) : ZW + (Math.max(ZW, upEnd) - ZW) * (x - UPS.x1) / (UPS.x2 - UPS.x1);
+  if (QUAY_MODEL) { const topS = (x, y) => Math.max(TZg(x, y) + 0.05, upZ(x) + 0.25);
+    for (let x = UPS.x0; x < UPS.x3 - 0.01; x += 1.5) { const x2 = Math.min(UPS.x3, x + 1.5), za = upZ(x), zb = upZ(x2);
+      quad([x, UPS.yN, TER.wl - 0.04], [x2, UPS.yN, TER.wl - 0.04], [x2, 478.5, TER.wl - 0.04], [x, 478.5, TER.wl - 0.04], [0.2, 0.25, 0.28]);   // water-coloured floor out to the river surface (the ground is cut there)
+      quad([x, UPS.yS, za], [x2, UPS.yS, zb], [x2, UPS.yN, zb], [x, UPS.yN, za], pave);                                                            // walk
+      quad([x, UPS.yN, ZB], [x2, UPS.yN, ZB], [x2, UPS.yN, zb], [x, UPS.yN, za], wallc);                                                           // river wall
+      quad([x, UPS.yS, za], [x2, UPS.yS, zb], [x2, UPS.yS, topS(x2, UPS.yS)], [x, UPS.yS, topS(x, UPS.yS)], riser);                                // retaining wall
+      quad([x, UPS.yS, topS(x, UPS.yS)], [x2, UPS.yS, topS(x2, UPS.yS)], [x2, UPS.cap, topS(x2, UPS.cap)], [x, UPS.cap, topS(x, UPS.cap)], pave); }     // capping strip
+    for (let x = UPS.x0; x < UPS.x3 - 0.01; x += 1.5) { const x2 = Math.min(UPS.x3, x + 1.5); quad([x, UPS.cap, ZW - 0.5], [x2, UPS.cap, ZW - 0.5], [x2, UPS.cap, topS(x2, UPS.cap)], [x, UPS.cap, topS(x, UPS.cap)], riser); }   // skirt: closes the void under the capping strip
+    for (const x of [UPS.x0, UPS.x3]) quad([x, UPS.yS, x === UPS.x0 ? ZW : upZ(x)], [x, UPS.cap, x === UPS.x0 ? ZW : upZ(x)], [x, UPS.cap, topS(x, UPS.cap)], [x, UPS.yS, topS(x, UPS.yS)], riser);
+    const rp = []; for (let x = UPS.x0; x < UPS.x2; x += 1.5) { const x2 = Math.min(UPS.x2, x + 1.5); for (const h of [1.05, 0.55]) rp.push(x, upZ(x) + h, -UPS.yN + 0.25, x2, upZ(x2) + h, -UPS.yN + 0.25); }
+    const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); scene.add(noT(new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0x222528 }))));
+    const upPosts = []; for (let x = UPS.x0 + 0.5; x < UPS.x2; x += 2.2) upPosts.push(x);
+    const um = new THREE.InstancedMesh(new THREE.BoxGeometry(0.07, 1.05, 0.07), new THREE.MeshLambertMaterial({ color: 0x2a2d30 }), upPosts.length), m4 = new THREE.Matrix4();
+    upPosts.forEach((x, k) => um.setMatrixAt(k, m4.makeTranslation(x, upZ(x) + 0.52, -(UPS.yN - 0.25)))); scene.add(noT(um)); }
+  // the surface height for walkers and the player (groundTop): the photo ground lies up to 1 m off the walk and the steps
+  if (QUAY_MODEL) { const SEG = []; for (const R of RUN) { const PR = R.r.map((_, k) => R.prof(k)); for (let k = 0; k + 1 < R.r.length; k++) { const a = Q[R.r[k]], b = Q[R.r[k + 1]], L = Math.hypot(b[0] - a[0], b[1] - a[1]); SEG.push({ a, ux: (b[0] - a[0]) / L, uy: (b[1] - a[1]) / L, L, n: R.n[k], A: PR[k], B: PR[k + 1] }); } }
+    const zAt = (A, o) => { for (let j = A.length - 2; j >= 0; j--) if (o >= A[j][0]) { const [o0, z0] = A[j], [o1, z1] = A[j + 1]; return o1 > o0 + 0.01 ? z0 + (z1 - z0) * Math.min(1, (o - o0) / (o1 - o0)) : z1; } return A[0][1]; };
+    window.__quayZ = (x, y, maxO = 16) => { if (x >= UPS.x0 && x <= UPS.x3 && y >= UPS.yS && y <= UPS.yN + 0.3) return upZ(x);
+      if (x < -150 || x > 200 || y < 465 || y > 540) return null;
+      for (const s of SEG) { const dx = x - s.a[0], dy = y - s.a[1], t = dx * s.ux + dy * s.uy, o = dx * s.n[0] + dy * s.n[1]; if (t < 0 || t > s.L || o < -0.3 || o > maxO) continue;
+        const f = t / s.L; return zAt(s.A, o) * (1 - f) + zAt(s.B, o) * f; } return null; }; }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(C, 3)); g.computeVertexNormals();
-  if (QUAY_MODEL) scene.add(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })));
+  if (QUAY_MODEL) scene.add(noT(new THREE.Mesh(g, new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide }))));
   // walk along the line: railing posts, hedges on the steps, lamps on the street edge
   const segs = []; let tot = 0; for (let i = 0; i + 1 < Q.length; i++) { const L = Math.hypot(Q[i + 1][0] - Q[i][0], Q[i + 1][1] - Q[i][1]); segs.push([tot, L]); tot += L; }
   const along = (d, o) => { let i = 0; while (i < segs.length - 1 && d > segs[i][0] + segs[i][1]) i++; const f = Math.min(1, Math.max(0, (d - segs[i][0]) / segs[i][1]));
     const a = at(i, o), b = at(i + 1, o); return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, Math.atan2(Q[i + 1][1] - Q[i][1], Q[i + 1][0] - Q[i][0])]; };
-  const nearTaavi = d => { const p = along(d, 0); return Math.abs(p[0] + 149) < 9; };
+  const nearT = p => Math.abs(p[0] + 149) < 9;
   const dark = new THREE.MeshLambertMaterial({ color: 0x2a2d30 }), hedge = new THREE.MeshLambertMaterial({ color: 0x3f6b2f }), M4 = new THREE.Matrix4(), Q4 = new THREE.Quaternion(), V3 = new THREE.Vector3(), S3 = new THREE.Vector3(1, 1, 1), UP = new THREE.Vector3(0, 1, 0);
-  const posts = []; for (let d = 1; d < tot - 1; d += 2.2) if (!nearTaavi(d)) posts.push(along(d, 0.25));
+  const posts = []; for (const R of RUN) for (let d = 0.6; d < R.len - 0.5; d += 2.2) { const p = R.at(d, 0.25); if (!nearT(p)) posts.push(p); }
   const pm = new THREE.InstancedMesh(new THREE.BoxGeometry(0.07, 1.05, 0.07), dark, posts.length);
-  posts.forEach((p, k) => pm.setMatrixAt(k, M4.compose(V3.set(p[0], LOW + 0.52, -p[1]), Q4.setFromAxisAngle(UP, p[2]), S3))); if (QUAY_MODEL) scene.add(pm);
-  if (QUAY_MODEL) { const rp = []; for (let i = 0; i + 1 < Q.length; i++) { const a = at(i, 0.25), b = at(i + 1, 0.25); for (const h of [LOW + 1.05, LOW + 0.55]) rp.push(a[0], h, -a[1], b[0], h, -b[1]); }
-    const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); scene.add(new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0x222528 }))); }
-  if (QUAY_MODEL) for (let d = 12; d < tot - 20; d += 40) { if (nearTaavi(d) || nearTaavi(d + 22)) continue;
-    const a = along(d, 5.7), b = along(d + 22, 5.7), mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, L = Math.hypot(b[0] - a[0], b[1] - a[1]);
-    const hm = new THREE.Mesh(new THREE.BoxGeometry(L, 1.0, 1.5), hedge); hm.position.set(mx, LOW + 0.7 + 0.5, -my); hm.rotation.y = -Math.atan2(b[1] - a[1], b[0] - a[0]); scene.add(hm);
-    const bm = new THREE.Mesh(new THREE.BoxGeometry(L + 0.2, 0.5, 1.7), new THREE.MeshLambertMaterial({ color: 0x5c5a56 })); bm.position.set(mx, LOW + 0.7 + 0.1, -my); bm.rotation.y = hm.rotation.y; scene.add(bm); }
+  posts.forEach((p, k) => pm.setMatrixAt(k, M4.compose(V3.set(p[0], ZW + 0.52, -p[1]), Q4.setFromAxisAngle(UP, p[2]), S3))); if (QUAY_MODEL) scene.add(noT(pm));
+  if (QUAY_MODEL) { const rp = []; for (const R of RUN) for (let k = 0; k + 1 < R.r.length; k++) { const a = R.pt(k, 0.25), b = R.pt(k + 1, 0.25); for (const h of [ZW + 1.05, ZW + 0.55]) rp.push(a[0], h, -a[1], b[0], h, -b[1]); }
+    const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); scene.add(noT(new THREE.LineSegments(rg, new THREE.LineBasicMaterial({ color: 0x222528 })))); }
+  if (false) for (const R of RUN) for (let d = 5; d + 22 < R.len - 4; d += 40) {     /* hedges per run on the second step - 20.11.2026 omistaja: "vihertävät osat voidaan rannalta poistaa" */
+    const a = R.at(d, 5.7), b = R.at(d + 22, 5.7); if (nearT(a) || nearT(b)) continue; const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+    const s = R.at(d + 11, 11), tz = ZW + (street(s[0], s[1]) - ZW) * 2 / 4;
+    const hm = new THREE.Mesh(new THREE.BoxGeometry(L, 1.0, 1.5), hedge); hm.position.set(mx, tz + 0.5, -my); hm.rotation.y = -Math.atan2(b[1] - a[1], b[0] - a[0]); scene.add(noT(hm));
+    const bm = new THREE.Mesh(new THREE.BoxGeometry(L + 0.2, 0.5, 1.7), new THREE.MeshLambertMaterial({ color: 0x5c5a56 })); bm.position.set(mx, tz + 0.1, -my); bm.rotation.y = hm.rotation.y; scene.add(noT(bm)); }
   const lampPost = new THREE.MeshLambertMaterial({ color: 0x1f2326 }), lampGlass = new THREE.MeshBasicMaterial({ color: 0xfff3d6 });
-  for (let d = 8; d < tot; d += 22) { const p = along(d, 8.5); const po = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.13, 4.2, 8), lampPost); po.position.set(p[0], 2.1, -p[1]); scene.add(po);
-    const lg = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.16, 0.6, 6), lampGlass); lg.position.set(p[0], 4.45, -p[1]); scene.add(lg);
-    const cp = new THREE.Mesh(new THREE.ConeGeometry(0.33, 0.3, 6), lampPost); cp.position.set(p[0], 4.9, -p[1]); scene.add(cp); }
+  for (const R of RUN) for (let d = Math.min(8, R.len / 2); d < R.len - 2; d += 22) { const p = R.at(d, 9.5), s = R.at(d, 11), z = QUAY_MODEL ? street(s[0], s[1]) : TZs(p[0], p[1]);      /* per run: the lamps stay on the top paving at the jogs */
+    const po = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.13, 4.2, 8), lampPost); po.position.set(p[0], z + 2.1, -p[1]); scene.add(noT(po));
+    const lg = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.16, 0.6, 6), lampGlass); lg.position.set(p[0], z + 4.45, -p[1]); scene.add(noT(lg));
+    const cp = new THREE.Mesh(new THREE.ConeGeometry(0.33, 0.3, 6), lampPost); cp.position.set(p[0], z + 4.9, -p[1]); scene.add(noT(cp)); }
   // pontoon jetties with moored boats
   const pont = new THREE.MeshLambertMaterial({ color: 0x9b9890 }), hullM = new THREE.MeshLambertMaterial({ color: 0xf2f2ee }), cabM = new THREE.MeshLambertMaterial({ color: 0x32404a });
   if (false) for (const f of [64, 159, 249]) {      /* 20.11.2026: replaced by the measured pontoon jetties in ranta/ranta.js */ const p = along(Math.min(tot - 15, f), 0), ang = p[2], nx = -Math.sin(ang), ny = Math.cos(ang);
@@ -1239,6 +1300,7 @@ function gridTop(x, y, x0, y0, st, dy) { const fx = (x - x0) / st, fy = (y - y0)
   const X = a => x0 + a * st, Y = b => y0 + b * st, z00 = TZg(X(i), Y(j)), z10 = TZg(X(i + 1), Y(j)), z11 = TZg(X(i + 1), Y(j + 1)), z01 = TZg(X(i), Y(j + 1));
   return (u >= v ? z00 + (z10 - z00) * u + (z11 - z10) * v : z00 + (z11 - z01) * u + (z01 - z00) * v) + dy; }
 function groundTop(x, y) {
+  if (window.__quayZ) { const q = window.__quayZ(x, y, 8.2); if (q !== null) return q - ROAD.pave; }   // Eteläranta: the hand-built walk and steps (the callers add the pavement height)
   const S = 512, ti = Math.floor((x + 1280) / S), tj = Math.floor((y + 1280) / S), st = 6;   // gridGeo steps exactly 6 m
   return Math.max(TZg(x, y), gridTop(x, y, -HW, YS, 6, 0), gridTop(x, y, -1280 + ti * S, -1280 + tj * S, st, 0.03));
 }
@@ -1383,6 +1445,21 @@ import('./roads.js').then(mod => {
           for (let yy = ya; yy < yb; yy++) for (let xx = xa; xx < xb; xx++) { const gx = Math.floor(xx - x0), gy = Math.floor(yy - y0); if (gx >= 0 && gy >= 0 && gx < nx && gy < ny) M[gy * nx + gx] |= 1; } }
         const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); if (uv) g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.computeVertexNormals(); return g; };
       if (QA.length) add(geo(QA, false), mAsph); if (QK.length && ROAD.mK) add(geo(QK, true), ROAD.mK); ROAD.toriFill = { asph: QA.length, kivi: QK.length }; }
+    /* 20.11.2026 (omistaja: "rakenne yhtenäiseksi ja asfaltti koko alueelle, Porinsiltaa pitää jatkaa"): roads.js leaves Porinsilta's south approach
+       empty for 32 m (the OSM bridge way is longer than the bridge), so the car drove on the photo ground up to the deck. The carriageway (9.2 m) and
+       the pavements on both sides continue from the Eteläranta street to the deck, on the ground that is levelled there (see the bridge humps above). */
+    { const ux = Math.sin(PSIL.head), uy = Math.cos(PSIL.head), wx = uy, wy = -ux, CW = 4.6, HWB = PSIL.half, T0 = -48, T1 = -13.3, STP = 1.5, PA = [], PP = [], PK = [];
+      /* the last 8 m rise onto the deck front (the model's slab: carriageway ~0.1 m, pavements ~0.3 m above psilDeck) */
+      const ramp = (t, s, h) => { const f = Math.max(0, Math.min(1, (t - (T1 - 8)) / 8)); if (!f) return 0; const [x, y] = pt(t, s), tgt = psilDeck(T1) + (Math.abs(s) < CW + 0.01 && h < ROAD.pave ? 0.08 : 0.27); return Math.max(0, tgt - (groundTop(x, y) + h)) * f * f * (3 - 2 * f); };
+      const pt = (t, s) => [PSIL.x + ux * t + wx * s, PSIL.y + uy * t + wy * s];
+      const z = (t, s, h) => { const [x, y] = pt(t, s); return groundTop(x, y) + h + ramp(t, s, h); };
+      for (let t = T0; t < T1 - 0.01; t += STP) { const t2 = Math.min(T1, t + STP);
+        const q = (arr, s0, s1, h) => { for (const [tt, ss] of [[t, s0], [t2, s0], [t2, s1], [t, s0], [t2, s1], [t, s1]]) { const [x, y] = pt(tt, ss); arr.push(x, groundTop(x, y) + h + ramp(tt, ss, h), -y); } };
+        q(PA, -CW, CW, ROAD.asph); q(PP, -HWB, -CW, ROAD.pave); q(PP, CW, HWB, ROAD.pave);
+        for (const sd of [-CW, CW]) { const [ax, ay] = pt(t, sd), [bx, by] = pt(t2, sd); PK.push(ax, z(t, sd, ROAD.pave), -ay, ax, z(t, sd, -0.05), -ay, bx, z(t2, sd, -0.05), -by, ax, z(t, sd, ROAD.pave), -ay, bx, z(t2, sd, -0.05), -by, bx, z(t2, sd, ROAD.pave), -by); } }
+      const mk = A => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(A, 3)); g.computeVertexNormals(); return g; };
+      add(mk(PA), mAsph); add(mk(PP), mPave); add(mk(PK), mKerb);
+      for (let t = T0; t <= T1; t += 0.5) for (let sd = -HWB; sd <= HWB; sd += 0.5) { const [x, y] = pt(t, sd), gx = Math.floor(x - x0), gy = Math.floor(y - y0); if (gx >= 0 && gy >= 0 && gx < nx && gy < ny) M[gy * nx + gx] = Math.abs(sd) < CW ? 2 : 1; } }
   }
   if (R.ow) { const O = dec(R.ow); for (let i = 0; i < O.length; i += 3) ONEWAY.set(O[i] + ',' + O[i + 1], O[i + 2]); }
   if (R.tmv && TREES.move) { const s0 = atob(R.tmv), u8 = new Uint8Array(s0.length); for (let i = 0; i < s0.length; i++) u8[i] = s0.charCodeAt(i); TREES.move(new Int32Array(u8.buffer)); }
@@ -1471,6 +1548,13 @@ function loadModel(name, done) {
     if (Math.hypot(tx + 1942.5, ty - 191.85) < 4.5) LIST.pop(); }   // no tree in the mausoleum doorway (popped after the random draws, so the other trees keep theirs)
   for (const [tx, ty] of [[107.1, 99], [97.2, 101.1], [89.5, 102.8], [81.4, 104.5], [30.5, 116.8]]) { const i = LIST.findIndex(t => Math.hypot(t.x - tx, t.y - ty) < 0.6); if (i >= 0) LIST.splice(i, 1); }      // owner 20.11.2026: no trees (and so no ring benches) on Pohjoiskauppatori, the north edge of the square: "siellä ei ole penkkejä". Taken out after the random draws, so the other trees keep theirs
   LIST.push({ x: 93.3, y: -32.0, k: 0, sc: 1.12, sy: 1.2, rot: 2.1, c: [0.92, 0.94, 0.88], fc: 1 });      // owner 20.11.2026: one more street tree (with its ring bench) on Yrjönkatu between Itäpuisto and Nortamonkatu, in line with the others (2 m east of the centre line); fixed values, so the random draws of the other trees stay as they were
+  // 20.11.2026 (omistaja: "puu pois"): no tree on a bridge deck or on Porinsilta's approaches (OSM / photo trees and the moved street trees landed there)
+  const onBridgeT = t => { const ux = Math.sin(PSIL.head), uy = Math.cos(PSIL.head), dx = t.x - PSIL.x, dy = t.y - PSIL.y, a = dx * ux + dy * uy;
+      if (Math.abs(dx * uy - dy * ux) < PSIL.half + 2 && a > -50 && a < PSIL.len + 20) return true;
+      for (const b of RIV.br) { const P = b.p; for (let i = 0; i + 3 < P.length; i += 2) { const ax = P[i], ay = P[i + 1], ex = P[i + 2] - ax, ey = P[i + 3] - ay, L2 = ex * ex + ey * ey || 1, f = Math.max(0, Math.min(1, ((t.x - ax) * ex + (t.y - ay) * ey) / L2));
+        if (Math.hypot(ax + ex * f - t.x, ay + ey * f - t.y) < b.w / 2 + 1.5) return true; } } return false; };
+  const dropBridgeTrees = () => { for (let n = LIST.length - 1; n >= 0; n--) if (onBridgeT(LIST[n])) LIST.splice(n, 1); };
+  dropBridgeTrees();
   window.__treeList = LIST;      // the ring benches (people on foot: places to sit) stand round these
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), UPV = THREE.Object3D.DEFAULT_UP;
   // far crowns: deciduous = squashed icosahedron on a short trunk, spruce = two stacked cones (about 30 triangles each)
@@ -1505,8 +1589,9 @@ function loadModel(name, done) {
   TREES.move = M => { const by = new Map(); for (let k = 0; k < M.length; k += 3) by.set(M[k], k);
     for (let n = LIST.length - 1; n >= 0; n--) { const t = LIST[n]; if (t.i === undefined || !by.has(t.i)) continue; const k = by.get(t.i);
       if (M[k + 1] === -32768) LIST.splice(n, 1); else { t.x = M[k + 1] / 10; t.y = M[k + 2] / 10; } }
+    dropBridgeTrees();
     last = { x: 1e9, y: 1e9 }; TREES.update(S && S.x !== undefined ? S.x : 70, S && S.y !== undefined ? S.y : 45); };
-  TREES.add = A => { for (let k = 0; k < A.length; k += 2) addTree(A[k] / 10, A[k + 1] / 10, 0, false); last = { x: 1e9, y: 1e9 }; TREES.update(S.x, S.y); };
+  TREES.add = A => { for (let k = 0; k < A.length; k += 2) addTree(A[k] / 10, A[k + 1] / 10, 0, false); dropBridgeTrees(); last = { x: 1e9, y: 1e9 }; TREES.update(S.x, S.y); };
   window.__treesAt = (x, y) => { last = { x: 1e9, y: 1e9 }; TREES.update(x, y); };
   TREES.update(70, 45);
   // trees_extra.js (aerial-photo guesses) removed 13.11.2026: wrong places; to be replaced by trees from MML laser scanning
@@ -1732,6 +1817,7 @@ window.__hallTest = { HALL, inHall, carBlocked: (x, y, yaw) => carBlocked(x, y, 
 // ground under the car: the street surface (asphalt / pavement), bridge decks, the smoothed field elsewhere
 function carGround(x, y) {
   if (onPorinsilta(x, y) !== null) return TZs(x, y) + bridgeZ(x, y);
+  { const qz = window.__quayZ ? window.__quayZ(x, y) : null; if (qz !== null) return qz; }      // Eteläranta's hand-built quay
   if (inRiver(x, y)) return onBridgeDeck(x, y) ? brDeckZ(x, y) ?? Math.max(TZs(x, y), TER.wl + 2.2) : null;
   if (!inCore(x, y)) return TZs(x, y);
   if (inHall(x, y)) return hallZ(x, y);   // parking hall floor (test)
@@ -2130,7 +2216,10 @@ function triZ(T, x, y) {   // highest roof triangle under (x, y), or null
 function roofAt(x, y) {
   const tb = TZs(x, y), l = grid.get(gkey(Math.floor(x / GRID) + 100, Math.floor(y / GRID) + 100));
   let h = onPorinsilta(x, y) !== null ? bridgeZ(x, y) + tb : inRiver(x, y) ? (onBridgeDeck(x, y) ? brDeckZ(x, y) ?? tb : TER.wl) : Math.max(TZg(x, y), tb - 0.5);
-  if (ROAD.on && inCore(x, y) && !inRiver(x, y)) h = Math.max(h, groundTop(x, y) + (ROAD.paveAt(x, y) ? ROAD.pave : ROAD.asph));   // stand on the street surface
+  const qz = window.__quayZ ? window.__quayZ(x, y) : null;      /* 20.11.2026 (omistaja: "pelaaja uppoaa läpi"): the river mask's 4 m cells reach over the lower walk, so the player stood at the water level */
+  if (qz !== null) h = qz;
+  else if (window.__laituriZ) { const lz = window.__laituriZ(x, y); if (lz !== null) h = Math.max(h, lz); }      /* Etelärannan laiturit (ranta/ranta.js) */
+  else if (ROAD.on && inCore(x, y) && !inRiver(x, y)) h = Math.max(h, groundTop(x, y) + (ROAD.paveAt(x, y) ? ROAD.pave : ROAD.asph));   // stand on the street surface
   if (!l) return h;
   for (const bi of l) { const b = blds[bi]; if (x < b.minx - 4 || x > b.maxx + 4 || y < b.miny - 4 || y > b.maxy + 4 || b.h + tb <= h) continue;
     if (b.tris) { for (const p of PROBE) { const z = triZ(b.tris, x + p[0], y + p[1]); if (z !== null && z + tb > h) h = z + tb; } continue; }
