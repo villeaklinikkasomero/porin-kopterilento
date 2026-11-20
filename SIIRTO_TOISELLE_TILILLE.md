@@ -1761,3 +1761,63 @@ tila voi sekoilla). Pysäköityihin autoihin ei edelleenkään voi törmätä. O
 **EI testattu:** ajaminen; kuljettajakameran paikka pakussa (laskettu raportin luvuista, kuvassa näyttää olevan ohjaamossa mutta ei varmistettu ajossa); kevytmallit puhelimella.
 **Tiedossa:** kadulla seisovat autot ovat yhä vanhoja kevytmalleja (cars.js), joten katumaasturi muuttuu lainatessa farmariksi. Kespan lenkin botit kloonaavat
 pelaajan senhetkisen mallin (pakulla ajaessa botitkin ovat pakuja).
+
+---
+
+## 20.11.2026 klo 10 – Polkupyörät parkkiin (c33)
+
+**Tehty (viety koneelle, EI pushattu):**
+- `pyora.js` (mallichatin `porikopteri_pyora.glb`, 5 100 kolmiota; solmut ja ajo-ohje: `tools/props/porikopteri_siirto_pyoraily.md`).
+- `index.html`: lohko `window.__bikes` ennen `window.__game`-riviä. Kaikki pyörät instansseina (yksi InstancedMesh per mallin verkko, rungon `BikePaint` värjätään
+  pyöräkohtaisesti 10 värin paletista, ohjaustanko käännetty satunnaisesti, pieni kallistus). Yhteensä 102 pyörää (kosketuslaitteella n. puolet):
+  - **Tori:** 5 riviä (9 paikkaa, osa tyhjiä) torin reunoilla, vähintään 16 m kopterikentästä.
+  - **SAMK:** kaksi 12 paikan riviä kampuksen Satakunnankadun puoleisen seinän edessä (paikka haetaan rakennuksen pohjasta ulos kohti katua).
+  - **Yksittäiset:** 55 kpl ydinkeskustan jalkakäytävillä talon seinän vieressä seinän suuntaisesti, siemenluku kiinteä (samat paikat joka kerta), ei 14 m lähempänä toisiaan.
+  Paikat lasketaan pelin omista maskeista (`ROAD.paveAt/asphAt`, `bldTopAt`), korkeus maaston nostovarjostimesta kuten pysäköidyillä autoilla.
+
+**Tarkistettu:** headless-kuva (`polkupyorat_20_11.jpg`): torin rivi, yksittäinen pyörä, SAMKin rivit; ei konsolivirheitä.
+**EI testattu:** pelaaminen, suorituskyky puhelimella. Pyöriin ei voi törmätä eikä niitä voi vielä ottaa.
+**Jatko (mallit valmiina omistajalla, zip `porikopteri_pyoraily.zip`):** pyörällä ajo – uusi `porikopteri_hahmo.glb` jossa `Cycle`-animaatio korvaa `hahmo.js`:n,
+pyörän `Crank`/`Wheel_*`/`Steering` ohjeen mukaan; lainaus samalla tavalla kuin autolla (`takeNear`).
+
+---
+
+## 20.11.2026 klo 11 – Pyörällä ajo (c34)
+
+**Tehty (viety koneelle, EI pushattu):**
+- `hahmo.js` korvattu mallichatin uudella hahmolla (animaatiot Cycle, Idle, Run, Sit, Walk; muuten sama). Vanha versio on gitissä.
+- `index.html`: pyörä on neljäs ajettava tyyppi `CARTY.bike` (malli `pyora.js`, ei kevytversiota): autofysiikka pienellä laatikolla (0,85 × 0,28), kiihtyvyys 2,2,
+  huippu 8,5 m/s (n. 30 km/h), kuljettajakamera pään korkeudella, ei savua, moottoriääni lähes pois. `loadCar` hakee myös renkaat `Wheel_F/Wheel_R`.
+- Lainaus: `takeNear` tarjoaa pysäköityä pyörää (`window.__bikes`, < 2 m, "ota pyörä"), instanssi piilotetaan (`__bikes.ims`), väri siirtyy (`BikePaint`).
+  Jätetty pyörä jää kopiona kallelleen ja sen saa takaisin kuten auton.
+- Ajo (`__takeTick(dt)`): kävelijämalli `walkG` asetetaan pyörän päälle ja soittaa `Cycle` (nopeus v/5, rullatessa pysähtyy), `Crank` ja polkimet klipin tahdissa,
+  `Steering.rotation.y = -steer·0,9`, pyörä ja ajaja kallistuvat mutkaan (enintään 0,35 rad). Pyörältä noustaan kuten autosta.
+
+**Tarkistettu:** headless (`pyoraily_20_11.jpg`): lainaus, ajaja satulassa, kallistus; ei konsolivirheitä.
+**EI testattu:** oikea ajaminen (ohjaustangon suunta ja kallistuksen puoli päätelty, ei nähty ajossa); uuden hahmon kävely/juoksu pelissä; Kespan lenkki pyörällä.
+**Tiedossa:** kääntösäde on auton (akseliväli 2,64) eli pyörä kääntyy leveästi; pysähdyksissä ajajan jalat eivät ole maassa (mallissa ei asentoa); törmäys vahingoittaa
+"autoa" samoilla teksteillä; radio näkyy pyörälläkin.
+
+## 20.11.2026 klo 11 – Autot ja ihmiset kiinteiksi (omistaja: "bottien läpi ei kuuluisi päästä kävelemään, eikä myöskään autojen")
+
+**Muutettu:** `index.html` (uusi lohko `SOLID` juuri ennen `carBlocked`ia + viisi koukkua), uusi `tools/solid_test.js`.
+
+- **`SOLID`:** jokainen auto on laatikko (keskipiste, suunta, puolipituus, puolileveys; `DIM` = cars.js:n car0–car3), jokainen kävelijä ympyrä. Lista
+  kootaan kerran / piirretty ruutu (`renderer.info.render.frame`): liikenteen autot (<190 m), kisabotit, pelaajan oma kulkuneuvo, taakse jätetty auto
+  (`TAKE.left`) ja kopteri, pelaaja jalan. Ilmakuvan pysäköidyt autot (`window.__parked`) haetaan 8 m ruudukosta; lainattu (`gone`) ei ole este.
+- **Pelaaja jalan** (`walkHit`, kävelyaskeleen `wf`): ei pääse autoon (0,3 m) eikä kävelijään (0,55 m). Vain lähentävä liike estetään → ei jää jumiin.
+  Jos auto ajaa pelaajan päälle, pelaaja siirtyy sen viereen (`pushOut`).
+- **Pelaajan auto** (`carHit` ← `carBlocked`): ei pääse pysäköidyn auton, taakse jätetyn auton eikä jätetyn kopterin läpi (laatikko–laatikko, SAT;
+  vain lähentävä liike estetään). Kolhu vahingoittaa kuten seinäkin. Liikenteen autot hoitaa edelleen vanha kolmen ympyrän testi.
+- **Kävelijät** (`npcStep`, kutsutaan bottilohkon hahmosilmukasta): liikkuva auto tiellä → odottaa; seisova auto tai pelaaja tiellä → kiertää laatikon
+  kulmien kautta; **pelaajan liikkuva auto tai kisabotti → astuu sivuun** sen tieltä (vyöhyke auton edessä 1,5 m + 0,9 s × nopeus, leveys ±0,75 m
+  kyljestä; 4,5 m/s) ja palaa reitilleen, kun auto on ohi. Autoa ihmiset eivät pysäytä. Jälkeen jäänyt kävelijä ottaa ryhmän kiinni reippaasti
+  kävellen (enint. 1,9 × ryhmän nopeus), ei enää loikkaamalla.
+- **Liikenne** (`cars.update`): auto jarruttaa kaistallaan edessä olevalle ihmiselle (kävelijä tai pelaaja jalan, <30 m, sivusuunnassa <1,4 m kaistan
+  keskeltä) ja pysähtyy 1,6 m ennen. Jos se seisoo ihmisten takia 9 s (`c.wb`), se ajaa 6 s välittämättä → kävelijät väistävät sivuun (ei pysyvää jonoa).
+- **Suojatien reuna:** ryhmä odottaa reunakivellä (enint. 6 s, `p.gw`), jos auto on tulossa yli 2 m/s ja ehtii ylityslinjalle 3 s:ssa (`SOLID.coming`).
+- **Koe:** `node tools/solid_test.js` leikkaa `SOLID`in index.html:stä ja ajaa 26 tarkistusta (kierto, odotus, väistö 3–22 m/s edestä ja takaa, peruutus,
+  pelaajan esteet, pysäköity auto). Kaikki läpi. **EI testattu pelissä** (headless ei pysty `begin()`iin) – omistaja kokeilee.
+- **Tekemättä / tiedossa:** kävelijät eivät väistä toisiaan; polkupyörät (c33) ja patsaat eivät ole esteitä; kopteri ei ole este liikenteelle; pelaajan auto
+  ei pysähdy kävelijään (omistajan toive: botti väistää) – jos kävelijä on seinän ja auton välissä, auto voi yhä mennä läpi; liikenteen auto, joka kääntyy
+  kulmasta pelaajan auton kylkeen, menee yhä läpi (vanha rajoitus).
