@@ -2491,6 +2491,7 @@ function toggleSound() { soundOn = !soundOn; RADIO.mute(); toast(soundOn ? 'Ää
 const DIRS = ['P', 'KO', 'I', 'KA', 'E', 'LO', 'L', 'LU'];
 function step(dt) {
   readInput();
+  if (window.__jump && window.__jump.on) { if (sGain) sGain.gain.value = 0; window.__jump.step(dt); return; }      // parachute jump (laskuvarjo/hyppy.js, 21.11.2026)
   if (window.__plane && window.__plane.on) { if (sGain) sGain.gain.value = 0; window.__plane.step(dt); return; }      // jump plane (lento/lento.js, 20.11.2026)
   if (S.dead > 0) { S.dead -= dt; if (S.dead <= 0) (VEH === 'car' ? resetCar : resetHeli)(); return; }
   if (WALK.on) { stepWalk(dt); return; }
@@ -2603,7 +2604,7 @@ function loadWalker() { if (walkLoading) return; walkLoading = true;
     new GLTFLoader().parse(buf.buffer, '', gl => { const root = gl.scene; root.rotation.y = Math.PI;   // glTF faces +z, the game frame -z
       root.traverse(q => { q.userData.noT = true; if (q.isMesh) { q.frustumCulled = false; q.material.userData.noT = true; if (q.material.map) q.material.map.anisotropy = 4; } });
       walkG.add(root); walkMix = new THREE.AnimationMixer(root); for (const c of gl.animations) walkAct[c.name] = walkMix.clipAction(c);
-      if (walkAct.Idle) { walkAct.Idle.play(); walkCur = 'Idle'; } window.__walker = root; }, () => {}); }).catch(() => { walkLoading = false; }); }
+      if (walkAct.Idle) { walkAct.Idle.play(); walkCur = 'Idle'; } window.__walker = root; window.__walkerClips = gl.animations;      /* the parachute jump (laskuvarjo/hyppy.js) plays its own clips on the same model */ }, () => {}); }).catch(() => { walkLoading = false; }); }
 function loadInterior(P) { if (P.loading) return; P.loading = true;
   import(`./${P.file}.js`).then(K => { const bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
     const lm = new THREE.TextureLoader().load(K.lm); lm.flipY = false; lm.colorSpace = THREE.SRGBColorSpace; lm.channel = 1;
@@ -2654,6 +2655,7 @@ function walkNear() {   // what Enter would do here: 'in' (church door), 'out' (
 }
 function walkAction() {
   if (!started || S.dead > 0 || WALK.busy) return;
+  if (window.__jump && window.__jump.on) { window.__jump.action(); return; }      // parachute jump: Enter / the action button opens the parachute
   if (window.__plane && window.__plane.on) { window.__plane.exitReq(); return; }
   if (!WALK.on) { walkExit(); return; }
   const k = walkNear();
@@ -2744,6 +2746,7 @@ function updateCamera(dt) {
   if (!started) { // slow orbit around the square
     introA += dt * 0.12; camera.position.set(HOME.x + Math.sin(introA) * 210, 120, -HOME.y + Math.cos(introA) * 210); camera.lookAt(HOME.x, 10, -HOME.y); return;
   }
+  if (window.__jump && window.__jump.on) return window.__jump.cam(dt, camMode);      // parachute jump
   if (window.__plane && window.__plane.on) return window.__plane.cam(dt, camMode);      // jump plane: cockpit / chase / top-down
   if (window.__bus && window.__bus.cam(dt)) return;      // riding a live bus
   if (WALK.on) return walkCamera(dt);
@@ -4038,7 +4041,7 @@ $('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.tog
 function walkOutAt(x, y, yaw) {      // leaving the jump plane: on foot beside it (the helicopter / car stays where it was left)
   Object.assign(WALK, { on: true, in: false, x, y, z: carGround(x, y) ?? TZs(x, y), yaw, v: 0, vs: 0 }); document.body.classList.add('walk'); scene.add(walkG); walkG.visible = true; loadWalker(); RADIO.mute();
   camera.near = 0.25; camera.updateProjectionMatrix(); if (camMode === 2) camMode = 0; }
-window.__game = { touchIn, carGround, bldTopAt, fadeDo, toast, walkOutAt, get camMode() { return camMode; }, get actx() { return actx; }, get soundOn() { return soundOn; },
+window.__game = { touchIn, carGround, bldTopAt, fadeDo, toast, walkOutAt, walkG, loadWalker, get camMode() { return camMode; }, get actx() { return actx; }, get soundOn() { return soundOn; },
   world: (x, y) => { if (performance.now() - HR.last > 500) { HR.last = performance.now(); hrUpdate(x, y); TEXLOD.update(x, y); streamUpdate(x, y); TREES.update(x, y); GRASS.update(); } GRASS.tick(performance.now() / 1000); },
   WALK, IN, PLACES, placeDoor, walkAction, sceneIn, door: churchDoor, S, begin, keys, camera, renderer, scene, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
 terrainizeScene(); setInterval(terrainizeScene, 1000);
@@ -4051,5 +4054,7 @@ requestAnimationFrame(frame);
 <script type="module" src="ranta/ranta.js"></script>
 <!-- 20.11.2026: hyppykoneen lentomalli, ohjaus ja mittaristo (lento/lento.js) -->
 <script type="module" src="lento/lento.js"></script>
+<!-- 21.11.2026: laskuvarjohyppy hyppykoneesta (laskuvarjo/hyppy.js; varusteet ja kupu laskuvarjo/laskuvarjo.js) -->
+<script type="module" src="laskuvarjo/hyppy.js"></script>
 </body>
 </html>

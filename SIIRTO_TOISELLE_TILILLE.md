@@ -2124,3 +2124,41 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
   Kattavuuskuva ilmakuvan päällä tehtiin pilvessä (roads.js + river.js rasteroitu): ilmakuvaa näkyi x −45…140 rannan ja kadun välissä.
 - **Ei testattu oikeassa pelissä** – vain erilliset testisivut (holvi, laatat). Kysy omistajalta kuvakaappaus.
 - Seuraavaksi mahdollisesti (omistajan kuvista): metallipenkit, kaksivartiset katuvalot, nupukivikaista, musta pystypinnakaide istuinportaiden yläpuolella, vihreät aurinkovarjot.
+
+## 21.11.2026 – Laskuvarjo päähahmolle ja hypyn kaikki vaiheet (omistaja: "renderöidään päähahmolle laskuvarjo selässä sekä kaikki vaiheet … mahdollisimman uskottava")
+
+**Uutta (EI kytketty peliin; index.html:ään ja lento/lento.js:ään ei koskettu):** kansio `laskuvarjo/` (`laskuvarjo.js`, `varusteet.js`, `esikatselu.html`,
+`README.md`), `hahmo.js`:ään 10 klippiä, `tools/hahmo/varusteet.py`, `tools/hahmo/porikopteri_hahmo.py` (hyppyasennot `Poser`issa), `tools/hahmo/kavely_glb.py` (klipit listassa).
+
+- **Varusteet** (`varusteet.py` → `varusteet.js`, 3 333 pistettä): reppuvaljaat, kantohihnat, rinta-, lantio- ja reisihihnat, 3-rengaslukot, irtipäästötyyny,
+  varavarjon kahva, apuvarjon kahva, avokypärä, lasit, rannekorkeusmittari. Hihnojen reitit ammutaan säteinä hahmon lepoasennon verkkoon ja pisteet
+  perivät osumakohdan luupainot → `SkinnedMesh` sidotaan pelaajan omaan luurankoon ja taipuu vaatteiden mukana kaikissa klipeissä.
+- **Kupu** (`laskuvarjo.js`, proseduraalinen): 9-kennoinen liitovarjo 7,0 × 2,5 m, rivat, vakaajat, 60 kantopunosta haaroineen, ohjauspunokset, liukuri,
+  4 kantohihnaa, apuvarjo, yhdyspunos, sisäpussi. `rig.state.deploy` 0..1 ajaa koko avautumisen; jarrut taivuttavat jättöreunaa; `collapse` kaataa kuvun maahan.
+- **Klipit** (vartalon omassa kehyksessä; koko hahmon asento käännetään juuresta): `JumpDoor`, `JumpExit`, `Freefall`, `Pull`, `Opening`, `Canopy`,
+  `CanopyL`, `CanopyR`, `Flare`, `Land`. Leivottu `kavely_glb.py --add … --clips …`; vanhat klipit tavu tavulta ennallaan (`--check` 0).
+- **Esikatselu:** `/laskuvarjo/esikatselu.html` pelin palvelimelta: 29,5 s aikajana ovelta alastuloon hyppykoneen kanssa. Ajoitukset ja kytkentäohje
+  `laskuvarjo/README.md`:ssä (taulukko: vaihe, klippi, varjon tila, vartalon asento).
+- **Tarkistettu** renderöimällä esikatselu headless 12 kohdasta (kuva omistajalle). **Tekemättä:** kytkentä peliin (hyppy lento.js:n koneesta, putoamisen
+  ja kuvun lentomalli, ohjaus, kamera) – lento.js oli toisen istunnon työn alla, joten tämä tehtiin erillisenä moduulina.
+
+## 21.11.2026 – Laskuvarjohyppy kytketty peliin (hyppy lentävästä hyppykoneesta)
+
+- **Mitä:** hyppykoneesta voi hypätä lennon aikana. Enter (sama näppäin kuin koneesta poistuminen) yli 250 m korkeudessa → hahmo nousee ovelle,
+  hyppää, putoaa vatsa maata kohti (rajanopeus n. 53 m/s), Väli tai Enter heittää apuvarjon, kupu avautuu n. 3,8 s, kuvun alla A / D = ohjauslenkit,
+  S tai Väli = molemmat alas (jarru ja loppuveto), alastulon jälkeen peli jatkuu kävellen laskupaikalta. Alle 250 m korkeudessa Enter antaa ilmoituksen
+  eikä hyppää. Jos varjoa ei avaa, automaattilaukaisin avaa sen 300 m korkeudessa.
+- **Missä:** uusi `laskuvarjo/hyppy.js` (`window.__jump`: `start`, `action`, `step(dt)`, `cam(dt, mode)`; vaiheet `door → exit → fall → pull → open → fly → land`).
+  `index.html`: kolme koukkua (`step()`, `walkAction()`, `updateCamera()` – kaikki muotoa `if (window.__jump && window.__jump.on) …`), `window.__game`iin
+  `walkOutAt, walkG, loadWalker`, `loadWalker` tallettaa `window.__walker` ja `window.__walkerClips`, uusi `<script>` lento.js:n jälkeen.
+  `lento/lento.js`: `P.exitReq` ohjaa ilmassa hyppyyn; uudet `P.leave()` (ohjaamon käyttöliittymä ja ääni pois, ovi auki) ja `P.ghost(dt, pos)`
+  (kone jatkaa suoraan autopilotilla, palaa platalle kun hyppääjä on 2,5 km päässä tai 50 s kuluttua).
+- **Lentomalli:** putoaminen = painovoima + neliöllinen vastus, rajanopeus liukuu 53 → 5 m/s kuvun täyttyessä. Kuvun alla nopeus 10,5 m/s (jarrulla 4,5),
+  vajoaminen 4,6 m/s (jarrulla 2,9; käännöksessä enemmän), loppuveto vähentää vajoamista hetkeksi. Alastulon ilmoitus riippuu vajoamisnopeudesta.
+  Katto tai vesi laskupaikkana → hahmo siirretään lähimpään vapaaseen kohtaan.
+- **Testattu:** headless koko hyppy oikeassa pelissä 1 240 m korkeudesta (ovi 0,9 s → uloshyppy → vapaapudotus → avaus 1 077 m → kupu auki 890 m →
+  käännös → alastulo → kävelytila päällä, kone palannut platalle), ei konsolivirheitä, kuvat joka vaiheesta. `tools/solid_test.js` läpi.
+- **Ei testattu:** pelaaminen oikeilla näppäimillä ja kosketuksella (kosketusnäytöllä ohjaus tulee samoista virtuaalinäppäimistä kuin kävely; ei kokeiltu),
+  ääni, hyppy kopterista (ei tehty), loppuvedon ajoitus käsin (testissä veto tuli liian myöhään → "kova alastulo" 3,7 m/s).
+- **Tiedossa:** kuvun lysähtäessä katon reunalla kangas voi mennä reunan yli. Tuulta ei ole. Varavarjoa ei ole. Kameran tila 1 = hyppääjän silmistä
+  vapaapudotuksessa, tila 2 = ylhäältä.

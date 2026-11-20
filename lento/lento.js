@@ -66,6 +66,7 @@ const P = window.__plane = {
   lights: { nav: false, strobe: false, land: false, beacon: false },
   assist: matchMedia('(pointer:coarse)').matches,      // touch: auto rudder, auto mixture, one-button start
   air: { V: 0, ias: 0, a: 0, b: 0, rho: 1.225, stall: 0, gload: 1, onGround: true, agl: 0, vs: 0 },
+  easy: true,      // helppo ohjaus (8): nuolet kaartavat koordinoidusti, siivet oikenevat
   look: { yaw: 0, pitch: -0.2 }, dead: 0, msg: '', help: false, hornT: 0,
 };
 window.__planeDebug = P;
@@ -272,12 +273,19 @@ function readControls(dt) {
   const ax = (pos, neg) => (pos.some(K) ? 1 : 0) - (neg.some(K) ? 1 : 0);
   // stick: W / Up pushes (nose down), S / Down pulls (nose up); keyboard deflections build up over ~0.4 s and centre when released
   const pitchIn = clamp(ax(['KeyS', 'ArrowDown'], ['KeyW', 'ArrowUp']) - (ti.f || 0), -1, 1);
-  const rollIn = clamp(ax(['KeyD', 'ArrowRight'], ['KeyA', 'ArrowLeft']) + (ti.t || 0), -1, 1);
-  let yawIn = clamp(ax(['KeyE'], ['KeyQ']) + (ti.r || 0), -1, 1);
+  // 20.11.2026 (omistaja: "takalaipan käännökset nuolinäppäimillä"): ← / → kääntävät sivuperäsintä (maassa nokkapyörää) ja helppo ohjaus kallistaa
+  // konetta samaan suuntaan noin 25° (koordinoitu kaarto); kun nuolet päästetään, siivet oikaistaan. A / D ovat yhä siivekkeet suoraan, Q / E peräsin.
+  const turn = ax(['ArrowRight'], ['ArrowLeft']);
+  let rollIn = clamp(ax(['KeyD'], ['KeyA']) + (ti.t || 0), -1, 1);
+  let yawIn = clamp(ax(['KeyE'], ['KeyQ']) + (ti.r || 0) + turn * (P.air.onGround ? 1 : 0.12), -1, 1);
+  if (P.easy && !P.air.onGround && !ax(['KeyD'], ['KeyA']) && !(ti.t || 0)) {
+    const rt = _v.set(1, 0, 0).applyQuaternion(P.q), up = _v2.set(0, 1, 0).applyQuaternion(P.q), roll = Math.atan2(-rt.y, up.y), p = -P.w.z;
+    rollIn = clamp((turn * 0.44 - roll) * 2.2 - p * 0.7, -1, 1); }
   const rate = (cur, tgt, up, dn) => cur + clamp(tgt - cur, -(Math.abs(tgt) < Math.abs(cur) ? dn : up) * dt, (Math.abs(tgt) < Math.abs(cur) ? dn : up) * dt);
   // keys move the controls like hands on a yoke: the elevator builds up ~0.5 of its travel per second held (a short press = a gentle
   // rotation, holding on = full back stick and a stall), ailerons ~0.5 s; touch / analogue input is direct
-  const ana = Math.abs(ti.f || 0) > 0.01; c.ei = ana ? rate(c.ei, pitchIn, 6, 6) : rate(c.ei, pitchIn * (P.air.wload > 3000 ? 0.75 : 1), 0.5, 2.5);      // on the wheels keys give at most half travel (a take-off never needs more) c.ai = rate(c.ai, rollIn, 2.2, 4.5);
+  const ana = Math.abs(ti.f || 0) > 0.01; c.ei = ana ? rate(c.ei, pitchIn, 6, 6) : rate(c.ei, pitchIn * (P.air.wload > 3000 ? 0.75 : 1), 0.5, 2.5);      // on the wheels keys give at most half travel (a take-off never needs more)
+  c.ai = P.easy && !P.air.onGround && !ax(['KeyD'], ['KeyA']) && !(ti.t || 0) ? rate(c.ai, rollIn, 3, 4.5) : rate(c.ai, rollIn, 2.2, 4.5);      // (20.11: this line was inside the comment above, so A / D did nothing)
   if (P.assist && !yawIn) yawIn = clamp(-P.air.b * 4 + (P.air.onGround ? 0 : 0.25 * c.ai), -1, 1);       // touch helper: keeps the ball centred
   c.ri = rate(c.ri, yawIn, 2.5, 3.5);
   c.e = c.ei; c.a = c.ai; c.r = c.ri;
@@ -303,6 +311,7 @@ function readControls(dt) {
     if (code === 'Digit4') { P.lights.beacon = !P.lights.beacon; P.toast('Majakkavalo ' + (P.lights.beacon ? 'päällä' : 'pois'), 1); }
     if (code === 'Digit5') { E.cowl = E.cowl > 0.5 ? 0 : 1; P.toast('Jäähdytysläpät ' + (E.cowl ? 'auki' : 'kiinni'), 1); }
     if (code === 'Digit6') { E.mags = (E.mags + 1) % 4; P.toast('Magneetot: ' + ['POIS', 'R', 'L', 'MOLEMMAT'][E.mags], 1.2); }
+    if (code === 'Digit8') { P.easy = !P.easy; P.toast('Helppo ohjaus ' + (P.easy ? 'päällä: ← → kaartaa, siivet oikenevat itsestään' : 'pois: ← → vain sivuperäsin'), 1.8); }
     if (code === 'Digit9') { P.assist = !P.assist; P.toast('Avustimet ' + (P.assist ? 'päällä (peräsin, seos, käynnistys)' : 'pois'), 1.6); }
     if (code === 'Digit7') { P.strip = !P.strip; P.toast('Mittaripalkki ' + (P.strip ? 'piilossa' : 'näkyvissä'), 1); }
     if (code === 'Digit0') { P.help = !P.help; helpEl().style.display = P.help ? 'block' : 'none'; }
@@ -412,7 +421,8 @@ P.enter = () => { P.on = true; P.look.yaw = 0; P.look.pitch = -0.2; camDir.set(0
   P.toast(P.eng.running ? 'Ohjaamossa – 0 näyttää ohjeet' : 'Ohjaamossa. Käynnistys: O päävirta, L seos rikkaaksi, Space vähän kaasua, pidä I. Ohjeet: 0', 6); };
 P.exitReq = () => {
   const G = gm();
-  if (!P.air.onGround || P.air.V > 1.0) { P.toast('Pysäytä kone ensin', 1.5); return; }
+  if (!P.air.onGround && P.air.agl > 250 && window.__jump) { window.__jump.start(); return; }      // parachute jump (laskuvarjo/hyppy.js, 21.11.2026): Enter in the air above 250 m
+  if (!P.air.onGround || P.air.V > 1.0) { P.toast(P.air.onGround ? 'Pysäytä kone ensin' : 'Hyppy onnistuu yli 250 m korkeudesta – nyt ' + Math.round(P.air.agl) + ' m', 1.8); return; }
   if (P.eng.running) { P.eng.mixture = 0; P.toast('Seos köyhäksi – moottori sammutettu', 1.6); }
   P.ctl.park = true; P.eng.master = false;
   const sd = new V3(1.0, 0, 0).applyQuaternion(P.q).multiplyScalar(-1);      // pilot's door is on the left
@@ -421,6 +431,13 @@ P.exitReq = () => {
   G.walkOutAt(x, y, Math.atan2(fw.x, -fw.z));
 };
 
+// parachute jump (21.11.2026): the player leaves the flying plane. The door opens, the cockpit UI goes, and the plane flies on by itself (P.ghost,
+// called by laskuvarjo/hyppy.js): wings level on its heading at its speed. After 50 s, or 2.5 km from the jumper, it is back on the apron.
+P.leave = () => { P.on = false; ui(false); helpEl().style.display = 'none'; P.help = false; stopSound(); P.ghostOn = true; P.ghostT = 0; if (P.nodes && P.nodes.door) P.nodes.door.rotation.z = -1.5; };
+P.ghost = (dt, jp) => { if (!P.ghostOn) return; P.ghostT += dt; const fw = _v.copy(FWD).applyQuaternion(P.q), yaw = Math.atan2(P.vel.x, -P.vel.z), sp = Math.max(36, Math.hypot(P.vel.x, P.vel.z));
+  P.vel.set(Math.sin(yaw) * sp, P.vel.y * Math.exp(-dt * 1.5), -Math.cos(yaw) * sp); P.pos.addScaledVector(P.vel, dt); P.q.slerp(_q.setFromAxisAngle(_v2.set(0, 1, 0), -yaw), Math.min(1, dt * 1.5)); P.w.set(0, 0, 0); place(dt);
+  if (P.ghostT > 50 || (jp && Math.hypot(jp.x - P.pos.x, jp.z - P.pos.z) > 2500)) { P.ghostOn = false; if (P.nodes && P.nodes.door) P.nodes.door.rotation.z = 0; resetToPark(); } };
+
 /* ---------------------------------------------------------------- HUD: instrument strip (outside views), help, touch buttons */
 let hudEl = null, hudCv = null, helpDiv = null, tbtn = null;
 P.toast = (m, s) => { const G = gm(); if (G && G.toast) G.toast(m, s); };
@@ -428,7 +445,7 @@ function helpEl() {
   if (helpDiv) return helpDiv;
   helpDiv = document.createElement('div'); helpDiv.id = 'planehelp';
   helpDiv.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(10,16,22,.88);color:#e8eef2;font:14px/1.45 system-ui,sans-serif;padding:16px 22px;border-radius:12px;z-index:60;display:none;max-width:640px;columns:2;column-gap:28px;pointer-events:none';
-  const rows = [['Ohjaus', ''], ['W / S, ↑ / ↓', 'sauva eteen / taakse'], ['A / D, ← / →', 'kallistus (siivekkeet)'], ['Q / E', 'sivuperäsin ja nokkapyörä'], ['B', 'jarrut (pidä)'], ['P', 'seisontajarru'],
+  const rows = [['Ohjaus', ''], ['W / S, ↑ / ↓', 'sauva eteen / taakse'], ['← / →', 'kaarto: sivuperäsin + kallistus (maassa nokkapyörä)'], ['A / D', 'kallistus (siivekkeet)'], ['Q / E', 'sivuperäsin ja nokkapyörä'], ['8', 'helppo ohjaus päälle / pois'], ['B', 'jarrut (pidä)'], ['P', 'seisontajarru'],
     ['Moottori', ''], ['Space / Shift', 'kaasu lisää / vähemmän'], ['X / Z', 'potkurin kierrokset + / −'], ['L / K', 'seos rikkaampi / laihempi'], ['H', 'kaasuttimen lämmitys'], ['O', 'päävirta'], ['6', 'magneetot'], ['I', 'käynnistin (pidä)'],
     ['Lentäminen', ''], ['G / V', 'laipat alas / ylös (10°)'], ['U / J', 'trimmi nokka ylös / alas'], ['1 2 3 4', 'navi, strobo, laskuvalo, majakka'], ['5', 'jäähdytysläpät'], ['9', 'avustimet'], ['C', 'kamera (ohjaamo, ulko, ylhäältä)'], ['7', 'mittaripalkki ulkokamerassa'], ['Hiiri', 'katsele ohjaamossa'], ['Enter', 'poistu (kone pysähdyksissä)'],
     ['Lentoonlähtö', ''], ['', 'Laipat 10–20°, trimmi lentoonlähtöön, kaasu täysille, oikeaa peräsintä. Nokka ylös 50 kt, nousu 70–80 kt. Laskeutuminen 65–70 kt laipat 30–40°.']];

@@ -16,7 +16,9 @@ from math import sin, cos, pi, radians, acos, sqrt
 from mathutils import Vector, Matrix, Quaternion
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CLIPS = (("Idle", 90, "idle"), ("Walk", 30, "walk"), ("Run", 20, "run"), ("Sit", 30, "sit"), ("Chair", 180, "chair"), ("Dance", 60, "dance"), ("Dance2", 60, "dance2"))      # Dance: 4 iskua = 2 s (120 BPM); peli skaalaa tahdin
+CLIPS = (("Idle", 90, "idle"), ("Walk", 30, "walk"), ("Run", 20, "run"), ("Sit", 30, "sit"), ("Chair", 180, "chair"), ("Dance", 60, "dance"), ("Dance2", 60, "dance2"),
+         ("JumpDoor", 90, "jump_door"), ("JumpExit", 36, "jump_exit"), ("Freefall", 60, "freefall"), ("Pull", 48, "pull"), ("Opening", 72, "opening"),
+         ("Canopy", 120, "canopy"), ("CanopyL", 30, "canopy_l"), ("CanopyR", 30, "canopy_r"), ("Flare", 30, "flare"), ("Land", 48, "land"))      # Dance: 4 iskua = 2 s (120 BPM); peli skaalaa tahdin
 FPS = 30
 
 def load_poser():

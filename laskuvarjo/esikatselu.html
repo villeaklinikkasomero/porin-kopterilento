@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fi"><head><meta charset="utf-8"><title>Laskuvarjohyppy – esikatselu</title><meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  html, body { margin: 0; height: 100%; background: #0d1620; color: #eef2f5; font: 14px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; }
+  #top { position: fixed; left: 18px; top: 14px; max-width: min(560px, 80vw); text-shadow: 0 1px 3px rgba(0,0,0,.7); pointer-events: none; }
+  #top h1 { margin: 0 0 4px; font-size: 20px; font-weight: 650; } #top p { margin: 0; opacity: .92; }
+  #bar { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 16px 14px; background: linear-gradient(transparent, rgba(6,12,18,.85) 40%); display: flex; flex-direction: column; gap: 8px; }
+  #row { display: flex; gap: 10px; align-items: center; } #t { flex: 1; } #clock { min-width: 86px; text-align: right; font-variant-numeric: tabular-nums; }
+  button { font: inherit; color: inherit; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); border-radius: 8px; padding: 6px 11px; cursor: pointer; }
+  button:hover, button.on { background: rgba(237,184,26,.28); border-color: #edb81a; } #ph { display: flex; gap: 6px; flex-wrap: wrap; }
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="top"><h1 id="name">Ladataan…</h1><p id="desc"></p></div>
+<div id="bar"><div id="ph"></div><div id="row"><button id="play">⏸</button><input id="t" type="range" min="0" max="29.5" step="0.01" value="0"><span id="clock"></span><button id="orbit" title="Kierrä kameraa hiirellä vetämällä">kamera: ohjattu</button></div></div>
+<script type="module">
+// Laskuvarjohypyn kaikki vaiheet yhtenä aikajanana (20.11.2026). Avaa pelin kansiosta paikallisen palvelimen kautta: /laskuvarjo/esikatselu.html
+// Sama data kuin pelissä: ../hahmo.js (klipit JumpDoor … Land), ./laskuvarjo.js (varusteet + kupu), ../hyppykone_m.js (jos löytyy).
+import * as THREE from '../three.module.min.js'; import { GLTFLoader } from '../GLTFLoader.js'; import { makeRig } from './laskuvarjo.js';
+const $ = id => document.getElementById(id), ease = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x), seg = (x, a, b) => Math.max(0, Math.min(1, (x - a) / (b - a))), lerp = (a, b, t) => a + (b - a) * t;
+const glb = async f => { const K = await import('../' + f), bin = atob(K.default), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i); return new Promise((res, rej) => new GLTFLoader().parse(buf.buffer, '', res, rej)); };
+const renderer = new THREE.WebGLRenderer({ canvas: $('c'), antialias: true, preserveDrawingBuffer: true }); renderer.setPixelRatio(Math.min(2, devicePixelRatio));
+const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(42, 1, 0.1, 9000); scene.fog = new THREE.Fog(0xa9c6e2, 900, 7000);
+{ const g = new THREE.SphereGeometry(8000, 24, 12), c = [], A = new THREE.Color(0x3f77c2), B = new THREE.Color(0xcfe0ee); for (let i = 0; i < g.attributes.position.count; i++) { const y = g.attributes.position.getY(i) / 8000, k = new THREE.Color().copy(B).lerp(A, Math.max(0, y) ** 0.6); c.push(k.r, k.g, k.b); }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(c, 3)); const sky = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false })); scene.add(sky); scene.userData.sky = sky; }
+scene.add(new THREE.HemisphereLight(0xdfeeff, 0x7d8a6e, 2.1)); const sun = new THREE.DirectionalLight(0xfff3df, 2.4); sun.position.set(-0.5, 1, 0.35); scene.add(sun);
+{ const cv = document.createElement('canvas'); cv.width = cv.height = 512; const g = cv.getContext('2d'); let s = 7; const r = () => (s = (s * 16807) % 2147483647) / 2147483647;      // maa: peltotilkkuja
+  for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { const k = r(); g.fillStyle = k < 0.35 ? '#6f8f4e' : k < 0.6 ? '#88a05a' : k < 0.8 ? '#b9ad6e' : k < 0.92 ? '#4f7340' : '#8d8a80'; g.fillRect(x * 64, y * 64, 64, 64); }
+  g.strokeStyle = 'rgba(60,60,55,.5)'; g.lineWidth = 3; g.strokeRect(0, 0, 512, 512); g.beginPath(); g.moveTo(0, 200); g.lineTo(512, 240); g.stroke();
+  const t = new THREE.CanvasTexture(cv); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(14, 14); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  const gr = new THREE.Mesh(new THREE.PlaneGeometry(14000, 14000), new THREE.MeshLambertMaterial({ map: t })); gr.rotation.x = -Math.PI / 2; scene.add(gr); scene.userData.ground = gr; }
+
+const G = new THREE.Group(), pivot = new THREE.Group(), inner = new THREE.Group(), PIV = 1.22; scene.add(G); G.add(pivot); pivot.add(inner); inner.position.y = -PIV;      // G = rintakehän paikka, pivot = vartalon asento
+const gl = await glb('hahmo.js'); inner.add(gl.scene); gl.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
+const rig = makeRig(gl.scene); scene.add(rig.canopy); rig.wear(true);
+const mix = new THREE.AnimationMixer(gl.scene), act = {}; for (const c of gl.animations) { const a = mix.clipAction(c); a.play(); a.setEffectiveWeight(0); act[c.name] = a; }
+let plane = null; try { const p = await glb('hyppykone_m.js'); plane = new THREE.Group(); plane.add(p.scene); scene.add(plane); plane.userData.prop = p.scene.getObjectByName('propeller'); plane.userData.door = p.scene.getObjectByName('door'); p.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; }); } catch (e) { console.warn('hyppykonetta ei ladattu', e); }
+
+// ---------- aikajana ----------
+const PH = [[0, 'Ovella', 'Kone on hyppylinjalla noin 1 200 metrissä. Hyppääjä kyykyssä avoimella ovella: reppuvaljaat, kypärä, lasit ja korkeusmittari vasemmassa ranteessa.'],
+  [3, 'Uloshyppy', 'Ponnistus ovelta ulos ja vartalo kaarelle. Ilmavirta kääntää hyppääjän vatsa maata kohti.'],
+  [4.2, 'Vapaapudotus', 'Boksiasento: lantio alimpana, selkä kaarella, kädet ja jalat koukussa. Nopeus noin 190 km/h.'],
+  [10, 'Avaus', 'Oikea käsi hakee apuvarjon kahvan repun alakulmasta ja heittää apuvarjon sivulle ilmavirtaan. Vasen käsi pään yläpuolelle tasapainoksi.'],
+  [10.99, 'Avautuminen', 'Apuvarjo täyttyy ja kiristää yhdyspunoksen, sisäpussi nousee repusta, punokset purkautuvat suoriksi, kupu tulee pussista ja kennot täyttyvät. Liukuri valuu punoksia pitkin alas ja jarruttaa avautumista.'],
+  [15.2, 'Kuvun alla', 'Kupu on auki ja liukuri alhaalla. Ohjauslenkit irrotetaan kantohihnoista: veto vasemmasta kääntää vasemmalle, oikeasta oikealle.'],
+  [23, 'Loppulähestyminen', 'Vastatuuleen, kädet ylhäällä täydellä liidolla. Jalat yhdessä, katse horisontissa.'],
+  [25, 'Loppuveto ja alastulo', 'Molemmat ohjauslenkit vedetään tasaisesti alas: kupu jarruttaa ja vajoaminen pysähtyy. Jalat ottavat vastaan, kupu kaatuu taakse.']];
+const TEND = 29.5, TD = 10.99, DDUR = 4.2, V3 = THREE.Vector3;
+const J = new V3(), camOff = new V3(), camLook = new V3(), tmp = new V3();
+const SHOTS = [[0, [-4.6, 0.9, 2.2], [0, 0.1, 0]], [3.4, [-5.2, 0.4, 2.6], [0, 0, 0]], [4.6, [3.6, 1.6, 4.6], [0, 0, 0]], [9.6, [-2.6, 3.0, -3.6], [0, 0, 0.2]], [11.4, [-3.4, 1.2, -5.5], [0, 1.2, 0]], [12.6, [9, -2.5, 12], [0, 3.2, 0]],
+  [15.4, [8, 0.5, 13.5], [0, 2.9, 0]], [22.9, [8, 0.5, 13.5], [0, 2.9, 0]], [23.0, [9, -0.2, 12], [0, 2.8, 0]], [26.2, [9.5, 0.4, 12.5], [0, 1.6, -1.5]], [29.5, [10, 0.8, 13], [0, 1.2, -2]]];
+let orbit = null;
+function state(t) {
+  const w = {}, set = (n, k, tm) => { if (k > 0) w[n] = [k, tm]; };
+  // animaatiot
+  const pullT = seg(t, 10, 11.6), dep = seg(t, TD, TD + DDUR), opT = seg(t, TD + DDUR * 0.33, TD + DDUR * 0.33 + 2.4), land = seg(t, 26, 27.6);
+  const turnL = ease(seg(t, 17, 17.7)) * (1 - ease(seg(t, 19, 19.7))), turnR = ease(seg(t, 20, 20.7)) * (1 - ease(seg(t, 22, 22.7))), flare = ease(seg(t, 25.0, 25.75));
+  if (t < 3) set('JumpDoor', 1, t % 3);
+  else if (t < 4.2) set('JumpExit', 1, Math.min(1.199, t - 3));
+  else if (t < 10) set('Freefall', 1, (t - 4.2) % 2);
+  else if (t < 11.6) set('Pull', 1, Math.min(1.599, t - 10));
+  else if (opT <= 0) set('Freefall', 1, (t - 11.6) % 2);
+  else if (opT < 1) set('Opening', 1, Math.min(2.399, opT * 2.4));
+  else if (t < 26) { const c = Math.max(0, 1 - turnL - turnR - flare); set('Canopy', c, (t - 15) % 4); set('CanopyL', turnL, 0.5); set('CanopyR', turnR, 0.5); set('Flare', flare, 0.5); }
+  else set('Land', 1, Math.min(1.599, (t - 26)));
+  // korkeus (jalkojen korkeus maasta). Irti koneesta 3,42 s; 50 m/s kolmen sekunnin jälkeen; punokset suorina TO; leikkaus 23 s kohdalla loppulähestymiseen
+  const TO = TD + 1.4, fall = f => f < 3 ? 4.6 * f * f : 41.4 + (f - 3) * 50, A0 = 1200 - fall(TO - 3.42); let alt;
+  if (t < 3.42) alt = 1200; else if (t < TO) alt = 1200 - fall(t - 3.42);
+  else if (t < 23) { const f = t - TO, k = Math.min(f, 2.2); alt = A0 - (50 * k - 45 * k * k / 4.4) - Math.max(0, f - 2.2) * 5; }      // kupu jarruttaa 50 -> 5 m/s
+  else if (t < 25) alt = 4.6 + (25 - t) * 4.6; else if (t < 26) { const f = t - 25; alt = 4.6 * (1 - f) * (1 - 0.55 * f); } else alt = 0;                // loppuveto pysäyttää vajoamisen
+  // vartalon asento: pitch 0 = pysty, 90° = vatsa maata kohti
+  let pitch = 0; if (t >= 3 && t < 4.2) pitch = ease(seg(t, 3.25, 4.2)) * 1.45; else if (t >= 4.2) pitch = lerp(1.5, 0, ease(seg(dep, 0.33, 0.56)));
+  if (dep > 0.5 && dep < 1) pitch += 0.22 * Math.sin((dep - 0.5) * 16) * (1 - dep) * 2;                                      // heilahdus kuvun alle
+  const roll = 0.42 * (turnL - turnR) + (t >= 4.2 && t < 10 ? 0.03 * Math.sin(t * 2.3) : 0), yaw = 0;
+  return { w, alt, pitch, roll, dep, pc: t < 10 + 1.6 * 0.40 ? 'stowed' : t < TD ? 'hand' : 'out', bl: Math.max(turnL * 0.72, flare), br: Math.max(turnR * 0.72, flare), toggles: t > 15.6 && t < 26.7, collapse: ease(seg(t, 26.15, 28.7)), land };
+}
+function apply(t) {
+  const s = state(t); for (const n in act) { const a = act[n], k = s.w[n]; a.setEffectiveWeight(k ? k[0] : 0); if (k) a.time = k[1]; } mix.update(0);
+  const e = ease(seg(t, 3.3, 4.2));                                                    // ovella kääntöpiste on jaloissa, ilmassa rintakehässä
+  G.position.set(-1.5 * ease(seg(t, 3.3, 4.2)), s.alt + PIV * e, 0); inner.position.y = -PIV * e;
+  pivot.rotation.set(t >= 26 ? 0 : s.pitch, 0, 0); G.rotation.set(0, lerp(-Math.PI / 2, 0, ease(seg(t, 3.5, 4.2))), s.roll);      // ovella kasvot ulos koneen oikealle sivulle
+  if (plane) { const f = Math.max(0, t - 3); plane.visible = t < 9; plane.position.set(0.42, 1200 - 0.96, -0.15 + f * 34); if (plane.userData.door) plane.userData.door.rotation.z = -1.5; if (plane.userData.prop) plane.userData.prop.rotation.z = t * 37; }
+  rig.state.pc = s.pc; rig.state.deploy = s.dep; rig.state.brakeL = s.bl; rig.state.brakeR = s.br; rig.state.toggles = s.toggles; rig.state.collapse = s.collapse;
+  scene.updateMatrixWorld(true); if (s.pc === 'out' && !rig._rel) rig.throwPilot(); if (s.pc !== 'out') rig._rel = null;
+  rig.canopy.rotation.set(0, 0, s.roll * 0.9); rig.update(t);
+  // kamera
+  J.setFromMatrixPosition(pivot.matrixWorld); let i = 0; while (i < SHOTS.length - 2 && SHOTS[i + 1][0] <= t) i++; const a = SHOTS[i], b = SHOTS[i + 1], k = t >= 22.95 && t < 23.05 ? (t < 23 ? 0 : 1) : ease(seg(t, a[0], Math.min(b[0], a[0] + 1.6) > a[0] ? Math.max(a[0] + 0.01, b[0] - 0.0) : b[0]));
+  const kk = ease(seg(t, b[0] - Math.min(1.4, b[0] - a[0]), b[0])); camOff.set(...a[1]).lerp(tmp.set(...b[1]), kk); camLook.set(...a[2]).lerp(tmp.set(...b[2]), kk);
+  if (orbit) { const r = camOff.length(); camOff.set(r * Math.cos(orbit.el) * Math.sin(orbit.az), r * Math.sin(orbit.el), r * Math.cos(orbit.el) * Math.cos(orbit.az)).multiplyScalar(orbit.zoom); }
+  camera.position.copy(J).add(camOff); if (camera.position.y < 0.4) camera.position.y = 0.4; camera.lookAt(tmp.copy(J).add(camLook));
+  scene.userData.sky.position.copy(camera.position); scene.userData.ground.position.set(camera.position.x, 0, camera.position.z); scene.userData.ground.material.map.offset.set(camera.position.x / 1000, -(camera.position.z + (t < 23 ? t * 30 : t * 6)) / 1000);
+  $('t').value = t;  let p = PH[0]; for (const q of PH) if (q[0] <= t) p = q; $('name').textContent = p[1]; $('desc').textContent = p[2]; $('clock').textContent = t.toFixed(1) + ' s · ' + Math.round(Math.max(0, G.position.y - PIV)) + ' m';
+  document.querySelectorAll('#ph button').forEach(bn => bn.classList.toggle('on', bn.dataset.t == p[0]));
+  renderer.render(scene, camera);
+}
+const fit = () => { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }; addEventListener('resize', () => { fit(); apply(T); }); fit();
+let T = 0, playing = true, last = performance.now();
+for (const p of PH) { const b = document.createElement('button'); b.textContent = p[1]; b.dataset.t = p[0]; b.onclick = () => { T = p[0] + 0.001; $('t').value = T; apply(T); }; $('ph').appendChild(b); }
+$('play').onclick = () => { playing = !playing; $('play').textContent = playing ? '⏸' : '▶'; }; $('t').oninput = e => { T = +e.target.value; apply(T); };
+$('orbit').onclick = () => { orbit = orbit ? null : { az: 0.6, el: 0.15, zoom: 1 }; $('orbit').textContent = orbit ? 'kamera: vapaa (vedä)' : 'kamera: ohjattu'; apply(T); };
+let drag = null; $('c').addEventListener('pointerdown', e => { if (orbit) drag = [e.clientX, e.clientY]; }); addEventListener('pointerup', () => drag = null);
+addEventListener('pointermove', e => { if (!drag || !orbit) return; orbit.az -= (e.clientX - drag[0]) * 0.008; orbit.el = Math.max(-1.3, Math.min(1.4, orbit.el + (e.clientY - drag[1]) * 0.006)); drag = [e.clientX, e.clientY]; apply(T); });
+$('c').addEventListener('wheel', e => { if (orbit) { orbit.zoom = Math.max(0.3, Math.min(4, orbit.zoom * (e.deltaY > 0 ? 1.1 : 0.9))); apply(T); } });
+function loop(now) { const dt = Math.min(0.1, (now - last) / 1000); last = now; if (playing) { T += dt; if (T > TEND) T = 0; $('t').value = T; apply(T); } requestAnimationFrame(loop); }
+window.__lv = { apply, rig, state, scene, camera, renderer, setOrbit: o => { orbit = o; }, ready: true }; apply(0); requestAnimationFrame(loop);
+</script></body></html>

@@ -932,6 +932,194 @@ class Poser:
         hip = H["pelvis"] + qp @ (H["thigh_l"] - H["pelvis"])
         return self.common(P, 26), Vector((0.0, 0.0, 0.075 - hip.z))
 
+    # ------------------------------------------------------------------------------------------------------------------
+    # LASKUVARJOHYPPY (20.11.2026): asennot ovat vartalon omassa kehyksessa (Z = paata kohti, -Y = vatsan puoli). Koko hahmon asento
+    # (vatsa maata kohti vapaapudotuksessa, pysty kuvun alla) tehdaan pelissa / esikatselussa juurisolmua kaantamalla.
+    # Klipit: JumpDoor (kyykky ovella), JumpExit (ponnistus), Freefall (boksi), Pull (apuvarjon heitto), Opening (avautuminen),
+    # Canopy (ohjauslenkit ylhaalla), CanopyL / CanopyR (kaannos), Flare (loppuveto), Land (alastulo).
+    def _arm2(self, P, sd, s, u, f):
+        """Olkavarsi suuntaan u ja kyynarvarsi suuntaan f (rintakehan kehyksessa, x = vartalosta ulospain kerrotaan s:lla)."""
+        u = Vector((s * u[0], u[1], u[2])).normalized()
+        f = Vector((s * f[0], f[1], f[2])).normalized()
+        q = self.dU[s].rotation_difference(u)
+        P["upperarm_" + sd] = q
+        P["lowerarm_" + sd] = self.dF[s].rotation_difference(q.inverted() @ f)
+
+    @staticmethod
+    def _mix(A, B, w):
+        w = clamp(w)
+        w = w * w * (3 - 2 * w)
+        out = {}
+        for k in set(A) | set(B):
+            out[k] = A.get(k, Quaternion()).slerp(B.get(k, Quaternion()), w)
+        return out
+
+    @staticmethod
+    def _lerp3(a, b, w):
+        return tuple(a[i] + (b[i] - a[i]) * w for i in range(3))
+
+    def _legs_free(self, P, hip, knee, spread, foot, n=0.0):
+        for sd, s in (("l", 1), ("r", -1)):
+            P["thigh_" + sd] = Q(X, -hip + n * s) @ Q(Y, -s * spread)
+            P["calf_" + sd] = Q(X, knee - n * s)
+            P["foot_" + sd] = Q(X, foot)
+
+    def _p_box(self, t=0.0):
+        """Vapaapudotuksen perusasento (boksi): lantio alimpana, selka kaarella, kadet 90 asteen kulmissa, polvet koukussa."""
+        b, b2 = sin(2 * pi * t), sin(4 * pi * t + 1.0)
+        P = {"pelvis": Q(X, -6), "spine_01": Q(X, -9), "spine_02": Q(X, -9), "spine_03": Q(X, -7 + 0.6 * b2), "neck_01": Q(X, -10), "head": Q(X, -13 + 1.0 * b)}
+        self._legs_free(P, -16, 52 + 1.5 * b2, 13, 22, 1.2 * b)
+        for sd, s in (("l", 1), ("r", -1)):
+            self._arm2(P, sd, s, (0.93, 0.30 + 0.02 * b * s, 0.16), (0.16, 0.26 + 0.03 * b2 * s, 0.95))
+            P["hand_" + sd] = Q(X, -8)
+        return self.common(P, 8)
+
+    def _p_toggle(self, bl, br, t=0.0):
+        """Roikkuu valjaissa kuvun alla, kadet ohjauslenkeissa: 0 = ylhaalla, 0.5 = olkapaan tasolla, 1 = taysi jarru lantiolla."""
+        b = sin(2 * pi * t)
+        lean = 7.0 * (bl - br)
+        P = {"pelvis": Q(X, 8) @ Q(Y, lean * 0.5), "spine_01": Q(X, -3), "spine_02": Q(Y, -lean * 0.3), "spine_03": Q(X, -2),
+             "neck_01": Q(X, -4), "head": Q(X, -3 + 1.5 * b) @ Q(Z, -2.5 * lean)}
+        for sd, s, k in (("l", 1, bl), ("r", -1, br)):
+            P["thigh_" + sd] = Q(X, -24 - 6 * max(bl, br) + 1.5 * b * s) @ Q(Y, s * 3)
+            P["calf_" + sd] = Q(X, 34 - 12 * max(bl, br) - 1.5 * b * s)
+            P["foot_" + sd] = Q(X, 12)
+            U = ((0.40, -0.24, 0.89), (0.36, -0.22, -0.90), (0.20, 0.03, -0.98))
+            F = ((0.07, -0.12, 0.99), (0.02, -0.45, 0.89), (0.12, -0.10, -0.99))
+            if k < 0.5:
+                u, f = self._lerp3(U[0], U[1], k * 2), self._lerp3(F[0], F[1], k * 2)
+                if 0.05 < k < 0.45:                        # kyynarpaa kiertaa sivukautta, ei vartalon lapi
+                    u = (u[0] + 0.55 * sin(pi * k * 2), u[1], u[2])
+            else:
+                u, f = self._lerp3(U[1], U[2], k * 2 - 1), self._lerp3(F[1], F[2], k * 2 - 1)
+                f = (f[0], f[1] - 0.5 * sin(pi * (k * 2 - 1)), f[2])
+            self._arm2(P, sd, s, u, f)
+        return self.common(P, 62)                          # nyrkki lenkin ymparilla
+
+    def _p_crouch(self):
+        """Kyykky koneen ovella: paino paikioilla, ylavartalo eteen, kadet ovenpielissa."""
+        P = {"spine_01": Q(X, 14), "spine_02": Q(X, 12), "spine_03": Q(X, 8), "neck_01": Q(X, -12), "head": Q(X, -14)}
+        for sd, s in (("l", 1), ("r", -1)):
+            self._arm2(P, sd, s, (0.38, -0.80, -0.45), (0.10, -0.92, 0.38))
+        return self.common(P, 50)
+
+    def _crouch_legs(self, P, drop, lean, heel):
+        qp = Q(X, lean)
+        off = Vector((0.0, 0.02, -drop * self.k))
+        P["pelvis"] = qp
+        H = self.H
+        bf, bd = self.ball
+        c_, s_ = cos(radians(-heel)), sin(radians(-heel))
+        for sd, s in (("l", 1), ("r", -1)):
+            A = Vector((s * 0.15 * self.k, H["foot_" + sd].y - (bf * (1 - c_) - bd * s_), self.ank_h - bf * s_ + bd * (c_ - 1)))
+            hip = H["pelvis"] + off + qp @ (H["thigh_" + sd] - H["pelvis"])
+            self._leg(P, sd, s, qp, hip, A, -heel, 10, 0.25)
+            P["ball_" + sd] = Q(X, -clamp(heel, 0.0, 50.0))
+        return off
+
+    def jump_door(self, t):
+        b = sin(2 * pi * t)
+        P = self._p_crouch()
+        P["spine_03"] = Q(X, 8 + 0.8 * b)
+        P["head"] = Q(X, -14) @ Q(Z, 10 * sin(2 * pi * t + 0.6))   # vilkaisee ulos
+        off = self._crouch_legs(P, 0.40 + 0.006 * b, 22, 24)
+        return P, off
+
+    def jump_exit(self, t):
+        """Ponnistus ovelta: kyykysta ojennukseen ja siita boksiin (0.45 kohdalla jalat irtoavat; siita eteenpain peli liikuttaa hahmoa)."""
+        if t < 0.45:
+            w = t / 0.45
+            P = self._p_crouch()
+            off = self._crouch_legs(P, 0.40 * (1 - w * w) , 22 - 30 * w, 24 + 22 * w)
+            for sd, s in (("l", 1), ("r", -1)):
+                self._arm2(P, sd, s, self._lerp3((0.38, -0.80, -0.45), (0.85, -0.10, 0.50), w), self._lerp3((0.10, -0.92, 0.38), (0.35, 0.05, 0.93), w))
+            return P, off
+        A = self._p_crouch()
+        self._crouch_legs(A, 0.0, -8, 46)
+        for sd, s in (("l", 1), ("r", -1)):
+            self._arm2(A, sd, s, (0.85, -0.10, 0.50), (0.35, 0.05, 0.93))
+        return self._mix(A, self._p_box(0.0), (t - 0.45) / 0.55), Vector((0.0, 0.0, 0.0))
+
+    def freefall(self, t):
+        return self._p_box(t), Vector((0.0, 0.0, 0.0))
+
+    def pull(self, t):
+        """Avaus: oikea kasi hakee apuvarjon kahvan repun alakulmasta ja heittaa sen sivulle, vasen kasi paan ylle tasapainoksi."""
+        box = self._p_box(0.0)
+        reach = dict(box)
+        self._arm2(reach, "r", -1, (0.30, 0.62, -0.72), (-0.42, 0.55, -0.72))
+        self._arm2(reach, "l", 1, (0.62, 0.12, 0.78), (-0.42, 0.18, 0.89))
+        reach["spine_03"] = Q(X, -7) @ Q(Z, -7)
+        reach["head"] = Q(X, -13) @ Q(Z, 6)
+        throw = dict(box)
+        self._arm2(throw, "r", -1, (0.96, 0.24, -0.14), (0.97, 0.22, -0.10))
+        self._arm2(throw, "l", 1, (0.62, 0.12, 0.78), (-0.42, 0.18, 0.89))
+        throw["spine_03"] = Q(X, -7) @ Q(Z, 5)
+        for d in (reach, throw):
+            d.update(self.common({}, 55))
+        if t < 0.34:
+            P = self._mix(box, reach, t / 0.34)
+        elif t < 0.46:
+            P = reach
+        elif t < 0.62:
+            P = self._mix(reach, throw, (t - 0.46) / 0.16)
+        elif t < 0.72:
+            P = throw
+        else:
+            P = self._mix(throw, box, (t - 0.72) / 0.28)
+        return P, Vector((0.0, 0.0, 0.0))
+
+    def opening(self, t):
+        """Kupu tayttyy: vartalo nykaistaan pystyyn (peli kaantaa juuren), jalat heilahtavat eteen, kadet nousevat kantohihnoille."""
+        box = self._p_box(0.0)
+        hang = self._p_toggle(0.0, 0.0, 0.0)
+        swing = dict(hang)
+        self._legs_free(swing, 58, 22, 6, 5)
+        swing["spine_01"] = Q(X, 10)
+        swing["head"] = Q(X, 18)
+        for sd, s in (("l", 1), ("r", -1)):
+            self._arm2(swing, sd, s, (0.80, -0.45, 0.30), (0.45, -0.60, 0.66))
+        look = dict(hang)
+        look["neck_01"] = Q(X, -22)
+        look["head"] = Q(X, -30)
+        if t < 0.30:
+            P = self._mix(box, swing, t / 0.30)
+        elif t < 0.62:
+            P = self._mix(swing, look, (t - 0.30) / 0.32)
+        else:
+            P = self._mix(look, hang, (t - 0.62) / 0.38)
+        return P, Vector((0.0, 0.0, 0.0))
+
+    def canopy(self, t):
+        return self._p_toggle(0.0, 0.0, t), Vector((0.0, 0.0, 0.0))
+
+    def canopy_l(self, t):
+        return self._p_toggle(0.72, 0.0, t), Vector((0.0, 0.0, 0.0))
+
+    def canopy_r(self, t):
+        return self._p_toggle(0.0, 0.72, t), Vector((0.0, 0.0, 0.0))
+
+    def flare(self, t):
+        P = self._p_toggle(1.0, 1.0, t)
+        self._legs_free(P, 12, 18, -2, -4)
+        return P, Vector((0.0, 0.0, 0.0))
+
+    def land(self, t):
+        """Alastulo loppuvedon jalkeen: jalat ottavat vastaan (polvet joustavat), ylos nousu, kadet paastavat lenkit."""
+        fl = self._p_toggle(1.0, 1.0, 0.0)
+        dip = sin(pi * clamp(t / 0.55)) ** 1.2 * 0.20
+        P = dict(fl)
+        off = self._crouch_legs(P, 0.02 + dip, 4 + 60 * dip, 0)
+        P["spine_01"] = Q(X, 40 * dip)
+        if t > 0.5:
+            idle, _ = self.idle(0.0)
+            st = dict(idle)
+            st["pelvis"] = P["pelvis"]
+            for k in ("thigh_l", "thigh_r", "calf_l", "calf_r", "foot_l", "foot_r", "ball_l", "ball_r"):
+                st[k] = P[k]
+            P = self._mix(P, st, (t - 0.5) / 0.5)
+        return P, off
+
 def bake_action(arm, name, nframes, posefn):
     act = bpy.data.actions.new(name)
     ad = arm.animation_data or arm.animation_data_create()

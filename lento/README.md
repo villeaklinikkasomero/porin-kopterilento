@@ -19,7 +19,8 @@ Cessna 182 -tyyppinen kone jäykkänä kappaleena kuudella vapausasteella. Aerod
 | Näppäin | Toiminto |
 |---|---|
 | W/S, ↑/↓ | sauva eteen / taakse (näppäin rakentaa poikkeutusta noin puoli liikealaa sekunnissa; maassa enintään 75 %) |
-| A/D, ←/→ | siivekkeet |
+| ←/→ | kaarto: sivuperäsin (maassa nokkapyörä); helppo ohjaus kallistaa samalla ~25° ja oikaisee siivet, kun nuolet päästetään |
+| A/D | siivekkeet (suoraan) |
 | Q/E | sivuperäsin ja nokkapyörä |
 | B | jarrut (pidä); peräsimen puoli jarruttaa enemmän |
 | P | seisontajarru |
@@ -35,6 +36,7 @@ Cessna 182 -tyyppinen kone jäykkänä kappaleena kuudella vapausasteella. Aerod
 | 1 2 3 4 | navigointivalot, strobot, laskuvalo, majakka |
 | 5 | jäähdytysläpät |
 | 7 | mittaripalkki ulkokamerassa |
+| 8 | helppo ohjaus päälle / pois (oletuksena päällä) |
 | 9 | avustimet (peräsin, seos, yhden napin käynnistys; kosketuslaitteilla oletuksena päällä) |
 | 0 | ohjeet |
 | C | kamera: ohjaamo, ulko, ylhäältä |
