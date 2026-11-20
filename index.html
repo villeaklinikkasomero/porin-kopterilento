@@ -139,7 +139,7 @@
   <span class="heli-only"><kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
   <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>Enter</kbd> nouse ulos<br></span><span class="car-only"><kbd>W</kbd> kaasu · <kbd>S</kbd> jarru/peruutus · <kbd>A</kbd><kbd>D</kbd> ohjaus · <kbd>Väli</kbd> käsijarru · <kbd>R</kbd> radio · <kbd>Enter</kbd> nouse ulos<br></span><span class="walk-only"><kbd>W</kbd><kbd>S</kbd> kävele · <kbd>A</kbd><kbd>D</kbd> käänny · <kbd>Q</kbd><kbd>E</kbd> sivuaskel · <kbd>Shift</kbd> juokse<br><kbd>Enter</kbd> kyytiin / ovesta · <kbd>H</kbd> tervehdi · <kbd>B</kbd> musiikki ja tanssi · </span><kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
 </div>
-<div id="credit">Ilmakuva © Maanmittauslaitos, ortokuva 2025 (CC BY 4.0) · Kartta-aineisto © OpenStreetMapin tekijät · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0) · valokuvat © Porin kaupunki · maalaukset: Akseli Gallen-Kallela (Juseliuksen mausoleumin freskojen esityöt) ja R. W. Ekman (alttaritaulun luonnos), Kansallisgalleria / Wikimedia Commons (public domain, CC0) · Porin Teatterin kattomaalaukset: valokuva Sven Raita 1955, Satakunnan Museo (CC BY 4.0), oikaistu ja värikorjattu</div>
+<div id="credit">Ilmakuva © Maanmittauslaitos, ortokuva 2025 (CC BY 4.0) · Kartta-aineisto ja bussipysäkit © OpenStreetMapin tekijät · bussien sijainnit: Digitransit / Waltti (avoin data) · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0) · valokuvat © Porin kaupunki · maalaukset: Akseli Gallen-Kallela (Juseliuksen mausoleumin freskojen esityöt) ja R. W. Ekman (alttaritaulun luonnos), Kansallisgalleria / Wikimedia Commons (public domain, CC0) · Porin Teatterin kattomaalaukset: valokuva Sven Raita 1955, Satakunnan Museo (CC BY 4.0), oikaistu ja värikorjattu</div>
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
@@ -172,6 +172,7 @@
       <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Rock, pois</div>
       <div><kbd>Y</kbd></div><div>kyyti: ota kyytiä pyytävä kyytiin (pysähdy viereen)</div>
       <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään ja takaisin kyytiin</div>
+      <div><kbd>N</kbd></div><div>bussi: Kauppatorin laiturilta tai Matkakeskuksesta saa bussin (Enter), pysäkillä pysähdy niin ovet aukeavat. Oikeaan bussiin nouset pysäkillä Enterillä, N painaa pysähtyy-nappia</div>
       <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
     </div>
     <div id="daily">
@@ -1614,9 +1615,10 @@ let wheels = [], carLoading = {};
 // length and width of the collision box, acceleration and top speed, and the driver's eye shift [left, up, forward] from the hatch (steering wheel positions
 // in the model reports). A borrowed parked car picks its model by type: hatch -> hatch, saloon and SUV -> estate, van -> van.
 const CARM = {}, CARTY = { hatch: { f: 'auto', hl: 2.1, hw: 0.9, acc: 4.2, top: 24, cam: [0, 0, 0] }, van: { f: 'auto_van', hl: 2.4, hw: 0.97, acc: 3.3, top: 21, cam: [0.03, 0.3, 0.45] }, estate: { f: 'auto_est', hl: 2.3, hw: 0.91, acc: 4.0, top: 24, cam: [0, 0, 0.06] },
-  bike: { f: 'pyora', one: true, hl: 0.85, hw: 0.28, acc: 2.2, top: 8.5, cam: [-0.37, 0.42, 0.3] } };      // a borrowed bicycle rides on the car physics: small box, 30 km/h, the rider is the walker model (Cycle clip), see TAKE
+  bike: { f: 'pyora', one: true, hl: 0.85, hw: 0.28, acc: 2.2, top: 8.5, cam: [-0.37, 0.42, 0.3] },
+  bus: { f: 'bussi', hl: 6.0, hw: 1.28, acc: 1.7, top: 16, cam: [0.38, 1.2, 5.1], wb: 5.9, r: 0.48 } };      // 20.11.2026 city bus (bussi.js / bussi_m.js): 12 m long, wheelbase 5.9 m, wheels r 0.48 m, about 58 km/h, driver high up at the front left      // a borrowed bicycle rides on the car physics: small box, 30 km/h, the rider is the walker model (Cycle clip), see TAKE
 let carEnv = null;
-const useCar = t => { const M = CARM[t], Y = CARTY[t]; if (!M) return false; CAR.type = t; CAR.hl = Y.hl; CAR.hw = Y.hw; CAR.acc = Y.acc; CAR.top = Y.top; CAR.cam = Y.cam; wheels = M.wheels; CAR.setDmg = M.setDmg; CAR.dmg = -1; carG.clear(); carG.add(M.root); if (window.__take) window.__take.applied = null; return true; };
+const useCar = t => { const M = CARM[t], Y = CARTY[t]; if (!M) return false; CAR.type = t; CAR.hl = Y.hl; CAR.hw = Y.hw; CAR.acc = Y.acc; CAR.top = Y.top; CAR.cam = Y.cam; CAR.wb = Y.wb || WB; CAR.r = Y.r || CAR_R; wheels = M.wheels; CAR.setDmg = M.setDmg; CAR.dmg = -1; carG.clear(); carG.add(M.root); if (window.__take) window.__take.applied = null; return true; };
 const setCarType = t => { CAR.want = t; if (!useCar(t)) loadCar(t); };
 const loadCar = (t = CAR.want || 'hatch') => { if (CARM[t] || carLoading[t]) return; carLoading[t] = true; loadModel(CARTY[t].f + (isTouch && !CARTY[t].one ? '_m' : ''), root0 => {   // glTF: nose +z, wheels Wheel_FL/FR/RL/RR spinning about their local x, ground at y 0
   const root = new THREE.Group(); root.add(root0); root0.rotation.y = Math.PI;   // game frame: nose -z, like the helicopter
@@ -1784,7 +1786,7 @@ function stepCar(dt, live) {
   { const ds = S.hp < 30 ? 3 : S.hp < 45 ? 2 : S.hp < 60 ? 1 : 0; if (CAR.setDmg && CAR.dmg !== ds) CAR.setDmg(ds);                 // the body shows the damage step
     const lim = S.hp < 30 ? 14 : S.hp < 60 ? 22 : 1e9; if (CAR.v > lim) CAR.v += (lim - CAR.v) * Math.min(1, dt * 2);          // a damaged car is slower
     smokeStep(dt, S.hp < 60 && !S.dead && CAR.type !== 'bike' ? (S.hp < 30 ? 0.05 : S.hp < 45 ? 0.09 : 0.16) : 0, S.hp < 30, CAR.x + Math.sin(CAR.yaw) * 1.5, CAR.y + Math.cos(CAR.yaw) * 1.5, CAR.z + 0.95); }
-  const yr = CAR.v / WB * Math.tan(CAR.steer + (S.hp < 45 ? 0.03 : 0)) * (hb ? 1.25 : 1);
+  const yr = CAR.v / (CAR.wb || WB) * Math.tan(CAR.steer + (S.hp < 45 ? 0.03 : 0)) * (hb ? 1.25 : 1);
   const nyaw = CAR.yaw + yr * dt, sn = Math.sin(nyaw), cs = Math.cos(nyaw);
   const nx = CAR.x + sn * CAR.v * dt * fw, ny = CAR.y + cs * CAR.v * dt * fw;
   if (carBlocked(nx, ny, nyaw)) {
@@ -1802,10 +1804,10 @@ function stepCar(dt, live) {
   const s0 = Math.sin(CAR.yaw), c0 = Math.cos(CAR.yaw), gz = (fx, rx) => { const z = carGround(CAR.x + s0 * fx + c0 * rx, CAR.y + c0 * fx - s0 * rx); return z === null ? CAR.z : z; };
   const zf = (gz(1.32, 0.77) + gz(1.32, -0.77)) / 2, zr = (gz(-1.32, 0.77) + gz(-1.32, -0.77)) / 2, zl = (gz(1.32, 0.77) + gz(-1.32, 0.77)) / 2, zrr = (gz(1.32, -0.77) + gz(-1.32, -0.77)) / 2;
   CAR.z += ((zf + zr) / 2 - CAR.z) * Math.min(1, dt * 14);
-  const tp = Math.atan2(zf - zr, WB) + (live ? -f * 0.012 : 0), tr = Math.atan2(zl - zrr, 1.55) + yr * CAR.v * 0.0016;
+  const tp = Math.atan2(zf - zr, CAR.wb || WB) + (live ? -f * 0.012 : 0), tr = Math.atan2(zl - zrr, 1.55) + yr * CAR.v * 0.0016;
   CAR.pitch += (tp - CAR.pitch) * Math.min(1, dt * 8); CAR.roll += (tr - CAR.roll) * Math.min(1, dt * 8);
   carG.position.set(CAR.x, CAR.z, -CAR.y); carG.rotation.set(CAR.pitch, -CAR.yaw, -CAR.roll);
-  CAR.spin += CAR.v / CAR_R * dt;
+  CAR.spin += CAR.v / (CAR.r || CAR_R) * dt;
   for (const w of wheels) { w.rotation.x = CAR.spin; w.rotation.y = w.userData.front ? CAR.steer : 0; }
   // keep the shared state in step: camera, HUD, tour, minimap read S
   S.x = CAR.x; S.y = CAR.y; S.alt = CAR.z; S.yaw = CAR.yaw; S.vx = Math.sin(CAR.yaw) * CAR.v; S.vy = Math.cos(CAR.yaw) * CAR.v; S.vz = 0; S.landed = Math.abs(CAR.v) < 0.5;
@@ -2112,6 +2114,7 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyM') toggleSound();
   if (e.code === 'KeyR' && !WALK.on) RADIO.next();
   if (e.code === 'KeyY' && window.__ride) window.__ride.accept();
+  if (e.code === 'KeyN' && window.__bus) window.__bus.bell();      // bus: stop button (B is dancing on foot)
   if (e.code === 'KeyH' && WALK.on && !WALK.in && window.__npc) window.__npc.greet();
   if (e.code === 'KeyB' && WALK.on && !WALK.in) DANCE.toggle();      // music on foot: the people near dance
   if (e.code === 'KeyN') newTour();
@@ -2321,8 +2324,8 @@ function walkFree(x, y) {
 function walkExit() {
   if (VEH === 'car' ? Math.abs(CAR.v) > 1.5 : !S.landed) { toast(VEH === 'car' ? 'Pysäytä auto ensin' : 'Laskeudu ensin maahan', 1.6); return; }
   if (VEH !== 'car' && bldTopAt(S.x, S.y) > TZs(S.x, S.y) + 1.5) { toast('Katolta ei pääse kävellen alas – laskeudu maahan', 2); return; }
-  const sn = Math.sin(S.yaw), cs = Math.cos(S.yaw), w = VEH === 'car' ? 1.55 : 2.3; let spot = null;
-  for (const [f, r] of [[0.2, -w], [0.2, w], [-1.2, -w], [-1.2, w], [-3.6, 0], [3.6, 0], [1.5, -w - 1], [1.5, w + 1]]) { const x = S.x + sn * f + cs * r, y = S.y + cs * f - sn * r; if (walkFree(x, y)) { spot = [x, y]; break; } }
+  const sn = Math.sin(S.yaw), cs = Math.cos(S.yaw), w = VEH === 'car' ? (CAR.hw || 0.9) + 0.65 : 2.3; let spot = null;
+  for (const [f, r] of (CAR.type === 'bus' && VEH === 'car' ? [[4.4, w], [4.4, -w], [0, w], [0, -w], [-3, w]] : [[0.2, -w], [0.2, w], [-1.2, -w], [-1.2, w], [-3.6, 0], [3.6, 0], [1.5, -w - 1], [1.5, w + 1]])) { const x = S.x + sn * f + cs * r, y = S.y + cs * f - sn * r; if (walkFree(x, y)) { spot = [x, y]; break; } }
   if (!spot) { toast('Tässä ei mahdu nousemaan ulos', 1.6); return; }
   if (VEH === 'car') CAR.v = 0;
   Object.assign(WALK, { on: true, in: false, x: spot[0], y: spot[1], z: carGround(spot[0], spot[1]), yaw: S.yaw, v: 0, vs: 0, veh: { x: S.x, y: S.y, alt: S.alt, yaw: S.yaw } });
@@ -2342,7 +2345,8 @@ function walkNear() {   // what Enter would do here: 'in' (church door), 'out' (
     if (M.ports) for (const q of M.ports) if (Math.hypot(WALK.ix - q[0], WALK.iy - q[1]) < q[2]) { WALK.port = q; return 'port'; }   // inner doors that move the player (theatre: foyer <-> upstairs café): [x, y, r, to x, to y, yaw, hint]
     return ''; }
   for (const P of PLACES) { const d = placeDoor(P); if (d && Math.hypot(WALK.x - d.x, WALK.y - d.y) < 4.2) { WALK.at = P; return 'in'; } }
-  const v = WALK.veh; if (v && Math.hypot(WALK.x - v.x, WALK.y - v.y) < (VEH === 'car' ? 4.2 : 6)) return 'veh';
+  if (window.__bus) { const b = window.__bus.rideNear(WALK.x, WALK.y); if (b) return b; }      // 'bus' (a live bus standing here, it will not wait) or 'busout' (riding one)
+  const v = WALK.veh; if (v && Math.hypot(WALK.x - v.x, WALK.y - v.y) < (VEH === 'car' ? (CAR.type === 'bus' ? 7.5 : 4.2) : 6)) return 'veh';
   return takeNear();      // 'heli' (the helicopter left behind), 'take' (a parked car to borrow) or ''
 }
 function walkAction() {
@@ -2357,6 +2361,8 @@ function walkAction() {
       camPos.set(WALK.x - Math.sin(d.out) * 3, WALK.z + 2, -WALK.y + Math.cos(d.out) * 3); camera.near = 0.25; camera.updateProjectionMatrix(); });
   else if (k === 'port') fadeDo(() => { const q = WALK.port; WALK.ix = q[3]; WALK.iy = q[4]; WALK.iyaw = q[5]; WALK.v = 0; WALK.z = inFloor(q[3], q[4]); camPos.set(q[3] - Math.sin(q[5]) * 1.5, WALK.z + 2, -(q[4] - Math.cos(q[5]) * 1.5)); });
   else if (k === 'take' || k === 'heli') takeDo(k);
+  else if (k === 'bus') window.__bus.ride();
+  else if (k === 'busout') window.__bus.out();
   else toast(VEH === 'car' ? 'Auto on liian kaukana' : 'Kopteri on liian kaukana', 1.4);
 }
 function walkCollide(p) {   // push the player's circle out of the hall's walls, columns, pews and rails
@@ -2406,7 +2412,7 @@ function stepWalk(dt) {
   walkG.visible = camMode !== 1;
   if (VEH !== 'car') { S.rotorSpd += (0 - S.rotorSpd) * Math.min(1, dt * 0.6); rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt; }
   if (actx && sGain) sGain.gain.value += ((VEH !== 'car' && soundOn && !WALK.in ? 0.05 * S.rotorSpd : 0) - sGain.gain.value) * Math.min(1, dt * 4);
-  const k = walkNear(), h = $('hint'), msg = k === 'in' ? WALK.at.hint : k === 'out' ? 'ulos' : k === 'port' ? WALK.port[6] : k === 'veh' ? (VEH === 'car' ? (CAR.type === 'bike' ? 'nouse pyörälle' : 'nouse autoon') : 'nouse kopteriin') : k === 'heli' ? 'nouse kopteriin' : k === 'take' ? (TAKE.tgt && (TAKE.tgt.b || TAKE.tgt.l && TAKE.tgt.l.type === 'bike') ? 'ota pyörä' : 'ota auto') : '';
+  const k = walkNear(), h = $('hint'), msg = k === 'in' ? WALK.at.hint : k === 'out' ? 'ulos' : k === 'port' ? WALK.port[6] : k === 'veh' ? (VEH === 'car' ? (CAR.type === 'bike' ? 'nouse pyörälle' : CAR.type === 'bus' ? 'nouse bussiin' : 'nouse autoon') : 'nouse kopteriin') : k === 'heli' ? 'nouse kopteriin' : k === 'take' ? (TAKE.tgt && TAKE.tgt.bp ? 'aja bussia (linja ' + TAKE.tgt.bp.dep.line + ')' : TAKE.tgt && (TAKE.tgt.b || TAKE.tgt.l && TAKE.tgt.l.type === 'bike') ? 'ota pyörä' : 'ota auto') : (k === 'bus' || k === 'busout') ? window.__bus.hint(k) : '';
   if (msg) { if (h.dataset.m !== msg) { h.dataset.m = msg; h.innerHTML = (isTouch ? '🚶 ' : '<kbd>Enter</kbd> ') + msg; } h.classList.add('on'); } else h.classList.remove('on');
 }
 function walkCamera(dt) {
@@ -2433,6 +2439,7 @@ function updateCamera(dt) {
   if (!started) { // slow orbit around the square
     introA += dt * 0.12; camera.position.set(HOME.x + Math.sin(introA) * 210, 120, -HOME.y + Math.cos(introA) * 210); camera.lookAt(HOME.x, 10, -HOME.y); return;
   }
+  if (window.__bus && window.__bus.cam(dt)) return;      // riding a live bus
   if (WALK.on) return walkCamera(dt);
   if (VEH === 'car') {
     if (camMode === 1) { // driver's seat (left-hand drive)
@@ -2441,7 +2448,7 @@ function updateCamera(dt) {
       camera.position.set(CAR.x + sn * cf - rx * cl, CAR.z + 1.17 + cm[1], -(CAR.y + cs * cf - ry * cl)); camera.rotation.order = 'YXZ'; camera.rotation.set(CAR.pitch - 0.05, -S.yaw, -CAR.roll * 0.8); return;
     }
     if (camMode === 2) { tmp.set(CAR.x, CAR.z + 90, -CAR.y + 1); camPos.lerp(tmp, Math.min(1, dt * 4)); camera.position.copy(camPos); camera.up.set(sn, 0, -cs); camera.lookAt(CAR.x, CAR.z, -CAR.y); camera.up.set(0, 1, 0); return; }
-    const hl = inHall(CAR.x, CAR.y), back = hl ? 4.6 : 7.8, up = hl ? 1.9 : 2.9; tmp.set(CAR.x - sn * back, CAR.z + up, -CAR.y + cs * back);   // under the hall's ceiling the camera comes down and closer
+    const hl = inHall(CAR.x, CAR.y), bus = CAR.type === 'bus', back = hl ? 4.6 : bus ? 17 : 7.8, up = hl ? 1.9 : bus ? 5.6 : 2.9; tmp.set(CAR.x - sn * back, CAR.z + up, -CAR.y + cs * back);   // under the hall's ceiling the camera comes down and closer
     const gb = carGround(tmp.x, -tmp.z); if (gb !== null && tmp.y < gb + 1.2) tmp.y = gb + 1.2;
     camPos.lerp(tmp, 1 - Math.exp(-dt * 6)); tmp2.set(CAR.x + sn * 6, CAR.z + 1.1, -CAR.y - cs * 6); camLook.lerp(tmp2, 1 - Math.exp(-dt * 9));
     camera.position.copy(camPos); camera.lookAt(camLook); return;
@@ -2524,7 +2531,7 @@ function navHud() {
 let lastT = performance.now(), bt = 0;
 function frame(now) {
   const dt = Math.min(0.05, (now - lastT) / 1000); lastT = now; bt += dt;
-  step(dt); cars.update(dt); if (window.__npc) window.__npc.update(dt); if (window.__statueTick) window.__statueTick(dt); if (window.__caseTick) window.__caseTick(dt); if (window.__birdTick) window.__birdTick(dt); if (window.__raceTick) window.__raceTick(dt); if (window.__rideTick) window.__rideTick(dt); window.__takeTick(dt); updateCamera(dt); hud(dt);
+  step(dt); cars.update(dt); if (window.__npc) window.__npc.update(dt); if (window.__statueTick) window.__statueTick(dt); if (window.__caseTick) window.__caseTick(dt); if (window.__birdTick) window.__birdTick(dt); if (window.__raceTick) window.__raceTick(dt); if (window.__rideTick) window.__rideTick(dt); if (window.__busTick) window.__busTick(dt); window.__takeTick(dt); updateCamera(dt); hud(dt);
   const r1 = beacon.getObjectByName('ring'), r2 = beacon.getObjectByName('ring2'); const pu = 1 + Math.sin(bt * 3) * 0.06; r1.scale.setScalar(pu); r2.scale.setScalar(0.72 + (bt * 0.5 % 1) * 0.5); r2.material.opacity = 0.8 - (bt * 0.5 % 1) * 0.8;
   for (const sp of sprites) { const d = sp.position.distanceTo(camera.position), far = sp.userData.big ? 2600 : 1100;
     const o = Math.min(1, Math.max(0, (d - 70) / 110)) * Math.min(1, Math.max(0, (far - d) / 250)); sp.visible = o > 0.02; sp.material.opacity = o; }
@@ -2815,11 +2822,11 @@ setTarget();
     if (c.sat) { let foot = false; try { foot = WALK.on && !WALK.in; } catch (e) {} seatLook(c, s, dt, p.hold > 0 || (foot && Math.hypot(S.x - c.x, S.y - c.y) < 4.5)); }
     if (vis) { if (!c.sat) setAnim(c, sp > 0.3 ? 'Walk' : 'Idle'); if (c.act.Walk) c.act.Walk.timeScale = Math.max(0.6, sp / STRIDE[c.k]); c.mix.update(dt); if (c.sat) ARMS(c, dt); } };
   let acc = 0;
-  window.__npc = { parties, sitters: SITTERS, seats: SEATS, greet: () => greet(false),
-    arrive: (x, y) => { if (!net || count() > NMAX + 6) return; let b = null, bd = 30; for (const q of net) { const d = Math.hypot(q.x - x, q.y - y); if (d < bd) { bd = d; b = q; } } if (!b) return;   // people getting out of a car that has just parked: they walk to the nearest footway
-      const r = rnd(), ks = r < 0.5 ? [adult()] : r < 0.8 ? [adult(), adult()] : [guard(), child()]; if (ks.some(k => !MOD[k])) return;
-      const p = { a: { x, y, nb: [{ n: b, c: 0 }] }, b, c: 0, pc: 0, t: 0, v: 1.2, wait: false, lat: (rnd() - 0.5) * 7, m: ks.map(mkChar) };
-      p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.x = x; c.y = y; c.z = carGround(x, y) ?? 0; c.new = true; }); parties.push(p); },
+  window.__npc = { parties, sitters: SITTERS, seats: SEATS, greet: () => greet(false), mk: k => MOD[k] ? mkChar(k) : null, free: freeChar, anim: setAnim, stride: STRIDE,      /* mk/free/anim: people waiting at bus stops (bus module) */ mk: mkChar, free: freeChar,      /* mk/free: the bicycle passenger (kyydit) is an own copy of the walker */
+    arrive: (x, y, ch) => { if (!net || count() > NMAX + 6) return;      /* ch: this very walker gets off (bicycle passenger) */ let b = null, bd = 30; for (const q of net) { const d = Math.hypot(q.x - x, q.y - y); if (d < bd) { bd = d; b = q; } } if (!b) return;   // people getting out of a car that has just parked: they walk to the nearest footway
+      const r = rnd(), ks = ch ? [ch.k] : r < 0.5 ? [adult()] : r < 0.8 ? [adult(), adult()] : [guard(), child()]; if (ks.some(k => !MOD[k])) return;
+      const p = { a: { x, y, nb: [{ n: b, c: 0 }] }, b, c: 0, pc: 0, t: 0, v: 1.2, wait: false, lat: (rnd() - 0.5) * 7, m: ch ? [ch] : ks.map(mkChar) };
+      p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.x = x; c.y = y; c.z = carGround(x, y) ?? 0; c.new = true; }); parties.push(p); return true; },
     update: dt => { if (!net || dt <= 0) return; const px = S.x, py = S.y;
     DANCE.tick();
     seatFrame(dt, px, py);
@@ -3069,12 +3076,13 @@ const KESPA = {"p":[32.6,-339.0,28,-338,20,-336,14,-334,-91,-310,-99,-308,-111,-
 // can be taken back. From the helicopter the game switches to driving; the helicopter waits where it landed (TAKE.heli) and is boarded again on foot -
 // the landmark round pauses meanwhile, so a car cannot finish a helicopter round.
 const TAKE = { left: null, heli: null, hex: null, applied: null, tgt: null }; window.__take = TAKE;
-const takeType = T => T.l ? T.l.type : T.b ? 'bike' : ['hatch', 'estate', 'estate', 'van'][T.p ? T.p.k : T.c.k] || 'hatch';      /* parked types: hatch, saloon, SUV, van */
+const takeType = T => T.l ? T.l.type : T.bp ? 'bus' : T.b ? 'bike' : ['hatch', 'estate', 'estate', 'van'][T.p ? T.p.k : T.c.k] || 'hatch';      /* parked types: hatch, saloon, SUV, van */
 function takeNear() { const x = WALK.x, y = WALK.y; if (TAKE.heli && VEH === 'car' && Math.hypot(TAKE.heli.x - x, TAKE.heli.y - y) < 6) return 'heli';
   let best = null, bd = 3.4; if (TAKE.left && Math.hypot(TAKE.left.x - x, TAKE.left.y - y) < 4.2) { TAKE.tgt = { l: TAKE.left }; return 'take'; }
   if (window.__parked) for (const p of window.__parked) { if (p.gone) continue; const dx = p.x - x; if (dx > 3.4 || dx < -3.4) continue; const d = Math.hypot(dx, p.y - y); if (d < bd) { bd = d; best = { p }; } }
   for (const c of cars) if (c.pk && c.pk.ph === 1 && c.wx !== undefined) { const d = Math.hypot(c.wx - x, c.wy - y); if (d < bd) { bd = d; best = { c }; } }
   if (window.__bikes) { let kd = 2.0; for (const b of window.__bikes) { if (b.gone) continue; const dx = b.x - x; if (dx > 2 || dx < -2) continue; const d = Math.hypot(dx, b.y - y); if (d < kd) { kd = d; best = { b }; } } }      /* a parked bicycle, closer than any car */
+  if (window.__bus) { const q = window.__bus.near(x, y); if (q) best = { bp: q }; }      /* a parked bus at Kauppatori or the Matkakeskus */
   TAKE.tgt = best; if (best) loadCar(takeType(best));      /* fetch that car's model as soon as the offer shows */
   return best ? 'take' : ''; }
 function takeLeave() {      /* the car driven so far stays behind as a copy */
@@ -3087,25 +3095,37 @@ function takeDo(k) { if (window.__race && (window.__race.st === 1 || window.__ra
   const T = TAKE.tgt; if (!T) return; let x, y, yaw, hex, hp = 100; const ty = takeType(T);
   if (T.l) { ({ x, y, yaw, hex, hp } = T.l); scene.remove(T.l.g); TAKE.left = null; if (VEH === 'car') takeLeave(); }
   else { if (VEH === 'car') takeLeave(); if (T.p) { ({ x, y, yaw, hex } = T.p); T.p.gone = true; T.p.im.setMatrixAt(T.p.j, new THREE.Matrix4().makeScale(0, 0, 0)); T.p.im.instanceMatrix.needsUpdate = true; }
+    else if (T.bp) { ({ x, y, yaw, hex } = T.bp); }
     else if (T.b) { ({ x, y, yaw, hex } = T.b); T.b.gone = true; const z0 = new THREE.Matrix4().makeScale(0, 0, 0); for (const im of window.__bikes.ims) { im.setMatrixAt(T.b.i, z0); im.instanceMatrix.needsUpdate = true; } }
     else { x = T.c.wx; y = T.c.wy; yaw = T.c.yaw; hex = T.c.paint || 0x8b9096; cars.vanish(T.c); } }
   if (VEH !== 'car') { TAKE.heli = { x: WALK.veh.x, y: WALK.veh.y, alt: WALK.veh.alt, yaw: WALK.veh.yaw, hp: S.hp, tour: tourOn }; tourOn = false; VEH = 'car'; document.body.classList.add('car'); }
   setCarType(ty);
   carG.visible = true; Object.assign(CAR, { x, y, yaw, v: 0, steer: 0, pitch: 0, roll: 0 }); CAR.z = carGround(x, y) ?? TZs(x, y); S.hp = hp; TAKE.hex = hex; TAKE.tgt = null;
-  WALK.veh = { x, y, alt: CAR.z, yaw }; walkBoard(); toast(T.l ? (ty === 'bike' ? 'Takaisin pyörän selässä' : 'Takaisin edellisessä autossa') : (ty === 'bike' ? '🚲 Lainasit pyörän' : ty === 'van' ? '🚐 Lainasit pakettiauton' : ty === 'estate' ? '🚗 Lainasit farmarin' : '🚗 Lainasit auton') + (ty !== 'bike' && Math.random() < 0.4 ? ' – "Hei! Se o mnuu auto!"' : ''), 2.6); }
+  WALK.veh = { x, y, alt: CAR.z, yaw }; walkBoard(); if (T.bp) { window.__bus.take(T.bp); return; } toast(T.l ? (ty === 'bike' ? 'Takaisin pyörän selässä' : 'Takaisin edellisessä autossa') : (ty === 'bike' ? '🚲 Lainasit pyörän' : ty === 'van' ? '🚐 Lainasit pakettiauton' : ty === 'estate' ? '🚗 Lainasit farmarin' : '🚗 Lainasit auton') + (ty !== 'bike' && Math.random() < 0.4 ? ' – "Hei! Se o mnuu auto!"' : ''), 2.6); }
 TAKE.near = takeNear; TAKE.do = takeDo;
 window.__takeTick = dt => { if (TAKE.hex !== TAKE.applied && carG.children.length) { carG.traverse(q => { if (q.isMesh && q.material && /^(Car|Bike)Paint$/.test(q.material.name)) q.material.color.setHex(TAKE.hex); }); TAKE.applied = TAKE.hex; }
   if (TAKE.heli && VEH === 'car' && !S.dead && !heli.visible) heli.visible = true;
   /* riding a bicycle: the walker model sits on it and pedals (clip Cycle, one crank turn a second at 5 m/s), cranks and pedals in step with the clip, the
      handlebar follows the steering, bike and rider lean into the bend */
   const riding = VEH === 'car' && CAR.type === 'bike' && !WALK.on && !S.dead && carG.children.length > 0 && CARM.bike && carG.children[0] === CARM.bike.root;
-  if (riding) { loadWalker(); const R = CARM.bike.root; if (!TAKE.bk) TAKE.bk = { st: R.getObjectByName('Steering'), cr: R.getObjectByName('Crank'), pl: R.getObjectByName('Pedal_L'), pr: R.getObjectByName('Pedal_R'), sx: R.getObjectByName('Steering').rotation.x };
+  if (riding) { loadWalker(); const R = CARM.bike.root; if (!TAKE.bk) TAKE.bk = { st: R.getObjectByName('Steering'), cr: R.getObjectByName('Crank'), pl: R.getObjectByName('Pedal_L'), pr: R.getObjectByName('Pedal_R'), pad: R.getObjectByName('RackPad'), sx: R.getObjectByName('Steering').rotation.x };
     const K = TAKE.bk, yr = CAR.v / WB * Math.tan(CAR.steer), lean = Math.max(-0.35, Math.min(0.35, Math.atan(CAR.v * yr / 9.81))); TAKE.lean = (TAKE.lean || 0) + (lean - (TAKE.lean || 0)) * Math.min(1, dt * 6);
-    R.rotation.z = -TAKE.lean; K.st.rotation.y = -CAR.steer * 0.9;
+    R.rotation.z = -TAKE.lean; K.st.rotation.y = -CAR.steer * 0.55;      /* 0.9 -> 0.55 (20.11): the hands do not follow the bar (no such clip), a smaller visible turn keeps them near the grips */
     if (walkG.parent !== scene) scene.add(walkG); walkG.rotation.order = 'YXZ'; walkG.position.set(CAR.x, CAR.z, -CAR.y); walkG.rotation.set(0, -CAR.yaw, -TAKE.lean); walkG.visible = camMode !== 1; TAKE.rider = true;
     if (walkMix && walkAct.Cycle) { const a = walkAct.Cycle; if (walkCur !== 'Cycle') { const b = walkAct[walkCur]; a.reset().play(); if (b) a.crossFadeFrom(b, 0.15, false); walkCur = 'Cycle'; }
-      a.timeScale = input.f > 0.05 ? Math.max(0.35, Math.min(2.2, Math.abs(CAR.v) / 5)) : 0; walkMix.update(dt); const d = a.getClip().duration, ang = 2 * Math.PI * ((a.time % d) / d); K.cr.rotation.x = ang; if (K.pl) K.pl.rotation.x = -ang; if (K.pr) K.pr.rotation.x = -ang; } }
-  else if (TAKE.rider) { TAKE.rider = false; walkG.rotation.z = 0; if (!WALK.on) walkG.visible = false; if (CARM.bike) CARM.bike.root.rotation.z = 0; } };
+      a.timeScale = input.f > 0.05 ? Math.max(0.35, Math.min(2.2, Math.abs(CAR.v) / 5)) : 0;
+      const LL = walkAct.CycleLeanL, LR = walkAct.CycleLeanR; if (LL && LR) { if (!TAKE.leanOn) { TAKE.leanOn = true; LL.reset().play(); LR.reset().play(); }      /* the rider leans on top of the bike's own tilt: the three clips run in step, only the weights change (TAKE.lean > 0 = right) */
+        const w = Math.min(1, Math.abs(TAKE.lean) / 0.3); a.weight = 1 - w; LL.weight = TAKE.lean < 0 ? w : 0; LR.weight = TAKE.lean > 0 ? w : 0; LL.timeScale = LR.timeScale = a.timeScale; LL.time = LR.time = a.time; }
+      walkMix.update(dt); const d = a.getClip().duration, ang = 2 * Math.PI * ((a.time % d) / d); K.cr.rotation.x = ang; if (K.pl) K.pl.rotation.x = -ang; if (K.pr) K.pr.rotation.x = -ang; } }
+  else if (TAKE.rider) { TAKE.rider = false; walkG.rotation.z = 0; if (!WALK.on) walkG.visible = false; if (CARM.bike) CARM.bike.root.rotation.z = 0;
+    if (TAKE.leanOn) { TAKE.leanOn = false; walkAct.CycleLeanL.stop(); walkAct.CycleLeanR.stop(); walkAct.Cycle.weight = 1; } }
+  /* passenger on the rack (kyydit, 20.11.2026): the walker copy __ride.pc follows the bike with clip Passenger; its root scale is never touched. Off the bike it
+     stays sitting on the bike left behind. The rack pad shows only with a passenger. */
+  const pc = window.__ride && window.__ride.pc, own = !riding && VEH === 'car' && CAR.type === 'bike' && !S.dead, src = pc ? (riding ? walkG : own ? carG : TAKE.left && TAKE.left.type === 'bike' ? TAKE.left.g : null) : null;
+  if (TAKE.bk && TAKE.bk.pad) TAKE.bk.pad.visible = !!pc;
+  if (pc) { pc.g.visible = !!src; if (src) { if (own) { pc.g.position.set(CAR.x, CAR.z, -CAR.y); pc.g.rotation.set(0, -CAR.yaw, 0); } else { pc.g.position.copy(src.position); pc.g.rotation.copy(src.rotation); } const l = riding ? TAKE.lean : 0, w = Math.min(1, Math.abs(l) / 0.3), P = pc.act;
+      if (P.PassengerLeanL && P.PassengerLeanR) { P.Passenger.weight = 1 - w; P.PassengerLeanL.weight = l < 0 ? w : 0; P.PassengerLeanR.weight = l > 0 ? w : 0; P.PassengerLeanL.time = P.PassengerLeanR.time = P.Passenger.time; }
+      pc.mix.update(dt); } } };
 
 // 20.11.2026 (owner: "bicycles on the market square, several parked, the same in front of SAMK, single bikes around the centre"). Model: pyora.js. All bikes
 // are drawn as instances (one InstancedMesh per mesh of the model, frame paint tinted per bike). Racks: rows 0.62 m apart on free paving round Kauppatori
@@ -3133,7 +3153,7 @@ window.__takeTick = dt => { if (TAKE.hex !== TAKE.applied && carG.children.lengt
       if (wa < 0 || bld(x + Math.sin(wa) * 0.7, y + Math.cos(wa) * 0.7) || S1.some(q => Math.hypot(q[0] - x, q[1] - y) < 14) || Math.hypot(x - HOME.x, y - HOME.y) < 14) continue; S1.push([x, y]); add(x, y, wa + Math.PI / 2 + (rn() < 0.5 ? Math.PI : 0)); }
     /* instances: every mesh of the model once, placed by bike matrix x the mesh's own matrix under Bike */
     const root = gl.scene; root.updateMatrixWorld(true); const steer = root.getObjectByName('Steering'), inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4(), bm = new THREE.Matrix4(), sm = new THREE.Matrix4(), e = new THREE.Euler(0, 0, 0, 'YXZ'), q = new THREE.Quaternion(), p = new THREE.Vector3(), s1 = new THREE.Vector3(1, 1, 1), col = new THREE.Color();
-    const meshes = []; root.traverse(o => { if (o.isMesh) { let st = false; for (let a = o; a; a = a.parent) if (a === steer) st = true; meshes.push({ o, st }); } });
+    const meshes = []; root.traverse(o => { if (o.isMesh) { let st = false, pad = false; for (let a = o; a; a = a.parent) { if (a === steer) st = true; if (a.name === 'RackPad') pad = true; } if (!pad) meshes.push({ o, st }); } });      /* the rack pad (passenger seat) only on the bike being ridden */
     for (const { o, st } of meshes) { const paint = o.material && o.material.name === 'BikePaint', mat = o.material.clone(); if (paint) mat.color.setRGB(1, 1, 1); const im = new THREE.InstancedMesh(o.geometry, mat, B.length); im.frustumCulled = false;
       B.forEach((b, i) => { const z = (carGround(b.x, b.y) ?? TZs(b.x, b.y)) - TZs(b.x, b.y) + 0.01; p.set(b.x, z, -b.y); e.set(0, Math.PI - b.yaw, b.lean); q.setFromEuler(e); bm.compose(p, q, s1);      /* the terrain height comes from the lift shader, as for the parked cars */
         if (st) { sm.copy(steer.matrixWorld).premultiply(inv); const lo = new THREE.Matrix4().copy(steer.matrixWorld).invert().multiply(o.matrixWorld), ry = new THREE.Matrix4().makeRotationY(b.st); m4.copy(bm).multiply(sm).multiply(ry).multiply(lo); }      /* handlebars turned a little, each bike its own way */
@@ -3192,25 +3212,32 @@ window.__takeTick = dt => { if (TAKE.hex !== TAKE.applied && carG.children.lengt
     toast('🙋 ' + ASK[Math.floor(Math.random() * ASK.length)].replace('{}', why) + ' – pysähdy viereen', 5); };
   R.accept = () => { if (R.st !== 1 || !R.c) return; const c = R.c, d = Math.hypot(c.x - S.x, c.y - S.y), v = veh();
     if (!S.landed || d > (v === 'heli' ? 20 : 7) || (v === 'heli' && S.alt > ground(S.x, S.y) + 3)) { toast(v === 'heli' ? 'Laskeudu lähemmäs (20 m)' : 'Pysähdy viereen (7 m)', 1.8); return; }
+    R.freePc(); if (v === 'bike' && window.__npc.mk && c.act && c.act.Passenger && c.g) {      // bicycle: an own copy of this walker (same model, same tints) sits on the rack, clip Passenger (see __takeTick)
+      const n = window.__npc.mk(c.k), A = [], Bm = []; c.g.traverse(o => { if (o.isMesh) A.push(o); }); n.g.traverse(o => { if (o.isMesh) Bm.push(o); }); for (const m of n.g.mats || []) m.dispose(); n.g.mats = [];
+      Bm.forEach((o, i) => { if (!A[i]) return; if ((c.g.mats || []).includes(A[i].material)) { o.material = A[i].material.clone(); o.material.userData.noT = true; n.g.mats.push(o.material); } else o.material = A[i].material; });
+      n.mix.stopAllAction(); for (const q of ['Passenger', 'PassengerLeanL', 'PassengerLeanR']) if (n.act[q]) { n.act[q].play(); n.act[q].weight = q === 'Passenger' ? 1 : 0; } n.cur = 'Passenger'; n.g.visible = false; R.pc = n; }
     c.x = 1e6; c.y = 1e6;                                                               // the walker leaves the street (the npc cleanup frees the model)
     Object.assign(R, { st: 2, c: null, p: null, t0: performance.now(), hp0: S.hp, hpMin: S.hp, from: { x: S.x, y: S.y }, v });
     const g = ground(R.d.x, R.d.y); col.position.set(R.d.x, g + 40, -R.d.y); col.visible = true; arrow.visible = false; ok.style.display = 'none';
     toast(v === 'bike' ? '🚲 Kyytiläinen hyppäsi tarakalle – ' + R.d.n : '🚕 Kyytiin! Kohde: ' + R.d.n, 3); };
+  R.freePc = () => { if (R.pc) { if (window.__npc && window.__npc.free) window.__npc.free(R.pc); else scene.remove(R.pc.g); R.pc = null; } };
   const drop = () => { const dist = Math.hypot(R.d.x - R.from.x, R.d.y - R.from.y), secs = (performance.now() - R.t0) / 1000, par = dist / ({ heli: 14, car: 8, bike: 5 }[R.v]) + 20;
     const fast = Math.max(0, Math.min(1, (par - secs) / (par * 0.5))), dmg = Math.max(0, R.hp0 - R.hpMin), keep = Math.max(0.2, 1 - dmg * 0.02);
     const pts = Math.max(1, Math.round(dist / 10 * (1 + 0.5 * fast) * keep)); R.tot += pts; R.n++; save();
-    if (window.__npc && window.__npc.arrive) window.__npc.arrive(S.x, S.y);            // somebody gets out and walks off
+    if (R.pc) { const c = R.pc, x = S.x - Math.cos(S.yaw) * 0.7, y = S.y + Math.sin(S.yaw) * 0.7; c.mix.stopAllAction(); for (const q in c.act) c.act[q].weight = 1; c.cur = ''; c.yaw = S.yaw - Math.PI / 2; c.g.rotation.set(0, -c.yaw, 0); c.g.visible = true;      // the bicycle passenger hops off on the left (the side they sit facing) and walks away
+      if (window.__npc && window.__npc.arrive && window.__npc.arrive(x, y, c)) R.pc = null; else R.freePc(); }
+    else if (window.__npc && window.__npc.arrive) window.__npc.arrive(S.x, S.y);            // somebody gets out and walks off
     toast('✅ Perillä: ' + R.d.n + ' · +' + pts + ' p' + (fast > 0.05 ? ' (nopea!)' : '') + (dmg > 2 ? ' · kolhuja −' + Math.round((1 - keep) * 100) + ' %' : ''), 4);
     Object.assign(R, { st: 0, d: null, t: 15 + Math.random() * 30 }); clear(); };
   let broken = false;
   window.__rideTick = dt => { if (broken) return; try { tick(dt); } catch (e) { broken = true; clear(); el.classList.remove('on'); console.warn('kyydit', e); } };   // a bug here must not stop the game loop
   const tick = dt => { if (!started) return; const walking = WALK.on;
-    if (R.st === 0) { if (!walking && !S.dead && (R.t -= dt) < 0) { R.t = 6; offer(); } }
+    if (R.st === 0) { if (!walking && !S.dead && !(VEH === 'car' && CAR.type === 'bus') && (R.t -= dt) < 0) { R.t = 6; offer(); } }
     else if (R.st === 1) { const c = R.c, d = c ? Math.hypot(c.x - S.x, c.y - S.y) : 1e9;
       if (!c || d > 160 || (R.t -= dt) < 0 || S.dead) { if (c && d < 160 && !S.dead) toast('Kyytipyyntö raukesi', 1.6); R.st = 0; R.c = R.p = null; R.t = 20 + Math.random() * 25; clear(); }
       else { R.p.hold = 1; arrow.visible = true; arrow.position.set(c.x, c.z + 2.6 + Math.sin(performance.now() / 250) * 0.15, -c.y); arrow.rotation.y += dt * 2;
         const v = veh(), near = !walking && S.landed && d < (v === 'heli' ? 20 : 7); ok.style.display = near ? '' : 'none'; } }
-    else if (R.st === 2) { if (S.dead) { toast('Kyyti keskeytyi', 2); R.st = 0; R.t = 30; clear(); }
+    else if (R.st === 2) { if (S.dead) { toast('Kyyti keskeytyi', 2); R.st = 0; R.t = 30; R.freePc(); clear(); }
       else { R.hpMin = Math.min(R.hpMin, S.hp); const d = Math.hypot(R.d.x - S.x, R.d.y - S.y);
         if (!walking && S.landed && d < (R.v === 'heli' ? 45 : 30) && (R.v !== 'heli' || S.alt < ground(S.x, S.y) + 3)) drop(); } }
     show(); };
@@ -3236,6 +3263,209 @@ DANCE.tick = () => { if (!DANCE.on) return; if (!WALK.on || WALK.in) { DANCE.sto
   if (b) { let k = DANCE.k; if (k > b.length - 2 || b[k] > t) k = 0; while (k < b.length - 2 && b[k + 1] <= t) k++; DANCE.k = k; DANCE.ph = k + (t - b[k]) / (b[k + 1] - b[k]); } else DANCE.ph = t * 2; };
 DANCE.sync = (a, off) => { const d = a.getClip().duration; a.timeScale = 0; a.time = ((((DANCE.ph + off) % 4) + 4) % 4) / 4 * d; };      // a four-beat clip at the song's beat
 $('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.toggle(); });
+
+// ---------- city bus (20.11.2026, owner: "a bus the player can drive or ride; borrowed at the Kauppatori stands or the Matkakeskus the player drives the
+// line, picks up passengers and lets them off when the stop button is pressed"). Model: bussi.js / bussi_m.js (tools/vehicles/porikopteri_bussi.py, doors
+// DoorF_A/B and DoorM_A/B turn about their hinges, damage steps as in the cars). Stops: OpenStreetMap (tools/bus/osm_stops.json, 20.11.2026), the 87 in the
+// sharp core. Two lines of our own over real stops: 1 Kauppatori - Puuvilla and back, 2 Matkakeskus - Kauppatori and back. Parked buses wait at
+// Kauppatori laituri 2 and Matkakeskus laituri 1; on foot next to one Enter takes it and starts that line.
+// Live buses: Digitransit's open MQTT feed (wss://mqtt.digitransit.fi, topic /gtfsrt/vp/Pori/#, GTFS-RT vehicle positions, no key) puts the real Pori
+// buses on the streets where they are right now (only while they run). On foot next to one that stands still, Enter gets on; N (or the bell button) asks
+// it to stop and the player gets off at the next halt. The live buses are drawn only - they do not collide.
+{
+  const STOPS = [["Yliopistokeskus E",255.2,733.4],["Valajankatu I",542.2,652.6],["Tuomarinkatu P",-994,-214.2],["Ratakatu L",-976,-820.1],["Ratakatu I",-907.1,-841.2],["Karjapiha L",-953,356.7],["Tasavallankatu P",-387.4,-791.7],["Lyseo I",-451.1,318.9],["Cygnaeus I",-367,-385.5],["Keski-Porin kirkko P",187.8,349.2],["Poliisilaitos E",-535.6,-666],["Karhukatu L",-502.7,-516.7],["Hallituskatu L",115.2,334.4],["Antinkatu",-115.2,-352.5],["Poliisilaitos P",-514.5,-643.8],["Asema-aukio I",-272.8,-823.3],["Porilaistenkatu E",-172.5,-594.8],["Valtionsilta I",-688.9,-309.3],["Liisantori L",-429.9,-221.6],["Otava I",-239.5,269.8],["Tasavallantori P",-408.9,-425.1],["Teljäntori P",-80.9,-262],["Kampus P",-261.8,-893.7],["Valtionsilta L",-646.5,-170.8],["Antinkatu L",-159.5,-286.8],["Kampus I",-276.2,-920.8],["Kuninkaanhaka L",801.5,-630.5],["Kävelykatu L",60.8,-338.3],["Oikokatu E",159.7,-736.4],["Itsenäisyydenkatu P",-9.5,-510.6],["Vähälinnankatu I",216.8,-694.2],["Isolinnankatu E",153.4,-178.7],["Presidentinpuistokatu I",465.5,-832],["Pori Kauppatori laituri 11",-22.5,-5.7],["Keskusaukio I",33.6,-478.2],["Yrjönkatu 9",125.9,149.8],["Nuorisotalo L",262.5,13.1],["Uimahalli I",591.4,-613.1],["Presidentinpuistokatu L",368.9,-740.7],["Teljäntori E",-65.4,-129.4],["Teljänkatu L",263.3,-510.8],["Teljänkatu I",278.7,-536.3],["Yliopistokeskus P",279,741.9],["Karjapiha I",-871.8,353.7],["Keskusaukio P",96.2,-518],["Keskusaukio E",67.6,-524.1],["Oikeustalo P",366.7,171],["Eetunaukio E",152.4,-100.3],["Itäpuisto P",10.2,-71.2],["Kuninkaanhaka I",805.5,-660.6],["Porin silta L",311.2,679.3],["Valajankatu L",426.2,665.3],["Sampo L",814.9,842.4],["Sampo I",824.4,827.2],["Pori matkakeskus laituri 7",-399.1,-892.5],["Pori matkakeskus laituri 1",-370.5,-928.6],["Pori matkakeskus laituri 2",-350.8,-913.1],["Pori matkakeskus laituri 4",-360.4,-904.4],["Pori matkakeskus laituri 3",-375.7,-917.3],["Pori matkakeskus laituri 5",-384.1,-908.1],["Pori matkakeskus laituri 6",-368.6,-895.8],["Puuvilla piha",159.5,986.7],["Keskusaukio L",96.9,-580.4],["Vähälinnankatu L",198.1,-666],["Urheilutalo L",636.5,-884.1],["Urheilutalo I",664.3,-930.2],["Isosannanpuistokatu E",315,1022.8],["Yliopistokeskus L",214,702.1],["Kävelykatu P",17.5,-367.1],["Oikokatu P",200.8,-776.8],["Tasavallankatu",-266.6,-539.1],["Porilaistenkatu I",-105.4,-636.4],["Porilaistenkatu L",-161.3,-671.8],["Lyseo L",-392.9,322.8],["Taavi",-125.7,498.2],["Pelle-Hermanni",-501.5,702.1],["Hanhipuisto",-701.5,741.3],["Porin silta I",313.3,660.8],["Pohjois-Porin terveysasema",138.6,854],["Uimahalli L",593.9,-583.9],["Pori Kauppatori laituri 6",15.6,112.7],["Pori Kauppatori laituri 7",25.5,105.5],["Pori Kauppatori laituri 5",4.7,114.8],["Pori Kauppatori laituri 4",-7.2,62.5],["Pori Kauppatori laituri 3",3.8,59.5],["Pori Kauppatori laituri 2",15,57.4],["Pori Kauppatori laituri 9",-7.1,62.8]].map(([n, x, y]) => ({ n, x, y, pose: null }));
+  const byName = n => STOPS.find(s => s.n === n);
+  const LINES = { 1: { n: '1', to: 'Puuvilla', depot: 'Pori Kauppatori laituri 2', dp: [8.8, 57, 0.25], s: ['Pori Kauppatori laituri 2', 'Hallituskatu L', 'Keski-Porin kirkko P', 'Porin silta L', 'Yliopistokeskus P', 'Puuvilla piha', 'Yliopistokeskus L', 'Porin silta I', 'Yrjönkatu 9', 'Pori Kauppatori laituri 6'] },
+    2: { n: '2', to: 'Kauppatori', depot: 'Pori matkakeskus laituri 1', dp: [-374.1, -924.1, 0.896], s: ['Pori matkakeskus laituri 1', 'Asema-aukio I', 'Porilaistenkatu I', 'Keskusaukio E', 'Kävelykatu P', 'Teljäntori E', 'Itäpuisto P', 'Pori Kauppatori laituri 11', 'Teljäntori P', 'Antinkatu L', 'Tasavallankatu', 'Porilaistenkatu L', 'Pori matkakeskus laituri 7'] } };
+  for (const k in LINES) LINES[k].stops = LINES[k].s.map(byName);
+  const short = n => n.replace(/^Pori /, '').replace(/ ([LIPE])$/, '');
+  const R = { line: null, i: 0, pax: [], req: false, reqT: 0, score: 0, served: false, near: 1e9, dwell: 0, door: 0, queue: null, hp: 100, best: 0, ride: null, bell: false, still: 0 };
+  try { R.best = +localStorage.getItem('pori-bussi') || 0; } catch (e) {}
+  let ready = false, broken = false;
+
+  /* stop pose: the bus stands on the carriageway next to the stop, nose along the street, the stop on its right (right-hand traffic) */
+  const asph = (x, y) => ROAD.asphAt(x, y);
+  const pose = (st, hint) => {
+    let px = st.x, py = st.y, f = asph(px, py);
+    for (let r = 1; r <= 12 && !f; r++) for (let a = 0; a < 16 && !f; a++) { const x = st.x + r * Math.sin(a * Math.PI / 8), y = st.y + r * Math.cos(a * Math.PI / 8); if (asph(x, y)) { px = x; py = y; f = true; } }
+    if (!f) return hint != null ? { x: st.x, y: st.y, yaw: hint } : null;
+    let yaw = hint;
+    if (yaw == null) { let best = -1; for (let a = 0; a < 18; a++) { const t = a * Math.PI / 18, sx = Math.sin(t), sy = Math.cos(t); let n = 0; for (const s of [1, -1]) for (let d = 1; d <= 40; d++) { if (!asph(px + sx * d * s, py + sy * d * s)) break; n++; } if (n > best) { best = n; yaw = t; } }
+      if ((st.x - px) * Math.cos(yaw) - (st.y - py) * Math.sin(yaw) < 0) yaw += Math.PI; }
+    const rx = Math.cos(yaw), ry = -Math.sin(yaw); let d = 0; while (d < 8 && asph(px + rx * (d + 0.5), py + ry * (d + 0.5))) d += 0.5;
+    const sh = Math.max(0, d - 1.7); return { x: px + rx * sh, y: py + ry * sh, yaw };
+  };
+
+  /* stop signs at every stop: a grey pole and a yellow sign with a bus, drawn as two instanced meshes */
+  const sign = () => { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const g = cv.getContext('2d'); g.fillStyle = '#f2c500'; g.fillRect(0, 0, 64, 64); g.strokeStyle = '#111'; g.lineWidth = 4; g.strokeRect(2, 2, 60, 60);
+    g.fillStyle = '#111'; g.fillRect(12, 18, 40, 24); g.fillStyle = '#f2c500'; g.fillRect(16, 22, 9, 8); g.fillRect(28, 22, 9, 8); g.fillRect(40, 22, 8, 8); g.fillStyle = '#111'; g.beginPath(); g.arc(21, 44, 5, 0, 7); g.arc(43, 44, 5, 0, 7); g.fill();
+    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t; };
+  const buildSigns = () => {
+    const poleG = new THREE.CylinderGeometry(0.04, 0.04, 2.6, 6), signG = new THREE.BoxGeometry(0.5, 0.5, 0.03);
+    const pm = new THREE.MeshStandardMaterial({ color: 0x8a8f94, metalness: 0.4, roughness: 0.5 }), sm = new THREE.MeshStandardMaterial({ map: sign(), roughness: 0.6 });
+    pm.userData.noT = sm.userData.noT = true; const P = new THREE.InstancedMesh(poleG, pm, STOPS.length), Q = new THREE.InstancedMesh(signG, sm, STOPS.length);
+    const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), one = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3();
+    STOPS.forEach((s, i) => { const z = carGround(s.x, s.y) ?? TZs(s.x, s.y), yaw = s.pose ? s.pose.yaw : 0;
+      p.set(s.x, z + 1.3, -s.y); m.compose(p, q.identity(), one); P.setMatrixAt(i, m);
+      e.set(0, -yaw + Math.PI / 2, 0); q.setFromEuler(e); p.set(s.x, z + 2.35, -s.y); m.compose(p, q, one); Q.setMatrixAt(i, m); });
+    for (const I of [P, Q]) { I.frustumCulled = false; I.userData.noT = true; scene.add(I); } };
+
+  /* markers for the next stop: a blue column over the sign and a ring where the bus should stand */
+  const mk = new THREE.Group(); mk.userData.noT = true; mk.visible = false; scene.add(mk);
+  { const c = new THREE.Mesh(new THREE.CylinderGeometry(0.6, 0.6, 30, 16, 1, true), new THREE.MeshBasicMaterial({ color: 0x3aa0ff, transparent: true, opacity: 0.28, depthWrite: false, side: THREE.DoubleSide })); c.position.y = 15; c.userData.noT = true; c.material.userData.noT = true; mk.add(c);
+    const r = new THREE.Mesh(new THREE.RingGeometry(5.6, 6.4, 40), new THREE.MeshBasicMaterial({ color: 0x3aa0ff, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide })); r.rotation.x = -Math.PI / 2; r.userData.noT = true; r.material.userData.noT = true; mk.ring = r; scene.add(r); r.visible = false; mk.col = c; }
+
+  /* a copy of the bus model for parked and live buses: undamaged, doors shut */
+  const copy = () => { const g = CARM.bus.root.clone(true); g.traverse(q => { if (/_d[1-3]$/.test(q.name || '')) q.visible = false; else if (/_d0$/.test(q.name || '') || q.name === 'PlateText_front') q.visible = true; if (/^Door[FM]_[AB]$/.test(q.name || '')) q.rotation.y = 0; });
+    const w = new THREE.Group(); w.rotation.order = 'YXZ'; w.userData.noT = true; w.add(g); scene.add(w); return w; };
+  const place = (g, x, y, yaw) => { g.position.set(x, carGround(x, y) ?? TZs(x, y), -y); g.rotation.set(0, -yaw, 0); };
+
+  /* parked buses at the two depots */
+  const DEP = []; let paint = 0x2a6fb5;
+  const setup = () => { for (const s of STOPS) s.pose = pose(s, null);
+    for (const k in LINES) { const L = LINES[k], s = byName(L.depot); s.pose = { x: L.dp[0], y: L.dp[1], yaw: L.dp[2] }; DEP.push({ line: k, x: s.pose.x, y: s.pose.y, yaw: s.pose.yaw, g: null, gone: false }); }      /* depot stands on the OSM bus lanes (the square's paving is not carriageway in the game) */
+    try { buildSigns(); } catch (e) { console.warn('bus signs', e); }
+    CARM.bus.root.traverse(q => { if (q.isMesh && q.material && q.material.name === 'CarPaint') paint = q.material.color.getHex(); }); };
+  const depTick = () => { const px = WALK.on ? WALK.x : S.x, py = WALK.on ? WALK.y : S.y;
+    for (const d of DEP) { if (d.gone && !(VEH === 'car' && CAR.type === 'bus' && R.line === d.line) && Math.hypot(d.x - px, d.y - py) > 250) d.gone = false;
+      if (!d.gone && !d.g) { d.g = copy(); place(d.g, d.x, d.y, d.yaw); } if (d.g) d.g.visible = !d.gone; } };
+
+  /* doors of the bus the player drives */
+  const doors = o => { const r = CARM.bus && CARM.bus.root; if (!r) return; for (const n of ['DoorF_A', 'DoorF_B', 'DoorM_A', 'DoorM_B']) { const q = r.getObjectByName(n); if (!q) continue; const a = q.userData.openAngleDeg ?? (/_A$/.test(n) ? -85 : 85); q.rotation.y = a * Math.PI / 180 * o; } };
+
+  /* people: the walker models of the NPC module, standing at a stop or walking to the door */
+  const kinds = ['nainen_a', 'nainen_b', 'mies_a', 'mies_b', 'tytto', 'poika'];
+  const person = (x, y, yaw) => { const N = window.__npc; if (!N || !N.mk) return null; const k = kinds[Math.random() < 0.85 ? Math.floor(Math.random() * 4) : 4 + Math.floor(Math.random() * 2)], c = N.mk(k); if (!c) return null;
+    c.x = x; c.y = y; c.yaw = yaw; N.anim(c, 'Idle'); return c; };
+  const show = (c, dt, vis) => { const z = carGround(c.x, c.y) ?? TZs(c.x, c.y); c.g.position.set(c.x, z, -c.y); c.g.rotation.y = -c.yaw; c.g.visible = vis; if (vis) c.mix.update(dt); };
+  const drop = c => { if (window.__npc && window.__npc.free) window.__npc.free(c); };
+
+  const door = (front) => { const sn = Math.sin(CAR.yaw), cs = Math.cos(CAR.yaw), f = front ? 4.4 : 0.05, r = 1.75; return { x: CAR.x + sn * f + cs * r, y: CAR.y + cs * f - sn * r }; };
+  const waitAt = s => { if (s.w) return; s.w = []; const L = LINES[R.line], depot = s === L.stops[0]; const n = depot ? 2 + Math.floor(Math.random() * 3) : [0, 0, 1, 1, 1, 2, 2, 3][Math.floor(Math.random() * 8)];
+    const yaw = s.pose ? s.pose.yaw - Math.PI / 2 : 0; for (let j = 0; j < n; j++) { const a = Math.random() * 6.28, r = 0.6 + Math.random() * 1.4, c = person(s.x + Math.sin(a) * r, s.y + Math.cos(a) * r, yaw + (Math.random() - 0.5)); if (c) s.w.push(c); } };
+  const clearWait = s => { if (s.w) for (const c of s.w) drop(c); s.w = null; };
+  const clearAll = () => { for (const s of STOPS) clearWait(s); for (const p of R.pax) if (p.c) drop(p.c); R.pax = []; if (R.queue) for (const q of R.queue) if (q.c) drop(q.c); R.queue = null; };
+
+  /* sound: the stop bell (two soft tones) */
+  const ding = () => { try { const A = typeof actx !== 'undefined' && actx ? actx : null; if (!A) return; const t = A.currentTime;
+    for (const [f, d] of [[988, 0], [784, 0.22]]) { const o = A.createOscillator(), g = A.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.setValueAtTime(0, t + d); g.gain.linearRampToValueAtTime(0.18, t + d + 0.01); g.gain.exponentialRampToValueAtTime(0.001, t + d + 0.6); o.connect(g).connect(A.destination); o.start(t + d); o.stop(t + d + 0.7); } } catch (e) {} };
+
+  /* HUD */
+  const css = document.createElement('style'); css.textContent = '#bus { left:14px; bottom:124px; padding:6px 10px; font-size:13px; display:none; gap:10px; align-items:center; color:var(--ink); max-width:min(420px,80vw); flex-wrap:wrap; }' +
+    ' #bus.on { display:flex; } #bus b { font-variant-numeric:tabular-nums; } #bus .bell { padding:1px 7px; border-radius:6px; background:#333; color:#888; font-weight:700; } #bus .bell.on { background:#e0312b; color:#fff; }' +
+    ' .touch #bus { bottom:auto; top:214px; } body.walk #bus:not(.ride) { display:none !important; } #tbell { bottom:302px; display:none; } body.busride #tbell { display:flex !important; }';
+  document.head.appendChild(css);
+  const el = document.createElement('div'); el.id = 'bus'; el.className = 'hud panel'; document.body.appendChild(el);
+  { const t = document.getElementById('touch'); if (t) { const b = document.createElement('div'); b.className = 'tb'; b.id = 'tbell'; b.textContent = '🔔'; b.setAttribute('aria-label', 'Pysähtyy'); t.appendChild(b); b.addEventListener('pointerdown', e => { e.preventDefault(); bell(); }); } }
+  const arrow = (dx, dy, yaw) => { let a = Math.atan2(dx, dy) - yaw; a = Math.atan2(Math.sin(a), Math.cos(a)); return '⬆↗➡↘⬇↙⬅↖'[((Math.round(a / (Math.PI / 4)) % 8) + 8) % 8]; };
+  let hudT = 0;
+  const hudBus = () => { const L = LINES[R.line], s = L.stops[R.i], d = Math.hypot(s.x - CAR.x, s.y - CAR.y);
+    el.className = 'hud panel on'; el.innerHTML = '🚌 <b>Linja ' + L.n + '</b> · Seuraava: <b>' + short(s.n) + '</b> ' + (d > 30 ? Math.round(d) + ' m ' + arrow(s.x - CAR.x, s.y - CAR.y, CAR.yaw) : '') +
+      ' · 👥 <b>' + R.pax.length + '</b>' + (s.w && s.w.length ? ' · odottaa ' + s.w.length : '') + ' <span class="bell' + (R.req ? ' on' : '') + '">PYSÄHTYY</span> · <b>' + R.score + '</b> p'; };
+
+  /* driving the line */
+  const start = line => { clearAll(); R.line = line; R.i = 0; R.req = false; R.reqT = 0; R.served = false; R.near = 1e9; R.dwell = 0; R.door = 0; R.hp = S.hp; R.queue = null;
+    const L = LINES[line]; waitAt(L.stops[0]); toast('🚌 Linja ' + L.n + ' → ' + L.to + '. Ensimmäinen pysäkki: ' + short(L.stops[0].n), 3.5); };
+  const next = () => { const L = LINES[R.line]; clearWait(L.stops[R.i]); R.i = (R.i + 1) % L.stops.length; if (R.i === 0) { R.score += 30; toast('Linja ajettu! +30', 2.2); }
+    R.served = false; R.near = 1e9; R.req = false; R.reqT = R.pax.some(p => p.dest === R.i) ? 2 + Math.random() * 5 : 0; save(); };
+  const save = () => { if (R.score > R.best) { R.best = R.score; try { localStorage.setItem('pori-bussi', String(R.best)); } catch (e) {} } };
+  const driveTick = dt => {
+    const L = LINES[R.line], s = L.stops[R.i], P = s.pose || s, d = Math.min(Math.hypot(P.x - CAR.x, P.y - CAR.y), Math.hypot(s.x - CAR.x, s.y - CAR.y));
+    for (const k of [0, 1]) { const q = L.stops[(R.i + k) % L.stops.length]; if (Math.hypot(q.x - CAR.x, q.y - CAR.y) < 260) waitAt(q); }
+    if (R.reqT > 0 && (R.reqT -= dt) <= 0) { R.req = true; ding(); }
+    if (S.hp < R.hp) { if (R.pax.length) { R.score = Math.max(0, R.score - Math.ceil((R.hp - S.hp) / 2)); if (R.hp - S.hp > 4) toast('Matkustajat kaatuilevat! −' + Math.ceil((R.hp - S.hp) / 2), 1.6); } R.hp = S.hp; } else R.hp = S.hp;
+    const want = R.pax.some(p => p.dest === R.i), wait = s.w ? s.w.length : 0;
+    if (!R.served && d < 18 && Math.abs(CAR.v) < 0.6) R.dwell += dt; else if (!R.queue) R.dwell = 0;
+    if (!R.served && R.dwell > 0.5 && !R.queue) {      /* stopped at the stop: doors open, those for here get off, the waiting get on */
+      R.queue = []; const off = R.pax.filter(p => p.dest === R.i); R.pax = R.pax.filter(p => p.dest !== R.i);
+      for (const p of off) R.queue.push({ off: true }); for (const c of s.w || []) R.queue.push({ c }); s.w = []; R.qt = 0.9; }
+    R.door += ((R.queue ? 1 : 0) - R.door) * Math.min(1, dt * 3.5); doors(R.door);
+    if (R.queue) {
+      if (Math.abs(CAR.v) > 1.2) { const left = R.queue.filter(q => q.c).length; for (const q of R.queue) if (q.c) drop(q.c); if (left) { R.score = Math.max(0, R.score - 5 * left); toast('Ajoit ovet auki pois – ' + left + ' jäi kyydistä! −' + 5 * left, 2.2); } R.queue = null; R.served = true; next(); return; }
+      const q = R.queue[0];
+      if (!q) { if (input.f > 0.05 || (R.qt -= dt) < -1.5) { R.queue = null; R.served = true; next(); } return; }
+      if (q.off) { if ((R.qt -= dt) <= 0) { const D = door(false); if (window.__npc && window.__npc.arrive) window.__npc.arrive(D.x, D.y); R.score += 10; toast('Matkustaja jäi pois: ' + short(s.n) + ' +10', 1.4); R.queue.shift(); R.qt = 0.9; } return; }
+      const D = door(true), dx = D.x - q.c.x, dy = D.y - q.c.y, l = Math.hypot(dx, dy); window.__npc.anim(q.c, 'Walk');
+      if (l < 0.35) { drop(q.c); const n = L.stops.length; R.pax.push({ dest: (R.i + 1 + Math.floor(Math.random() * Math.min(5, n - 1))) % n }); R.score += 2; R.queue.shift(); }
+      else { const v = Math.min(l, 1.35 * dt); q.c.x += dx / l * v; q.c.y += dy / l * v; q.c.yaw = Math.atan2(dx, dy); if (q.c.act.Walk) q.c.act.Walk.timeScale = 1.35 / (window.__npc.stride[q.c.k] || 1.2); }
+      return; }
+    R.near = Math.min(R.near, d);
+    const passed = (R.near < 30 && d > R.near + 25) || Math.hypot(L.stops[(R.i + 1) % L.stops.length].x - CAR.x, L.stops[(R.i + 1) % L.stops.length].y - CAR.y) < 25;
+    if (!R.served && passed) {
+      if (want) { const n = R.pax.filter(p => p.dest === R.i).length; R.score = Math.max(0, R.score - 15 * n); toast('Ohitit pysäkin, vaikka joku painoi nappia! −' + 15 * n, 2.4); for (const p of R.pax) if (p.dest === R.i) p.dest = (R.i + 1) % L.stops.length; }
+      else if (wait) { R.score = Math.max(0, R.score - 5 * wait); toast(wait + ' jäi odottamaan pysäkille ' + short(s.n) + ' −' + 5 * wait, 2.2); }
+      next(); } };
+
+  /* live buses (Digitransit MQTT, GTFS-RT vehicle positions) */
+  const LIVE = new Map(); let ws = null, wsT = 0, wsBad = 0, buf = new Uint8Array(0), pingT = 0;
+  const enc = s => new TextEncoder().encode(s), cat = (...a) => { const o = new Uint8Array(a.reduce((n, x) => n + x.length, 0)); let i = 0; for (const x of a) { o.set(x, i); i += x.length; } return o; };
+  const remLen = n => { const o = []; do { let b = n % 128; n = Math.floor(n / 128); if (n > 0) b |= 128; o.push(b); } while (n > 0); return Uint8Array.from(o); };
+  const str = s => { const b = enc(s); return cat(Uint8Array.from([b.length >> 8, b.length & 255]), b); };
+  const pkt = (h, body) => cat(Uint8Array.from([h]), remLen(body.length), body);
+  const connect = () => { if (ws || wsBad > 5) return; try { ws = new WebSocket('wss://mqtt.digitransit.fi', ['mqtt']); } catch (e) { ws = null; wsBad++; return; } ws.binaryType = 'arraybuffer';
+    ws.onopen = () => { ws.send(pkt(0x10, cat(str('MQTT'), Uint8Array.from([4, 2, 0, 60]), str('porikopteri-' + Math.random().toString(36).slice(2, 10))))); ws.send(pkt(0x82, cat(Uint8Array.from([0, 1]), str('/gtfsrt/vp/Pori/#'), Uint8Array.from([0])))); };
+    ws.onmessage = e => { buf = cat(buf, new Uint8Array(e.data)); parse(); };
+    ws.onclose = ws.onerror = () => { if (ws) { ws.onclose = ws.onerror = null; try { ws.close(); } catch (x) {} } ws = null; wsBad++; wsT = 10 + wsBad * 10; }; };
+  const parse = () => { for (;;) { if (buf.length < 2) return; let m = 1, n = 0, i = 1, b; do { if (i >= buf.length) return; b = buf[i++]; n += (b & 127) * m; m *= 128; } while (b & 128); if (buf.length < i + n) return;
+      const h = buf[0], t = h >> 4, body = buf.slice(i, i + n); buf = buf.slice(i + n); if (t === 3) { const tl = (body[0] << 8) | body[1], topic = new TextDecoder().decode(body.subarray(2, 2 + tl)); let o = 2 + tl; if ((h >> 1 & 3) > 0) o += 2; try { onVP(topic, body.subarray(o)); } catch (e) {} } else if (t === 2) wsBad = 0; } };
+  /* minimal protobuf reader for FeedMessage > entity > vehicle > position / trip */
+  const pb = (u, f) => { const dv = new DataView(u.buffer, u.byteOffset, u.byteLength); let p = 0; const vi = () => { let r = 0, s = 1, b; do { b = u[p++]; r += (b & 127) * s; s *= 128; } while (b & 128); return r; };
+    while (p < u.length) { const k = vi(), fn = Math.floor(k / 8), wt = k & 7; if (wt === 0) f(fn, 0, vi()); else if (wt === 2) { const l = vi(); f(fn, 2, u.subarray(p, p + l)); p += l; } else if (wt === 5) { f(fn, 5, dv.getFloat32(p, true)); p += 4; } else if (wt === 1) { f(fn, 1, dv.getFloat64(p, true)); p += 8; } else return; } };
+  const onVP = (topic, u) => { const T = topic.split('/'), line = T[18] || T[7] || '?', head = T[9] || '', vid = T[13] || '';
+    pb(u, (f, w, v) => { if (f !== 2 || w !== 2) return; pb(v, (f2, w2, v2) => { if (f2 !== 4 || w2 !== 2) return; let lat = null, lon = null, br = null, sp = 0;
+      pb(v2, (f3, w3, v3) => { if (f3 === 2 && w3 === 2) pb(v3, (f4, w4, v4) => { if (f4 === 1) lat = v4; else if (f4 === 2) lon = v4; else if (f4 === 3) br = v4; else if (f4 === 5) sp = v4; }); });
+      if (lat === null) return; const x = (lon - 21.796) * 53278, y = (lat - 61.486) * 111437; if (x < OX0 + 50 || x > OX1 - 50 || y < OY0 + 50 || y > OY1 - 50) { const o = LIVE.get(vid); if (o) o.t = -1e9; return; }
+      let o = LIVE.get(vid); if (!o) { o = { id: vid, x, y, yaw: br !== null ? br * Math.PI / 180 : 0, g: null }; LIVE.set(vid, o); }
+      o.tx = x; o.ty = y; o.sp = sp || 0; if (br !== null && (sp > 0.5 || !o.br)) o.br = br * Math.PI / 180; o.line = line; o.head = head; o.t = performance.now() / 1000; }); }); };
+  let pool = [];
+  const liveTick = dt => { if (!document.hidden) { if (!ws && (wsT -= dt) <= 0) connect(); if (ws && ws.readyState === 1 && (pingT += dt) > 30) { pingT = 0; ws.send(Uint8Array.from([0xc0, 0])); } }
+    const now = performance.now() / 1000, px = WALK.on ? WALK.x : S.x, py = WALK.on ? WALK.y : S.y; const vis = [];
+    for (const [k, o] of LIVE) { if (now - o.t > 90) { if (o.g) { o.g.visible = false; pool.push(o.g); o.g = null; } LIVE.delete(k); continue; }
+      const age = Math.min(4, now - o.t), fx = o.tx + Math.sin(o.br || 0) * o.sp * age, fy = o.ty + Math.cos(o.br || 0) * o.sp * age;
+      o.x += (fx - o.x) * Math.min(1, dt * 2.2); o.y += (fy - o.y) * Math.min(1, dt * 2.2); if (Math.hypot(fx - o.x, fy - o.y) > 60) { o.x = fx; o.y = fy; }
+      if (o.br !== undefined) { let a = o.br - o.yaw; a = Math.atan2(Math.sin(a), Math.cos(a)); o.yaw += a * Math.min(1, dt * 2.5); }
+      o.d = Math.hypot(o.x - px, o.y - py); if (o.d < 650) vis.push(o); else if (o.g) { o.g.visible = false; pool.push(o.g); o.g = null; } }
+    vis.sort((a, b) => a.d - b.d); vis.forEach((o, i) => { if (i >= (isTouch ? 5 : 9)) { if (o.g) { o.g.visible = false; pool.push(o.g); o.g = null; } return; }
+      if (!o.g) o.g = pool.pop() || copy(); o.g.visible = true; place(o.g, o.x, o.y, o.yaw); }); };
+
+  /* riding a live bus */
+  const rideNear = (x, y) => { if (R.ride) return 'busout'; let b = null, bd = 1e9; for (const o of LIVE.values()) { if (!o.g || o.sp > 1) continue; const dx = x - o.x, dy = y - o.y, sn = Math.sin(o.yaw), cs = Math.cos(o.yaw), f = dx * sn + dy * cs, r = dx * cs - dy * sn;
+      const e = Math.hypot(Math.max(0, Math.abs(f) - 6.1), Math.max(0, Math.abs(r) - 1.3)); if (e < 2.2 && e < bd) { bd = e; b = o; } } R.cand = b; return b ? 'bus' : ''; };
+  const bell = () => { if (!R.ride || R.bell) return; R.bell = true; ding(); toast('🔔 Pysähtyy', 1.2); };
+  const getOff = msg => { const o = R.ride; R.ride = null; R.bell = false; document.body.classList.remove('busride'); el.className = 'hud panel';
+    if (o) { const sn = Math.sin(o.yaw), cs = Math.cos(o.yaw); let x = o.x + cs * 2.4, y = o.y - sn * 2.4; if (!walkFree(x, y)) { x = o.x - cs * 2.4; y = o.y + sn * 2.4; } WALK.x = x; WALK.y = y; WALK.z = carGround(x, y) ?? TZs(x, y); WALK.yaw = o.yaw + Math.PI / 2; }
+    walkG.visible = true; camPos.set(WALK.x - Math.sin(WALK.yaw) * 3, WALK.z + 2, -WALK.y + Math.cos(WALK.yaw) * 3); toast(msg, 2.2); };
+  const ride = () => { const o = R.cand; if (!o) return; R.ride = o; R.bell = false; R.still = 0; R.moved = false; document.body.classList.add('busride');
+    toast('🚌 Kyydissä: linja ' + o.line + (o.head ? ' → ' + o.head : '') + (isTouch ? ' – 🔔 pysäyttää' : ' – N pysäyttää'), 3); };
+  const rideTick = dt => { const o = R.ride; if (!o.g || !LIVE.has(o.id)) { getOff('Bussi poistui kartalta – jäit pois'); return; }
+    WALK.x = o.x; WALK.y = o.y; WALK.v = 0; walkG.visible = false; if (o.sp > 2) R.moved = true;
+    const now = performance.now() / 1000; if (o.sp < 0.4) { if (!R.st0) R.st0 = now; R.still = now - R.st0; } else { R.st0 = 0; R.still = 0; }      /* wall-clock: the halt is real time */
+    if (R.bell && R.moved && R.still > 2) { getOff('Jäit pois bussista ' + o.line); return; }
+    el.className = 'hud panel on ride'; el.innerHTML = '🚌 <b>Linja ' + o.line + '</b>' + (o.head ? ' → ' + o.head : '') + ' · ' + Math.round(o.sp * 3.6) + ' km/h <span class="bell' + (R.bell ? ' on' : '') + '">PYSÄHTYY</span>'; };
+  const cam = dt => { const o = R.ride; if (!o) return false; const sn = Math.sin(o.yaw), cs = Math.cos(o.yaw), z = carGround(o.x, o.y) ?? TZs(o.x, o.y);
+    tmp.set(o.x - sn * 14, z + 5.5, -o.y + cs * 14); camPos.lerp(tmp, 1 - Math.exp(-dt * 3)); tmp2.set(o.x + sn * 8, z + 1.8, -o.y - cs * 8); camLook.lerp(tmp2, 1 - Math.exp(-dt * 5)); camera.position.copy(camPos); camera.lookAt(camLook); return true; };
+
+  let acc = 0;
+  const tick = dt => { if (!started) return;
+    if (!CARM.bus) { if (!carLoading.bus) loadCar('bus'); return; }
+    if (!ready) { if (!window.__roads && (acc += dt) < 40) return; ready = true; setup(); }
+    depTick(); liveTick(dt);
+    if (R.ride) rideTick(dt);
+    const driving = VEH === 'car' && CAR.type === 'bus' && !WALK.on && R.line;
+    if (driving) { driveTick(dt); if ((hudT -= dt) <= 0) { hudT = 0.2; hudBus(); } const L = LINES[R.line], s = L.stops[R.i], P = s.pose || s;
+      mk.visible = true; mk.position.set(s.x, carGround(s.x, s.y) ?? TZs(s.x, s.y), -s.y); mk.ring.visible = true; mk.ring.position.set(P.x, (carGround(P.x, P.y) ?? TZs(P.x, P.y)) + 0.08, -P.y); }
+    else { mk.visible = false; mk.ring.visible = false; if (!R.ride) el.className = 'hud panel'; if (R.door > 0.01 && !(VEH === 'car' && CAR.type === 'bus')) { R.door = 0; doors(0); } }
+    if (R.line) { const vis = []; for (const k of [0, 1]) { const q = LINES[R.line].stops[(R.i + k) % LINES[R.line].stops.length]; if (q.w) for (const c of q.w) vis.push(c); } if (R.queue) for (const q of R.queue) if (q.c) vis.push(q.c);
+      const px = WALK.on ? WALK.x : S.x, py = WALK.on ? WALK.y : S.y; for (const c of vis) show(c, dt, Math.hypot(c.x - px, c.y - py) < 160); } };
+  window.__bus = { R, LINES, STOPS, LIVE, DEP,
+    near: (x, y) => { if (!ready) return null; for (const d of DEP) { if (d.gone) continue; const dx = x - d.x, dy = y - d.y, sn = Math.sin(d.yaw), cs = Math.cos(d.yaw), f = dx * sn + dy * cs, r = dx * cs - dy * sn;
+        if (Math.hypot(Math.max(0, Math.abs(f) - 6.1), Math.max(0, Math.abs(r) - 1.3)) < 2.4) return { x: d.x, y: d.y, yaw: d.yaw, hex: paint, dep: d }; } return null; },
+    take: T => { T.dep.gone = true; if (T.dep.g) T.dep.g.visible = false; start(T.dep.line); },
+    rideNear, ride, bell, out: () => { if (R.ride && R.ride.sp < 0.6) getOff('Jäit pois bussista'); else toast(isTouch ? 'Bussi liikkuu – paina 🔔' : 'Bussi liikkuu – paina N', 1.6); },
+    hint: k => k === 'busout' ? 'jää pois' : R.cand ? 'nouse bussiin ' + R.cand.line + (R.cand.head ? ' → ' + R.cand.head : '') : '', cam,
+    tick: dt => { if (broken) return; try { tick(dt); } catch (e) { broken = true; window.__bus.err = String(e && e.stack || e); console.warn('bussi', e); el.className = 'hud panel'; } } };
+  window.__busTick = dt => window.__bus.tick(dt);
+}
 
 window.__game = { WALK, IN, PLACES, placeDoor, walkAction, sceneIn, door: churchDoor, S, begin, keys, camera, renderer, scene, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
 terrainizeScene(); setInterval(terrainizeScene, 1000);

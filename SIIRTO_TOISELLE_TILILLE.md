@@ -1219,6 +1219,33 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
   areenan probe `[-6.1, 0, -1, 0]`.
 - **Testi (pilvi):** kauppahalliin sisään ovesta, molemmat käytävät, saareke, pöydät; ei virheitä. Jäähallin katos kuvattu pelistä. Kuva: `Claude outputs/sisatilat_20_11/`.
 
+## 20.11.2026 klo 16 – Kyytiläinen tarakalla ja nojaus (mallichatin zip `porikopteri_pyoraily_kyytiläinen.zip`, ohje v3)
+
+**Muutettu:** `index.html`, `hahmo.js`, `npc_*.js` (6), `pyora.js`, `tools/props/porikopteri_siirto_pyoraily.md` (v3), uusi `tools/hahmo/siirra_klipit.py`.
+
+- **Mallitiedostoja EI korvattu kokonaan.** Zipin `porikopteri_hahmo.glb` ja `porikopteri_npc_*.glb` sisältävät vanhan Walk/Run/Idle-askelluksen eivätkä tunne
+  klippejä `Chair`, `Dance`, `Dance2`. Siksi vain uudet klipit siirrettiin pelin nykyisiin tiedostoihin: `python tools/hahmo/siirra_klipit.py peli.js lahde.glb
+  ulos.js Klippi1,Klippi2` (luut nimen mukaan, lepoasento tarkistetaan, ero 0). hahmo.js: `Cycle` (zipin versio), `CycleLeanL`, `CycleLeanR`;
+  npc_*.js: `Passenger`, `PassengerLeanL`, `PassengerLeanR`. **Jos mallichat tekee hahmot uudestaan, aja sama työkalu – älä kopioi GLB:tä päälle.**
+- `pyora.js` = zipin uusi `porikopteri_pyora.glb` (uusi solmu `RackPad`). Pehmuste näkyy vain, kun kyydissä on joku (`TAKE.bk.pad`); pysäköidyistä
+  instanssipyöristä se on jätetty pois.
+- **Kyytiläinen (`kyydit`-lohko + `__takeTick`):** kun kyytipyyntö hyväksytään pyörällä, kävelijästä tehdään oma kopio (`__npc.mk`, sama malli ja samat
+  värisävyt) → `__ride.pc`. Se seuraa pyörää (sama paikka ja kierto kuin ajajalla, juuren skaalaan ei kosketa) ja soittaa `Passenger`-klippiä. Perillä sama
+  hahmo nousee pois vasemmalle ja kävelee lähimmälle jalkakäytävälle (`__npc.arrive(x, y, ch)`). Jos pelaaja nousee pyörältä, kyytiläinen jää istumaan.
+  Kuolema/keskeytys: `R.freePc()`.
+- **Nojaus:** pyörä + ajaja + kyytiläinen kallistuvat kuten ennen (`TAKE.lean`, enint. 0,35 rad, > 0 = oikealle), lisäksi nojausklipit painoilla
+  `w = min(1, |lean| / 0,3)`: oikealle `CycleLeanR`/`PassengerLeanR`, vasemmalle `…LeanL`; kolme klippiä samassa tahdissa (`time` kopioidaan). Painot
+  asetetaan `action.weight`illa (ei `setEffectiveWeight`, joka katkaisisi ristihäivytyksen).
+- Ohjaustangon näkyvä kääntö 0,9 → 0,55 × ohjauskulma: kädet eivät seuraa tankoa (ei klippiä), pienemmällä kulmalla ne pysyvät lähempänä kahvoja.
+- **Tarkistettu pelissä headless** (`/home/claude/work/bk.mjs`, kuva `Claude outputs/pyoraily_kyytilainen_20_11.jpg`): pyörän lainaus, kyytiin otto, kyytiläinen
+  tarakalla, kallistus vasemmalle ja oikealle oikeaan suuntaan (kaarteen sisään), kädet kahvoilla ja jalat polkimilla suoraan ajaessa, perillä kyytiläinen
+  nousee pois ja pehmuste katoaa, pyörältä nousu ja takaisin, kävely sen jälkeen normaali; ei konsolivirheitä.
+- **Ei toimi / tiedossa:** jyrkässä käännöksessä ulkokaarteen käsi irtoaa kahvasta; pysähdyksissä jalat ovat polkimilla (ei asentoa jalka maassa);
+  kyytiin nousulle ja pois nousulle ei ole animaatiota (hahmo ilmestyy tarakalle / pyörän viereen); kyytiläinen istuu aina kasvot vasemmalle; lapset eivät
+  pyydä kyytiä (klipit on, koodi rajaa aikuisiin); 20° + 10° nojaus täydessä vauhdissa voi näyttää jyrkältä – pienennä `0.35`/`0.3`, jos omistaja haluaa.
+  EI testattu oikealla ruudunpäivityksellä eikä puhelimella.
+- **Toive mallichatille (ei pakollinen):** käsien IK-kohteet tai `SteerL/SteerR`-klipit, pysähdysasento (`CycleStop`, jalka maassa), kyytiin nousu.
+
 ## ILLAN MODAL-JONO (omistaja polttaa illalla – PÄIVITÄ TÄTÄ LISTAA, älä tee uutta)
 (Sisätilat ja jalankulku eivät kuulu tähän jonoon: ne eivät tarvitse polttoa, vain pushin – ks. edellinen luku "SISÄTILAT JA JALANKULKU".)
 Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 mennessä viedyn). Sen jälkeen kertyneet:
@@ -1986,3 +2013,13 @@ bottilohkon ryhmä- ja hahmosilmukka), `npc_*.js` ja `hahmo.js` (uudet klipit `D
   (107.1, 99), (97.2, 101.1), (89.5, 102.8), (81.4, 104.5), (30.5, 116.8). Rengaspenkit seuraavat `window.__treeList`iä, joten nekin jäivät pois (4 kpl).
 - Torin itäreunan (Yrjönkadun puoli) kaksi puuta (104.7, 88.3) ja (102.6, 78.9) rengaspenkkeineen ovat yhä paikallaan – omistaja ei maininnut niitä.
 - Tarkistettu headless: rengaspenkkejä 14 (ennen 18), ei yhtään 15 m lähempänä Pohjoiskauppatoria; ei konsolivirheitä.
+
+## 20.11.2026 klo 14 – KONSEPTI VAIHTUU: "Outojen asioiden toimitus" lopetettu, tilalle tarinatila Satamakaupunki (omistaja: "luovutaan outojen asioiden toimituksesta")
+
+- **Konsepti "Outojen asioiden toimitus" (luku "20.11.2026 klo 03", c28) on hylätty.** Älä tee tapauksia 2–4 äläkä yleistä tapausmoottoria sen konseptin pohjalta.
+- **Uusi suunta:** perheystävällinen (PEGI 7) GTA-tyylinen tarinatila **Satamakaupunki**, 26 tehtävää viidessä luvussa Porin keskustassa. Alkaa Kokemäenjoen Etelärannalta.
+  - Käsikirjoitus moottoria varten (ID, VAATII, LAUKAISU, OBJ, CP, FAIL, ASETTAA; repliikit, välianimaatiot, sijainti-ID:t): https://claude.ai/artifact/YYef6VTmqtmEmZJPU8M6mN
+  - Tehtävälista ja sisältösäännöt: https://claude.ai/artifact/SNDBx6wNPEjLagx5e6vbJi
+  - **Puuttuvat ominaisuudet prioriteetteineen: `tarvittavat_ominaisuudet/README.md`** (repon juuressa). Aloita sen kohdasta 10 (Luku 1 pystysuorana siivuna).
+- **Tapaus 1 ("Karhu katsoo väärään suuntaan") poistetaan pelistä**, mutta sen tekniikka (soitto + tekstitys, valintanapit, localStorage-tallennus, radion soittolistalisäys) on tehtävämoottorin pohja. Ei vielä poistettu koodista eikä tiedostoista – tee se tehtävämoottorin yhteydessä.
+- Auki: radion nimi tarinassa (pelissä "Radio Porikopteri", käsikirjoituksessa "Radio Kirjuri").

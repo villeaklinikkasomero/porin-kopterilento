@@ -1,0 +1,852 @@
+{
+"note": "Porin bussipysäkit OpenStreetMapista (Overpass, haettu 20.11.2026, © OpenStreetMapin tekijät, ODbL). x,y pelin metreinä: x=(lon-21.796)*53278, y=(lat-61.486)*111437. Nimen pääte kertoo suunnan (I/L/P/E). core=pelin tarkan alueen sisällä.",
+"stops": [
+{
+"id": "n300427015",
+"n": "Yliopistokeskus E",
+"x": 255.2,
+"y": 733.4,
+"core": true
+},
+{
+"id": "n536713078",
+"n": "Valajankatu I",
+"x": 542.2,
+"y": 652.6,
+"core": true
+},
+{
+"id": "n1024842154",
+"n": "Tiilitehtaanpuistokatu I",
+"x": -1175.1,
+"y": -494.2,
+"core": false
+},
+{
+"id": "n1024842155",
+"n": "Tapionkatu I",
+"x": -1445.1,
+"y": -431.9,
+"core": false
+},
+{
+"id": "n1024842166",
+"n": "Pääterveysasema I",
+"x": -1347,
+"y": -102.9,
+"core": false
+},
+{
+"id": "n1024842167",
+"n": "Pääterveysasema L",
+"x": -1426.5,
+"y": -64.7,
+"core": false
+},
+{
+"id": "n1024842168",
+"n": "Tapionkatu L",
+"x": -1487.8,
+"y": -389,
+"core": false
+},
+{
+"id": "n1024842264",
+"n": "Tiilitehtaanpuistokatu L",
+"x": -1225,
+"y": -450.2,
+"core": false
+},
+{
+"id": "n1024842481",
+"n": "Tuomarinkatu E",
+"x": -1012,
+"y": -250.8,
+"core": false
+},
+{
+"id": "n1024842491",
+"n": "Tuomarinkatu P",
+"x": -994,
+"y": -214.2,
+"core": true
+},
+{
+"id": "n1024842523",
+"n": "Päärnäistenkatu L",
+"x": -1039.3,
+"y": -159.1,
+"core": false
+},
+{
+"id": "n1024842534",
+"n": "Päärnäistenkatu I",
+"x": -1061.8,
+"y": -167.5,
+"core": false
+},
+{
+"id": "n1024842638",
+"n": "Ratakatu L",
+"x": -976,
+"y": -820.1,
+"core": true
+},
+{
+"id": "n1024842655",
+"n": "Ratakatu I",
+"x": -907.1,
+"y": -841.2,
+"core": true
+},
+{
+"id": "n1033322172",
+"n": "Karjapiha L",
+"x": -953,
+"y": 356.7,
+"core": true
+},
+{
+"id": "n1033322211",
+"n": "Puunaulakatu I",
+"x": -1429.7,
+"y": 278.3,
+"core": false
+},
+{
+"id": "n1033322219",
+"n": "Puunaulakatu L",
+"x": -1486.8,
+"y": 318.8,
+"core": false
+},
+{
+"id": "n1041158806",
+"n": "Urheilutie I",
+"x": -1593.1,
+"y": -705.4,
+"core": false
+},
+{
+"id": "n1041158820",
+"n": "Urheilutie L",
+"x": -1599.9,
+"y": -688.4,
+"core": false
+},
+{
+"id": "n1682129019",
+"n": "Ulvilantie E",
+"x": 974,
+"y": -1098.8,
+"core": false
+},
+{
+"id": "n1943858227",
+"n": "Ulvilantie L",
+"x": 975.6,
+"y": -1065.5,
+"core": false
+},
+{
+"id": "n3073799814",
+"n": "Tasavallankatu P",
+"x": -387.4,
+"y": -791.7,
+"core": true
+},
+{
+"id": "n3073799815",
+"n": "Lyseo I",
+"x": -451.1,
+"y": 318.9,
+"core": true
+},
+{
+"id": "n3073799816",
+"n": "Cygnaeus I",
+"x": -367,
+"y": -385.5,
+"core": true
+},
+{
+"id": "n3073799817",
+"n": "Keski-Porin kirkko P",
+"x": 187.8,
+"y": 349.2,
+"core": true
+},
+{
+"id": "n3073799818",
+"n": "Poliisilaitos E",
+"x": -535.6,
+"y": -666,
+"core": true
+},
+{
+"id": "n3073799819",
+"n": "Karhukatu L",
+"x": -502.7,
+"y": -516.7,
+"core": true
+},
+{
+"id": "n3073799821",
+"n": "Hallituskatu L",
+"x": 115.2,
+"y": 334.4,
+"core": true
+},
+{
+"id": "n3073799822",
+"n": "Antinkatu",
+"x": -115.2,
+"y": -352.5,
+"core": true
+},
+{
+"id": "n3073799825",
+"n": "Poliisilaitos P",
+"x": -514.5,
+"y": -643.8,
+"core": true
+},
+{
+"id": "n3073799826",
+"n": "Asema-aukio I",
+"x": -272.8,
+"y": -823.3,
+"core": true
+},
+{
+"id": "n3073799828",
+"n": "Porilaistenkatu E",
+"x": -172.5,
+"y": -594.8,
+"core": true
+},
+{
+"id": "n3073799830",
+"n": "Valtionsilta I",
+"x": -688.9,
+"y": -309.3,
+"core": true
+},
+{
+"id": "n3073799831",
+"n": "Liisantori L",
+"x": -429.9,
+"y": -221.6,
+"core": true
+},
+{
+"id": "n3073799832",
+"n": "Otava I",
+"x": -239.5,
+"y": 269.8,
+"core": true
+},
+{
+"id": "n3073803633",
+"n": "Tasavallantori P",
+"x": -408.9,
+"y": -425.1,
+"core": true
+},
+{
+"id": "n3073803634",
+"n": "Teljäntori P",
+"x": -80.9,
+"y": -262,
+"core": true
+},
+{
+"id": "n3073803635",
+"n": "Kampus P",
+"x": -261.8,
+"y": -893.7,
+"core": true
+},
+{
+"id": "n3073803636",
+"n": "Valtionsilta L",
+"x": -646.5,
+"y": -170.8,
+"core": true
+},
+{
+"id": "n3073803638",
+"n": "Antinkatu L",
+"x": -159.5,
+"y": -286.8,
+"core": true
+},
+{
+"id": "n3073803640",
+"n": "Kampus I",
+"x": -276.2,
+"y": -920.8,
+"core": true
+},
+{
+"id": "n3073818830",
+"n": "Kuninkaanhaka L",
+"x": 801.5,
+"y": -630.5,
+"core": true
+},
+{
+"id": "n3073820433",
+"n": "Kävelykatu L",
+"x": 60.8,
+"y": -338.3,
+"core": true
+},
+{
+"id": "n3073820434",
+"n": "Oikokatu E",
+"x": 159.7,
+"y": -736.4,
+"core": true
+},
+{
+"id": "n3073820435",
+"n": "Itsenäisyydenkatu P",
+"x": -9.5,
+"y": -510.6,
+"core": true
+},
+{
+"id": "n3073820436",
+"n": "Vähälinnankatu I",
+"x": 216.8,
+"y": -694.2,
+"core": true
+},
+{
+"id": "n3073820438",
+"n": "Isolinnankatu E",
+"x": 153.4,
+"y": -178.7,
+"core": true
+},
+{
+"id": "n3073820443",
+"n": "Presidentinpuistokatu I",
+"x": 465.5,
+"y": -832,
+"core": true
+},
+{
+"id": "n3073820444",
+"n": "Pori Kauppatori laituri 11",
+"x": -22.5,
+"y": -5.7,
+"core": true
+},
+{
+"id": "n3073820445",
+"n": "Keskusaukio I",
+"x": 33.6,
+"y": -478.2,
+"core": true
+},
+{
+"id": "n3073820447",
+"n": "Yrjönkatu 9",
+"x": 125.9,
+"y": 149.8,
+"core": true
+},
+{
+"id": "n3073820449",
+"n": "Nuorisotalo L",
+"x": 262.5,
+"y": 13.1,
+"core": true
+},
+{
+"id": "n3073820452",
+"n": "Uimahalli I",
+"x": 591.4,
+"y": -613.1,
+"core": true
+},
+{
+"id": "n3073820453",
+"n": "Presidentinpuistokatu L",
+"x": 368.9,
+"y": -740.7,
+"core": true
+},
+{
+"id": "n3075034176",
+"n": "Teljäntori E",
+"x": -65.4,
+"y": -129.4,
+"core": true
+},
+{
+"id": "n3075034177",
+"n": "Teljänkatu L",
+"x": 263.3,
+"y": -510.8,
+"core": true
+},
+{
+"id": "n3075034179",
+"n": "Teljänkatu I",
+"x": 278.7,
+"y": -536.3,
+"core": true
+},
+{
+"id": "n4891027193",
+"n": "Yliopistokeskus P",
+"x": 279,
+"y": 741.9,
+"core": true
+},
+{
+"id": "n5026363443",
+"n": "Karjapiha I",
+"x": -871.8,
+"y": 353.7,
+"core": true
+},
+{
+"id": "n5163590373",
+"n": "Porin matkakeskus",
+"x": -444.3,
+"y": -957.6,
+"core": false
+},
+{
+"id": "n5176560006",
+"n": "Keskusaukio P",
+"x": 96.2,
+"y": -518,
+"core": true
+},
+{
+"id": "n5176560007",
+"n": "Keskusaukio E",
+"x": 67.6,
+"y": -524.1,
+"core": true
+},
+{
+"id": "n5176569424",
+"n": "Oikeustalo P",
+"x": 366.7,
+"y": 171,
+"core": true
+},
+{
+"id": "n5186471553",
+"n": "Eetunaukio E",
+"x": 152.4,
+"y": -100.3,
+"core": true
+},
+{
+"id": "n5186471554",
+"n": "Itäpuisto P",
+"x": 10.2,
+"y": -71.2,
+"core": true
+},
+{
+"id": "n5186496023",
+"n": "Kuninkaanhaka I",
+"x": 805.5,
+"y": -660.6,
+"core": true
+},
+{
+"id": "n5188680842",
+"n": "Jaakontie L",
+"x": -566.6,
+"y": -1220.9,
+"core": false
+},
+{
+"id": "n5188680843",
+"n": "Sairaalantie I",
+"x": -673.1,
+"y": -1183.3,
+"core": false
+},
+{
+"id": "n5188680845",
+"n": "Maamiehenkatu I",
+"x": -855.4,
+"y": -1091.4,
+"core": false
+},
+{
+"id": "n5188680846",
+"n": "Maamiehenkatu P",
+"x": -864.3,
+"y": -1033.5,
+"core": false
+},
+{
+"id": "n5192899554",
+"n": "Porin silta L",
+"x": 311.2,
+"y": 679.3,
+"core": true
+},
+{
+"id": "n5192899555",
+"n": "Valajankatu L",
+"x": 426.2,
+"y": 665.3,
+"core": true
+},
+{
+"id": "n5192899556",
+"n": "Sampo L",
+"x": 814.9,
+"y": 842.4,
+"core": true
+},
+{
+"id": "n5192899557",
+"n": "Sampo I",
+"x": 824.4,
+"y": 827.2,
+"core": true
+},
+{
+"id": "n5192899558",
+"n": "Kanavakatu L",
+"x": 1225.6,
+"y": 1039.9,
+"core": false
+},
+{
+"id": "n5192899559",
+"n": "Kanavakatu I",
+"x": 1393.8,
+"y": 1048,
+"core": false
+},
+{
+"id": "n5192922770",
+"n": "Pori matkakeskus laituri 7",
+"x": -399.1,
+"y": -892.5,
+"core": true
+},
+{
+"id": "n5192922771",
+"n": "Pori matkakeskus laituri 1",
+"x": -370.5,
+"y": -928.6,
+"core": true
+},
+{
+"id": "n5192922772",
+"n": "Pori matkakeskus laituri 2",
+"x": -350.8,
+"y": -913.1,
+"core": true
+},
+{
+"id": "n5192922773",
+"n": "Pori matkakeskus laituri 4",
+"x": -360.4,
+"y": -904.4,
+"core": true
+},
+{
+"id": "n5192922774",
+"n": "Pori matkakeskus laituri 3",
+"x": -375.7,
+"y": -917.3,
+"core": true
+},
+{
+"id": "n5192922775",
+"n": "Pori matkakeskus laituri 5",
+"x": -384.1,
+"y": -908.1,
+"core": true
+},
+{
+"id": "n5192922776",
+"n": "Pori matkakeskus laituri 6",
+"x": -368.6,
+"y": -895.8,
+"core": true
+},
+{
+"id": "n5192922779",
+"n": "Pori matkakeskus laituri 8",
+"x": -401.8,
+"y": -962.9,
+"core": false
+},
+{
+"id": "n5243813095",
+"n": "Koivula L",
+"x": 1301.1,
+"y": -1195.4,
+"core": false
+},
+{
+"id": "n5243813096",
+"n": "Koivula I",
+"x": 1248.3,
+"y": -1199,
+"core": false
+},
+{
+"id": "n5243813097",
+"n": "Sammontie P",
+"x": 1371.4,
+"y": -1171.5,
+"core": false
+},
+{
+"id": "n5243813098",
+"n": "Sammontie E",
+"x": 1363.8,
+"y": -1129.6,
+"core": false
+},
+{
+"id": "n5289263015",
+"n": "Puuvilla piha",
+"x": 159.5,
+"y": 986.7,
+"core": true
+},
+{
+"id": "n5289263826",
+"n": "Sairaalantie L",
+"x": -677.1,
+"y": -1163.2,
+"core": false
+},
+{
+"id": "n5308819398",
+"n": "Keskusaukio L",
+"x": 96.9,
+"y": -580.4,
+"core": true
+},
+{
+"id": "n5309841068",
+"n": "Vähälinnankatu L",
+"x": 198.1,
+"y": -666,
+"core": true
+},
+{
+"id": "n6221044532",
+"n": "Koivulantie L",
+"x": 1311.9,
+"y": -611.2,
+"core": false
+},
+{
+"id": "n6221044533",
+"n": "Koivulantie I",
+"x": 1429.7,
+"y": -601.8,
+"core": false
+},
+{
+"id": "n6271086709",
+"n": "Urheilutalo L",
+"x": 636.5,
+"y": -884.1,
+"core": true
+},
+{
+"id": "n6271086711",
+"n": "Urheilutalo I",
+"x": 664.3,
+"y": -930.2,
+"core": true
+},
+{
+"id": "n6271086712",
+"n": "Sirkustori P",
+"x": 324.9,
+"y": -972.2,
+"core": false
+},
+{
+"id": "n6271086713",
+"n": "Sirkustori E",
+"x": 316.8,
+"y": -993.1,
+"core": false
+},
+{
+"id": "n6271096900",
+"n": "Porttaali I",
+"x": -499.8,
+"y": -1064.9,
+"core": false
+},
+{
+"id": "n6271096901",
+"n": "Porttaali L",
+"x": -506.6,
+"y": -1058,
+"core": false
+},
+{
+"id": "n6271096902",
+"n": "Isosannanpuistokatu E",
+"x": 315,
+"y": 1022.8,
+"core": true
+},
+{
+"id": "n6271096904",
+"n": "Yliopistokeskus L",
+"x": 214,
+"y": 702.1,
+"core": true
+},
+{
+"id": "n6271096905",
+"n": "Kävelykatu P",
+"x": 17.5,
+"y": -367.1,
+"core": true
+},
+{
+"id": "n6271096906",
+"n": "Oikokatu P",
+"x": 200.8,
+"y": -776.8,
+"core": true
+},
+{
+"id": "n9569024398",
+"n": "Tasavallankatu",
+"x": -266.6,
+"y": -539.1,
+"core": true
+},
+{
+"id": "n9569024399",
+"n": "Porilaistenkatu I",
+"x": -105.4,
+"y": -636.4,
+"core": true
+},
+{
+"id": "n9569024400",
+"n": "Porilaistenkatu L",
+"x": -161.3,
+"y": -671.8,
+"core": true
+},
+{
+"id": "n9569024408",
+"n": "Lyseo L",
+"x": -392.9,
+"y": 322.8,
+"core": true
+},
+{
+"id": "n9569024409",
+"n": "Taavi",
+"x": -125.7,
+"y": 498.2,
+"core": true
+},
+{
+"id": "n9569024410",
+"n": "Pelle-Hermanni",
+"x": -501.5,
+"y": 702.1,
+"core": true
+},
+{
+"id": "n9569024411",
+"n": "Hanhipuisto",
+"x": -701.5,
+"y": 741.3,
+"core": true
+},
+{
+"id": "n9842541677",
+"n": "Porin silta I",
+"x": 313.3,
+"y": 660.8,
+"core": true
+},
+{
+"id": "n9842541683",
+"n": "Pohjois-Porin terveysasema",
+"x": 138.6,
+"y": 854,
+"core": true
+},
+{
+"id": "n9844135295",
+"n": "Uimahalli L",
+"x": 593.9,
+"y": -583.9,
+"core": true
+},
+{
+"id": "n13028599192",
+"n": "Pori Kauppatori laituri 6",
+"x": 15.6,
+"y": 112.7,
+"core": true
+},
+{
+"id": "n13028599194",
+"n": "Pori Kauppatori laituri 7",
+"x": 25.5,
+"y": 105.5,
+"core": true
+},
+{
+"id": "n13075526801",
+"n": "Pori Kauppatori laituri 5",
+"x": 4.7,
+"y": 114.8,
+"core": true
+},
+{
+"id": "n13075526802",
+"n": "Pori Kauppatori laituri 4",
+"x": -7.2,
+"y": 62.5,
+"core": true
+},
+{
+"id": "n13075526803",
+"n": "Pori Kauppatori laituri 3",
+"x": 3.8,
+"y": 59.5,
+"core": true
+},
+{
+"id": "n13075526804",
+"n": "Pori Kauppatori laituri 2",
+"x": 15,
+"y": 57.4,
+"core": true
+},
+{
+"id": "n14296103325",
+"n": "Pori Kauppatori laituri 9",
+"x": -7.1,
+"y": 62.8,
+"core": true
+}
+]
+}
