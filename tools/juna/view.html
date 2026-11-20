@@ -1,0 +1,13 @@
+<!DOCTYPE html><html><body style="margin:0;background:#9cb6cc"><script type="module">
+import * as THREE from '../../three.module.min.js'; import { GLTFLoader } from '../../GLTFLoader.js';
+const q = new URLSearchParams(location.search), files = (q.get('f') || 'sr3').split(','), az = +(q.get('az') || 35), el = +(q.get('el') || 12), dist = +(q.get('d') || 30);
+const r = new THREE.WebGLRenderer({ antialias: true }); r.setSize(innerWidth, innerHeight); document.body.appendChild(r.domElement); r.outputColorSpace = THREE.SRGBColorSpace;
+const sc = new THREE.Scene(); sc.add(new THREE.HemisphereLight(0xfff0da, 0x8a8070, 2.4)); const sun = new THREE.DirectionalLight(0xffedd2, 1.6); sun.position.set(0.79, 0.81, 0.62); sc.add(sun);
+const g = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshLambertMaterial({ color: 0x777066 })); g.rotation.x = -Math.PI / 2; sc.add(g);
+const cam = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 1000);
+let z = 0, n = 0; const L = { sr3: 18.98, ed: 26.4, edo: 26.4 };
+for (const f of files) { const gl = await new GLTFLoader().loadAsync('../../juna/' + f + '.glb'); const o = gl.scene; const len = L[f.replace('_m', '')] || 20; z -= (n ? len / 2 + 0.6 : 0); o.position.z = z; z -= len / 2; sc.add(o); n++; }
+const cz = q.has('cz') ? +q.get('cz') : z / 2, cy = +(q.get('cy') || 2.2);
+cam.position.set(Math.sin(az * Math.PI / 180) * dist * Math.cos(el * Math.PI / 180), cy + Math.sin(el * Math.PI / 180) * dist, cz + Math.cos(az * Math.PI / 180) * dist * Math.cos(el * Math.PI / 180));
+cam.lookAt(0, cy, cz); r.render(sc, cam); window.done = 1;
+</script></body></html>

@@ -2201,3 +2201,21 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
   kuriirin katoaminen loppuun asti (headless-ajossa aika kului liian hitaasti). Paikat `tarkista: true` ovat yhä arvioita.
 - **Tiedossa:** Harju seisoo vain paikallaan; hänellä ei ole tehtävää eikä repliikkejä. Kuriiri juoksee suoraa viivaa eikä väistä taloja. Hahmojen mallit
   ladataan heti pelin alussa (Terttu, Harju, Tapsa = noin 6,5 Mt lisää).
+
+
+## 20.–21.11.2026 – Rataverkko, Porin asema ja IC-juna (omistaja: "junarata oikeille paikoille, niin autenttista kuin mahdollista … intercityjuna … asema ja rataverkosto tarkasti ilmakuvan päälle")
+- **Uudet kansiot:** `rata/` (rata.js, rata_data.js, sepelitekstuurit, README.md), `juna/` (juna.js, yhdista.js, sr3/ed/edo.glb + _m, README.md), `tools/rata/`, `tools/juna/`.
+- **index.html** muutettu `tools/rata/patch_index.py`:llä (idempotentti, aja uudelleen jos index.html on tallennettu päälle): RATA-import, maastokorjaukset
+  siltakumpujen jälkeen, ulkokehän 18 m solut pois raiteiden kohdalta, rautatiesiltojen vanhat kannet pois (`bdSkip`), LoD2 2298/2299 pois (`hideB`),
+  `window.__game` + `TZg`, `outerMat`, ja `<script>`-rivit rata/rata.js ja juna/juna.js.
+- **Rata:** OSM-raiteet koko kartalta (26 km) tasoitettuina, vaihteet tangentiaalisina. Sepeli, B97-pölkyt, 60E1-kiskot ja kiinnitykset lähellä.
+  Laiturit 550 mm, alikulun portaali, välilaiturin lasikatos, sillat, tasoristeykset, opastimet ja ajojohdin. Ks. `rata/README.md`.
+- **Alikulku (omistaja: "rata menee suoraan eikä seuraa portaalin kohdalla maastokartan pintoja"):** korkeusmallin 4 m kaivanto täytetty raiteiden ja laitureiden
+  kohdalta. Rata kulkee suoraan, ja kaivanto on auki vain asema-aukion puolella (portaali, "Laiturit 1–3").
+- **IC-juna (vain botti):** Edo + 3 × Ed + Sr3. Tulee Tampereen suunnasta raiteelle 1, seisoo 150 s ovet auki ja lähtee takaisin. Ks. `juna/README.md`.
+  Omistaja kysyi Meshystä: vastattu, että korit voi tehdä Meshyllä (3 erillistä mallia). Telit, pyörät ja ovet tulevat skriptistä samoilla solmunimillä.
+- **Testattu** pilvessä headless-pelissä (Playwright + swiftshader): laiturit, juna laiturissa, saapuminen, ratapiha, sillat. Ei konsolivirheitä.
+  **Ei testattu** oikealla näytönohjaimella eikä puhelimella (kevyet mallit `_m`). Kysy omistajalta kuvakaappaus asemalta.
+- **Tiedossa / seuraavaksi:** junamallit ovat yksinkertaisia (6 000 kolmiota, bussissa 40 000; Meshy-korit tai lisää yksityiskohtia), ääniä ei ole,
+  juna ei ole kiinteä (SOLID), Mäntyluodon ja Aittaluodon radoilla ei ole liikennettä, ajojohtimen pylväät ovat paikoin laiturilla,
+  ilmakuvan vaaleita läikkiä näkyy raiteiden ja laiturin välissä.
