@@ -11,7 +11,7 @@ export const TALLENNUSAVAIN = 'pori-tarina-v1';
 const kloonaa = o => JSON.parse(JSON.stringify(o));
 const etaisyys = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
-export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit = {}, varasto = null, kasittelijat = {} } = {}) {
+export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit = {}, varasto = null, kasittelijat = {}, sijoitukset = [] } = {}) {
   const T = {}; for (const t of tehtavat) T[t.id] = t;
   const KUUNTELIJAT = {};
   const on = (nimi, f) => { (KUUNTELIJAT[nimi] = KUUNTELIJAT[nimi] || []).push(f); return () => { KUUNTELIJAT[nimi] = KUUNTELIJAT[nimi].filter(g => g !== f); }; };
@@ -312,6 +312,26 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     return null;
   }
 
+  // ---------- hahmot maailmassa ----------
+  // Lähteet: (1) data/maailma.json `aina`-sijoitukset (ehto valinnainen), (2) saatavilla olevan tehtävän antaja merkillä (`antaja`, `antajaPaikka`),
+  // (3) käynnissä olevan tehtävän `hahmot` (valinnaiset `alkaen`/`asti` = vaiheindeksit), (4) nykyisen vaiheen `hahmot`.
+  // Sijoitus: { h: 'TAPSA', paikka, suunta: asteet (0 = pohjoinen, myötäpäivään) | 'pelaaja', anim: 'Idle' }
+  let maailma = sijoitukset, viimeHahmot = '';
+  function sijoita(id, q) { const p = paikka(q.paikka); return p ? { id, h: q.h, x: p.x, y: p.y, suunta: q.suunta ?? 'pelaaja', anim: q.anim || 'Idle' } : null; }
+  function hahmolista() {
+    const r = [];
+    maailma.forEach((q, i) => { if (tayttyy(q.ehto) && !(K && (K.t.piilota || []).includes(q.h))) r.push(sijoita('maailma:' + i, q)); });
+    if (!K) {
+      for (const t of Object.values(T)) if (saatavilla(t) && t.antaja && t.laukaisu && t.laukaisu.tyyppi === 'merkki')
+        r.push(sijoita('antaja:' + t.id, { h: t.antaja, paikka: t.antajaPaikka || { paikka: t.laukaisu.paikka, dx: 2.5 }, suunta: 'pelaaja' }));
+    } else if (K.tila === 'kaynnissa') {
+      (K.t.hahmot || []).forEach((q, i) => { if (K.i >= (q.alkaen ?? 0) && K.i <= (q.asti ?? 1e9)) r.push(sijoita(K.t.id + ':' + i, q)); });
+      (K.t.vaiheet[K.i].hahmot || []).forEach((q, i) => r.push(sijoita(K.t.id + ':v' + K.i + ':' + i, q)));
+    }
+    return r.filter(Boolean);
+  }
+  function paivitaHahmot() { const l = hahmolista(); const k = JSON.stringify(l); if (k !== viimeHahmot) { viimeHahmot = k; emit('hahmot', l); } }
+
   // ---------- päivitys ----------
   function paivita(dt, maailma) {
     if (maailma) W = maailma;
@@ -325,9 +345,9 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
         if (autoOdotus[t.id] >= (t.laukaisu.viive || 0)) { autoOdotus[t.id] = 0; aloita(t.id); break; }
       }
     }
-    if (!K) { const t = lahinTehtava(); const kh = t ? teksti('SYS_START', { nimi: t.nimi }) : ''; if (kh !== viimeKehote) { viimeKehote = kh; emit('kehote', kh || null); } paivitaMerkit(false); return; }
+    if (!K) { const t = lahinTehtava(); const kh = t ? teksti('SYS_START', { nimi: t.nimi }) : ''; if (kh !== viimeKehote) { viimeKehote = kh; emit('kehote', kh || null); } paivitaMerkit(false); paivitaHahmot(); return; }
     if (viimeKehote) { viimeKehote = ''; emit('kehote', null); }
-    if (K.tila !== 'kaynnissa') return;
+    if (K.tila !== 'kaynnissa') { paivitaHahmot(); return; }
     K.aika += dt;
     const s = K.t.vaiheet[K.i], v = K.v;
     v.t += dt; v.dt = dt;
@@ -336,7 +356,7 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     if (!v.tehty && k && k.paivita) k.paivita(s, v, dt);
     if (!K || K.tila !== 'kaynnissa' || K.v !== v) return;
     if (v.tehty) seuraavaVaihe();
-    paivitaMerkit(false);
+    paivitaMerkit(false); paivitaHahmot();
   }
 
   // pelaajan toimintonäppäin (X / kosketusnappi): aloittaa tehtävän merkillä tai ohittaa repliikin
@@ -389,6 +409,6 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     get tila() { return tila; }, get kaynnissa() { return K ? { id: K.t.id, nimi: K.t.nimi, vaihe: K.i, tila: K.tila } : null; },
     saatavilla: () => Object.values(T).filter(saatavilla).map(t => ({ id: t.id, nimi: t.nimi, luku: t.luku })),
     tehtavat: () => Object.values(T).map(t => ({ id: t.id, nimi: t.nimi, luku: t.luku, valmis: tila.valmiit.includes(t.id), saatavilla: saatavilla(t) })),
-    merkit, paikka, sopii, kasittelijat, kehittaja, teksti
+    merkit, hahmolista, paikka, sopii, kasittelijat, kehittaja, teksti
   };
 }

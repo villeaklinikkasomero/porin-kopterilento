@@ -1,12 +1,57 @@
 {
-  "RAMI":    { "nimi": "Rami",    "vari": "#f4c95d", "kirjain": "R" },
-  "TAPSA":   { "nimi": "Tapsa",   "vari": "#7cc4ff", "kirjain": "T" },
-  "LUMI":    { "nimi": "Lumi",    "vari": "#c79bff", "kirjain": "L" },
-  "TERTTU":  { "nimi": "Terttu",  "vari": "#ffb08a", "kirjain": "Te" },
-  "HARJU":   { "nimi": "Harju",   "vari": "#9fe0c0" },
-  "VARJO":   { "nimi": "Varjo",   "vari": "#ff6b6b" },
-  "VARTIJA": { "nimi": "Vartija", "vari": "#b0b8c0" },
-  "MYYJA":   { "nimi": "Myyjä",   "vari": "#d0d0a0" },
-  "KURIIRI": { "nimi": "Kuriiri", "vari": "#d0d0a0" },
-  "RADIO":   { "nimi": "Radio",   "vari": "#ffe08a" }
+ "RAMI": {
+  "nimi": "Rami",
+  "vari": "#f4c95d",
+  "kirjain": "R",
+  "malli": null
+ },
+ "TAPSA": {
+  "nimi": "Tapsa",
+  "vari": "#7cc4ff",
+  "kirjain": "T",
+  "malli": "npc_tapsa"
+ },
+ "LUMI": {
+  "nimi": "Lumi",
+  "vari": "#c79bff",
+  "kirjain": "L",
+  "malli": "npc_lumi"
+ },
+ "TERTTU": {
+  "nimi": "Terttu",
+  "vari": "#ffb08a",
+  "kirjain": "Te",
+  "malli": "npc_terttu"
+ },
+ "HARJU": {
+  "nimi": "Harju",
+  "vari": "#9fe0c0",
+  "malli": null
+ },
+ "VARJO": {
+  "nimi": "Varjo",
+  "vari": "#ff6b6b",
+  "malli": "npc_varjo"
+ },
+ "VARTIJA": {
+  "nimi": "Vartija",
+  "vari": "#b0b8c0",
+  "malli": "npc_vartija"
+ },
+ "MYYJA": {
+  "nimi": "Myyjä",
+  "vari": "#d0d0a0",
+  "malli": "npc_myyja"
+ },
+ "KURIIRI": {
+  "nimi": "Kuriiri",
+  "vari": "#d0d0a0",
+  "malli": null
+ },
+ "RADIO": {
+  "nimi": "Radio",
+  "vari": "#ffe08a",
+  "malli": null
+ },
+ "_ohje": "malli = repon juuren npc_*.js (Idle/Walk/Run/Dance…). null = mallia ei vielä ole (Harju, kuriiri) → hahmo puhuu vain ruudulla. RAMI = pelaajan oma hahmo.js."
 }

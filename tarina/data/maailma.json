@@ -1,0 +1,14 @@
+{
+ "_ohje": "Hahmot, jotka seisovat maailmassa tehtävistä riippumatta. ehto valinnainen (kuten tehtävien ehto). suunta asteina, 0 = pohjoinen, tai 'pelaaja'.",
+ "aina": [
+  {
+   "h": "TERTTU",
+   "paikka": [
+    53.3,
+    45.4
+   ],
+   "suunta": 0,
+   "_huom": "Tertun koju = torikojut.js eteläreunan keltainen hedelmäkoju (53, 47), myyntipuoli pohjoiseen"
+  }
+ ]
+}

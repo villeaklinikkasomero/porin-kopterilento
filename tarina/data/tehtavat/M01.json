@@ -89,5 +89,20 @@
  },
  "palkinto": {
   "teksti": "Tapsan korjaamo on nyt tukikohtasi"
- }
+ },
+ "antajaPaikka": {
+  "paikka": "LOC_ETELARANTA",
+  "dx": 3
+ },
+ "hahmot": [
+  {
+   "h": "TAPSA",
+   "paikka": {
+    "paikka": "LOC_ETELARANTA",
+    "dx": 3
+   },
+   "suunta": "pelaaja",
+   "asti": 1
+  }
+ ]
 }

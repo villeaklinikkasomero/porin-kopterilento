@@ -87,5 +87,49 @@
  },
  "palkinto": {
   "teksti": "Vesiletku ja sammutin varusteisiin"
- }
+ },
+ "antajaPaikka": {
+  "paikka": "LOC_KORJAAMO_OVI",
+  "dx": 2
+ },
+ "hahmot": [
+  {
+   "h": "TAPSA",
+   "paikka": {
+    "paikka": "LOC_KORJAAMO_OVI",
+    "dx": 2.5
+   },
+   "suunta": "pelaaja"
+  },
+  {
+   "h": "VARTIJA",
+   "paikka": {
+    "paikka": "LOC_KORJAAMO_OVI",
+    "dx": -2,
+    "dy": -3
+   },
+   "suunta": 0,
+   "asti": 1
+  },
+  {
+   "h": "VARTIJA",
+   "paikka": {
+    "paikka": "LOC_KORJAAMO_OVI",
+    "dx": -5,
+    "dy": -1
+   },
+   "suunta": 45,
+   "asti": 1
+  },
+  {
+   "h": "VARTIJA",
+   "paikka": {
+    "paikka": "LOC_KORJAAMO_OVI",
+    "dx": 1,
+    "dy": -5
+   },
+   "suunta": "pelaaja",
+   "asti": 1
+  }
+ ]
 }

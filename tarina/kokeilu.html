@@ -14,7 +14,7 @@
 <body>
 <div id="ohje">
   <b>Kokeilutila</b> – tehtävämoottori ilman peliä (kartta ylhäältä, 1 ruutu = 50 m)<br>
-  <kbd>←↑→↓</kbd>/<kbd>WASD</kbd> liiku · <kbd>Shift</kbd> nopeammin · <kbd>V</kbd> vaihda kulkuneuvo · <kbd>B</kbd> hajota kulkuneuvo<br>
+  <kbd>←↑→↓</kbd>/<kbd>WASD</kbd> liiku · <kbd>Shift</kbd> nopeammin · <kbd>V</kbd> vaihda kulkuneuvo · <kbd>B</kbd> hajota kulkuneuvo · <kbd>Z</kbd> lähikuva<br>
   <kbd>X</kbd> toiminto · <kbd>1–3</kbd> valinta · <kbd>P</kbd> valikko · <kbd>Ctrl+Shift+D</kbd> kehittäjä (<kbd>O</kbd> ohita)
 </div>
 <div id="tila"></div>
@@ -27,12 +27,13 @@ const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 1, 5000
 const renderer = new THREE.WebGLRenderer({ antialias: true }); renderer.setSize(innerWidth, innerHeight); renderer.setPixelRatio(Math.min(2, devicePixelRatio));
 document.body.appendChild(renderer.domElement);
 addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); });
+scene.add(new THREE.HemisphereLight(0xffffff, 0x445566, 2.2)); const aurinko = new THREE.DirectionalLight(0xffffff, 1.6); aurinko.position.set(50, 100, 30); scene.add(aurinko);
 const grid = new THREE.GridHelper(4000, 80, 0x2b3a4a, 0x1a2633); scene.add(grid);
 // joki suunnilleen (y 500–620)
 const joki = new THREE.Mesh(new THREE.PlaneGeometry(4000, 110).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0x173a5c })); joki.position.set(0, -0.2, -560); scene.add(joki);
 
-const S = { x: -120, y: 470, alt: 0, hp: 100, dead: 0 };
-const WALK = { on: true, x: -120, y: 470, in: false, v: 0 };
+const S = { x: -8, y: 462, alt: 0, hp: 100, dead: 0 };
+const WALK = { on: true, x: -8, y: 462, in: false, v: 0 };
 const CAR = { x: 0, y: 0, type: 'estate', v: 0 };
 window.__game = { scene, camera, renderer, S };
 window.__walk = WALK; window.__car = CAR;
@@ -50,7 +51,7 @@ for (const [id, p] of Object.entries(paikat)) {
   const pt = new THREE.Mesh(new THREE.CircleGeometry(2.2, 12).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: p.keksitty ? 0xc79bff : 0x9fd3ff })); pt.position.set(p.x, 0.1, -p.y); scene.add(pt);
 }
 
-const KULUT = ['jalan', 'auto', 'heli', 'pyora']; let ki = 0, yaw = 0;
+const KULUT = ['jalan', 'auto', 'heli', 'pyora']; let ki = 0, yaw = 0, lahi = false;
 const keys = new Set();
 addEventListener('keydown', e => {
   keys.add(e.code);
@@ -60,6 +61,7 @@ addEventListener('keydown', e => {
     WALK.on = k === 'jalan'; document.body.classList.toggle('car', k === 'auto' || k === 'pyora'); CAR.type = k === 'pyora' ? 'bike' : 'estate';
     WALK.x = CAR.x = S.x = x; WALK.y = CAR.y = S.y = y; S.dead = 0; S.hp = 100;
   }
+  if (e.code === 'KeyZ') lahi = !lahi;
   if (e.code === 'KeyB') { S.dead = 2; S.hp = 0; setTimeout(() => { S.dead = 0; S.hp = 100; }, 2200); }
 });
 addEventListener('keyup', e => keys.delete(e.code));
@@ -76,7 +78,9 @@ function kierros(nyt) {
   S.alt = k === 'heli' ? 30 : 0;
   pelaaja.position.set(o.x, 3 + S.alt, -o.y); pelaaja.material.color.set({ jalan: 0xffffff, auto: 0x4fc3f7, heli: 0xffb74d, pyora: 0x81c784 }[k]);
   nokka.position.set(o.x + Math.sin(yaw) * 7, 3 + S.alt, -o.y - Math.cos(yaw) * 7); nokka.rotation.set(-Math.PI / 2, 0, -yaw); nokka.material.color.copy(pelaaja.material.color);
-  camera.position.set(o.x, 420, -o.y + 260); camera.lookAt(o.x, 0, -o.y);
+  if (lahi) { camera.position.set(o.x - Math.sin(yaw) * 9, 4 + S.alt, -o.y + Math.cos(yaw) * 9); camera.lookAt(o.x + Math.sin(yaw) * 6, 1.4 + S.alt, -o.y - Math.cos(yaw) * 6); }
+  else { camera.position.set(o.x, 420, -o.y + 260); camera.lookAt(o.x, 0, -o.y); }
+  pelaaja.visible = nokka.visible = !lahi;
   document.getElementById('tila').textContent = `${k}${S.dead > 0 ? ' (RIKKI)' : ''}  x ${o.x.toFixed(0)}  y ${o.y.toFixed(0)}`;
   renderer.render(scene, camera); requestAnimationFrame(kierros);
 }

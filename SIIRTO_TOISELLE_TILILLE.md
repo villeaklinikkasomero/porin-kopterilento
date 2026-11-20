@@ -2110,3 +2110,17 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
 ### Testisivut (pilvi, eivät repossa)
 - `/home/claude/peli/ranta_testi.html` (+ `shot.js`, `ODOTA=ms`): maa + vesi + Porinsilta + Etelärannan lohko kopioituna index.html:stä + ranta.js.
   Kopioi Eteläranta-lohko uudelleen index.html:stä aina muutoksen jälkeen. Kysy käyttäjältä kuvakaappaus oikeasta pelistä ennen kuin julistat valmiiksi.
+
+## 20.11.2026 ilta (n. klo 20–21) – Laiturit levennetty, alikulku kaareksi, Etelärannan laattapinnat
+- **ranta.js:** `LEVENNYS = 1.4` lisätään laitureiden ja neliölavan mitattuun leveyteen (omistaja: leveämmät laiturit peittävät ilmakuvan vanhat laiturit). Kulkusillat ennallaan.
+  Jos vaaleita läikkiä näkyy yhä sivuilla, nosta arvoa; jos laiturin päässä, levennys ei auta (vesi.js:n kirkkaat pikselit).
+- **Alikulku (index.html, Eteläranta-lohko, `UPS.tun = [197, 216]`):** omistaja: "kaarimallinen, pellillä päällystetty kulku, leveys noin 3 m". Aaltopeltiholvi 3,0 m,
+  pystysivut 0,9 m + puoliellipsi; harja min(2,7 m, psilDeck − 0,45 − ZW) → `window.__alikulku`, konsoli `[alikulku] kaari`. Betoniotsat (ExtrudeGeometry, U-muoto),
+  kansilaatta ja maatuen seinä joelle. Kaide ja tolpat jätetään pois holvin kohdalta (`inTun`). Kävelyalue on yhä 3,6 m (pelaaja voi mennä 0,3 m seinään).
+- **Laattapinnat:** Eteläranta-lohkon alussa `laattaTex` → `window.__laatta` (graniitti 0,6 m rivit, betoni 1,5 × 2–3 m; 4 m toisto, rivit rantaviivan suuntaan `kulma`).
+  Rannan mallin materiaali `quayMat`: maailmakoordinaattikuvio, alempi taso (< ZW + 0,12) betonilaatta, ylempi graniittilaatta, pystypinnat betonirae.
+  Roads-lohko: aukion täyttö (`etFill`) nyt graniittilaattaa (ennen punaharmaa kivetys), ja **uusi välitäyttö** (`ROAD.etGap`, x −140…216, y 440…522): 1 m soluina
+  laattaa kaikkialle, missä ei ole tietä, nurmea, polkua, taloa, rantaa, jokea eikä alikulun leikkausta (rannan ja Etelärannan kadun väli, terassit, sillan korva).
+  Kattavuuskuva ilmakuvan päällä tehtiin pilvessä (roads.js + river.js rasteroitu): ilmakuvaa näkyi x −45…140 rannan ja kadun välissä.
+- **Ei testattu oikeassa pelissä** – vain erilliset testisivut (holvi, laatat). Kysy omistajalta kuvakaappaus.
+- Seuraavaksi mahdollisesti (omistajan kuvista): metallipenkit, kaksivartiset katuvalot, nupukivikaista, musta pystypinnakaide istuinportaiden yläpuolella, vihreät aurinkovarjot.

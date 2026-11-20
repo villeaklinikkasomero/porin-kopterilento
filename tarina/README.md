@@ -43,9 +43,11 @@ Kosketuslaitteella näkyy **X**-nappi, kun sille on käyttöä.
 |---|---|
 | `moottori.js` | Ydin: tehtävät, vaiheet, liput/muuttujat/esineet, tarkistuspisteet, epäonnistuminen, tallennus. Ei riipu pelistä. |
 | `peli.js` | Sovitin: lukee `__walk`/`__car`/`__game.S` ja body-luokat `car`/`walk`, piirtää merkit `__game.sceneen`, näppäimet, oma silmukka. Pelin mekaniikat liitetään kohtaan `KASITTELIJAT`. |
+| `hahmot.js` | Tarinan hahmot maailmaan (mallit npc_*.js, Idle-animaatio, kääntyminen pelaajaa kohti) |
 | `ui.js` | HUD: tavoite + suuntanuoli ja metrit, mittarit, dialogi, tekstiviesti, valinnat, välianimaation mustat palkit, epäonnistumis- ja läpäisyruutu, valikko, kehittäjäpaneeli |
 | `data/tehtavat/Mxx.json` | Yksi tehtävä per tiedosto (nyt Luku 1: M01–M06). Listattava tiedostoon `index.json`. |
 | `data/paikat.json` | `LOC_*`-paikat pelin karttametreinä. `tarkista: true` = arvio, mittaa pelissä. |
+| `data/maailma.json` | Aina paikalla olevat hahmot (Terttu torilla) |
 | `data/hahmot.json`, `data/fi.json` | Hahmojen nimet/värit ja kaikki järjestelmätekstit (lokalisointi) |
 | `testi.mjs` | `node tarina/testi.mjs`: 14 testiä, jotka pelaavat Luvun 1 läpi ilman selainta |
 | `kokeilu.html` | Pelin korvike tehtävien kokeiluun |
@@ -118,6 +120,22 @@ export const VESILETKU = {
 };
 ```
 `api.mittari({ laji: 'palkki', nimi, arvo })` näyttää mittarin. `api.vihje(teksti)` näyttää vihjeen, ja `api.aseta({...})` asettaa liput.
+
+## Hahmot maailmassa (`hahmot.js`)
+
+Tarinan hahmot seisovat pelissä omilla malleillaan: `npc_tapsa`, `npc_lumi`, `npc_terttu`, `npc_varjo`, `npc_vartija` ja `npc_myyja`
+(repon juuri, klipit Idle/Walk/Run/Dance…). Malli määritellään tiedostossa `data/hahmot.json` (`malli`). **Harjulla ja kuriirilla ei vielä ole mallia** (`malli: null`):
+he puhuvat vain ruudulla. Rami on pelaajan oma `hahmo.js`.
+
+Mistä hahmot tulevat (moottorin `hahmolista()` → tapahtuma `hahmot`):
+1. `data/maailma.json` `aina`: aina paikalla, esim. Terttu kojullaan torilla. Valinnainen `ehto`.
+2. Tehtävän `antaja` odottaa tehtävän merkin vieressä, kun tehtävä on saatavilla (`antajaPaikka`, oletus 2,5 m merkistä itään).
+3. Tehtävän `hahmot` ovat paikalla tehtävän aikana. `alkaen`/`asti` = vaiheindeksit, esim. vartijat lähtevät vesiletkuvaiheen jälkeen.
+4. Vaiheen `hahmot` ovat paikalla vain sen vaiheen ajan.
+
+Sijoitus: `{ "h": "TAPSA", "paikka": { "paikka": "LOC_KORJAAMO_OVI", "dx": 2 }, "suunta": "pelaaja" | asteet (0 = pohjoinen), "anim": "Idle" }`.
+Puhuva hahmo kääntyy pelaajaa kohti. Korkeus tulee pelin `roofAt`-funktiosta (katu, laituri, silta). Mallit ladataan vasta tarvittaessa, kerran per malli.
+Kokeilusivulla **Z** vaihtaa lähikuvaan, jossa hahmot näkyvät.
 
 ## Raha ja päivän kierros
 

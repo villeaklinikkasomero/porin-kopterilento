@@ -70,10 +70,10 @@ testi('M01: auto hajoaa → epäonnistuu, uudelleen jatkaa tarkistuspisteestä',
 testi('M02: kilpa – liian hidas häviää, nopea voittaa; valinta asettaa radion', () => {
   const T = uusi(); const { m, aja, mene } = T;
   m.kehittaja.valmiiksi('M01'); mene('LOC_KORJAAMO_OVI', 'jalan'); aja(0.1); m.toiminta();
-  m.toiminta(); aja(0.1); mene('LOC_KORJAAMO', 'auto'); aja(0.2);
+  m.toiminta(); aja(0.1); mene('LOC_KORJAAMO', 'auto'); aja(0.2); mene('LOC_KESPA_LAHTO', 'auto'); aja(0.2);
   ass(m.kehittaja.vaihe().tyyppi === 'portit');
-  aja(151); ass(m.kaynnissa.tila === 'epaonnistui', 'hidas ei hävinnyt');
-  m.uudelleen(); const s = tehtavat.find(t => t.id === 'M02').vaiheet[2];
+  aja(206); ass(m.kaynnissa.tila === 'epaonnistui', 'hidas ei hävinnyt');
+  m.uudelleen(); const s = tehtavat.find(t => t.id === 'M02').vaiheet[3];
   for (const p of s.portit) { mene(p, 'auto'); aja(3); }
   ass(m.kehittaja.vaihe() && m.kehittaja.vaihe().tyyppi !== 'portit', 'portit eivät valmistuneet');
   for (let i = 0; i < 4 && m.kehittaja.vaihe().tyyppi !== 'valinta'; i++) { m.toiminta(); aja(0.1); }
@@ -83,8 +83,8 @@ testi('M02: kilpa – liian hidas häviää, nopea voittaa; valinta asettaa radi
 
 testi('M02: kyydistä poistuminen kesken kilvan epäonnistuu', () => {
   const T = uusi(); const { m, aja, mene } = T;
-  m.kehittaja.valmiiksi('M01'); m.kehittaja.aloita('M02'); m.toiminta(); aja(0.1); mene('LOC_KORJAAMO', 'auto'); aja(0.2);
-  mene('LOC_KORJAAMO', 'jalan'); aja(13); ass(m.kaynnissa.tila === 'epaonnistui');
+  m.kehittaja.valmiiksi('M01'); m.kehittaja.aloita('M02'); m.toiminta(); aja(0.1); mene('LOC_KORJAAMO', 'auto'); aja(0.2); mene('LOC_KESPA_LAHTO', 'auto'); aja(0.2);
+  ass(m.kehittaja.vaihe().tyyppi === 'portit'); mene('LOC_KESPA_LAHTO', 'jalan'); aja(13); ass(m.kaynnissa.tila === 'epaonnistui');
 });
 
 testi('M03 käynnistyy automaattisesti puheluna; puuttuva toiminto ohitetaan', () => {
@@ -152,6 +152,20 @@ testi('seuraa-vaihe: kohde karkaa jos jää jälkeen', () => {
   ass(log.length === 1, 'ei epäonnistunut');
   m.uudelleen(); for (let i = 0; i < 700; i++) { const t2 = i * 0.05; m.paivita(0.05, { x: Math.min(300, t2 * 10 - 5), y: 0, kulku: 'jalan' }); }
   ass(!m.kaynnissa, 'ei päässyt perille');
+});
+
+testi('hahmot: antaja merkillä, tehtävän hahmot vaiheittain, maailman hahmot', () => {
+  const sijoitukset = lue('maailma.json').aina;
+  const m = luoMoottori({ tehtavat, paikat, hahmot, tekstit, sijoitukset });
+  const W = { x: 0, y: 0, kulku: 'jalan' }; const aja = s => { for (let t = 0; t < s; t += 0.05) m.paivita(0.05, W); };
+  aja(0.1); let l = m.hahmolista();
+  ass(l.some(q => q.h === 'TERTTU'), 'Terttu puuttuu torilta'); ass(l.some(q => q.h === 'TAPSA' && q.id === 'antaja:M01'), 'Tapsa ei odota Etelärannalla');
+  for (const id of ['M01', 'M02', 'M03']) m.kehittaja.valmiiksi(id);
+  Object.assign(W, paikat.LOC_KORJAAMO_OVI); aja(0.1); m.toiminta(); aja(0.1);
+  l = m.hahmolista(); ass(l.filter(q => q.h === 'VARTIJA').length === 3, 'vartijoita ei 3: ' + JSON.stringify(l));
+  ass(l.filter(q => q.h === 'TAPSA').length === 1, 'Tapsa kahdesti');
+  for (let i = 0; i < 6; i++) { m.toiminta(); aja(0.1); }   // cut läpi → vesiletku (ohitetaan 4 s) → vartijat lähtevät
+  aja(5); l = m.hahmolista(); ass(l.filter(q => q.h === 'VARTIJA').length === 0, 'vartijat jäivät');
 });
 
 console.log(`\n${ok} läpi, ${vika} virhettä`); process.exit(vika ? 1 : 0);

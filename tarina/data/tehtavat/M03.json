@@ -168,5 +168,17 @@
  "palkinto": {
   "raha": 300,
   "teksti": "Hiiviskely avautui"
- }
+ },
+ "hahmot": [
+  {
+   "h": "MYYJA",
+   "paikka": {
+    "paikka": "LOC_KIILTO_TOIMISTO",
+    "dx": -4
+   },
+   "suunta": "pelaaja",
+   "alkaen": 1,
+   "asti": 5
+  }
+ ]
 }

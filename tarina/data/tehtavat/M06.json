@@ -64,5 +64,28 @@
  },
  "palkinto": {
   "teksti": "Luku 2 avautui · Lumin piilo on pelastuskohta"
- }
+ },
+ "antajaPaikka": {
+  "paikka": "LOC_PIILO",
+  "dx": 2
+ },
+ "hahmot": [
+  {
+   "h": "LUMI",
+   "paikka": {
+    "paikka": "LOC_PIILO",
+    "dx": 2
+   },
+   "suunta": "pelaaja"
+  },
+  {
+   "h": "TAPSA",
+   "paikka": {
+    "paikka": "LOC_PIILO",
+    "dx": -2,
+    "dy": 1.5
+   },
+   "suunta": "pelaaja"
+  }
+ ]
 }

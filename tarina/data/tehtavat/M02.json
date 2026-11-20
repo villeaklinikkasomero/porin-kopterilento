@@ -165,5 +165,30 @@
  "palkinto": {
   "raha": 200,
   "teksti": "Kilpa-ajot avautuivat"
- }
+ },
+ "antajaPaikka": {
+  "paikka": "LOC_KORJAAMO_OVI",
+  "dx": 2
+ },
+ "hahmot": [
+  {
+   "h": "TAPSA",
+   "paikka": {
+    "paikka": "LOC_KORJAAMO_OVI",
+    "dx": 2
+   },
+   "suunta": "pelaaja",
+   "asti": 1
+  },
+  {
+   "h": "TAPSA",
+   "paikka": {
+    "paikka": "LOC_KESPA_LAHTO",
+    "dx": 6,
+    "dy": 4
+   },
+   "suunta": "pelaaja",
+   "alkaen": 4
+  }
+ ]
 }

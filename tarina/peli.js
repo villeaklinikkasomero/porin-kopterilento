@@ -12,6 +12,7 @@
 import * as THREE from '../three.module.min.js';
 import { luoMoottori } from './moottori.js';
 import { luoUI } from './ui.js';
+import { luoHahmot } from './hahmot.js';
 
 const POHJA = new URL('./data/', import.meta.url);
 const hae = async p => (await fetch(new URL(p, POHJA), { cache: 'no-cache' })).json();
@@ -84,10 +85,10 @@ export async function kaynnista() {
   if (window.__tarina) return window.__tarina;
   for (let i = 0; i < 600 && !(window.__game && window.__game.scene); i++) await new Promise(r => setTimeout(r, 100));
   const G = window.__game; if (!G) throw new Error('[tarina] peliä (window.__game) ei löytynyt');
-  const [ids, paikat, hahmot, tekstit] = await Promise.all([hae('tehtavat/index.json'), hae('paikat.json'), hae('hahmot.json'), hae('fi.json')]);
+  const [ids, paikat, hahmot, tekstit, maailmaData] = await Promise.all([hae('tehtavat/index.json'), hae('paikat.json'), hae('hahmot.json'), hae('fi.json'), hae('maailma.json').catch(() => ({ aina: [] }))]);
   const tehtavat = await Promise.all(ids.map(id => hae(`tehtavat/${id}.json`)));
   const varasto = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
-  const M = luoMoottori({ tehtavat, paikat, hahmot, tekstit, varasto, kasittelijat: KASITTELIJAT });
+  const M = luoMoottori({ tehtavat, paikat, hahmot, tekstit, varasto, kasittelijat: KASITTELIJAT, sijoitukset: maailmaData.aina || [] });
   const kosketus = document.body.classList.contains('touch') || matchMedia('(pointer: coarse)').matches;
   // päivän kierros (kiertoajelun tolpat ja HUD-kortti) piilossa tarinatilassa; valikosta saa näkyviin. Muistetaan selaimessa.
   const asetukset = { kierros: varasto.get('pori-tarina-kierros') === '1' };
@@ -100,7 +101,11 @@ export async function kaynnista() {
   const MK = luoMerkit(G.scene);
   M.on('merkit', m => MK.aseta(m));
   M.on('siirto', d => siirra(d.paikka));
-  M.lataa(); MK.aseta(M.merkit());
+  // tarinan hahmot (npc_tapsa.js ym.) maailmaan; korkeus pelin omasta roofAt-funktiosta (katu, laituri, silta)
+  const HH = luoHahmot(G.scene, { hahmot, korkeus: (x, y) => { try { return G.roofAt ? G.roofAt(x, y) : 0; } catch (e) { return 0; } } });
+  M.on('hahmot', l => HH.aseta(l));
+  M.on('repliikki', d => HH.puhuu(d && d.hahmo));
+  M.lataa(); MK.aseta(M.merkit()); HH.aseta(M.hahmolista());
 
   // radio hiljaisemmalle repliikkien ajaksi
   M.on('repliikki', d => { const R = window.__radio; if (R && R.el) R.el.volume = (R.vol ?? 0.6) * (d ? 0.3 : 1); });
@@ -132,6 +137,7 @@ export async function kaynnista() {
     if (NAUHA && w) { const l = NAUHA[NAUHA.length - 1]; if (!l || Math.hypot(w.x - l[0], w.y - l[1]) >= 40) NAUHA.push([+w.x.toFixed(1), +w.y.toFixed(1)]); }
     UI.ruutu(dt);
     MK.animoi(nyt / 1000);
+    HH.paivita(dt, w);
     if (tahdetLoppuu && nyt > tahdetLoppuu) { tahdetLoppuu = 0; UI.tahdet(0); }
     // kiertoajelun majakka pois näkyvistä (peli asettaa sen näkyväksi aina kohteen vaihtuessa, siksi joka ruudulla)
     if (!asetukset.kierros) { if (!majakka) majakka = etsiMajakka(); if (majakka) majakka.visible = false; }
@@ -154,7 +160,7 @@ export async function kaynnista() {
   }
   requestAnimationFrame(kierros);
 
-  const api = { moottori: M, ui: UI, merkit: MK, kasittelijat: KASITTELIJAT, maailma };
+  const api = { moottori: M, ui: UI, merkit: MK, hahmot: HH, kasittelijat: KASITTELIJAT, maailma };
   window.__tarina = api;
   console.log('[tarina] Satamakaupunki käynnissä:', M.tehtavat().length, 'tehtävää. P = valikko, Ctrl+Shift+D = kehittäjätila.');
   return api;
