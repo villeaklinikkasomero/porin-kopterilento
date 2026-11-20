@@ -416,12 +416,27 @@ if KEY == 'mausoleumi':
         a_ = rot + math.pi / 8 + i * math.pi / 4; n = Vector((math.cos(a_), math.sin(a_), 0)); window(C + n * 1.1, Vector((-n.y, n.x, 0)), n, 0.4, 1.5, 18.6, arch=True, frame=None, glass='dark')
     frustum(cc, 1.25, 0.05, 20.85, 30.0, 8, 'cu', rot); boxc((C.x, C.y, 30.6), (0.08, 0.08, 1.3), 'dark'); boxc((C.x, C.y, 30.8), (0.6, 0.08, 0.08), 'dark')
 elif KEY == 'areena':
-    # Isomaki Areena after the 2020s renovation: pale concrete base, dark glazed upper band, white roof fascia, red entrance
-    M('conc', '#d6d6d1'); M('fasc', '#f0f0ec'); M('red', '#c8232c'); M('roofl', '#9a9da0'); M('glassd', '#1d2730', rough=0.2); ROOF_IN_MODEL = True; TEX = 2048; h = 15.0
-    walls(P, 0, h, 'conc'); ribbons(P, 5.6, 7.0, 1, hgt=6.0, sill=0.4, mull=5.0, glass='glassd', margin=2.0); ribbons(P, 0, 4.5, 1, hgt=2.6, sill=0.6, mull=6.0, margin=6.0)
-    ledge(P, 1.4, h - 1.3, h + 0.2, 'fasc'); ledge(P, 0.25, 5.2, 5.6, 'fasc'); cap(P, h, 'roofl')
-    best = max(edges(P), key=lambda e: e[3]); a0, u0, n0, L0 = best
-    obox((a0 + u0 * L0 / 2 + n0 * 1.6)[:2], u0, 9.0, 1.7, 0, 4.4, 'red'); obox((a0 + u0 * L0 / 2 + n0 * 3.35)[:2], u0, 7.0, 0.05, 0.2, 3.6, 'glassd')
+    # Porin jäähalli (Isomäen jäähalli), 20.11.2026 (owner: "pääsisäänkäynti on pitkällä sivulla Karhuhallin puolella, korkeat pilarit joiden päällä katos"):
+    # measured LoD2 shell (Maanmittauslaitos, building 1975: arched roof 13...23 m) instead of the flat box; pale walls with a dark window band, and the
+    # MAIN ENTRANCE on the north long side (the 31.6 m projecting block): a row of glass doors under a red canopy carried by tall slender pillars
+    # (read from Wikimedia Commons "Isomäki Areena sivu.jpg", Lepax 2017, public domain; nothing copied). Signs and logos are left out.
+    # Assumed: canopy size (30 x 6 m, 7.5 m up), eight pillars, window bands on the other walls.
+    M('conc', '#d6d6d1'); M('fasc', '#f0f0ec'); M('red', '#c8232c'); M('roofl', '#9a9da0'); M('glassd', '#1d2730', rough=0.2); ROOF_IN_MODEL = True; TEX = 4096
+    AEX = Vector((0.8988, -0.4384, 0)); AEY = Vector((0.4384, 0.8988, 0)); AO = Vector((-1676.6 - AX, -1377.45 - AY, 0))     # along the rink (east), towards Karhuhalli (north), middle of the west wall
+    def adeco(pts, nrm, u, us, zb, ztop):
+        u0, u1 = min(us), max(us); L_ = u1 - u0
+        if L_ < 6.0 or zb > 0.5: return
+        zt = min(ztop(u0 + L_ * f) for f in (0.03, 0.5, 0.97))
+        if zt < 6: return
+        base = pts[0] + nrm * 0.01; base.z = 0; um = (u0 + u1) / 2
+        extrude(shape(base + u * um, u, L_ - 3.0, 2.2, min(zt - 3.4, 5.2), False, -0.03, nrm), nrm * 0.08, 'glassd')
+        mid = (base + u * um).to_2d(); n2 = nrm.to_2d(); obox(Vector((mid.x + n2.x * 0.12, mid.y + n2.y * 0.12)), u, L_ / 2 + 0.1, 0.14, zt - 0.6, zt, 'fasc')
+    mml_shell(1975, 'conc', 'roofl', adeco)
+    ec = AO + AEX * 53.2 + AEY * 49.1                                             # middle of the entrance block's front
+    obox((ec + AEY * 0.06)[:2], AEX, 13.0, 0.05, 0.1, 2.6, 'glassd')                # doors
+    obox((ec + AEY * 3.0)[:2], AEX, 15.0, 3.1, 7.4, 7.9, 'red')                     # canopy
+    obox((ec + AEY * 0.2)[:2], AEX, 15.0, 0.22, 2.8, 3.5, 'red')
+    for k in range(8): frustum((ec + AEX * (-13.8 + 27.6 * k / 7) + AEY * 5.6)[:2], 0.2, 0.2, 0, 7.4, 10, 'fasc')    # tall pillars under the canopy's front edge
 elif KEY == 'harjoitushalli':
     M('metal', '#cdd1d4'); M('roofl', '#a9acae'); M('stripe', '#c8232c'); ROOF_IN_MODEL = True; TEX = 1024; h = 8.5
     walls(P, 0, h, 'metal'); pilasters(P, 0, h, 6.0, 'roofl', w=0.12, d=0.05); ledge(P, 0.2, 2.6, 2.9, 'stripe')

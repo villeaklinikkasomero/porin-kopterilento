@@ -1185,6 +1185,26 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
 - **Testi (pilvi):** jäähalli: ulkoa ovelle, sisään, jäälle, seisomakatsomoon (z 1,9), A-katsomon ylätasanteelle (z 5,8), ei virheitä. Taidemuseo: sisään ovipisteestä ja kolme
   näkymää; kyydistä nousua museon edessä EI saatu testattua (testiajuri hidas Kivi-Porin lohkojen latautuessa) – kokeile pelissä.
 
+### 20.11.2026 aamu – Porin jäähalli uusittu sisältä JA ulkoa (omistajan korjaukset; korvaa yllä olevan jäähallikuvauksen)
+- **Omistajan ohjeet 20.11:** D-päätyyn ravintolapääty, toiseen päätyyn kioskit, istumakatsomoa ympäri hallia; **C-katsomo on seisomakatsomon PÄÄLLÄ**, ei takana;
+  seisomakatsomossa EI ole kaiteita; istumakatsomot nousevat yhtä korkealle kuin C myös D- ja B-päädyssä; **pääsisäänkäynti on pitkällä sivulla Karhuhallin puolella**
+  (korkeat pilarit ja katos); **halli on sisältä kaarihalli**. Kuvat chatissa: ottelukuvat seisomakatsomosta ja jäältä (valonauha C:n etureunassa).
+- **Tila:** kansiossa, pushaamatta. `areena_sisa.js` (uusi), `blender/areena_sisa.py`, `bl_areena.js` (paikallinen leivonta 4096², 20 näytettä), `blender/lm.py` (haara `areena`),
+  `index.html` (`AREE` + probe). Kuvat `Claude outputs/sisatilat_20_11/jaahalli_sisa_v2.jpg` ja `jaahalli_ulko_v2.jpg`.
+- **Mitat:** jalanjälki (b 1975) on paikallisesti 104 × 85 m – ensimmäinen versio oli tehty 70 × 62 m:iin. Nyt halli 105 × 76,5 m, jää 60 × 28 m.
+- **Sisältä (`areena_sisa.py`):** malli rakennetaan kaukalon suuntaisessa kehyksessä ja KÄÄNNETÄÄN lopuksi pelin kehykseen (x = pääovelta pohjoisseinältä sisään etelään).
+  `AREE` origo (−1611.69, −1365.72), x (−0.4384, −0.8988). Pääovelta 5,2 m leveä käytävä A-katsomon läpi kaukalolle. A (pohjoinen): 8 mustaa + 16 punaista riviä, poikkikäytävä,
+  kaksi porraskäytävää, käveltävä ylös asti (10,8 m). Etelä: seisomakatsomo 16 askelmaa ilman kaiteita, C-katsomo sen päällä omana kerroksenaan (lattia 6,4 m, 10 riviä → 10,9 m,
+  punainen valonauha etureunassa, pilarit). Eteläkulmat C1/C5 kaarevina täyteen korkeuteen. B-pääty (länsi): 8 alariviä + ylärivit parvena kioskiaulan päällä, kioskit länsiseinällä
+  ja luoteiskulmassa. D-pääty (itä): 8 alariviä, kaksi ravintolatasoa (pöydät, tuolit, kaiteet), ylärivit samaan korkeuteen; koilliskulmassa baari. Kaareva katto (kanta 12,6 m,
+  laki 19 m) kaarikannattajineen, kuutio, viirit, ilmakanavat.
+- **Ulkoa (`lm.py areena`):** tasakattoinen laatikko → MML:n LoD2-kuori (kaarikatto 13…23 m), vaaleat seinät + tumma ikkunanauha, pääsisäänkäynti pohjoisen pitkän sivun ulkonevassa
+  osassa: lasiovet, punainen katos 30 × 6 m 7,5 m korkeudella ja kahdeksan korkeaa pilaria. Vanha punainen länsipäädyn sisäänkäynti poistui.
+- **Oletettu / tarkista:** kumpi pääty on D (nyt itä) – jos väärin, päädyt vaihdetaan peilaamalla; katoksen mitat ja pilarien määrä; ravintolatasojen ja kioskien tarkka paikka;
+  pohjoiskulmat ovat katsomokartan BAR ja MEDIA (ei istuimia). LoD2-kuoren korkeutta ei ole tarkistettu Street View'sta (vrt. teatterin 3,1 m virhe).
+- **Tekemättä:** D-käytävä (baari, punainen parvi) omana tilanaan, aitiotaso, suojalasit ja -verkot, vaihtoaitiot; ravintolatasoille, C-katsomoon ja päätyjen yläriveille ei pääse kävellen.
+- **Testi (pilvi):** sisään pääovesta, käytävä, jää, seisomakatsomo (z 1,9), A:n ylätasanne (z 10,8), kioskit, D-pääty; ei virheitä. Ulkokuvat pelistä otettu.
+
 ## ILLAN MODAL-JONO (omistaja polttaa illalla – PÄIVITÄ TÄTÄ LISTAA, älä tee uutta)
 (Sisätilat ja jalankulku eivät kuulu tähän jonoon: ne eivät tarvitse polttoa, vain pushin – ks. edellinen luku "SISÄTILAT JA JALANKULKU".)
 Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 mennessä viedyn). Sen jälkeen kertyneet:
