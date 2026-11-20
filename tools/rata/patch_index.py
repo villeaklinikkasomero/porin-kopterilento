@@ -24,5 +24,7 @@ f = "window.__game = { touchIn, carGround,"
 rep(f, "window.__game = { TZg, outerMat, touchIn, carGround,", "window.__game = { TZg, outerMat,")
 g = '<script type="module" src="laskuvarjo/hyppy.js"></script>\n'
 rep(g, g + '<!-- 20.11.2026: rataverkko, aseman laiturit ja alikulun portaali (rata/rata.js) sekä IC-juna (juna/juna.js) -->\n<script type="module" src="rata/rata.js"></script>\n<script type="module" src="juna/juna.js"></script>\n', 'src="rata/rata.js"')
+h = "  { const qz = window.__quayZ ? window.__quayZ(x, y) : null; if (qz !== null) return qz; }      // Eteläranta's hand-built quay\n"
+rep(h, h + "  { const rz = window.__rataZ ? window.__rataZ(x, y) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: \"pelaaja uppoaa\"): aseman laiturit ja ratapenkka (rata/rata.js)\n", "window.__rataZ")
 open(sys.argv[2], 'w', encoding='utf-8').write(s)
 print('ok', len(s))
