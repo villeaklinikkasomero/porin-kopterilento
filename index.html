@@ -590,6 +590,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     col2.copy(col); if (lk_ && lk_.w2) col2.set(lk_.w2);   // second wall colour in wide vertical bands (two strong colours measured on the same building)
     const win = house ? true : shed ? false : h >= 5;
     if (L2 && PHS[bIdx]) {   // photo-textured walls
+      const PH602CUT = [[97.5, -41.8], [111.5, -45.1], [117.1, -21.1], [103.0, -17.9]];   // footprint of 1217
       const ox = L2.o[0], oy = L2.o[1], W = L2.w, E = Math.max(2.4, L2.e || L2.h), st = PHS[bIdx];
       // the photo strip was fitted to the median eave E; parts of the building with a higher eave (Yrjönkatu 10 towards the square: 23 m against 19.8 m)
       // were left blank under the roof.  With g and n the strip is extended by whole storeys of the same height up to the highest flat-topped wall.
@@ -608,11 +609,16 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
         const pr = q.map(v => v[0] * pk.tx + v[1] * pk.ty); let a = 0, b = 1; if (Math.abs(pr[2] - pr[0]) > Math.abs(pr[1] - pr[0])) b = 2; if (Math.abs(pr[b] - pr[a]) < 0.2) continue;
         const sg = (q[b][3] - q[a][3]) / (pr[b] - pr[a]) > 0 ? 1 : -1; planes.set(pk.k, { tx: pk.tx, ty: pk.ty, sg, off: q[a][3] - sg * pr[a] }); }
       for (let k = 0; k < W.length; k += 12) {
-        const ax = (W[k] + ox) / 10, ay = (W[k + 1] + oy) / 10, bx = (W[k + 4] + ox) / 10, by = (W[k + 5] + oy) / 10, cx = (W[k + 8] + ox) / 10, cy = (W[k + 9] + oy) / 10;
+        let ax = (W[k] + ox) / 10, ay = (W[k + 1] + oy) / 10, bx = (W[k + 4] + ox) / 10, by = (W[k + 5] + oy) / 10, cx = (W[k + 8] + ox) / 10, cy = (W[k + 9] + oy) / 10;
         const az = W[k + 2] / 10, bz = W[k + 6] / 10, cz = W[k + 10] / 10;
+        // 602's LoD2 shell runs on over Hallitalo (1217): its photo walls stood 0.6 m inside that house and filled the Kauppahalli portal recess (20.11.2026).
+        // Corners inside 1217's footprint move north along Yrjönkatu onto the houses' boundary. DO NOT DROP: without this the portal recess shows dark "glass".
+        const mv602 = (x, y) => { if (bIdx !== 602 || !pip(x, y, PH602CUT)) return [x, y]; const d = (103.0 - x) * 0.2245 + (-17.9 - y) * 0.9755 + 0.05; return [x + 0.2245 * d, y + 0.9755 * d]; };
+        [ax, ay] = mv602(ax, ay); [bx, by] = mv602(bx, by); [cx, cy] = mv602(cx, cy);
         let nx = (by - ay) * (cz - az) - (bz - az) * (cy - ay), nz = -((bz - az) * (cx - ax) - (bx - ax) * (cz - az)); const nl = Math.hypot(nx, nz) || 1; nx /= nl; nz /= nl;
         // two photo facades on one footprint meet at a party wall: cut the triangles there (choosing by triangle centre gave a diagonal seam)
         const V = [0, 1, 2].map(j => [(W[k + j * 4] + ox) / 10, (W[k + j * 4 + 1] + oy) / 10, W[k + j * 4 + 2] / 10, W[k + j * 4 + 3] / 10]);
+        for (const q of V) { const m = mv602(q[0], q[1]); q[0] = m[0]; q[1] = m[1]; }
         if (planes.size && V.some(q => q[3] < 0)) { const pk = pkey(V[0][0], V[0][1], V[0][2], V[1][0] - V[0][0], V[1][1] - V[0][1], V[1][2] - V[0][2], V[2][0] - V[0][0], V[2][1] - V[0][1], V[2][2] - V[0][2]), pl = pk && planes.get(pk.k);
           if (pl) for (const q of V) q[3] = Math.max(0, pl.off + pl.sg * (q[0] * pl.tx + q[1] * pl.ty)); }
         const side = st.length > 1 ? (st[1].cut !== undefined ? q => q[0] * 0.9744 - q[1] * 0.225 - st[1].cut : q => q[0] - st[1].west) : null;
@@ -2830,7 +2836,7 @@ setTarget();
 
 // ---------- statues and memorials (19.11.2026): patsaat.js = the owner's list (21 works, Wikipedia; ten positions refined from OpenStreetMap) and his Blender
 // models (origin on the ground, front +Z). A point that falls in a building or on a carriageway is moved to the nearest free spot (spiral, 30 m); with no
-// heading given the work faces the nearest street. Near one, a card tells its name, maker and year.
+// heading given the work faces the nearest street.
 {
   const ST = []; window.__statues = ST;
   import('./patsaat.js').then(K => { const D = K.default, G = {}; let left = Object.keys(D.m).length;
@@ -2844,8 +2850,7 @@ setTarget();
     for (const m in D.m) { const bin = atob(D.m[m]), buf = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
       new GLTFLoader().parse(buf.buffer, '', gl => { gl.scene.traverse(q => { q.userData.noT = true; if (q.isMesh && q.material) q.material.userData.noT = true;      /* placed at its own height: no terrain lift in the shader */
         if (q.isMesh && q.material && q.material.metalness !== undefined) { q.material.metalness = Math.min(q.material.metalness, 0.3); q.material.roughness = Math.max(q.material.roughness, 0.55); } }); G[m] = gl.scene; if (!--left) go(); }, () => { if (!--left) go(); }); } }).catch(() => {});
-  let acc = 0; window.__statueTick = dt => { acc += dt; if (acc < 0.4 || !ST.length) return; acc = 0; const px = WALK.on ? WALK.x : S.x, py = WALK.on ? WALK.y : S.y, R = WALK.on ? 14 : VEH === 'car' ? 20 : 32;
-    for (const s of ST) { const n = Math.hypot(s.x - px, s.y - py) < R; if (n && !s.seen) toast('🗿 ' + s.k.n + (s.k.a ? ' – ' + s.k.a : '') + (s.k.v ? ', ' + s.k.v : ''), 4); s.seen = n; } };
+  /* 20.11.2026 (owner): no on-screen card near a statue any more (the near-statue toast was removed). */
 }
 
 // 19.11.2026 (owner: "more believable smoke"): soft camera-facing puffs instead of solid balls. One procedural texture (overlapping radial blobs, so the edge is
@@ -3092,7 +3097,7 @@ window.__takeTick = dt => { if (TAKE.hex !== TAKE.applied && carG.children.lengt
 // (not near the helipad) and outside the wall of the SAMK campus that faces Satakunnankatu. Singles: seeded random spots on pavement within 2 m of a house
 // wall, parked along the wall. Positions are found once from the game's own masks, so nothing stands on a carriageway or inside a house.
 {
-  const few = matchMedia('(pointer: coarse)').matches; let sd = 4711; const rn = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  const few = false; let sd = 4711;      /* 20.11.2026 (owner: no bicycle on the phone): phones get as many bikes as desktop - they are instances, the draw calls do not grow */ const rn = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
   const PAINTS = [0xb3261e, 0x1f4e8c, 0x2e6b45, 0xe9c33a, 0x1b1b1d, 0xe8e8e4, 0x7a3b8f, 0xd9772b, 0x4aa3c7, 0x8b9096];
   const bld = (x, y) => bldTopAt(x, y) > TZs(x, y) + 1.2;
   const free = (x, y) => !bld(x, y) && !inRiver(x, y) && !(ROAD.on && inCore(x, y) && ROAD.asphAt(x, y));
