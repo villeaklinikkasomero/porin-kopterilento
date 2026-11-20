@@ -342,11 +342,12 @@ def export(root, name):
     for o in bpy.data.objects: o.select_set(True)
     # Blender: eteenpäin -Y  ->  glTF +Z
     path = os.path.join(OUT, name + ('' if HI else '_m') + '.glb')
-    bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=True, export_apply=True, export_yup=True)
+    bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=True, export_apply=True, export_yup=True, export_image_format='JPEG', export_jpeg_quality=86)
     tris = sum(len(p.vertices) - 2 for o in bpy.data.objects if o.type == 'MESH' for p in o.data.polygons)
     print('EXPORT', path, 'tris', tris)
 
-os.makedirs(OUT, exist_ok=True)
-export(build_sr3(), 'sr3')
-export(build_dd(False), 'ed')
-export(build_dd(True), 'edo')
+if __name__ == '__main__':
+    os.makedirs(OUT, exist_ok=True)
+    export(build_sr3(), 'sr3')
+    export(build_dd(False), 'ed')
+    export(build_dd(True), 'edo')

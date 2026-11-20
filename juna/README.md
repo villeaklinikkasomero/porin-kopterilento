@@ -6,7 +6,13 @@
   - Telit kääntyvät raiteen mukaan, pyörät pyörivät, ja vaunu kallistuu pituussuunnassa kahden telin korkeuseron mukaan.
   - Ilmoitukset (`toast`), kun pelaaja on alle 450 m:n päässä asemasta.
   - `window.__juna`: `T` (`s` = keulan kohta reitillä, `v`, `mode` = in/dwell/out/away), `cars`, `R`, `STOP`.
-- Mallit: `sr3.glb`, `ed.glb`, `edo.glb` (+ kevyet `_m` kosketuslaitteille), tehty proseduraalisesti: `tools/juna/juna_blender.py`
+- Mallit (21.11.2026): **korit omistajan Meshy-malleista** (Blue Steel Locomotive -> Sr3, Double Decker Train -> Ed, Blue Horizon Express -> Edo), sinivalkooranssi väritys.
+  `tools/juna/meshy_juna.py`: Meshyn telit/alusta leikataan pois, kori harvennetaan (Sr3 64 000, vaunut 54 000 kolmiota; `_m` 17–20 000) ja venytetään oikeisiin mittoihin
+  (Sr3 kori 18,1 × 3,0 m, katto 3,95 m, virroitin ylhäällä n. 5,5 m; vaunut 25,9 × 3,18 m, katto 5,05 m). Ohjausvaunun ohjaamo on Meshy-mallissa -X-päässä (`flip`).
+  Telit, pyöräkerrat, puskimet ja kytkimet tulevat `juna_blender.py`:stä. Tekstuurit `tools/juna/glb_shrink.py`: 2048 px (`_m` 1024 px).
+  Ajo: `bl313/bin/python tools/juna/meshy_juna.py -- --src <kansio: loco.glb dd.glb horizon.glb> --out juna --detail high|low`, sitten glb_shrink.py.
+  Meshyn lähdemallit (23–71 Mt) eivät ole repossa.
+- Vanhat proseduraaliset mallit: `tools/juna/juna_blender.py`
   (`bl313/bin/python tools/juna/juna_blender.py -- --out juna --detail high|low`). Solmut: `Bogie_F/R`, `Wheel_*`, `Door_*`, `Panto_1/2`, `Lamp_F/R`.
   Esikatselu: `tools/juna/view.html?f=edo,ed,sr3&az=40&el=10&d=40` pelin palvelimelta.
 - `yhdista.js`: staattiset osat yhteen materiaaleittain (myös rata.js käyttää).
