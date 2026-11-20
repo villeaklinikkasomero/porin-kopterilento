@@ -1205,6 +1205,20 @@ Sen jälkeen (omistajan päätöksellä): loput 18 isoa taloa (itään 1229–69
 - **Tekemättä:** D-käytävä (baari, punainen parvi) omana tilanaan, aitiotaso, suojalasit ja -verkot, vaihtoaitiot; ravintolatasoille, C-katsomoon ja päätyjen yläriveille ei pääse kävellen.
 - **Testi (pilvi):** sisään pääovesta, käytävä, jää, seisomakatsomo (z 1,9), A:n ylätasanne (z 10,8), kioskit, D-pääty; ei virheitä. Ulkokuvat pelistä otettu.
 
+### 20.11.2026 aamupäivä – uusi sisätila: Porin kauppahalli + jäähallin katos kiinni seinään
+
+- **Kauppahalli (`blender/kauppahalli_sisa.py` → `kauppahalli_sisa.js`, PLACES-rivi `kauppahalli`, `KAUH`):** omistaja: "nykyisin hallissa paljon ravintoloita",
+  "keskellä myyntikojuja ja sen pystyy kiertämään, eli kaksi käytävää". Halli 61 × 14 m, seinustoilla kojut (syvyys 2,4 m), keskellä 2 m leveä selkä selkää vasten
+  -kojusaareke (lohkot 1, 2, 5, 6), ravintolapöytiä lohkoissa 3–4 ja päädyissä, käytävät y = ±3,3, ruutulattia, kattolyhty. Kyltit tyhjiä, ei logoja.
+- **Ovi:** pelin ovi on ISOLINNANKADUN päädyssä (`KAUH`-origo itäpäädyssä, x-akseli länteen; malli on päädyistään symmetrinen). Yrjönkadun pääty on pelin kartassa kiinni
+  rakennuksessa 1217, joten `placeDoor` ei löytänyt sieltä vapaata kohtaa. Probe `[-4.3, 0, -1, 0]` → ovi 1,75 m seinästä. Kun kauppahallin ulkomalli (`lm.py kauppahalli`,
+  toinen keskustelu) muuttuu, tarkista probe uudelleen (portaat/katos oven edessä).
+- **Oletettu:** kojujen määrä ja jako, värit, saarekkeen pituus, pöytien paikat – ei mitattu kuvista. Halli on oikeasti läpikuljettava (Yrjönkadun ovi puuttuu pelistä).
+- **Jäähallin katos (`lm.py areena`, `bl_areena.js` poltettu uudelleen):** omistaja: "katoselementti pitäisi sijoittaa kiinni halliin". Katos oli 4,5 m irti seinästä, koska
+  se oli asetettu ulkonevan osan linjaan (y 49,1); mitattu pohjoisseinä on y 44,6 (x 45,7…101), ulkoneva osa vain x 38…45,7. Nyt `ec = AO + AEX*60.7 + AEY*44.6`,
+  areenan probe `[-6.1, 0, -1, 0]`.
+- **Testi (pilvi):** kauppahalliin sisään ovesta, molemmat käytävät, saareke, pöydät; ei virheitä. Jäähallin katos kuvattu pelistä. Kuva: `Claude outputs/sisatilat_20_11/`.
+
 ## ILLAN MODAL-JONO (omistaja polttaa illalla – PÄIVITÄ TÄTÄ LISTAA, älä tee uutta)
 (Sisätilat ja jalankulku eivät kuulu tähän jonoon: ne eivät tarvitse polttoa, vain pushin – ks. edellinen luku "SISÄTILAT JA JALANKULKU".)
 Viimeisin onnistunut poltto: PR #62 klo 12.18 (sisältää kaiken 19.11 klo 12 mennessä viedyn). Sen jälkeen kertyneet:
@@ -1526,6 +1540,29 @@ Seinät on annettu raw.pkl:n päätepisteinä; **käännä suunta niin että kat
 - Akselin s 20,4–21,6 alaikkuna oli puunrungon takana (toistettu). Kattolyhdyt jätetty pois. Vertailukuva `Claude outputs/rautatienpuistokatu_111_109_vertailu_19_11.jpg`.
   c064 testipoltettu (19 000 kärkeä; ennen 17 558).
 
+## 20.11.2026 – KAUPPAHALLI: molemmat sisäänkäynnit (omistaja: "yrjönkadulla kauppahallin sisäänkäyntiä ei näy, mallinnettava uudelleen"; "kauppahalli on läpi talon")
+- **Rakenne:** Kauppahalli (city.js 636, maamerkki `kauppahalli`, lm.py) ulottuu Isolinnankadulta korttelin läpi, mutta Yrjönkadulla sen edessä on
+  **Hallitalo 1217** (Yrjönkatu 12, 1927, lohko `tori4`): hallin sisäänkäynti on Hallitalon pohjakerroksen läpi. Hallin oma länsipääty jää 1217:n taakse piiloon.
+- **Isolinnankadun pääty (`blender/lm.py` haara `kauppahalli`, UUSI):** vaalea kerma (ennen keltainen), graniittisokkeli, korotettu päätykolmiollinen keskiosa
+  (0,34 m ulkona), korkea kaari-ikkuna sisäänkäynnin yllä, lippa kahdella pylväällä, graniittiportaat, lasitetut puuovet, vihreä nimitaulu tyhjänä,
+  kaari-ikkuna + näyteikkuna kummallakin puolella, kellarisäleiköt. Pano 61.4855769, 21.7995711 (h 283, p 12, huhti 2026); julkisivu oletettu
+  symmetriseksi 17,2 m jalanjäljen suhteen (oikea reuna jäi kuvan ulkopuolelle): s = 8,6 + (s − 9,58)·1,03, z = 1,03·z − 0,775.
+  Yksinkertaistettu: siipien vinot räystäät vaakasuorina, lyhdyt ja kaiteet pois. Pitkät sivut ennallaan (yleiset kaari-ikkunat).
+  **`bl_kauppahalli.js` leivottu paikallisesti** (2048², 20 näytettä; `python3 blender/lm.py kauppahalli` + `python3 tools/lm_to_js.py kauppahalli`,
+  vaatii `ln -s /home/claude/pori /home/claude/game` ja `mkdir -p /home/claude/blender/out`) ja viety kansioon → näkyy pushin jälkeen ilman Modalia.
+- **Yrjönkadun sisäänkäynti (`tools/rautalanka/facades/f1217.py`, facades.json id 1217):** Hallitalon Yrjönkadun julkisivu 24,5 m, seinä a (103.0,−17.9) → b (97.5,−41.8):
+  kermanvärinen rappaus, 6 ikkuna-akselia (jako 3,77 m) neljässä kerroksessa, punaruskea pohjakerros ja lista, liikkeiden näyteikkunat ja kermat kylttikentät
+  (tekstit pois), ja **hallin portaali s 6,45–11,45** omistajan kahden valokuvan mukaan: 5 m leveä ja 3,4 m korkea, 2 graniittipylvästä jalustoilla,
+  kermanvärinen eteinen varjossa, hallin tummat pariovet valaistuin lasein, sivuovet, kerma nimikenttä joka katkaisee listan (HALLI-tekstiä ei kopioitu).
+  Pano "12 Yrjönkatu" 61.4857386, 21.7977328 (h 58 / 103 / 148, p 14; vain h 103 terävä): s = 15,0 + (s − 13,33)·1,084, z = 1,084·z − 0,21.
+- **PORTAALI EI OLE OIKEA AUKKO.** `gate` leikkaa vain LoD2-kuoria (kivi.py); 1217 rakennetaan jalanjäljestä (zones.py build_building) → kokeiltu, seinä jäi
+  umpeen ja peitti kaiken takanaan. Nyt portaali on piirretty seinän pintaan ja pylväät ovat 0,05–0,45 m seinän edessä. Oikea läpikulku vaatisi `gate`-tuen
+  build_buildingiin + hallin sisätilan (ei ole).
+- **Väri auki:** pohjakerros on todellisuudessa himmeä punaruskea (#84575a), mutta peli näyttää sen tiilenpunaisena saumoineen (brickify, vaikka merkinnässä
+  on `nobrick`; 1217:llä on SPEC) – tarkista 64 näytteen poltosta / korjaa nobrick SPEC-taloille.
+- Kuvat `Claude outputs/kauppahalli_isolinnankatu_vertailu_20_11.jpg` ja `kauppahalli_yrjonkatu_vertailu_20_11.jpg`. tori4 testipoltettu (7 037 kärkeä).
+  **Modal: `bake tori4 --samples 64`** (push ensin).
+
 ## 19.11.2026 ilta – ALOITA TÄSTÄ (uusi chat: JULKISIVUINVENTAARIO, Itsenäisyydenkadun loput → Rautatienpuistokatu)
 
 Vastaa suomeksi, lyhyesti, kuva jokaisesta muutoksesta (Street View vasemmalla, peli oikealla). Tämä luku riittää aloitukseen ja korvaa luvun
@@ -1540,7 +1577,7 @@ Vastaa suomeksi, lyhyesti, kuva jokaisesta muutoksesta (Street View vasemmalla, 
 - Kaikki 19.11 tehty on omistajan kansiossa (takaisinluvulla tarkistettu) ja **Modal-polttamatta**. GitHubin commit `itsenäisyydenkatu` (19.11 klo 16.33)
   sisältää julkisivutyöt 1228:aa edeltävään asti; **pushaamatta: 1228, 585:n länsisivu, 111/109, Keskuskartanon korjaus (f1228.py, f585.py, f111.py, facades.json, kivi.py) ja tämä tiedosto**. Päivitä taulukon Tila-sarake ja
   ILLAN MODAL-JONO jokaisen talon jälkeen – valmiita ei tehdä uudelleen.
-- **Modal-jono nyt:** `city 64 c046,c047,c048,c051,c061,c063,c064` ja `bake bepop --samples 64` (c064:ssä nyt myös 111/109). zones.py, zones2.py, gen.py, kivi.py muuttuivat 19.11 → push ja Actions
+- **Modal-jono nyt:** `city 64 c046,c047,c048,c051,c061,c063,c064` ja `bake bepop --samples 64` ja `bake tori4 --samples 64` (c064:ssä nyt myös 111/109). zones.py, zones2.py, gen.py, kivi.py muuttuivat 19.11 → push ja Actions
   "porikit image" vihreäksi ENNEN ajoa. Tarkistus: lohkon kärkimäärä kasvaa; Modal-lokissa rivi `facades.json: <polku>`.
 - **Auki omistajalta:** (1) pysäköintihallin 164 läpiajotesti – omistaja ei ole vielä ajanut; ennen c051:n Modal-polttoa aukot eivät näy (auto ajaa umpiseinän
   läpi). Jos kelpaa: sisus Blender-moduuliksi omistajan kuvista. (2) "katot irti seinistä keskustassa" – ei toistunut, odottaa kuvakaappausta.

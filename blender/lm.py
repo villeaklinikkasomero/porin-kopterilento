@@ -418,7 +418,7 @@ if KEY == 'mausoleumi':
 elif KEY == 'areena':
     # Porin jäähalli (Isomäen jäähalli), 20.11.2026 (owner: "pääsisäänkäynti on pitkällä sivulla Karhuhallin puolella, korkeat pilarit joiden päällä katos"):
     # measured LoD2 shell (Maanmittauslaitos, building 1975: arched roof 13...23 m) instead of the flat box; pale walls with a dark window band, and the
-    # MAIN ENTRANCE on the north long side (the 31.6 m projecting block): a row of glass doors under a red canopy carried by tall slender pillars
+    # MAIN ENTRANCE on the north long side (beside the projecting block): a row of glass doors under a red canopy carried by tall slender pillars
     # (read from Wikimedia Commons "Isomäki Areena sivu.jpg", Lepax 2017, public domain; nothing copied). Signs and logos are left out.
     # Assumed: canopy size (30 x 6 m, 7.5 m up), eight pillars, window bands on the other walls.
     M('conc', '#d6d6d1'); M('fasc', '#f0f0ec'); M('red', '#c8232c'); M('roofl', '#9a9da0'); M('glassd', '#1d2730', rough=0.2); ROOF_IN_MODEL = True; TEX = 4096
@@ -432,7 +432,7 @@ elif KEY == 'areena':
         extrude(shape(base + u * um, u, L_ - 3.0, 2.2, min(zt - 3.4, 5.2), False, -0.03, nrm), nrm * 0.08, 'glassd')
         mid = (base + u * um).to_2d(); n2 = nrm.to_2d(); obox(Vector((mid.x + n2.x * 0.12, mid.y + n2.y * 0.12)), u, L_ / 2 + 0.1, 0.14, zt - 0.6, zt, 'fasc')
     mml_shell(1975, 'conc', 'roofl', adeco)
-    ec = AO + AEX * 53.2 + AEY * 49.1                                             # middle of the entrance block's front
+    ec = AO + AEX * 60.7 + AEY * 44.6                                             # entrance: on the measured north wall (y 44.6 for x 45.7...101) right beside the 9 m projecting block (x 38...45.7); owner 20.11: the canopy must sit against the hall
     obox((ec + AEY * 0.06)[:2], AEX, 13.0, 0.05, 0.1, 2.6, 'glassd')                # doors
     obox((ec + AEY * 3.0)[:2], AEX, 15.0, 3.1, 7.4, 7.9, 'red')                     # canopy
     obox((ec + AEY * 0.2)[:2], AEX, 15.0, 0.22, 2.8, 3.5, 'red')
@@ -584,7 +584,53 @@ elif KEY == 'teatteri':
 elif KEY == 'taidemuseo':
     M('plaster', '#d9d3c4', tex='rust'); classic('plaster', 8.2, 1, 6.2, 2.9, 5.0, True, cornice=0.5, frame='white')
 elif KEY == 'kauppahalli':
-    M('plaster', '#d8c88e'); classic('plaster', 8.5, 2, 4.2, 1.7, 2.3, True)
+    # Porin kauppahalli (1927). The hall runs through the block from Isolinnankatu to Yrjönkatu (owner 20.11.2026: "sisäänkäyntiä ei näy,
+    # mallinnettava uudelleen"; "kauppahalli on läpi talon, sisäänkäynti Yrjönkadulla myös").
+    # EAST FRONT (Isolinnankatu 11) measured on a rectified Street View frame, April 2026 (pano 61.4855769, 21.7995711, heading 283,
+    # pitch 12): the facade is taken as symmetric about the middle of the 17.2 m footprint edge (left edge and centre line read from the
+    # frame, the right edge was outside it) -> s = 8.6 + (s_m - 9.58) * 1.03, z = 1.03 z_m - 0.775.
+    # Pale cream render (the old model was yellow), granite plinth; a raised gabled middle bay with a tall round-arched window over the
+    # entrance (flat canopy on two columns, granite steps, glazed wooden doors, a green name board - lettering not copied); a round-arched
+    # window over a shop window on each side; cellar grilles. Simplified: the wings' raking end cornices are level, lanterns and railings
+    # left out, the right-hand lower window drawn like the left one's width.
+    # WEST FRONT (Yrjönkatu): NOT MEASURED - no usable street photo (pedestrian street; only a restaurant's own photospheres). It keeps the
+    # generic arched windows until the owner sends a photo. The long sides are generic as before.
+    M('plaster', '#e9e2cc'); M('kgreen', '#2f6b5a'); M('kwood', '#7a5234'); M('kroof', '#6f7376', rough=0.7)
+    H = 9.0; base = 0.6
+    walls(offset(P, 0.1), 0, base, 'granite'); cap(offset(P, 0.1), base, 'granite'); walls(P, base, H, 'plaster'); ledge(P, 0.3, H - 0.5, H, 'white')
+    ea = Vector((178.8 - AX, -52.7 - AY, 0)); eb = Vector((182.6 - AX, -35.9 - AY, 0)); eu = (eb - ea).normalized(); en = Vector((eu.y, -eu.x, 0))
+    for a, u, nrm, L in edges(P):                                              # the other sides: generic arched windows as before
+        if L < 3.0 or ((a - ea).length < 0.6 and abs(L - (eb - ea).length) < 0.6) or (nrm - en).length < 0.2 and abs((a - ea).dot(en)) < 0.5: continue
+        n = max(1, round(L / 4.2)); step = L / n
+        for k in range(n):
+            for z0 in (1.9, 5.3): window(a + u * (step * (k + 0.5)) + nrm * 0.02, u, nrm, 1.7, 2.3, z0, arch=True, frame='white')
+    S = lambda s_, d_=0.0, z=0.0: ea + eu * s_ + en * d_ + Vector((0, 0, z))
+    def fbox(s0, s1, z0, z1, d0, d1, m): extrude([S(s0, d0, z0), S(s1, d0, z0), S(s1, d0, z1), S(s0, d0, z1)], en * (d1 - d0), m)
+    # raised gabled middle bay (the end of the hall's nave): 7.0 m wide, eave 10.55, apex 11.84
+    g0, g1, ge, gt, gd = 5.09, 12.12, 10.55, 11.84, 5.0; cd = 0.34       # the bay stands 0.34 m proud, so the wings' cornice stops against it
+    extrude([S(g0, cd, base), S(g1, cd, base), S(g1, cd, ge), S(8.6, cd, gt), S(g0, cd, ge)], en * -(gd + cd), 'plaster')
+    for a_, b_ in (((g0 - 0.3, ge - 0.12), (8.6, gt + 0.05)), ((8.6, gt + 0.05), (g1 + 0.3, ge - 0.12))):       # roof slopes with a white verge
+        extrude([S(a_[0], cd + 0.35, a_[1]), S(b_[0], cd + 0.35, b_[1]), S(b_[0], cd + 0.35, b_[1] + 0.22), S(a_[0], cd + 0.35, a_[1] + 0.22)], en * -0.45, 'white')
+        extrude([S(a_[0], -0.1, a_[1] + 0.1), S(b_[0], -0.1, b_[1] + 0.1), S(b_[0], -0.1, b_[1] + 0.22), S(a_[0], -0.1, a_[1] + 0.22)], en * -(gd - 0.1), 'kroof')
+    fbox(g0 - 0.3, g1 + 0.3, ge - 0.3, ge - 0.08, cd, cd + 0.3, 'white')                                             # the pediment's base cornice
+    # tall arched window over the entrance, three lights wide
+    window(S(8.6, cd + 0.02), eu, en, 2.47, 5.4, 4.72, arch=True, frame='white', mull=False)
+    for ds in (-0.41, 0.41): fbox(8.6 + ds - 0.04, 8.6 + ds + 0.04, 4.72, 9.4, cd + 0.02, cd + 0.24, 'white')
+    for z_ in (5.75, 6.8, 7.85, 8.87): fbox(8.6 - 1.23, 8.6 + 1.23, z_ - 0.04, z_ + 0.04, cd + 0.02, cd + 0.24, 'white')
+    fbox(7.1, 10.1, 4.28, 4.7, cd, cd + 0.12, 'kgreen')                                                               # name board (blank)
+    # entrance: steps, canopy on two columns, recessed glazed wooden doors
+    for k_, (d_, z_) in enumerate(((2.5, 0.43), (2.05, 0.86), (1.6, 1.29))): fbox(6.3 - 0.3 * (2 - k_), 10.9 + 0.3 * (2 - k_), 0.0, z_, 0.0, d_, 'granite')
+    fbox(6.25, 10.95, 3.86, 4.17, cd, 1.55, 'white')
+    for s_ in (6.6, 10.6): frustum(S(s_, 1.3)[:2], 0.17, 0.17, 1.29, 3.86, 10, 'white')
+    fbox(7.45, 9.75, 1.29, 3.7, cd, cd + 0.06, 'dark'); fbox(7.6, 9.6, 1.29, 3.0, cd + 0.06, cd + 0.1, 'kwood')
+    for s_ in (7.72, 8.66): fbox(s_, s_ + 0.82, 1.75, 2.85, cd + 0.1, cd + 0.12, 'glass')
+    fbox(7.6, 9.6, 3.05, 3.6, cd + 0.06, cd + 0.1, 'glass')
+    # side bays: an arched window over a shop window, cellar grilles; the small window at the south end
+    for c_ in (4.47, 12.73):
+        window(S(c_, 0.02), eu, en, 1.97, 3.09, 3.77, arch=True, frame='white')
+        window(S(c_, 0.02), eu, en, 1.97, 2.4 if c_ < 8 else 1.2, 1.2, arch=False, frame='white', sill=False)
+        fbox(c_ - 0.85, c_ + 0.85, 0.1, 0.52, 0.1, 0.16, 'dark')
+    window(S(1.52, 0.02), eu, en, 1.6, 1.3, 1.1, arch=False, frame='white', sill=False, mull=False)
 elif KEY == 'kehraamo':
     M('brick', '#9c4a38', tex='brick'); M('btrim', '#7e3a2c')
     classic('brick', 9.5, 2, 3.6, 1.3, 2.1, True, trim='btrim', frame=None, glass='dark', cornice=0.35)

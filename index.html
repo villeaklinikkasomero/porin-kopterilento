@@ -2269,6 +2269,7 @@ const blobIn = new THREE.Mesh(new THREE.CircleGeometry(0.42, 20).rotateX(-Math.P
 const MAUS = { cx: -1947.81, cy: 193.18, ex: [-0.9703, 0.2419], ey: [-0.2419, -0.9703] };   // bl_mausoleumi.js: hall centre, local x runs from the east door inwards (166 deg)
 const TEAT = { cx: -199.62, cy: 374.34, ex: [-0.2236, -0.9747], ey: [0.9747, -0.2236] };   // Porin Teatteri (blender/teatteri_sisa.py): origin on the hall's rear wall, 11.5 m in from the middle of the Hallituskatu front; x runs towards the stage. The upstairs café is modelled 100 m further along x and folded back for the map
 const AREE = { cx: -1611.69, cy: -1365.72, ex: [-0.4384, -0.8988], ey: [0.8988, -0.4384] };   // Porin jäähalli (blender/areena_sisa.py): origin at the main doors on the north long side (Karhuhalli side), x across the rink to the south
+const KAUH = { cx: 177.01, cy: -43.68, ex: [-0.9839, 0.1788], ey: [-0.1788, -0.9839] };   // Porin kauppahalli (blender/kauppahalli_sisa.py): origin in the middle of the Isolinnankatu (east) end, x along the hall to the west (the Yrjönkatu end adjoins the neighbouring house, so the game's door is on Isolinnankatu)
 const TAIM = { cx: -96.85, cy: 467.4, ex: [-0.2267, -0.9740], ey: [0.9740, -0.2267] };   // Porin taidemuseo (blender/taidemuseo_sisa.py): origin in the middle of the recessed river front, x into the hall
 const lin2 = T => (x, y) => [T.cx + T.ex[0] * x + T.ey[0] * y, T.cy + T.ex[1] * x + T.ey[1] * y];
 const PLACES = [
@@ -2276,7 +2277,8 @@ const PLACES = [
   { key: 'mausoleumi', file: 'mausoleumi_sisa', name: 'Juseliuksen mausoleumi', room: 'halli ja krypta', label: '🕯 Sisään mausoleumiin', hint: 'astu Juseliuksen mausoleumiin', ok: () => true, map: (x, y) => [MAUS.cx + MAUS.ex[0] * x + MAUS.ey[0] * y, MAUS.cy + MAUS.ex[1] * x + MAUS.ey[1] * y], probe: [-5.0, 0, -1, 0], markH: 5.2 },
   { key: 'teatteri', file: 'teatteri_sisa', name: 'Porin Teatteri', room: 'aula, päänäyttämö ja kahvila', label: '🎭 Sisään teatteriin', hint: 'astu Porin Teatteriin', ok: () => true, map: (x, y) => { if (x > 50) x -= 100; return [TEAT.cx + TEAT.ex[0] * x + TEAT.ey[0] * y, TEAT.cy + TEAT.ex[1] * x + TEAT.ey[1] * y]; }, probe: [-15.8, 0, -1, 0], markH: 6 },
   { key: 'taidemuseo', file: 'taidemuseo_sisa', name: 'Porin taidemuseo', room: 'Halli', label: '🖼 Sisään taidemuseoon', hint: 'astu Porin taidemuseoon', ok: () => true, map: lin2(TAIM), probe: [-3.0, 0, -1, 0], markH: 5 },
-  { key: 'areena', file: 'areena_sisa', name: 'Porin jäähalli', room: 'kaukalo ja katsomot', label: '🏒 Sisään jäähalliin', hint: 'astu Porin jäähalliin', ok: () => true, map: lin2(AREE), probe: [-10.6, 0, -1, 0], markH: 9 } ];
+  { key: 'areena', file: 'areena_sisa', name: 'Porin jäähalli', room: 'kaukalo ja katsomot', label: '🏒 Sisään jäähalliin', hint: 'astu Porin jäähalliin', ok: () => true, map: lin2(AREE), probe: [-6.1, 0, -1, 0], markH: 9 },
+  { key: 'kauppahalli', file: 'kauppahalli_sisa', name: 'Porin kauppahalli', room: 'halli', label: '🍽 Sisään kauppahalliin', hint: 'astu Porin kauppahalliin', ok: () => true, map: lin2(KAUH), probe: [-4.3, 0, -1, 0], markH: 6 } ];
 const IN = PLACES[0];
 let walkMix = null, walkCur = '', walkLoading = false; const walkAct = {};
 function loadWalker() { if (walkLoading) return; walkLoading = true;

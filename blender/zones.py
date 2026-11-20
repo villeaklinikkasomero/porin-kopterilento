@@ -1363,6 +1363,12 @@ def _gate_w(w):
     rl = dict(bw=60.0, rows=[(gh, 'plain', 'G'), (max(0.5, h - gh), 'plain', 'P')], cols=lambda c, nb: 'W', P={},
               rowP={'G': dict(setback=dp, piers=(0, 0.04), soffit=wm, noback=True)})
     return dict(P=dict(wall=wm, piermat=wm), layout=rl, upper=_bare_lay)
+def _gate_lay(w):
+    """footprint edge of a recessed gateway (facades.json "gate": [s0, s1, gh, depth, h] with "fp": true): the ground storey gh high stands
+    'depth' metres back - reveals, soffit and a plain BACK WALL (doors are drawn on it by box items with negative d); plain wall above"""
+    s0, s1, gh, dp, h = w['gate']; wm = _bare_mat(w)
+    return dict(bw=60.0, rows=[(gh, 'plain', 'G'), (max(0.5, h - gh), 'plain', 'P')], cols=lambda c, nb: 'W', P=dict(wall=wm, piermat=wm),
+                rowP={'G': dict(setback=dp, piers=(0, 0.04), soffit=wm)})
 WALLS = {}; FEXTRA = {}; NOBRICK = set()   # NOBRICK: houses without a SPEC whose entry says "nobrick" (19.11.2026, 166: red granite, not brick)
 FACADES = {e['id']: e for e in (_json_f.load(open(_FJ)) if _os_f.path.exists(_FJ) else [])}
 for _i, _e in FACADES.items():
@@ -1379,6 +1385,16 @@ for _i, _e in FACADES.items():
                 return _bare_w(w)
         return None
     FEXTRA[_i] = _fac_extra(_e['walls'])                # also run when the house is a stretch of another house's LoD2 shell (kivi.shell_runalt)
+    for w in _bw:                                        # footprint-built house with a recessed gateway ("gate" + "fp": true, 20.11.2026, 1217 Kauppahalli
+        if 'gate' in w and w.get('fp'):                  # portal): the gateway stretch gets a footprint edge of its own (kivi.cut_walls does this for shells only)
+            _p = B[_i]['p']; _kk = [(_p[k], _p[k + 1]) for k in range(0, len(_p), 2)]; a_, b_ = w['a'], w['b']
+            Lw = math.hypot(b_[0] - a_[0], b_[1] - a_[1]); t_ = ((b_[0] - a_[0]) / Lw, (b_[1] - a_[1]) / Lw)
+            for _j in range(len(_kk)):
+                p_, q_ = _kk[_j], _kk[(_j + 1) % len(_kk)]
+                if _on_line((p_[0] + q_[0]) / 20, (p_[1] + q_[1]) / 20, tuple(a_), tuple(b_)) and math.hypot(q_[0] - p_[0], q_[1] - p_[1]) / 10 > w['gate'][1] - w['gate'][0] + 1:
+                    cuts = [(round((a_[0] + t_[0] * s_) * 10), round((a_[1] + t_[1] * s_) * 10)) for s_ in w['gate'][:2]]
+                    if (cuts[0][0] - p_[0]) ** 2 + (cuts[0][1] - p_[1]) ** 2 > (cuts[1][0] - p_[0]) ** 2 + (cuts[1][1] - p_[1]) ** 2: cuts.reverse()
+                    _kk[_j + 1:_j + 1] = cuts; B[_i]['p'] = [v for q in _kk for v in q]; break
     _wk = {}                                             # footprint-built houses (no LoD2 shell): the bare walls by footprint edge
     if _bw:
         try:
@@ -1386,7 +1402,12 @@ for _i, _e in FACADES.items():
             for _k in range(len(_pp)):
                 _p, _q = _pp[_k], _pp[(_k + 1) % len(_pp)]
                 for w in _bw:
-                    if _on_line((_p[0] + _q[0]) / 2, (_p[1] + _q[1]) / 2, tuple(w['a']), tuple(w['b'])): _wk[_k] = _bare_lay
+                    if _on_line((_p[0] + _q[0]) / 2, (_p[1] + _q[1]) / 2, tuple(w['a']), tuple(w['b'])):
+                        _wk[_k] = _bare_lay
+                        if 'gate' in w and w.get('fp'):
+                            a_, b_ = w['a'], w['b']; Lw = math.hypot(b_[0] - a_[0], b_[1] - a_[1])
+                            u_ = (((_p[0] + _q[0]) / 2 - a_[0]) * (b_[0] - a_[0]) + ((_p[1] + _q[1]) / 2 - a_[1]) * (b_[1] - a_[1])) / Lw
+                            if w['gate'][0] <= u_ <= w['gate'][1]: _wk[_k] = _gate_lay(w)
         except Exception: pass
     if _i in SPEC:
         SPEC[_i] = dict(SPEC[_i])
