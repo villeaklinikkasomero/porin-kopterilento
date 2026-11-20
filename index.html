@@ -3291,6 +3291,7 @@ $('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.tog
 // DoorF_A/B and DoorM_A/B turn about their hinges, damage steps as in the cars). Stops: OpenStreetMap (tools/bus/osm_stops.json, 20.11.2026), the 87 in the
 // sharp core. Two lines of our own over real stops: 1 Kauppatori - Puuvilla and back, 2 Matkakeskus - Kauppatori and back. Parked buses wait at
 // Kauppatori laituri 2 and Matkakeskus laituri 1; on foot next to one Enter takes it and starts that line.
+// Live buses (smooth, 20.11.2026): drawn 2 s behind the feed, interpolated between received points and kept on our street lanes.
 // Live buses: Digitransit's open MQTT feed (wss://mqtt.digitransit.fi, topic /gtfsrt/vp/Pori/#, GTFS-RT vehicle positions, no key) puts the real Pori
 // buses on the streets where they are right now (only while they run). On foot next to one that stands still, Enter gets on; N (or the bell button) asks
 // it to stop and the player gets off at the next halt. The live buses are drawn only - they do not collide.
@@ -3452,15 +3453,35 @@ $('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.tog
     pb(u, (f, w, v) => { if (f !== 2 || w !== 2) return; pb(v, (f2, w2, v2) => { if (f2 !== 4 || w2 !== 2) return; let lat = null, lon = null, br = null, sp = 0;
       pb(v2, (f3, w3, v3) => { if (f3 === 2 && w3 === 2) pb(v3, (f4, w4, v4) => { if (f4 === 1) lat = v4; else if (f4 === 2) lon = v4; else if (f4 === 3) br = v4; else if (f4 === 5) sp = v4; }); });
       if (lat === null) return; const x = (lon - 21.796) * 53278, y = (lat - 61.486) * 111437; if (x < OX0 + 50 || x > OX1 - 50 || y < OY0 + 50 || y > OY1 - 50) { const o = LIVE.get(vid); if (o) o.t = -1e9; return; }
-      let o = LIVE.get(vid); if (!o) { o = { id: vid, x, y, yaw: br !== null ? br * Math.PI / 180 : 0, g: null }; LIVE.set(vid, o); }
-      o.tx = x; o.ty = y; o.sp = sp || 0; if (br !== null && (sp > 0.5 || !o.br)) o.br = br * Math.PI / 180; o.line = line; o.head = head; o.t = performance.now() / 1000; }); }); };
+      const now = performance.now() / 1000; let o = LIVE.get(vid); if (!o) { o = { id: vid, x, y, yaw: br !== null ? br * Math.PI / 180 : 0, hd: br !== null ? br * Math.PI / 180 : 0, g: null, h: [] }; LIVE.set(vid, o); }
+      o.sp = sp || 0; if (br !== null && (sp > 0.5 || o.br === undefined)) o.br = br * Math.PI / 180; o.line = line; o.head = head; o.t = now;
+      const L = o.h[o.h.length - 1]; if (!L || now - L.t > 0.3) { o.h.push({ t: now, x, y, sp: o.sp, br: o.br || 0 }); if (o.h.length > 14) o.h.shift(); } }); }); };
+  /* the street network the traffic uses (CITY.r centrelines), in a 40 m grid: a live bus is drawn on its right-hand lane, 1.7 m off the centreline like the
+     traffic, on the nearest street that runs its way (the GPS point is often a few metres off our map) */
+  const SEG = [], SG = new Map(), SGS = 40;
+  const segInit = () => { CITY.r.forEach(r => { if (!r.k) return; for (let i = 0; i + 3 < r.p.length; i += 2) { const ax = r.p[i], ay = r.p[i + 1], bx = r.p[i + 2], by = r.p[i + 3], l = Math.hypot(bx - ax, by - ay); if (l < 0.5) continue;
+      const sg = { ax, ay, bx, by, l, ux: (bx - ax) / l, uy: (by - ay) / l }; SEG.push(sg);
+      for (let gi = Math.floor((Math.min(ax, bx) - 25) / SGS); gi <= Math.floor((Math.max(ax, bx) + 25) / SGS); gi++) for (let gj = Math.floor((Math.min(ay, by) - 25) / SGS); gj <= Math.floor((Math.max(ay, by) + 25) / SGS); gj++) { const k = gi + ',' + gj; let a = SG.get(k); if (!a) SG.set(k, a = []); a.push(sg); } } }); };
+  const TERM = [[-2, 44, 32, 126], [-445, -975, -335, -870]];      /* bus stations (Kauppatori stands, Matkakeskus): drawn where the data says, not pulled onto a street */
+  const snap = (x, y, yaw) => { if (TERM.some(b => x > b[0] && x < b[2] && y > b[1] && y < b[3])) return null; const L = SG.get(Math.floor(x / SGS) + ',' + Math.floor(y / SGS)); if (!L) return null; const fx = Math.sin(yaw), fy = Math.cos(yaw); let b = null, bs = 1e9;
+    for (const q of L) { const t = Math.max(-4, Math.min(q.l + 4, (x - q.ax) * q.ux + (y - q.ay) * q.uy)), px = q.ax + q.ux * t, py = q.ay + q.uy * t, d = Math.hypot(x - px, y - py); if (d > 15) continue;
+      const c = fx * q.ux + fy * q.uy, sc = d + (1 - Math.abs(c)) * 14; if (sc < bs) { bs = sc; b = { px, py, ux: c >= 0 ? q.ux : -q.ux, uy: c >= 0 ? q.uy : -q.uy }; } }
+    return b && { x: b.px + b.uy * 1.7, y: b.py - b.ux * 1.7, yaw: Math.atan2(b.ux, b.uy) }; };
+  const DELAY = 2.0;      /* drawn 2 s behind the data: always between two received points, so the movement is smooth */
   let pool = [];
   const liveTick = dt => { if (!document.hidden) { if (!ws && (wsT -= dt) <= 0) connect(); if (ws && ws.readyState === 1 && (pingT += dt) > 30) { pingT = 0; ws.send(Uint8Array.from([0xc0, 0])); } }
     const now = performance.now() / 1000, px = WALK.on ? WALK.x : S.x, py = WALK.on ? WALK.y : S.y; const vis = [];
+    if (!SEG.length) segInit();
     for (const [k, o] of LIVE) { if (now - o.t > 90) { if (o.g) { o.g.visible = false; pool.push(o.g); o.g = null; } LIVE.delete(k); continue; }
-      const age = Math.min(4, now - o.t), fx = o.tx + Math.sin(o.br || 0) * o.sp * age, fy = o.ty + Math.cos(o.br || 0) * o.sp * age;
-      o.x += (fx - o.x) * Math.min(1, dt * 2.2); o.y += (fy - o.y) * Math.min(1, dt * 2.2); if (Math.hypot(fx - o.x, fy - o.y) > 60) { o.x = fx; o.y = fy; }
-      if (o.br !== undefined) { let a = o.br - o.yaw; a = Math.atan2(Math.sin(a), Math.cos(a)); o.yaw += a * Math.min(1, dt * 2.5); }
+      const h = o.h, rt = now - DELAY; let bx, by;
+      if (rt <= h[0].t) { bx = h[0].x; by = h[0].y; }
+      else if (rt >= h[h.length - 1].t) { const a = h[h.length - 1], e = Math.min(2, rt - a.t); bx = a.x + Math.sin(a.br) * a.sp * e; by = a.y + Math.cos(a.br) * a.sp * e; }      /* data late: carry on briefly */
+      else { let i = h.length - 2; while (i > 0 && h[i].t > rt) i--; const a = h[i], b = h[i + 1], u = (rt - a.t) / Math.max(0.01, b.t - a.t); bx = a.x + (b.x - a.x) * u; by = a.y + (b.y - a.y) * u; }
+      if (o.rx !== undefined) { const mx = bx - o.rx, my = by - o.ry; if (Math.hypot(mx, my) > 0.04) { let a = Math.atan2(mx, my) - o.hd; a = Math.atan2(Math.sin(a), Math.cos(a)); o.hd += a * Math.min(1, dt * 3); } }
+      o.rx = bx; o.ry = by;
+      const q = snap(bx, by, o.hd) || { x: bx, y: by, yaw: o.hd };
+      if (!o.on || Math.hypot(q.x - o.x, q.y - o.y) > 30) { o.x = q.x; o.y = q.y; o.yaw = q.yaw; o.on = true; }
+      else { const f = Math.min(1, dt * 5); o.x += (q.x - o.x) * f; o.y += (q.y - o.y) * f; let a = q.yaw - o.yaw; a = Math.atan2(Math.sin(a), Math.cos(a)); o.yaw += a * Math.min(1, dt * 4); }
       o.d = Math.hypot(o.x - px, o.y - py); if (o.d < 650) vis.push(o); else if (o.g) { o.g.visible = false; pool.push(o.g); o.g = null; } }
     vis.sort((a, b) => a.d - b.d); vis.forEach((o, i) => { if (i >= (isTouch ? 5 : 9)) { if (o.g) { o.g.visible = false; pool.push(o.g); o.g = null; } return; }
       if (!o.g) o.g = pool.pop() || copy(); o.g.visible = true; place(o.g, o.x, o.y, o.yaw); }); };
