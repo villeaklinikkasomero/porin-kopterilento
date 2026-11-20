@@ -3,8 +3,7 @@
 // Kokeilu pelissä (selaimen konsoli):   await import('./tori/torikojut.js')
 // Pysyvästi index.html:n loppuun:       <script type="module" src="tori/torikojut.js"></script>
 //
-// Kojut ovat kahdessa rivissä torin avoimella kivetyksellä (entisen helikopterikentän kohdalla) toisiaan kohti, 7 m käytävä välissä.
-// Rivit on käännetty torin reunojen suuntaan (noin 11° myötäpäivään pohjoisesta, mitattu ilmakuvasta).
+// Kojut ovat pieninä ryhminä eri puolilla toria, käännetty torin reunojen suuntaan (noin 11° myötäpäivään pohjoisesta, mitattu ilmakuvasta).
 // Korkeus: pelin maastonosto (terrainize) nostaa mallit maanpinnalle; lisäksi kivetyksen paksuus ROAD.pave = 0,26 m.
 import * as THREE from '../three.module.min.js';
 import { GLTFLoader } from '../GLTFLoader.js';
@@ -13,21 +12,19 @@ import MALLIT from './torikojut_mallit.js';
 const PAVE = 0.26;                       // index.html: ROAD.pave
 const KESKI = { x: 62, y: 70 };          // torin avoin keskiosa (karttametrit)
 const KULMA = -0.19;                     // torin akselien kierto (rad), negatiivinen = myötäpäivään
-const RIVI = 4.5;                        // rivin etäisyys käytävän keskeltä (m)
-const PAIKAT = [                         // u = torin suuntaan, v = rivi (+ = pohjoinen rivi, katsoo etelään)
-  { u: -7.5, v: +1, m: 'hedelmat_keltainen' }, { u: -3.3, v: +1, m: 'sininen_raita' }, { u: 0.9, v: +1, m: 'punainen_raita' }, { u: 5.1, v: +1, m: 'oranssi_puupoyta' },
-  { u: -7.5, v: -1, m: 'vihannekset_vihrea' }, { u: -3.3, v: -1, m: 'oranssi_puupoyta' }, { u: 0.9, v: -1, m: 'hedelmat_keltainen' }, { u: 5.1, v: -1, m: 'sininen_raita' },
+// 20.11.2026 (omistaja: "torin myyntipöytiä voisi levittää hieman eri paikkoihin"): kojut ovat pieninä ryhminä ympäri toria eivätkä yhdessä korttelissa.
+// x, y = karttametrit; suunta = mihin myyntipuoli katsoo (N, S, W, E, SW ...), kierretty torin akseleille (KULMA).
+const SUUNTA = { S: 0, N: Math.PI, W: -Math.PI / 2, E: Math.PI / 2, SW: -Math.PI / 4, SE: Math.PI / 4, NW: -3 * Math.PI / 4, NE: 3 * Math.PI / 4 };
+const PAIKAT = [
+  { x: 53.0, y: 47.0, s: 'N', m: 'hedelmat_keltainen' }, { x: 58.6, y: 45.9, s: 'N', m: 'sininen_raita' },        // eteläreuna, Yrjönkadun puoli
+  { x: 80.0, y: 40.5, s: 'N', m: 'vihannekset_vihrea' },                                                            // kaakkoiskulma
+  { x: 65.5, y: 60.0, s: 'W', m: 'punainen_raita' }, { x: 66.4, y: 64.6, s: 'W', m: 'oranssi_puupoyta' },          // keskellä, paviljonkia kohti
+  { x: 90.0, y: 85.0, s: 'SW', m: 'hedelmat_keltainen' },                                                           // koillisosa
+  { x: 74.0, y: 98.0, s: 'S', m: 'oranssi_puupoyta' }, { x: 62.0, y: 101.0, s: 'S', m: 'sininen_raita' },           // pohjoisreuna
 ];
 
 export function torikojuPaikat() {
-  const ca = Math.cos(KULMA), sa = Math.sin(KULMA);
-  const U = [ca, sa], V = [-sa, ca];      // karttakoordinaateissa (x itään, y pohjoiseen)
-  return PAIKAT.map(p => {
-    const x = KESKI.x + U[0] * p.u + V[0] * p.v * RIVI, y = KESKI.y + U[1] * p.u + V[1] * p.v * RIVI;
-    // malli katsoo +Z:aan = kartalla etelään (y-); pohjoinen rivi katsoo etelään, eteläinen pohjoiseen
-    const rotY = KULMA + (p.v < 0 ? Math.PI : 0);
-    return { x, y, rotY, malli: p.m };
-  });
+  return PAIKAT.map(p => ({ x: p.x, y: p.y, rotY: KULMA + SUUNTA[p.s], malli: p.m }));   // malli katsoo +Z:aan = kartalla etelään (S)
 }
 
 function lataa(b64) {

@@ -209,7 +209,26 @@ const THG = new Int16Array(TDEC(TER.hg).buffer), THS = new Int16Array(TDEC(TER.h
 function tBil(A, x, y) { const fx = Math.min(TER.nx - 1.001, Math.max(0, (x - TER.x0) / TER.g)), fy = Math.min(TER.ny - 1.001, Math.max(0, (y - TER.y0) / TER.g)), i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j, k = j * TER.nx + i;
   return ((A[k] * (1 - u) + A[k + 1] * u) * (1 - v) + (A[k + TER.nx] * (1 - u) + A[k + TER.nx + 1] * u) * v) / 10; }
 const TZg = (x, y) => tBil(THG, x, y), TZs = (x, y) => tBil(THS, x, y);
-const QUAY_MODEL = false;   // 15.11.2026: the MML 2025 aerial photo shows the renewed Eteläranta quay, so its hand-built walk, steps, hedges and railing are off and the ground covers the strip
+// 20.11.2026 (omistaja: "sillat pitää tarkastaa ja ne alueet"): the laser elevation model has the bridge abutments and ramps in it, so the true ground
+// rose 2-3 m in a hump at the bridge ends (Porinsilta, Linnansilta, Kirjurinluodontie, Pormestarinsilta, Niittäjänsilta...) and stuck through the deck.
+// The ground grid is lowered under every bridge to just below its deck line (straight between the street levels at its ends) and, past the ends, kept
+// at street level for 12 m and then allowed to rise at 1:6 back to the natural ground; sideways it rises 1:2 from 2 m outside the deck edge.
+{ const lines = [];
+  const psx = Math.sin(PSIL.head), psy = Math.cos(PSIL.head), pa = [PSIL.x - psx * 14, PSIL.y - psy * 14], pb = [PSIL.x + psx * (PSIL.len + 14), PSIL.y + psy * (PSIL.len + 14)];
+  lines.push([pa, pb, PSIL.half * 2]);
+  for (const b of RIV.br) { const P = b.p, a = [P[0], P[1]], c = [P[P.length - 2], P[P.length - 1]], mx = (a[0] + c[0]) / 2 - PSIL.x, my = (a[1] + c[1]) / 2 - PSIL.y;
+    if (Math.abs(mx * psy - my * psx) < 12 && mx * psx + my * psy > -20 && mx * psx + my * psy < PSIL.len + 20) continue;      /* Porinsilta itse */
+    lines.push([a, c, b.w]); }
+  let n = 0;
+  for (const [a, c, w] of lines) { const dx = c[0] - a[0], dy = c[1] - a[1], L = Math.hypot(dx, dy) || 1, ux = dx / L, uy = dy / L, E0 = TZs(a[0], a[1]), E1 = TZs(c[0], c[1]), hw = w / 2;
+    const R = 45 + hw + 14, i0 = Math.max(0, Math.floor((Math.min(a[0], c[0]) - R - TER.x0) / TER.g)), i1 = Math.min(TER.nx - 1, Math.ceil((Math.max(a[0], c[0]) + R - TER.x0) / TER.g));
+    const j0 = Math.max(0, Math.floor((Math.min(a[1], c[1]) - R - TER.y0) / TER.g)), j1 = Math.min(TER.ny - 1, Math.ceil((Math.max(a[1], c[1]) + R - TER.y0) / TER.g));
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const x = TER.x0 + i * TER.g, y = TER.y0 + j * TER.g, t = (x - a[0]) * ux + (y - a[1]) * uy, s = Math.abs((x - a[0]) * uy - (y - a[1]) * ux);
+      const beyond = Math.max(-t, t - L, 0), lat = Math.max(0, s - hw - 2); if (beyond > 45 || lat > 14) continue;
+      const u = Math.max(0, Math.min(1, t / L)), lim = E0 + (E1 - E0) * u - 0.12 + Math.max(0, beyond - 12) / 6 + lat / 2, k = j * TER.nx + i;
+      if (THG[k] / 10 > lim) { THG[k] = Math.round(lim * 10); n++; } } }
+  window.__siltaKummut = n; }
+const QUAY_MODEL = true;    // 20.11.2026 (omistaja: "Etelärannan pinnat pitänee rakentaa myös itse, ilmakuva ei toimi tuossa"): the hand-built walk, steps, hedges and railing are back and the photo ground is cut out under them (15.11 they were off for the MML 2025 photo)
 const tSkip = (x, y) => { if (!QUAY_MODEL) return false; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
 let gridGeo;
 const WREL = (x, y) => TER.wl - TZs(x, y);          // water level relative to the lifted objects at (x, y)
@@ -1156,6 +1175,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     for (let k = 0; k < 3; k++) { const [o0, z0] = steps[k], o1 = steps[k + 1][0], z1 = z0 + 0.35;
       quad(s2(o0, z0, i), s2(o0, z0, i + 1), s2(o0, z1, i + 1), s2(o0, z1, i), riser);                       // riser
       quad(s2(o0, z1, i), s2(o0, z1, i + 1), s2(o1, z1, i + 1), s2(o1, z1, i), gran); }                      // tread
+    quad(s2(7.25, 0, i), s2(7.25, 0, i + 1), s2(12, 0, i + 1), s2(12, 0, i), pave);                         // top paving out to the edge of the cut-out (6 m cells)
     quad(s2(0, WREL(Q[i][0], Q[i][1]) - 0.4, i), s2(0, WREL(Q[i + 1][0], Q[i + 1][1]) - 0.4, i + 1), s2(0, LOW, i + 1), s2(0, LOW, i), wallc);      // quay wall into the water
   }
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(C, 3)); g.computeVertexNormals();
@@ -1181,7 +1201,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
     const cp = new THREE.Mesh(new THREE.ConeGeometry(0.33, 0.3, 6), lampPost); cp.position.set(p[0], 4.9, -p[1]); scene.add(cp); }
   // pontoon jetties with moored boats
   const pont = new THREE.MeshLambertMaterial({ color: 0x9b9890 }), hullM = new THREE.MeshLambertMaterial({ color: 0xf2f2ee }), cabM = new THREE.MeshLambertMaterial({ color: 0x32404a });
-  if (QUAY_MODEL) for (const f of [64, 159, 249]) { const p = along(Math.min(tot - 15, f), 0), ang = p[2], nx = -Math.sin(ang), ny = Math.cos(ang);
+  if (false) for (const f of [64, 159, 249]) {      /* 20.11.2026: replaced by the measured pontoon jetties in ranta/ranta.js */ const p = along(Math.min(tot - 15, f), 0), ang = p[2], nx = -Math.sin(ang), ny = Math.cos(ang);
     const sgn = inRiver(p[0] + nx * 6, p[1] + ny * 6) ? 1 : -1, L = 24, cx = p[0] + nx * sgn * L / 2, cy = p[1] + ny * sgn * L / 2;
     const pm2 = new THREE.Mesh(new THREE.BoxGeometry(2.6, 0.45, L), pont); pm2.position.set(cx, WREL(cx, cy) + 0.2, -cy); pm2.rotation.y = -ang; scene.add(pm2);
     for (const k of [-1, 1]) for (const t of [0.35, 0.75]) { const bx = p[0] + nx * sgn * L * t + Math.cos(ang) * k * 3.4, by = p[1] + ny * sgn * L * t + Math.sin(ang) * k * 3.4;
@@ -1343,10 +1363,12 @@ import('./roads.js').then(mod => {
        west and north of the hall become asphalt lanes, the platform under the hall's west canopy (east of x 14.5) and the strips north and south of the
        square get the stone paving. Filled per 1 m cell where nothing lies yet (not in houses), as runs of at most 4 m, a centimetre under the pavement
        level so the existing surfaces win where they overlap; the cells count as pavement for the car and the walkers (flat, no kerbs inside). */
+    /* 20.11.2026 (omistaja: "torin kivetys tulisi olla koko alueella"): east of x 80 too, inside the square's outline (Kauppatori edges from the photo, 2 m out) */
+    const TP = [[18, 43], [31, 39], [90, 24.5], [110, 97], [104, 113], [46, 118], [20, 118]], inTori = (x, y) => { let c = false; for (let i = 0, j = TP.length - 1; i < TP.length; j = i++) { const [xi, yi] = TP[i], [xj, yj] = TP[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
     { const QA = [], QK = [], dz = ROAD.pave - 0.012, zone = (x, y) => (x < 14.5 || (y >= 106 && x < 31)) ? 1 : 2;
-      const W0 = -6, H0 = 27, WN = 89, HN = 99, Z = new Uint8Array(WN * HN), cell = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny ? M[gy * nx + gx] : 255; };
+      const W0 = -6, H0 = 24, WN = 116, HN = 102, Z = new Uint8Array(WN * HN), cell = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny ? M[gy * nx + gx] : 255; };
       const house = (x, y) => bldTopAt(x + 0.5, y + 0.5) > TZs(x + 0.5, y + 0.5) + 1.5;
-      for (let j = 1; j < HN - 1; j++) for (let i = 1; i < WN - 1; i++) { const x = W0 + i, y = H0 + j; if (x > 80 || y >= 124 || y < 28) continue; if (cell(x, y) === 0 && !house(x, y)) Z[j * WN + i] = zone(x + 0.5, y + 0.5); }
+      for (let j = 1; j < HN - 1; j++) for (let i = 1; i < WN - 1; i++) { const x = W0 + i, y = H0 + j; if ((x > 80 && !inTori(x + 0.5, y + 0.5)) || y >= 124 || y < 25) continue; if (cell(x, y) === 0 && !house(x, y)) Z[j * WN + i] = zone(x + 0.5, y + 0.5); }
       /* one cell of overlap into the pavement round the gaps (never onto the carriageway or into houses): the drawn edge of a pavement triangle runs
          through its cells, and without this the photo showed as slivers along it */
       const Z2 = Z.slice(); for (let j = 1; j < HN - 1; j++) for (let i = 1; i < WN - 1; i++) { const x = W0 + i, y = H0 + j; if (Z[j * WN + i] || cell(x, y) !== 1 || house(x, y)) continue;
@@ -3734,5 +3756,7 @@ requestAnimationFrame(frame);
 <!-- 20.11.2026: elävä Kokemäenjoki (vesi/README.md) ja Kauppatorin torikojut (tori/torikojut.js) omina moduuleinaan -->
 <script type="module" src="vesi/vesi.js"></script>
 <script type="module" src="tori/torikojut.js"></script>
+<!-- 20.11.2026: rantakivikko Kokemäenjoen penkoille ja Etelärannan laiturit (ranta/ranta.js) -->
+<script type="module" src="ranta/ranta.js"></script>
 </body>
 </html>
