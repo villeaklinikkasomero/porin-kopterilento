@@ -149,7 +149,7 @@
 <div id="start">
   <div id="card" class="panel">
     <h1>Pori<span>kopteri</span></h1>
-    <p>Lennä helikopterilla tai aja autolla Porin keskustassa. Joka päivä arvotaan uusi kierros: lähde Kauppatorilta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja palaa torille. Voit myös nousta ulos ja kävellä: Keski-Porin kirkkoon (tornin ovi) ja Juseliuksen mausoleumiin pääsee sisälle. Nopeimmat ajat pääsevät päivän top-10:een – kopterille ja autolle on omat listansa.</p>
+    <p>Lennä helikopterilla tai aja autolla Porin keskustassa. Joka päivä arvotaan uusi kierros: lähde Kirjurinluodon areenalta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja palaa Kirjurinluotoon. Voit myös nousta ulos ja kävellä: Keski-Porin kirkkoon (tornin ovi) ja Juseliuksen mausoleumiin pääsee sisälle. Nopeimmat ajat pääsevät päivän top-10:een – kopterille ja autolle on omat listansa.</p>
     <div id="vehs" role="group" aria-label="Valitse kulkuneuvo">
       <button class="veh" id="vheli" aria-pressed="true"><video poster="./veh_heli.jpg" autoplay muted loop playsinline><source src="./veh_heli.webm" type="video/webm"><source src="./veh_heli.mp4" type="video/mp4"></video><span>Helikopteri</span></button>
       <button class="veh" id="vcar" aria-pressed="false"><video poster="./veh_auto.jpg" autoplay muted loop playsinline><source src="./veh_auto.webm" type="video/webm"><source src="./veh_auto.mp4" type="video/mp4"></video><span>Auto</span></button>
@@ -1548,7 +1548,7 @@ const TOUR = (() => {
   let r = ord, imp = true; while (imp) { imp = false; for (let i = 0; i < r.length - 1; i++) for (let j = i + 1; j < r.length; j++) { const c = r.slice(0, i).concat(r.slice(i, j + 1).reverse(), r.slice(j + 1)); if (len(c) < len(r) - 0.01) { r = c; imp = true; } } }
   return r; })();
 const TORI = find('Kauppatori') || { n: 'Kauppatori', x: 64, y: 65 };
-const HOME = { x: 70, y: 45 };   // open paving south of the stalls, clear of the stage and the pavilion
+const HOME = { x: -862, y: 1222 };   // 20.11.2026 (omistaja): lähtöpaikka Kirjurinluodon areenan asfaltilla (Pori Jazzin areenan luoteiskulma); ennen Kauppatori { x: 70, y: 45 }
 {
   const seen = new Set(); var sprites = [];
   const labels = [...TOUR, { n: 'Kauppatori', x: TORI.x, y: TORI.y, h: 0 }, ...CITY.named.filter(d => d.a > 900), ...CITY.places.filter(p => /puisto|aukio|tori/i.test(p.n))];
@@ -2097,7 +2097,7 @@ function resetHeli() { Object.assign(S, { x: HOME.x, y: HOME.y, alt: SKID, vx: 0
 function newTour() { walkReset(); LB.show(false); tourIdx = 0; tourT = 0; tourOn = false; tourDone = false; NAV.route = null; NAV.tgt = null;
   if (VEH === 'car') { heli.visible = false; resetCar(); } else { carG.visible = false; resetHeli(); }
   setTarget(); toast(VEH === 'car' ? 'Aja valopylvään luo – navigaattori näyttää käännökset' : 'Nouse ilmaan ja lennä valopylvääseen'); }
-function target() { return tourIdx < TOUR.length ? TOUR[tourIdx] : { n: VEH === 'car' ? 'Pysähdy Kauppatorille' : 'Laskeudu Kauppatorille', x: HOME.x, y: HOME.y, h: 0, land: true }; }
+function target() { return tourIdx < TOUR.length ? TOUR[tourIdx] : { n: VEH === 'car' ? 'Pysähdy Kirjurinluotoon' : 'Laskeudu Kirjurinluotoon', x: HOME.x, y: HOME.y, h: 0, land: true }; }
 function setTarget() {
   const t = target(); beacon.position.set(t.x, 0, -t.y);
   const ry = t.land ? 3 : VEH === 'car' ? 7 : Math.max(38, Math.min(t.h, 70) + 26);
@@ -2109,7 +2109,7 @@ function setTarget() {
 
 function damage(d) {
   S.hp = Math.max(0, S.hp - d);
-  if (S.hp <= 0 && !S.dead) { S.dead = 2.2; heli.visible = false; carG.visible = false; toast(VEH === 'car' ? 'Auto hajosi – palataan torille' : 'Kopteri hajosi – palataan torille', 2.2); }
+  if (S.hp <= 0 && !S.dead) { S.dead = 2.2; heli.visible = false; carG.visible = false; toast(VEH === 'car' ? 'Auto hajosi – palataan Kirjurinluotoon' : 'Kopteri hajosi – palataan Kirjurinluotoon', 2.2); }
 }
 
 // ---------- cemeteries: rows of gravestones ----------
@@ -3703,5 +3703,8 @@ window.__game = { WALK, IN, PLACES, placeDoor, walkAction, sceneIn, door: church
 terrainizeScene(); setInterval(terrainizeScene, 1000);
 requestAnimationFrame(frame);
 </script>
+<!-- 20.11.2026: elävä Kokemäenjoki (vesi/README.md) ja Kauppatorin torikojut (tori/torikojut.js) omina moduuleinaan -->
+<script type="module" src="vesi/vesi.js"></script>
+<script type="module" src="tori/torikojut.js"></script>
 </body>
 </html>

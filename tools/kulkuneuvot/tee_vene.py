@@ -12,6 +12,7 @@ ap.add_argument("--kolmiot", type=int, default=16000)
 ap.add_argument("--korkeus", type=float, default=0, help="skaalaa korkeuden mukaan (pituuden sijaan)")
 ap.add_argument("--perämoottori", dest="moottori", action="store_true", help="origo kiinnikkeeseen, ei istuinmerkkeja")
 ap.add_argument("--nimi", default="Vene")
+ap.add_argument("--esine", action="store_true", help="tavallinen esine: origo pohjan keskella, ei merkkeja")
 ap.add_argument("--tex", type=int, default=1024)
 ap.add_argument("--tapa", default="yhd", help="yhd = saumat yhdistetaan (siistimpi, kevyempi), saumat = UV-saarten reunat lukitaan")
 ap.add_argument("--uvpaino", type=float, default=8)
@@ -85,7 +86,7 @@ nrm = imgs[j["textures"][j["materials"][0]["normalTexture"]["index"]]["source"]]
 bw, bh = base.size; ba = np.asarray(base).astype(int)
 px = np.clip((T2[:, 0] % 1) * bw, 0, bw - 1).astype(int); py = np.clip((T2[:, 1] % 1) * bh, 0, bh - 1).astype(int)
 col = ba[py, px]
-dark = (col.sum(1) < 200) & (not A.moottori) & (col[:, 0] > col[:, 2]) & (np.abs(P2[:, 0]) < 0.75)
+dark = (col.sum(1) < 200) & (not A.moottori) & (not A.esine) & (col[:, 0] > col[:, 2]) & (np.abs(P2[:, 0]) < 0.75)
 merkit = {}
 up = N[:, 1] > 0.7
 if dark.sum() > 20:
@@ -105,7 +106,7 @@ if dark.sum() > 20:
     if len(Q): merkit["Penkki_taka"] = [0.0, float(np.percentile(Q[:, 1], 60)), float(np.median(Q[:, 2]))]
     merkit["_lattia_y"] = float(floor)
 st = P2[P2[:, 2] < P2[:, 2].min() + 0.05]
-if not A.moottori: merkit["Moottori_kiinnitys"] = [0.0, float(np.percentile(st[:, 1], 80)), float(P2[:, 2].min())]
+if not A.moottori and not A.esine: merkit["Moottori_kiinnitys"] = [0.0, float(np.percentile(st[:, 1], 80)), float(P2[:, 2].min())]
 print("merkit", json.dumps(merkit))
 # GLB
 buf = bytearray(); views = []; accs = []
@@ -124,7 +125,7 @@ def jpg(img):
     img = img.resize((A.tex, A.tex), Image.LANCZOS) if max(img.size) > A.tex else img
     b = io.BytesIO(); img.save(b, "JPEG", quality=85); return b.getvalue()
 iv0 = view(jpg(base)); iv1 = view(jpg(nrm))
-nodes = [{"name": "Runko" if not A.moottori else "Moottori", "mesh": 0}]
+nodes = [{"name": A.nimi + "_mesh" if A.esine else ("Runko" if not A.moottori else "Moottori"), "mesh": 0}]
 for nm, p in merkit.items():
     if not nm.startswith("_"): nodes.append({"name": nm, "translation": p})
 nodes.append({"name": A.nimi, "children": list(range(len(nodes)))})
