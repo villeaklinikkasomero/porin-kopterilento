@@ -7,6 +7,7 @@
 //
 // Näppäimet: X = toiminto (aloita / ohita repliikki / yritä uudelleen) · 1–3 = valinta · P = tarinavalikko
 //            Ctrl+Shift+D = kehittäjätila (O = ohita vaihe, Ctrl+Shift+K = kopioi oma paikka leikepöydälle)
+//            Ctrl+Shift+R = nauhoita ajettu reitti (piste 40 m välein) ja kopioi se kilpaportteiksi
 
 import * as THREE from '../three.module.min.js';
 import { luoMoottori } from './moottori.js';
@@ -25,7 +26,10 @@ export const KASITTELIJAT = {
   }
   // tulossa: hiiviskely, vesiletku, drooni (ks. tarvittavat_ominaisuudet/README.md)
 };
-let UI = null, tahdetLoppuu = 0;
+let UI = null, tahdetLoppuu = 0, NAUHA = null, kyytiPisteet = null;
+// Kyydit: pelin pisteet = suora matka m / 10, enintään +50 % nopeusbonus, kolhut vähentävät → 1 km = 100–150 pistettä.
+// Omistaja 20.11.2026: kilometristä enintään 10 € → 10 € / 150 pistettä (perus 1 km ≈ 6,7 €, nopea ja ehjä ≈ 10 €).
+const KYYTI_EUROA_PISTE = 10 / 150;
 
 const VARIT = { tehtava: 0xf4c95d, tavoite: 0x4fc3f7, portti: 0xffd54f, seuraava: 0xffd54f, maali: 0x81c784, kohde: 0xff8a65, seurattava: 0xff5252, alue: 0x4fc3f7 };
 
@@ -56,7 +60,7 @@ function luoMerkit(scene) {
       const g = new THREE.Group(); const vari = VARIT[m.laji] ?? 0xffffff; const r = Math.max(1.2, m.r || 4);
       const leveys = m.laji === 'alue' ? r : Math.min(r, m.laji === 'kohde' ? 1.2 : 3.2);
       const korkeus = m.laji === 'seuraava' ? 18 : m.laji === 'kohde' ? 6 : 70;
-      const mat = new THREE.MeshBasicMaterial({ color: vari, transparent: true, opacity: m.laji === 'seuraava' ? 0.12 : 0.28, depthWrite: false, side: THREE.DoubleSide });
+      const mat = new THREE.MeshBasicMaterial({ color: vari, transparent: true, opacity: m.laji === 'seuraava' || m.himmea ? 0.12 : 0.28, depthWrite: false, side: THREE.DoubleSide });
       mat.userData.noT = true;
       const p = new THREE.Mesh(pilari, mat); p.scale.set(leveys, korkeus, leveys); p.position.y = korkeus / 2 - 6; g.add(p);
       const rm = new THREE.MeshBasicMaterial({ color: vari, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide }); rm.userData.noT = true;
@@ -67,7 +71,7 @@ function luoMerkit(scene) {
   }
   function animoi(t, maaKorkeus) {
     for (const g of lista) {
-      g.userData.p.material.opacity = (g.userData.m.laji === 'seuraava' ? 0.1 : 0.22) + 0.08 * Math.sin(t * 3);
+      g.userData.p.material.opacity = (g.userData.m.laji === 'seuraava' || g.userData.m.himmea ? 0.1 : 0.22) + 0.08 * Math.sin(t * 3);
       if (g.userData.m.laji === 'seurattava') g.position.set(g.userData.m.x, 0, -g.userData.m.y);
       if (maaKorkeus) g.userData.ri.position.y = maaKorkeus(g.userData.m.x, g.userData.m.y) + 0.25;
     }
@@ -85,7 +89,14 @@ export async function kaynnista() {
   const varasto = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
   const M = luoMoottori({ tehtavat, paikat, hahmot, tekstit, varasto, kasittelijat: KASITTELIJAT });
   const kosketus = document.body.classList.contains('touch') || matchMedia('(pointer: coarse)').matches;
-  UI = luoUI(M, { kosketus });
+  // päivän kierros (kiertoajelun tolpat ja HUD-kortti) piilossa tarinatilassa; valikosta saa näkyviin. Muistetaan selaimessa.
+  const asetukset = { kierros: varasto.get('pori-tarina-kierros') === '1' };
+  const tyyli = document.createElement('style'); tyyli.textContent = 'body.tarina-ei-kierrosta #mission { display: none !important; }'; document.head.appendChild(tyyli);
+  asetukset.muuttui = () => { varasto.set('pori-tarina-kierros', asetukset.kierros ? '1' : '0'); document.body.classList.toggle('tarina-ei-kierrosta', !asetukset.kierros); if (asetukset.kierros && majakka && !G.tour().tourDone) majakka.visible = true; };
+  let majakka = null;
+  asetukset.muuttui();
+  const etsiMajakka = () => { const r = G.scene.getObjectByName('ring2'); return r && r.parent && r.parent.getObjectByName('ring') ? r.parent : null; };
+  UI = luoUI(M, { kosketus, asetukset });
   const MK = luoMerkit(G.scene);
   M.on('merkit', m => MK.aseta(m));
   M.on('siirto', d => siirra(d.paikka));
@@ -99,6 +110,11 @@ export async function kaynnista() {
     if (e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
     if (e.ctrlKey && e.shiftKey && e.code === 'KeyD') { M.kehittaja.paalla = !M.kehittaja.paalla; UI.ilmoita('Kehittäjätila ' + (M.kehittaja.paalla ? 'päällä' : 'pois'), 2000); if (!M.kehittaja.paalla) UI.kehitysTeksti(''); e.preventDefault(); return; }
     if (e.ctrlKey && e.shiftKey && e.code === 'KeyK') { const w = maailma(); if (w) { const s = `[${w.x.toFixed(1)}, ${w.y.toFixed(1)}]`; console.log('[tarina] paikka', s, w); navigator.clipboard && navigator.clipboard.writeText(s).catch(() => {}); UI.ilmoita('Kopioitu ' + s, 2500); } e.preventDefault(); return; }
+    if (e.ctrlKey && e.shiftKey && e.code === 'KeyR') {   // reitin nauhoitus: piste 40 m välein, lopetus kopioi JSONin
+      if (!NAUHA) { NAUHA = []; UI.ilmoita('● Nauhoitetaan reittiä – aja reitti, Ctrl+Shift+R lopettaa', 4000); }
+      else { const w = maailma(); if (w) NAUHA.push([+w.x.toFixed(1), +w.y.toFixed(1)]); const s = JSON.stringify(NAUHA); console.log('[tarina] reitti (' + NAUHA.length + ' pistettä):', s);
+        navigator.clipboard && navigator.clipboard.writeText(s).catch(() => {}); UI.ilmoita('■ Reitti kopioitu: ' + NAUHA.length + ' pistettä', 4000); NAUHA = null; }
+      e.preventDefault(); return; }
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (e.code === 'KeyX') { M.toiminta(); return; }
     if (e.code === 'KeyP') { if (UI.ruutuAuki) M.luovuta(); else UI.valikko(); return; }
@@ -113,9 +129,15 @@ export async function kaynnista() {
     const dt = Math.min(0.1, (nyt - edell) / 1000); edell = nyt;
     const w = maailma();
     if (w) M.paivita(dt, w);
+    if (NAUHA && w) { const l = NAUHA[NAUHA.length - 1]; if (!l || Math.hypot(w.x - l[0], w.y - l[1]) >= 40) NAUHA.push([+w.x.toFixed(1), +w.y.toFixed(1)]); }
     UI.ruutu(dt);
     MK.animoi(nyt / 1000);
     if (tahdetLoppuu && nyt > tahdetLoppuu) { tahdetLoppuu = 0; UI.tahdet(0); }
+    // kiertoajelun majakka pois näkyvistä (peli asettaa sen näkyväksi aina kohteen vaihtuessa, siksi joka ruudulla)
+    if (!asetukset.kierros) { if (!majakka) majakka = etsiMajakka(); if (majakka) majakka.visible = false; }
+    // kyydit tuovat rahaa: pelin kyytipisteet (window.__ride.tot) → 1 piste = 0,5 €
+    const R = window.__ride;
+    if (R && typeof R.tot === 'number') { if (kyytiPisteet === null) kyytiPisteet = R.tot; else if (R.tot > kyytiPisteet) { M.lisaaRaha((R.tot - kyytiPisteet) * KYYTI_EUROA_PISTE, 'kyyti'); kyytiPisteet = R.tot; } }
     // suuntanuoli lähimpään tavoitemerkkiin kameran suunnasta
     const kohteet = MK.lista.filter(m => m.laji !== 'seuraava' && m.laji !== 'tehtava');
     if (w && kohteet.length && M.kaynnissa) {

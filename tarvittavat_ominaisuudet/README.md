@@ -145,7 +145,7 @@ Valmiina: kävely, polkupyörä, helikopteri, bussi, farmari, pakettiauto ja sed
 
 | Ominaisuus | Tila | Huom |
 |---|---|---|
-| Taksi / bussikuski | ❌ | Bussi on jo ajettava |
+| Taksi / bussikuski | 🟡 | Kyydit ovat jo pelissä ja tuottavat rahaa (kohta 7b). Bussilinja puuttuu. |
 | Ensihoito (ambulanssi) | ❌ | Uusi malli |
 | Palokunta (paloauto, tulipalot) | ❌ | Uusi malli + liekit |
 | Pizzalähetti (skootteri) | ❌ | |
@@ -154,6 +154,31 @@ Valmiina: kävely, polkupyörä, helikopteri, bussi, farmari, pakettiauto ja sed
 | Satunnaiset tapahtumat | ❌ | Käsikirjoituksen ohikulkijat (hukattu lompakko, karannut koira). Tehdään samalla tehtävämoottorilla. |
 | Rallikisat / katukisat | 🟡 | Kespan lenkki + uudet reitit |
 | Päivän tulostaulu | 🟡 | Kespan "Ei vielä" -lista |
+
+## 7b. Raha (omistaja 20.11.2026: "pelaaja voi kerätä rahaa esim. kyyditsemällä porukkaa")
+
+| Ominaisuus | Tila | Prio | Huom |
+|---|---|---|---|
+| Raha tehtävistä | ✅ | – | `palkinto.raha` (tarina/) |
+| Raha kyydeistä | ✅ | – | Pelin kyydit (`window.__ride`) → enintään 10 € / km (omistaja 20.11.); `KYYTI_EUROA_PISTE` tarina/peli.js:ssä |
+| Raha muista sivutehtävistä (taksi, pizzalähetti, kilpa-ajot, ensihoito) | ❌ | P3 | `__tarina.moottori.lisaaRaha(n, lähde)` |
+| **Mihin rahaa käytetään** | 🟡 | P2 | **Päätetty: auton maalaus ja tuunaus Tapsan korjaamolla (kohta 7c).** Muita ehdotuksia: autojen ostaminen, korjaus kesken tehtävän, valepuvut teatterin puvustamosta, Tapsan korjaamon ja Lumin piilon päivitykset, kahvit torilla (kunto takaisin). Ei uhkapelejä eikä ostoja oikealla rahalla (ikäraja 7). |
+| Raha näkyviin HUDiin | 🟡 | P2 | Nyt vain P-valikossa ja ilmoituksena (+50 € · kyyti) |
+| Kyydit tarinan sivutehtäväksi | 🟡 | P3 | Pelin kyydit toimivat jo; tarinaan voi lisätä nimettyjä kyytejä (Terttu torille, Tapsa korjaamolle) |
+
+## 7c. Auton maalaus ja tuunaus (omistaja 20.11.2026: "Autoa voi maalata ja tuunata")
+
+Osat pyydetään mallichatista; pyyntöteksti: `tuunaus_mallipyynto.md` (tämä kansio).
+
+| Ominaisuus | Tila | Prio | Huom |
+|---|---|---|---|
+| Maalaus (väri + pinta: kiiltävä, metallinen, matta) | 🟡 | P2 | `CarPaint`-materiaali on jo kaikissa autoissa ja lainaus vaihtaa sen värin → maalaus on vain väri + roughness/metalness. Ei vaadi uusia malleja. |
+| Teippaukset ja raidat | ❌ | P2 | Mallichat: teippikuviot tekstuureina tai erillisinä ohuina verkkoina |
+| Tuunausosat (vanteet, spoileri, helmat, puskurit, kattoteline/-boksi, pakoputki, lisävalot) | ❌ | P2 | Mallichat: osat + kiinnityspisteet jokaiseen automalliin |
+| Korjaamon tuunausvalikko (osa, hinta, esikatselu, osto) | ❌ | P2 | Tarinatilaan: korjaamon merkki → valikko, raha `tila.raha`sta, valinnat tallennetaan autokohtaisesti |
+| Oma auto (tuunattu auto säilyy) | ❌ | P2 | Nyt jokainen lainattu auto on uusi. Tarvitaan "oma auto" korjaamolle, joka säilyttää maalin ja osat (tallennus localStorageen). |
+| Osien vaikutus ajoon | ❌ | P3 | Esim. vanteet/renkaat +pito, spoileri vain ulkonäkö. Pidetään pienenä (±5–10 %). |
+| Hinnasto | ❌ | P2 | Ehdotus: maalaus 120 €, metalli/matta +60 €, teippaus 80 €, vanteet 250 €, spoileri 180 €, helmat 150 €, puskurit 200 €, kattoboksi 90 €, lisävalot 70 €, pakoputki 60 €. Tehtävä 200–300 €, kyyti ≤ 10 €/km. |
 
 ## 8. Yleiset järjestelmät
 

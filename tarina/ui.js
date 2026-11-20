@@ -53,7 +53,7 @@ const CSS = `
 
 const TUNNE = { neutraali: '', iloinen: 'iloinen', vihainen: 'vihainen', yllattynyt: 'yllättynyt', 'yllättynyt': 'yllättynyt', huolestunut: 'huolestunut', ovela: 'ovela' };
 
-export function luoUI(moottori, { kosketus = false, kehitys = null } = {}) {
+export function luoUI(moottori, { kosketus = false, kehitys = null, asetukset = { kierros: false } } = {}) {
   const M = moottori, t = M.teksti;
   const tyyli = document.createElement('style'); tyyli.textContent = CSS; document.head.appendChild(tyyli);
   const juuri = document.createElement('div'); juuri.id = 'tarina'; document.body.appendChild(juuri);
@@ -102,6 +102,7 @@ export function luoUI(moottori, { kosketus = false, kehitys = null } = {}) {
   M.on('kehote', s => { E.kehote.textContent = s || ''; nayta(E.kehote, !!s); paivitaX(); });
   M.on('tarkistuspiste', () => ilmoita('✔ ' + esc(t('SYS_CHECKPOINT')), 2500));
   M.on('poimittu', d => ilmoita('＋ ' + esc(d.nimi), 2500));
+  M.on('raha', d => ilmoita(`${d.muutos > 0 ? '+' : ''}${d.muutos} €${d.lahde ? ' · ' + esc(d.lahde) : ''}`, 3000));
   M.on('portti', d => { if (d.n < d.kaikki) ilmoita(`${d.n}/${d.kaikki}`, 1200); });
 
   // dialogi
@@ -153,8 +154,9 @@ export function luoUI(moottori, { kosketus = false, kehitys = null } = {}) {
     const k = M.kaynnissa;
     const rivit = M.tehtavat().map(x => `<div class="rivi ${x.valmis ? 'valmis' : x.saatavilla ? '' : 'lukossa'}"><span>${esc(x.id)} ${esc(x.nimi)}</span><span>${x.valmis ? '✔' : x.saatavilla ? '●' : '🔒'}</span></div>`).join('');
     E.valikko.innerHTML = `<h3>${esc(t('SYS_MENU'))} – Satamakaupunki</h3><div style="opacity:.7;font-size:13px;margin-bottom:8px">${M.tila.raha} € · ${M.tila.valmiit.length}/${M.tehtavat().length} keikkaa</div>${rivit}
-      <div class="napit"><button data-k="jatka"><kbd>P</kbd>Jatka</button>${k ? `<button data-k="lopeta">Lopeta tehtävä</button>` : ''}${M.kehittaja.paalla ? `<button data-k="nollaa">Nollaa tallennus</button>` : ''}</div>`;
+      <div class="napit"><button data-k="jatka"><kbd>P</kbd>Jatka</button>${k ? `<button data-k="lopeta">Lopeta tehtävä</button>` : ''}<button data-k="kierros">${asetukset.kierros ? 'Piilota päivän kierros' : 'Näytä päivän kierros'}</button>${M.kehittaja.paalla ? `<button data-k="nollaa">Nollaa tallennus</button>` : ''}</div>`;
     E.valikko.querySelector('[data-k=jatka]').onclick = () => valikko(false);
+    E.valikko.querySelector('[data-k=kierros]').onclick = () => { asetukset.kierros = !asetukset.kierros; if (asetukset.muuttui) asetukset.muuttui(); valikko(true); };
     const lo = E.valikko.querySelector('[data-k=lopeta]'); if (lo) lo.onclick = () => { M.luovuta(); valikko(false); };
     const no = E.valikko.querySelector('[data-k=nollaa]'); if (no) no.onclick = () => { if (confirm('Nollataanko tarinan tallennus?')) { M.nollaa(); valikko(false); } };
   }

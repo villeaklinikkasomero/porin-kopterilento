@@ -32,6 +32,7 @@ await import('./tarina/peli.js')
 | **P** | Tarinavalikko (tehtävät, raha). Epäonnistumisruudussa P lopettaa tehtävän. |
 | **Ctrl+Shift+D** | Kehittäjätila: paikka, vaihe ja liput näkyvät. **O** ohittaa vaiheen. |
 | **Ctrl+Shift+K** | Kopioi oma paikka leikepöydälle muodossa `[x, y]`. Käytä tätä paikkojen ja porttien mittaamiseen. |
+| **Ctrl+Shift+R** | Nauhoita reitti: aja reitti, ja piste tallentuu 40 m välein. Toinen painallus kopioi pisteet JSON-listana leikepöydälle ja konsoliin (käy suoraan `portit`- tai `reitti`-kentäksi). |
 
 Nämä näppäimet eivät ole pelissä muussa käytössä. Poikkeus: tapaus 1 käyttää numeroita 1–3 otsikon valintaan, ja tapaus 1 poistetaan.
 Kosketuslaitteella näkyy **X**-nappi, kun sille on käyttöä.
@@ -117,6 +118,17 @@ export const VESILETKU = {
 };
 ```
 `api.mittari({ laji: 'palkki', nimi, arvo })` näyttää mittarin. `api.vihje(teksti)` näyttää vihjeen, ja `api.aseta({...})` asettaa liput.
+
+## Raha ja päivän kierros
+
+- **Rahan lähteet:** tehtävien palkkiot (`palkinto.raha`) ja **kyydit**. Pelin oma kyytijärjestelmä (`window.__ride`, Y-näppäin) kerää pisteitä; tarinatilassa jokainen
+  kyytipisteet muutetaan rahaksi niin, että **kilometristä saa enintään 10 €** (omistaja 20.11.2026): `KYYTI_EUROA_PISTE = 10 / 150` peli.js:ssä.
+  Pisteet ovat suora matka / 10 + enintään 50 % nopeusbonus − kolhut, joten 1 km tuo 6,7–10 €. Tehtävät maksavat 200–300 €.
+  Moottorin rajapinta muille lähteille: `__tarina.moottori.lisaaRaha(n, 'lähde')`.
+- **Rahan käyttö puuttuu vielä** (ks. `../tarvittavat_ominaisuudet/README.md`).
+- **Päivän kierros** (kiertoajelun keltainen majakka ja vasemman yläkulman kortti) piilotetaan tarinatilassa, koska kaksi keltaista merkkiä sekoittaa.
+  P-valikosta sen saa takaisin näkyviin (muistetaan: `localStorage['pori-tarina-kierros']`). Piilotus tehdään peli.js:ssä joka ruudulla: majakka on
+  `__game.sceneen` lisätty ryhmä, jonka lapset ovat `ring` ja `ring2`, ja kortti on `#mission`. Kun index.html pilkotaan, tämä kannattaa tehdä pelin omana asetuksena.
 
 ## Tila ja rajoitukset
 

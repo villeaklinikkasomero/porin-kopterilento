@@ -1,8 +1,9 @@
 {
   "_ohje": "Pelin karttametrit (x itään, y pohjoiseen) kuten window.__walk / __car. 'tarkista': true = arvio, mittaa pelissä kehittäjätilassa (Ctrl+Shift+D, sitten Ctrl+Shift+K kopioi oman paikan).",
-  "LOC_ETELARANTA":    { "x": -120, "y": 485, "nimi": "Eteläranta", "tarkista": true },
+  "LOC_ETELARANTA":    { "x": -8.1, "y": 478.9, "nimi": "Eteläranta" },
   "LOC_ISOSILTA":      { "x": 229,  "y": 560, "nimi": "Isosilta" },
   "LOC_POHJOISRANTA":  { "x": 0,    "y": 650, "nimi": "Pohjoisranta", "tarkista": true },
+  "LOC_KESPA_LAHTO":   { "x": 32.6, "y": -339.0, "nimi": "Kespan lenkin lähtö (Mikonkatu)" },
   "LOC_TORI":          { "x": 64,   "y": 65,  "nimi": "Kauppatori" },
   "LOC_RAATIHUONE":    { "x": -116, "y": 394, "nimi": "Vanha raatihuone" },
   "LOC_KAUPUNGINTALO": { "x": -58,  "y": 331, "nimi": "Junneliuksen palatsi" },

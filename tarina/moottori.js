@@ -204,8 +204,11 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
         }
         if (v.n >= s.portit.length) { emit('mittari', null); valmis(); }
       },
-      merkit(s, v) { const r = []; const a = paikka(s.portit[v.n]), b = paikka(s.portit[v.n + 1]);
-        if (a) r.push({ ...a, r: s.r || 9, laji: v.n === s.portit.length - 1 ? 'maali' : 'portti' }); if (b) r.push({ ...b, r: s.r || 9, laji: 'seuraava' }); return r; }
+      merkit(s, v) { const r = [], viim = s.portit.length - 1; const a = paikka(s.portit[v.n]), b = paikka(s.portit[v.n + 1]);
+        if (a) r.push({ ...a, r: s.r || 9, laji: v.n === viim ? 'maali' : 'portti' });
+        if (b) r.push({ ...b, r: s.r || 9, laji: v.n + 1 === viim ? 'maali' : 'seuraava' });
+        if (v.n + 1 < viim) { const m = paikka(s.portit[viim]); if (m) r.push({ ...m, r: s.r || 9, laji: 'maali', himmea: true }); }   // maali näkyy aina
+        return r; }
     },
     keraa: {
       alku(s, v) { v.saatu = {}; v.n = 0; },
@@ -359,6 +362,8 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     try { const j = JSON.parse(varasto.get(TALLENNUSAVAIN) || 'null'); if (j && j.tila) { tila = Object.assign(uusiTila(), j.tila); paivitaMerkit(true); return true; } } catch (e) {}
     return false;
   }
+  // raha muualta pelistä (kyydit ym.): lähde näkyy ilmoituksessa
+  function lisaaRaha(n, lahde = '') { n = Math.round(n); if (!n) return; tila.raha += n; tallenna(); emit('raha', { muutos: n, raha: tila.raha, lahde }); }
   function nollaa() { tila = uusiTila(); K = null; D = null; autoOdotus = {}; tallenna(); emit('nollattu', null); paivitaMerkit(true); }
 
   // ---------- kehittäjä ----------
@@ -379,7 +384,7 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
   };
 
   return {
-    on, paivita, toiminta, valitse, aloita, uudelleen, luovuta, lataa, tallenna, nollaa,
+    on, paivita, toiminta, valitse, aloita, uudelleen, luovuta, lataa, tallenna, nollaa, lisaaRaha,
     tauko(b) { tauolla = !!b; }, get tauolla() { return tauolla; },
     get tila() { return tila; }, get kaynnissa() { return K ? { id: K.t.id, nimi: K.t.nimi, vaihe: K.i, tila: K.tila } : null; },
     saatavilla: () => Object.values(T).filter(saatavilla).map(t => ({ id: t.id, nimi: t.nimi, luku: t.luku })),

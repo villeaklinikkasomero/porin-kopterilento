@@ -20,7 +20,7 @@
    "ehto": "nousi_kyydista",
    "kulku": "auto",
    "viive": 12,
-   "alkaen": 2
+   "alkaen": 3
   }
  ],
  "vaiheet": [
@@ -30,7 +30,7 @@
     [
      "TAPSA",
      "ovela",
-     "Katotaan, ootko sää vielä nopee. Korjaamolta rantaa pitkin, Isosillan yli torille. Häviäjä tarjoaa makkaraperät."
+     "Katotaan, ootko sää vielä nopee. Kespan lenkki, Mikonkadun valoilta. Häviäjä tarjoaa makkaraperät."
     ]
    ]
   },
@@ -40,49 +40,81 @@
    "teksti": "Ota auto"
   },
   {
+   "tyyppi": "mene",
+   "paikka": "LOC_KESPA_LAHTO",
+   "r": 15,
+   "kulku": "auto",
+   "teksti": "Aja Kespan lenkin lähtöön Mikonkadun valoille",
+   "merkki": "Lähtö"
+  },
+  {
    "tyyppi": "portit",
    "kulku": "auto",
-   "r": 12,
+   "r": 14,
    "cp": true,
-   "teksti": "Voita Tapsa kilpa-ajossa torille",
+   "cpSiirto": "LOC_KESPA_LAHTO",
+   "teksti": "Kespan lenkki: Otavankatu – Luvianpuistokatu – Nesteen ympäri – Itsenäisyydenkatu – Antinkatu – Mikonkatu",
    "kilpailija": {
     "hahmo": "TAPSA",
-    "aika": 150,
+    "aika": 205,
     "voitti": "SYS_FAIL_RIVAL"
    },
    "portit": [
     [
-     60,
-     690
+     -248,
+     -274
     ],
     [
-     0,
-     650
+     -402,
+     -315
     ],
     [
-     -60,
-     640
+     -512,
+     -535
     ],
     [
-     90,
-     612
-    ],
-    "LOC_ISOSILTA",
-    [
-     200,
-     420
+     -709,
+     -692
     ],
     [
-     150,
-     250
+     -835,
+     -842
     ],
     [
-     110,
-     140
+     -845,
+     -986
     ],
-    "LOC_TORI"
+    [
+     -785,
+     -768
+    ],
+    [
+     -607,
+     -621
+    ],
+    [
+     -441,
+     -469
+    ],
+    [
+     -244,
+     -405
+    ],
+    [
+     -101,
+     -317
+    ],
+    [
+     28,
+     -213
+    ],
+    [
+     111,
+     -356
+    ],
+    "LOC_KESPA_LAHTO"
    ],
-   "_huom": "porttien paikat arvioita – aja reitti kehittäjätilassa ja tallenna oikeat pisteet"
+   "_huom": "Portit 250 m välein pelin KESPA-reitiltä (index.html, 3,34 km). Pelaaja tasaisesti 17,5 m/s = 3:10, pelin kisabotit n. 3:30 → Tapsa 3:25."
   },
   {
    "tyyppi": "repliikit",
