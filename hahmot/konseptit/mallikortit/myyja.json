@@ -1,0 +1,194 @@
+{
+ "id": "MYYJA",
+ "nimi": "Autokauppias (Autoliike Kiilto)",
+ "rooli": "Autoliike Kiillon myyjä – M03:n vastustaja",
+ "ika": 45,
+ "pituus": 172,
+ "kuvaus": "Myy autot ja vie ne 'maksuhäiriön' takia takaisin. Liian leveä hymy, liian iso föönikampaus, liian ruudullinen takki. Partioi pihaa hiiviskelytehtävässä (näkökenttä 12 m).",
+ "luonne": [
+  "lipevä",
+  "äänekäs",
+  "laiska vartioija",
+  "säikähtää helposti"
+ ],
+ "siluetti": "Punaruskea föönikampaus ja pitkät pulisongit, sävytetyt pilottilasit, 70-luvun ruutubleiseri (sinappi/ruskea), iso kermanvärinen paitakaulus, leveä solmio, levenevät housut.",
+ "lahde": "M03 (MYYJA, Autoliike Kiilto, hiiviskely)",
+ "oletukset": [],
+ "rekvisiitta": [
+  "iso avainnippu",
+  "käyntikortit 'KIILTO – kiiltää kuin uusi!'",
+  "kahvikuppi",
+  "kauppakirja (väärennetty)"
+ ],
+ "animaatiot": [
+  "Patrol_Walk (kierros)",
+  "Look_Around",
+  "Sip_Coffee",
+  "Shout ('Hei! Tää on yksityisalue!')",
+  "Chase_Run",
+  "Sales_Pitch"
+ ],
+ "mallinnus": [
+  "Pohja: npc_mies_b. Ruutukuvio tekstuurina (ei geometriaa). Levenevät lahkeet: lahkeen helma +4 cm/puoli.",
+  "Föönikampaus yhtenä isona hiusverkkona; pilottilasien linssit puoliläpinäkyvät ruskeat."
+ ],
+ "makehuman": {
+  "sukupuoli": 1.0,
+  "ika": 0.6,
+  "lihakset": 0.45,
+  "paino": 0.7,
+  "pituus_cm": 172
+ },
+ "dialogivari": "#d0d0a0",
+ "mittasuhteet_cm": {
+  "pituus": 172,
+  "paan_korkeus": 24.6,
+  "paan_leveys": 20.1,
+  "hartialeveys": 42.0,
+  "vyotaro_leveys": 39.0,
+  "lantio_leveys": 34.0,
+  "haara_korkeus": 80.0,
+  "polvi_korkeus": 47.3,
+  "rinnan_syvyys": 24,
+  "paita_pituudessa": 7.0
+ },
+ "varit": {
+  "Iho": {
+   "srgb": "#e0a985",
+   "blender_linear": [
+    0.745,
+    0.397,
+    0.235
+   ]
+  },
+  "Hiukset": {
+   "srgb": "#b8602a",
+   "blender_linear": [
+    0.479,
+    0.117,
+    0.023
+   ]
+  },
+  "Silmät": {
+   "srgb": "#5a4a3a",
+   "blender_linear": [
+    0.102,
+    0.068,
+    0.042
+   ]
+  },
+  "Takki": {
+   "srgb": "#c9a24a",
+   "blender_linear": [
+    0.584,
+    0.361,
+    0.068
+   ]
+  },
+  "Yläosa": {
+   "srgb": "#f3e7b6",
+   "blender_linear": [
+    0.896,
+    0.799,
+    0.468
+   ]
+  },
+  "Solmio": {
+   "srgb": "#a8402a",
+   "blender_linear": [
+    0.392,
+    0.051,
+    0.023
+   ]
+  },
+  "Alaosa": {
+   "srgb": "#6a4a2a",
+   "blender_linear": [
+    0.144,
+    0.068,
+    0.023
+   ]
+  },
+  "Kengät": {
+   "srgb": "#5a2a1a",
+   "blender_linear": [
+    0.102,
+    0.023,
+    0.01
+   ]
+  }
+ },
+ "vaatteet": {
+  "ylä": {
+   "tyyppi": "paita",
+   "vari": "#f3e7b6",
+   "hiha": "pitka",
+   "kaulus": "paita",
+   "kaulusvari": "#f3e7b6"
+  },
+  "solmio": "#a8402a",
+  "solmioleveys": 1.7,
+  "ala": {
+   "tyyppi": "housut",
+   "vari": "#6a4a2a",
+   "levennys": 4.5
+  },
+  "kengat": {
+   "tyyppi": "kenka",
+   "vari": "#5a2a1a",
+   "pohja": "#1e1a16"
+  },
+  "takki": {
+   "vari": "#c9a24a",
+   "vari2": "#7a4a24",
+   "kuvio": "ruutu",
+   "pituus": "haara",
+   "levennys": 2.0,
+   "aukko_rinta": 3.4,
+   "aukko_helma": 6.0,
+   "kaulus": "kaannetty",
+   "kaulusvari": "#7a4a24",
+   "taskut": true,
+   "taskuliina": "#f3e7b6"
+  }
+ },
+ "hiukset": {
+  "tyyli": "foni",
+  "vari": "#b8602a"
+ },
+ "kasvot": {
+  "leuka": 0.88,
+  "leuanpaa": 0.45,
+  "nenä": 1.1,
+  "posket_puna": "#e07a63",
+  "suu": 1.2,
+  "lasit": {
+   "muoto": "pilotti",
+   "vari": "#b8902a",
+   "koko": 1.1,
+   "linssi": "rgba(160,110,40,0.35)"
+  }
+ },
+ "varusteet": [],
+ "ilmeet": [
+  "neutraali",
+  "iloinen",
+  "vihainen",
+  "yllättynyt",
+  "huolestunut",
+  "ovela"
+ ],
+ "muotokuvat": [
+  "muotokuvat/myyja_neutraali.png",
+  "muotokuvat/myyja_iloinen.png",
+  "muotokuvat/myyja_vihainen.png",
+  "muotokuvat/myyja_yllattynyt.png",
+  "muotokuvat/myyja_huolestunut.png",
+  "muotokuvat/myyja_ovela.png"
+ ],
+ "tyyli": {
+  "aariviiva_cm": 0.55,
+  "aariviiva_vari": "#1b1712",
+  "varjostus": "1–2 sävyn toon + rasteripisteet varjopuolella (valo vasemmalta ylhäältä)"
+ }
+}

@@ -1,0 +1,202 @@
+{
+ "id": "VARJO",
+ "nimi": "Varjo",
+ "rooli": "Vastavoima – Varjo Holdingsin toimitusjohtaja",
+ "ika": 46,
+ "pituus": 186,
+ "kuvaus": "Kiinteistösijoittaja, joka ostaa Porin keskustaa talo kerrallaan ja haluaa kauppakeskuksen torin, rantapuistojen ja Kirjurinluodon paikalle. Kasvot joka bussipysäkin mainoksessa. Päältä päin sympaattinen ja uskottava – juonittelu paljastuu vasta papereista (M06). PEGI 7.",
+ "luonne": [
+  "karismaattinen",
+  "kohtelias",
+  "tehokas",
+  "ei kuuntele vastaväitteitä"
+ ],
+ "siluetti": "Siisti nykyajan johtaja: tummansininen istuva puku ilman solmiota, valkoinen paita auki kauluksesta, lyhyt tukka harmaantuvin ohimoin, valkoiset nahkatennarit, punainen pinssi.",
+ "lahde": "M01 ('Varjo Holdings', kasvot bussipysäkeillä), M04 (vartijat), M05 (Varjo-torni), M06 (väärennetyt paperit)",
+ "oletukset": [
+  "Sukupuoli ja ulkonäkö ovat konseptiehdotus – nimi 'Varjo' on sukupuolineutraali."
+ ],
+ "rekvisiitta": [
+  "tabletti (kauppakeskuksen 3D-havainnekuva)",
+  "kauppakeskuksen pienoismalli",
+  "kahvikuppi take away",
+  "älypuhelin korvalla"
+ ],
+ "animaatiot": [
+  "Idle (rento, käsi taskussa)",
+  "Walk (itsevarma)",
+  "Gesture_Present (esittelee hanketta)",
+  "Handshake",
+  "Phone_Call",
+  "Frustrated_Sigh"
+ ],
+ "mallinnus": [
+  "Pohja: npc_mies_a, pituus 186. Istuva pikkutakki yhdellä napilla, ei solmiota. Valkoiset tennarit erottavat hänet vartijoista.",
+  "Mainoskuvaa varten: sama pää + kädet ristissä -asento renderöidään bussipysäkkijulisteeseen (ks. README)."
+ ],
+ "makehuman": {
+  "sukupuoli": 1.0,
+  "ika": 0.62,
+  "lihakset": 0.5,
+  "paino": 0.4,
+  "pituus_cm": 186
+ },
+ "dialogivari": "#ff6b6b",
+ "mittasuhteet_cm": {
+  "pituus": 186,
+  "paan_korkeus": 24.5,
+  "paan_leveys": 18.1,
+  "hartialeveys": 42.0,
+  "vyotaro_leveys": 28.0,
+  "lantio_leveys": 31.0,
+  "haara_korkeus": 86.5,
+  "polvi_korkeus": 51.2,
+  "rinnan_syvyys": 21.0,
+  "paita_pituudessa": 7.6
+ },
+ "varit": {
+  "Iho": {
+   "srgb": "#dcb79c",
+   "blender_linear": [
+    0.716,
+    0.474,
+    0.332
+   ]
+  },
+  "Hiukset": {
+   "srgb": "#2c2722",
+   "blender_linear": [
+    0.025,
+    0.02,
+    0.016
+   ]
+  },
+  "Ohimot": {
+   "srgb": "#a7a9ae",
+   "blender_linear": [
+    0.386,
+    0.397,
+    0.423
+   ]
+  },
+  "Silmät": {
+   "srgb": "#4a6a7a",
+   "blender_linear": [
+    0.068,
+    0.144,
+    0.195
+   ]
+  },
+  "Takki": {
+   "srgb": "#1f2a40",
+   "blender_linear": [
+    0.014,
+    0.023,
+    0.051
+   ]
+  },
+  "Yläosa": {
+   "srgb": "#f6f4ef",
+   "blender_linear": [
+    0.922,
+    0.905,
+    0.863
+   ]
+  },
+  "Alaosa": {
+   "srgb": "#1f2a40",
+   "blender_linear": [
+    0.014,
+    0.023,
+    0.051
+   ]
+  },
+  "Kengät": {
+   "srgb": "#f4f2ee",
+   "blender_linear": [
+    0.905,
+    0.888,
+    0.855
+   ]
+  },
+  "Pinssi": {
+   "srgb": "#ff6b6b",
+   "blender_linear": [
+    1.0,
+    0.147,
+    0.147
+   ]
+  }
+ },
+ "vaatteet": {
+  "ylä": {
+   "tyyppi": "kauluspaita",
+   "vari": "#f6f4ef",
+   "hiha": "pitka",
+   "kaulus": "paita",
+   "kaulusvari": "#f6f4ef",
+   "kalvosin": "#f6f4ef",
+   "helma": "lantio"
+  },
+  "ala": {
+   "tyyppi": "housut",
+   "vari": "#1f2a40"
+  },
+  "kengat": {
+   "tyyppi": "lenkkari",
+   "vari": "#f4f2ee",
+   "pohja": "#e2ded6"
+  },
+  "takki": {
+   "vari": "#1f2a40",
+   "pituus": "haara",
+   "levennys": 1.5,
+   "aukko_rinta": 0.6,
+   "aukko_helma": 7.0,
+   "kaulus": "kaannetty",
+   "kaulusvari": "#1a2336",
+   "nappi1": true,
+   "nappivari": "#10151f",
+   "taskut": true
+  }
+ },
+ "hiukset": {
+  "tyyli": "lyhyt",
+  "vari": "#2c2722",
+  "ohimot": "#a7a9ae"
+ },
+ "kasvot": {
+  "leuka": 0.78,
+  "leuanpaa": 0.4,
+  "nenä": 1.05,
+  "sanki": 0.12,
+  "kulmat": 1.1
+ },
+ "varusteet": [
+  {
+   "tyyppi": "pinssi",
+   "vari": "#ff6b6b"
+  }
+ ],
+ "ilmeet": [
+  "neutraali",
+  "iloinen",
+  "vihainen",
+  "yllättynyt",
+  "huolestunut",
+  "ovela"
+ ],
+ "muotokuvat": [
+  "muotokuvat/varjo_neutraali.png",
+  "muotokuvat/varjo_iloinen.png",
+  "muotokuvat/varjo_vihainen.png",
+  "muotokuvat/varjo_yllattynyt.png",
+  "muotokuvat/varjo_huolestunut.png",
+  "muotokuvat/varjo_ovela.png"
+ ],
+ "tyyli": {
+  "aariviiva_cm": 0.55,
+  "aariviiva_vari": "#1b1712",
+  "varjostus": "1–2 sävyn toon + rasteripisteet varjopuolella (valo vasemmalta ylhäältä)"
+ }
+}

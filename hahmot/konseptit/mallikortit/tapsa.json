@@ -1,0 +1,195 @@
+{
+ "id": "TAPSA",
+ "nimi": "Tapsa",
+ "rooli": "Korjaamon omistaja, Ramin vanha ystävä ja tehtävänantaja",
+ "ika": 52,
+ "pituus": 174,
+ "kuvaus": "Pohjoisrannan korjaamon isäntä. Puhuu leveää porin murretta (\"sää\", \"tiärät\"), kuuntelee rokkia omalta mixtapelta, kilpailee mielellään. Varjo-yhtiön ostolistalla seuraavana.",
+ "luonne": [
+  "äänekäs ja lämmin",
+  "kilpailuhenkinen",
+  "porilainen ylpeys",
+  "suuttuu nopeasti, leppyy nopeasti"
+ ],
+ "siluetti": "Tanakka, pyöreä vatsa, kalju päälaki + pulisongit + mursunviikset. Siniset haalarit, punainen trasseli takataskussa.",
+ "lahde": "M01–M04 (antaja), 'Tapsan korjaamo', kilpakuski M02, mixtape",
+ "oletukset": [
+  "Ikä ~50 ja ulkonäkö ovat konseptiehdotus – käsikirjoitus ei kuvaa ulkonäköä."
+ ],
+ "rekvisiitta": [
+  "jakoavain (iso, kromi)",
+  "punainen trasseli takataskussa",
+  "C-kasetti 'TAPSAN MIXTAPE'",
+  "makkarapaperi (M02)"
+ ],
+ "animaatiot": [
+  "Idle (kädet lanteilla)",
+  "Walk (leveä, keinuva)",
+  "Talk_Gesture (heiluttaa jakoavainta)",
+  "Sit_Drive (M01 kuljettaa)",
+  "Hose (vesiletku, M04)",
+  "Cheer",
+  "Facepalm"
+ ],
+ "mallinnus": [
+  "Pohja: npc_mies_b + paino ylös, vatsa. Haalari yhtenä kappaleena (yläosa + lahkeet samaa materiaalia).",
+  "Mursunviikset erillisenä verkkona (helppo ilmeistää), pulisongit hiusmateriaalilla.",
+  "Trasseli: pieni kangasverkko takataskusta, jäykkä (ei kangasfysiikkaa)."
+ ],
+ "makehuman": {
+  "sukupuoli": 1.0,
+  "ika": 0.75,
+  "lihakset": 0.55,
+  "paino": 0.8,
+  "pituus_cm": 174
+ },
+ "dialogivari": "#7cc4ff",
+ "mittasuhteet_cm": {
+  "pituus": 174,
+  "paan_korkeus": 26.4,
+  "paan_leveys": 22.1,
+  "hartialeveys": 45.0,
+  "vyotaro_leveys": 44.0,
+  "lantio_leveys": 36.0,
+  "haara_korkeus": 80.9,
+  "polvi_korkeus": 47.9,
+  "rinnan_syvyys": 26,
+  "paita_pituudessa": 6.6
+ },
+ "varit": {
+  "Iho": {
+   "srgb": "#d9a07e",
+   "blender_linear": [
+    0.694,
+    0.352,
+    0.209
+   ]
+  },
+  "Hiukset": {
+   "srgb": "#6b4a30",
+   "blender_linear": [
+    0.147,
+    0.068,
+    0.03
+   ]
+  },
+  "Silmät": {
+   "srgb": "#4a6a8a",
+   "blender_linear": [
+    0.068,
+    0.144,
+    0.254
+   ]
+  },
+  "Parta/viikset": {
+   "srgb": "#5a3d26",
+   "blender_linear": [
+    0.102,
+    0.047,
+    0.019
+   ]
+  },
+  "Yläosa": {
+   "srgb": "#3f78b5",
+   "blender_linear": [
+    0.05,
+    0.188,
+    0.462
+   ]
+  },
+  "Alaosa": {
+   "srgb": "#3f78b5",
+   "blender_linear": [
+    0.05,
+    0.188,
+    0.462
+   ]
+  },
+  "Kengät": {
+   "srgb": "#3a2a1e",
+   "blender_linear": [
+    0.042,
+    0.023,
+    0.013
+   ]
+  },
+  "Pinssi": {
+   "srgb": "#f2d13c",
+   "blender_linear": [
+    0.888,
+    0.638,
+    0.045
+   ]
+  }
+ },
+ "vaatteet": {
+  "ylä": {
+   "tyyppi": "haalari",
+   "vari": "#3f78b5",
+   "hiha": "pitka",
+   "kaulus": "paita",
+   "kaulusvari": "#3f78b5",
+   "vetoketju": true,
+   "rintatasku": true,
+   "taskuteksti": "TAPSA",
+   "taskutekstivari": "#f2d13c",
+   "helma": "vyotaro",
+   "kalvosin": "#2f5d8f"
+  },
+  "ala": {
+   "tyyppi": "haalari",
+   "vari": "#3f78b5",
+   "vyo": "#3a2a1e",
+   "sauma": "#2f5d8f"
+  },
+  "kengat": {
+   "tyyppi": "saapas",
+   "vari": "#3a2a1e",
+   "pohja": "#1e1a16"
+  },
+  "hanskat": null
+ },
+ "hiukset": {
+  "tyyli": "kalju_sivut",
+  "vari": "#6b4a30"
+ },
+ "kasvot": {
+  "leuka": 0.92,
+  "leuanpaa": 0.5,
+  "posket": 1.04,
+  "nenä": 1.25,
+  "nenatyyppi": "perunanena",
+  "viikset": "mursu",
+  "viiksivari": "#5a3d26",
+  "kulmat": 1.4,
+  "posket_puna": "#e07a63",
+  "silmapussit": true
+ },
+ "varusteet": [
+  {
+   "tyyppi": "pinssi",
+   "vari": "#f2d13c"
+  }
+ ],
+ "ilmeet": [
+  "neutraali",
+  "iloinen",
+  "vihainen",
+  "yllättynyt",
+  "huolestunut",
+  "ovela"
+ ],
+ "muotokuvat": [
+  "muotokuvat/tapsa_neutraali.png",
+  "muotokuvat/tapsa_iloinen.png",
+  "muotokuvat/tapsa_vihainen.png",
+  "muotokuvat/tapsa_yllattynyt.png",
+  "muotokuvat/tapsa_huolestunut.png",
+  "muotokuvat/tapsa_ovela.png"
+ ],
+ "tyyli": {
+  "aariviiva_cm": 0.55,
+  "aariviiva_vari": "#1b1712",
+  "varjostus": "1–2 sävyn toon + rasteripisteet varjopuolella (valo vasemmalta ylhäältä)"
+ }
+}

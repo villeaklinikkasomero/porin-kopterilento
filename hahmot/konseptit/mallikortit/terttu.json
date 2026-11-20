@@ -1,0 +1,219 @@
+{
+ "id": "TERTTU",
+ "nimi": "Terttu",
+ "rooli": "Kauppatorin torikauppias",
+ "ika": 67,
+ "pituus": 160,
+ "kuvaus": "Myy torilla marjoja, kukkia ja juoruja. Tietää kaiken kaikista. Varjo-yhtiö on jo ostanut hänen torikojunsa. Lämmin mutta tiukka – kukaan ei tingi Tertulta.",
+ "luonne": [
+  "äidillinen",
+  "tarkka rahasta",
+  "tietää kaikki juorut",
+  "sisukas"
+ ],
+ "siluetti": "Lyhyt ja pyöreä, harmaa nuttura, persikanoranssi neuletakki, kukallinen esiliina, kumisaappaat, rahalaukku vyöllä.",
+ "lahde": "hahmot.json, M01 ('Tertun torikoju')",
+ "oletukset": [
+  "Rooli torikauppiaana pääteltiin M01:n repliikistä. Ikä ja ulkonäkö ovat konseptiehdotus."
+ ],
+ "rekvisiitta": [
+  "mansikkalaatikko (lastu)",
+  "litran mitta",
+  "kukkakimppu paperissa",
+  "termoskannu"
+ ],
+ "animaatiot": [
+  "Idle (kädet esiliinan taskuissa)",
+  "Walk (lyhyt askel)",
+  "Sell (ojentaa laatikon)",
+  "Wave",
+  "Scold (heristää sormea)",
+  "Laugh"
+ ],
+ "mallinnus": [
+  "Pohja: npc_nainen_b, ikä ja paino ylös. Neuletakki kuorena, esiliina erillisenä tasona (kevyt luunpaino lantioon).",
+  "Kissasilmälasit ketjulla: ketju pelkkänä ohuena putkena."
+ ],
+ "makehuman": {
+  "sukupuoli": 0.0,
+  "ika": 0.9,
+  "lihakset": 0.4,
+  "paino": 0.8,
+  "pituus_cm": 160
+ },
+ "dialogivari": "#ffb08a",
+ "mittasuhteet_cm": {
+  "pituus": 160,
+  "paan_korkeus": 24.2,
+  "paan_leveys": 19.9,
+  "hartialeveys": 37.0,
+  "vyotaro_leveys": 41.0,
+  "lantio_leveys": 40.0,
+  "haara_korkeus": 74.4,
+  "polvi_korkeus": 44.0,
+  "rinnan_syvyys": 26,
+  "paita_pituudessa": 6.6
+ },
+ "varit": {
+  "Iho": {
+   "srgb": "#e9b996",
+   "blender_linear": [
+    0.815,
+    0.485,
+    0.305
+   ]
+  },
+  "Hiukset": {
+   "srgb": "#b9b5ad",
+   "blender_linear": [
+    0.485,
+    0.462,
+    0.418
+   ]
+  },
+  "Silmät": {
+   "srgb": "#5d7c5a",
+   "blender_linear": [
+    0.109,
+    0.202,
+    0.102
+   ]
+  },
+  "Takki": {
+   "srgb": "#f09a6a",
+   "blender_linear": [
+    0.871,
+    0.323,
+    0.144
+   ]
+  },
+  "Yläosa": {
+   "srgb": "#f4efe2",
+   "blender_linear": [
+    0.905,
+    0.863,
+    0.761
+   ]
+  },
+  "Esiliina": {
+   "srgb": "#3c78a8",
+   "blender_linear": [
+    0.045,
+    0.188,
+    0.392
+   ]
+  },
+  "Alaosa": {
+   "srgb": "#6a4a3a",
+   "blender_linear": [
+    0.144,
+    0.068,
+    0.042
+   ]
+  },
+  "Kengät": {
+   "srgb": "#2f5b3a",
+   "blender_linear": [
+    0.028,
+    0.105,
+    0.042
+   ]
+  },
+  "Vyolaukku": {
+   "srgb": "#5a3a26",
+   "blender_linear": [
+    0.102,
+    0.042,
+    0.019
+   ]
+  },
+  "Huulet": {
+   "srgb": "#b8606a",
+   "blender_linear": [
+    0.479,
+    0.117,
+    0.144
+   ]
+  }
+ },
+ "vaatteet": {
+  "ylä": {
+   "tyyppi": "pusero",
+   "vari": "#f4efe2",
+   "hiha": "pitka",
+   "kaulus": "paita"
+  },
+  "ala": {
+   "tyyppi": "hame",
+   "vari": "#6a4a3a",
+   "pituus": 8
+  },
+  "sukat": "#c9a88a",
+  "kengat": {
+   "tyyppi": "kumisaapas",
+   "vari": "#2f5b3a",
+   "pohja": "#1e2a1e"
+  },
+  "takki": {
+   "vari": "#f09a6a",
+   "pituus": "lantio",
+   "levennys": 2.0,
+   "aukko_rinta": 3.5,
+   "aukko_helma": 7.0,
+   "napit2": 0,
+   "hiha": true
+  },
+  "esiliina": {
+   "vari": "#3c78a8",
+   "vari2": "#ffffff",
+   "kuvio": "kukka"
+  }
+ },
+ "hiukset": {
+  "tyyli": "nuttura",
+  "vari": "#b9b5ad"
+ },
+ "kasvot": {
+  "leuka": 0.86,
+  "leuanpaa": 0.5,
+  "posket": 1.06,
+  "nenä": 1.0,
+  "nenatyyppi": "perunanena",
+  "posket_puna": "#e8846c",
+  "huulet": "#b8606a",
+  "lasit": {
+   "muoto": "kissa",
+   "vari": "#7a3b2a",
+   "koko": 1.0,
+   "ketju": true
+  },
+  "silmapussit": true
+ },
+ "varusteet": [
+  {
+   "tyyppi": "vyolaukku",
+   "vari": "#5a3a26"
+  }
+ ],
+ "ilmeet": [
+  "neutraali",
+  "iloinen",
+  "vihainen",
+  "yllättynyt",
+  "huolestunut",
+  "ovela"
+ ],
+ "muotokuvat": [
+  "muotokuvat/terttu_neutraali.png",
+  "muotokuvat/terttu_iloinen.png",
+  "muotokuvat/terttu_vihainen.png",
+  "muotokuvat/terttu_yllattynyt.png",
+  "muotokuvat/terttu_huolestunut.png",
+  "muotokuvat/terttu_ovela.png"
+ ],
+ "tyyli": {
+  "aariviiva_cm": 0.55,
+  "aariviiva_vari": "#1b1712",
+  "varjostus": "1–2 sävyn toon + rasteripisteet varjopuolella (valo vasemmalta ylhäältä)"
+ }
+}

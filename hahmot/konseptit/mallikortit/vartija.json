@@ -1,0 +1,191 @@
+{
+ "id": "VARTIJA",
+ "nimi": "Vartija (Varjo Security)",
+ "rooli": "Varjon vartija – toistuva vastustaja, 3 muunnelmaa",
+ "ika": 35,
+ "pituus": 178,
+ "kuvaus": "Varjo Holdingsin harmaa vartijaunivormu. Toistaa 'Tilanne on hallinnassa' ja kiinnittää keltaisia PURKUKOHDE-tarroja oviin. Koominen, ei uhkaava: kastuu, liukastuu ja vetäytyy (\"Pukuni on märkä!\").",
+ "luonne": [
+  "virkaintoinen",
+  "sanoo kaiken radiopuhelimeen",
+  "helposti hämmentyvä"
+ ],
+ "siluetti": "Harmaa univormu V-merkillä, lakki, keltainen tarrarulla, radiopuhelin rinnassa. Muunnelmat: A pitkä/laiha, B lyhyt/tanakka, C nainen.",
+ "lahde": "M04 (kolme vartijaa, purkutarrat, vesiletku), Varjo-mittari (M03, M13, M18, M26)",
+ "oletukset": [
+  "Ei poliisia (käsikirjoitus) – vartija on ainoa 'virkavalta'."
+ ],
+ "rekvisiitta": [
+  "keltainen tarrarulla 'PURKUKOHDE'",
+  "radiopuhelin",
+  "taskulamppu",
+  "kansio (lomakkeet)"
+ ],
+ "animaatiot": [
+  "Patrol_Walk",
+  "Look_Around",
+  "Radio_Talk",
+  "Stick_Sticker",
+  "Slip (liukastuu)",
+  "Wet_Shake",
+  "Retreat_Run",
+  "Alert (!)"
+ ],
+ "mallinnus": [
+  "Pohja: npc_mies_a / npc_mies_b / npc_nainen_a + sama univormuverkko 3 kokoon. Lakki ja V-merkki yhteisiä.",
+  "Varjo-mittarin jahtaukseen tarvitaan näkökartio – kypärä/lakki toimii suunnan visuaalisena vihjeenä."
+ ],
+ "makehuman": {
+  "sukupuoli": 1.0,
+  "ika": 0.5,
+  "lihakset": 0.55,
+  "paino": 0.6,
+  "pituus_cm": 178
+ },
+ "dialogivari": "#b0b8c0",
+ "mittasuhteet_cm": {
+  "pituus": 178,
+  "paan_korkeus": 24.7,
+  "paan_leveys": 19.3,
+  "hartialeveys": 42.0,
+  "vyotaro_leveys": 34.0,
+  "lantio_leveys": 34.0,
+  "haara_korkeus": 82.8,
+  "polvi_korkeus": 49.0,
+  "rinnan_syvyys": 23.0,
+  "paita_pituudessa": 7.2
+ },
+ "varit": {
+  "Iho": {
+   "srgb": "#d8a888",
+   "blender_linear": [
+    0.687,
+    0.392,
+    0.246
+   ]
+  },
+  "Hiukset": {
+   "srgb": "#5a4430",
+   "blender_linear": [
+    0.102,
+    0.058,
+    0.03
+   ]
+  },
+  "Silmät": {
+   "srgb": "#4a5a6a",
+   "blender_linear": [
+    0.068,
+    0.102,
+    0.144
+   ]
+  },
+  "Päähine": {
+   "srgb": "#8c949c",
+   "blender_linear": [
+    0.262,
+    0.296,
+    0.332
+   ]
+  },
+  "Yläosa": {
+   "srgb": "#9aa2aa",
+   "blender_linear": [
+    0.323,
+    0.361,
+    0.402
+   ]
+  },
+  "Alaosa": {
+   "srgb": "#22222b",
+   "blender_linear": [
+    0.016,
+    0.016,
+    0.024
+   ]
+  },
+  "Kengät": {
+   "srgb": "#111111",
+   "blender_linear": [
+    0.006,
+    0.006,
+    0.006
+   ]
+  }
+ },
+ "vaatteet": {
+  "ylä": {
+   "tyyppi": "univormu",
+   "vari": "#9aa2aa",
+   "hiha": "pitka",
+   "kaulus": "paita",
+   "kaulusvari": "#9aa2aa",
+   "napit": 5,
+   "nappivari": "#22222b",
+   "rintatasku": true,
+   "logo": {
+    "teksti": "V",
+    "vari": "#d8312f",
+    "tekstivari": "#ffffff"
+   },
+   "kalvosin": "#7e868e"
+  },
+  "ala": {
+   "tyyppi": "housut",
+   "vari": "#22222b",
+   "vyo": "#111111",
+   "sauma": "#d8312f"
+  },
+  "kengat": {
+   "tyyppi": "kenka",
+   "vari": "#111111",
+   "pohja": "#2a2a2a"
+  }
+ },
+ "hiukset": {
+  "tyyli": "sivuhiukset_lakki",
+  "vari": "#5a4430"
+ },
+ "kasvot": {
+  "leuka": 0.9,
+  "leuanpaa": 0.5,
+  "nenä": 1.0,
+  "sanki": 0.15
+ },
+ "paahine": {
+  "tyyppi": "vartija",
+  "vari": "#8c949c",
+  "kupu": "#8c949c",
+  "nauha": "#22222b",
+  "merkki": {
+   "vari": "#d8312f",
+   "teksti": "V"
+  }
+ },
+ "varusteet": [
+  {
+   "tyyppi": "radiopuhelin"
+  }
+ ],
+ "ilmeet": [
+  "neutraali",
+  "iloinen",
+  "vihainen",
+  "yllättynyt",
+  "huolestunut",
+  "ovela"
+ ],
+ "muotokuvat": [
+  "muotokuvat/vartija_neutraali.png",
+  "muotokuvat/vartija_iloinen.png",
+  "muotokuvat/vartija_vihainen.png",
+  "muotokuvat/vartija_yllattynyt.png",
+  "muotokuvat/vartija_huolestunut.png",
+  "muotokuvat/vartija_ovela.png"
+ ],
+ "tyyli": {
+  "aariviiva_cm": 0.55,
+  "aariviiva_vari": "#1b1712",
+  "varjostus": "1–2 sävyn toon + rasteripisteet varjopuolella (valo vasemmalta ylhäältä)"
+ }
+}

@@ -1495,10 +1495,24 @@ Länsi-/luoteispuoli = parittomat, itä-/kaakkoispuoli = parilliset. **Tee vain 
 | 36 | Rautatienpuistokatu 8 (1954) | kaakko | c047 | oma | (−193.953,−743.875)→(−172.824,−720.017) 31,9 m | VALMIS 19.11 (f36.py) |
 | 19 | Rautatienpuistokatu 10 (1954) | kaakko | c047 | oma | VALMIS 20.11 (f19.py; 2. portaan ovi pakettiauton takana, piirretty kuten 1.) |
 | 34 | Rautatienpuistokatu 12 (1954) | kaakko | c046 | oma | (−254.125,−810.805)→(−232.851,−786.778) 32,1 m | VALMIS 19.11 (f36.py; asettelu TOISTETTU nro 8:sta, oma kuva sumea) |
-| 21 | Satakunnankatu 23, 6 krs beige lamelli (pääty kadulle) | kaakko | c046 | oma | (−286.337,−847.299)→(−262.543,−820.12) 36,1 m | TEKEMÄTTÄ |
+| 21 | Satakunnankatu 23, 6 krs beige lamelli (pääty kadulle) | kaakko | c046 | oma | (−286.337,−847.299)→(−262.543,−820.12) 36,1 m | VALMIS 20.11 (f21.py: matala 3 krs siipi kadun varrella; 6 krs lamelli SPECillä) |
 
 Seinät on annettu raw.pkl:n päätepisteinä; **käännä suunta niin että katu on oikealla** (luoteispuolen taloilla a = lounaispää, kaakkoispuolella a = koillispää).
 6, 8, 10 ja 12 ovat saman sarjan taloja (1954): mittaa yksi huolella ja tarkista muista erot.
+
+### 21: Satakunnankatu 23:n matala siipi Rautatienpuistokadulla (testipoltettu 20.11, c046)
+- Kuoren 21 kadunpuoleinen seinä a (−262.543,−820.12) → b (−286.337,−847.299), 36,1 m, on MATALA 3-kerroksinen siipi (räystäs 11,7); 6-kerroksinen
+  lamelli on sen takana ja pitää SPECinsä. `f21.py`: harmaa roiskerappaus, valkoiset puitteet, leveät 3-osaiset ja kapeat ikkunat, 2 puista
+  oviaukkoa portaineen (suippokaaret piirretty suorina), lasitettu parvekepino kaidepaneeleineen kummassakin päässä (tasona, ei syvyyttä).
+- Pano "11 Rautatienpuistokatu" 61.4785751, 21.7906462 (h 85 / 124,2 / 162,69, p 14). s = 1,92 + 0,939·s, z = (z − 0,9)·1,116. Kuvan oma mittakaava
+  antaa räystään vain 9,9 m jalkakäytävästä → korkeudet voivat olla jopa 1 m liian suuria (kuoren pohja on katua alempana).
+- Vertailukuva `Claude outputs/rautatienpuistokatu_21_vertailu_20_11.jpg`. c046 testipoltettu (8 695 kärkeä). **Modal: `city 64 c046,c047,c061`.**
+- **TUMMAT LUOTEISSEINÄT (13, 6, 8, 10, 12, 21):** kadun kaakkoispuolen talojen katuseinät osoittavat luoteeseen ja leipoutuvat hyvin tummiksi
+  (vaaleanharmaa → tummanharmaa). Syy on poltossa: aurinko paistaa kaakosta ja taivasvalo on heikko (lm.py/gen.py: bg strength), EI näytemäärä –
+  64 näytettä poistaa vain kohinan. Aiemmin kirjoitin "katso 64 näytteen poltosta"; se oli väärä odotus. Korjausvaihtoehdot omistajalle: taivasvalon
+  nosto koko kaupungin poltossa tai värien vaalennus näille seinille. EI tehty.
+- **Selain:** jos Street View -kuva on musta, sovelluksen selainpaneeli on piilossa tai juuri avattu – lataa pano uudelleen (navigate) ja odota.
+- **Rautatienpuistokatu: jäljellä vain Keskuskartanon (2) katusivu** (lamellin peltipääty 14,7 m + matalat liikesiivet) ja 15 (tarkista näkyykö kadulle).
 
 ### 23 ja 19: Rautatienpuistokatu 6 ja 10 (testipoltettu 20.11, c061 ja c047)
 - **Nro 6 (`f23.py`):** ruskea roiskerappaus, 3 krs, KAKSI seinää (matalampi koillisosa 12,7 m on 0,4 m taempana; pääosa 40,0 m omalla seinälinjallaan, koska
@@ -1612,6 +1626,23 @@ Seinät on annettu raw.pkl:n päätepisteinä; **käännä suunta niin että kat
   Yrjönkadun portaali näkyy vasta ajon `bake tori4 --samples 64` jälkeen.
 - Kuvat `Claude outputs/kauppahalli_isolinnankatu_vertailu_20_11.jpg` ja `kauppahalli_yrjonkatu_vertailu_20_11.jpg`. tori4 testipoltettu (7 037 kärkeä).
   **Modal: `bake tori4 --samples 64`** (push ensin).
+
+## 20.11.2026 ilta – JULKISIVUT TERÄVÄMMIKSI JALANKULKIJALLE (omistaja: "tehdään tarkempaa, näyttää huonolta nyt kun pelaaja pääsee kävelemään" → "tehdään nämä")
+- **Tekstuuritarkkuus EI ollut syy.** Koe: c046 poltettu 4096 px (44 px/m) vs nykyinen 2048 px (18–21 px/m) → jalankulkijan silmin lähes sama, tiedosto
+  0,96 → 1,7 Mt. Modal polttaa 2048 px JPEG 75 (modal_app.py: "4096 made the game crawl"); peli näyttää lähimmät 8 lohkoa täydellä tarkkuudella (TEXLOD).
+  Aiempi väitteeni "Modal polttaa 4096" oli väärä. Kuva `Claude outputs/tarkkuusvertailu_2048_4096_20_11.jpg` (vain chatissa).
+- **1) Täytevalo polttoon (`blender/gen.py` bake_zone):** varjon puolen seinät leipoutuivat lähes mustiksi (vaaleanharmaa → tummanharmaa, rappauksen
+  pintakuvio hävisi). Lisätty heikko VARJOTON aurinko vastakkaisesta suunnasta (az + 180°, korkeus 22°, energia `PORI_FILL`, oletus 0,75; 0 = pois).
+  Aurinkoseinät eivät muuttuneet näkyvästi (tarkistettu 124:stä). **Koskee KAIKKIA lohkoja vasta kun ne poltetaan uudelleen.**
+- **2) Ikkunoille syvyys (`blender/zones.py`, facades.json `winp`):** puite on nyt 4 listan kehä 7 cm seinästä, lasi 3,5 cm (kehä varjostaa sitä poltossa),
+  lasin yläosa vaaleampi (taivaan heijastus, `_mixhex`), ikkunapenkki 12 cm. Ennen: lasi puitelevyn PÄÄLLÄ. `PORI_FLATWIN=1` palauttaa vanhan.
+  Sääntö ennallaan: `box` ikkunan alla enintään 2,5 cm. Koskee kaikkia mitattuja julkisivuja (uudelleenpoltto). Kärkimäärä kasvaa (c046 8 695 → 11 503).
+- **3) "Sininen kaistale" talojen juuressa EI ole rako:** sädetestillä se on maanpinnan ilmakuvatekstuuri (ortokuvassa talon oma varjo). Korjaus kuuluu
+  index.html:n maanpintaan (talon viereen kiveys/nurmi ortokuvan sijaan) – EI tehty, kysytty omistajalta.
+- Testipoltettu c046 ja c063 (8 näytettä). Kuva `Claude outputs/julkisivut_ennen_jalkeen_20_11.jpg`.
+- **Modal:** push + "porikit image" vihreäksi (gen.py ja zones.py muuttuivat). Näkyy vain uudelleen poltetuissa lohkoissa: ensin keskusta
+  `city 64 c046,c047,c048,c051,c061,c063,c064` + `bake bepop --samples 64` + `bake tori4 --samples 64`; koko kaupunki = kaikki lohkot uudelleen (omistajan päätös).
+  Maamerkit (lm.py) polttavat omalla valaistuksellaan – ei muutettu.
 
 ## 19.11.2026 ilta – ALOITA TÄSTÄ (uusi chat: JULKISIVUINVENTAARIO, Itsenäisyydenkadun loput → Rautatienpuistokatu)
 

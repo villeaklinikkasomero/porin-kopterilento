@@ -1,4 +1,5 @@
 import math
+import os as _os_env
 from gen import *
 
 def lay(h, mod='punched', gh=0, bw=3.3, fh=3.0, cols=None, P=None, rowP=None, top=None, second=None, plain=False):
@@ -186,6 +187,10 @@ def _a31bx(Z, W, s0, s1, z0, z1, d0, d1, m):              # a box on the wall (p
     add_solid(Z, [W(s1, z0, d0), W(s1, z0, d1), W(s1, z1, d1), W(s1, z1, d0)][::-1], m, 0.3)    # end facing +s
     add_solid(Z, [W(s0, z0, d0), W(s1, z0, d0), W(s1, z0, d1), W(s0, z0, d1)], m, 0.3)          # underside
     add_solid(Z, [W(s0, z1, d0), W(s1, z1, d0), W(s1, z1, d1), W(s0, z1, d1)][::-1], m, 0.3)    # top
+PV_FLATWIN = _os_env.environ.get('PORI_FLATWIN', '0') == '1'    # old flat windows of facades.json 'winp' (for a before / after bake)
+def _mixhex(a, b, t):
+    A = [int(a[i:i + 2], 16) for i in (1, 3, 5)]; B_ = [int(b[i:i + 2], 16) for i in (1, 3, 5)]
+    return '#%02x%02x%02x' % tuple(round(x + (y - x) * t) for x, y in zip(A, B_))
 def _a31win(Z, W, s0, s1, z0, z1, fr, gl, d=0.03):
     _a31q(Z, W, s0, s1, z0, z1, d, fr); _a31q(Z, W, s0 + 0.09, s1 - 0.09, z0 + 0.09, z1 - 0.09, d + 0.01, gl)
     if s1 - s0 > 1.0: _a31q(Z, W, (s0 + s1) / 2 - 0.04, (s0 + s1) / 2 + 0.04, z0, z1, d + 0.02, fr)   # mullion
@@ -1332,9 +1337,20 @@ def _fac_extra(walls):
                 elif k == 'door': _a31q(Z, W, it[1], it[2], it[3], it[4], 0.02, M(it[5], 0.6))
                 elif k == 'winp':                             # window of n equal panes: ['winp', s0, s1, z0, z1, n, frame, glass]
                     fr_, gl_ = M(it[6]) if len(it) > 6 else _a31FR, M(it[7], 0.1, 0.3) if len(it) > 7 else _a31GL
-                    _a31q(Z, W, it[1], it[2], it[3], it[4], 0.03, fr_); _a31q(Z, W, it[1] + 0.08, it[2] - 0.08, it[3] + 0.08, it[4] - 0.08, 0.04, gl_)
+                    # 20.11.2026 (owner: the facades looked flat on foot): the frame is a ring of four bars 7 cm proud, the glass lies 3.5 cm behind it
+                    # (the bars shade it in the bake) and is lighter in its upper part, as a pane that mirrors the sky. Was: glass ON the frame.
+                    s0_, s1_, z0_, z1_ = it[1], it[2], it[3], it[4]; fw_ = 0.08 if min(s1_ - s0_, z1_ - z0_) > 0.5 else 0.05
+                    if PV_FLATWIN or min(s1_ - s0_, z1_ - z0_) < 0.3:
+                        _a31q(Z, W, s0_, s1_, z0_, z1_, 0.03, fr_); _a31q(Z, W, s0_ + fw_, s1_ - fw_, z0_ + fw_, z1_ - fw_, 0.04, gl_)
+                    else:
+                        zm_ = z0_ + (z1_ - z0_) * 0.52; gh_ = it[7] if len(it) > 7 else None
+                        gu_ = M(_mixhex(gh_, '#b9cbdc', 0.42), 0.1, 0.3) if gh_ else gl_
+                        _a31q(Z, W, s0_ + fw_, s1_ - fw_, z0_ + fw_, zm_, 0.035, gl_); _a31q(Z, W, s0_ + fw_, s1_ - fw_, zm_, z1_ - fw_, 0.035, gu_)
+                        _a31q(Z, W, s0_, s1_, z0_, z0_ + fw_, 0.07, fr_); _a31q(Z, W, s0_, s1_, z1_ - fw_, z1_, 0.07, fr_)
+                        _a31q(Z, W, s0_, s0_ + fw_, z0_ + fw_, z1_ - fw_, 0.07, fr_); _a31q(Z, W, s1_ - fw_, s1_, z0_ + fw_, z1_ - fw_, 0.07, fr_)
+                        _a31bx(Z, W, s0_ - 0.05, s1_ + 0.05, z0_ - 0.06, z0_, 0.0, 0.12, fr_)        # sill
                     for j in range(1, int(it[5])):
-                        m_ = it[1] + (it[2] - it[1]) * j / it[5]; _a31q(Z, W, m_ - 0.04, m_ + 0.04, it[3], it[4], 0.05, fr_)
+                        m_ = it[1] + (it[2] - it[1]) * j / it[5]; _a31q(Z, W, m_ - 0.04, m_ + 0.04, it[3] + 0.05, it[4] - 0.05, 0.07, fr_)
                 elif k == 'glass': _a31q(Z, W, it[1], it[2], it[3], it[4], it[6] if len(it) > 6 else 0.02, M(it[5], 0.1, 0.3))   # a sheet of glass
                 elif k == 'box': _a31bx(Z, W, it[1], it[2], it[3], it[4], it[5], it[6], _fac_mat(it[7], it[8] if len(it) > 8 else None))
                 elif k == 'balc':

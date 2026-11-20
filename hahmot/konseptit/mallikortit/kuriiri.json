@@ -1,0 +1,192 @@
+{
+ "id": "KURIIRI",
+ "nimi": "Kuriiri",
+ "rooli": "Pyöräkuriiri – tuo Lumin paketit",
+ "ika": 22,
+ "pituus": 176,
+ "kuvaus": "Ilmestyy, jättää laatikon oven eteen ja katoaa ennen kuin kukaan ehtii kysyä mitään. Lippalakki syvällä päässä. Toistuva sivuhahmo, joka voi myöhemmin paljastua Lumin apulaiseksi.",
+ "luonne": [
+  "nopea",
+  "vaitelias",
+  "aina kiire"
+ ],
+ "siluetti": "Lippalakki + iso olkalaukku heijastinraidalla, raidallinen paita, polvihousut, pitkät sukat, retrolenkkarit.",
+ "lahde": "hahmot.json (KURIIRI), M05 (laatikko ovella)",
+ "oletukset": [
+  "Yhteys Lumiin on ehdotus."
+ ],
+ "rekvisiitta": [
+  "pahvilaatikko (drooni), teippiä ja 'ÄLÄ AVAA' -tarra",
+  "polkupyörä (pelin pyora.js)"
+ ],
+ "animaatiot": [
+  "Cycle (olemassa)",
+  "Drop_Package",
+  "Run",
+  "Salute_Cap"
+ ],
+ "mallinnus": [
+  "Pohja: npc_poika/npc_mies_a. Käyttää pelin olemassa olevaa Cycle-klippiä ja pyörää."
+ ],
+ "makehuman": {
+  "sukupuoli": 1.0,
+  "ika": 0.35,
+  "lihakset": 0.55,
+  "paino": 0.4,
+  "pituus_cm": 176
+ },
+ "dialogivari": "#d0d0a0",
+ "mittasuhteet_cm": {
+  "pituus": 176,
+  "paan_korkeus": 23.8,
+  "paan_leveys": 18.6,
+  "hartialeveys": 39.0,
+  "vyotaro_leveys": 28.0,
+  "lantio_leveys": 32.0,
+  "haara_korkeus": 81.8,
+  "polvi_korkeus": 48.4,
+  "rinnan_syvyys": 20,
+  "paita_pituudessa": 7.4
+ },
+ "varit": {
+  "Iho": {
+   "srgb": "#b98060",
+   "blender_linear": [
+    0.485,
+    0.216,
+    0.117
+   ]
+  },
+  "Hiukset": {
+   "srgb": "#221812",
+   "blender_linear": [
+    0.016,
+    0.009,
+    0.006
+   ]
+  },
+  "Silmät": {
+   "srgb": "#3a2a20",
+   "blender_linear": [
+    0.042,
+    0.023,
+    0.014
+   ]
+  },
+  "Päähine": {
+   "srgb": "#2f8f6a",
+   "blender_linear": [
+    0.028,
+    0.275,
+    0.144
+   ]
+  },
+  "Yläosa": {
+   "srgb": "#f2d13c",
+   "blender_linear": [
+    0.888,
+    0.638,
+    0.045
+   ]
+  },
+  "Kuvio": {
+   "srgb": "#e2672c",
+   "blender_linear": [
+    0.761,
+    0.136,
+    0.025
+   ]
+  },
+  "Alaosa": {
+   "srgb": "#3a4a5a",
+   "blender_linear": [
+    0.042,
+    0.068,
+    0.102
+   ]
+  },
+  "Kengät": {
+   "srgb": "#f1f1f1",
+   "blender_linear": [
+    0.88,
+    0.88,
+    0.88
+   ]
+  },
+  "Laukku": {
+   "srgb": "#e2672c",
+   "blender_linear": [
+    0.761,
+    0.136,
+    0.025
+   ]
+  }
+ },
+ "vaatteet": {
+  "ylä": {
+   "tyyppi": "t-paita",
+   "vari": "#f2d13c",
+   "vari2": "#e2672c",
+   "kuvio": "raita",
+   "hiha": "lyhyt",
+   "kaulus": "pyorea"
+  },
+  "ala": {
+   "tyyppi": "shortsit",
+   "vari": "#3a4a5a"
+  },
+  "sukat": "#b98060",
+  "kengat": {
+   "tyyppi": "lenkkari",
+   "vari": "#f1f1f1",
+   "pohja": "#c9a640",
+   "raidat": "#2f8f6a"
+  }
+ },
+ "hiukset": {
+  "tyyli": "lyhyt",
+  "vari": "#221812"
+ },
+ "kasvot": {
+  "leuka": 0.78,
+  "leuanpaa": 0.36,
+  "nenä": 0.95,
+  "pisamat": false
+ },
+ "paahine": {
+  "tyyppi": "lippis",
+  "vari": "#2f8f6a",
+  "lippa": "#1d5c44",
+  "logo": "K",
+  "logovari": "#f2d13c"
+ },
+ "varusteet": [
+  {
+   "tyyppi": "laukku",
+   "vari": "#e2672c",
+   "hihna": "#3a2a1e",
+   "heijastin": "#f1f1f1"
+  }
+ ],
+ "ilmeet": [
+  "neutraali",
+  "iloinen",
+  "vihainen",
+  "yllättynyt",
+  "huolestunut",
+  "ovela"
+ ],
+ "muotokuvat": [
+  "muotokuvat/kuriiri_neutraali.png",
+  "muotokuvat/kuriiri_iloinen.png",
+  "muotokuvat/kuriiri_vihainen.png",
+  "muotokuvat/kuriiri_yllattynyt.png",
+  "muotokuvat/kuriiri_huolestunut.png",
+  "muotokuvat/kuriiri_ovela.png"
+ ],
+ "tyyli": {
+  "aariviiva_cm": 0.55,
+  "aariviiva_vari": "#1b1712",
+  "varjostus": "1–2 sävyn toon + rasteripisteet varjopuolella (valo vasemmalta ylhäältä)"
+ }
+}

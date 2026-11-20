@@ -910,6 +910,15 @@ def bake_zone(Z, outdir, samples=24, sun_az=118, sun_el=38):
     az, el = math.radians(sun_az), math.radians(sun_el)
     d = -Vector((math.sin(az) * math.cos(el), math.cos(az) * math.cos(el), math.sin(el)))
     so.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
+    # fill light (owner 20.11.2026: on foot the walls facing away from the sun baked almost black - light grey render read as dark grey and lost
+    # its grain): a weak shadowless sun from the opposite side, a little above the horizon. Sunlit walls face away from it and keep their look.
+    fe = float(os.environ.get('PORI_FILL', '0.75'))
+    if fe > 0:
+        fl = bpy.data.lights.new('fill', 'SUN'); fl.energy = fe; fl.angle = math.radians(40); fl.color = (0.86, 0.92, 1.0)
+        try: fl.use_shadow = False
+        except Exception: pass
+        fo = bpy.data.objects.new('fill', fl); sc.collection.objects.link(fo); fa = az + math.pi; fel = math.radians(22)
+        fo.rotation_euler = (-Vector((math.sin(fa) * math.cos(fel), math.cos(fa) * math.cos(fel), math.sin(fel)))).to_track_quat('-Z', 'Y').to_euler()
     img = bpy.data.images.new('bake', ATLAS, ATLAS, alpha=False); img.generated_color = (0.5, 0.5, 0.5, 1)
     def imgnode(mat):
         nt = mat.node_tree; n = nt.nodes.new('ShaderNodeTexImage'); n.image = img; nt.nodes.active = n; n.select = True; return n

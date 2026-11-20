@@ -1,0 +1,217 @@
+{
+ "id": "LUMI",
+ "nimi": "Lumi",
+ "rooli": "Tekniikkanero ja suunnittelija – tarinan 'aivot'",
+ "ika": 27,
+ "pituus": 166,
+ "kuvaus": "Toimii tiilivarastossa olevasta piilosta. Lennättää drooneja, kaivaa paperit esiin ja suunnittelee keikat. Lähettää Ramille ensimmäisen droonin nimettömänä. Kuiva, tarkka, hieman salaperäinen.",
+ "luonne": [
+  "tarkka ja nopea",
+  "kuiva sanailu",
+  "salaperäinen",
+  "oikeudenmukainen"
+ ],
+ "siluetti": "Hoikka, musta epäsymmetrinen polkka violetilla raidalla, isot pyöreät lasit, oliivinvihreä parka + violetti poolo, kuulokkeet kaulalla.",
+ "lahde": "M05–M06 (antaja M06), 'Lumin piilo' (tiilivarasto), drooni",
+ "oletukset": [
+  "Ikä ja ulkonäkö ovat konseptiehdotus."
+ ],
+ "rekvisiitta": [
+  "droonin ohjain (antennit, pieni näyttö)",
+  "pieni nelikopteridrooni",
+  "läppäri tarroineen",
+  "suunnittelutaulu: valokuvat + lankaa"
+ ],
+ "animaatiot": [
+  "Idle (näpyttää ohjainta)",
+  "Walk",
+  "Type (näppäimistö)",
+  "Drone_Pilot",
+  "Point_Board",
+  "Arms_Crossed",
+  "Sit_Desk"
+ ],
+ "mallinnus": [
+  "Pohja: npc_nainen_a, kevyempi runko. Parka erillisenä kuorena (helma auki), huppu taakse taittuneena.",
+  "Lasit: läpinäkyvä materiaali + paksu musta kehys (näkyy myös kaukaa). Violetti raita hiustekstuuriin."
+ ],
+ "makehuman": {
+  "sukupuoli": 0.0,
+  "ika": 0.45,
+  "lihakset": 0.4,
+  "paino": 0.4,
+  "pituus_cm": 166
+ },
+ "dialogivari": "#c79bff",
+ "mittasuhteet_cm": {
+  "pituus": 166,
+  "paan_korkeus": 23.1,
+  "paan_leveys": 17.1,
+  "hartialeveys": 35.0,
+  "vyotaro_leveys": 25.0,
+  "lantio_leveys": 32.0,
+  "haara_korkeus": 77.2,
+  "polvi_korkeus": 45.7,
+  "rinnan_syvyys": 20,
+  "paita_pituudessa": 7.2
+ },
+ "varit": {
+  "Iho": {
+   "srgb": "#e7c0a0",
+   "blender_linear": [
+    0.799,
+    0.527,
+    0.352
+   ]
+  },
+  "Hiukset": {
+   "srgb": "#1f1c26",
+   "blender_linear": [
+    0.014,
+    0.012,
+    0.019
+   ]
+  },
+  "Hiusraita": {
+   "srgb": "#a46ee8",
+   "blender_linear": [
+    0.371,
+    0.156,
+    0.807
+   ]
+  },
+  "Silmät": {
+   "srgb": "#4f3b2a",
+   "blender_linear": [
+    0.078,
+    0.044,
+    0.023
+   ]
+  },
+  "Takki": {
+   "srgb": "#6b7040",
+   "blender_linear": [
+    0.147,
+    0.162,
+    0.051
+   ]
+  },
+  "Yläosa": {
+   "srgb": "#7b4bc4",
+   "blender_linear": [
+    0.198,
+    0.07,
+    0.552
+   ]
+  },
+  "Alaosa": {
+   "srgb": "#3b3a33",
+   "blender_linear": [
+    0.044,
+    0.042,
+    0.033
+   ]
+  },
+  "Kengät": {
+   "srgb": "#3a2a1e",
+   "blender_linear": [
+    0.042,
+    0.023,
+    0.013
+   ]
+  },
+  "Kuulokkeet": {
+   "srgb": "#2a2a2a",
+   "blender_linear": [
+    0.023,
+    0.023,
+    0.023
+   ]
+  },
+  "Huulet": {
+   "srgb": "#b0566a",
+   "blender_linear": [
+    0.434,
+    0.093,
+    0.144
+   ]
+  }
+ },
+ "vaatteet": {
+  "ylä": {
+   "tyyppi": "poolo",
+   "vari": "#7b4bc4",
+   "hiha": "pitka",
+   "kaulus": "poolo"
+  },
+  "ala": {
+   "tyyppi": "housut",
+   "vari": "#3b3a33",
+   "taskut": "cargo"
+  },
+  "kengat": {
+   "tyyppi": "saapas",
+   "vari": "#3a2a1e",
+   "pohja": "#c9a640"
+  },
+  "takki": {
+   "vari": "#6b7040",
+   "pituus": "reisi",
+   "levennys": 4.0,
+   "aukko_rinta": 5.5,
+   "aukko_helma": 8.0,
+   "kaulus": "pysty",
+   "huppu": true,
+   "huppuvari": "#c8b48a",
+   "taskut": true,
+   "vyo": null
+  }
+ },
+ "hiukset": {
+  "tyyli": "polkka",
+  "vari": "#1f1c26",
+  "raita": "#a46ee8"
+ },
+ "kasvot": {
+  "leuka": 0.7,
+  "leuanpaa": 0.3,
+  "nenä": 0.8,
+  "silmat": 1.1,
+  "ripset": true,
+  "huulet": "#b0566a",
+  "lasit": {
+   "muoto": "pyorea",
+   "vari": "#2a2a2a",
+   "koko": 1.15
+  },
+  "pisamat": true
+ },
+ "varusteet": [
+  {
+   "tyyppi": "kuulokkeet",
+   "vari": "#2a2a2a",
+   "vari2": "#a46ee8"
+  }
+ ],
+ "ilmeet": [
+  "neutraali",
+  "iloinen",
+  "vihainen",
+  "yllättynyt",
+  "huolestunut",
+  "ovela"
+ ],
+ "muotokuvat": [
+  "muotokuvat/lumi_neutraali.png",
+  "muotokuvat/lumi_iloinen.png",
+  "muotokuvat/lumi_vihainen.png",
+  "muotokuvat/lumi_yllattynyt.png",
+  "muotokuvat/lumi_huolestunut.png",
+  "muotokuvat/lumi_ovela.png"
+ ],
+ "tyyli": {
+  "aariviiva_cm": 0.55,
+  "aariviiva_vari": "#1b1712",
+  "varjostus": "1–2 sävyn toon + rasteripisteet varjopuolella (valo vasemmalta ylhäältä)"
+ }
+}

@@ -1,0 +1,143 @@
+{
+ "id": "RAMI",
+ "nimi": "Rami Koski",
+ "rooli": "Päähahmo – paluumuuttanut rallikuski",
+ "ika": 30,
+ "pituus": 180,
+ "kuvaus": "Palasi rallimaailmalta Poriin. Vähäpuheinen, kuiva huumori, nopeat refleksit. Pelaajan hahmo.",
+ "luonne": [
+  "harvasanainen",
+  "rauhallinen paineessa",
+  "kuiva huumori"
+ ],
+ "siluetti": "Valkoinen t-paita + farkut + valkoiset tennarit, vaalea kiharapilvi. Siluetin 'nolla' – muut hahmot erottuvat hänestä.",
+ "lahde": "hahmot.json, M01–M06; malli tools/hahmo/porikopteri_hahmo.py",
+ "oletukset": [],
+ "rekvisiitta": [],
+ "animaatiot": [
+  "(olemassa) Idle, Walk, Run, Sit, Cycle, Chair, Dance, Dance2"
+ ],
+ "mallinnus": [
+  "Ei uutta mallia. Jos tyyliä yhtenäistetään, lisää vain toon-materiaali/ääriviiva (ks. README)."
+ ],
+ "makehuman": {
+  "sukupuoli": 1.0,
+  "ika": 0.5,
+  "lihakset": 0.5,
+  "paino": 0.5,
+  "pituus_cm": 180
+ },
+ "dialogivari": "#f4c95d",
+ "mittasuhteet_cm": {
+  "pituus": 180,
+  "paan_korkeus": 24.3,
+  "paan_leveys": 19.0,
+  "hartialeveys": 43.0,
+  "vyotaro_leveys": 30.0,
+  "lantio_leveys": 34.0,
+  "haara_korkeus": 83.7,
+  "polvi_korkeus": 49.5,
+  "rinnan_syvyys": 22,
+  "paita_pituudessa": 7.4
+ },
+ "varit": {
+  "Iho": {
+   "srgb": "#cba085",
+   "blender_linear": [
+    0.597,
+    0.352,
+    0.235
+   ]
+  },
+  "Hiukset": {
+   "srgb": "#cead6f",
+   "blender_linear": [
+    0.617,
+    0.418,
+    0.159
+   ]
+  },
+  "Silmät": {
+   "srgb": "#5986ad",
+   "blender_linear": [
+    0.1,
+    0.238,
+    0.418
+   ]
+  },
+  "Yläosa": {
+   "srgb": "#f1f1f1",
+   "blender_linear": [
+    0.88,
+    0.88,
+    0.88
+   ]
+  },
+  "Alaosa": {
+   "srgb": "#354b76",
+   "blender_linear": [
+    0.036,
+    0.07,
+    0.181
+   ]
+  },
+  "Kengät": {
+   "srgb": "#eaeae7",
+   "blender_linear": [
+    0.823,
+    0.823,
+    0.799
+   ]
+  }
+ },
+ "vaatteet": {
+  "ylä": {
+   "tyyppi": "t-paita",
+   "vari": "#f1f1f1",
+   "hiha": "lyhyt",
+   "kaulus": "pyorea"
+  },
+  "ala": {
+   "tyyppi": "housut",
+   "vari": "#354b76",
+   "sauma": "#c9a640"
+  },
+  "kengat": {
+   "tyyppi": "lenkkari",
+   "vari": "#eaeae7",
+   "pohja": "#b3b3b3"
+  }
+ },
+ "hiukset": {
+  "tyyli": "kihara",
+  "vari": "#cead6f"
+ },
+ "kasvot": {
+  "leuka": 0.8,
+  "leuanpaa": 0.38,
+  "nenä": 0.95,
+  "sanki": 0.35
+ },
+ "varusteet": [],
+ "ilmeet": [
+  "neutraali",
+  "iloinen",
+  "vihainen",
+  "yllättynyt",
+  "huolestunut",
+  "ovela"
+ ],
+ "muotokuvat": [
+  "muotokuvat/rami_neutraali.png",
+  "muotokuvat/rami_iloinen.png",
+  "muotokuvat/rami_vihainen.png",
+  "muotokuvat/rami_yllattynyt.png",
+  "muotokuvat/rami_huolestunut.png",
+  "muotokuvat/rami_ovela.png"
+ ],
+ "tyyli": {
+  "aariviiva_cm": 0.55,
+  "aariviiva_vari": "#1b1712",
+  "varjostus": "1–2 sävyn toon + rasteripisteet varjopuolella (valo vasemmalta ylhäältä)"
+ }
+}

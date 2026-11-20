@@ -1,0 +1,204 @@
+{
+ "id": "HARJU",
+ "nimi": "Harju",
+ "rooli": "Ex-satamakapteeni, venevajan isäntä (EHDOTUS)",
+ "ika": 70,
+ "pituus": 184,
+ "kuvaus": "Entinen satamakapteeni, nykyään venevajan isäntä Etelärannalla. Soutaa joka aamu, korjaa veneitä ja muistaa, kenelle rantatontit oikeasti kuuluvat – vanhat kartat ja kauppakirjat ovat hänen kaapissaan. Hidas puhuja, nopea soutaja.",
+ "luonne": [
+  "rauhallinen",
+  "muistaa kaiken",
+  "jääräpäinen",
+  "lempeä"
+ ],
+ "siluetti": "Pitkä ja laiha, lyhyeksi trimmattu valkoinen parta, mintunvihreä neulepipo, laivastonsininen tekninen kuoritakki, harmaa villapaita, ulkoiluhousut ja vaelluskengät.",
+ "lahde": "hahmot.json (vain nimi + väri). Rooli on OLETUS: käsikirjoituksessa venevaja + laituri Etelärannalla, soutukilpa M19, liittolaiset VAR_ALLIES.",
+ "oletukset": [
+  "Harjun rooli ei näy repon tiedostoissa – tarkista käsikirjoituksesta (M07–M26)."
+ ],
+ "rekvisiitta": [
+  "vanha merikartta rullalla",
+  "kiikari",
+  "airot",
+  "termosmuki",
+  "veneen avain kelluvassa avaimenperässä"
+ ],
+ "animaatiot": [
+  "Idle (kädet taskuissa)",
+  "Walk (hidas, pitkä askel)",
+  "Row (soutu)",
+  "Binoculars",
+  "Nod",
+  "Sit_Bench"
+ ],
+ "mallinnus": [
+  "Pohja: npc_mies_a, ikä ylös, laihempi. Lyhyt parta + viikset yhtenä verkkona, pipo erillisenä (ribbikuvio normaalikarttaan).",
+  "Kuoritakki: olkapäiden tummempi paneeli, pystykaulus, vetoketju."
+ ],
+ "makehuman": {
+  "sukupuoli": 1.0,
+  "ika": 0.92,
+  "lihakset": 0.4,
+  "paino": 0.35,
+  "pituus_cm": 184
+ },
+ "dialogivari": "#9fe0c0",
+ "mittasuhteet_cm": {
+  "pituus": 184,
+  "paan_korkeus": 24.5,
+  "paan_leveys": 18.2,
+  "hartialeveys": 42.0,
+  "vyotaro_leveys": 29.0,
+  "lantio_leveys": 32.0,
+  "haara_korkeus": 85.6,
+  "polvi_korkeus": 50.6,
+  "rinnan_syvyys": 20,
+  "paita_pituudessa": 7.5
+ },
+ "varit": {
+  "Iho": {
+   "srgb": "#d69c80",
+   "blender_linear": [
+    0.672,
+    0.332,
+    0.216
+   ]
+  },
+  "Hiukset": {
+   "srgb": "#ece8df",
+   "blender_linear": [
+    0.839,
+    0.807,
+    0.738
+   ]
+  },
+  "Silmät": {
+   "srgb": "#6a8aa0",
+   "blender_linear": [
+    0.144,
+    0.254,
+    0.352
+   ]
+  },
+  "Parta/viikset": {
+   "srgb": "#ece8df",
+   "blender_linear": [
+    0.839,
+    0.807,
+    0.738
+   ]
+  },
+  "Päähine": {
+   "srgb": "#7fcfa8",
+   "blender_linear": [
+    0.212,
+    0.624,
+    0.392
+   ]
+  },
+  "Takki": {
+   "srgb": "#22304d",
+   "blender_linear": [
+    0.016,
+    0.03,
+    0.074
+   ]
+  },
+  "Yläosa": {
+   "srgb": "#9a9a94",
+   "blender_linear": [
+    0.323,
+    0.323,
+    0.296
+   ]
+  },
+  "Alaosa": {
+   "srgb": "#5d5a4a",
+   "blender_linear": [
+    0.109,
+    0.102,
+    0.068
+   ]
+  },
+  "Kengät": {
+   "srgb": "#5a4632",
+   "blender_linear": [
+    0.102,
+    0.061,
+    0.032
+   ]
+  }
+ },
+ "vaatteet": {
+  "ylä": {
+   "tyyppi": "villapaita",
+   "vari": "#9a9a94",
+   "hiha": "pitka",
+   "kaulus": "pyorea"
+  },
+  "ala": {
+   "tyyppi": "housut",
+   "vari": "#5d5a4a",
+   "taskut": "cargo"
+  },
+  "kengat": {
+   "tyyppi": "saapas",
+   "vari": "#5a4632",
+   "pohja": "#2a241e"
+  },
+  "takki": {
+   "vari": "#22304d",
+   "pituus": "lantio",
+   "levennys": 2.0,
+   "aukko_rinta": 2.5,
+   "aukko_helma": 4.0,
+   "kaulus": "pysty",
+   "kaulusvari": "#22304d",
+   "taskut": true,
+   "olkalaput": true
+  }
+ },
+ "hiukset": {
+  "tyyli": "sivuhiukset_lakki",
+  "vari": "#ece8df"
+ },
+ "kasvot": {
+  "leuka": 0.8,
+  "leuanpaa": 0.38,
+  "nenä": 1.2,
+  "parta": true,
+  "parran_pituus": 0.35,
+  "viikset": "tuuhea",
+  "viiksivari": "#ece8df",
+  "kulmat": 1.4,
+  "posket_puna": "#d77a68",
+  "silmapussit": true
+ },
+ "paahine": {
+  "tyyppi": "pipo",
+  "vari": "#7fcfa8",
+  "kaanne": "#6cbf97"
+ },
+ "varusteet": [],
+ "ilmeet": [
+  "neutraali",
+  "iloinen",
+  "vihainen",
+  "yllättynyt",
+  "huolestunut",
+  "ovela"
+ ],
+ "muotokuvat": [
+  "muotokuvat/harju_neutraali.png",
+  "muotokuvat/harju_iloinen.png",
+  "muotokuvat/harju_vihainen.png",
+  "muotokuvat/harju_yllattynyt.png",
+  "muotokuvat/harju_huolestunut.png",
+  "muotokuvat/harju_ovela.png"
+ ],
+ "tyyli": {
+  "aariviiva_cm": 0.55,
+  "aariviiva_vari": "#1b1712",
+  "varjostus": "1–2 sävyn toon + rasteripisteet varjopuolella (valo vasemmalta ylhäältä)"
+ }
+}
