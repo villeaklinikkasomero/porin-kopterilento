@@ -799,6 +799,68 @@ class Poser:
         th = t0 + (t1 - t0) * ease((s - g["sw0"]) / (1 - g["sw0"])) - g["curl"] * sin(pi * clamp(s / g["sw0"]) * 0.5) * (1 - ease((s - g["sw0"]) / (1 - g["sw0"])))
         return f, h, th
 
+    def _leg(self, P, sd, s, qp, hip, A, th, toe_out, knee_out):
+        """Jalan kahden luun IK: lonkka pisteessa hip (lantion kierto qp), nilkka pisteeseen A, jalkateran kallistus th (+ = varpaat ylos)."""
+        H = self.H
+        d1, d2 = H["calf_" + sd] - H["thigh_" + sd], H["foot_" + sd] - H["calf_" + sd]
+        L1, L2 = d1.length, d2.length
+        n = A - hip
+        D = min(n.length, (L1 + L2) * 0.9985)
+        n.normalize()
+        pole = Vector((s * knee_out, -1.0, 0.0))  # polvi osoittaa menosuuntaan
+        fw = (pole - n * pole.dot(n)).normalized()
+        a = (L1 * L1 - L2 * L2 + D * D) / (2 * D)
+        knee = hip + n * a + fw * sqrt(max(0.0, L1 * L1 - a * a))
+        ank = hip + n * D
+        ax = fw.cross(n)
+        if ax.x < 0:
+            ax.negate()
+        qt = (self._frame(knee - hip, ax) @ self._frame(d1, X).transposed()).to_quaternion()
+        qc = (self._frame(ank - knee, ax) @ self._frame(d2, X).transposed()).to_quaternion()
+        qf = Q(Z, s * toe_out) @ Q(X, -th)
+        P["thigh_" + sd] = qp.inverted() @ qt
+        P["calf_" + sd] = qt.inverted() @ qc
+        P["foot_" + sd] = qc.inverted() @ qf
+
+    def _groove(self, t, sway, twist, lst, arms, heel, stance, toe):
+        """Tanssin runko: 4 iskua / kierros (t = 0..1). Polvet joustavat joka iskulla (alimmillaan iskulla), paino siirtyy puolelta toiselle
+        kahden iskun jaksossa, jalkaterat pysyvat maassa (IK) ja kevennetyn jalan kanta nousee. arms(P, sd, s, b) asettaa kadet."""
+        b = 4.0 * t
+        w = sin(pi * b)                                    # +1 = paino vasemmalla
+        k = self.k
+        qp = Q(Z, twist * w) @ Q(Y, -lst * w) @ Q(X, 3)
+        off = Vector((sway * k * w, 0.0, (-0.032 - 0.022 * cos(2 * pi * b)) * k))
+        P = {"pelvis": qp, "spine_01": Q(Z, -0.5 * twist * w) @ Q(Y, 0.8 * lst * w) @ Q(X, 2), "spine_02": Q(Z, -0.7 * twist * w) @ Q(Y, 0.5 * lst * w),
+             "spine_03": Q(Z, -0.6 * twist * w) @ Q(X, 1.5 * cos(2 * pi * b)), "neck_01": Q(Z, 0.4 * twist * w),
+             "head": Q(Z, 0.4 * twist * w) @ Q(X, 4 * cos(2 * pi * b) - 2)}
+        H = self.H
+        for sd, s in (("l", 1), ("r", -1)):
+            light = clamp(-s * w)                          # 1 = tama jalka kevennetty
+            th = -heel * light ** 1.5                      # kanta ylos, paino pakialla
+            bf, bd = self.ball
+            c_, s_ = cos(radians(th)), sin(radians(th))
+            A = Vector((s * stance * k, H["foot_" + sd].y - (bf * (1 - c_) - bd * s_), self.ank_h - bf * s_ + bd * (c_ - 1)))   # nilkka nousee ja siirtyy, kun jalka kaantyy pakian varassa
+            hip = H["pelvis"] + off + qp @ (H["thigh_" + sd] - H["pelvis"])
+            self._leg(P, sd, s, qp, hip, A, th, toe + 4 * light, 0.12)
+            P["ball_" + sd] = Q(X, -clamp(-th, 0.0, 50.0))
+            arms(P, sd, s, b)
+        return self.common(P, 30), off
+
+    def dance(self, t):
+        """Tanssi 1 (4 iskua): askel-askel paikallaan, kadet koukussa heiluvat vuorotellen, paa nyokkaa."""
+        def arms(P, sd, s, b):
+            a = s * sin(pi * b)
+            self.arm(P, sd, s, 2 - 22 * a, 88 + 10 * cos(2 * pi * b) + 12 * a, 13)
+        return self._groove(t, 0.055, 7, 4, arms, 30, 0.135, 8)
+
+    def dance2(self, t):
+        """Tanssi 2 (4 iskua): lantio kiertaa enemman, toinen kasi nousee ylos kahdeksi iskuksi ja pumppaa iskulla, toinen pysyy rinnan korkeudella."""
+        def arms(P, sd, s, b):
+            up = clamp(s * sin(pi * b / 2) * 1.6)          # vasen iskuilla 0-2, oikea 2-4
+            up = up * up * (3 - 2 * up)
+            self.arm(P, sd, s, 28 + 112 * up + 9 * cos(2 * pi * b), 96 - 50 * up + 8 * cos(2 * pi * b), 14 + 10 * up)
+        return self._groove(t, 0.04, 13, 3, arms, 22, 0.15, 12)
+
     def gait(self, t, g):
         ph = 2 * pi * t
         c1, s1 = cos(ph), sin(ph - g["lag"])
@@ -821,25 +883,7 @@ class Poser:
             hip = H["pelvis"] + off + qp @ (H["thigh_" + sd] - H["pelvis"])
             swing = clamp((u - g["st"]) / (1 - g["st"]))
             A = Vector((s * (g["width"] + g["swing_out"] * sin(pi * swing)), -f, h))
-            d1, d2 = H["calf_" + sd] - H["thigh_" + sd], H["foot_" + sd] - H["calf_" + sd]
-            L1, L2 = d1.length, d2.length
-            n = A - hip
-            D = min(n.length, (L1 + L2) * 0.9985)
-            n.normalize()
-            pole = Vector((s * g["knee_out"], -1.0, 0.0))  # polvi osoittaa menosuuntaan
-            fw = (pole - n * pole.dot(n)).normalized()
-            a = (L1 * L1 - L2 * L2 + D * D) / (2 * D)
-            knee = hip + n * a + fw * sqrt(max(0.0, L1 * L1 - a * a))
-            ank = hip + n * D
-            ax = fw.cross(n)
-            if ax.x < 0:
-                ax.negate()
-            qt = (self._frame(knee - hip, ax) @ self._frame(d1, X).transposed()).to_quaternion()
-            qc = (self._frame(ank - knee, ax) @ self._frame(d2, X).transposed()).to_quaternion()
-            qf = Q(Z, s * g["toe_out"]) @ Q(X, -th)
-            P["thigh_" + sd] = qp.inverted() @ qt
-            P["calf_" + sd] = qt.inverted() @ qc
-            P["foot_" + sd] = qc.inverted() @ qf
+            self._leg(P, sd, s, qp, hip, A, th, g["toe_out"], g["knee_out"])
             P["ball_" + sd] = Q(X, -clamp(-th, 0.0, 50.0) * (1 - swing) ** 2)   # varpaat pysyvat maassa ponnistuksessa
             sw = -cos(2 * pi * u - g["arm_lag"])           # kasi heilahtaa vastakkaisen jalan tahdissa
             self.arm(P, sd, s, g["arm_f"] * sw if sw > 0 else g["arm_b"] * sw,

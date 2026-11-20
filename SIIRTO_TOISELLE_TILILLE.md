@@ -1463,15 +1463,31 @@ Länsi-/luoteispuoli = parittomat, itä-/kaakkoispuoli = parilliset. **Tee vain 
 | 122 | pieni piharakennus 51 m² | kaakko | c064 | ei kuorta | – | JÄTETÄÄN |
 | 124 | Rautatienpuistokatu 5, ent. Teljän ammattikoulu (1938), valkoinen 3 krs | luode | c063 | oma | (−114.398,−609.46)→(−80.242,−572.33) 50,5 m ja (−135.486,−639.38)→(−110.914,−612.67) 36,3 m | VALMIS 19.11 (f124.py: molemmat siivet; sisänurkan portiikki mittaamatta) |
 | 13 | 4 krs lamelli | kaakko | c061 | oma | (−114.441,−655.249)→(−61.531,−596.099) 79,4 m | VALMIS 19.11 (f13.py; ikkunamoduuli luettu s 11–59, päät toistettu) |
-| 23 | Rautatienpuistokatu 6 (1954) | kaakko | c061 | oma | (−164.549,−710.867)→(−138.006,−680.88) 40,0 m + (−136.824,−681.927)→(−128.432,−672.444) 12,7 m | TEKEMÄTTÄ – EI sama asettelu kuin 8/12 (pidempi, rapattu päätykaista); tarvitsee terävän kuvan, pano 61.4798294, 21.7929287 |
+| 23 | Rautatienpuistokatu 6 (1954) | kaakko | c061 | oma | VALMIS 20.11 (f23.py; kaksi seinää) |
 | 15 | iso koulurakennus (Rautatienpuistokatu 7, ent. poikien ammattikoulu?) | luode | c047 | oma | ei seinää alle 22 m kadusta (puiston takana) | TARKISTA näkyykö kadulle |
 | 36 | Rautatienpuistokatu 8 (1954) | kaakko | c047 | oma | (−193.953,−743.875)→(−172.824,−720.017) 31,9 m | VALMIS 19.11 (f36.py) |
-| 19 | Rautatienpuistokatu 10 (1954) | kaakko | c047 | oma | (−224.007,−778.342)→(−202.228,−753.749) 32,9 m | TEKEMÄTTÄ – EI sama asettelu kuin 8/12 (rapatut parvekekaistat molemmissa päissä); tarvitsee terävän kuvan, pano 61.479217, 21.791768 |
+| 19 | Rautatienpuistokatu 10 (1954) | kaakko | c047 | oma | VALMIS 20.11 (f19.py; 2. portaan ovi pakettiauton takana, piirretty kuten 1.) |
 | 34 | Rautatienpuistokatu 12 (1954) | kaakko | c046 | oma | (−254.125,−810.805)→(−232.851,−786.778) 32,1 m | VALMIS 19.11 (f36.py; asettelu TOISTETTU nro 8:sta, oma kuva sumea) |
 | 21 | Satakunnankatu 23, 6 krs beige lamelli (pääty kadulle) | kaakko | c046 | oma | (−286.337,−847.299)→(−262.543,−820.12) 36,1 m | TEKEMÄTTÄ |
 
 Seinät on annettu raw.pkl:n päätepisteinä; **käännä suunta niin että katu on oikealla** (luoteispuolen taloilla a = lounaispää, kaakkoispuolella a = koillispää).
 6, 8, 10 ja 12 ovat saman sarjan taloja (1954): mittaa yksi huolella ja tarkista muista erot.
+
+### 23 ja 19: Rautatienpuistokatu 6 ja 10 (testipoltettu 20.11, c061 ja c047)
+- **Nro 6 (`f23.py`):** ruskea roiskerappaus, 3 krs, KAKSI seinää (matalampi koillisosa 12,7 m on 0,4 m taempana; pääosa 40,0 m omalla seinälinjallaan, koska
+  se on porrastuksessa 1,2 m edempänä – itemit jäisivät muuten seinän taakse), 2 porrasta, kermanvärinen rapattu uloke leveine ikkunoineen lounaispäässä.
+  Pano "6 Rautatienpuistokatu" 61.4798294, 21.7929287 (h 85 / 135,49 / 186,06, p 14). s = 35,2 + (s − 35,2)·0,94, z = (z − 0,97)·1,034.
+- **Nro 10 (`f19.py`):** sama tyyppi, 32,9 m, 2 porrasta, kermanväriset ulokkeet molemmissa päissä. Pano "9 Rautatienpuistokatu" 61.479217, 21.791768
+  (h 85 / 136 / 185,57, p 14). s = 17,3 + (s − 17,0)·0,904, z = (z − 1,05)·1,062. Toisen portaan ovi oli pakettiauton takana → piirretty kuten ensimmäinen.
+- Molemmissa: katu on n. 1 m kuoren pohjan yläpuolella → korkeudet ±0,5 m; kellari-ikkunat ja syöksytorvet pois; ulokkeiden syvyys 0,4 m arvioitu.
+- **TÄRKEÄ OPPI – terävät kuvat nopeasti:** lataa pano kerran (navigate + odota kunnes URL:ssa on panoid, n. 80 s) ja **käännä näkymää VETÄMÄLLÄ**
+  (`left_click_drag` (560,600)→(172,600) = +50°, 8 s odotus, screenshot, lue todellinen suunta URL:sta `…,135.49h,…`). Jokainen kuva on heti terävä;
+  uusi navigate samaan panoon lataa kaiken alusta ja jää usein sumeaksi.
+- Vertailukuvat `Claude outputs/rautatienpuistokatu_6_vertailu_20_11.jpg` ja `…_10_vertailu_20_11.jpg`. c061 (8 506 kärkeä) ja c047 (16 860) testipoltettu;
+  molemmat ovat jo Modal-jonossa – **aja `city 64 c047,c061` uudelleen** (edellinen ajo ei sisältänyt näitä).
+- **Rautatienpuistokadulla jäljellä:** 21 (Satakunnankatu 23, pääty kadulle), Keskuskartanon (2) katusivu, 15 (tarkista näkyykö kadulle).
+- **Omistajan toive 20.11: "toivottavasti grafiikka olisi hieman terävämpää".** Havainto: peli pienentää lohkojen atlakset 2048 px:iin (lähimmät 8) ja muut
+  512 px:iin (`TEXLOD`, `shrinkMap`, index.html), vaikka Modal polttaa 4096 px. Ehdotettu omistajalle, EI tehty: lähimmille 2–3 lohkolle täysi 4096 px.
 
 ### 36 ja 34: Rautatienpuistokatu 8 ja 12 (testipoltettu, c047 ja c046)
 - `f36.py` kirjoittaa molemmat (funktio `house`): vaaleanruskea tiili (`kind: brick`), 3 kerrosta, 10 ikkunasaraketta, 2 porrasta (puiset pariovet
@@ -1555,11 +1571,18 @@ Seinät on annettu raw.pkl:n päätepisteinä; **käännä suunta niin että kat
   (tekstit pois), ja **hallin portaali s 6,45–11,45** omistajan kahden valokuvan mukaan: 5 m leveä ja 3,4 m korkea, 2 graniittipylvästä jalustoilla,
   kermanvärinen eteinen varjossa, hallin tummat pariovet valaistuin lasein, sivuovet, kerma nimikenttä joka katkaisee listan (HALLI-tekstiä ei kopioitu).
   Pano "12 Yrjönkatu" 61.4857386, 21.7977328 (h 58 / 103 / 148, p 14; vain h 103 terävä): s = 15,0 + (s − 13,33)·1,084, z = 1,084·z − 0,21.
-- **PORTAALI EI OLE OIKEA AUKKO.** `gate` leikkaa vain LoD2-kuoria (kivi.py); 1217 rakennetaan jalanjäljestä (zones.py build_building) → kokeiltu, seinä jäi
-  umpeen ja peitti kaiken takanaan. Nyt portaali on piirretty seinän pintaan ja pylväät ovat 0,05–0,45 m seinän edessä. Oikea läpikulku vaatisi `gate`-tuen
-  build_buildingiin + hallin sisätilan (ei ole).
-- **Väri auki:** pohjakerros on todellisuudessa himmeä punaruskea (#84575a), mutta peli näyttää sen tiilenpunaisena saumoineen (brickify, vaikka merkinnässä
-  on `nobrick`; 1217:llä on SPEC) – tarkista 64 näytteen poltosta / korjaa nobrick SPEC-taloille.
+- **PORTAALI ON OIKEA 3 m SYVENNYS** (omistaja: "tee sisäänveto kauppahallin ovelle, syvennys noin 3 metriä jonka jälkeen ovi"): seinämerkinnässä
+  `"gate": [s0, s1, gh, depth, h]` + **`"fp": true`** = jalanjäljestä rakennetun talon sisäänveto. `zones.py`: (1) portaalin kohdalle lisätään jalanjälkeen
+  kaksi kärkeä (kivi.cut_walls tekee saman vain LoD2-kuorille), (2) `_gate_lay(w)`: katutaso gh korkea vedetään depth metriä sisään – pielet, alakatto ja
+  TAKASEINÄ. Itemit negatiivisella d:llä ovat syvennyksen sisällä (pylväät aukossa, hallin ovet takaseinässä d −3). Sivuovia pielissä ei piirretty.
+  Ovesta ei pääse sisään (hallin sisätilaa ei ole).
+- **Teksti HALLI** (omistaja: "merkitse teksti HALLI") portaalin yllä kermanvärisessä kentässä: tikkukirjaimet `box`-palkeista (0,85 m korkeat), ei oikea fontti.
+- **`index.html` (PHS-valokuvaseinät) – ÄLÄ POISTA `mv602` / `PH602CUT`:** naapurin 602 (Yrjönkatu 10, LUKITTU) LoD2-kuori jatkuu Hallitalon päälle, ja sen
+  valokuvaseinä oli 0,6 m Hallitalon seinän sisäpuolella → täytti syvennyksen tummalla "lasilla". `mv602` siirtää 602:n valokuvaseinän kulmat, jotka ovat
+  1217:n jalanjäljen sisällä, Yrjönkadun suuntaisesti talojen rajalle. **Tämä korjaus katosi kerran 20.11, kun toinen chat kirjoitti index.html:n ja tämän
+  tiedoston vanhemman pohjan päälle** – palautettu molempiin. Stage AINA juuri ennen vientiä ja käytä expectedMtimeMs.
+- **Tila 20.11 klo 10.45:** GitHubissa zones.py, facades.json, f1217.py ja bl_kauppahalli.js; **`bl_tori4.js` on vanha (6 465 kärkeä, pitää olla ~7 300)** →
+  Yrjönkadun portaali näkyy vasta ajon `bake tori4 --samples 64` jälkeen.
 - Kuvat `Claude outputs/kauppahalli_isolinnankatu_vertailu_20_11.jpg` ja `kauppahalli_yrjonkatu_vertailu_20_11.jpg`. tori4 testipoltettu (7 037 kärkeä).
   **Modal: `bake tori4 --samples 64`** (push ensin).
 
@@ -1907,3 +1930,53 @@ puulohkoon `window.__treeList`), `npc_*.js` (uusi klippi `Chair`), `hahmo.js` (W
 - **Tiedossa:** torilla ei ole omia penkkejä (vain terassit ja reunan puiden rengaspenkit); penkin paikka on laskettu, ei mitattu (voi olla keskellä
   kulkuväylää); terassi tulee jokaisen listatun kahvilan eteen, jos tilaa on – oikeasti kaikilla ei ole terassia; pelaaja ei voi itse istua;
   lapset eivät istu yksin (vain aikuiset varatuilla paikoilla), mutta perheet eivät istahda penkille (vain 1–2 hengen ryhmät).
+
+## 20.11.2026 – HUOM: kaksi istuntoa tallensi index.html:n toistensa päälle
+Istumapaikkojen 2. kierros (alla, tallennettu koneelle n. klo 7.30) katosi index.html:stä ja tästä lokista, kun toinen istunto ("istujat liikuttavat
+käsiään", ARMS) tallensi oman versionsa vanhemman pohjan päälle. Muutokset on nyt tehty uudestaan nykyisen version päälle (ARMS säilyy) ja lokimerkintä
+palautettu. **Ennen index.html:n tai tämän lokin tallennusta: hae tuore versio koneelta juuri ennen tallennusta ja tee muutokset sen päälle.**
+
+## 20.11.2026 klo 14 – Istumapaikat, 2. kierros (omistajan kuvakaappaus ja palaute)
+
+**Muutettu:** vain `index.html` (lohko "places to sit", puulohkon `LIST.push`, `greet`, `spawn`).
+
+- **Mustat irralliset lankkupenkit poistettu** (omistaja: "nuo mustat irralliset penkit voi poistaa"). Jäljellä rengaspenkit puiden ympärillä, terassit ja
+  7 puistonpenkkiä OSM-penkkien paikoilla (kaikki nyt selkänojallisia). Lankkupenkin geometria (GEO[0]) on yhä koodissa, sitä ei sijoiteta.
+- **Uusi katupuu + rengaspenkki Yrjönkadulle** Itäpuiston ja Nortamonkadun väliin: (93.3, −32.0), 2 m keskilinjasta itään kuten muutkin kävelykadun puut.
+  Lisätty puulohkoon kiinteillä arvoilla (`LIST.push` ennen `window.__treeList`-riviä), joten muiden puiden satunnaisluvut eivät muutu.
+  Korttelissa Itäpuisto–Eteläkauppatori ei ollut ennestään yhtään puuta. Nortamonkatu alkaa pelissä pisteestä (112, 59) torin itälaidalta.
+- **Istujat elävämmiksi** (omistaja: "istujat vaikuttavat kuolleilta"):
+  - Kun pelaaja kävelee <4,5 m päähän, istuja kääntyy häntä kohti (enint. 0,8 rad, `seatLook`) ja puhuu kuten kävelijät (`greet` käy nyt läpi myös
+    `SITTERS`in; istuja vastaa 1,6 m kauempaa, koska pöytä on välissä). H / 💬 toimii istujiin 8 m asti.
+  - Varatun paikan istuja nousee 20–140 s kuluttua ja kävelee pois yhden hengen ryhmänä lähimmälle kävelyverkon solmulle (`seatLeave`); paikka on
+    sen jälkeen 45 s tyhjä.
+  - Ohikulkijat (1–2 hlö) istuvat nyt myös terassipöytiin (paikat ryhmitelty pöydittäin `seat.g`; tuoliin tullaan sivulta) ja useammin (8 % / 0,25 s).
+  - Uusia valmiiksi istuvia ilmestyy vain yli 30 m päähän pelaajasta (ensimmäiset 8 s täytetään lähempääkin), ettei kukaan "putkahda" tuolille silmien edessä.
+- **Löytynyt vanha vika korjattu:** uusi kävelijäryhmä oli ensimmäiseen askeleeseensa asti pisteessä (0, 0), ja koska yli 150 m päässä oleva ryhmä
+  poistetaan heti syntymisen jälkeen, **kävelijöitä ei syntynyt lainkaan, kun pelaaja oli yli 150 m kartan origosta** (esim. kävelykadun eteläpää,
+  SAMK, jäähalli). Nyt `spawn` asettaa paikan heti.
+- **Tarkistettu oikeassa pelissä headless:** puu ja rengaspenkki paikallaan (4 istumapaikkaa), lankkupenkkejä 0; 6 min simulaatio (70, −150): 15 ryhmää
+  istahti (6 rengaspenkille, 9 pöytään), 3 istujaa nousi ja lähti, kukaan ei jäänyt jumiin; katse kääntyy pelaajaan ja palaa; ei konsolivirheitä.
+  Puhetta ei voitu kokeilla pilvessä (`radio/huudot.json` ei ollut mukana) – omistaja kokeilee.
+
+## 20.11.2026 – Musiikki ja tanssi jalan (omistaja: "tehdään mahdolliseksi, että botit voivat tanssia musiikin tahtiin"; valinta: pelaajan näppäimestä)
+
+**Muutettu:** `index.html` (lohko `DANCE` ennen `window.__game`-riviä + koukut: näppäin B, kosketuspainike `#tdance` 🎵, ohjeteksti, pelaajan animaatiovalinta,
+bottilohkon ryhmä- ja hahmosilmukka), `npc_*.js` ja `hahmo.js` (uudet klipit `Dance`, `Dance2`), uusi `radio/tahti.json`, uusi `tools/radio/tahti.py`,
+`tools/hahmo/porikopteri_hahmo.py` (`Poser._leg`, `_groove`, `dance`, `dance2`), `tools/hahmo/kavely_glb.py` (klipit listassa).
+
+- **Käyttö:** jalan ulkona **B** (kosketus 🎵) käynnistää radion kappaleen (pop_*/rock_*, joka kerralla seuraava; kappaleen loputtua seuraava) ja sama
+  näppäin lopettaa. Musiikki loppuu myös kyytiin noustessa ja sisätilaan mentäessä. Äänenvoimakkuus = radion (`RADIO.vol`, M mykistää).
+- **Botit:** musiikin soidessa alle 13 m päähän tulevista ryhmistä 3/4 pysähtyy ja tanssii pelaajaan päin (`p.dn`; ei suojatiellä, ei istuvat), kunnes
+  musiikki loppuu tai pelaaja on yli 19 m päässä. Kaksi tanssia (`Dance` askel–askel, `Dance2` käsi ylhäällä), hahmoittain arvottu, puolet kaksi iskua
+  eri vaiheessa. **Pelaajan hahmo** tanssii (`Dance`), kun seisoo paikallaan.
+- **Tahdissa:** `tools/radio/tahti.py` (librosa) etsii jokaisen kappaleen iskut → `radio/tahti.json` (ensimmäinen isku ja välit ms). Klipit ovat 4 iskun
+  mittaisia ja ne asetetaan joka ruudussa kappaleen iskukohtaan (`DANCE.sync`: `timeScale 0`, `time` = isku mod 4), joten tahti ei ryömi. Kappaleet eivät
+  ole tasatempoisia (Suno), siksi iskulista eikä pelkkä BPM. Ilman iskulistaa tai ääntä tanssitaan 120 BPM / kellon mukaan.
+  **Kun kappaleita vaihdetaan: `python3 tools/radio/tahti.py radio/`.** Nyt 11 kappaletta (99–143 BPM).
+- **Jos hahmomalli tehdään uudestaan** (mallichat), Dance-klipit pitää leipoa perään: `python tools/hahmo/kavely_glb.py hahmo.js --add Dance,Dance2 --clips Dance,Dance2`
+  (ja Walk/Run kuten aiemmin). Ilman klippejä peli toimii, kukaan ei vain tanssi.
+- **Tarkistettu oikeassa pelissä headless:** B päälle → 6 ryhmää (9 hahmoa) tanssi, klippien aika seuraa iskua, B pois → kaikki jatkoivat matkaa; ei
+  konsolivirheitä; `solid_test.js` läpi. **EI kuunneltu** (pilvessä ei ääntä): osuuko liike korvakuulolta iskuun, ja iskunhaun mahdollinen puoli-/tuplatempo.
+- **Tiedossa:** tahdin "ykkönen" on arvaus (4 iskun jakso alkaa ensimmäisestä löydetystä iskusta); istujat eivät reagoi musiikkiin; musiikki ei kuulu
+  muille paikoista (ei etäisyysvaimennusta, se on pelaajan oma soitin).

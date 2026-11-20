@@ -83,7 +83,7 @@
   #radio { left:14px; bottom:84px; padding:6px 10px; font-size:13px; display:flex; gap:8px; align-items:baseline; color:var(--ink); }
   #radio #rsong { color:var(--dim); font-size:12px; }
   .touch #radio { bottom:auto; top:178px; }
-  #thei { bottom:162px; } #tradio { bottom:22px; } body:not(.car) #tradio { bottom:232px; } body.walk .ride-only { display:none !important; }   /* radio: car and helicopter, not on foot */
+  #thei { bottom:162px; } #tdance { bottom:232px; } #tradio { bottom:22px; } body:not(.car) #tradio { bottom:232px; } body.walk .ride-only { display:none !important; }   /* radio: car and helicopter, not on foot */
   #vehs { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0 6px; }
   .veh { pointer-events:auto; position:relative; padding:0; border:2px solid var(--line); border-radius:10px; overflow:hidden; background:#0e161e; cursor:pointer; color:var(--ink); font:inherit; text-align:left; }
   .veh video, .veh img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; }
@@ -137,13 +137,13 @@
 <div id="board" class="hud panel"><h2>Päivän top-10</h2><div class="sub" id="bsub"></div><div id="nickrow" style="display:none;margin:10px 0 4px"><label for="nick">Pääsit listalle! Nimimerkki</label><input id="nick" maxlength="5" autocomplete="off" spellcheck="false" placeholder="5 merkkiä"><button id="nicksave" >Tallenna</button><span style="font-size:12px;width:100%">Älä käytä oikeaa nimeäsi.</span></div><ol class="top" id="top1"></ol><div class="topnote" id="note1"></div></div>
 <div id="help" class="hud panel">
   <span class="heli-only"><kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
-  <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>Enter</kbd> nouse ulos<br></span><span class="car-only"><kbd>W</kbd> kaasu · <kbd>S</kbd> jarru/peruutus · <kbd>A</kbd><kbd>D</kbd> ohjaus · <kbd>Väli</kbd> käsijarru · <kbd>R</kbd> radio · <kbd>Enter</kbd> nouse ulos<br></span><span class="walk-only"><kbd>W</kbd><kbd>S</kbd> kävele · <kbd>A</kbd><kbd>D</kbd> käänny · <kbd>Q</kbd><kbd>E</kbd> sivuaskel · <kbd>Shift</kbd> juokse<br><kbd>Enter</kbd> kyytiin / ovesta · </span><kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
+  <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>Enter</kbd> nouse ulos<br></span><span class="car-only"><kbd>W</kbd> kaasu · <kbd>S</kbd> jarru/peruutus · <kbd>A</kbd><kbd>D</kbd> ohjaus · <kbd>Väli</kbd> käsijarru · <kbd>R</kbd> radio · <kbd>Enter</kbd> nouse ulos<br></span><span class="walk-only"><kbd>W</kbd><kbd>S</kbd> kävele · <kbd>A</kbd><kbd>D</kbd> käänny · <kbd>Q</kbd><kbd>E</kbd> sivuaskel · <kbd>Shift</kbd> juokse<br><kbd>Enter</kbd> kyytiin / ovesta · <kbd>H</kbd> tervehdi · <kbd>B</kbd> musiikki ja tanssi · </span><kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
 </div>
 <div id="credit">Ilmakuva © Maanmittauslaitos, ortokuva 2025 (CC BY 4.0) · Kartta-aineisto © OpenStreetMapin tekijät · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0) · valokuvat © Porin kaupunki · maalaukset: Akseli Gallen-Kallela (Juseliuksen mausoleumin freskojen esityöt) ja R. W. Ekman (alttaritaulun luonnos), Kansallisgalleria / Wikimedia Commons (public domain, CC0) · Porin Teatterin kattomaalaukset: valokuva Sven Raita 1955, Satakunnan Museo (CC BY 4.0), oikaistu ja värikorjattu</div>
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
-  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb ride-only" id="tradio">📻</div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta">🚶</div><div class="tb walk-only" id="thei" aria-label="Tervehdi kävelijää">💬</div><div class="tb walk-only" id="trun" aria-label="Juokse">🏃</div>
+  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb ride-only" id="tradio">📻</div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta">🚶</div><div class="tb walk-only" id="thei" aria-label="Tervehdi kävelijää">💬</div><div class="tb walk-only" id="tdance" aria-label="Musiikki ja tanssi">🎵</div><div class="tb walk-only" id="trun" aria-label="Juokse">🏃</div>
 </div>
 
 <div id="start">
@@ -1397,6 +1397,7 @@ function loadModel(name, done) {
     if (v < 0.1 && inCore(tx, ty)) continue;   // owner 18.11.2026: no spruces in the centre (they were random picks, not real spruces)
     addTree(tx, ty, v < 0.1 ? 2 : v < 0.38 ? 1 : 0, false); LIST[LIST.length - 1].i = i;
     if (Math.hypot(tx + 1942.5, ty - 191.85) < 4.5) LIST.pop(); }   // no tree in the mausoleum doorway (popped after the random draws, so the other trees keep theirs)
+  LIST.push({ x: 93.3, y: -32.0, k: 0, sc: 1.12, sy: 1.2, rot: 2.1, c: [0.92, 0.94, 0.88], fc: 1 });      // owner 20.11.2026: one more street tree (with its ring bench) on Yrjönkatu between Itäpuisto and Nortamonkatu, in line with the others (2 m east of the centre line); fixed values, so the random draws of the other trees stay as they were
   window.__treeList = LIST;      // the ring benches (people on foot: places to sit) stand round these
   const m = new THREE.Matrix4(), q = new THREE.Quaternion(), s = new THREE.Vector3(), p = new THREE.Vector3(), c = new THREE.Color(), UPV = THREE.Object3D.DEFAULT_UP;
   // far crowns: deciduous = squashed icosahedron on a short trunk, spruce = two stacked cones (about 30 triangles each)
@@ -2111,6 +2112,7 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyR' && !WALK.on) RADIO.next();
   if (e.code === 'KeyY' && window.__ride) window.__ride.accept();
   if (e.code === 'KeyH' && WALK.on && !WALK.in && window.__npc) window.__npc.greet();
+  if (e.code === 'KeyB' && WALK.on && !WALK.in) DANCE.toggle();      // music on foot: the people near dance
   if (e.code === 'KeyN') newTour();
 });
 addEventListener('keyup', e => keys.delete(e.code));
@@ -2396,9 +2398,9 @@ function stepWalk(dt) {
         P.mark.scale.set(1.5 * t.aspect, 1.5, 1); P.mark.renderOrder = 3; P.mark.position.set(d.x, (carGround(d.x, d.y) || TZs(d.x, d.y)) + P.markH, -d.y); scene.add(P.mark); } }
   }
   S.alt = WALK.z + SKID; S.vx = Math.sin(S.yaw) * WALK.v; S.vy = Math.cos(S.yaw) * WALK.v; S.vz = 0;
-  if (walkMix) { const sp = Math.max(Math.abs(WALK.v), Math.abs(WALK.vs)), want = sp < 0.15 ? 'Idle' : sp < 2.8 ? 'Walk' : 'Run';
+  if (walkMix) { const sp = Math.max(Math.abs(WALK.v), Math.abs(WALK.vs)), want = sp < 0.15 ? (DANCE.on && walkAct.Dance ? 'Dance' : 'Idle') : sp < 2.8 ? 'Walk' : 'Run';
     if (want !== walkCur && walkAct[want]) { const a = walkAct[want], b = walkAct[walkCur]; a.reset().play(); if (b) a.crossFadeFrom(b, 0.22, false); walkCur = want; }
-    if (walkAct[walkCur]) walkAct[walkCur].timeScale = walkCur === 'Walk' ? Math.max(0.5, sp / 1.36) * (WALK.v < -0.05 ? -1 : 1) : walkCur === 'Run' ? sp / 4.65 : 1;   // clip strides (tools/hahmo/porikopteri_hahmo.py WALK/RUN): 1.36 m in 1 s, 3.10 m in 0.667 s -> the planted foot does not slide
+    DANCE.tick(); if (walkCur === 'Dance') DANCE.sync(walkAct.Dance, 0); else if (walkAct[walkCur]) walkAct[walkCur].timeScale = walkCur === 'Walk' ? Math.max(0.5, sp / 1.36) * (WALK.v < -0.05 ? -1 : 1) : walkCur === 'Run' ? sp / 4.65 : 1;   // clip strides (tools/hahmo/porikopteri_hahmo.py WALK/RUN): 1.36 m in 1 s, 3.10 m in 0.667 s -> the planted foot does not slide
     walkMix.update(dt); }
   walkG.visible = camMode !== 1;
   if (VEH !== 'car') { S.rotorSpd += (0 - S.rotorSpd) * Math.min(1, dt * 0.6); rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt; }
@@ -2659,7 +2661,7 @@ setTarget();
     else { ks = [guard()]; if (rnd() < 0.3) ks.push(adult()); ks.push(child()); if (rnd() < 0.4) ks.push(child()); }
     if (ks.some(k => !MOD[k])) return;
     const p = { a, b: e.n, c: e.c, pc: 0, t, v: ks.length > 2 ? 1.0 : 1.15 + rnd() * 0.3, wait: false, lat: (rnd() - 0.5) * 7, m: ks.map(mkChar) };          /* lat: on a pedestrian street the party keeps its own line, not the centre line */
-    p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.new = true; }); parties.push(p); };
+    p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.x = a.x + (e.n.x - a.x) * t; c.y = a.y + (e.n.y - a.y) * t; c.new = true; }); parties.push(p); };      /* 20.11.2026: placed at once; a new party stood at (0, 0) until its first step and was dropped again as "over 150 m away" whenever the player was that far from the map origin, so there were no walkers outside the centre */
   const sigFor = (a, b) => { const S_ = window.__sig; if (!S_ || !S_.poles.length) return undefined; const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2, L = Math.hypot(b.x - a.x, b.y - a.y) || 1, ux = (b.x - a.x) / L, uy = (b.y - a.y) / L;
     let best = null, bd = 16; for (const q of S_.poles) { const d = Math.hypot(q.x - mx, q.y - my); if (d < bd && Math.abs(ux * q.ux + uy * q.uy) < 0.6) { bd = d; best = q; } } return best; };
   // H on foot: the nearest walker within 8 m stops, turns to the player and says something in the Pori dialect (radio/huuto_*.mp3, tools/radio/huudot.py;
@@ -2667,6 +2669,7 @@ setTarget();
   let HU = null, huEl = null, huT = 0; fetch('./radio/huudot.json').then(r => r.json()).then(j => { HU = j; }).catch(() => {});
   const greet = auto => { if (!HU || performance.now() < huT) return; let best = null, bp = null, bd = auto ? 2.6 : 8;
     for (const p of parties) for (const c of p.m) { const d = Math.hypot(c.x - WALK.x, c.y - WALK.y); if (d < bd) { bd = d; best = c; bp = p; } }
+    for (const c of SITTERS) { const d = Math.hypot(c.x - WALK.x, c.y - WALK.y) - (auto ? 1.6 : 0); if (d < bd) { bd = d; best = c; bp = c; } }      // people sitting at a table or on a bench (the sitter itself keeps saidT and hold); they answer from a little further, behind their table
     if (!best) { if (!auto) toast('Ei ketään kuuloetäisyydellä', 1.4); return; }
     if (auto && performance.now() < (bp.saidT || 0)) return; bp.saidT = performance.now() + 45000; if (auto) huT = performance.now() + 6000;      // by itself: once per party in 45 s, at most one line in 6 s
     const kid = best.kid, v = kid ? 'l' : best.k.startsWith('mies') ? 'm' : 'n', L = kid ? HU.l : v === 'n' ? HU.a.concat(HU.n || []) : HU.a, i = Math.floor(Math.random() * L.length);   /* women: the shared lines + their own (files n_13...) */
@@ -2674,19 +2677,21 @@ setTarget();
     try { huEl = huEl || new Audio(); huEl.src = './radio/huuto_' + v + '_' + String(i + 1).padStart(2, '0') + '.mp3'; huEl.volume = soundOn ? 0.9 : 0; huEl.play().catch(() => {}); } catch (e) {} };
   $('thei').addEventListener('pointerdown', e => { e.preventDefault(); if (WALK.on && !WALK.in) greet(false); });
   // ---------- places to sit (owner 20.11.2026: "saadaanko botit istumaan tuolille"; "kartoita minkälaisia penkkejä kävelykadulla on") ----------
-  // Street View (summer 2019) shows on the pedestrian street: dark backless plank benches (Eetunaukio), red-brown ring benches round the street trees
+  // Street View (summer 2019) shows on the pedestrian street: dark backless plank benches (Eetunaukio; not placed any more), red-brown ring benches round the street trees
   // with a tree guard, and café terraces fenced with red posts and rope (light armchairs, small round tables). Built here from boxes and cylinders
   // (no model file): one instanced mesh per kind, heights from carGround. Terraces stand in front of the cafés and restaurants OpenStreetMap has
   // on the pedestrian streets and the square (POI below), park benches where OpenStreetMap has a bench. Everything goes to window.__furn, so
   // SOLID keeps the player, the walkers and the cars out of it.
   // People: some seats are taken while the player is near (SITTERS, own models with the Chair clip of npc_*.js), and a passing party of one or
-  // two sits down on a free bench for a while (p.sit) and walks on.
-  const SEATS = [], SITTERS = [], FURN = [], SMAX = matchMedia('(pointer: coarse)').matches ? 6 : 16; let seatsOn = false, seatTry = 0;
+  // two sits down on a free bench or at a free table for a while (p.sit) and walks on. They are alive (owner 20.11.2026: "istujat vaikuttavat kuolleilta"):
+  // a sitter turns towards the player who walks up and speaks (greet), after a while gets up and walks away as a party of one (seatLeave), and the
+  // seats near the player are filled only by people who walk to them (new sitters appear on seats over 30 m away).
+  const SEATS = [], SITTERS = [], FURN = [], SMAX = matchMedia('(pointer: coarse)').matches ? 6 : 16; let seatsOn = false, seatTry = 0, seatFill = 0;
   const POI = [['Caffé Locale', 61.4854, 21.797822], ['Ice Cream House', 61.48524, 21.797974], ['Shots', 61.485212, 21.797929], ['Torrero', 61.485591, 21.797877], ['Petras Café', 61.4859, 21.797531], ['Kalevi', 61.485969, 21.797576],
     ['Pub Jussikka', 61.485887, 21.798099], ['Kotipizza', 61.486147, 21.796471], ['Espresso House', 61.48428, 21.797214], ['Burger King', 61.484327, 21.797255], ['Burger Company', 61.484498, 21.797339], ['Seoul Crunch', 61.484628, 21.79739],
     ['Coffee House', 61.483856, 21.797007], ['Café Teljäntori', 61.484429, 21.795921], ['Jätskibaari Vohveli', 61.484254, 21.796111], ['Cafe Anton', 61.487372, 21.795937], ['Hesburger', 61.486847, 21.796544], ['Galle', 61.487235, 21.796972],
     ['Borg', 61.48521, 21.79697], ['Cafe Europa', 61.486387, 21.798313], ['Mäkilän Leipomo', 61.486539, 21.795482], ['Päre', 61.486635, 21.795531], ['06 Tori Pizzeria', 61.48727, 21.796554], ['Rosso', 61.487186, 21.795847]];
-  const OSMB = [[61.485126, 21.799022, 0], [61.485048, 21.791777, 2], [61.485078, 21.791571, 2], [61.48535, 21.791701, 2], [61.485327, 21.791918, 2], [61.482949, 21.790774, 0], [61.482973, 21.790539, 2]];      // OpenStreetMap amenity=bench: lat, lon, kind (2 = with a backrest)
+  const OSMB = [[61.485126, 21.799022, 2], [61.485048, 21.791777, 2], [61.485078, 21.791571, 2], [61.48535, 21.791701, 2], [61.485327, 21.791918, 2], [61.482949, 21.790774, 2], [61.482973, 21.790539, 2]];      // OpenStreetMap amenity=bench: lat, lon, kind (2 = the park bench with a backrest)
   const hs = (a, b) => { let x = (Math.imul(a | 0, 73856093) ^ Math.imul(b | 0, 19349663)) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return (x >>> 0) / 4294967296; };
   const seatBuild = () => {
     const V3 = THREE.Vector3, M4 = THREE.Matrix4, QQ = THREE.Quaternion, one = new V3(1, 1, 1), E3 = new THREE.Euler();
@@ -2715,11 +2720,11 @@ setTarget();
     const clear = (x, y, r) => { for (const f of FURN) if (Math.hypot(f.x - x, f.y - y) < r + (f.r || 0)) return false; if (window.__bikes) for (const b of window.__bikes) if (Math.hypot(b.x - x, b.y - y) < r) return false; return true; };
     const ok = (x, y) => walkFree(x, y) && !asph(x, y) && !pad(x, y) && inCore(x, y);
     const put = (k, x, y, yaw, o = {}) => { const f = { k, x, y, yaw, sx: o.sx || 1, r: o.r || 0, hl: BOX[k][0], hw: BOX[k][1] * (o.sx || 1), gone: false }; FURN.push(f); return f; };
-    const seat = (f, lx, lz, dyaw, kind) => { const sn = Math.sin(f.yaw), cs = Math.cos(f.yaw); SEATS.push({ x: f.x + cs * lx + sn * lz, y: f.y - sn * lx + cs * lz, yaw: f.yaw + dyaw, h: 0.45, kind, f, occ: null, st: false }); };      // lx to the sitter's right, lz forward
+    const seat = (f, lx, lz, dyaw, kind, grp) => { const sn = Math.sin(f.yaw), cs = Math.cos(f.yaw); SEATS.push({ x: f.x + cs * lx + sn * lz, y: f.y - sn * lx + cs * lz, yaw: f.yaw + dyaw, h: 0.45, kind, f, g: grp || f, occ: null, st: false }); };      // lx to the sitter's right, lz forward; g: the bench, or the table the chair stands at (a party sits together)
     // 1. ring benches round the trees that stand on a pedestrian street
     const E = busyE.map(q => [q.a, q.e.n]), near = (x, y) => { let bd = 1e9, bq = null; for (const [a, b] of E) { const ex = b.x - a.x, ey = b.y - a.y, u = Math.max(0, Math.min(1, ((x - a.x) * ex + (y - a.y) * ey) / (ex * ex + ey * ey || 1))), qx = a.x + ex * u, qy = a.y + ey * u, d = Math.hypot(x - qx, y - qy); if (d < bd) { bd = d; bq = [qx, qy, ex, ey]; } } return bq && [bd, ...bq]; };
     for (const t of window.__treeList || []) { const n = near(t.x, t.y); if (!n || n[0] > 4 || !ok(t.x, t.y) || !clear(t.x, t.y, 3)) continue; const f = put(1, t.x, t.y, Math.atan2(n[3], n[4]), { r: 1.1 });
-      for (let i = 0; i < 4; i++) { const a = f.yaw + Math.PI / 4 + i * Math.PI / 2, sx = t.x + Math.sin(a) * 1.5, sy = t.y + Math.cos(a) * 1.5; if (ok(sx, sy)) SEATS.push({ x: t.x + Math.sin(a) * 0.80, y: t.y + Math.cos(a) * 0.80, yaw: a, h: 0.45, kind: 1, f, occ: null, st: false }); } }
+      for (let i = 0; i < 4; i++) { const a = f.yaw + Math.PI / 4 + i * Math.PI / 2, sx = t.x + Math.sin(a) * 1.5, sy = t.y + Math.cos(a) * 1.5; if (ok(sx, sy)) SEATS.push({ x: t.x + Math.sin(a) * 0.80, y: t.y + Math.cos(a) * 0.80, yaw: a, h: 0.45, kind: 1, f, g: f, occ: null, st: false }); } }
     // 2. terraces in front of the cafés: from the map point out of the house towards the street, tables along the wall
     let nt = 0; const TC = [];
     for (const [nm, la, lo] of POI) { if (nt >= 12) break; const [px, py] = g2(la, lo); let tq = near(px, py); for (const q of busy) if (q.grid) { const d = Math.hypot(q.x - px, q.y - py); if (!tq || d < tq[0]) tq = [d, q.x, q.y, 0, 0]; }
@@ -2728,40 +2733,40 @@ setTarget();
       if (w < 0 || tq[0] - w < 5.5) continue; const ox = px + dx * (w + 1.55), oy = py + dy * (w + 1.55), ax = dy, ay = -dx, yw = Math.atan2(dx, dy); if (TC.some(q => Math.hypot(q[0] - ox, q[1] - oy) < 11)) continue;
       const tabs = []; for (const i of [0, -1, 1]) { const tx = ox + ax * i * 2.3, ty = oy + ay * i * 2.3; if (ok(tx, ty) && ok(tx + ax * 0.8, ty + ay * 0.8) && ok(tx - ax * 0.8, ty - ay * 0.8) && ok(tx + dx * 1.3, ty + dy * 1.3) && !inB(tx - dx * 0.9, ty - dy * 0.9) && clear(tx, ty, 1.6)) tabs.push(i); }
       if (tabs.length < 2 && !tabs.includes(0)) continue; TC.push([ox, oy]); nt++; const lo_ = Math.min(...tabs), hi = Math.max(...tabs);
-      for (const i of tabs) { const tx = ox + ax * i * 2.3, ty = oy + ay * i * 2.3; put(4, tx, ty, yw, { r: 1.2 });
-        for (const s of [1, -1]) seat(put(3, tx + ax * s * 0.78, ty + ay * s * 0.78, Math.atan2(-ax * s, -ay * s)), 0, 0.02, 0, 3);
-        if (hs(nt, i + 5) < 0.5) seat(put(3, tx - dx * 0.80, ty - dy * 0.80, yw), 0, 0.02, 0, 3); }
+      for (const i of tabs) { const tx = ox + ax * i * 2.3, ty = oy + ay * i * 2.3; const tb = put(4, tx, ty, yw, { r: 1.2 });
+        for (const s of [1, -1]) seat(put(3, tx + ax * s * 0.78, ty + ay * s * 0.78, Math.atan2(-ax * s, -ay * s)), 0, 0.02, 0, 3, tb);
+        if (hs(nt, i + 5) < 0.5) seat(put(3, tx - dx * 0.80, ty - dy * 0.80, yw), 0, 0.02, 0, 3, tb); }
       const a0 = lo_ * 2.3 - 1.45, a1 = hi * 2.3 + 1.45, fr = 1.45, bk = -1.25, P = (a, d) => [ox + ax * a + dx * d, oy + ay * a + dy * d], rope = (p, q) => { const L = Math.hypot(q[0] - p[0], q[1] - p[1]); put(6, (p[0] + q[0]) / 2, (p[1] + q[1]) / 2, Math.atan2(q[0] - p[0], q[1] - p[1]) + Math.PI / 2, { sx: L }); };
       const n = Math.max(2, Math.round((a1 - a0) / 1.6)), fp = []; for (let i = 0; i <= n; i++) fp.push(P(a0 + (a1 - a0) * i / n, fr)); const gap = Math.floor(n / 2);      // the fence: posts along the street side with a gap to walk in, a rope back to the wall at both ends
       fp.forEach((p, i) => { put(5, p[0], p[1], yw); if (i && i - 1 !== gap) rope(fp[i - 1], p); }); for (const a of [a0, a1]) { const q = P(a, bk); put(5, q[0], q[1], yw); rope(P(a, fr), q); } }
-    // 3. plank benches along the pedestrian streets, about every 40 m, beside the walking line and facing it
-    let nb = 0; for (const [a, b] of E) { const L = Math.hypot(b.x - a.x, b.y - a.y), ux = (b.x - a.x) / L, uy = (b.y - a.y) / L; if (L < 12 || a.x > b.x || (a.x === b.x && a.y > b.y)) continue;      /* busyE has every edge both ways */
-      for (let s = 8 + hs(a.x * 10, a.y * 10) * 20; s < L - 6 && nb < 44; s += 40) { const cx = a.x + ux * s, cy_ = a.y + uy * s, s0 = hs(cx * 10, cy_ * 10) < 0.5 ? 1 : -1;
-        for (const sd of [s0, -s0]) { let done = false; for (const lat of [3.4, 4.6, 2.6]) { const x = cx + uy * lat * sd, y = cy_ - ux * lat * sd;
-            if (ok(x, y) && ok(x + ux * 0.9, y + uy * 0.9) && ok(x - ux * 0.9, y - uy * 0.9) && !inB(x + uy * sd * 0.8, y - ux * sd * 0.8) && clear(x, y, 5)) { const f = put(0, x, y, Math.atan2(-uy * sd, ux * sd), { r: 1 }); for (const lx of [-0.6, 0, 0.6]) seat(f, lx, 0.02, 0, 0); nb++; done = true; break; } }
-          if (done) break; } } }
-    // 4. the benches OpenStreetMap knows (parks): facing the nearest footway
+    // (the loose dark plank benches along the streets were taken out again: owner 20.11.2026, "nuo mustat irralliset penkit voi poistaa")
+    // 3. the benches OpenStreetMap knows (parks): facing the nearest footway
     for (const [la, lo, k] of OSMB) { const [x, y] = g2(la, lo); if (!walkFree(x, y) || !clear(x, y, 2)) continue; let bn = null, bd = 60; for (const q of net) { const d = Math.hypot(q.x - x, q.y - y); if (d < bd && d > 0.5) { bd = d; bn = q; } }
       const f = put(k, x, y, bn ? Math.atan2(bn.x - x, bn.y - y) : 0, { r: 1 }); for (const lx of k === 2 ? [-0.4, 0.4] : [-0.6, 0, 0.6]) seat(f, lx, 0.02, 0, k); }
     // draw: one instanced mesh per kind
     const mat = new THREE.MeshLambertMaterial({ vertexColors: true }); mat.userData.noT = true; const m4 = new M4(), p3 = new V3(), q4 = new QQ(), s3 = new V3(), UPV = new V3(0, 1, 0);
     GEO.forEach((g, k) => { const L = FURN.filter(f => f.k === k); if (!L.length) return; const im = new THREE.InstancedMesh(g, mat, L.length); im.userData.noT = true; im.frustumCulled = false;
       L.forEach((f, i) => { f.z = carGround(f.x, f.y) ?? TZs(f.x, f.y); p3.set(f.x, f.z, -f.y); q4.setFromAxisAngle(UPV, -f.yaw); s3.set(f.sx, 1, 1); im.setMatrixAt(i, m4.compose(p3, q4, s3)); }); scene.add(im); });
-    SEATS.forEach((s, i) => { s.z = carGround(s.x, s.y) ?? TZs(s.x, s.y); s.st = hs(i, 7) < [0.2, 0.18, 0.3, 0.5][s.kind]; });
-    window.__furn = FURN; seatsOn = true; };
+    SEATS.forEach((s, i) => { s.z = carGround(s.x, s.y) ?? TZs(s.x, s.y); s.st = hs(i, 7) < [0.2, 0.3, 0.3, 0.5][s.kind]; });
+    window.__furn = FURN; seatsOn = true; seatFill = performance.now() + 8000; };
   const sitDown = (c, s) => { c.x = s.x; c.y = s.y; c.z = s.z; c.yaw = s.yaw; c.g.position.set(s.x, s.z + s.h, -s.y); c.g.rotation.y = -s.yaw; };
   const freeChar = c => { scene.remove(c.g); c.mix.stopAllAction(); for (const m of c.g.mats || []) m.dispose(); if (c.seat) c.seat.occ = null; };
+  const seatLeave = c => { const s = c.seat; let b = null, bd = 40; for (const q of net) { const d = Math.hypot(q.x - s.x, q.y - s.y); if (d < bd) { bd = d; b = q; } } if (!b) { c.life = 30; return; }      // a sitter gets up: from now on a walking party of one, off to the nearest footway
+    const p = { a: { x: s.x + Math.sin(s.yaw) * 0.7, y: s.y + Math.cos(s.yaw) * 0.7, nb: [{ n: b, c: 0 }] }, b, c: 0, pc: 0, t: 0, v: 1.15 + rnd() * 0.3, wait: false, lat: (rnd() - 0.5) * 7, m: [c], sit: { T: 0, ph: 2, e: 0 }, satT: performance.now() + 180000 };
+    c.off = 0; c.back = 0; c.new = false; c.sat = true; c.hold = 0; s.cool = performance.now() + 45000; SITTERS.splice(SITTERS.indexOf(c), 1); parties.push(p); };
   const seatTick = (px, py) => {      // four times a second
     if (!seatsOn) { if (net && KIND.every(k => MOD[k]) && (window.__roads || ++seatTry > 40) && (window.__treeList || seatTry > 40)) { try { seatBuild(); } catch (e) { seatsOn = true; console.warn('seats', e); } } return; }
-    if (!MOD.mies_a.animations.some(a => a.name === 'Chair')) return;
-    for (let i = SITTERS.length - 1; i >= 0; i--) { const c = SITTERS[i]; if (Math.hypot(c.x - px, c.y - py) > 95) { freeChar(c); SITTERS.splice(i, 1); } }
-    if (SITTERS.length < SMAX) for (let i = 0; i < SEATS.length; i++) { const s = SEATS[i]; if (!s.st || s.occ || Math.hypot(s.x - px, s.y - py) > 75) continue;
-        const r = hs(i, 11), k = r < 0.32 ? 'nainen_a' : r < 0.62 ? 'nainen_b' : r < 0.93 ? 'mies_a' : 'mies_b', c = mkChar(k); c.seat = s; s.occ = c; sitDown(c, s);
+    if (!MOD.mies_a.animations.some(a => a.name === 'Chair')) return; const now = performance.now();
+    for (let i = SITTERS.length - 1; i >= 0; i--) { const c = SITTERS[i], d = Math.hypot(c.x - px, c.y - py); if (d > 95) { freeChar(c); SITTERS.splice(i, 1); } else if ((c.life -= 0.25) < 0 && d < 75 && !(c.hold > 0) && count() < NMAX + 8) seatLeave(c); }
+    if (SITTERS.length < SMAX) for (let i = 0; i < SEATS.length; i++) { const s = SEATS[i], d = Math.hypot(s.x - px, s.y - py); if (!s.st || s.occ || d > 75 || (d < 30 && now > seatFill) || now < (s.cool || 0)) continue;      // near the player nobody pops up on a seat: those are taken by people who walk there
+        const r = hs(i, 11), k = r < 0.32 ? 'nainen_a' : r < 0.62 ? 'nainen_b' : r < 0.93 ? 'mies_a' : 'mies_b', c = mkChar(k); c.seat = s; s.occ = c; sitDown(c, s); c.life = 20 + rnd() * 120;
         if (c.act.Walk) c.act.Walk.stop(); c.act.Chair.play(); c.act.Chair.time = hs(i, 13) * 6; c.cur = 'Chair'; SITTERS.push(c); break; }      /* one new sitter per tick */
-    for (const p of parties) { if (p.sit || p.m.length > 2 || p.hold > 0 || p.wait || performance.now() < (p.satT || 0) || rnd() > 0.03) continue; const l = p.m[0]; if (Math.hypot(l.x - px, l.y - py) > 70) continue;
-      let bf = null, bd = 6; for (const s of SEATS) { if (s.occ || s.kind === 3) continue; const d = Math.hypot(s.x - l.x, s.y - l.y); if (d < bd && SEATS.filter(q => q.f === s.f && !q.occ).length >= p.m.length) { bd = d; bf = s.f; } }
-      if (!bf) continue; const fr = SEATS.filter(q => q.f === bf && !q.occ).sort((a, b) => Math.hypot(a.x - l.x, a.y - l.y) - Math.hypot(b.x - l.x, b.y - l.y));
-      p.sit = { T: 14 + rnd() * 26, ph: 0, e: 0 }; p.m.forEach((c, i) => { c.seat = fr[i]; fr[i].occ = c; c.sat = false; c.at2 = false; }); } };
+    for (const p of parties) { if (p.sit || p.m.length > 2 || p.hold > 0 || p.wait || now < (p.satT || 0) || rnd() > 0.08) continue; const l = p.m[0]; if (Math.hypot(l.x - px, l.y - py) > 70) continue;
+      let bg = null, bd = 7; for (const s of SEATS) { if (s.occ) continue; const d = Math.hypot(s.x - l.x, s.y - l.y); if (d < bd && SEATS.filter(q => q.g === s.g && !q.occ).length >= p.m.length) { bd = d; bg = s.g; } }
+      if (!bg) continue; const fr = SEATS.filter(q => q.g === bg && !q.occ).sort((a, b) => Math.hypot(a.x - l.x, a.y - l.y) - Math.hypot(b.x - l.x, b.y - l.y));
+      p.sit = { T: 14 + rnd() * 40, ph: 0, e: 0 }; p.m.forEach((c, i) => { c.seat = fr[i]; fr[i].occ = c; c.sat = false; c.at2 = false; c.ap = null; }); } };
+  const seatLook = (c, s, dt, on) => { let t = s.yaw; if (on) { let a = Math.atan2(S.x - c.x, S.y - c.y) - s.yaw; a = Math.atan2(Math.sin(a), Math.cos(a)); t += Math.max(-0.8, Math.min(0.8, a)); }      // seated: turn towards the player (0.8 rad at most), and back
+    let d = t - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 4); c.g.rotation.y = -c.yaw; };
   // ---------- seated people move their hands (owner 20.11.2026: "saadanko istuvat botit liikuttamaan käsiään, nyt ne istuu staattisesti") ----------
   // The Chair clip is one still pose. After the mixer every visible sitter gets a small procedural layer on the arms: a slow breathing sway and, every
   // few seconds, a gesture (talking with one hand, both hands up as if reading a phone, a hand to the chin), eased in and out. The elbow bends about the
@@ -2789,19 +2794,24 @@ setTarget();
         if (G.t >= G.d) { A.gs = null; A.nx = 3 + Math.random() * 9; } }
       bend(A, A.L, fl, tl); bend(A, A.R, fr, tr);
       for (const k of A.B) (k.last || (k.last = new Q())).copy(k.o.quaternion); }; })();
-  const seatFrame = (dt, px, py) => { for (const c of SITTERS) { const v = Math.hypot(c.x - px, c.y - py) < 70; c.g.visible = v; if (v) { c.mix.update(dt); if (Math.hypot(c.x - px, c.y - py) < 40) ARMS(c, dt); } }
+  const seatFrame = (dt, px, py) => { let foot = false; try { foot = WALK.on && !WALK.in; } catch (e) {}
+    for (const c of SITTERS) { const d = Math.hypot(c.x - px, c.y - py), v = d < 70; c.g.visible = v; if (c.hold > 0) c.hold -= dt; if (v) { seatLook(c, c.seat, dt, c.hold > 0 || (foot && d < 4.5)); c.mix.update(dt); if (d < 40) ARMS(c, dt); } }
     for (const p of parties) { const s = p.sit; if (!s) continue;
       if (s.ph === 0) { if (p.m.every(c => c.sat)) s.ph = 1; else if ((s.e += dt) > 25) s.ph = 2; }      // 0 walking to the bench (25 s at most), 1 sitting, 2 getting up
       else if (s.ph === 1) { if ((s.T -= dt) < 0) s.ph = 2; }
       else if (p.m.every(c => !c.seat)) { p.sit = null; p.satT = performance.now() + 180000; } } };
-  const seatMove = (p, c, dt, vis) => { const s = c.seat, fx = s.x + Math.sin(s.yaw) * 0.7, fy = s.y + Math.cos(s.yaw) * 0.7, up = p.sit && p.sit.ph === 2; let gx = fx, gy = fy, sp = 0;      // (fx, fy): standing in front of the seat
+  const seatMove = (p, c, dt, vis) => { const s = c.seat, up = p.sit && p.sit.ph === 2; let sp = 0;
+    if (!c.ap) { if (s.kind === 3) { const rx = Math.cos(s.yaw) * 0.62, ry = -Math.sin(s.yaw) * 0.62, k = Math.hypot(s.x + rx - c.x, s.y + ry - c.y) < Math.hypot(s.x - rx - c.x, s.y - ry - c.y) || c.sat ? 1 : -1; c.ap = [s.x + rx * k, s.y + ry * k]; }      // a chair at a table is entered from its side, a bench from the front
+      else c.ap = [s.x + Math.sin(s.yaw) * 0.7, s.y + Math.cos(s.yaw) * 0.7]; }
+    const fx = c.ap[0], fy = c.ap[1]; let gx = fx, gy = fy;      // (fx, fy): standing beside or in front of the seat
     if (up) { if (c.sat) { c.sat = false; c.at2 = true; setAnim(c, 'Idle'); c.e = 0; } if ((c.e = (c.e || 0) + dt) < 0.45) { gx = s.x; gy = s.y; } }
     else if (c.at2) { gx = s.x; gy = s.y; }
     if (!c.sat) { const dx = gx - c.x, dy = gy - c.y, d = Math.hypot(dx, dy), st = Math.min(d, (c.at2 ? 0.7 : 1.25) * dt); if (d > 1e-4) { c.x += dx / d * st; c.y += dy / d * st; sp = st / Math.max(dt, 1e-3); }
       let ty = c.at2 ? s.yaw : Math.atan2(dx, dy), a = ty - c.yaw; a = Math.atan2(Math.sin(a), Math.cos(a)); c.yaw += a * Math.min(1, dt * 7);
-      if (d < 0.06) { if (up) { if (c.e >= 0.45) { s.occ = null; c.seat = null; c.at2 = false; c.zo = 0; } } else if (!c.at2) c.at2 = true; else { c.sat = true; setAnim(c, 'Chair'); } } }
+      if (d < 0.06) { if (up) { if (c.e >= 0.45) { s.occ = null; c.seat = null; c.at2 = false; c.zo = 0; c.ap = null; } } else if (!c.at2) c.at2 = true; else { c.sat = true; setAnim(c, 'Chair'); } } }
     const g = carGround(c.x, c.y); if (g !== null) c.z += (g - c.z) * Math.min(1, dt * 10); c.zo = (c.zo || 0) + ((c.sat ? s.h : 0) - (c.zo || 0)) * Math.min(1, dt * 6);
     c.g.position.set(c.x, c.z + c.zo, -c.y); c.g.rotation.y = -c.yaw; c.g.visible = vis;
+    if (c.sat) { let foot = false; try { foot = WALK.on && !WALK.in; } catch (e) {} seatLook(c, s, dt, p.hold > 0 || (foot && Math.hypot(S.x - c.x, S.y - c.y) < 4.5)); }
     if (vis) { if (!c.sat) setAnim(c, sp > 0.3 ? 'Walk' : 'Idle'); if (c.act.Walk) c.act.Walk.timeScale = Math.max(0.6, sp / STRIDE[c.k]); c.mix.update(dt); if (c.sat) ARMS(c, dt); } };
   let acc = 0;
   window.__npc = { parties, sitters: SITTERS, seats: SEATS, greet: () => greet(false),
@@ -2810,6 +2820,7 @@ setTarget();
       const p = { a: { x, y, nb: [{ n: b, c: 0 }] }, b, c: 0, pc: 0, t: 0, v: 1.2, wait: false, lat: (rnd() - 0.5) * 7, m: ks.map(mkChar) };
       p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.x = x; c.y = y; c.z = carGround(x, y) ?? 0; c.new = true; }); parties.push(p); },
     update: dt => { if (!net || dt <= 0) return; const px = S.x, py = S.y;
+    DANCE.tick();
     seatFrame(dt, px, py);
     acc += dt; if (acc > 0.25) { acc = 0; seatTick(px, py); if (WALK.on && !WALK.in) greet(true);       /* walking up to somebody (2.6 m) makes them speak; H still calls from further away */
       if (count() < NMAX) spawn(px, py);
@@ -2819,6 +2830,8 @@ setTarget();
       if (p.c && !p.pc && p.t < 0.02) { if (p.sg === undefined) p.sg = sigFor(p.a, p.b); p.wait = !!p.sg && !window.__sig.ped(p.sg.n, p.sg.a); } else p.wait = false;   // at the kerb of a signalled crossing
       if (p.hold > 0) { p.hold -= dt; p.wait = true; }                         // greeted: stand and face the player
       if (p.sit) p.wait = true;                                                // sitting on a bench, or on the way to it
+      if (!DANCE.on) p.dn = undefined; else if (!p.sit) { const d = Math.hypot(p.m[0].x - px, p.m[0].y - py);      // music (B): 1 dancing, 0 not this one; decided when the party first comes within 13 m, not on a crossing
+        if (p.dn === undefined) { if (d < 13 && !p.c && !p.wait) p.dn = Math.random() < 0.75 ? 1 : 0; } else if (d > 19) p.dn = undefined; if (p.dn) p.wait = true; }
       if (p.c && !p.pc && p.t < 0.02) { if (!p.wait && (p.gw || 0) < 6 && SOLID.coming(p.a.x, p.a.y, p.b.x, p.b.y)) { p.gw = (p.gw || 0) + dt; p.wait = true; } } else p.gw = 0;      // 20.11.2026: at the kerb while a car is coming (at most 6 s; then the cars brake)
       if (!p.wait) p.t += p.v * dt / len;
       if (p.t >= 1) { const o = p.b.nb, gb = p.b.grid, e = pickW(o, o.map(q => q.n === p.a ? (o.length === 1 ? 1 : q.n.busy && !q.n.grid ? 2 : 0.02) : q.n.grid ? (gb ? 1 : 0.25) : q.n.busy ? 12 : gb ? 4 : 1)); p.a = p.b;   /* stay on the pedestrian streets; cross the square, do not circle in it */ p.b = e.n; p.pc = p.c; p.c = e.c; p.sg = undefined; p.t = 0; dx = p.b.x - p.a.x; dy = p.b.y - p.a.y; len = Math.hypot(dx, dy) || 1; }
@@ -2827,11 +2840,12 @@ setTarget();
       for (const c of p.m) { if (c.seat) { seatMove(p, c, dt, near); continue; } const tx = lx + uy * (c.off + lt) - ux * c.back, ty = ly - ux * (c.off + lt) - uy * c.back, fresh = c.new, k = fresh ? 1 : Math.min(1, dt * 4); c.new = false;
         let mx = (tx - c.x) * k, my = (ty - c.y) * k; if (!fresh && near) { const q = SOLID.npcStep(c, mx, my, tx, ty, p.v, dt); mx = q[0]; my = q[1]; }      // 20.11.2026: cars and the player are solid
         const sp = Math.hypot(mx, my) / Math.max(dt, 1e-3); c.x += mx; c.y += my;
-        if (p.hold > 0) { let d = Math.atan2(px - c.x, py - c.y) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6); }
+        if (p.hold > 0 || (p.dn && sp < 0.3)) { let d = Math.atan2(px - c.x, py - c.y) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6); }
         else if (sp > 0.15) { let d = Math.atan2(mx, my) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 8); }
         const g = carGround(c.x, c.y); if (g !== null) c.z += (g - c.z) * Math.min(1, dt * 10);
         c.g.position.set(c.x, c.z, -c.y); c.g.rotation.y = -c.yaw; c.g.visible = near;
-        if (near) { setAnim(c, sp > 0.3 ? 'Walk' : 'Idle'); if (c.act.Walk) c.act.Walk.timeScale = Math.max(0.6, sp / STRIDE[c.k]); c.mix.update(dt); } } } } };
+        if (near) { const dn = p.dn && sp < 0.3 && c.act.Dance ? (c.dk || (c.dk = Math.random() < 0.45 && c.act.Dance2 ? 'Dance2' : 'Dance')) : '';
+          setAnim(c, sp > 0.3 ? 'Walk' : dn || 'Idle'); if (c.act.Walk) c.act.Walk.timeScale = Math.max(0.6, sp / STRIDE[c.k]); if (dn) DANCE.sync(c.act[dn], c.dph === undefined ? (c.dph = Math.random() < 0.5 ? 0 : 2) : c.dph); c.mix.update(dt); } } } } };
 }
 
 // ---------- statues and memorials (19.11.2026): patsaat.js = the owner's list (21 works, Wikipedia; ten positions refined from OpenStreetMap) and his Blender
@@ -3200,6 +3214,27 @@ window.__takeTick = dt => { if (TAKE.hex !== TAKE.applied && carG.children.lengt
         if (!walking && S.landed && d < (R.v === 'heli' ? 45 : 30) && (R.v !== 'heli' || S.alt < ground(S.x, S.y) + 3)) drop(); } }
     show(); };
 })();
+
+// ---------- music and dancing on foot (owner 20.11.2026: "tehdään mahdolliseksi, että botit voivat tanssia musiikin tahtiin"; started by the player's key) ----------
+// B on foot (touch: the note button) starts a song of the radio (pop_*, rock_*; the next one each time) and stops it. While it plays, three parties
+// out of four that come within 13 m of the player stop and dance facing him (clips Dance / Dance2 of npc_*.js), and the player's own character dances
+// when it stands still (Dance of hahmo.js). In time: radio/tahti.json (tools/radio/tahti.py, librosa) has the beats of every song; the clips are
+// four beats long and each frame they are set to the place of the song's beat (DANCE.sync), so nothing drifts. A song without beats: 120 BPM.
+const DANCE = { on: false, el: null, f: '', tab: null, beats: null, k: 0, idx: -1, ph: 0 }; window.__dance = DANCE;
+fetch('./radio/tahti.json').then(r => r.json()).then(j => { DANCE.tab = j; }).catch(() => {});
+DANCE.songs = () => { const L = [], seen = new Set(); if (RADIO.list) for (const k in RADIO.list) for (const e of RADIO.list[k]) if (/^(pop|rock|electric)_/.test(e.f) && !seen.has(e.f)) { seen.add(e.f); L.push(e); } return L; };
+DANCE.play = () => { const L = DANCE.songs(); if (!L.length) { DANCE.on = false; toast('Musiikkia ei löytynyt', 1.6); return; }
+  DANCE.idx = (DANCE.idx < 0 ? Math.floor(Math.random() * L.length) : DANCE.idx + 1) % L.length; const e = L[DANCE.idx], d = DANCE.tab && DANCE.tab[e.f];
+  DANCE.beats = null; if (d && d.length > 8) { const b = new Float32Array(d.length); let t = 0; for (let i = 0; i < d.length; i++) { t += d[i]; b[i] = t / 1000; } DANCE.beats = b; } DANCE.k = 0; DANCE.f = e.f; DANCE.t0 = performance.now();
+  try { DANCE.el = DANCE.el || new Audio(); DANCE.el.onended = () => { if (DANCE.on) DANCE.play(); }; DANCE.el.src = './radio/' + e.f; DANCE.el.volume = soundOn ? RADIO.vol : 0; DANCE.el.play().catch(() => {}); } catch (err) {}
+  toast('🎵 ' + e.t + ' – B lopettaa', 2.6); };
+DANCE.stop = () => { DANCE.on = false; if (DANCE.el) DANCE.el.pause(); };
+DANCE.toggle = () => { if (!WALK.on || WALK.in) return; if (DANCE.on) { DANCE.stop(); toast('Musiikki pois', 1.2); } else { DANCE.on = true; DANCE.play(); } };
+DANCE.tick = () => { if (!DANCE.on) return; if (!WALK.on || WALK.in) { DANCE.stop(); return; }      // the beat the song is at (DANCE.ph, counted from its first beat)
+  const el = DANCE.el, b = DANCE.beats, t = el && !el.paused && !el.error && el.readyState >= 2 ? el.currentTime : (performance.now() - DANCE.t0) / 1000;      /* no sound (blocked, missing file, still loading): the dance goes on by the clock */ if (el) el.volume = soundOn ? RADIO.vol : 0;
+  if (b) { let k = DANCE.k; if (k > b.length - 2 || b[k] > t) k = 0; while (k < b.length - 2 && b[k + 1] <= t) k++; DANCE.k = k; DANCE.ph = k + (t - b[k]) / (b[k + 1] - b[k]); } else DANCE.ph = t * 2; };
+DANCE.sync = (a, off) => { const d = a.getClip().duration; a.timeScale = 0; a.time = ((((DANCE.ph + off) % 4) + 4) % 4) / 4 * d; };      // a four-beat clip at the song's beat
+$('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.toggle(); });
 
 window.__game = { WALK, IN, PLACES, placeDoor, walkAction, sceneIn, door: churchDoor, S, begin, keys, camera, renderer, scene, roofAt, TZs, tour: () => ({ tourIdx, tourOn, tourDone, tourT, n: TOUR.length }), setTour: i => { tourIdx = i; tourOn = true; setTarget(); }, setCam: m => camMode = m, step, snap: () => { camPos.set(S.x - Math.sin(S.yaw) * 21, S.alt + 7.5, -S.y + Math.cos(S.yaw) * 21); camLook.set(S.x + Math.sin(S.yaw) * 14, S.alt + 1.5, -S.y - Math.cos(S.yaw) * 14); } };
 terrainizeScene(); setInterval(terrainizeScene, 1000);
