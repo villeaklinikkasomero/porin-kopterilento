@@ -1,0 +1,91 @@
+{
+ "id": "M04",
+ "nimi": "Korjaamon puolustus",
+ "luku": 1,
+ "antaja": "TAPSA",
+ "vaatii": [
+  "FLAG_M03_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_KORJAAMO_OVI",
+  "r": 5,
+  "kulku": "jalan"
+ },
+ "fail": [
+  {
+   "ehto": "poistui",
+   "paikka": "LOC_KORJAAMO",
+   "r": 80,
+   "teksti": "Jätit korjaamon puolustuksetta."
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_M04_A",
+   "rivit": [
+    {
+     "h": "VARTIJA",
+     "tu": "neutraali",
+     "te": "[Kolme Varjon vartijaa kiinnittää korjaamon oveen keltaista Purkukohde-tarraa.]",
+     "toiminta": true
+    },
+    [
+     "VARTIJA",
+     "neutraali",
+     "Kiinteistö siirtyy Varjo Holdingsin hallintaan. Tilanne on hallinnassa. Toistan: hallinnassa."
+    ],
+    [
+     "TAPSA",
+     "vihainen",
+     "Kohta on märkääkin hallinnassa. Rami, letku!"
+    ]
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "vesiletku",
+   "cp": true,
+   "teksti": "Aja vartijat pois pihalta vesiletkulla",
+   "param": {
+    "paikka": "LOC_KORJAAMO",
+    "vartijoita": 3,
+    "ovet": 3
+   },
+   "failTeksti": "Vartijat saivat tarrat kaikkiin oviin."
+  },
+  {
+   "tyyppi": "repliikit",
+   "estaa": false,
+   "rivit": [
+    [
+     "VARTIJA",
+     "huolestunut",
+     "Vetäydytään! Pukuni on märkä!"
+    ]
+   ]
+  },
+  {
+   "tyyppi": "pysy",
+   "paikka": "LOC_KORJAAMO_OVI",
+   "r": 2.5,
+   "s": 2,
+   "kulku": "jalan",
+   "mittari": "Revitään tarraa",
+   "teksti": "Revi purkutarra ovesta"
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M04_DONE"
+  ],
+  "esineet": [
+   "ITEM_VESILETKU",
+   "ITEM_SAMMUTIN"
+  ]
+ },
+ "palkinto": {
+  "teksti": "Vesiletku ja sammutin varusteisiin"
+ }
+}

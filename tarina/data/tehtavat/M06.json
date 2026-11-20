@@ -1,0 +1,68 @@
+{
+ "id": "M06",
+ "nimi": "Vanha ystävä",
+ "luku": 1,
+ "antaja": "LUMI",
+ "vaatii": [
+  "FLAG_M05_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_PIILO",
+  "r": 5,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_M06_A",
+   "rivit": [
+    [
+     "LUMI",
+     "neutraali",
+     "Rami Koski. Sinulla on hyvät refleksit ja huono tapa olla väärässä paikassa. Se sopii minulle."
+    ],
+    [
+     "RAMI",
+     "neutraali",
+     "Sinä lähetit droonin."
+    ],
+    [
+     "LUMI",
+     "ovela",
+     "Ja sinä lennätit sen. Katso."
+    ],
+    {
+     "h": "LUMI",
+     "tu": "neutraali",
+     "te": "[Näytöllä Varjon suunnitelma: tori, rantapuistot ja Kirjurinluoto kauppakeskuksen alla.]",
+     "toiminta": true
+    },
+    [
+     "LUMI",
+     "vihainen",
+     "Varjo ostaa maat väärennetyillä papereilla. Jos todistamme sen, kaikki kaupat purkautuvat."
+    ],
+    [
+     "TAPSA",
+     "iloinen",
+     "Elikkä tehdään keikka?"
+    ],
+    [
+     "LUMI",
+     "ovela",
+     "Tehdään monta."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M06_DONE",
+   "FLAG_CH1_DONE"
+  ]
+ },
+ "palkinto": {
+  "teksti": "Luku 2 avautui · Lumin piilo on pelastuskohta"
+ }
+}

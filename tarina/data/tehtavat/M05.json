@@ -1,0 +1,77 @@
+{
+ "id": "M05",
+ "nimi": "Pikkukopteri",
+ "luku": 1,
+ "vaatii": [
+  "FLAG_M04_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "automaattinen",
+  "viive": 15
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "viesti",
+   "viesti": "Haluatko tietää, mitä Varjo rakentaa? Ota laatikko ovelta.",
+   "kesto": 4
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Hae laatikko korjaamon ovelta",
+   "kohteet": [
+    {
+     "id": "laatikko",
+     "paikka": "LOC_KORJAAMO_OVI",
+     "r": 3,
+     "nimi": "Drooni",
+     "esine": "ITEM_DROONI"
+    }
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "drooni",
+   "cp": true,
+   "teksti": "Lennätä drooni Varjo-tornin työmaalle ja kuvaa kolme suunnitelmataulua",
+   "param": {
+    "paikka": "LOC_VARJOTORNI",
+    "taulut": [
+     [
+      410,
+      -140
+     ],
+     [
+      430,
+      -160
+     ],
+     [
+      425,
+      -135
+     ]
+    ],
+    "akku": 90,
+    "tormayksia": 3
+   },
+   "failTeksti": "Droonin akku loppui."
+  },
+  {
+   "tyyppi": "repliikit",
+   "estaa": false,
+   "rivit": [
+    [
+     "LUMI",
+     "ovela",
+     "Hyvä. Varo nosturia. Ei, toista nosturia."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M05_DONE"
+  ]
+ },
+ "palkinto": {
+  "teksti": "Uusi yhteystieto: Lumi"
+ }
+}

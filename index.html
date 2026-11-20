@@ -1312,6 +1312,28 @@ import('./roads.js').then(mod => {
         const t = tri(k - 1); let w = bary(t, x, y); if (!w) return null; let z = ZC.get(k); if (!z) { z = [groundTop(t[0], t[1]), groundTop(t[2], t[3]), groundTop(t[4], t[5])]; ZC.set(k, z); }
         w = w.map(q => Math.max(0, q)); const sw = w[0] + w[1] + w[2] || 1; return (w[0] * z[0] + w[1] * z[1] + w[2] * z[2]) / sw + ROAD.pave; }; }
     ROAD.asphAt = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny && M[gy * nx + gx] === 2; };
+    /* 20.11.2026 (owner, checked against the aerial photo): round the market hall the photo showed through where roads.js has no surface - the bus stands
+       west and north of the hall become asphalt lanes, the platform under the hall's west canopy (east of x 14.5) and the strips north and south of the
+       square get the stone paving. Filled per 1 m cell where nothing lies yet (not in houses), as runs of at most 4 m, a centimetre under the pavement
+       level so the existing surfaces win where they overlap; the cells count as pavement for the car and the walkers (flat, no kerbs inside). */
+    { const QA = [], QK = [], dz = ROAD.pave - 0.012, zone = (x, y) => (x < 14.5 || (y >= 106 && x < 31)) ? 1 : 2;
+      const W0 = -6, H0 = 27, WN = 89, HN = 99, Z = new Uint8Array(WN * HN), cell = (x, y) => { const gx = Math.floor(x - x0), gy = Math.floor(y - y0); return gx >= 0 && gy >= 0 && gx < nx && gy < ny ? M[gy * nx + gx] : 255; };
+      const house = (x, y) => bldTopAt(x + 0.5, y + 0.5) > TZs(x + 0.5, y + 0.5) + 1.5;
+      for (let j = 1; j < HN - 1; j++) for (let i = 1; i < WN - 1; i++) { const x = W0 + i, y = H0 + j; if (x > 80 || y >= 124 || y < 28) continue; if (cell(x, y) === 0 && !house(x, y)) Z[j * WN + i] = zone(x + 0.5, y + 0.5); }
+      /* one cell of overlap into the pavement round the gaps (never onto the carriageway or into houses): the drawn edge of a pavement triangle runs
+         through its cells, and without this the photo showed as slivers along it */
+      const Z2 = Z.slice(); for (let j = 1; j < HN - 1; j++) for (let i = 1; i < WN - 1; i++) { const x = W0 + i, y = H0 + j; if (Z[j * WN + i] || cell(x, y) !== 1 || house(x, y)) continue;
+        for (let dj = -1; dj <= 1 && !Z2[j * WN + i]; dj++) for (let di = -1; di <= 1; di++) { const q = Z[(j + dj) * WN + i + di]; if (q) { Z2[j * WN + i] = q; break; } } }
+      for (let j = 1; j < HN - 1; j++) { const y = H0 + j; let run = null;
+        for (let i = 1; i < WN; i++) { const x = W0 + i;
+          const k = i < WN - 1 ? Z2[j * WN + i] : 0;
+          if (run && (k !== run.k || x - run.x >= 4)) { (run.k === 1 ? QA : QK).push([run.x, y, x, y + 1]); run = null; }
+          if (k && !run) run = { x, k }; } }
+      const geo = (Q, uv) => { const P = [], U = [];
+        for (const [xa, ya, xb, yb] of Q) { for (const [x, y] of [[xa, ya], [xb, ya], [xb, yb], [xa, ya], [xb, yb], [xa, yb]]) { P.push(x, groundTop(x, y) + dz, -y); U.push(x / 2.2, y / 2.2); }
+          for (let yy = ya; yy < yb; yy++) for (let xx = xa; xx < xb; xx++) { const gx = Math.floor(xx - x0), gy = Math.floor(yy - y0); if (gx >= 0 && gy >= 0 && gx < nx && gy < ny) M[gy * nx + gx] |= 1; } }
+        const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); if (uv) g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.computeVertexNormals(); return g; };
+      if (QA.length) add(geo(QA, false), mAsph); if (QK.length && ROAD.mK) add(geo(QK, true), ROAD.mK); ROAD.toriFill = { asph: QA.length, kivi: QK.length }; }
   }
   if (R.ow) { const O = dec(R.ow); for (let i = 0; i < O.length; i += 3) ONEWAY.set(O[i] + ',' + O[i + 1], O[i + 2]); }
   if (R.tmv && TREES.move) { const s0 = atob(R.tmv), u8 = new Uint8Array(s0.length); for (let i = 0; i < s0.length; i++) u8[i] = s0.charCodeAt(i); TREES.move(new Int32Array(u8.buffer)); }
@@ -3275,7 +3297,7 @@ $('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.tog
 {
   const STOPS = [["Yliopistokeskus E",255.2,733.4],["Valajankatu I",542.2,652.6],["Tuomarinkatu P",-994,-214.2],["Ratakatu L",-976,-820.1],["Ratakatu I",-907.1,-841.2],["Karjapiha L",-953,356.7],["Tasavallankatu P",-387.4,-791.7],["Lyseo I",-451.1,318.9],["Cygnaeus I",-367,-385.5],["Keski-Porin kirkko P",187.8,349.2],["Poliisilaitos E",-535.6,-666],["Karhukatu L",-502.7,-516.7],["Hallituskatu L",115.2,334.4],["Antinkatu",-115.2,-352.5],["Poliisilaitos P",-514.5,-643.8],["Asema-aukio I",-272.8,-823.3],["Porilaistenkatu E",-172.5,-594.8],["Valtionsilta I",-688.9,-309.3],["Liisantori L",-429.9,-221.6],["Otava I",-239.5,269.8],["Tasavallantori P",-408.9,-425.1],["Teljäntori P",-80.9,-262],["Kampus P",-261.8,-893.7],["Valtionsilta L",-646.5,-170.8],["Antinkatu L",-159.5,-286.8],["Kampus I",-276.2,-920.8],["Kuninkaanhaka L",801.5,-630.5],["Kävelykatu L",60.8,-338.3],["Oikokatu E",159.7,-736.4],["Itsenäisyydenkatu P",-9.5,-510.6],["Vähälinnankatu I",216.8,-694.2],["Isolinnankatu E",153.4,-178.7],["Presidentinpuistokatu I",465.5,-832],["Pori Kauppatori laituri 11",-22.5,-5.7],["Keskusaukio I",33.6,-478.2],["Yrjönkatu 9",125.9,149.8],["Nuorisotalo L",262.5,13.1],["Uimahalli I",591.4,-613.1],["Presidentinpuistokatu L",368.9,-740.7],["Teljäntori E",-65.4,-129.4],["Teljänkatu L",263.3,-510.8],["Teljänkatu I",278.7,-536.3],["Yliopistokeskus P",279,741.9],["Karjapiha I",-871.8,353.7],["Keskusaukio P",96.2,-518],["Keskusaukio E",67.6,-524.1],["Oikeustalo P",366.7,171],["Eetunaukio E",152.4,-100.3],["Itäpuisto P",10.2,-71.2],["Kuninkaanhaka I",805.5,-660.6],["Porin silta L",311.2,679.3],["Valajankatu L",426.2,665.3],["Sampo L",814.9,842.4],["Sampo I",824.4,827.2],["Pori matkakeskus laituri 7",-399.1,-892.5],["Pori matkakeskus laituri 1",-370.5,-928.6],["Pori matkakeskus laituri 2",-350.8,-913.1],["Pori matkakeskus laituri 4",-360.4,-904.4],["Pori matkakeskus laituri 3",-375.7,-917.3],["Pori matkakeskus laituri 5",-384.1,-908.1],["Pori matkakeskus laituri 6",-368.6,-895.8],["Puuvilla piha",159.5,986.7],["Keskusaukio L",96.9,-580.4],["Vähälinnankatu L",198.1,-666],["Urheilutalo L",636.5,-884.1],["Urheilutalo I",664.3,-930.2],["Isosannanpuistokatu E",315,1022.8],["Yliopistokeskus L",214,702.1],["Kävelykatu P",17.5,-367.1],["Oikokatu P",200.8,-776.8],["Tasavallankatu",-266.6,-539.1],["Porilaistenkatu I",-105.4,-636.4],["Porilaistenkatu L",-161.3,-671.8],["Lyseo L",-392.9,322.8],["Taavi",-125.7,498.2],["Pelle-Hermanni",-501.5,702.1],["Hanhipuisto",-701.5,741.3],["Porin silta I",313.3,660.8],["Pohjois-Porin terveysasema",138.6,854],["Uimahalli L",593.9,-583.9],["Pori Kauppatori laituri 6",15.6,112.7],["Pori Kauppatori laituri 7",25.5,105.5],["Pori Kauppatori laituri 5",4.7,114.8],["Pori Kauppatori laituri 4",-7.2,62.5],["Pori Kauppatori laituri 3",3.8,59.5],["Pori Kauppatori laituri 2",15,57.4],["Pori Kauppatori laituri 9",-7.1,62.8]].map(([n, x, y]) => ({ n, x, y, pose: null }));
   const byName = n => STOPS.find(s => s.n === n);
-  const LINES = { 1: { n: '1', to: 'Puuvilla', depot: 'Pori Kauppatori laituri 2', dp: [8.8, 57, 0.25], s: ['Pori Kauppatori laituri 2', 'Hallituskatu L', 'Keski-Porin kirkko P', 'Porin silta L', 'Yliopistokeskus P', 'Puuvilla piha', 'Yliopistokeskus L', 'Porin silta I', 'Yrjönkatu 9', 'Pori Kauppatori laituri 6'] },
+  const LINES = { 1: { n: '1', to: 'Puuvilla', depot: 'Pori Kauppatori laituri 2', dp: [12.4, 57.3, 0.23], s: ['Pori Kauppatori laituri 2', 'Hallituskatu L', 'Keski-Porin kirkko P', 'Porin silta L', 'Yliopistokeskus P', 'Puuvilla piha', 'Yliopistokeskus L', 'Porin silta I', 'Yrjönkatu 9', 'Pori Kauppatori laituri 6'] },
     2: { n: '2', to: 'Kauppatori', depot: 'Pori matkakeskus laituri 1', dp: [-374.1, -924.1, 0.896], s: ['Pori matkakeskus laituri 1', 'Asema-aukio I', 'Porilaistenkatu I', 'Keskusaukio E', 'Kävelykatu P', 'Teljäntori E', 'Itäpuisto P', 'Pori Kauppatori laituri 11', 'Teljäntori P', 'Antinkatu L', 'Tasavallankatu', 'Porilaistenkatu L', 'Pori matkakeskus laituri 7'] } };
   for (const k in LINES) LINES[k].stops = LINES[k].s.map(byName);
   const short = n => n.replace(/^Pori /, '').replace(/ ([LIPE])$/, '');
@@ -3300,14 +3322,29 @@ $('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.tog
   const sign = () => { const cv = document.createElement('canvas'); cv.width = cv.height = 64; const g = cv.getContext('2d'); g.fillStyle = '#f2c500'; g.fillRect(0, 0, 64, 64); g.strokeStyle = '#111'; g.lineWidth = 4; g.strokeRect(2, 2, 60, 60);
     g.fillStyle = '#111'; g.fillRect(12, 18, 40, 24); g.fillStyle = '#f2c500'; g.fillRect(16, 22, 9, 8); g.fillRect(28, 22, 9, 8); g.fillRect(40, 22, 8, 8); g.fillStyle = '#111'; g.beginPath(); g.arc(21, 44, 5, 0, 7); g.arc(43, 44, 5, 0, 7); g.fill();
     const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; return t; };
+  /* shelters at the Kauppatori stands (owner 20.11.2026, from the aerial photo): the lanes run along the market hall (axis 0.23 rad east of north); each
+     shelter stands on the kerb side, glass back and ends, a roof, posts and a bench, open towards the lane. [stop, centre x, y, which way the open side faces] */
+  const AX = 0.23, EX = [Math.cos(AX), -Math.sin(AX)], DX = [Math.sin(AX), Math.cos(AX)];
+  const SHEL = [['Pori Kauppatori laituri 2', 16.4, 57.1, -1], ['Pori Kauppatori laituri 3', -3.0, 61.1, 1], ['Pori Kauppatori laituri 4', -5.7, 62.2, -1], ['Pori Kauppatori laituri 5', 8.4, 113.9, 1]];
+  const SIGN = { 'Pori Kauppatori laituri 6': [10.2, 111.4], 'Pori Kauppatori laituri 7': [31.6, 105.2], 'Pori Kauppatori laituri 9': null };      /* stop points that now lie in a lane */
+  for (const [n, x, y] of SHEL) { const s = byName(n); if (s) SIGN[n] = [x + DX[0] * 2.35, y + DX[1] * 2.35]; }
+  const buildShelters = () => {
+    const mat = (c, o) => { const m = new THREE.MeshStandardMaterial(Object.assign({ color: c, roughness: 0.5, metalness: 0.3 }, o || {})); m.userData.noT = true; return m; };
+    const steel = mat(0x5d6368), roof = mat(0x3a3f44, { roughness: 0.7 }), glass = mat(0xcfe3ea, { transparent: true, opacity: 0.28, roughness: 0.05, metalness: 0, depthWrite: false }), wood = mat(0x8a6a48, { metalness: 0, roughness: 0.8 });
+    const box = (g, m, w, h, d, x, y, z) => { const me = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m); me.position.set(x, y, z); me.userData.noT = true; g.add(me); };
+    for (const [n, x, y, side] of SHEL) { const g = new THREE.Group(); g.userData.noT = true;
+      for (const px of [-1.95, 1.95]) for (const pz of [-0.68, 0.62]) box(g, steel, 0.07, 2.35, 0.07, px, 1.175, pz);
+      box(g, roof, 4.3, 0.12, 1.75, 0, 2.4, 0); box(g, glass, 3.9, 2.0, 0.02, 0, 1.15, -0.68); for (const px of [-1.95, 1.95]) box(g, glass, 0.02, 2.0, 1.2, px, 1.15, -0.08);
+      box(g, wood, 2.2, 0.06, 0.38, 0, 0.46, -0.45); box(g, steel, 0.06, 0.44, 0.3, -1, 0.22, -0.45); box(g, steel, 0.06, 0.44, 0.3, 1, 0.22, -0.45);
+      const nx = EX[0] * side, ny = EX[1] * side; g.position.set(x, carGround(x, y) ?? TZs(x, y), -y); g.rotation.y = Math.atan2(nx, -ny); scene.add(g); } };
   const buildSigns = () => {
     const poleG = new THREE.CylinderGeometry(0.04, 0.04, 2.6, 6), signG = new THREE.BoxGeometry(0.5, 0.5, 0.03);
     const pm = new THREE.MeshStandardMaterial({ color: 0x8a8f94, metalness: 0.4, roughness: 0.5 }), sm = new THREE.MeshStandardMaterial({ map: sign(), roughness: 0.6 });
     pm.userData.noT = sm.userData.noT = true; const P = new THREE.InstancedMesh(poleG, pm, STOPS.length), Q = new THREE.InstancedMesh(signG, sm, STOPS.length);
     const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), one = new THREE.Vector3(1, 1, 1), p = new THREE.Vector3();
-    STOPS.forEach((s, i) => { const z = carGround(s.x, s.y) ?? TZs(s.x, s.y), yaw = s.pose ? s.pose.yaw : 0;
-      p.set(s.x, z + 1.3, -s.y); m.compose(p, q.identity(), one); P.setMatrixAt(i, m);
-      e.set(0, -yaw + Math.PI / 2, 0); q.setFromEuler(e); p.set(s.x, z + 2.35, -s.y); m.compose(p, q, one); Q.setMatrixAt(i, m); });
+    STOPS.forEach((s, i) => { const o = SIGN[s.n]; if (o === null) { m.makeScale(0, 0, 0); P.setMatrixAt(i, m); Q.setMatrixAt(i, m); return; } const sx = o ? o[0] : s.x, sy = o ? o[1] : s.y, z = carGround(sx, sy) ?? TZs(sx, sy), yaw = o ? AX : s.pose ? s.pose.yaw : 0;
+      p.set(sx, z + 1.3, -sy); m.compose(p, q.identity(), one); P.setMatrixAt(i, m);
+      e.set(0, -yaw + Math.PI / 2, 0); q.setFromEuler(e); p.set(sx, z + 2.35, -sy); m.compose(p, q, one); Q.setMatrixAt(i, m); });
     for (const I of [P, Q]) { I.frustumCulled = false; I.userData.noT = true; scene.add(I); } };
 
   /* markers for the next stop: a blue column over the sign and a ring where the bus should stand */
@@ -3324,7 +3361,7 @@ $('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.tog
   const DEP = []; let paint = 0x2a6fb5;
   const setup = () => { for (const s of STOPS) s.pose = pose(s, null);
     for (const k in LINES) { const L = LINES[k], s = byName(L.depot); s.pose = { x: L.dp[0], y: L.dp[1], yaw: L.dp[2] }; DEP.push({ line: k, x: s.pose.x, y: s.pose.y, yaw: s.pose.yaw, g: null, gone: false }); }      /* depot stands on the OSM bus lanes (the square's paving is not carriageway in the game) */
-    try { buildSigns(); } catch (e) { console.warn('bus signs', e); }
+    try { buildSigns(); buildShelters(); } catch (e) { console.warn('bus signs', e); }
     CARM.bus.root.traverse(q => { if (q.isMesh && q.material && q.material.name === 'CarPaint') paint = q.material.color.getHex(); }); };
   const depTick = () => { const px = WALK.on ? WALK.x : S.x, py = WALK.on ? WALK.y : S.y;
     for (const d of DEP) { if (d.gone && !(VEH === 'car' && CAR.type === 'bus' && R.line === d.line) && Math.hypot(d.x - px, d.y - py) > 250) d.gone = false;

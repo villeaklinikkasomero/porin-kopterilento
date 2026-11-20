@@ -1,0 +1,137 @@
+{
+ "id": "M02",
+ "nimi": "Kaksi kuskia",
+ "luku": 1,
+ "antaja": "TAPSA",
+ "vaatii": [
+  "FLAG_M01_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_KORJAAMO_OVI",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "fail": [
+  {
+   "ehto": "kulkuneuvo_rikki"
+  },
+  {
+   "ehto": "nousi_kyydista",
+   "kulku": "auto",
+   "viive": 12,
+   "alkaen": 2
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "ovela",
+     "Katotaan, ootko sää vielä nopee. Korjaamolta rantaa pitkin, Isosillan yli torille. Häviäjä tarjoaa makkaraperät."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": "auto",
+   "teksti": "Ota auto"
+  },
+  {
+   "tyyppi": "portit",
+   "kulku": "auto",
+   "r": 12,
+   "cp": true,
+   "teksti": "Voita Tapsa kilpa-ajossa torille",
+   "kilpailija": {
+    "hahmo": "TAPSA",
+    "aika": 150,
+    "voitti": "SYS_FAIL_RIVAL"
+   },
+   "portit": [
+    [
+     60,
+     690
+    ],
+    [
+     0,
+     650
+    ],
+    [
+     -60,
+     640
+    ],
+    [
+     90,
+     612
+    ],
+    "LOC_ISOSILTA",
+    [
+     200,
+     420
+    ],
+    [
+     150,
+     250
+    ],
+    [
+     110,
+     140
+    ],
+    "LOC_TORI"
+   ],
+   "_huom": "porttien paikat arvioita – aja reitti kehittäjätilassa ja tallenna oikeat pisteet"
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "yllättynyt",
+     "No niin, ei oo ruoste vielä vieny. Sun valinta: radio vai mun mixtape?"
+    ]
+   ]
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Oletusradio",
+   "vaihtoehdot": [
+    {
+     "teksti": "Radio Kirjuri",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_RADIO_DEFAULT": 1
+      }
+     }
+    },
+    {
+     "teksti": "Tapsan mixtape (rock)",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_RADIO_DEFAULT": 2
+      }
+     },
+     "rivit": [
+      [
+       "TAPSA",
+       "iloinen",
+       "Hyvä valinta. Ainoa oikea."
+      ]
+     ]
+    }
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M02_DONE",
+   "FLAG_KILPA_AUKI"
+  ]
+ },
+ "palkinto": {
+  "raha": 200,
+  "teksti": "Kilpa-ajot avautuivat"
+ }
+}

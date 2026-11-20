@@ -26,6 +26,11 @@ ja pelin nykytilaan (`index.html`, `SIIRTO_TOISELLE_TILILLE.md` 20.11. asti).
 
 ## 1. Tehtävämoottori (P1, kriittisin)
 
+> **20.11.2026: tehty kansioon `tarina/`** (ks. `tarina/README.md`). index.html ei muuttunut. Valmiina: data-ohjattu moottori, liput/muuttujat/esineet,
+> tarkistuspisteet, epäonnistumisruutu, tallennus, HUD-tavoite + suuntanuoli, karttamerkit, avautumisjärjestys, kehittäjätila, `kokeilu.html`
+> ja node-testit. Lisäksi kohdasta 2 dialogi, valinnat, puhelu, tekstiviesti ja välianimaation palkit (kameraa ei vielä ohjata).
+> Luku 1 (M01–M06) on datana. Vielä puuttuu: iso kartta / minikartta, kytkentä index.html:ään (1 rivi) ja tapaus 1:n poisto.
+
 | Ominaisuus | Tila | Tarvitaan | Huom |
 |---|---|---|---|
 | Data-ohjattu tehtävämoottori (ID, VAATII, LAUKAISU, OBJ, CP, FAIL, ASETTAA, PALKINTO) | 🟡 | kaikki | `window.__case` on tapaus 1:lle kovakoodattu tilakone. Se yleistetään lukemaan `missions/Mxx.json`. |

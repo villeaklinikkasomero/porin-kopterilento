@@ -1,0 +1,12 @@
+{
+  "RAMI":    { "nimi": "Rami",    "vari": "#f4c95d", "kirjain": "R" },
+  "TAPSA":   { "nimi": "Tapsa",   "vari": "#7cc4ff", "kirjain": "T" },
+  "LUMI":    { "nimi": "Lumi",    "vari": "#c79bff", "kirjain": "L" },
+  "TERTTU":  { "nimi": "Terttu",  "vari": "#ffb08a", "kirjain": "Te" },
+  "HARJU":   { "nimi": "Harju",   "vari": "#9fe0c0" },
+  "VARJO":   { "nimi": "Varjo",   "vari": "#ff6b6b" },
+  "VARTIJA": { "nimi": "Vartija", "vari": "#b0b8c0" },
+  "MYYJA":   { "nimi": "Myyjä",   "vari": "#d0d0a0" },
+  "KURIIRI": { "nimi": "Kuriiri", "vari": "#d0d0a0" },
+  "RADIO":   { "nimi": "Radio",   "vari": "#ffe08a" }
+}

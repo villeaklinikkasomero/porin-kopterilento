@@ -1,0 +1,22 @@
+{
+  "_ohje": "Pelin karttametrit (x itään, y pohjoiseen) kuten window.__walk / __car. 'tarkista': true = arvio, mittaa pelissä kehittäjätilassa (Ctrl+Shift+D, sitten Ctrl+Shift+K kopioi oman paikan).",
+  "LOC_ETELARANTA":    { "x": -120, "y": 485, "nimi": "Eteläranta", "tarkista": true },
+  "LOC_ISOSILTA":      { "x": 229,  "y": 560, "nimi": "Isosilta" },
+  "LOC_POHJOISRANTA":  { "x": 0,    "y": 650, "nimi": "Pohjoisranta", "tarkista": true },
+  "LOC_TORI":          { "x": 64,   "y": 65,  "nimi": "Kauppatori" },
+  "LOC_RAATIHUONE":    { "x": -116, "y": 394, "nimi": "Vanha raatihuone" },
+  "LOC_KAUPUNGINTALO": { "x": -58,  "y": 331, "nimi": "Junneliuksen palatsi" },
+  "LOC_TEATTERI":      { "x": -201, "y": 378, "nimi": "Porin Teatteri" },
+  "LOC_KIRKKO":        { "x": 293,  "y": 370, "nimi": "Keski-Porin kirkko" },
+  "LOC_KIRJURINLUOTO": { "x": -420, "y": 1000, "nimi": "Kirjurinluoto", "tarkista": true },
+  "LOC_ASEMA":         { "x": 130,  "y": -560, "nimi": "Rautatieasema", "tarkista": true },
+  "LOC_MUSEO":         { "x": -265, "y": 456, "nimi": "Satakunnan Museo" },
+  "LOC_TAIDEMUSEO":    { "x": -95,  "y": 463, "nimi": "Porin taidemuseo" },
+  "LOC_LENTOASEMA":    { "x": 0,    "y": -3000, "nimi": "Porin lentoasema", "tarkista": true, "_huom": "ei vielä kartalla" },
+  "LOC_KORJAAMO":      { "x": 110,  "y": 720, "nimi": "Tapsan korjaamo", "keksitty": true, "tarkista": true },
+  "LOC_KORJAAMO_OVI":  { "x": 104,  "y": 714, "nimi": "Korjaamon ovi", "keksitty": true, "tarkista": true },
+  "LOC_PIILO":         { "x": -330, "y": 640, "nimi": "Lumin piilo", "keksitty": true, "tarkista": true },
+  "LOC_VARJOTORNI":    { "x": 420,  "y": -150, "nimi": "Varjo-tornin työmaa", "keksitty": true, "tarkista": true },
+  "LOC_KIILTO":        { "x": -380, "y": -90, "nimi": "Autoliike Kiilto", "keksitty": true, "tarkista": true },
+  "LOC_KIILTO_TOIMISTO": { "x": -372, "y": -82, "nimi": "Kiillon toimisto", "keksitty": true, "tarkista": true }
+}

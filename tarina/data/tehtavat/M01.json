@@ -1,0 +1,93 @@
+{
+ "id": "M01",
+ "nimi": "Tervetuloa takaisin",
+ "luku": 1,
+ "antaja": "TAPSA",
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_ETELARANTA",
+  "r": 7,
+  "kulku": "jalan"
+ },
+ "fail": [
+  {
+   "ehto": "kulkuneuvo_rikki",
+   "teksti": "Tapsan auto ei kestänyt."
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_M01_A",
+   "kamera": {
+    "paikka": "LOC_ETELARANTA",
+    "kohti": "LOC_ISOSILTA"
+   },
+   "rivit": [
+    {
+     "h": "RADIO",
+     "tu": "iloinen",
+     "te": "Huomenta, Pori! Radio Kirjurissa on taas aamu, ja aurinko paistaa joelle. Kaupungilla kerrotaan, että Varjo Holdings esittelee tänään uuden kauppakeskushankkeensa..."
+    },
+    [
+     "TAPSA",
+     "iloinen",
+     "No kato! Rami Koski. Mitä sää siellä rallimaailmalla teit, unohdit tien kottiin?"
+    ],
+    [
+     "RAMI",
+     "neutraali",
+     "Tulin katsomaan, onko joki vielä paikallaan."
+    ],
+    [
+     "TAPSA",
+     "ovela",
+     "On se. Mut kaikki muu ei kohta oo. Hyppy kyytiin, mennään korjaamolle."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": "auto",
+   "teksti": "Ota auto rannasta (Tapsa ajaa perässä)"
+  },
+  {
+   "tyyppi": "repliikit",
+   "estaa": false,
+   "rivit": [
+    [
+     "TAPSA",
+     "huolestunut",
+     "Varjo ostaa talo kerrallaan. Tertun torikoju, uimarannan kioski, mun korjaamo seuraavana listalla."
+    ],
+    [
+     "RAMI",
+     "neutraali",
+     "Kuka Varjo?"
+    ],
+    [
+     "TAPSA",
+     "vihainen",
+     "Kyl sää vielä tiärät. Sen kasvot on joka bussipysäkillä."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KORJAAMO",
+   "r": 10,
+   "kulku": "auto",
+   "teksti": "Aja korjaamolle Isosillan yli",
+   "merkki": "Tapsan korjaamo",
+   "cp": true
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M01_DONE"
+  ]
+ },
+ "palkinto": {
+  "teksti": "Tapsan korjaamo on nyt tukikohtasi"
+ }
+}

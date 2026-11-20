@@ -1,0 +1,172 @@
+{
+ "id": "M03",
+ "nimi": "Takaisinhaku",
+ "luku": 1,
+ "antaja": "TAPSA",
+ "vaatii": [
+  "FLAG_M02_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "automaattinen",
+  "viive": 20
+ },
+ "fail": [
+  {
+   "ehto": "kulkuneuvo_rikki",
+   "alkaen": 5
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "soitto",
+   "soittaja": "TAPSA",
+   "rivit": [
+    [
+     "TAPSA",
+     "vihainen",
+     "Autoliike Kiilto myi kahdelle mun asiakkaalle autot ja vei ne sit takasin \"maksuhäiriön\" takia. Paperit on kunnossa, autot vaan on väärässä paikassa."
+    ],
+    [
+     "RAMI",
+     "neutraali",
+     "Hoidan."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KIILTO",
+   "r": 25,
+   "teksti": "Mene Autoliike Kiillon pihaan",
+   "merkki": "Autoliike Kiilto"
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": "jalan",
+   "teksti": "Nouse kyydistä – tästä mennään jalan"
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "hiiviskely",
+   "cp": true,
+   "teksti": "Hiivi myyjän ohi toimistoon",
+   "param": {
+    "vartijat": [
+     {
+      "hahmo": "MYYJA",
+      "paikka": "LOC_KIILTO",
+      "kierros": [
+       [
+        -388,
+        -96
+       ],
+       [
+        -372,
+        -96
+       ],
+       [
+        -372,
+        -86
+       ]
+      ],
+      "nako": 12
+     }
+    ],
+    "kohde": "LOC_KIILTO_TOIMISTO"
+   },
+   "failTeksti": "SYS_FAIL_SPOTTED"
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Ota avaimet toimistosta",
+   "kohteet": [
+    {
+     "id": "avaimet",
+     "paikka": "LOC_KIILTO_TOIMISTO",
+     "r": 2.5,
+     "nimi": "Autojen avaimet",
+     "esine": "ITEM_KIILTO_AVAIMET"
+    }
+   ]
+  },
+  {
+   "tyyppi": "repliikit",
+   "estaa": false,
+   "rivit": [
+    [
+     "MYYJA",
+     "vihainen",
+     "Hei! Tää on yksityisalue!"
+    ]
+   ]
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": "auto",
+   "teksti": "Ota ensimmäinen auto pihasta"
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "varjo_mittari",
+   "param": {
+    "tahdet": 1
+   },
+   "puuttuuOhita": 0.5
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KORJAAMO",
+   "r": 10,
+   "kulku": "auto",
+   "cp": true,
+   "cpSiirto": "LOC_KIILTO",
+   "teksti": "Aja auto korjaamolle",
+   "merkki": "Korjaamo"
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": "jalan",
+   "teksti": "Jätä auto korjaamolle"
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KIILTO",
+   "r": 25,
+   "teksti": "Hae toinen auto Kiillosta"
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": "auto",
+   "teksti": "Ota toinen auto"
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KORJAAMO",
+   "r": 10,
+   "kulku": "auto",
+   "cp": true,
+   "teksti": "Aja toinen auto korjaamolle",
+   "merkki": "Korjaamo"
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "RAMI",
+     "ovela",
+     "Kaupat purettu."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M03_DONE",
+   "FLAG_HIIVISKELY"
+  ]
+ },
+ "palkinto": {
+  "raha": 300,
+  "teksti": "Hiiviskely avautui"
+ }
+}
