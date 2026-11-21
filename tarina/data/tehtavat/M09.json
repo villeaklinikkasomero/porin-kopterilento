@@ -1,0 +1,159 @@
+{
+ "id": "M09",
+ "nimi": "Gaala-ilta",
+ "luku": 2,
+ "rautalanka": true,
+ "antaja": "LUMI",
+ "vaatii": [
+  "FLAG_M07_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_PIILO",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "fail": [
+  {
+   "ehto": "poistui",
+   "paikka": "LOC_TAIDEMUSEO",
+   "r": 80,
+   "alkaen": 5
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "LUMI",
+     "ovela",
+     "Varjo pitää sijoittajagaalan taidemuseolla. Hae teatterin puvustamosta frakki ja nimeä itsesi joksikin, mikä kuulostaa rahalta."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_TEATTERI",
+   "r": 8,
+   "teksti": "Hae valepuku Porin Teatterin puvustamosta",
+   "kulku": "maa",
+   "merkki": "Teatteri"
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Ota frakki puvustamosta",
+   "kohteet": [
+    {
+     "id": "frakki",
+     "paikka": "LOC_TEATTERI",
+     "r": 6,
+     "nimi": "Frakki",
+     "esine": "ITEM_FRAKKI"
+    }
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_TAIDEMUSEO",
+   "r": 8,
+   "teksti": "Mene gaalaan taidemuseolle",
+   "kulku": "jalan",
+   "merkki": "Gaala",
+   "cp": true
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Ovimies: \"Ja te olette…?\"",
+   "vaihtoehdot": [
+    {
+     "teksti": "\"Olen Kuusinen-sijoitusten edustaja.\"",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_GAALA_ROOLI": 1
+      }
+     }
+    },
+    {
+     "teksti": "\"Tulin korjaamaan kaiuttimia.\"",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_GAALA_ROOLI": 2
+      }
+     }
+    },
+    {
+     "teksti": "\"Olen taiteilija.\"",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_GAALA_ROOLI": 3
+      }
+     }
+    }
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "salakuuntelu",
+   "teksti": "Seuraa Varjoa salissa ja pysy kuuloetäisyydellä (kuuntelumittari 100 %)",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "cut",
+   "id": "CUT_M09_A",
+   "rivit": [
+    [
+     "VARJO",
+     "ovela",
+     "Pori saa kauppakeskuksen, jollaista ei ole nähty. Kukaan ei kaipaa vanhaa toria, kun on liukuportaat."
+    ],
+    [
+     "HARJU",
+     "huolestunut",
+     "Viktor, ne kauppakirjat… eikö niissä ollut jotain epäselvää?"
+    ],
+    [
+     "VARJO",
+     "vihainen",
+     "Hanna. Hymyile."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M09_DONE"
+  ],
+  "muuttujat": {
+   "VAR_AREAS_SAVED": "+1"
+  }
+ },
+ "palkinto": {
+  "raha": 200,
+  "teksti": "Taidemuseon kortteli pelastettu"
+ },
+ "hahmot": [
+  {
+   "h": "VARJO",
+   "paikka": {
+    "paikka": "LOC_TAIDEMUSEO",
+    "dx": 6,
+    "dy": 0
+   },
+   "suunta": "pelaaja",
+   "alkaen": 5
+  },
+  {
+   "h": "HARJU",
+   "paikka": {
+    "paikka": "LOC_TAIDEMUSEO",
+    "dx": 8,
+    "dy": 2
+   },
+   "suunta": "pelaaja",
+   "alkaen": 5
+  }
+ ],
+ "_huom": "Hahmot VARJO ja HARJU tarvitsevat juhla-asut (puuttuu). Valinta muuttaa vain repliikkejä (VAR_GAALA_ROOLI)."
+}

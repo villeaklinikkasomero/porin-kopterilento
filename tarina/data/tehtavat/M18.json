@@ -1,0 +1,129 @@
+{
+ "id": "M18",
+ "nimi": "Ansa",
+ "luku": 4,
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_CH3_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_TERTUN_KOJU",
+  "r": 8,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_M18_A",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Ilta torilla. Varjo seisoo kojujen keskellä hymyillen. Kameramiehiä on joka puolella.]"
+    },
+    [
+     "VARJO",
+     "ovela",
+     "Rami Koski! Ja hänen kummallisesti kadonneet museokorunsa. Hups, tarkoitin minun."
+    ],
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Varjon vartijat nostavat Tapsan auton takakontista \"varastettuja\" esineitä. Ne ovat väärennettyjä kopioita. Uutiskopteri kuvaa.]"
+    },
+    [
+     "TAPSA",
+     "vihainen",
+     "Rami, ne on feikkejä! Juokse!"
+    ]
+   ],
+   "kamera": {
+    "paikka": "LOC_TORI",
+    "kohti": "LOC_TERTUN_KOJU"
+   }
+  },
+  {
+   "tyyppi": "aseta",
+   "asettaa": {
+    "liput": [
+     "FLAG_TAPSA_CAPTURED"
+    ]
+   }
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "varjo_mittari",
+   "teksti": "Pakene torilta!",
+   "puuttuuOhita": 0.5,
+   "param": {
+    "tahdet": 5,
+    "kesto": 90
+   }
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "karista_jahtaajat",
+   "teksti": "Karista Varjo-mittari: kulje sillan alta ja pysy uutiskopterin katveessa",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_PIILO",
+   "r": 12,
+   "teksti": "Mene Lumin piilolle",
+   "kulku": "maa",
+   "merkki": "Piilo"
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "LUMI",
+     "huolestunut",
+     "Tapsa on poissa. Ja koko kaupunki luulee sinua varkaaksi. Sinun pitää kadota hetkeksi."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M18_DONE"
+  ]
+ },
+ "hahmot": [
+  {
+   "h": "VARJO",
+   "paikka": {
+    "paikka": "LOC_TORI",
+    "dx": 4,
+    "dy": 0
+   },
+   "suunta": "pelaaja",
+   "asti": 0
+  },
+  {
+   "h": "TAPSA",
+   "paikka": {
+    "paikka": "LOC_TORI",
+    "dx": 8,
+    "dy": 3
+   },
+   "suunta": "pelaaja",
+   "asti": 0
+  },
+  {
+   "h": "VARTIJA",
+   "paikka": {
+    "paikka": "LOC_TORI",
+    "dx": 6,
+    "dy": -3
+   },
+   "suunta": "pelaaja",
+   "asti": 3
+  }
+ ],
+ "_huom": "Tähdet 5 ja jahtaajat (vartijabotit, uutiskopteri) puuttuvat. Tapsan pitäisi kadota maailmasta kunnes M23 (FLAG_TAPSA_CAPTURED): tehtävien antajana hän ei näy, koska M19–M23 antajat ovat muita.",
+ "merkki": "Te"
+}

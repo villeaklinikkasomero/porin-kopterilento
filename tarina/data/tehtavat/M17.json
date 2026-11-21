@@ -1,0 +1,163 @@
+{
+ "id": "M17",
+ "nimi": "Pilvenpiirtäjä",
+ "luku": 3,
+ "rautalanka": true,
+ "antaja": "LUMI",
+ "vaatii": [
+  "FLAG_M16_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_PIILO",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_CH3_A",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Lumin piilo. Valkotaululle on kiinnitetty kuvia ja karttoja.]"
+    },
+    [
+     "LUMI",
+     "ovela",
+     "Kaksi tapaa. Hiljainen: kukaan ei huomaa mitään. Äänekäs: kaikki huomaavat, mutta liian myöhään."
+    ]
+   ],
+   "kamera": {
+    "paikka": "LOC_PIILO",
+    "kohti": "LOC_PIILO"
+   }
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Miten keikka tehdään?",
+   "vaihtoehdot": [
+    {
+     "teksti": "Hiljainen (vähemmän tähtiä)",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_APPROACH_M17": 1
+      }
+     }
+    },
+    {
+     "teksti": "Äänekäs (nopeampi, enemmän tähtiä)",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_APPROACH_M17": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_VARJOTORNI",
+   "r": 15,
+   "teksti": "Pääse tornin 12. kerrokseen",
+   "kulku": "maa",
+   "merkki": "Varjo-torni",
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "torni_sisatila",
+   "teksti": "Kulje 12. kerrokseen (sisätila)",
+   "puuttuuOhita": 3
+  },
+  {
+   "tyyppi": "pysy",
+   "paikka": "LOC_VARJOTORNI",
+   "s": 60,
+   "r": 20,
+   "teksti": "Suojaa Lumia 60 s, kun hän kopioi palvelimen – ohjaa vartijat harhaan äänillä ja hissinapeilla",
+   "mittari": "Kopiointi"
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "pyykkikuilu",
+   "teksti": "Poistu tornista pyykkikuilua pitkin",
+   "puuttuuOhita": 3,
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M17",
+    "yhtakuin": 1
+   }
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "laskuvarjo_katolta",
+   "teksti": "Hyppää katolta laskuvarjolla joen yli",
+   "puuttuuOhita": 3,
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M17",
+    "yhtakuin": 2
+   }
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_PIILO",
+   "r": 12,
+   "teksti": "Palaa Lumin piilolle",
+   "kulku": "maa",
+   "merkki": "Piilo",
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M17",
+    "yhtakuin": 1
+   }
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KIRJURINLUOTO",
+   "r": 40,
+   "teksti": "Laskeudu Kirjurinluodolle",
+   "merkki": "Kirjurinluoto",
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M17",
+    "yhtakuin": 2
+   }
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "LUMI",
+     "yllättynyt",
+     "Sain sen. Ja löysin jotain muutakin. Varjo tietää, keitä te olette."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M17_DONE",
+   "FLAG_CH3_DONE"
+  ],
+  "esineet": [
+   "ITEM_PALVELINDATA"
+  ]
+ },
+ "palkinto": {
+  "raha": 500,
+  "teksti": "Palvelindata · Luku 4 avautui"
+ },
+ "hahmot": [
+  {
+   "h": "LUMI",
+   "paikka": {
+    "paikka": "LOC_VARJOTORNI",
+    "dx": 3,
+    "dy": 0
+   },
+   "suunta": "pelaaja",
+   "alkaen": 4,
+   "asti": 4
+  }
+ ],
+ "_huom": "Tornin sisätila puuttuu. Laskuvarjo on pelissä (laskuvarjo/), mutta ei liitetty tarinaan."
+}

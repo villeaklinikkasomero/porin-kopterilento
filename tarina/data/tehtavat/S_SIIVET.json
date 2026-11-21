@@ -1,0 +1,65 @@
+{
+ "id": "S_SIIVET",
+ "nimi": "Rattiksen siipilähetti",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 300,
+ "laji": "sivu",
+ "merkki": "€",
+ "rautalanka": true,
+ "antaja": "BAARIMIKKO",
+ "antajaPaikka": {
+  "paikka": "LOC_RATTIS_OVI",
+  "dx": 6,
+  "dy": 0
+ },
+ "vaatii": [
+  "FLAG_M01_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": {
+   "paikka": "LOC_RATTIS_OVI",
+   "dx": 5,
+   "dy": 0
+  },
+  "r": 3,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "BAARIMIKKO",
+     "iloinen",
+     "Kaks laatikkoo wingsejä Kirjurinluodon jazzlavalle. Kuumana!"
+    ]
+   ]
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": [
+    "pyora",
+    "auto"
+   ],
+   "teksti": "Ota pyörä tai auto"
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KIRJURINLUOTO",
+   "r": 35,
+   "teksti": "Vie wingsit Kirjurinluodon jazzlavalle (4 min)",
+   "kulku": [
+    "pyora",
+    "auto"
+   ],
+   "merkki": "Jazzlava",
+   "aikaraja": 240
+  }
+ ],
+ "palkinto": {
+  "raha": 18,
+  "teksti": "Wingsit perillä kuumana"
+ }
+}

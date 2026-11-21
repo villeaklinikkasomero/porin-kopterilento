@@ -1,0 +1,66 @@
+{
+ "id": "K_TUUNAUS",
+ "nimi": "Tuunaus Tapsan hallissa",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 0,
+ "laji": "korjaamo",
+ "merkki": "🔧",
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M02_DONE"
+ ],
+ "ehto": {
+  "esine": "ITEM_OSAT_HALLISSA"
+ },
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": {
+   "paikka": "LOC_KORJAAMO",
+   "dx": -5,
+   "dy": 0
+  },
+  "r": 8,
+  "kulku": "auto:estate"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "ovela",
+     "Aja nostimeen. Mä laitan osat kiinni, sää keität kahvit."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "tuunaa",
+   "teksti": "Tapsa asentaa osat",
+   "puuttuuOhita": 0.5
+  },
+  {
+   "tyyppi": "aseta",
+   "asettaa": {
+    "poistaEsineet": [
+     "ITEM_OSAT_HALLISSA"
+    ],
+    "muuttujat": {
+     "TILAUS": 0
+    }
+   }
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "iloinen",
+     "Kato nyt. Melkein yhtä hieno ku mun."
+    ]
+   ]
+  }
+ ],
+ "_huom": "Asennus Ramin farmariin. Maali ja moottori vaikuttavat jo (talous.js); vanteet, spoileri, pakoputki ja valot odottavat osamalleja."
+}

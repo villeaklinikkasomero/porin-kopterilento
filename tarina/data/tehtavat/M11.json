@@ -1,0 +1,107 @@
+{
+ "id": "M11",
+ "nimi": "Sillankilpa",
+ "luku": 2,
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M07_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_ISOSILTA",
+  "r": 12,
+  "kulku": "auto"
+ },
+ "fail": [
+  {
+   "ehto": "kulkuneuvo_rikki"
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "RADIO",
+     "iloinen",
+     "Kaupungin syysajot käynnistyvät! Reitti on suljettu muulta liikenteeltä, ja yhtenä kuljettajana on Varjo Holdingsin oma kuski!"
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_ISOSILTA",
+   "r": 15,
+   "teksti": "Aja lähtöviivalle Isosillalle",
+   "kulku": "auto",
+   "merkki": "Lähtö"
+  },
+  {
+   "tyyppi": "portit",
+   "kulku": "auto",
+   "r": 14,
+   "cp": true,
+   "teksti": "Voita kolmen kierroksen kilpa: Isosilta → Eteläranta → Pohjoisranta",
+   "portit": [
+    "LOC_ETELARANTA",
+    "LOC_POHJOISRANTA",
+    "LOC_ISOSILTA",
+    "LOC_ETELARANTA",
+    "LOC_POHJOISRANTA",
+    "LOC_ISOSILTA",
+    "LOC_ETELARANTA",
+    "LOC_POHJOISRANTA",
+    "LOC_ISOSILTA"
+   ],
+   "kilpailija": {
+    "hahmo": "VARJO",
+    "aika": 330,
+    "voitti": "Varjon kuski ehti ensin. Yritä uudelleen."
+   }
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Poimi Varjon kuskin pudottama kulkukortti maalista",
+   "kohteet": [
+    {
+     "id": "kortti",
+     "paikka": {
+      "paikka": "LOC_ISOSILTA",
+      "dx": 8,
+      "dy": 0
+     },
+     "r": 6,
+     "nimi": "Kulkukortti",
+     "esine": "ITEM_KULKUKORTTI"
+    }
+   ],
+   "kulku": "maa"
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "RAMI",
+     "neutraali",
+     "Hyvä auto. Huono kuski."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M11_DONE"
+  ],
+  "muuttujat": {
+   "VAR_AREAS_SAVED": "+1"
+  },
+  "esineet": [
+   "ITEM_KULKUKORTTI"
+  ]
+ },
+ "palkinto": {
+  "raha": 250,
+  "teksti": "Isosilta pelastettu · Varjon kulkukortti"
+ },
+ "_huom": "Kilpailija on ajastin (moottorin portit-vaihe). Varjon kuskin auto radalla puuttuu (bottiauto reitillä). Pohjoisrannan paikka on arvio."
+}

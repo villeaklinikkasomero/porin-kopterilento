@@ -1,0 +1,63 @@
+{
+ "id": "M10",
+ "nimi": "Pienoislentokone",
+ "luku": 2,
+ "rautalanka": true,
+ "antaja": "TAPSA",
+ "vaatii": [
+  "FLAG_M09_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_KORJAAMO_OVI",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "ovela",
+     "Lumi kaivo Varjon kuorma-autojen reitit. Mul on vanha radio-ohjattava kone vintillä – laitetaan siihen Lumin lähetin."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "rc_lentokone",
+   "teksti": "Ohjaa RC-lentokonetta Pohjoisrannan yllä ja pudota lähetin kolmen Varjon kuorma-auton katolle (120 s)",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "LUMI",
+     "iloinen",
+     "Signaali on kunnossa. Nyt nähdään, minne Varjo vie tavaransa."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M10_DONE"
+  ],
+  "muuttujat": {
+   "VAR_AREAS_SAVED": "+1"
+  }
+ },
+ "palkinto": {
+  "raha": 150,
+  "teksti": "Pohjoisranta pelastettu"
+ },
+ "antajaPaikka": {
+  "paikka": "LOC_KORJAAMO_OVI",
+  "dx": 3.2,
+  "dy": -1.5
+ },
+ "_huom": "Uusi kulkuneuvo: RC-lentokone (malli + ohjaus puuttuvat)."
+}

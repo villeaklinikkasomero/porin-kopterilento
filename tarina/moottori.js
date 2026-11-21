@@ -11,14 +11,14 @@ export const TALLENNUSAVAIN = 'pori-tarina-v1';
 const kloonaa = o => JSON.parse(JSON.stringify(o));
 const etaisyys = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
-export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit = {}, varasto = null, kasittelijat = {}, sijoitukset = [] } = {}) {
+export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit = {}, varasto = null, kasittelijat = {}, sijoitukset = [], esto = null, kello = () => Date.now() } = {}) {
   const T = {}; for (const t of tehtavat) T[t.id] = t;
   const KUUNTELIJAT = {};
   const on = (nimi, f) => { (KUUNTELIJAT[nimi] = KUUNTELIJAT[nimi] || []).push(f); return () => { KUUNTELIJAT[nimi] = KUUNTELIJAT[nimi].filter(g => g !== f); }; };
   const emit = (nimi, d) => { for (const f of KUUNTELIJAT[nimi] || []) f(d); for (const f of KUUNTELIJAT['*'] || []) f(nimi, d); };
   const teksti = (avain, korvaa = {}) => { let s = tekstit[avain] ?? avain; for (const k in korvaa) s = s.split('{' + k + '}').join(korvaa[k]); return s; };
 
-  const uusiTila = () => ({ liput: {}, muuttujat: {}, esineet: {}, raha: 0, valmiit: [] });
+  const uusiTila = () => ({ liput: {}, muuttujat: {}, esineet: {}, raha: 0, valmiit: [], viimeksi: {}, kerrat: {} });
   let tila = uusiTila();
   let K = null;          // käynnissä oleva tehtävä: { t, i, v, cp: { i, tila }, alku, aika, tila: 'kaynnissa'|'epaonnistui' }
   let D = null;          // dialogi: { rivit, i, t, kesto, tyyli, kun }
@@ -38,9 +38,9 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     }
     for (const e of spec.esineet || []) tila.esineet[e] = true;
     for (const e of spec.poistaEsineet || []) delete tila.esineet[e];
-    if (spec.raha) tila.raha += spec.raha;
+    if (spec.raha) { tila.raha += spec.raha; if (spec.raha) emit('raha', { muutos: spec.raha, raha: tila.raha, lahde: spec.rahaLahde || '' }); }
   }
-  // ehto: { lippu, eiLippua, esine, muuttuja, vah, enint, yhtakuin, kaikki: [...], jokin: [...] }
+  // ehto: { lippu, eiLippua, esine, eiEsinetta, muuttuja, vah, enint, yhtakuin, raha (vähintään € kukkarossa), kaikki: [...], jokin: [...] }
   function tayttyy(e) {
     if (!e) return true;
     if (Array.isArray(e)) return e.every(tayttyy);
@@ -49,6 +49,8 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     if (e.lippu && !lippu(e.lippu)) return false;
     if (e.eiLippua && lippu(e.eiLippua)) return false;
     if (e.esine && !tila.esineet[e.esine]) return false;
+    if (e.eiEsinetta && tila.esineet[e.eiEsinetta]) return false;
+    if (e.raha !== undefined && tila.raha < e.raha) return false;
     if (e.muuttuja) {
       const m = muuttuja(e.muuttuja);
       if (e.vah !== undefined && m < e.vah) return false;
@@ -57,7 +59,9 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     }
     return true;
   }
-  const saatavilla = t => !tila.valmiit.includes(t.id) && (t.vaatii || []).every(lippu) && tayttyy(t.ehto);
+  // toistuva tehtävä (alitehtävät, kaupat, korjaamo): voi tehdä uudelleen `jaahtyy` sekunnin kuluttua edellisestä kerrasta
+  const jaahtyy = t => t.toistuva && tila.viimeksi && tila.viimeksi[t.id] && kello() - tila.viimeksi[t.id] < (t.jaahtyy || 0) * 1000;
+  const saatavilla = t => (t.toistuva || !tila.valmiit.includes(t.id)) && !jaahtyy(t) && (t.vaatii || []).every(lippu) && tayttyy(t.ehto);
 
   // ---------- paikat ja kulkuneuvot ----------
   function paikka(p) {
@@ -99,6 +103,7 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     if (!t) throw new Error('tuntematon tehtävä ' + id);
     if (K) return false;
     if (!pakota && !saatavilla(t)) return false;
+    if (!pakota && esto) { const syy = esto(t, tila); if (syy) { vihje(teksti(syy)); return false; } }   // esim. Rami on liian nälkäinen (peli.js)
     K = { t, i: -1, v: null, alku: kloonaa(tila), cp: { i: 0, tila: kloonaa(tila) }, aika: 0, tila: 'kaynnissa' };
     emit('tehtava', { id: t.id, nimi: t.nimi, luku: t.luku, alkaa: true });
     seuraavaVaihe();
@@ -155,9 +160,11 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     const t = K.t; const ennen = new Set(Object.values(T).filter(saatavilla).map(x => x.id));
     aseta(t.asettaa); if (t.palkinto && t.palkinto.raha) tila.raha += t.palkinto.raha;
     if (!tila.valmiit.includes(t.id)) tila.valmiit.push(t.id);
+    tila.kerrat = tila.kerrat || {}; tila.kerrat[t.id] = (tila.kerrat[t.id] || 0) + 1;
+    if (t.toistuva) { tila.viimeksi = tila.viimeksi || {}; tila.viimeksi[t.id] = kello(); }
     K = null; emit('tavoite', null); emit('ajastin', null); emit('mittari', null);
     tallenna();
-    const avautui = Object.values(T).filter(x => saatavilla(x) && !ennen.has(x.id)).map(x => ({ id: x.id, nimi: x.nimi }));
+    const avautui = Object.values(T).filter(x => saatavilla(x) && !ennen.has(x.id) && !x.toistuva && x.id !== t.id).map(x => ({ id: x.id, nimi: x.nimi }));
     emit('lapi', { id: t.id, nimi: t.nimi, palkinto: t.palkinto || null, avautui });
     paivitaMerkit(true);
   }
@@ -296,7 +303,7 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     if (K && K.tila === 'kaynnissa') { const s = K.t.vaiheet[K.i]; const k = VAIHEET[s.tyyppi]; return k && k.merkit ? k.merkit(s, K.v).filter(m => m && m.x !== undefined) : []; }
     if (K) return [];
     return Object.values(T).filter(t => saatavilla(t) && t.laukaisu && t.laukaisu.tyyppi === 'merkki')
-      .map(t => ({ ...paikka(t.laukaisu.paikka), r: t.laukaisu.r || 4, laji: 'tehtava', id: t.id, nimi: t.nimi, kirjain: t.merkki || (hahmot[t.antaja] || {}).kirjain || '' }));
+      .map(t => ({ ...paikka(t.laukaisu.paikka), r: t.laukaisu.r || 4, laji: t.toistuva ? (t.laji || 'sivu') : 'tehtava', id: t.id, nimi: t.nimi, kirjain: t.merkki || (hahmot[t.antaja] || {}).kirjain || '' }));
   }
   function paivitaMerkit(pakota) {
     const m = merkit(); const k = JSON.stringify(m.map(q => [q.laji, Math.round(q.x * 2), Math.round(q.y * 2), q.id || '']));
@@ -365,7 +372,7 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
   // pelaajan toimintonäppäin (X / kosketusnappi): aloittaa tehtävän merkillä tai ohittaa repliikin
   function toiminta() {
     if (D) { seuraavaRivi(); return 'repliikki'; }
-    if (!K) { const t = lahinTehtava(); if (t) { aloita(t.id); return 'aloitettu'; } }
+    if (!K) { const t = lahinTehtava(); if (t) return aloita(t.id) ? 'aloitettu' : 'estetty'; }
     if (K && K.tila === 'epaonnistui') { uudelleen(); return 'uudelleen'; }
     return null;
   }
@@ -373,7 +380,8 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     if (!K || K.tila !== 'kaynnissa') return false;
     const s = K.t.vaiheet[K.i]; if (s.tyyppi !== 'valinta' || !K.v.odottaa) return false;
     const o = s.vaihtoehdot[i]; if (!o || !tayttyy(o.ehto)) return false;
-    K.v.odottaa = false; emit('valinta', null); aseta(o.asettaa);
+    if (o.hinta && tila.raha < o.hinta) { vihje(teksti('SYS_NO_MONEY', { hinta: o.hinta, raha: tila.raha })); return false; }   // kaupat: hinta näkyy tekstissä, raha ei riitä → valinta jää auki
+    K.v.odottaa = false; emit('valinta', null); if (o.hinta) aseta({ raha: -o.hinta, rahaLahde: o.lahde || '' }); aseta(o.asettaa);
     if (o.rivit) puhu(o.rivit, 'puhe', valmis); else valmis();
     return true;
   }
@@ -410,8 +418,9 @@ export function luoMoottori({ tehtavat = [], paikat = {}, hahmot = {}, tekstit =
     on, paivita, toiminta, valitse, aloita, uudelleen, luovuta, lataa, tallenna, nollaa, lisaaRaha,
     tauko(b) { tauolla = !!b; }, get tauolla() { return tauolla; },
     get tila() { return tila; }, get kaynnissa() { return K ? { id: K.t.id, nimi: K.t.nimi, vaihe: K.i, tila: K.tila } : null; },
-    saatavilla: () => Object.values(T).filter(saatavilla).map(t => ({ id: t.id, nimi: t.nimi, luku: t.luku })),
-    tehtavat: () => Object.values(T).map(t => ({ id: t.id, nimi: t.nimi, luku: t.luku, valmis: tila.valmiit.includes(t.id), saatavilla: saatavilla(t) })),
+    saatavilla: () => Object.values(T).filter(saatavilla).map(t => ({ id: t.id, nimi: t.nimi, luku: t.luku, toistuva: !!t.toistuva })),
+    tehtavat: () => Object.values(T).map(t => ({ id: t.id, nimi: t.nimi, luku: t.luku, valmis: tila.valmiit.includes(t.id), saatavilla: saatavilla(t), toistuva: !!t.toistuva })),
+    asetaMuuttuja(k, a) { tila.muuttujat[k] = a; },
     merkit, hahmolista, paikka, sopii, kasittelijat, kehittaja, teksti
   };
 }

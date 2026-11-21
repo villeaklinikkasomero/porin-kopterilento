@@ -1,0 +1,134 @@
+{
+ "id": "M24",
+ "nimi": "Iso keikka",
+ "luku": 5,
+ "rautalanka": true,
+ "antaja": "LUMI",
+ "vaatii": [
+  "FLAG_CH4_DONE"
+ ],
+ "ehto": {
+  "kaikki": [
+   {
+    "esine": "ITEM_KAUPPAKIRJAT_1"
+   },
+   {
+    "esine": "ITEM_KAUPPAKIRJAT_2"
+   },
+   {
+    "esine": "ITEM_TALLENTEET"
+   },
+   {
+    "esine": "ITEM_PALVELINDATA"
+   }
+  ]
+ },
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_PIILO",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_M24_A",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Lumin piilo. Koko porukka on koolla: Rami, Tapsa, Lumi, Terttu ja ne rantalaiset, joita Rami auttoi luvussa 4.]"
+    },
+    [
+     "LUMI",
+     "ovela",
+     "Meillä on kopiot kaikesta. Mutta alkuperäiset väärennetyt kauppakirjat ovat Varjon omassa kassakaapissa, 20. kerroksessa. Ilman niitä Varjo kiistää kaiken."
+    ],
+    [
+     "TERTTU",
+     "iloinen",
+     "Me torilaiset hoidetaan harhautus. Kukaan ei vartioi ovia, kun ilmaisia munkkeja jaetaan."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "torilaiset_harhauttavat",
+   "teksti": "Terttu ja liittolaiset harhauttavat vartijat (kesto = liittolaisten määrä × 10 s)",
+   "puuttuuOhita": 3
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "anna_ajoneuvo",
+   "param": {
+    "paikka": "LOC_PIILO",
+    "dx": 6,
+    "dy": 0,
+    "yaw": 0,
+    "tyyppi": "van",
+    "viesti": "🚐 Tapsan paku",
+    "vari": "#d8b030"
+   },
+   "puuttuuOhita": 0.5
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_VARJOTORNI",
+   "r": 20,
+   "teksti": "Aja pakettiauto tornin lastauslaiturille (Tapsa ohjaa reittiä)",
+   "kulku": "auto:van",
+   "merkki": "Lastauslaituri",
+   "cp": true
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": "jalan",
+   "teksti": "Nouse autosta"
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "torni_kerros20",
+   "teksti": "Nouse 20. kerrokseen – vartijoiden määrä = 6 − Varjon tunnustukset",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "kassakaappi",
+   "teksti": "Avaa kassakaappi (Lumin ohjaama kolmivaiheinen minipeli)",
+   "puuttuuOhita": 3,
+   "cp": true
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M24_DONE"
+  ],
+  "esineet": [
+   "ITEM_ALKUPERAISET"
+  ]
+ },
+ "hahmot": [
+  {
+   "h": "TAPSA",
+   "paikka": {
+    "paikka": "LOC_PIILO",
+    "dx": 3,
+    "dy": 0
+   },
+   "suunta": "pelaaja",
+   "asti": 1
+  },
+  {
+   "h": "TERTTU",
+   "paikka": {
+    "paikka": "LOC_PIILO",
+    "dx": -3,
+    "dy": 0
+   },
+   "suunta": "pelaaja",
+   "asti": 1
+  }
+ ],
+ "_huom": "Finaalin harhautus, tornin sisätila ja kassakaappipeli puuttuvat."
+}

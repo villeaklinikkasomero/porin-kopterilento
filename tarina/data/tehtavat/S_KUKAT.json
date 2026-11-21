@@ -1,0 +1,66 @@
+{
+ "id": "S_KUKAT",
+ "nimi": "Tertun kukkalähetys",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 240,
+ "laji": "sivu",
+ "merkki": "€",
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M01_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": {
+   "paikka": "LOC_TERTUN_KOJU",
+   "dx": -6,
+   "dy": 4
+  },
+  "r": 3,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TERTTU",
+     "iloinen",
+     "Viäs nää kukat Raatihuoneelle, siel on häät. Pyörällä pääsee kiveyksiä pitkin nopeimmin."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": "pyora",
+   "teksti": "Ota pyörä – torin laidalla on pyörätelineitä"
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Ota kukat Tertun kojulta",
+   "kohteet": [
+    {
+     "id": "kukat",
+     "paikka": "LOC_TERTUN_KOJU",
+     "r": 8,
+     "nimi": "Kukat",
+     "kulku": "pyora"
+    }
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_RAATIHUONE",
+   "r": 12,
+   "teksti": "Vie kukat Raatihuoneelle ennen kuin hääpari tulee (3 min)",
+   "kulku": "pyora",
+   "merkki": "Häät",
+   "aikaraja": 180
+  }
+ ],
+ "palkinto": {
+  "raha": 12,
+  "teksti": "Kukat perillä"
+ }
+}

@@ -12,7 +12,7 @@
  "fail": [
   {
    "ehto": "kulkuneuvo_rikki",
-   "teksti": "Tapsan auto ei kestänyt."
+   "teksti": "Tapsan fillari ei kestänyt."
   }
  ],
  "vaiheet": [
@@ -42,14 +42,23 @@
     [
      "TAPSA",
      "ovela",
-     "On se. Mut kaikki muu ei kohta oo. Hyppy kyytiin, mennään korjaamolle."
+     "On se. Mut kaikki muu ei kohta oo. Ota mun fillari – ja tee mulle palvelus matkalla: Tertulla on torilla siipilähetys Rattikseen. Mä meen hallille edeltä."
     ]
    ]
   },
   {
-   "tyyppi": "kulku",
-   "kulku": "auto",
-   "teksti": "Ota auto rannasta (Tapsa ajaa perässä)"
+   "tyyppi": "toiminto",
+   "nimi": "anna_ajoneuvo",
+   "param": {
+    "paikka": "LOC_ETELARANTA",
+    "dx": 1.5,
+    "dy": -2.5,
+    "yaw": 3.14,
+    "tyyppi": "bike",
+    "vari": "#2f6fb5",
+    "viesti": "🚲 Tapsan fillari"
+   },
+   "puuttuuOhita": 0.5
   },
   {
    "tyyppi": "repliikit",
@@ -74,21 +83,131 @@
   },
   {
    "tyyppi": "mene",
-   "paikka": "LOC_KORJAAMO",
+   "paikka": "LOC_TERTUN_KOJU",
    "r": 10,
-   "kulku": "auto",
-   "teksti": "Aja Tapsan korjaamolle Äestäjänkadulle",
+   "kulku": "pyora",
+   "teksti": "Polje torille Tertun kojulle",
+   "merkki": "Tertun torikoju",
+   "cp": true
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TERTTU",
+     "iloinen",
+     "Rami! Tapsa sano et sää tuut. Tässä, kaks laatikkoo siipii Rattikseen. Keittiön ovelle, ja äkkiä – ne on vielä lämpimii."
+    ],
+    [
+     "RAMI",
+     "neutraali",
+     "Fillarilla?"
+    ],
+    [
+     "TERTTU",
+     "ovela",
+     "Tarakka kestää. Kestäks sää?"
+    ]
+   ]
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Ota siipilaatikot tarakalle",
+   "kulku": "pyora",
+   "kohteet": [
+    {
+     "id": "siivet",
+     "paikka": "LOC_TERTUN_KOJU",
+     "r": 6,
+     "nimi": "Siipilaatikot",
+     "esine": "ITEM_SIIVET"
+    }
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_RATTIS",
+   "r": 18,
+   "kulku": "pyora",
+   "teksti": "Vie siivet Rattikseen (Yrjönkatu 27)",
+   "merkki": "Rattis",
+   "cp": true,
+   "aikaraja": 240,
+   "aikarajaTeksti": "Siivet jäähtyi. Terttu paistaa uudet – yritä uudelleen."
+  },
+  {
+   "tyyppi": "soitto",
+   "soittaja": "TAPSA",
+   "rivit": [
+    [
+     "TAPSA",
+     "iloinen",
+     "Perillä? Hyvä. Rattiksessa muistetaan sut vielä – kuulemma rallikuski, joka ei osannu pyöräillä."
+    ],
+    [
+     "TAPSA",
+     "ovela",
+     "Tuu hallille Äestäjänkadulle. Mul on sulle jotain."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KORJAAMO",
+   "r": 12,
+   "kulku": "pyora",
+   "teksti": "Polje Tapsan korjaamolle Äestäjänkadulle",
    "merkki": "Tapsan korjaamo",
    "cp": true
+  },
+  {
+   "tyyppi": "cut",
+   "id": "CUT_M01_B",
+   "kamera": {
+    "paikka": "LOC_KORJAAMO_PIHA",
+    "kohti": "LOC_KORJAAMO"
+   },
+   "rivit": [
+    [
+     "TAPSA",
+     "iloinen",
+     "Muistaksää tän? Sun vanha farmari. Mä säilytin sen, ku sää lähdit."
+    ],
+    [
+     "RAMI",
+     "yllättynyt",
+     "Se käy vielä?"
+    ],
+    [
+     "TAPSA",
+     "ovela",
+     "Käy se. Avaimet on virtalukos. Katotaan huomenna Kespan lenkillä, kumpi meist on nopeempi."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "anna_ajoneuvo",
+   "param": {
+    "paikka": "LOC_KORJAAMO_PIHA",
+    "yaw": 0.14,
+    "tyyppi": "estate",
+    "vari": "#7a2e2a",
+    "viesti": "🚗 Ramin vanha farmari"
+   },
+   "puuttuuOhita": 0.5
   }
  ],
  "asettaa": {
   "liput": [
    "FLAG_M01_DONE"
+  ],
+  "poistaEsineet": [
+   "ITEM_SIIVET"
   ]
  },
  "palkinto": {
-  "teksti": "Tapsan korjaamo on nyt tukikohtasi"
+  "teksti": "Tapsan korjaamo on nyt tukikohtasi · Ramin vanha farmari on taas tien päällä"
  },
  "antajaPaikka": {
   "paikka": "LOC_ETELARANTA",
@@ -102,8 +221,18 @@
     "dx": 3
    },
    "suunta": "pelaaja",
-   "asti": 1
+   "asti": 2
+  },
+  {
+   "h": "TAPSA",
+   "paikka": {
+    "paikka": "LOC_KORJAAMO_OVI",
+    "dx": 3.2,
+    "dy": -1.5
+   },
+   "suunta": "pelaaja",
+   "alkaen": 8
   }
  ],
- "_huom_korjaamo": "Korjaamo siirtyi 21.11.2026 paikkaan [-598.9, -443.0] (ei enää Isosillan takana); CUT_M01_A:n kamera katsoo yhä Isosillalle."
+ "_huom": "21.11.2026 omistaja: tarina alkaa polkupyörästä ja etenee vaativampiin ajoneuvoihin. Eteläranta → Tapsan fillari → tori (Terttu, siipilaatikot) → Rattis → korjaamo → Ramin vanha farmari (M02:n Kespan lenkki)."
 }

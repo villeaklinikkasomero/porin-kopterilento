@@ -1,0 +1,129 @@
+{
+ "id": "K_KORJAUS",
+ "nimi": "Korjaus Tapsan hallissa",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 0,
+ "laji": "korjaamo",
+ "merkki": "🔧",
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M01_DONE"
+ ],
+ "ehto": {
+  "muuttuja": "AUTON_VAURIO",
+  "vah": 5
+ },
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": {
+   "paikka": "LOC_KORJAAMO",
+   "dx": 5,
+   "dy": 0
+  },
+  "r": 8,
+  "kulku": "auto"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "huolestunut",
+     "No mitä sää oot tehny? Aja sisään, katotaan."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Korjaus – Tapsa veloittaa vain osat",
+   "vaihtoehdot": [
+    {
+     "teksti": "Pikkukolhut – 10 €",
+     "asettaa": {
+      "muuttujat": {
+       "KORJAUS": 1
+      }
+     },
+     "ehto": {
+      "muuttuja": "AUTON_VAURIO",
+      "enint": 30
+     },
+     "hinta": 10,
+     "lahde": "korjaus"
+    },
+    {
+     "teksti": "Kunnon korjaus – 25 €",
+     "asettaa": {
+      "muuttujat": {
+       "KORJAUS": 1
+      }
+     },
+     "ehto": {
+      "muuttuja": "AUTON_VAURIO",
+      "vah": 31,
+      "enint": 70
+     },
+     "hinta": 25,
+     "lahde": "korjaus"
+    },
+    {
+     "teksti": "Iso remontti – 45 €",
+     "asettaa": {
+      "muuttujat": {
+       "KORJAUS": 1
+      }
+     },
+     "ehto": {
+      "muuttuja": "AUTON_VAURIO",
+      "vah": 71
+     },
+     "hinta": 45,
+     "lahde": "korjaus"
+    },
+    {
+     "teksti": "Ei nyt",
+     "asettaa": {
+      "muuttujat": {
+       "KORJAUS": 0
+      }
+     }
+    }
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "korjaa_auto",
+   "teksti": "Tapsa korjaa auton",
+   "puuttuuOhita": 0.5,
+   "ehto": {
+    "muuttuja": "KORJAUS",
+    "yhtakuin": 1
+   }
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "ovela",
+     "Valmis. Älä kerro kellekään, et mää tein tän melkein ilmaseks."
+    ]
+   ],
+   "ehto": {
+    "muuttuja": "KORJAUS",
+    "yhtakuin": 1
+   }
+  },
+  {
+   "tyyppi": "aseta",
+   "asettaa": {
+    "muuttujat": {
+     "KORJAUS": 0
+    }
+   }
+  }
+ ],
+ "_huom": "Omistaja 21.11.2026: autot korjataan Tapsan hallissa. Auto ei korjaannu muualla (kopteri korjaantuu laskeutuneena kuten ennen). AUTON_VAURIO = talous.js."
+}

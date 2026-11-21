@@ -1,0 +1,280 @@
+{
+ "id": "M13",
+ "nimi": "Korukeikka",
+ "luku": 3,
+ "rautalanka": true,
+ "antaja": "LUMI",
+ "vaatii": [
+  "FLAG_CH2_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_PIILO",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "fail": [
+  {
+   "ehto": "kulkuneuvo_rikki",
+   "alkaen": 7
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_CH3_A",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Lumin piilo. Valkotaululle on kiinnitetty kuvia ja karttoja.]"
+    },
+    [
+     "LUMI",
+     "ovela",
+     "Kaksi tapaa. Hiljainen: kukaan ei huomaa mitään. Äänekäs: kaikki huomaavat, mutta liian myöhään."
+    ]
+   ],
+   "kamera": {
+    "paikka": "LOC_PIILO",
+    "kohti": "LOC_PIILO"
+   }
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "LUMI",
+     "vihainen",
+     "Varjo \"lainasi\" Satakunnan Museolta vanhat hopeakorut omaan näyttelyynsä. Laina-aika on päättynyt, ja palautamme ne."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Miten keikka tehdään?",
+   "vaihtoehdot": [
+    {
+     "teksti": "Hiljainen (vähemmän tähtiä)",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_APPROACH_M13": 1
+      }
+     }
+    },
+    {
+     "teksti": "Äänekäs (nopeampi, enemmän tähtiä)",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_APPROACH_M13": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_TUHOLAISTORJUJA",
+   "r": 10,
+   "teksti": "Valmistelu: hae tuholaistorjujan haalarit ja pakettiauto",
+   "kulku": "maa",
+   "merkki": "Ötökkä-Oy",
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M13",
+    "yhtakuin": 1
+   }
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "anna_ajoneuvo",
+   "param": {
+    "paikka": "LOC_TUHOLAISTORJUJA",
+    "dx": 6,
+    "dy": 0,
+    "yaw": 0,
+    "tyyppi": "van",
+    "viesti": "🚐 Tuholaistorjujan paku",
+    "vari": "#e8e2c8"
+   },
+   "puuttuuOhita": 0.5,
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M13",
+    "yhtakuin": 1
+   }
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KORJAAMO",
+   "r": 12,
+   "teksti": "Valmistelu: hae moottoripyörät Tapsan korjaamolta",
+   "kulku": "maa",
+   "merkki": "Korjaamo",
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M13",
+    "yhtakuin": 2
+   }
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "moottoripyora",
+   "teksti": "Nouse moottoripyörän selkään",
+   "puuttuuOhita": 3,
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M13",
+    "yhtakuin": 2
+   }
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_VARJOTORNI",
+   "r": 15,
+   "teksti": "Mene Varjo-tornin näyttelykerrokseen",
+   "kulku": "maa",
+   "merkki": "Varjo-torni",
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "saippuakupla",
+   "teksti": "Käynnistä saippuakuplakone – vartijat jahtaavat kuplia",
+   "puuttuuOhita": 3,
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M13",
+    "yhtakuin": 1
+   }
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "savuverhot",
+   "teksti": "Laukaise värilliset savuverhot",
+   "puuttuuOhita": 3,
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M13",
+    "yhtakuin": 2
+   }
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Kerää korut kuudesta vitriinistä",
+   "kohteet": [
+    {
+     "id": "v1",
+     "paikka": {
+      "paikka": "LOC_VARJOTORNI",
+      "dx": -6,
+      "dy": 4
+     },
+     "r": 3,
+     "nimi": "Vitriini 1"
+    },
+    {
+     "id": "v2",
+     "paikka": {
+      "paikka": "LOC_VARJOTORNI",
+      "dx": -3,
+      "dy": 7
+     },
+     "r": 3,
+     "nimi": "Vitriini 2"
+    },
+    {
+     "id": "v3",
+     "paikka": {
+      "paikka": "LOC_VARJOTORNI",
+      "dx": 2,
+      "dy": 8
+     },
+     "r": 3,
+     "nimi": "Vitriini 3"
+    },
+    {
+     "id": "v4",
+     "paikka": {
+      "paikka": "LOC_VARJOTORNI",
+      "dx": 6,
+      "dy": 5
+     },
+     "r": 3,
+     "nimi": "Vitriini 4"
+    },
+    {
+     "id": "v5",
+     "paikka": {
+      "paikka": "LOC_VARJOTORNI",
+      "dx": 7,
+      "dy": 0
+     },
+     "r": 3,
+     "nimi": "Vitriini 5"
+    },
+    {
+     "id": "v6",
+     "paikka": {
+      "paikka": "LOC_VARJOTORNI",
+      "dx": 4,
+      "dy": -5
+     },
+     "r": 3,
+     "nimi": "Vitriini 6"
+    }
+   ],
+   "cp": true,
+   "laskuri": "Vitriinit"
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "varjo_mittari",
+   "teksti": "Pakene!",
+   "puuttuuOhita": 0.5,
+   "param": {
+    "tahdet": 2
+   },
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M13",
+    "yhtakuin": 1
+   }
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "varjo_mittari",
+   "teksti": "Pakene!",
+   "puuttuuOhita": 0.5,
+   "param": {
+    "tahdet": 4
+   },
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M13",
+    "yhtakuin": 2
+   }
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_MUSEO_TAKAOVI",
+   "r": 8,
+   "teksti": "Vie korut Satakunnan Museon takaovelle",
+   "kulku": "maa",
+   "merkki": "Museon takaovi"
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "RADIO",
+     "iloinen",
+     "Satakunnan Museon kadonneet korut löytyivät aamulla ovelta pakattuina rusetilla!"
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M13_DONE",
+   "FLAG_MUSEOESINEET_PALAUTETTU"
+  ]
+ },
+ "palkinto": {
+  "raha": 400,
+  "teksti": "Museon korut palautettu"
+ },
+ "_huom": "Kiinni jääminen (Varjo-mittarin jahti) puuttuu → FAIL ei vielä laukea. Moottoripyörä ei ole pelissä."
+}

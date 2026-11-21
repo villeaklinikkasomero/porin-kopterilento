@@ -1,0 +1,128 @@
+{
+ "id": "M21",
+ "nimi": "Neuvottelu",
+ "luku": 4,
+ "rautalanka": true,
+ "antaja": "VARJO",
+ "vaatii": [
+  "FLAG_M20_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_VARJOTORNI",
+  "r": 8,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "VARJO",
+     "ovela",
+     "Rami. Istu. Tarjoan sinulle sitä, mitä kukaan ei voi kieltäytyä: kauppakeskuksen hienoimman liiketilan."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Neuvottelu – kierros 1/3",
+   "vaihtoehdot": [
+    {
+     "teksti": "\"Tapsalla on muitakin kavereita.\"",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_VARJO_CONFESSION": "+1"
+      }
+     }
+    },
+    {
+     "teksti": "\"Ehkä haluan liiketilan.\""
+    },
+    {
+     "teksti": "\"Lumi näkee kaiken.\"",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_VARJO_CONFESSION": "+1"
+      }
+     }
+    }
+   ]
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "VARJO",
+     "neutraali",
+     "Kaverit. Kuinka liikuttavaa."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Neuvottelu – kierros 2/3",
+   "vaihtoehdot": [
+    {
+     "teksti": "\"Kauppakirjat on jo lehdistöllä.\"",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_VARJO_CONFESSION": "+1"
+      }
+     }
+    },
+    {
+     "teksti": "\"Harju ei ole puolellasi.\"",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_VARJO_CONFESSION": "+1"
+      }
+     }
+    },
+    {
+     "teksti": "\"Mitä jos torilla ei olekaan kauppakeskusta?\""
+    }
+   ]
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "VARJO",
+     "vihainen",
+     "Lehdistö kirjoittaa sen, minkä minä maksan."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Neuvottelu – kierros 3/3",
+   "vaihtoehdot": [
+    {
+     "teksti": "\"Missä Tapsa on?\""
+    }
+   ]
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "VARJO",
+     "vihainen",
+     "Tapsasi on turvassa varastollani. Niin kauan kuin sinä olet hiljaa."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M21_DONE",
+   "FLAG_TAPSAN_SIJAINTI"
+  ]
+ },
+ "antajaPaikka": {
+  "paikka": "LOC_VARJOTORNI",
+  "dx": 3
+ },
+ "_huom": "Kattoravintola (sisätila) puuttuu. Bluffit kasvattavat VAR_VARJO_CONFESSION (0–3) → finaalissa vähemmän vartijoita."
+}

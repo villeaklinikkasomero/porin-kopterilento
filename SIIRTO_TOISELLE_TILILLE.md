@@ -2315,8 +2315,18 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
 
 ## TILANNE 21.11.2026 (yhteenveto – lue tämä ensin, yksityiskohdat yllä olevissa 21.11. merkinnöissä)
 
+> ### ⚠ 21.11.2026 klo 4: index.html on PILKOTTU – älä muokkaa sitä suoraan
+> `index.html` kootaan nyt **`src/`-kansion 51 palasta** (`src/osat.txt` = järjestys, **`src/README.md` = palakartta ja säännöt**).
+> Muokkaa palaa (esim. `src/js/111_radio.js`) → `python tools/osat/kokoa.py` → commitoi pala + index.html. Tarkistus: `python tools/osat/kokoa.py --tarkista`
+> (myös GitHub Actions jokaisella pushilla). Jos index.html:ää muokattiin silti suoraan (esim. `tools/rata/patch_index.py`), aja `python tools/osat/pilko.py`.
+> **Yksi chat per pala kerrallaan**; kirjaa tähän lokiin, mitä palaa muokkaat. Uudet ominaisuudet omiksi paloikseen tai omiksi moduulikansioikseen.
+> Palat ovat yhä samaa moduulia (näkevät toistensa muuttujat); index.html on sama kuin ennen + yksi `@osa`-kommenttirivi palaa kohti.
+> **Klo 5: 13 palaa on nyt oikeita moduuleita kansiossa `moduulit/`** (kävelijät, bussi, kyydit, linnut, Kespan lenkki, pyörät, tanssi, patsaat, puut,
+> hautausmaat, Eteläranta, Kivi-Pori-maamerkit, kauppatori). Niitä muokataan suoraan `moduulit/x.js`:ssä ilman kokoamista. Pääskriptin muuttujat moduuli saa
+> P-oliosta (`P.scene`, `P.VEH`…); uusi riippuvuus → lisää se kutsuun palassa `src/js/…` ja kokoa. Ohje: `src/README.md`, kohta "Oikeat moduulit".
+
 **Kaksi istuntoa on kirjoittanut samaan kansioon samana päivänä** (tämä: hahmot, hyppy, tarina, korjaamo; toinen: rata, asema, juna). Ennen kuin muokkaat
-`index.html`:ää tai tätä tiedostoa: lue tuore versio laitteelta, tee muutos tekstikorvauksena, kirjoita heti ja lue takaisin. Älä koskaan kirjoita vanhasta kopiosta.
+palaa tai tätä tiedostoa: lue tuore versio laitteelta, tee muutos tekstikorvauksena, kirjoita heti ja lue takaisin. Älä koskaan kirjoita vanhasta kopiosta.
 
 **index.html:n loppuun ladattavat moduulit (järjestys):** `vesi/vesi.js`, `tori/torikojut.js`, `ranta/ranta.js`, `lento/lento.js`, `laskuvarjo/hyppy.js`, `rata/rata.js`,
 `juna/juna.js`, `korjaamo/korjaamo.js`, `tarina/peli.js`. Jos jokin näistä riveistä puuttuu, se on jäänyt toisen istunnon tallennuksen alle.
@@ -2341,3 +2351,68 @@ Muut tämän päivän koukut index.html:ssä: `window.__jump` (kolme riviä: `st
 **Kaikki 21.11. työ on testattu vain headless** (pilven Playwright + swiftshader, yksittäiset ruudut). Omistaja ei ole vielä vahvistanut pelaamalla: hypyn ohjaus ja loppuveto,
 tarinan tehtävät käsin, puheen ja eleiden ulkonäkö liikkeessä, autolla ajo korjaamoon ja nostimen pilarien välistä, rata/juna yhdessä korjaamon ja tarinan kanssa, puhelin.
 Latauskoko kasvoi: korjaamon mallit 7,2 Mt, tarinahahmot 2–2,6 Mt kappale (ladataan tarvittaessa).
+
+
+## 21.11.2026 klo 4 – index.html pilkottu paloiksi (omistaja: "useampaa chattiä käyttäessä olisi hyvä jos index.html paloiteltaisiin"; tehty kun muut chatit olivat kiinni)
+
+- **Uusi:** `src/` (51 palaa: `html/00_alku.html`, `css/peli.css`, `html/01_runko.html`, `js/000_tuonnit.js` … `js/990_kaynnistys.js`, `html/99_loppu.html`), `src/osat.txt`,
+  `src/README.md` (palakartta), `tools/osat/kokoa.py`, `tools/osat/pilko.py`, `tools/osat/osat_yhteinen.py`, `.github/workflows/index-osat.yml` (tarkistus), `.gitattributes` (src/ aina LF).
+- **index.html:** sisältö tavu tavulta sama kuin ennen + 50 merkintäriviä (`// @osa js/111_radio.js`, CSS:ssä `/* */`, HTML:ssä `<!-- -->`). Ei toiminnallisia muutoksia.
+- **Miksi ei erillisiä ES-moduuleja:** lohkot jakavat satoja ylätason muuttujia (`scene`, `S`, `WALK`, `ROAD`, `carGround`…). Tekstipaloina jako on riskitön ja heti valmis;
+  yksittäisen palan voi myöhemmin muuttaa oikeaksi moduuliksi (`window.__*`-rajapinnalla kuten `tarina/`, `korjaamo/`).
+- **Tarkistettu:** koottu index.html ilman merkintärivejä = alkuperäinen (cmp); pääskripti jäsentyy (`node --check`); `tools/solid_test.js` läpi;
+  `tools/rata/patch_index.py` idempotentti (ei muutoksia); suora muokkaus index.html:ään → `kokoa.py --tarkista` huomaa, `kokoa.py` pysähtyy, `pilko.py` palauttaa
+  muutoksen oikeaan palaan; CRLF-pala (Windows) kootaan oikein. **Ei ajettu peliä selaimessa** (sisältö on sama, vain kommentteja lisää) – omistaja: avaa peli kerran.
+- `tools/rata/patch_index.py` toimii edelleen index.html:ään; aja sen jälkeen `pilko.py`. Palat 150–156 ovat yhden aaltosulkulohkon osia (patsaat → pyörät).
+
+
+## 21.11.2026 klo 5 – 13 palaa oikeiksi moduuleiksi (omistaja: "luulin, että tähän menisi 1-3h" / "tehdään nyt, jätän sinut tekemään ja menen itse nukkumaan")
+
+- **Uusi kansio `moduulit/`:** `kivipori_maamerkit.js`, `etelaranta.js`, `kauppatori.js`, `puut.js`, `hautausmaat.js`, `kavelijat.js`, `patsaat.js`, `linnut.js`,
+  `kespan_lenkki.js`, `pyorat.js`, `kyydit.js`, `tanssi.js`, `bussi.js`. Vastaavat palat `src/js/041, 050, 051, 070, 101, 140, 150, 153, 154, 156, 160, 161, 170`
+  ovat nyt vain kutsuja (`import kaynnista_x from './moduulit/x.js'; kaynnista_x({…})`) samassa kohdassa kuin koodi ennen. index.html 547 kt → 368 kt.
+- **Malli:** `export default function kaynnista(P)`; pääskriptin muuttujat `P.x`, uudelleen asetettavat (`VEH`, `started`, `camMode`, `soundOn`…) gettereinä.
+  Kirjastot/data moduuli tuo itse (`../three.module.min.js`); dynaamiset `import()` muotoa `'../x.js'`; fetch- ja tekstuuripolut ennallaan. `tanssi.js` palauttaa `{ DANCE }`.
+- **Jätetty pääskriptiin:** `180_lentoasema.js` (tools/rata/patch_index.py:n ankkurit `const RSZ`/`const tri` ovat siinä) ja pelin ydin (maasto…silmukka).
+- **Testattu ennen kirjoitusta (headless Chrome, sama kierros: tori, Eteläranta, Kauppahalli, lentoasema):** koko peli kaikkine lisämoduuleineen (vesi, tori, ranta,
+  lento, laskuvarjo, rata, juna, korjaamo, tarina) 3474 = 3474 scene-objektia, jokainen ryhmä sama; `window.__*`-rajapinnat samat; patsaat 21 = 21; jalan, tanssi päälle/pois
+  ja kävely toimivat, ei sivuvirheitä; `tools/solid_test.js` ok; `patch_index.py` ei muuta mitään; `kokoa.py --tarkista` ok. Luettu laitteelta takaisin: tavu tavulta sama.
+- **Muille chateille:** muokkaa moduulia suoraan `moduulit/x.js`. Jos tarvitset pääskriptin muuttujan, jota P:ssä ei ole, lisää se kutsuun palassa ja aja `kokoa.py`.
+
+## 21.11.2026 klo 8.30 – Tapaus 1 poistettu pelistä, radio hiljaa jalan (omistaja: "tuo outojen tarinoiden konsepti piti unohtaa ja mennä tuolla sinun käsikirjoituksella. Nyt se lävähti soimaan" / "radio ei mene pois päältä, kun pelaaja nousee mistään ajoneuvosta")
+
+- **Tapaus 1 ("Karhu katsoo väärään suuntaan", konsepti "Outojen asioiden toimitus") pois:** rivi `js/152_tapaus1.js` poistettu `src/osat.txt`:stä (pala on nyt pelkkä
+  poistomerkintä, koodi git-historiassa), koukut pois `js/124_silmukka.js`:stä (`__caseTick`) ja `moduulit/kavelijat.js`:stä (`__case.ask`). `radio/tapaus1*` ja
+  `tools/radio/tapaus1.json` jäivät levylle käyttämättöminä (voi poistaa). Testattu: 3474 = 3474 objektia, vain `__case`/`__caseTick` pois, ei virheitä.
+- **Radio jalan:** äänenvoimakkuus tulee aina `RADIO.level()`:sta (`soundOn && !WALK.on ? vol * duck : 0`). Ennen uusi kappale (`RADIO.load`) ja tarinan repliikin
+  vaimennus (`tarina/peli.js`) nostivat radion takaisin kuuluviin jalan. Tarina käyttää nyt `RADIO.duck` (0.3 repliikin ajan). Testattu: jalan kappaleen ja kanavan vaihto → 0.
+
+## 21.11.2026 klo 9 – M01 alkaa polkupyörästä (omistaja: "pitäisikö tarinassa aloittaa polkupyörästä ja edetä siitä yhä monimutkaisempien ajoneuvojen hallintaan … Tapsan hallilta saadaan Ramin vanha auto alle jolla otetaan kisa kespan ympäri")
+
+- **Uusi M01 "Tervetuloa takaisin":** Eteläranta (Tapsa) → Tapsa antaa fillarinsa (pyörätelineitä ei ole rannan lähellä, lähin 330 m) → polje torille, Terttu antaa
+  siipilaatikot (`ITEM_SIIVET`) → vie Rattikseen 4 min aikarajalla → Tapsa soittaa → polje korjaamolle → CUT_M01_B: Tapsa antaa **Ramin vanhan farmarin** (viininpunainen, `estate`)
+  korjaamon pihalle. M02:n alku ("No, farmari on lämmin…", "Nouse vanhaan farmariisi") jatkaa siitä Kespan lenkille.
+- **Uudet paikat:** `LOC_RATTIS` [-37, -518] (Rattaanpyörä, Yrjönkatu 27 = city.js-rakennus 109, `tarkista`: mittaa sisäänkäynti), `LOC_KORJAAMO_PIHA` [-596.4, -427.7].
+- **Uusi toiminto `anna_ajoneuvo`** (tarina/peli.js) ja pelin puolella **`window.__take.give(x, y, yaw, tyyppi, väri)`** (src/js/155_auton_lainaus.js): pelaaja istuu heti annetussa ajoneuvossa.
+- **Testattu (headless, koko peli):** M01 läpi alusta loppuun (fillari → tori → Rattis → korjaamo → farmari), lopuksi `car:estate` pihalla, fillari jäi viereen, M02 saatavilla, ei virheitä.
+- **Ehdotettu ajoneuvojärjestys tarinaan:** pyörä (M01) → auto (M02) → jalan + auto (M03) → drooni (M05) → myöhemmin pakettiauto/bussi, vene, kopteri, lentokone ja hyppy.
+
+## 21.11.2026 klo 9.10 – Käsikirjoitus repoon (omistaja: "onko käsikirjoitus sellainen, että se kulkee mukana myös toiselle claudetililleni")
+
+- **`tarina/KASIKIRJOITUS.md`** = koko käsikirjoitus M01–M26, hahmot, paikat, loput ja järjestelmätekstit (viety Claude-dokumentista, versio 20). Alussa lista muutoksista,
+  joita on tehty käsikirjoituksen jälkeen (M01 pyörällä, Kespan lenkki, korjaamon paikka). **Tämä on nyt pääversio**; aiemmat merkinnät "käsikirjoitusartifaktia ei voi lukea
+  tältä tililtä" eivät enää estä: luvut 2–5 (M07–M26) löytyvät tästä tiedostosta. `tarina/README.md` osoittaa tänne.
+
+## 21.11.2026 klo 10 – Koko tarina rautalankana + talous (omistaja: "rakennetaan kaikista osista rautalangat ja sen jälkeen voidaan listata mitä meiltä puuttuu mekaniikasta tai kuvituksesta … alitehtäviä … autot pitää korjata tapsan hallissa, samoin kaikki tuunaukset … tuning-osia ostetaan autovaraosaliikkeestä ja noudetaan pakettiautolla … Ramin tarvitsee myös syödä … Grilli-Pori tai Wingsejä Ratiksesta")
+
+- **Tehtävät:** M07–M26 käsikirjoituksen mukaan (`tarina/data/tehtavat/`), puuttuvat mekaniikat `toiminto`-vaiheina (ohitetaan 3 s). Kaupat `K_GRILLI`, `K_RATTIS`,
+  korjaamo `K_KORJAUS`, tuunaus `K_OSAT` → `K_NOUTO` (Tapsan paku) → `K_TUUNAUS`, mikrotehtävät `S_KUKAT`, `S_SIIVET`, `S_GRILLI`, `S_HINAUS`, `S_RENKAAT`, `S_ILMAKUVA`. Yhteensä 38.
+- **Moottori:** toistuvat tehtävät (`toistuva`, `jaahtyy`, `laji`), hinta valinnoissa (`hinta`, SYS_NO_MONEY), ehdot `raha` ja `eiEsinetta`, `esto` (nälkä), `toiminta()` → `'estetty'`.
+- **Uusi `tarina/talous.js`:** ENERGIA (laskee, ruoka nostaa, 0 estää keikat), AUTON_VAURIO, käsittelijät `korjaa_auto`, `tuunaa`, tuunausten vaikutus farmariin (maali, viritys), HUD `#tr-energia` (pelkistetty – UI-konsepti toisessa langassa).
+- **Uudet paikat:** Grilli-Pori (Juhana Herttuan katu 19, arvio), Rattiksen ovi, Satakunnan Varaosa + laituri (keksitty), kauppahalli, tehdas, hotelli, varasto, tuholaistorjuja, museon takaovi,
+  lentoaseman halli, kiitotie, Tertun koju. **Korjattu:** LOC_ASEMA asemarakennukseen [-443, -940], LOC_LENTOASEMA terminaaliin [-170, -1972]. Uudet hahmot (vain teksti): GRILLI, BAARIMIKKO, VARAOSAMYYJA, KERTOJA.
+- **M01:** torikohta on nyt Tertun oikea koju (LOC_TERTUN_KOJU), ei toista Terttua.
+- **Testattu:** `node tarina/testi.mjs` 23/23 – automaattipelaaja pelaa koko tarinan läpi lopuilla A, B ja C (5 aluetta pelastettu, 3 liittolaista, Tapsa vapaana), ruoka/raha, nälkäesto,
+  korjaus vaurion mukaan, tuunausketju, mikrotehtävän jäähtyminen. Pelissä (headless): kaikki 38 tehtävää läpi kehittäjäohituksella ilman virheitä; korjaus 25 € → kunto 100; tuunaus kiihtyvyys ×1,25 ja maali.
+- **Puutelista:** `tarvittavat_ominaisuudet/PUUTTUU_RAUTALANGASTA.md` (mekaniikat prioriteetein, talouden puutteet, hahmot, paikat, kulkuneuvot, välianimaatiot, UI).
+- Generaattorit `tools/tarina/gen_tarina.py`, `gen_sivu.py` – vain uudelleenrakennukseen; muokkaa JSONia suoraan.

@@ -1,0 +1,81 @@
+{
+ "id": "M22",
+ "nimi": "Salainen hanke",
+ "luku": 4,
+ "rautalanka": true,
+ "antaja": "LUMI",
+ "vaatii": [
+  "FLAG_M21_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_PIILO",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "LUMI",
+     "ovela",
+     "Varjon varaston kellarissa on prototyyppi, jota hän ei näytä sijoittajille. Jos se on mitä luulen, me lennetään."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_VARASTO",
+   "r": 20,
+   "teksti": "Mene Varjon varastolle",
+   "kulku": "maa",
+   "merkki": "Varasto",
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "hiiviskely",
+   "teksti": "Hiivi kellariin: väistä hälytyslaserit tai sammuta ne sähkökaapista",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Ota prototyyppilentoreppu",
+   "kohteet": [
+    {
+     "id": "reppu",
+     "paikka": {
+      "paikka": "LOC_VARASTO",
+      "dx": -6,
+      "dy": 0
+     },
+     "r": 5,
+     "nimi": "Lentoreppu",
+     "esine": "ITEM_LENTOREPPU"
+    }
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "lentoreppu",
+   "teksti": "Lennä ulos kattoikkunasta lentorepulla",
+   "puuttuuOhita": 3,
+   "cp": true
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M22_DONE"
+  ],
+  "esineet": [
+   "ITEM_LENTOREPPU"
+  ]
+ },
+ "palkinto": {
+  "raha": 300,
+  "teksti": "Lentoreppu varusteisiin"
+ },
+ "_huom": "Lentoreppu (uusi liikkumistapa) ja varaston sisätila puuttuvat."
+}

@@ -53,5 +53,25 @@
   "vari": "#ffe08a",
   "malli": null
  },
+ "VARAOSAMYYJA": {
+  "nimi": "Kake (Satakunnan Varaosa)",
+  "vari": "#c8b08a",
+  "malli": null
+ },
+ "GRILLI": {
+  "nimi": "Grilli-Porin myyjä",
+  "vari": "#ffcf6b",
+  "malli": null
+ },
+ "BAARIMIKKO": {
+  "nimi": "Rattiksen baarimikko",
+  "vari": "#e0a070",
+  "malli": null
+ },
+ "KERTOJA": {
+  "nimi": "",
+  "vari": "#cccccc",
+  "malli": null
+ },
  "_ohje": "malli = repon juuren npc_*.js (Idle/Walk/Run/Dance…). null = mallia ei ole → hahmo puhuu vain ruudulla. RAMI = pelaajan oma hahmo.js. Vartijan muunnelmat B ja C: sijoituksessa \"malli\": \"npc_vartija_b\" / \"npc_vartija_c\" (hahmo pysyy VARTIJAna)."
 }

@@ -1,0 +1,166 @@
+{
+ "id": "K_OSAT",
+ "nimi": "Satakunnan Varaosa",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 0,
+ "laji": "kauppa",
+ "merkki": "⚙",
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M02_DONE"
+ ],
+ "ehto": {
+  "kaikki": [
+   {
+    "eiEsinetta": "ITEM_OSAT_NOUTAMATTA"
+   },
+   {
+    "eiEsinetta": "ITEM_OSAT_HALLISSA"
+   }
+  ]
+ },
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_VARAOSALIIKE",
+  "r": 6,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "VARAOSAMYYJA",
+     "iloinen",
+     "Päivää! Mitä Ramin farmariin tänään laitetaan?"
+    ]
+   ]
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Tilaa osa (nouto pakettiautolla lastauslaiturilta)",
+   "vaihtoehdot": [
+    {
+     "teksti": "Maalaus: helmiäismusta – 60 €",
+     "asettaa": {
+      "muuttujat": {
+       "TILAUS": 1
+      },
+      "esineet": [
+       "ITEM_OSAT_NOUTAMATTA"
+      ]
+     },
+     "ehto": {
+      "muuttuja": "TUNE_MAALI",
+      "enint": 0
+     },
+     "hinta": 60,
+     "lahde": "Satakunnan Varaosa"
+    },
+    {
+     "teksti": "Urheiluvanteet – 150 €",
+     "asettaa": {
+      "muuttujat": {
+       "TILAUS": 2
+      },
+      "esineet": [
+       "ITEM_OSAT_NOUTAMATTA"
+      ]
+     },
+     "ehto": {
+      "muuttuja": "TUNE_VANTEET",
+      "enint": 0
+     },
+     "hinta": 150,
+     "lahde": "Satakunnan Varaosa"
+    },
+    {
+     "teksti": "Takaspoileri – 90 €",
+     "asettaa": {
+      "muuttujat": {
+       "TILAUS": 3
+      },
+      "esineet": [
+       "ITEM_OSAT_NOUTAMATTA"
+      ]
+     },
+     "ehto": {
+      "muuttuja": "TUNE_SPOILERI",
+      "enint": 0
+     },
+     "hinta": 90,
+     "lahde": "Satakunnan Varaosa"
+    },
+    {
+     "teksti": "Tuplapakoputki – 110 €",
+     "asettaa": {
+      "muuttujat": {
+       "TILAUS": 4
+      },
+      "esineet": [
+       "ITEM_OSAT_NOUTAMATTA"
+      ]
+     },
+     "ehto": {
+      "muuttuja": "TUNE_PAKO",
+      "enint": 0
+     },
+     "hinta": 110,
+     "lahde": "Satakunnan Varaosa"
+    },
+    {
+     "teksti": "Moottorin viritys (+25 % kiihtyvyys) – 280 €",
+     "asettaa": {
+      "muuttujat": {
+       "TILAUS": 5
+      },
+      "esineet": [
+       "ITEM_OSAT_NOUTAMATTA"
+      ]
+     },
+     "ehto": {
+      "muuttuja": "TUNE_MOOTTORI",
+      "enint": 0
+     },
+     "hinta": 280,
+     "lahde": "Satakunnan Varaosa"
+    },
+    {
+     "teksti": "Lisävalot – 70 €",
+     "asettaa": {
+      "muuttujat": {
+       "TILAUS": 6
+      },
+      "esineet": [
+       "ITEM_OSAT_NOUTAMATTA"
+      ]
+     },
+     "ehto": {
+      "muuttuja": "TUNE_VALOT",
+      "enint": 0
+     },
+     "hinta": 70,
+     "lahde": "Satakunnan Varaosa"
+    },
+    {
+     "teksti": "Ei mitään tänään"
+    }
+   ]
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "VARAOSAMYYJA",
+     "neutraali",
+     "Osat on isossa laatikossa lastauslaiturilla. Tuo paku, niin nostetaan kyytiin."
+    ]
+   ],
+   "ehto": {
+    "esine": "ITEM_OSAT_NOUTAMATTA"
+   }
+  }
+ ],
+ "_huom": "Omistaja 21.11.2026: tuning-osat ostetaan autovaraosaliikkeestä rahalla ja noudetaan pakettiautolla. Yksi tilaus kerrallaan. Osamallit: tuunaus_mallipyynto.md."
+}

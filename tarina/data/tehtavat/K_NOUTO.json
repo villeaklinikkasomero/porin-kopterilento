@@ -1,0 +1,93 @@
+{
+ "id": "K_NOUTO",
+ "nimi": "Nouda osat pakulla",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 0,
+ "laji": "korjaamo",
+ "merkki": "🚐",
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M02_DONE"
+ ],
+ "ehto": {
+  "esine": "ITEM_OSAT_NOUTAMATTA"
+ },
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_KORJAAMO_PIHA",
+  "r": 5,
+  "kulku": "jalan"
+ },
+ "fail": [
+  {
+   "ehto": "kulkuneuvo_rikki",
+   "teksti": "Paku ei kestänyt – osat jäivät laiturille."
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "toiminto",
+   "nimi": "anna_ajoneuvo",
+   "param": {
+    "paikka": "LOC_KORJAAMO_PIHA",
+    "dx": 0,
+    "dy": 0,
+    "yaw": 0.14,
+    "tyyppi": "van",
+    "viesti": "🚐 Tapsan paku",
+    "vari": "#d8b030"
+   },
+   "puuttuuOhita": 0.5
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_VARAOSA_LAITURI",
+   "r": 8,
+   "teksti": "Aja paku Satakunnan Varaosan lastauslaiturille",
+   "kulku": "auto:van",
+   "merkki": "Lastauslaituri",
+   "cp": true
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "VARAOSAMYYJA",
+     "neutraali",
+     "Laatikko kyydissä. Aja nätisti, siinä on lasia."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KORJAAMO",
+   "r": 12,
+   "teksti": "Vie osat Tapsan halliin",
+   "kulku": "auto:van",
+   "merkki": "Korjaamo"
+  },
+  {
+   "tyyppi": "aseta",
+   "asettaa": {
+    "poistaEsineet": [
+     "ITEM_OSAT_NOUTAMATTA"
+    ],
+    "esineet": [
+     "ITEM_OSAT_HALLISSA"
+    ]
+   }
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "iloinen",
+     "Osat tuli. Tuo farmari halliin, niin laitetaan kiinni."
+    ]
+   ]
+  }
+ ],
+ "_huom": "Tapsan paku ilmestyy pihalle, kun aloitat tehtävän (pelin __take.give). Pysyvä pysäköity paku pihalla puuttuu."
+}

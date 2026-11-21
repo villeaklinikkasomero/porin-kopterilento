@@ -1,0 +1,92 @@
+{
+ "id": "M07",
+ "nimi": "Tavarajuna",
+ "luku": 2,
+ "rautalanka": true,
+ "antaja": "LUMI",
+ "vaatii": [
+  "FLAG_CH1_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_PIILO",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "fail": [
+  {
+   "ehto": "kulkuneuvo_rikki",
+   "alkaen": 2
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "LUMI",
+     "ovela",
+     "Varjo lähettää alkuperäiset kauppakirjat Helsinkiin tavarajunassa. Kansio on viimeisen vaunun avoimella lavalla."
+    ],
+    [
+     "TAPSA",
+     "iloinen",
+     "Mää ajan, sää nappaat. Mul on haavi takakontissa."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_ASEMA",
+   "r": 30,
+   "teksti": "Mene rautatieasemalle – Tapsa odottaa avoautolla",
+   "kulku": "maa",
+   "merkki": "Asema",
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "juna_rinnalla",
+   "teksti": "Pysy junan rinnalla radan vieressä huoltotiellä (etäisyysmittari)",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "nappaa_kansio",
+   "teksti": "Nappaa kansio haavilla, kun mittari on vihreällä",
+   "puuttuuOhita": 3
+  },
+  {
+   "tyyppi": "aseta",
+   "asettaa": {
+    "esineet": [
+     "ITEM_KAUPPAKIRJAT_1"
+    ]
+   }
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "yllättynyt",
+     "Saatiin se! Kalastan tästä lähtien vaan papereita."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M07_DONE"
+  ],
+  "esineet": [
+   "ITEM_KAUPPAKIRJAT_1"
+  ]
+ },
+ "palkinto": {
+  "raha": 300,
+  "teksti": "Ensimmäiset kauppakirjat · Luku 2 käynnissä"
+ },
+ "_huom": "Käsikirjoitus: Tapsa ajaa avoautoa ja Rami nappaa. Rautalanka: juna_rinnalla ja nappaa_kansio puuttuvat (rata/juna-moduulin juna olemassa)."
+}

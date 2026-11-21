@@ -1,0 +1,117 @@
+{
+ "id": "M12",
+ "nimi": "Paintball-turnaus",
+ "luku": 2,
+ "rautalanka": true,
+ "antaja": "TAPSA",
+ "vaatii": [
+  "FLAG_M08_DONE",
+  "FLAG_M10_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_KORJAAMO_OVI",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "ovela",
+     "Varjo osti nuorisotalon ja haastaa sen avaimista. Paintball, kaks joukkuetta, kolme erää. Ei mikään ongelma."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_TEHDAS",
+   "r": 25,
+   "teksti": "Mene vanhalle tehdasalueelle",
+   "kulku": "maa",
+   "merkki": "Paintball"
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "paintball",
+   "teksti": "Voita kaksi kolmesta erästä (lipun ryöstö): väriosuma palauttaa lähtöön",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "VARTIJA",
+     "yllättynyt",
+     "Minuun osui. Toistan: minuun osui."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "RADIO",
+     "iloinen",
+     "Nuorisotalon avaimet palasivat nuorille! Varjolle ei tänään mennyt hyvin."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M12_DONE",
+   "FLAG_CH2_DONE"
+  ],
+  "muuttujat": {
+   "VAR_AREAS_SAVED": "+1"
+  }
+ },
+ "palkinto": {
+  "raha": 300,
+  "teksti": "Nuorisotalo pelastettu · Luku 3 avautui"
+ },
+ "antajaPaikka": {
+  "paikka": "LOC_KORJAAMO_OVI",
+  "dx": 3.2,
+  "dy": -1.5
+ },
+ "hahmot": [
+  {
+   "h": "VARTIJA",
+   "paikka": {
+    "paikka": "LOC_TEHDAS",
+    "dx": 10,
+    "dy": 0
+   },
+   "suunta": "pelaaja",
+   "alkaen": 2
+  },
+  {
+   "h": "VARTIJA",
+   "paikka": {
+    "paikka": "LOC_TEHDAS",
+    "dx": 14,
+    "dy": 4
+   },
+   "suunta": "pelaaja",
+   "alkaen": 2,
+   "malli": "npc_vartija_b"
+  },
+  {
+   "h": "VARTIJA",
+   "paikka": {
+    "paikka": "LOC_TEHDAS",
+    "dx": 12,
+    "dy": -4
+   },
+   "suunta": "pelaaja",
+   "alkaen": 2,
+   "malli": "npc_vartija_c"
+  }
+ ],
+ "_huom": "Paintball-pelimuoto (aseet → väripistooli, lippu, erät, joukkuebotit) puuttuu kokonaan."
+}

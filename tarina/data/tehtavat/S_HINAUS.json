@@ -1,0 +1,81 @@
+{
+ "id": "S_HINAUS",
+ "nimi": "Asiakkaan auto",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 360,
+ "laji": "sivu",
+ "merkki": "€",
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M02_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": {
+   "paikka": "LOC_KORJAAMO_OVI",
+   "dx": -4,
+   "dy": 0
+  },
+  "r": 3,
+  "kulku": "jalan"
+ },
+ "fail": [
+  {
+   "ehto": "kulkuneuvo_rikki",
+   "teksti": "Asiakkaan auto hajosi lopullisesti. Tapsa huokaa."
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "huolestunut",
+     "Asiakkaan auto sammu Kauppahallin eteen. Hae se tänne, mut varovasti – se on jo valmiiks kipee."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KAUPPAHALLI",
+   "r": 15,
+   "teksti": "Mene Kauppahallin eteen",
+   "kulku": "maa",
+   "merkki": "Asiakkaan auto"
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": "jalan",
+   "teksti": "Nouse kyydistä ja mene asiakkaan autolle"
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "anna_ajoneuvo",
+   "param": {
+    "paikka": "LOC_KAUPPAHALLI",
+    "dx": 4,
+    "dy": 0,
+    "yaw": 0,
+    "tyyppi": "hatch",
+    "viesti": "🚗 Asiakkaan auto",
+    "vari": "#6a7f9a"
+   },
+   "puuttuuOhita": 0.5
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KORJAAMO",
+   "r": 12,
+   "teksti": "Aja auto Tapsan halliin ehjänä",
+   "kulku": "auto",
+   "merkki": "Korjaamo",
+   "cp": true
+  }
+ ],
+ "palkinto": {
+  "raha": 25,
+  "teksti": "Asiakas tyytyväinen"
+ }
+}

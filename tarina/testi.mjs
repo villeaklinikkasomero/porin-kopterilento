@@ -37,34 +37,41 @@ testi('kaikki paikat ja vaihetyypit löytyvät', () => {
   }
 });
 
-testi('alussa vain M01 on saatavilla ja sen merkki näkyy', () => {
+testi('alussa tarinasta vain M01 on saatavilla (lisäksi ruokapaikat) ja sen merkki näkyy', () => {
   const { m, aja, log } = uusi(); aja(0.2);
-  ass(JSON.stringify(m.saatavilla().map(t => t.id)) === '["M01"]', JSON.stringify(m.saatavilla()));
-  const mk = log.filter(e => e[0] === 'merkit').pop()[1]; ass(mk.length === 1 && mk[0].id === 'M01');
+  ass(JSON.stringify(m.saatavilla().filter(t => !t.toistuva).map(t => t.id)) === '["M01"]', JSON.stringify(m.saatavilla()));
+  ass(JSON.stringify(m.saatavilla().filter(t => t.toistuva).map(t => t.id).sort()) === '["K_GRILLI","K_RATTIS"]', 'alussa vain ruoka: ' + JSON.stringify(m.saatavilla()));
+  const mk = log.filter(e => e[0] === 'merkit').pop()[1].filter(q => q.laji === 'tehtava'); ass(mk.length === 1 && mk[0].id === 'M01');
 });
 
-testi('M01: kehote merkillä, cut, auto, ajo korjaamolle → läpi ja M02 avautuu', () => {
+// M01 (21.11.2026): pyörällä Etelärannalta torille, siivet Rattikseen, korjaamolle → Ramin farmari. anna_ajoneuvo-käsittelijä on pelissä (talous/peli.js);
+// testissä se puuttuu, joten moottori ohittaa sen.
+const ohitaRepliikit = (m, aja, n = 8) => { for (let i = 0; i < n; i++) { m.toiminta(); aja(0.1); } };
+testi('M01: kehote merkillä, cut, Tapsan fillari, tori, Rattis, korjaamo → läpi ja M02 avautuu', () => {
   const T = uusi(); const { m, aja, mene, tapahtui, log } = T;
   mene('LOC_ETELARANTA', 'auto'); aja(0.2); ass(!log.some(e => e[0] === 'kehote' && e[1]), 'autolla ei pidä tarjota (vaatii jalan)');
   mene('LOC_ETELARANTA', 'jalan'); aja(0.2); ass(log.some(e => e[0] === 'kehote' && e[1] && e[1].includes('Tervetuloa')), 'kehote puuttuu');
   ass(m.toiminta() === 'aloitettu'); ass(tapahtui('cut'));
-  for (let i = 0; i < 6; i++) { m.toiminta(); aja(0.1); }               // ohita repliikit
-  ass(m.kehittaja.vaihe().tyyppi === 'kulku', 'odottaa autoa: ' + m.kehittaja.vaihe().tyyppi);
-  mene('LOC_ETELARANTA', 'auto'); aja(0.3);
-  mene('LOC_KORJAAMO', 'auto'); aja(0.5);
-  ass(!m.kaynnissa, 'ei päättynyt'); ass(m.tila.liput.FLAG_M01_DONE);
+  ohitaRepliikit(m, aja, 5); aja(1);                                   // cut + anna_ajoneuvo (ohitetaan)
+  ass(m.kehittaja.vaihe().tyyppi === 'mene', 'odottaa torille: ' + m.kehittaja.vaihe().tyyppi);
+  mene('LOC_TERTUN_KOJU', 'auto'); aja(0.3); ass(m.kehittaja.vaihe().tyyppi === 'mene', 'autolla ei pidä kelvata');
+  mene('LOC_TERTUN_KOJU', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 4); aja(0.3);
+  ass(m.tila.esineet.ITEM_SIIVET, 'siivet eivät tarttuneet');
+  mene('LOC_RATTIS', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 3);
+  mene('LOC_KORJAAMO', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 4); aja(1);
+  ass(!m.kaynnissa, 'ei päättynyt: ' + JSON.stringify(m.kehittaja.vaihe() && m.kehittaja.vaihe().tyyppi)); ass(m.tila.liput.FLAG_M01_DONE); ass(!m.tila.esineet.ITEM_SIIVET);
   const l = log.find(e => e[0] === 'lapi'); ass(l && l[1].avautui.some(a => a.id === 'M02'), 'M02 ei avautunut');
 });
 
-testi('M01: auto hajoaa → epäonnistuu, uudelleen jatkaa tarkistuspisteestä', () => {
+testi('M01: fillari hajoaa → epäonnistuu, uudelleen jatkaa tarkistuspisteestä', () => {
   const T = uusi(); const { m, W, aja, mene, log } = T;
-  m.kehittaja.aloita('M01'); for (let i = 0; i < 6; i++) { m.toiminta(); aja(0.1); }
-  mene('LOC_ETELARANTA', 'auto'); aja(0.5);
+  m.kehittaja.aloita('M01'); ohitaRepliikit(m, aja, 5); aja(1);
+  mene('LOC_TERTUN_KOJU', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 4); aja(0.3);
   ass(m.kehittaja.vaihe().tyyppi === 'mene');
   W.rikki = true; aja(0.1);
-  ass(m.kaynnissa.tila === 'epaonnistui'); const f = log.find(e => e[0] === 'epaonnistui'); ass(f[1].teksti.includes('Tapsan auto'), f[1].teksti); ass(f[1].tarkistuspiste);
+  ass(m.kaynnissa.tila === 'epaonnistui'); const f = log.find(e => e[0] === 'epaonnistui'); ass(f[1].teksti.includes('Tapsan fillari'), f[1].teksti); ass(f[1].tarkistuspiste);
   W.rikki = false; m.uudelleen(); ass(m.kehittaja.vaihe().tyyppi === 'mene', 'jatkaa väärästä vaiheesta');
-  mene('LOC_KORJAAMO', 'auto'); aja(0.3); ass(!m.kaynnissa);
+  mene('LOC_RATTIS', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 3); mene('LOC_KORJAAMO', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 4); aja(1); ass(!m.kaynnissa);
 });
 
 testi('M02: kilpa – liian hidas häviää, nopea voittaa; valinta asettaa radion', () => {
@@ -141,7 +148,7 @@ testi('tallennus ja lataus', () => {
 testi('koko luku 1 kehittäjäohituksilla → FLAG_CH1_DONE', () => {
   const T = uusi(); const { m, aja, mene } = T; mene('LOC_KORJAAMO');
   for (const id of ['M01', 'M02', 'M03', 'M04', 'M05', 'M06']) { m.kehittaja.aloita(id); for (let i = 0; i < 80 && m.kaynnissa; i++) { m.kehittaja.ohita(); aja(0.05); } ass(!m.kaynnissa, id + ' jäi kesken'); }
-  ass(m.tila.liput.FLAG_CH1_DONE); ass(m.saatavilla().length === 0);
+  ass(m.tila.liput.FLAG_CH1_DONE); ass(JSON.stringify(m.saatavilla().filter(t => !t.toistuva).map(t => t.id)) === '["M07"]', JSON.stringify(m.saatavilla()));
 });
 
 testi('seuraa-vaihe: kohde karkaa jos jää jälkeen', () => {
@@ -166,6 +173,127 @@ testi('hahmot: antaja merkillä, tehtävän hahmot vaiheittain, maailman hahmot'
   ass(l.filter(q => q.h === 'TAPSA').length === 1, 'Tapsa kahdesti');
   for (let i = 0; i < 6; i++) { m.toiminta(); aja(0.1); }   // cut läpi → vesiletku (ohitetaan 4 s) → vartijat lähtevät
   aja(5); l = m.hahmolista(); ass(l.filter(q => q.h === 'VARTIJA').length === 0, 'vartijat jäivät');
+});
+
+
+// ---------- 21.11.2026: koko tarina automaattipelaajalla, talous ja toistuvat tehtävät ----------
+// Automaattipelaaja liikkuu jokaisen vaiheen paikkaan oikealla kulkuneuvolla, ohittaa repliikit ja valitsee annetun vaihtoehdon.
+function kulkuneuvo(k) {
+  if (!k) return null; if (Array.isArray(k)) return kulkuneuvo(k[0]);
+  if (k === 'maa') return ['auto', 'estate']; if (k.startsWith('auto:')) return ['auto', k.slice(5)];
+  return [k, k === 'auto' ? 'estate' : null];
+}
+function pelaaja(T, valinnat = {}) {
+  const { m, W, aja } = T;
+  const siirry = (p, k) => { const q = m.paikka(p); if (q) { W.x = q.x; W.y = q.y; } const kk = kulkuneuvo(k); if (kk) { W.kulku = kk[0]; W.auto = kk[1]; } };
+  return function askel() {
+    const v = m.kehittaja.vaihe(); if (!v) return;
+    if (v.tila === 'epaonnistui') { m.uudelleen(); return; }
+    const t = tehtavat.find(x => x.id === v.id), s = t.vaiheet[v.i];
+    switch (s.tyyppi) {
+      case 'mene': siirry(s.paikka, s.kulku); break;
+      case 'kulku': siirry({ x: W.x, y: W.y }, s.kulku); break;
+      case 'keraa': { const k = s.kohteet.find(k => !(v.v.saatu || {})[k.id]); if (k) siirry(k.paikka, k.kulku || s.kulku || 'jalan'); break; }
+      case 'pysy': siirry(s.paikka, s.kulku); break;
+      case 'portit': siirry(s.portit[v.v.n || 0], s.kulku); break;
+      case 'seuraa': if (v.v.pos) { W.x = v.v.pos.x; W.y = v.v.pos.y; } break;
+      case 'valinta': { const nakyvat = s.vaihtoehdot.map((o, i) => i); const i = valinnat[v.id + ':' + v.i] ?? 0; m.valitse(i) || m.valitse(nakyvat.find(j => m.valitse(j)) ?? 0); break; }
+      default: m.toiminta();
+    }
+    aja(s.tyyppi === 'toiminto' ? 1 : 0.6);
+  };
+}
+function pelaaTarina(valinnat) {
+  const T = uusi(); const { m, W, aja, log } = T; const askel = pelaaja(T, valinnat);
+  for (let kierros = 0; kierros < 60 && !m.tila.liput.FLAG_GAME_COMPLETE; kierros++) {
+    if (!m.kaynnissa) {
+      const t = tehtavat.filter(x => !x.toistuva).find(x => m.saatavilla().some(s => s.id === x.id));
+      if (!t) { aja(25); continue; }                                   // automaattinen laukaisu odottaa
+      if (t.laukaisu.tyyppi === 'merkki') { const q = m.paikka(t.laukaisu.paikka); W.x = q.x; W.y = q.y; const kk = kulkuneuvo(t.laukaisu.kulku); if (kk) { W.kulku = kk[0]; W.auto = kk[1]; } aja(0.2); let r = m.toiminta(); for (let j = 0; j < 12 && r === 'repliikki'; j++) r = m.toiminta(); ass(r === 'aloitettu', t.id + ' ei alkanut merkiltä: ' + r); }
+      else { aja((t.laukaisu.viive || 0) + 1); ass(m.kaynnissa, t.id + ' ei alkanut itsestään'); }
+    }
+    for (let i = 0; i < 500 && m.kaynnissa; i++) askel();
+    ass(!m.kaynnissa, 'jäi kesken: ' + JSON.stringify(m.kehittaja.vaihe() && { id: m.kehittaja.vaihe().id, i: m.kehittaja.vaihe().i, t: m.kehittaja.vaihe().tyyppi }));
+  }
+  return T;
+}
+for (const [loppu, valinnat] of [['A', { 'M25:1': 0 }], ['B', { 'M25:1': 1, 'M13:2': 1, 'M17:1': 1 }], ['C', { 'M25:1': 2, 'M23:1': 1 }]]) {
+  testi(`koko tarina M01–M26 automaattipelaajalla → loppu ${loppu}`, () => {
+    const { m, log } = pelaaTarina(valinnat);
+    ass(m.tila.liput.FLAG_GAME_COMPLETE, 'peli ei päättynyt');
+    const tarina = tehtavat.filter(t => !t.toistuva).map(t => t.id);
+    ass(tarina.every(id => m.tila.valmiit.includes(id)), 'kesken: ' + tarina.filter(id => !m.tila.valmiit.includes(id)));
+    ass(log.some(e => e[0] === 'cut' && e[1].id === 'END_' + loppu && e[1].paalla), 'loppu ' + loppu + ' ei näkynyt');
+    ass(!log.some(e => e[0] === 'cut' && /^END_/.test(e[1].id || '') && e[1].id !== 'END_' + loppu && e[1].paalla), 'väärä loppu näkyi');
+    ass(m.tila.muuttujat.VAR_AREAS_SAVED === 5, 'pelastetut alueet ' + m.tila.muuttujat.VAR_AREAS_SAVED);
+    ass(m.tila.muuttujat.VAR_ALLIES === 3, 'liittolaiset ' + m.tila.muuttujat.VAR_ALLIES);
+    ass(!m.tila.liput.FLAG_TAPSA_CAPTURED, 'Tapsa jäi vangiksi');
+  });
+}
+
+testi('ruoka: raha ei riitä → valinta jää auki; rahalla energia nousee', () => {
+  let nyt = 5e6; const T = uusi({ kello: () => nyt }); const { m, W, aja, mene, log } = T;
+  m.kehittaja.aseta({ muuttujat: { ENERGIA: 20 } }); mene('LOC_GRILLIPORI', 'jalan'); aja(0.2);
+  ass(m.toiminta() === 'aloitettu', 'grilli ei alkanut'); aja(0.1);
+  ass(!m.valitse(0), 'ilman rahaa ei saa'); ass(log.some(e => e[0] === 'vihje' && /Rahat eivät riitä/.test(e[1])), 'vihje puuttuu');
+  m.kehittaja.aseta({ raha: 20 }); ass(m.valitse(0), 'rahalla ei saa'); ohitaRepliikit(m, aja, 1); aja(0.3);
+  ass(!m.kaynnissa, 'ei päättynyt'); ass(m.tila.raha === 12, 'raha ' + m.tila.raha); ass(m.tila.muuttujat.ENERGIA === 70, 'energia ' + m.tila.muuttujat.ENERGIA);
+  ass(log.some(e => e[0] === 'raha' && e[1].muutos === -8), 'rahailmoitus puuttuu');
+  ass(m.toiminta() !== 'aloitettu', 'kioski aukesi heti uudelleen (X ohitti repliikin)'); nyt += 3500; aja(0.2); ass(m.saatavilla().some(t => t.id === 'K_GRILLI'), 'kioski ei auennut uudelleen');
+});
+
+testi('nälkä: energia 0 estää keikat, mutta ruokapaikka toimii', () => {
+  const esto = (t, ti) => (t.ruoka || t.laji === 'kauppa' || t.laji === 'korjaamo') ? null : ((ti.muuttujat.ENERGIA ?? 100) <= 0 ? 'SYS_HUNGRY' : null);
+  const T = uusi({ esto }); const { m, aja, mene, log } = T;
+  m.kehittaja.aseta({ muuttujat: { ENERGIA: 0 }, raha: 10 });
+  mene('LOC_ETELARANTA', 'jalan'); aja(0.2); ass(m.toiminta() !== 'aloitettu', 'M01 alkoi nälkäisenä'); ass(log.some(e => e[0] === 'vihje' && /nälkäinen/.test(e[1])));
+  mene('LOC_GRILLIPORI', 'jalan'); aja(0.2); ass(m.toiminta() === 'aloitettu', 'grilli ei auennut'); m.valitse(2); aja(0.3);
+  ass(m.tila.muuttujat.ENERGIA === 15);
+  mene('LOC_ETELARANTA', 'jalan'); aja(0.2); ass(m.toiminta() === 'aloitettu', 'syömisen jälkeen M01 ei alkanut');
+});
+
+testi('korjaus: merkki vain vaurioituneelle autolle, hinta vaurion mukaan', () => {
+  let korjattu = 0; const kasittelijat = { korjaa_auto: { alku() { korjattu++; }, paivita: () => 'valmis' } };
+  const T = uusi({ kasittelijat }); const { m, W, aja, log } = T;
+  m.kehittaja.valmiiksi('M01'); m.kehittaja.aseta({ raha: 100 });
+  const q = m.paikka({ paikka: 'LOC_KORJAAMO', dx: 5 }); W.x = q.x; W.y = q.y; W.kulku = 'auto'; W.auto = 'estate'; aja(0.2);
+  ass(!m.saatavilla().some(t => t.id === 'K_KORJAUS'), 'ehjälle autolle tarjottiin korjausta');
+  m.kehittaja.aseta({ muuttujat: { AUTON_VAURIO: 50 } }); aja(0.2);
+  ass(m.toiminta() === 'aloitettu'); ohitaRepliikit(m, aja, 1);
+  const val = log.filter(e => e[0] === 'valinta' && e[1]).pop()[1];
+  ass(JSON.stringify(val.vaihtoehdot.filter(o => o.nakyy).map(o => o.i)) === '[1,3]', 'näkyvät: ' + JSON.stringify(val.vaihtoehdot.filter(o => o.nakyy)));
+  ass(m.valitse(1)); ohitaRepliikit(m, aja, 2); aja(0.5);
+  ass(!m.kaynnissa); ass(korjattu === 1); ass(m.tila.raha === 75); ass(m.tila.muuttujat.KORJAUS === 0);
+});
+
+testi('tuunaus: osto varaosaliikkeestä → nouto pakulla → asennus hallissa', () => {
+  const kasittelijat = { tuunaa: { alku(p, api) { api.aseta({ muuttujat: { TUNE_MOOTTORI: 1 } }); }, paivita: () => 'valmis' } };
+  const T = uusi({ kasittelijat }); const { m, W, aja, mene } = T; const askel = pelaaja(T);
+  m.kehittaja.valmiiksi('M01'); m.kehittaja.valmiiksi('M02'); m.kehittaja.aseta({ raha: 300 });
+  mene('LOC_VARAOSALIIKE', 'jalan'); aja(0.2); ass(m.toiminta() === 'aloitettu'); ohitaRepliikit(m, aja, 1);
+  ass(m.valitse(4), 'viritystä ei voinut ostaa'); ohitaRepliikit(m, aja, 2); aja(0.3);
+  ass(!m.kaynnissa && m.tila.raha === 20 && m.tila.esineet.ITEM_OSAT_NOUTAMATTA && m.tila.muuttujat.TILAUS === 5, JSON.stringify(m.tila));
+  mene('LOC_VARAOSALIIKE', 'jalan'); aja(0.2); ass(!m.saatavilla().some(t => t.id === 'K_OSAT'), 'toinen tilaus ennen noutoa');
+  mene('LOC_KORJAAMO_PIHA', 'jalan'); aja(0.2); ass(m.toiminta() === 'aloitettu', 'nouto ei alkanut');
+  for (let i = 0; i < 100 && m.kaynnissa; i++) askel();
+  ass(!m.kaynnissa && m.tila.esineet.ITEM_OSAT_HALLISSA && !m.tila.esineet.ITEM_OSAT_NOUTAMATTA, 'nouto: ' + JSON.stringify(m.tila.esineet));
+  const q = m.paikka({ paikka: 'LOC_KORJAAMO', dx: -5 }); W.x = q.x; W.y = q.y; W.kulku = 'auto'; W.auto = 'hatch'; aja(0.2);
+  ass(m.toiminta() !== 'aloitettu', 'asennus muuhun kuin farmariin');
+  W.auto = 'estate'; aja(0.2); ass(m.toiminta() === 'aloitettu', 'asennus ei alkanut');
+  for (let i = 0; i < 40 && m.kaynnissa; i++) askel();
+  ass(!m.kaynnissa && m.tila.muuttujat.TUNE_MOOTTORI === 1 && !m.tila.esineet.ITEM_OSAT_HALLISSA && m.tila.muuttujat.TILAUS === 0);
+  mene('LOC_VARAOSALIIKE', 'jalan'); aja(0.2); ass(m.saatavilla().some(t => t.id === 'K_OSAT'), 'uusi tilaus ei auennut');
+});
+
+testi('mikrotehtävä: palkkio, jäähtymisaika ja uusi kerta', () => {
+  let nyt = 1e6; const T = uusi({ kello: () => nyt }); const { m, aja } = T; const askel = pelaaja(T);
+  m.kehittaja.valmiiksi('M01');
+  const t = tehtavat.find(x => x.id === 'S_KUKAT'); const q = m.paikka(t.laukaisu.paikka);
+  const aloita = () => { T.W.x = q.x; T.W.y = q.y; T.W.kulku = 'jalan'; aja(0.2); return m.toiminta() === 'aloitettu'; };
+  ass(aloita(), 'ei alkanut'); for (let i = 0; i < 80 && m.kaynnissa; i++) askel();
+  ass(!m.kaynnissa && m.tila.raha === 12, 'raha ' + m.tila.raha); ass(m.tila.kerrat.S_KUKAT === 1);
+  ass(!aloita(), 'alkoi heti uudelleen'); nyt += 241000; ass(aloita(), 'ei alkanut jäähtymisen jälkeen');
+  for (let i = 0; i < 80 && m.kaynnissa; i++) askel(); ass(m.tila.raha === 24 && m.tila.kerrat.S_KUKAT === 2);
 });
 
 console.log(`\n${ok} läpi, ${vika} virhettä`); process.exit(vika ? 1 : 0);

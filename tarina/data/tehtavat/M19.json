@@ -1,0 +1,150 @@
+{
+ "id": "M19",
+ "nimi": "Piilossa joella",
+ "luku": 4,
+ "rautalanka": true,
+ "antaja": "TERTTU",
+ "vaatii": [
+  "FLAG_M18_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_ETELARANTA",
+  "r": 6,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TERTTU",
+     "iloinen",
+     "Mun miehen vanha venevaja. Kukaan ei oo käyny siellä sitten -98. Korjaa itsellesi vene, niin pääset liikkumaan joella."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Korjaa vene: kerää osat rannalta (4 kpl)",
+   "kohteet": [
+    {
+     "id": "o1",
+     "paikka": {
+      "paikka": "LOC_ETELARANTA",
+      "dx": -15,
+      "dy": -6
+     },
+     "r": 3,
+     "nimi": "Veneen osa 1"
+    },
+    {
+     "id": "o2",
+     "paikka": {
+      "paikka": "LOC_ETELARANTA",
+      "dx": -30,
+      "dy": -2
+     },
+     "r": 3,
+     "nimi": "Veneen osa 2"
+    },
+    {
+     "id": "o3",
+     "paikka": {
+      "paikka": "LOC_ETELARANTA",
+      "dx": 12,
+      "dy": -8
+     },
+     "r": 3,
+     "nimi": "Veneen osa 3"
+    },
+    {
+     "id": "o4",
+     "paikka": {
+      "paikka": "LOC_ETELARANTA",
+      "dx": 25,
+      "dy": -4
+     },
+     "r": 3,
+     "nimi": "Veneen osa 4"
+    }
+   ],
+   "cp": true,
+   "laskuri": "Osat"
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "vene",
+   "teksti": "Laske vene vesille",
+   "puuttuuOhita": 3
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_POHJOISRANTA",
+   "r": 20,
+   "teksti": "Auta kalastajaa: hae verkko joen pohjoisrannalta",
+   "merkki": "Kalastaja"
+  },
+  {
+   "tyyppi": "aseta",
+   "asettaa": {
+    "muuttujat": {
+     "VAR_ALLIES": "+1"
+    }
+   }
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KIRJURINLUOTO",
+   "r": 30,
+   "teksti": "Etsi kadonnut koira Kirjurinluodolta",
+   "merkki": "Koira"
+  },
+  {
+   "tyyppi": "aseta",
+   "asettaa": {
+    "muuttujat": {
+     "VAR_ALLIES": "+1"
+    }
+   }
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "soutukilpa",
+   "teksti": "Voita soutukilpa joella",
+   "puuttuuOhita": 3
+  },
+  {
+   "tyyppi": "aseta",
+   "asettaa": {
+    "muuttujat": {
+     "VAR_ALLIES": "+1"
+    }
+   }
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "RADIO",
+     "huolestunut",
+     "Huhut Rami Koskesta jakavat kaupunkia. Torikauppiaat sanovat, että hän on hyvä poika."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M19_DONE"
+  ]
+ },
+ "palkinto": {
+  "raha": 200,
+  "teksti": "Vene ja kolme uutta liittolaista"
+ },
+ "antajaPaikka": {
+  "paikka": "LOC_ETELARANTA",
+  "dx": 3
+ },
+ "_huom": "Vene kulkuneuvona tarinassa (vene.js + perämoottori ovat pelissä, kulku 'vene' puuttuu moottorista). Liittolaiset ovat rautalangassa pelkkiä käyntejä."
+}

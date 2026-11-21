@@ -4,7 +4,7 @@ Tämä kansio on Satamakaupunki-tarinan (PEGI 7) tehtävämoottori Porin kopteri
 **Kytketty peliin 21.11.2026:** `index.html`:n lopussa on `<script type="module" src="tarina/peli.js"></script>` (omistajan päätös). Muuten moottori
 lukee pelin tilan jo olemassa olevista `window.__*`-olioista ja piirtää oman käyttöliittymänsä pelin päälle.
 
-- Käsikirjoitus: https://claude.ai/artifact/YYef6VTmqtmEmZJPU8M6mN
+- Käsikirjoitus: **`tarina/KASIKIRJOITUS.md`** (pääversio repossa 21.11.2026 alkaen; alkuperäinen Claude-dokumentti https://claude.ai/artifact/YYef6VTmqtmEmZJPU8M6mN näkyy vain omistajan päätilillä)
 - Puuttuvat ominaisuudet: `../tarvittavat_ominaisuudet/README.md`
 
 ## Kokeilu
@@ -121,6 +121,10 @@ export const VESILETKU = {
 ```
 `api.mittari({ laji: 'palkki', nimi, arvo })` näyttää mittarin. `api.vihje(teksti)` näyttää vihjeen, ja `api.aseta({...})` asettaa liput.
 
+**Valmiit toiminnot:** `varjo_mittari` (tähdet näkyviin) ja `anna_ajoneuvo` (21.11.2026): tarina antaa pelaajalle kulkuneuvon ja istuttaa hänet heti kyytiin.
+`param`: `paikka` (+ `dx`, `dy`), `yaw` (rad, 0 = pohjoinen), `tyyppi` `bike` | `hatch` | `estate` | `van`, `vari` `#rrggbb`, `viesti`. Edellinen ajoneuvo jää paikalleen
+kuin lainattu, kopteri odottaa laskeutumispaikallaan. Pelin puolella `window.__take.give` (src/js/155_auton_lainaus.js). M01: Tapsan fillari ja Ramin vanha farmari.
+
 ## Hahmot maailmassa (`hahmot.js`)
 
 Tarinan hahmot seisovat pelissä omilla malleillaan: `npc_tapsa`, `npc_lumi`, `npc_terttu`, `npc_varjo`, `npc_vartija` ja `npc_myyja`
@@ -167,3 +171,17 @@ Kokeilusivulla **Z** vaihtaa lähikuvaan, jossa hahmot näkyvät.
 - **Puuttuvat toiminnot:** hiiviskely, vesiletku, drooni ja Varjo-mittarin varsinainen jahtaus. Ne ohitetaan automaattisesti. `varjo_mittari` näyttää nyt vain tähdet.
 - **Merkkien korkeus:** pilari ulottuu 6 m maan alle ja 64 m ylös, joten maaston korkeus ei haittaa. Rengas on tasolla 0.
 - **Kun index.html pilkotaan:** `peli.js`:n `maailma()` ja `siirra()` ovat ainoat kohdat, jotka lukevat pelin sisäistä tilaa.
+
+## Rautalanka, talous ja toistuvat tehtävät (21.11.2026)
+
+- **Koko tarina M01–M26** on dataksi kirjoitettuna (`data/tehtavat/`), lisäksi kaupat `K_*` ja mikrotehtävät `S_*`. Puuttuvat mekaniikat ovat `toiminto`-vaiheita
+  (`puuttuuOhita: 3`). Lista puutteista: `tarvittavat_ominaisuudet/PUUTTUU_RAUTALANGASTA.md`. M07–M26 ja K/S on tehty generaattoreilla `tools/tarina/gen_tarina.py`
+  ja `gen_sivu.py` – **muokkaa nyt suoraan JSONia**, älä aja generaattoreita uudelleen (ne kirjoittavat käsin tehdyt muutokset yli).
+- **Toistuva tehtävä:** `"toistuva": true, "jaahtyy": s, "laji": "kauppa"|"korjaamo"|"sivu", "merkki": "🍔"`. Valmistuu monta kertaa (`tila.kerrat`), uudelleen `jaahtyy` sekunnin päästä.
+- **Hinta valinnassa:** vaihtoehto `{ "teksti": "Porilainen – 8 €", "hinta": 8, "lahde": "Grilli-Pori", "asettaa": { "muuttujat": { "ENERGIA": "+50" } } }`. Jos rahat eivät riitä,
+  valinta jää auki ja tulee vihje (`SYS_NO_MONEY`).
+- **Ehdot:** uudet `raha` (vähintään) ja `eiEsinetta`. `aseta`: `raha` voi olla negatiivinen (näkyy ilmoituksena).
+- **Esto:** `luoMoottori({ esto(t, tila) })` voi estää tehtävän alun (talous: nälkä). `toiminta()` palauttaa silloin `'estetty'`.
+- **Talous (`talous.js`):** ENERGIA laskee, AUTON_VAURIO korjaamon ehtoon, käsittelijät `korjaa_auto` ja `tuunaa`, tuunausten vaikutus Ramin farmariin, HUD `#tr-energia`.
+- **Valmiit käsittelijät:** `varjo_mittari` (vain tähdet), `anna_ajoneuvo`, `korjaa_auto`, `tuunaa`.
+- Valinnoissa näppäimet 1–9.

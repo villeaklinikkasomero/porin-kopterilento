@@ -1,0 +1,134 @@
+{
+ "id": "M23",
+ "nimi": "Tapsan vapautus",
+ "luku": 4,
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M22_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "automaattinen",
+  "viive": 8
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "viesti",
+   "viesti": "Tapsa on varaston yläkerrassa. Tule katolta.",
+   "kesto": 4,
+   "lahettaja": "LUMI"
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Miten keikka tehdään?",
+   "vaihtoehdot": [
+    {
+     "teksti": "Hiljainen (vähemmän tähtiä)",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_APPROACH_M23": 1
+      }
+     }
+    },
+    {
+     "teksti": "Äänekäs (nopeampi, enemmän tähtiä)",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_APPROACH_M23": 2
+      }
+     }
+    }
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "lentoreppu",
+   "teksti": "Lennä varaston katolle lentorepulla",
+   "puuttuuOhita": 3
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_VARASTO",
+   "r": 25,
+   "teksti": "Laskeudu varaston katolle",
+   "merkki": "Katto",
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "rc_auto",
+   "teksti": "Harhauta vartijat kauko-ohjattavalla autolla",
+   "puuttuuOhita": 3,
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M23",
+    "yhtakuin": 1
+   }
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "katkaise_sahkot",
+   "teksti": "Kytke varaston sähköt pois ja kaikki valot sammuvat",
+   "puuttuuOhita": 3,
+   "ehto": {
+    "muuttuja": "VAR_APPROACH_M23",
+    "yhtakuin": 2
+   }
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "tiirikka",
+   "teksti": "Avaa Tapsan varastohuoneen lukko (tiirikkaminipeli)",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "aseta",
+   "asettaa": {
+    "poista": [
+     "FLAG_TAPSA_CAPTURED"
+    ]
+   }
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "iloinen",
+     "Mitä sulla on selässä? Hetkinen. Mul on kysymyksiä. Ja haluun kokeilla."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KORJAAMO",
+   "r": 12,
+   "teksti": "Pakene Tapsan kanssa korjaamolle",
+   "kulku": "maa",
+   "merkki": "Korjaamo"
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M23_DONE",
+   "FLAG_CH4_DONE"
+  ]
+ },
+ "palkinto": {
+  "raha": 400,
+  "teksti": "Tapsa vapaana · Luku 5 avautui"
+ },
+ "hahmot": [
+  {
+   "h": "TAPSA",
+   "paikka": {
+    "paikka": "LOC_VARASTO",
+    "dx": -4,
+    "dy": 0
+   },
+   "suunta": "pelaaja",
+   "alkaen": 8,
+   "asti": 8
+  }
+ ],
+ "_huom": "Alkaa itsestään M22:n jälkeen (Lumin viesti)."
+}

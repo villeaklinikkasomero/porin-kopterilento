@@ -1,0 +1,105 @@
+{
+ "id": "M16",
+ "nimi": "Satamalaituri",
+ "luku": 3,
+ "rautalanka": true,
+ "antaja": "LUMI",
+ "vaatii": [
+  "FLAG_M15_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_PIILO",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "fail": [
+  {
+   "ehto": "kulkuneuvo_rikki",
+   "alkaen": 4
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_CH3_A",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Lumin piilo. Valkotaululle on kiinnitetty kuvia ja karttoja.]"
+    },
+    [
+     "LUMI",
+     "ovela",
+     "Kaksi tapaa. Hiljainen: kukaan ei huomaa mitään. Äänekäs: kaikki huomaavat, mutta liian myöhään."
+    ]
+   ],
+   "kamera": {
+    "paikka": "LOC_PIILO",
+    "kohti": "LOC_PIILO"
+   }
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "LUMI",
+     "ovela",
+     "Varjon kontissa on kauppakeskuksen pienoismalli ja kokousmuistiot. Kontti on liian painava autolle, joten se nostetaan ilmaan."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_ETELARANTA",
+   "r": 12,
+   "teksti": "Hae helikopteri Lumin tuttavalta Etelärannan laiturilta",
+   "kulku": "maa",
+   "merkki": "Laituri"
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "anna_kopteri",
+   "teksti": "Nouse helikopteriin",
+   "puuttuuOhita": 3
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_VARASTO",
+   "r": 40,
+   "teksti": "Lennä Varjon varastolle",
+   "kulku": "heli",
+   "merkki": "Kontti",
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "vaijeri",
+   "teksti": "Laske vaijeri ja kiinnitä kontti (tarkkuuslasku)",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_PIILO",
+   "r": 40,
+   "teksti": "Lennä kontti joen yli Lumin piilolle – vältä nostureita",
+   "kulku": "heli",
+   "merkki": "Piilo"
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M16_DONE"
+  ],
+  "esineet": [
+   "ITEM_PIENOISMALLI"
+  ]
+ },
+ "palkinto": {
+  "raha": 450,
+  "teksti": "Pienoismalli ja muistiot"
+ },
+ "_huom": "Kopterin vaijeri ja kontti (fysiikka, malli) puuttuvat. anna_kopteri: kopterin siirto laiturille puuttuu."
+}

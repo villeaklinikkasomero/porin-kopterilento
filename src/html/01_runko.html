@@ -1,0 +1,75 @@
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="mission" class="hud panel">
+  <div class="k" id="mk">Maamerkkikierros</div>
+  <div class="t" id="mt">–</div>
+  <div class="row"><span>Matka <b id="md">–</b></span><span>Aika <b id="mtime">0:00</b></span><span><b id="mn">0/0</b></span></div>
+  <div id="prog"><i></i></div>
+</div>
+<div id="mapwrap" class="hud panel"><canvas id="mini" width="340" height="340"></canvas></div>
+<div id="gauges" class="hud panel">
+  <div class="g"><div class="v" id="gs">0</div><div class="u">km/h</div></div>
+  <div class="g heli-only"><div class="v" id="ga">0</div><div class="u">korkeus m</div></div>
+  <div class="g"><div class="v" id="gh">P</div><div class="u">suunta</div></div>
+  <div class="g hpg"><div id="hp"><i></i></div><div class="u">kunto</div></div>
+  <div class="g ride-only" id="gradio"><div id="rctl"><button id="rprev" aria-label="Edellinen kanava">◀</button><div id="rinfo"><b id="rch2">Radio pois</b><span id="rsong2"></span></div><button id="rnext" aria-label="Seuraava kanava">▶</button><input id="rvol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Radion äänenvoimakkuus"></div><div class="u">radio · R</div></div>
+</div>
+<div id="street" class="hud"><div class="s" id="sn"></div><div class="p" id="sp"></div></div>
+<div id="nav" class="hud panel"><canvas id="navc" width="116" height="116"></canvas><div><div class="nd" id="navd"></div><div class="nn" id="navn"></div></div></div>
+<div id="toast" class="hud panel"></div>
+<div id="hint" class="hud panel"></div><div id="fade"></div>
+<div id="radio" class="hud panel ride-only"><span id="rch">📻 Radio pois</span><span id="rsong"></span></div>
+<div id="board" class="hud panel"><h2>Päivän top-10</h2><div class="sub" id="bsub"></div><div id="nickrow" style="display:none;margin:10px 0 4px"><label for="nick">Pääsit listalle! Nimimerkki</label><input id="nick" maxlength="5" autocomplete="off" spellcheck="false" placeholder="5 merkkiä"><button id="nicksave" >Tallenna</button><span style="font-size:12px;width:100%">Älä käytä oikeaa nimeäsi.</span></div><ol class="top" id="top1"></ol><div class="topnote" id="note1"></div></div>
+<div id="help" class="hud panel">
+  <span class="heli-only"><kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
+  <kbd>Väli</kbd> ylös · <kbd>Shift</kbd> alas · <kbd>Enter</kbd> nouse ulos<br></span><span class="car-only"><kbd>W</kbd> kaasu · <kbd>S</kbd> jarru/peruutus · <kbd>A</kbd><kbd>D</kbd> ohjaus · <kbd>Väli</kbd> käsijarru · <kbd>R</kbd> radio · <kbd>Enter</kbd> nouse ulos<br></span><span class="walk-only"><kbd>W</kbd><kbd>S</kbd> kävele · <kbd>A</kbd><kbd>D</kbd> käänny · <kbd>Q</kbd><kbd>E</kbd> sivuaskel · <kbd>Shift</kbd> juokse<br><kbd>Enter</kbd> kyytiin / ovesta · <kbd>H</kbd> tervehdi · <kbd>B</kbd> musiikki ja tanssi · </span><kbd>C</kbd> kamera · <kbd>M</kbd> ääni · <kbd>N</kbd> uusi yritys · <kbd>T</kbd> top-10
+</div>
+<div id="credit">Ilmakuva © Maanmittauslaitos, ortokuva 2025 (CC BY 4.0) · Kartta-aineisto, bussipysäkit ja lentoaseman alueet © OpenStreetMapin tekijät · lentoaseman tiedot: AIP Finland (Fintraffic) · bussien sijainnit: Digitransit / Waltti (avoin data) · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos (CC BY 4.0) · valokuvat © Porin kaupunki · maalaukset: Akseli Gallen-Kallela (Juseliuksen mausoleumin freskojen esityöt) ja R. W. Ekman (alttaritaulun luonnos), Kansallisgalleria / Wikimedia Commons (public domain, CC0) · Porin Teatterin kattomaalaukset: valokuva Sven Raita 1955, Satakunnan Museo (CC BY 4.0), oikaistu ja värikorjattu</div>
+
+<div id="touch">
+  <div id="stick"><div id="knob"></div></div>
+  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb ride-only" id="tradio">📻</div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta">🚶</div><div class="tb walk-only" id="thei" aria-label="Tervehdi kävelijää">💬</div><div class="tb walk-only" id="tdance" aria-label="Musiikki ja tanssi">🎵</div><div class="tb walk-only" id="trun" aria-label="Juokse">🏃</div>
+</div>
+
+<div id="start">
+  <div id="card" class="panel">
+    <h1>Pori<span>kopteri</span></h1>
+    <p>Lennä helikopterilla tai aja autolla Porin keskustassa. Joka päivä arvotaan uusi kierros: lähde Kirjurinluodon areenalta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja palaa Kirjurinluotoon. Voit myös nousta ulos ja kävellä: Keski-Porin kirkkoon (tornin ovi) ja Juseliuksen mausoleumiin pääsee sisälle. Nopeimmat ajat pääsevät päivän top-10:een – kopterille ja autolle on omat listansa.</p>
+    <div id="vehs" role="group" aria-label="Valitse kulkuneuvo">
+      <button class="veh" id="vheli" aria-pressed="true"><video poster="./veh_heli.jpg" autoplay muted loop playsinline><source src="./veh_heli.webm" type="video/webm"><source src="./veh_heli.mp4" type="video/mp4"></video><span>Helikopteri</span></button>
+      <button class="veh" id="vcar" aria-pressed="false"><video poster="./veh_auto.jpg" autoplay muted loop playsinline><source src="./veh_auto.webm" type="video/webm"><source src="./veh_auto.mp4" type="video/mp4"></video><span>Auto</span></button>
+    </div>
+    <div id="keys" class="heli-only">
+      <div><kbd>W</kbd> <kbd>S</kbd> / <kbd>↑</kbd> <kbd>↓</kbd></div><div>eteen ja taakse</div>
+      <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>käännä</div>
+      <div><kbd>Q</kbd> <kbd>E</kbd></div><div>liu'u sivulle</div>
+      <div><kbd>Väli</kbd> / <kbd>Shift</kbd></div><div>ylös ja alas</div>
+      <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään (maassa) ja takaisin kyytiin</div>
+      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Rock, pois</div>
+      <div><kbd>Y</kbd></div><div>kyyti: ota kyytiä pyytävä kyytiin (pysähdy viereen)</div>
+      <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
+    </div>
+    <div id="keys2" class="car-only" style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0;font-size:14px;align-items:center">
+      <div><kbd>W</kbd> / <kbd>↑</kbd></div><div>kaasu</div>
+      <div><kbd>S</kbd> / <kbd>↓</kbd></div><div>jarru ja peruutus</div>
+      <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>ohjaus</div>
+      <div><kbd>Väli</kbd></div><div>käsijarru</div>
+      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Rock, pois</div>
+      <div><kbd>Y</kbd></div><div>kyyti: ota kyytiä pyytävä kyytiin (pysähdy viereen)</div>
+      <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään ja takaisin kyytiin</div>
+      <div><kbd>N</kbd></div><div>bussi: Kauppatorin laiturilta tai Matkakeskuksesta saa bussin (Enter), pysäkillä pysähdy niin ovet aukeavat. Oikeaan bussiin nouset pysäkillä Enterillä, N painaa pysähtyy-nappia</div>
+      <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
+    </div>
+    <div id="daily">
+      <div class="dh">Päivän kierros <b id="dday"></b></div>
+      <div id="droute"></div>
+    </div>
+    <button id="go" disabled>Ladataan ilmakuvaa…</button>
+    <p id="src">Rakennukset, kadut ja puut: © OpenStreetMapin tekijät (ODbL). Ilmakuva: Porin kaupungin avoin WMS-rajapinta. Rakennusten korkeudet ovat osin arvioita.</p>
+  </div>
+</div>
+
+<script type="module">

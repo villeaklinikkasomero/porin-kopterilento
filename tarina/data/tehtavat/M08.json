@@ -1,0 +1,119 @@
+{
+ "id": "M08",
+ "nimi": "Toripaniikki",
+ "luku": 2,
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M07_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_TERTUN_KOJU",
+  "r": 5,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TERTTU",
+     "huolestunut",
+     "Varjo sai meijän torilupien uusinnat \"hukkumaan\". Hakemukset pitää olla kaupungintalolla neljältä, tai torikesä on mennyttä."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Kerää hakemukset viideltä kojulta",
+   "kohteet": [
+    {
+     "id": "h1",
+     "paikka": {
+      "paikka": "LOC_TORI",
+      "dx": -20,
+      "dy": 10
+     },
+     "r": 3,
+     "nimi": "Hakemus 1"
+    },
+    {
+     "id": "h2",
+     "paikka": {
+      "paikka": "LOC_TORI",
+      "dx": 0,
+      "dy": 18
+     },
+     "r": 3,
+     "nimi": "Hakemus 2"
+    },
+    {
+     "id": "h3",
+     "paikka": {
+      "paikka": "LOC_TORI",
+      "dx": 22,
+      "dy": 8
+     },
+     "r": 3,
+     "nimi": "Hakemus 3"
+    },
+    {
+     "id": "h4",
+     "paikka": {
+      "paikka": "LOC_TORI",
+      "dx": 18,
+      "dy": -14
+     },
+     "r": 3,
+     "nimi": "Hakemus 4"
+    },
+    {
+     "id": "h5",
+     "paikka": {
+      "paikka": "LOC_TERTUN_KOJU",
+      "dx": 2,
+      "dy": 0
+     },
+     "r": 3,
+     "nimi": "Hakemus 5"
+    }
+   ],
+   "cp": true,
+   "laskuri": "Hakemukset"
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KAUPUNGINTALO",
+   "r": 10,
+   "teksti": "Vie hakemukset Junneliuksen palatsiin ennen kello 16 (3 min)",
+   "kulku": "maa",
+   "merkki": "Kaupungintalo",
+   "aikaraja": 180,
+   "aikarajaTeksti": "Kello löi neljä. Terttu laittaa kahvit – yritetään uudestaan."
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TERTTU",
+     "iloinen",
+     "Pojat, huomenna kahvit talon piikkiin."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M08_DONE"
+  ],
+  "muuttujat": {
+   "VAR_AREAS_SAVED": "+1"
+  }
+ },
+ "palkinto": {
+  "raha": 150,
+  "teksti": "Kauppatori pelastettu (1/5)"
+ },
+ "_huom": "Törmäyksessä hakemus putoaa (puuttuu: pudotus/poiminta). Merkki: Terttu seisoo aina kojullaan (maailma.json).",
+ "merkki": "Te"
+}

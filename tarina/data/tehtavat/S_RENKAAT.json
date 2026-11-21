@@ -1,0 +1,66 @@
+{
+ "id": "S_RENKAAT",
+ "nimi": "Rengaskuljetus",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 360,
+ "laji": "sivu",
+ "merkki": "€",
+ "rautalanka": true,
+ "antaja": "VARAOSAMYYJA",
+ "antajaPaikka": {
+  "paikka": "LOC_VARAOSALIIKE",
+  "dx": 7,
+  "dy": 0
+ },
+ "vaatii": [
+  "FLAG_M03_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": {
+   "paikka": "LOC_VARAOSALIIKE",
+   "dx": 6,
+   "dy": 0
+  },
+  "r": 3,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "VARAOSAMYYJA",
+     "neutraali",
+     "Talvirenkaat asemalle, bussivarikon kuski odottaa. Tarvitset pakun."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "kulku",
+   "kulku": "auto:van",
+   "teksti": "Hanki pakettiauto (pysäköityjä pakuja on kaupungilla, Tapsan paku korjaamolla)"
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_VARAOSA_LAITURI",
+   "r": 8,
+   "teksti": "Lastaa renkaat laiturilta",
+   "kulku": "auto:van",
+   "merkki": "Lastauslaituri"
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_ASEMA",
+   "r": 30,
+   "teksti": "Vie renkaat asemalle",
+   "kulku": "auto:van",
+   "merkki": "Asema"
+  }
+ ],
+ "palkinto": {
+  "raha": 20,
+  "teksti": "Renkaat perillä"
+ }
+}

@@ -1,0 +1,158 @@
+{
+ "id": "M14",
+ "nimi": "Hotelli-ilta",
+ "luku": 3,
+ "rautalanka": true,
+ "antaja": "LUMI",
+ "vaatii": [
+  "FLAG_M13_DONE"
+ ],
+ "ehto": {
+  "esine": "ITEM_KULKUKORTTI"
+ },
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_PIILO",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_CH3_A",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Lumin piilo. Valkotaululle on kiinnitetty kuvia ja karttoja.]"
+    },
+    [
+     "LUMI",
+     "ovela",
+     "Kaksi tapaa. Hiljainen: kukaan ei huomaa mitään. Äänekäs: kaikki huomaavat, mutta liian myöhään."
+    ]
+   ],
+   "kamera": {
+    "paikka": "LOC_PIILO",
+    "kohti": "LOC_PIILO"
+   }
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_TEATTERI",
+   "r": 8,
+   "teksti": "Valmistelu A: hae hotellin henkilökunnan asut teatterilta",
+   "kulku": "maa",
+   "merkki": "Teatteri"
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Ota asut",
+   "kohteet": [
+    {
+     "id": "asut",
+     "paikka": "LOC_TEATTERI",
+     "r": 6,
+     "nimi": "Henkilökunnan asut",
+     "esine": "ITEM_HOTELLIASU"
+    }
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "hakkerointi",
+   "teksti": "Valmistelu B: Lumi hakkeroi kamerat – yhdistä johdot",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_HOTELLI",
+   "r": 10,
+   "teksti": "Mene Hotelli Varjoon henkilökunnan ovesta",
+   "kulku": "jalan",
+   "merkki": "Hotelli Varjo",
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "naamioituminen",
+   "teksti": "Kulje aulan läpi henkilökunnan asussa ja tarjoile kolmelle vieraalle (naamioitumismittari)",
+   "puuttuuOhita": 3
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "holvi_rytmipeli",
+   "teksti": "Avaa holvi kulkukortilla ja Lumin koodilla (rytmipeli)",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": {
+    "paikka": "LOC_HOTELLI",
+    "dx": 25,
+    "dy": -10
+   },
+   "r": 8,
+   "teksti": "Vie kauppakirjat ulos pyykkikärryssä",
+   "kulku": "jalan",
+   "merkki": "Pyykkiovi"
+  },
+  {
+   "tyyppi": "cut",
+   "id": "CUT_M14_A",
+   "rivit": [
+    [
+     "HARJU",
+     "yllättynyt",
+     "Te ette ole hotellin henkilökuntaa."
+    ],
+    [
+     "RAMI",
+     "neutraali",
+     "Emme."
+    ],
+    [
+     "HARJU",
+     "huolestunut",
+     "…Toinen ovi vasemmalla on nopeampi."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "aseta",
+   "asettaa": {
+    "liput": [
+     "FLAG_HARJU_DOUBT"
+    ]
+   }
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M14_DONE",
+   "FLAG_HARJU_DOUBT"
+  ],
+  "esineet": [
+   "ITEM_KAUPPAKIRJAT_2"
+  ]
+ },
+ "palkinto": {
+  "raha": 400,
+  "teksti": "Toiset kauppakirjat"
+ },
+ "hahmot": [
+  {
+   "h": "HARJU",
+   "paikka": {
+    "paikka": "LOC_HOTELLI",
+    "dx": 20,
+    "dy": -6
+   },
+   "suunta": "pelaaja",
+   "alkaen": 8
+  }
+ ],
+ "_huom": "Hotellin sisätila puuttuu (aula, holvi). Naamioituminen: pelaajan hahmon asu vaihtuu (malli puuttuu)."
+}

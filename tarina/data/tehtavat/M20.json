@@ -1,0 +1,145 @@
+{
+ "id": "M20",
+ "nimi": "Vapaapudotus",
+ "luku": 4,
+ "rautalanka": true,
+ "antaja": "LUMI",
+ "vaatii": [
+  "FLAG_M19_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_PIILO",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "LUMI",
+     "huolestunut",
+     "Varjon kuriiri vie todisteet väärennöksistä Varjon yksityiskoneella pois maasta. Kone lähtee lentoasemalta viidentoista minuutin päästä."
+    ],
+    [
+     "RAMI",
+     "neutraali",
+     "Sitten se ei lähde."
+    ],
+    [
+     "LUMI",
+     "ovela",
+     "Se lähtee. Mutta se tulee takaisin. Minulla on suunnitelma. Toivottavasti sinulla ei ole korkean paikan kammoa."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_LENTOASEMA",
+   "r": 40,
+   "teksti": "Aja keskustasta lentoasemalle (3 min)",
+   "kulku": "maa",
+   "merkki": "Lentoasema",
+   "cp": true,
+   "aikaraja": 180
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_LENTOASEMA_HALLI",
+   "r": 25,
+   "teksti": "Mene huoltohalliin – Lumin tuttava odottaa helikopterin kanssa",
+   "merkki": "Halli",
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "anna_kopteri",
+   "teksti": "Nouse helikopteriin",
+   "puuttuuOhita": 3
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "seuraa_konetta",
+   "teksti": "Seuraa konetta ilmassa ja pysy vihreällä alueella 60 s, kunnes Lumi saa yhteyden autopilottiin",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "hyppy_kiitotielle",
+   "teksti": "Hyppää helikopterista ja laskeudu laskuvarjolla kiitotien merkkiin ennen kuin kone laskeutuu",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "keraa",
+   "teksti": "Ota salkku kuriirilta koneen portailla",
+   "kohteet": [
+    {
+     "id": "salkku",
+     "paikka": "LOC_KIITOTIE",
+     "r": 8,
+     "nimi": "Salkku",
+     "esine": "ITEM_KOPIOTODISTE"
+    }
+   ]
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "KURIIRI",
+     "yllättynyt",
+     "Kone kääntyi itsestään ympäri. Ja sinä tulit taivaalta."
+    ],
+    [
+     "RAMI",
+     "ovela",
+     "Salkku, kiitos."
+    ],
+    [
+     "KURIIRI",
+     "huolestunut",
+     "…Ihan reilua. En minä edes pidä lentämisestä."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "RADIO",
+     "iloinen",
+     "Porin lentoasemalla nähtiin tänään laskuvarjohyppy kiitotielle. Lentoaseman mukaan kenelläkään ei ole hätää, ja lennot jatkuvat normaalisti."
+    ]
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M20_DONE"
+  ],
+  "esineet": [
+   "ITEM_KOPIOTODISTE",
+   "ITEM_LASKUVARJO"
+  ]
+ },
+ "palkinto": {
+  "raha": 500,
+  "teksti": "Todisteet väärennöksistä · laskuvarjo varusteisiin"
+ },
+ "hahmot": [
+  {
+   "h": "KURIIRI",
+   "paikka": {
+    "paikka": "LOC_KIITOTIE",
+    "dx": 4,
+    "dy": 0
+   },
+   "suunta": "pelaaja",
+   "alkaen": 6
+  }
+ ],
+ "_huom": "Lentokone, laskuvarjo ja kopteri ovat pelissä erikseen. Tarina tarvitsee: AI-kone kiitotiellä, seuraa-alue ilmassa, hyppy kopterista (hyppy.js), kiitotiemerkki."
+}

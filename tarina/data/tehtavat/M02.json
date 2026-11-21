@@ -30,14 +30,14 @@
     [
      "TAPSA",
      "ovela",
-     "Katotaan, ootko sää vielä nopee. Kespan lenkki, Mikonkadun valoilta. Häviäjä tarjoaa makkaraperät."
+     "No, farmari on lämmin. Katotaan, ootko sää vielä nopee. Kespan lenkki, Mikonkadun valoilta. Häviäjä tarjoaa makkaraperät."
     ]
    ]
   },
   {
    "tyyppi": "kulku",
    "kulku": "auto",
-   "teksti": "Ota auto"
+   "teksti": "Nouse vanhaan farmariisi (tai mihin tahansa autoon)"
   },
   {
    "tyyppi": "mene",

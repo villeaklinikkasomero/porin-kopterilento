@@ -1,0 +1,188 @@
+{
+ "id": "M26",
+ "nimi": "Viimeinen takaa-ajo",
+ "luku": 5,
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M25_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "automaattinen",
+  "viive": 3
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_M26_A",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Varjo tajuaa, mitä on tapahtunut, ja yrittää paeta yksityisveneellään ennen kuin totuus leviää.]"
+    },
+    [
+     "VARJO",
+     "vihainen",
+     "Ette te mitään todista! Ilman minua tämä kaupunki on pelkkä vanha tori ja joki!"
+    ],
+    [
+     "RAMI",
+     "neutraali",
+     "Hyvä tori. Hyvä joki."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "varjo_mittari",
+   "teksti": "Aja tornilta Etelärannan laiturille",
+   "puuttuuOhita": 0.5,
+   "param": {
+    "tahdet": 5,
+    "kesto": 120
+   }
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_ETELARANTA",
+   "r": 15,
+   "teksti": "Aja tornilta Etelärannan laiturille",
+   "kulku": "maa",
+   "merkki": "Laituri",
+   "cp": true
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "veneen_takaa_ajo",
+   "teksti": "Seuraa Varjon venettä joella (vene)",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KIRJURINLUOTO",
+   "r": 40,
+   "teksti": "Ohjaa vene Kirjurinluodon rantaan, jossa juhlakansa odottaa",
+   "merkki": "Kirjurinluoto"
+  },
+  {
+   "tyyppi": "cut",
+   "id": "END_A",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Aamu torilla. Kojut auki. Varjo-tornin kyltti puretaan. Radio puhuu taustalla.]"
+    },
+    [
+     "RADIO",
+     "iloinen",
+     "Varjo Holdings ilmoitti perääntyvänsä kauppakeskushankkeesta. Viktor Varjo ei ole tavoitettavissa kommentteja varten, ja hänen kerrotaan lähteneen pitkälle lomalle."
+    ],
+    [
+     "TAPSA",
+     "huolestunut",
+     "Ja jos se tulee takas?"
+    ],
+    [
+     "RAMI",
+     "ovela",
+     "Sitten tiedämme, mistä hänet löytää."
+    ],
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Jatko-osan vihje: postikortti ulkomailta, allekirjoitus V.]"
+    }
+   ],
+   "ehto": {
+    "muuttuja": "VAR_ENDING",
+    "yhtakuin": 1
+   }
+  },
+  {
+   "tyyppi": "cut",
+   "id": "END_B",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Juhlan iso näyttö torilla. Lumi painaa nappia. Näytölle ilmestyvät väärennetyt allekirjoitukset. Juhlakansa haukkoo henkeään.]"
+    },
+    [
+     "RADIO",
+     "yllättynyt",
+     "Ennenkuulumatonta! Viktor Varjo saapui poliisilaitokselle vastaamaan kysymyksiin kauppakirjoista. Myös talousjohtaja Hanna Harjun osuutta selvitetään."
+    ],
+    [
+     "TERTTU",
+     "iloinen",
+     "Kahvit koko kaupungille!"
+    ]
+   ],
+   "ehto": {
+    "muuttuja": "VAR_ENDING",
+    "yhtakuin": 2
+   }
+  },
+  {
+   "tyyppi": "cut",
+   "id": "END_C",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Harju astuu juhlan lavalle mikrofoni kädessä.]"
+    },
+    [
+     "HARJU",
+     "iloinen",
+     "Minä olen Hanna Harju. Työskentelin Varjo Holdingsille. Tänään kerron, mitä näin."
+    ],
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Ruudun ulkopuolella: poliisi saattaa Varjon pois veneeltä. Kaupunki ilmoittaa ostavansa puretuiksi aiotut paikat asukkaiden käyttöön. Ilotulitus Kokemäenjoen yllä.]"
+    },
+    [
+     "LUMI",
+     "iloinen",
+     "Seuraavaksi pitää keksiä, mitä tehdä tälle kaikelle vapaa-ajalle."
+    ],
+    [
+     "TAPSA",
+     "iloinen",
+     "Kyl sää tiärät. Sillankilpa."
+    ]
+   ],
+   "ehto": {
+    "muuttuja": "VAR_ENDING",
+    "yhtakuin": 3
+   }
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M26_DONE",
+   "FLAG_GAME_COMPLETE"
+  ]
+ },
+ "palkinto": {
+  "raha": 1000,
+  "teksti": "Tarina läpäisty – Satamakaupunki on pelastettu"
+ },
+ "hahmot": [
+  {
+   "h": "VARJO",
+   "paikka": {
+    "paikka": "LOC_ETELARANTA",
+    "dx": 20,
+    "dy": 30
+   },
+   "suunta": "pelaaja",
+   "alkaen": 3,
+   "asti": 3
+  }
+ ],
+ "_huom": "Veneen takaa-ajo puuttuu. Loppukohtaukset ovat välianimaatioita ilman omia kamera-ajoja."
+}

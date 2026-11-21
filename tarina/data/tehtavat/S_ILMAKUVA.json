@@ -1,0 +1,68 @@
+{
+ "id": "S_ILMAKUVA",
+ "nimi": "Liikennekuvaus Radio Kirjurille",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 420,
+ "laji": "sivu",
+ "merkki": "€",
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M02_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": {
+   "paikka": "LOC_ETELARANTA",
+   "dx": 30,
+   "dy": 0
+  },
+  "r": 30,
+  "kulku": "heli"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "soitto",
+   "soittaja": "RADIO",
+   "rivit": [
+    [
+     "RADIO",
+     "iloinen",
+     "Täällä Radio Kirjuri! Tarvitaan ilmakuvaa liikenteestä: Isosilta, tori ja kirkko. Leijaile hetki jokaisen yllä."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "pysy",
+   "paikka": "LOC_ISOSILTA",
+   "s": 5,
+   "r": 50,
+   "teksti": "Kuvaa Isosilta (leijaile yllä)",
+   "mittari": "Kuvaus",
+   "kulku": "heli"
+  },
+  {
+   "tyyppi": "pysy",
+   "paikka": "LOC_TORI",
+   "s": 5,
+   "r": 50,
+   "teksti": "Kuvaa Kauppatori",
+   "mittari": "Kuvaus",
+   "kulku": "heli"
+  },
+  {
+   "tyyppi": "pysy",
+   "paikka": "LOC_KIRKKO",
+   "s": 5,
+   "r": 50,
+   "teksti": "Kuvaa Keski-Porin kirkko",
+   "mittari": "Kuvaus",
+   "kulku": "heli"
+  }
+ ],
+ "palkinto": {
+  "raha": 30,
+  "teksti": "Ilmakuvat radiolle"
+ },
+ "_huom": "Lennä kopterilla Etelärannan merkin yli aloittaaksesi."
+}

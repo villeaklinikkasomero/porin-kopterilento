@@ -1,0 +1,133 @@
+{
+ "id": "M15",
+ "nimi": "Panssariauto",
+ "luku": 3,
+ "rautalanka": true,
+ "antaja": "TAPSA",
+ "vaatii": [
+  "FLAG_M14_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_KORJAAMO_OVI",
+  "r": 4,
+  "kulku": "jalan"
+ },
+ "fail": [
+  {
+   "ehto": "kulkuneuvo_rikki",
+   "alkaen": 3
+  }
+ ],
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_CH3_A",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Lumin piilo. Valkotaululle on kiinnitetty kuvia ja karttoja.]"
+    },
+    [
+     "LUMI",
+     "ovela",
+     "Kaksi tapaa. Hiljainen: kukaan ei huomaa mitään. Äänekäs: kaikki huomaavat, mutta liian myöhään."
+    ]
+   ],
+   "kamera": {
+    "paikka": "LOC_PIILO",
+    "kohti": "LOC_PIILO"
+   }
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "TAPSA",
+     "iloinen",
+     "Varjon panssariauto kuljettaa kokoustallenteet. Magneetti kiinni, ja Lumi sammuttaa moottorin kauko-ohjauksella. Kukaan ei ees huomaa."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "anna_ajoneuvo",
+   "param": {
+    "paikka": "LOC_KORJAAMO_PIHA",
+    "dx": 0,
+    "dy": 0,
+    "yaw": 0.14,
+    "tyyppi": "van",
+    "viesti": "🚐 Tapsan hinausauto (rautalanka: pakettiauto)",
+    "vari": "#d8b030"
+   },
+   "puuttuuOhita": 0.5
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_POHJOISRANTA",
+   "r": 30,
+   "teksti": "Aja hinausautolla Pohjoisrannalle panssariauton perään",
+   "kulku": "auto",
+   "merkki": "Pohjoisranta",
+   "cp": true
+  },
+  {
+   "tyyppi": "seuraa",
+   "teksti": "Pysy panssariauton perässä (alle 60 m)",
+   "kohde": "Panssariauto",
+   "reitti": [
+    "LOC_POHJOISRANTA",
+    {
+     "paikka": "LOC_POHJOISRANTA",
+     "dx": 200
+    },
+    {
+     "paikka": "LOC_POHJOISRANTA",
+     "dx": 380,
+     "dy": -60
+    }
+   ],
+   "nopeus": 9,
+   "min": 0,
+   "max": 60,
+   "armo": 6,
+   "mittari": "Etäisyys",
+   "karkasi": "Panssariauto katosi. Yritä uudelleen."
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "magneetti",
+   "teksti": "Kiinnitä magneetti (toimintonappi, kun etäisyys alle 3 m)",
+   "puuttuuOhita": 3,
+   "cp": true
+  },
+  {
+   "tyyppi": "mene",
+   "paikka": "LOC_KORJAAMO",
+   "r": 12,
+   "teksti": "Hinaa panssariauto korjaamolle – kuljettaja lähtee kävellen kotiin",
+   "kulku": "auto",
+   "merkki": "Korjaamo"
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M15_DONE"
+  ],
+  "esineet": [
+   "ITEM_TALLENTEET"
+  ]
+ },
+ "palkinto": {
+  "raha": 400,
+  "teksti": "Kokoustallenteet"
+ },
+ "antajaPaikka": {
+  "paikka": "LOC_KORJAAMO_OVI",
+  "dx": 3.2,
+  "dy": -1.5
+ },
+ "_huom": "Hinausauto ja panssariauto (mallit + hinaus) puuttuvat. Seuraa-vaiheen panssariauto näkyy nyt vain merkkinä."
+}

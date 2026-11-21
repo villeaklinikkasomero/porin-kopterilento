@@ -1,0 +1,73 @@
+{
+ "id": "K_GRILLI",
+ "nimi": "Grilli-Pori",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 3,
+ "laji": "kauppa",
+ "merkki": "🍔",
+ "rautalanka": true,
+ "ruoka": true,
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_GRILLIPORI",
+  "r": 7,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Grilli-Pori – mitä saisi olla?",
+   "vaihtoehdot": [
+    {
+     "teksti": "Porilainen – 8 € (+50 ⚡)",
+     "asettaa": {
+      "muuttujat": {
+       "ENERGIA": "+50"
+      }
+     },
+     "rivit": [
+      [
+       "GRILLI",
+       "iloinen",
+       "Porilainen, tuplana sipulia. Seuraava!"
+      ]
+     ],
+     "hinta": 8,
+     "lahde": "Grilli-Pori"
+    },
+    {
+     "teksti": "Lihapiirakka kahdella nakilla – 6 € (+35 ⚡)",
+     "asettaa": {
+      "muuttujat": {
+       "ENERGIA": "+35"
+      }
+     },
+     "rivit": [
+      [
+       "GRILLI",
+       "iloinen",
+       "Kaikilla mausteilla. Ole hyvä."
+      ]
+     ],
+     "hinta": 6,
+     "lahde": "Grilli-Pori"
+    },
+    {
+     "teksti": "Ranskalaiset – 3 € (+15 ⚡)",
+     "asettaa": {
+      "muuttujat": {
+       "ENERGIA": "+15"
+      }
+     },
+     "hinta": 3,
+     "lahde": "Grilli-Pori"
+    },
+    {
+     "teksti": "Ei tällä kertaa"
+    }
+   ]
+  }
+ ],
+ "_huom": "Omistaja 21.11.2026: Ramin pitää syödä. Grilli-Pori, Juhana Herttuan katu 19 (paikka arvio). Myyjän malli ja grillikioskin luukku puuttuvat."
+}

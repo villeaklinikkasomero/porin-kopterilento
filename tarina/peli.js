@@ -13,6 +13,7 @@ import * as THREE from '../three.module.min.js';
 import { luoMoottori } from './moottori.js';
 import { luoUI } from './ui.js';
 import { luoHahmot } from './hahmot.js';
+import { luoTalous } from './talous.js';
 
 const POHJA = new URL('./data/', import.meta.url);
 const hae = async p => (await fetch(new URL(p, POHJA), { cache: 'no-cache' })).json();
@@ -23,6 +24,17 @@ export const KASITTELIJAT = {
   // Varjo-mittarin tähdet näkyviin (varsinainen jahtaus tulee myöhemmin: vartijabotit, uutiskopteri)
   varjo_mittari: {
     alku(p, api) { if (UI) UI.tahdet(p.tahdet || 0); tahdetLoppuu = performance.now() + (p.kesto || 40) * 1000; },
+    paivita() { return 'valmis'; }
+  },
+  // Tarina antaa pelaajalle kulkuneuvon (21.11.2026: M01 Tapsan fillari, Ramin vanha farmari). param: { paikka, dx, dy, yaw (rad, 0 = pohjoinen),
+  // tyyppi: 'bike'|'hatch'|'estate'|'van', vari: '#rrggbb', viesti }. Pelaaja istuu heti kyydissä; edellinen ajoneuvo jää paikalleen (pelin __take.give).
+  anna_ajoneuvo: {
+    alku(p, api) {
+      const T = window.__take, q = p.paikka ? api.paikka(p.paikka) : p;
+      if (!T || !T.give || !q) { console.warn('[tarina] anna_ajoneuvo: pelin __take.give puuttuu'); return; }
+      const ok = T.give(q.x + (p.dx || 0), q.y + (p.dy || 0), p.yaw || 0, p.tyyppi || 'hatch', p.vari ? parseInt(String(p.vari).replace('#', ''), 16) : undefined);
+      if (ok && p.viesti && window.__game && window.__game.toast) window.__game.toast(p.viesti, 2.5);
+    },
     paivita() { return 'valmis'; }
   }
   // tulossa: hiiviskely, vesiletku, drooni (ks. tarvittavat_ominaisuudet/README.md)
@@ -88,7 +100,8 @@ export async function kaynnista() {
   const [ids, paikat, hahmot, tekstit, maailmaData] = await Promise.all([hae('tehtavat/index.json'), hae('paikat.json'), hae('hahmot.json'), hae('fi.json'), hae('maailma.json').catch(() => ({ aina: [] }))]);
   const tehtavat = await Promise.all(ids.map(id => hae(`tehtavat/${id}.json`)));
   const varasto = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) {} } };
-  const M = luoMoottori({ tehtavat, paikat, hahmot, tekstit, varasto, kasittelijat: KASITTELIJAT, sijoitukset: maailmaData.aina || [] });
+  let TAL = null;   // talous.js (energia, korjaus, tuunaus): luodaan UI:n jälkeen, esto kysyy sitä
+  const M = luoMoottori({ tehtavat, paikat, hahmot, tekstit, varasto, kasittelijat: KASITTELIJAT, sijoitukset: maailmaData.aina || [], esto: (t, ti) => TAL ? TAL.esto(t, ti) : null });
   const kosketus = document.body.classList.contains('touch') || matchMedia('(pointer: coarse)').matches;
   // päivän kierros (kiertoajelun tolpat ja HUD-kortti) piilossa tarinatilassa; valikosta saa näkyviin. Muistetaan selaimessa.
   const asetukset = { kierros: varasto.get('pori-tarina-kierros') === '1' };
@@ -110,9 +123,10 @@ export async function kaynnista() {
   M.on('hahmot', l => HH.aseta(l));
   M.on('repliikki', d => HH.puhuu(d && d.hahmo, d && d.toiminta));
   M.lataa(); MK.aseta(M.merkit()); HH.aseta(M.hahmolista());
+  TAL = luoTalous(M, { G, ilmoita: (t, ms) => UI.ilmoita(t, ms) }); Object.assign(KASITTELIJAT, TAL.kasittelijat);
 
   // radio hiljaisemmalle repliikkien ajaksi
-  M.on('repliikki', d => { const R = window.__radio; if (R && R.el) R.el.volume = (R.vol ?? 0.6) * (d ? 0.3 : 1); });
+  M.on('repliikki', d => { const R = window.__radio; if (!R) return; R.duck = d ? 0.3 : 1; if (R.mute) R.mute(); });   // radio quieter during dialogue; stays off on foot (RADIO.level)
 
   // näppäimet
   addEventListener('keydown', e => {
@@ -128,7 +142,7 @@ export async function kaynnista() {
     if ((window.__plane && window.__plane.on) || (window.__jump && window.__jump.on)) return;   // hyppykoneessa X, P ja O ovat koneen omia (potkuri, seisontajarru, päävirta)
     if (e.code === 'KeyX') { M.toiminta(); return; }
     if (e.code === 'KeyP') { if (UI.ruutuAuki) M.luovuta(); else UI.valikko(); return; }
-    if (/^Digit[1-3]$/.test(e.code) && UI.valitseNro(+e.code.slice(5) - 1)) { e.stopPropagation(); return; }
+    if (/^Digit[1-9]$/.test(e.code) && UI.valitseNro(+e.code.slice(5) - 1)) { e.stopPropagation(); return; }   // kauppojen valikoissa voi olla yli 3 vaihtoehtoa
     if (e.code === 'KeyO' && M.kehittaja.paalla) { M.kehittaja.ohita(); return; }
   }, true);
 
@@ -139,6 +153,7 @@ export async function kaynnista() {
     const dt = Math.min(0.1, (nyt - edell) / 1000); edell = nyt;
     const w = maailma();
     if (w) M.paivita(dt, w);
+    if (w && TAL) TAL.paivita(dt, w);
     if (NAUHA && w) { const l = NAUHA[NAUHA.length - 1]; if (!l || Math.hypot(w.x - l[0], w.y - l[1]) >= 40) NAUHA.push([+w.x.toFixed(1), +w.y.toFixed(1)]); }
     UI.ruutu(dt);
     MK.animoi(nyt / 1000);

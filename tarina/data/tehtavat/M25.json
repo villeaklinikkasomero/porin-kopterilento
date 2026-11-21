@@ -1,0 +1,91 @@
+{
+ "id": "M25",
+ "nimi": "Valinta",
+ "luku": 5,
+ "rautalanka": true,
+ "vaatii": [
+  "FLAG_M24_DONE"
+ ],
+ "laukaisu": {
+  "tyyppi": "automaattinen",
+  "viive": 1
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "cut",
+   "id": "CUT_M25_A",
+   "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Rami avaa kassakaapin. Takana on Harju, kansio kädessä.]"
+    },
+    [
+     "HARJU",
+     "huolestunut",
+     "Minä tiedän, mitä noissa lukee. Allekirjoitin osan itse."
+    ],
+    [
+     "HARJU",
+     "neutraali",
+     "Antakaa ne minulle. Varjo luopuu hankkeesta hiljaisesti, eikä kukaan joudu ongelmiin. Myöskään minä."
+    ],
+    [
+     "LUMI",
+     "ovela",
+     "Tai näytämme ne koko kaupungille. Juhlassa on iso näyttö torilla."
+    ]
+   ]
+  },
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Mitä teet kauppakirjoille?",
+   "vaihtoehdot": [
+    {
+     "teksti": "\"Ota ne. Kunhan tori säilyy.\"",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_ENDING": 1
+      }
+     }
+    },
+    {
+     "teksti": "\"Kaupunki ansaitsee tietää.\"",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_ENDING": 2
+      }
+     }
+    },
+    {
+     "teksti": "\"Tule meidän puolellemme. Kerro itse.\"",
+     "asettaa": {
+      "muuttujat": {
+       "VAR_ENDING": 3
+      }
+     },
+     "ehto": {
+      "lippu": "FLAG_HARJU_DOUBT"
+     }
+    }
+   ]
+  }
+ ],
+ "asettaa": {
+  "liput": [
+   "FLAG_M25_DONE"
+  ]
+ },
+ "hahmot": [
+  {
+   "h": "HARJU",
+   "paikka": {
+    "paikka": "LOC_VARJOTORNI",
+    "dx": 2,
+    "dy": 0
+   },
+   "suunta": "pelaaja"
+  }
+ ],
+ "_huom": "Alkaa heti M24:n jälkeen. Loppu C näkyy vain, jos Harju epäili jo hotellissa (M14)."
+}

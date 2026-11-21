@@ -1,5 +1,7 @@
 # Tarvittavat ominaisuudet – Satamakaupunki-tarinatila Porin kopterilentoon
 
+> **21.11.2026:** koko tarina on rautalankana pelissä. Ajantasainen lista puuttuvista mekaniikoista ja kuvituksesta: [`PUUTTUU_RAUTALANGASTA.md`](PUUTTUU_RAUTALANGASTA.md).
+
 Päivitetty 20.11.2026. Lista perustuu käsikirjoitukseen *Satamakaupunki – käsikirjoitus* (tehtävät M01–M26)
 ja pelin nykytilaan (`index.html`, `SIIRTO_TOISELLE_TILILLE.md` 20.11. asti).
 
