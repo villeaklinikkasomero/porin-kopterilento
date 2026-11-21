@@ -2320,6 +2320,24 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
   ei ääntä, pyörät eivät roiku, edellinen jätetty auto (`TAKE.left`) ei nouse – vain se, josta pelaaja juuri nousi.
 
 
+## 21.11.2026 – Korjaamo: nostimen rajoitukset korjattu (omistaja: "saadaanko rajaukset korjattua?")
+- **Auton alle voi kävellä:** yli 1,25 m korkeudella nostettu auto saa lipun `.lifted`, ja `index.html`:n `SOLID.frame` ohittaa sen (kaksi ehtoa: `!(foot && CAR.lifted)` ja `!TAKE.left.lifted`).
+- **Myös aiemmin jätetty auto nousee** (`window.__take.left`), ei vain se, josta pelaaja juuri nousi.
+- **Pyörät roikkuvat** 7 cm (auton solmut, joilla on `userData.front`), **ääni:** hurina liikkeen ajan (vaimenee etäisyyden mukaan) ja kolahdus päätyasennossa, pelin oma `actx`, vain kun äänet ovat päällä.
+- **Testattu** headless-pelissä kolme tapausta: oma auto ylös ja alas (lippu ja pyörät palautuvat), nouseminen nostettuun autoon (irtoaa, varret laskeutuvat), jätetty auto ylös ja alas;
+  `solid_test.js` läpi. **Ei testattu:** kävely auton alta käytännössä, ääni (pilvessä ei kuulu), oikea auto ja pakettiauto, kosketus.
+- **Tiedossa:** nostin voi laskea auton pelaajan päälle (ei turvarajaa; auto muuttuu esteeksi alle 1,25 m ja peli työntää pelaajan sivuun).
+
+
+## 21.11.2026 – Korjaamo: nostovarret kääntyvät auton alle + auto ei noussut oikeassa pelissä (omistajan kuva: varret ylhäällä, auto lattialla; "ne pitäisi kääntää eka auton alle")
+- **Vika:** auto tunnistettiin ehdolla "body-luokka `car` ei päällä", mutta pelissä luokka pysyy päällä myös jalan (se kertoo kulkuneuvon lajin) → autoa ei koskaan kiinnitetty.
+  Headless-testi ei huomannut, koska siinä luokka poistettiin käsin. Nyt ehto on kävelytila (`window.__walk.on`). Tunnistusalue väljemmäksi (±1,1 m sivusuunnassa, ±2,3 m pituussuunnassa).
+- **Varret:** neljä vartta omissa saranoissaan; ylös = varret kääntyvät ensin 62° auton alle (tyynyt akselien väliin), sitten nosto; alas = lasku, sitten varret takaisin sivuille.
+  Meshyn mallissa varret olivat 0,37–0,64 m korkeudella, joten varsiryhmä on laskettu 0,27 m alemmas, että ne mahtuvat auton pohjan alle.
+- **index.html:** `SOLID.frame`in kaksi `.lifted`-ehtoa (edellisen merkinnän muutos, jonka tallennus hylättiin kerran, koska toinen istunto oli juuri muuttanut tiedostoa) on nyt mukana.
+- **Testattu** headless: varret kääntyvät (kuva ylhäältä ilman autoa), auto nousee 1,81 m ja palaa. **Ei testattu** oikealla autolla – omistajan kuvakaappaus pyydetty.
+
+
 ## TILANNE 21.11.2026 (yhteenveto – lue tämä ensin, yksityiskohdat yllä olevissa 21.11. merkinnöissä)
 
 **Kaksi istuntoa on kirjoittanut samaan kansioon samana päivänä** (tämä: hahmot, hyppy, tarina, korjaamo; toinen: rata, asema, juna). Ennen kuin muokkaat

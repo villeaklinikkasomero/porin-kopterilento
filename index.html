@@ -232,6 +232,7 @@ const TZg = (x, y) => tBil(THG, x, y), TZs = (x, y) => tBil(THS, x, y);
 // 20.11.2026 (omistaja: rata ja juna): ratapenkka painetaan sepelin alle ja aseman alikulun kaivanto täytetään raiteiden ja laitureiden kohdalta
 // (korkeusmallissa tunneli näkyi 4 m syvänä kuoppana koko ratapihan poikki; rata kulkee suoraan sen yli, asema-aukion puolella portaali). juna/build/build_data.py
 { const o = RATA.ter || []; for (let k = 0; k + 1 < o.length; k += 2) { const i = o[k], v = o[k + 1], old = THG[i]; THG[i] = v; THS[i] = v > old ? Math.max(THS[i], v) : (THS[i] - old < 3 ? Math.min(THS[i], v) : THS[i]); } }
+{ const o = RATA.terS || []; for (let k = 0; k + 1 < o.length; k += 2) THS[o[k]] = Math.min(THS[o[k]], o[k + 1]); }   // 21.11.2026: Porttaalin jatke vt 2:n siltojen ali (pinta todelliseen maahan)
 const QUAY_MODEL = true;    // 20.11.2026 (omistaja: "Etelärannan pinnat pitänee rakentaa myös itse, ilmakuva ei toimi tuossa"): the hand-built walk, steps, hedges and railing are back and the photo ground is cut out under them (15.11 they were off for the MML 2025 photo)
 const QUAY_WALK = TER.wl + 1.05;   // Etelärannan alempi kävelytaso (absoluuttinen), myös ranta/ranta.js:n kulkusillat
 function quayCut(x, y) { if (x > 190 && x < 263 && y > 467 && y < 478) return true;      /* the underpass under Porinsilta (Eteläranta block) */
@@ -1992,9 +1993,9 @@ const SOLID = (() => {
     try { const T = window.__sig && window.__sig.cars, foot = WALK.on;
       if (T) for (const c of T) if (c.wx !== undefined && Math.abs(c.wx - S.x) < 190 && Math.abs(c.wy - S.y) < 190) { const d = DIM[c.k || 0]; dyn.push(mk(c.wx, c.wy, c.yaw, d[0], d[1], c.s || 0, 1)); }
       if (window.__race) for (const b of window.__race.bots) if (b.wx !== undefined) dyn.push(mk(b.wx, b.wy, b.yaw, 2.1, 0.9, b.v || 0, 2));
-      if (VEH === 'car') { if (carG.visible) { const b = mk(CAR.x, CAR.y, CAR.yaw, CAR.hl || 2.1, CAR.hw || 0.9, foot ? 0 : CAR.v, foot ? 0 : 2); b.me = !foot; dyn.push(b); } }
+      if (VEH === 'car') { if (carG.visible && !(foot && CAR.lifted)) { const b = mk(CAR.x, CAR.y, CAR.yaw, CAR.hl || 2.1, CAR.hw || 0.9, foot ? 0 : CAR.v, foot ? 0 : 2); b.me = !foot; dyn.push(b); } }
       else if (heli.visible && (foot || S.landed)) { const h = foot && WALK.veh ? WALK.veh : S, b = mk(h.x, h.y, h.yaw, 2.6, 1.0, 0, 0); b.me = !foot; dyn.push(b); }
-      if (TAKE.left) { const l = TAKE.left, y = CARTY[l.type] || CARTY.hatch; dyn.push(mk(l.x, l.y, l.yaw, y.hl, y.hw, 0, 0)); }
+      if (TAKE.left && !TAKE.left.lifted) { const l = TAKE.left, y = CARTY[l.type] || CARTY.hatch; dyn.push(mk(l.x, l.y, l.yaw, y.hl, y.hw, 0, 0)); }
       if (TAKE.heli && VEH === 'car') dyn.push(mk(TAKE.heli.x, TAKE.heli.y, TAKE.heli.yaw, 2.6, 1.0, 0, 0));
       if (foot && !WALK.in) { ME.x = WALK.x; ME.y = WALK.y; wk.push(ME); dyn.push(mk(WALK.x, WALK.y, 0, 0.12, 0.12, 0, 3)); }
       if (window.__npc) { for (const p of window.__npc.parties) for (const c of p.m) if (c.g.visible) wk.push(c); for (const c of window.__npc.sitters || []) if (c.g.visible) wk.push(c); }

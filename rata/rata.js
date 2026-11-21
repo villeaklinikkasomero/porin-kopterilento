@@ -652,7 +652,16 @@ function luoRata({ scene, TZg, G }) {
     return h; };
   // kävely ja ajo: laiturin pinta, sepelipenkalla pölkkyjen taso (index.html carGround kysyy window.__rataZ)
   const NZ = trackIndex(1);
-  window.__rataZ = (x, y) => { const c = inTun(x, y);
+  // vt 2:n sillat Porttaalin jatkeen yllä (omistaja 21.11.: "sillan alta ei voi kulkea portaalissa vaan se hyppää päälle"): kannen kohdalla kansi vain
+  // sille, joka on jo kannen tasolla; alhaalla tulevalle (kävelijä tai pelaajan auto alle 2 m kannen alapuolella) maa = kaivannon pohja (index.html)
+  const SIL = (RATA.silta || []).map(S => { const dx = S.b[0] - S.a[0], dy = S.b[1] - S.a[1], L = Math.hypot(dx, dy), u = [dx / L, dy / L];
+    const tg = p => (p[0] - S.a[0]) * u[0] + (p[1] - S.a[1]) * u[1]; return { S, L, u, hw: S.w / 2, t0: tg(S.ga) - 4, t1: tg(S.gb) + 4 }; });
+  const silZ = (x, y) => { for (const B of SIL) { const dx = x - B.S.a[0], dy = y - B.S.a[1], t = dx * B.u[0] + dy * B.u[1], l = dx * B.u[1] - dy * B.u[0];
+      if (t < B.t0 || t > B.t1 || Math.abs(l) > B.hw) continue; const dz = B.S.za + (B.S.zb - B.S.za) * t / B.L + 0.14;
+      const W2 = G.WALK, C = window.__car; let ref = null;
+      if (W2 && W2.on && Math.hypot(W2.x - x, W2.y - y) < 25) ref = W2.z; else if (C && Math.hypot(C.x - x, C.y - y) < 25) ref = C.z;
+      return ref !== null && ref < dz - 2 ? null : dz; } return undefined; };
+  window.__rataZ = (x, y) => { { const s = silZ(x, y); if (s !== undefined) return s; } const c = inTun(x, y);
     if (c) { const f = tunFloor(c.t) + 0.04, W2 = G.WALK; const up = c.t > TUN.t0 && c.t < TUN.t1 && W2 && W2.on && W2.z > f + 2.2;   // tunnelissa: lattia, paitsi kävelijä ylhäällä laiturilla
       if (!up) return f + (c.l > TUN.w / 2 - 1.4 ? 0.15 : 0); }
     for (const p of plats) if (inPoly(x, y, p.poly)) return p.z;

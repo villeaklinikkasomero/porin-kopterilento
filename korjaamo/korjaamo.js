@@ -1,6 +1,6 @@
 // Tapsan korjaamo – peltihalli ja nosto-ovi (omistajan Meshy-mallit, 21.11.2026) paikassa [-598.9, -443.0], Äestäjänkadun eteläpuolen tontilla.
 // Ovi katsoo kadulle (suunta 8° pohjoisesta itään) ja rullautuu ylös, kun pelaaja tulee jalan tai autolla alle 10 m päähän; sulkeutuu yli 13 m päässä.
-// Nostin: aja auto pilarien väliin, nouse ulos ja paina U (tai ruudun painiketta) → auto nousee 1,75 m; U uudestaan laskee.
+// Nostin: aja auto pilarien väliin, nouse ulos ja paina U (tai ruudun painiketta) → auto nousee 1,75 m; U uudestaan laskee. Nostetun auton alle voi kävellä.
 // Halliin voi kävellä ja ajaa sisään: seinät ja suljettu ovi ovat kiinteitä (window.__furn → index.html SOLID), lattian korkeus tulee
 // funktiosta window.__korjaamoZ (index.html carGround kysyy sitä). Tarinan paikat LOC_KORJAAMO ja LOC_KORJAAMO_OVI: tarina/data/paikat.json.
 import * as THREE from '../three.module.min.js';
@@ -59,14 +59,19 @@ function sisustus(ox) {
 }
 
 // Nostimen malli on yksi verkko: nostovarret ja kelkat (kolmiot korkeudella 0,28–1,05 m pilarien sisäpuolella) irrotetaan omaksi verkokseen, jotta ne voivat nousta.
-const NOSTIN = { x: (AUKKO.x0 + AUKKO.x1) / 2, z: -0.9, korkeus: 1.75, nopeus: 0.32, sade: 4.5 };
+const NOSTIN = { x: (AUKKO.x0 + AUKKO.x1) / 2, z: -0.9, korkeus: 1.75, nopeus: 0.32, sade: 4.5, kaanto: 62 * Math.PI / 180, kaantoAika: 1.3 };
+// Palauttaa ryhmän (kelkat + neljä vartta omissa saranaryhmissään): ryhmä nousee, saranat kääntävät varret auton alle.
+// Meshyn mallissa varret ovat 0,37–0,64 m korkeudella → koko ryhmä lasketaan 0,27 m, jotta nostotyynyt mahtuvat auton pohjan alle.
 function irrotaVarret(o) {
   let m = null; o.traverse(q => { if (q.isMesh && !m) m = q; }); if (!m || !m.geometry.index) return null;
-  const g = m.geometry, p = g.attributes.position, ix = g.index.array, runko = [], varsi = [];
-  for (let i = 0; i < ix.length; i += 3) { let lo = 1e9, hi = -1e9, mx = 0; for (let k = 0; k < 3; k++) { const v = ix[i + k], y = p.getY(v); lo = Math.min(lo, y); hi = Math.max(hi, y); mx = Math.max(mx, Math.abs(p.getX(v))); }
-    (lo > 0.28 && hi < 1.05 && mx < 1.64 ? varsi : runko).push(ix[i], ix[i + 1], ix[i + 2]); }
-  if (varsi.length < 300) return null;
-  const gv = g.clone(); gv.setIndex(varsi); g.setIndex(runko); const v = new THREE.Mesh(gv, m.material); v.frustumCulled = false; m.parent.add(v); return v;
+  const g = m.geometry, p = g.attributes.position, ix = g.index.array, runko = [], kelkka = [], osat = { '1,1': [], '1,-1': [], '-1,1': [], '-1,-1': [] };
+  for (let i = 0; i < ix.length; i += 3) { let lo = 1e9, hi = -1e9, mx = 0, cx = 0, cz = 0; for (let k = 0; k < 3; k++) { const v = ix[i + k], y = p.getY(v); lo = Math.min(lo, y); hi = Math.max(hi, y); mx = Math.max(mx, Math.abs(p.getX(v))); cx += p.getX(v) / 3; cz += p.getZ(v) / 3; }
+    const l = !(lo > 0.28 && hi < 1.05 && mx < 1.64) ? runko : Math.abs(cz) <= 0.33 || hi > 0.7 ? kelkka : osat[(cx > 0 ? 1 : -1) + ',' + (cz > 0 ? 1 : -1)]; l.push(ix[i], ix[i + 1], ix[i + 2]); }
+  if (kelkka.length < 300) return null;
+  const osa = lista => { const gg = g.clone(); gg.setIndex(lista); const v = new THREE.Mesh(gg, m.material); v.frustumCulled = false; return v; };
+  g.setIndex(runko); const ryhma = new THREE.Group(); ryhma.userData.y0 = -0.27; ryhma.position.y = -0.27; ryhma.add(osa(kelkka)); ryhma.userData.saranat = [];
+  for (const k in osat) { const [sx, sz] = k.split(',').map(Number), s = new THREE.Group(); s.position.set(sx * 1.42, 0, sz * 0.3); const v = osa(osat[k]); v.position.set(-sx * 1.42, 0, -sz * 0.3); s.add(v); s.userData.suunta = -sx * sz; ryhma.add(s); ryhma.userData.saranat.push(s); }
+  m.parent.add(ryhma); return ryhma;
 }
 
 // Meshy-kalusteet hallin sisään: malli (korjaamo_mallit.js), paikka mallin akseleissa (x, z), kierto (rad; 0 = etupuoli ovelle päin), törmäyslaatikot [dx, dz, pitkin z-akselia?, puolipituus, puolileveys] kalusteen paikasta.
@@ -124,21 +129,43 @@ export async function luoKorjaamo(G) {
     if (Math.abs(lx - ox) <= w && lz > LAATTA.z1 && lz <= z1) return lattia + (rampinPaa - lattia) * (lz - LAATTA.z1) / RAMPPI;
     return null; };
 
-  // nostin: U-näppäin tai ruudun painike, kun pelaaja on jalan alle 4,5 m nostimesta. Pilarien väliin pysäköity auto nousee varsien mukana.
-  const N = { h: 0, tavoite: 0, auto: false }, nk = kartalle(NOSTIN.x, NOSTIN.z);
+  // nostin: U-näppäin tai ruudun painike, kun pelaaja on jalan alle 4,5 m nostimesta. Pilarien väliin pysäköity auto nousee varsien mukana:
+  // joko auto, josta pelaaja juuri nousi (carG / window.__car), tai aiemmin jätetty auto (window.__take.left). Nostettu auto ei ole este
+  // (index.html SOLID ohittaa sen, kun .lifted on tosi), joten sen alle voi kävellä; pyörät roikkuvat ja nostin hurisee.
+  const N = { h: 0, tavoite: 0, auto: null, k: 0 }, nk = kartalle(NOSTIN.x, NOSTIN.z), ALLE = 1.25;      // ALLE = korkeus, josta alkaen auton alta mahtuu
   const jalan = () => { const Wk = window.__walk; return Wk && Wk.on && !Wk.in ? Wk : null; };
-  const autoNostimella = () => { const C = window.__car, cg = G.carG; if (!C || !cg || !cg.visible || document.body.classList.contains('car')) return false; const { lx, lz } = paikalliseen(C.x, C.y); return Math.abs(lx - NOSTIN.x) < 0.9 && Math.abs(lz - NOSTIN.z) < 1.5; };
+  const kohdalla = (x, y) => { const { lx, lz } = paikalliseen(x, y); return Math.abs(lx - NOSTIN.x) < 1.1 && Math.abs(lz - NOSTIN.z) < 2.3; };
+  const ajossa = () => !(window.__walk && window.__walk.on);      // body-luokka 'car' pysyy päällä myös jalan (se kertoo kulkuneuvon lajin), siksi kysytään kävelytilaa
+  // { g: auton ryhmä, o: olio jolle .lifted asetetaan, vasen: onko jätetty auto }
+  const autoNostimella = () => { const C = window.__car, cg = G.carG, T = window.__take;
+    if (C && cg && cg.visible && !ajossa() && kohdalla(C.x, C.y)) return { g: cg, o: C, vasen: false };
+    if (T && T.left && T.left.g && kohdalla(T.left.x, T.left.y)) return { g: T.left.g, o: T.left, vasen: true };
+    return null; };
+  const pyorat = (g, k) => g.traverse(q => { if (q.userData && 'front' in q.userData) { if (q.userData.y0 === undefined) q.userData.y0 = q.position.y; q.position.y = q.userData.y0 - 0.07 * k; } });
+  const irrota = () => { const a = N.auto; if (!a) return; a.o.lifted = false; pyorat(a.g, 0); N.auto = null; };
+  const voimassa = a => a.vasen ? !!(window.__take && window.__take.left === a.o) : !!(G.carG && G.carG.visible && !ajossa());
   const nappi = document.createElement('button'); nappi.id = 'korjaamo-nostin'; nappi.style.cssText = 'position:fixed;left:50%;bottom:22%;transform:translateX(-50%);z-index:60;display:none;padding:10px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:rgba(20,28,38,.82);color:#fff;font:600 15px system-ui,sans-serif;cursor:pointer';
   document.body.appendChild(nappi);
-  const kayta = () => { const w = jalan(); if (!w || !varret || Math.hypot(w.x - nk.x, w.y - nk.y) > NOSTIN.sade) return; if (N.tavoite === 0) { N.auto = autoNostimella(); N.tavoite = NOSTIN.korkeus; } else N.tavoite = 0; };
+  const kayta = () => { const w = jalan(); if (!w || !varret || Math.hypot(w.x - nk.x, w.y - nk.y) > NOSTIN.sade) return; if (N.tavoite === 0) { if (!N.auto) N.auto = autoNostimella(); N.tavoite = NOSTIN.korkeus; } else N.tavoite = N.h > 0 || N.k >= 1 ? 0 : N.tavoite; };
   nappi.addEventListener('click', e => { e.preventDefault(); kayta(); nappi.blur(); });
   addEventListener('keydown', e => { if (e.code === 'KeyU' && !e.repeat && !e.ctrlKey && !e.metaKey && !(e.target && /INPUT|TEXTAREA/.test(e.target.tagName))) kayta(); });
+  // ääni: sähköhydrauliikan hurina liikkeen ajan ja kolahdus päätyasennossa (pelin oma AudioContext, jos äänet ovat päällä)
+  let aani = null;
+  const hurina = paalle => { try { const A = G.actx; if (!A || !G.soundOn) { if (aani) { aani.g.gain.value = 0; } return; }
+      if (paalle && !aani) { const o = A.createOscillator(), o2 = A.createOscillator(), f = A.createBiquadFilter(), g = A.createGain(); o.type = 'sawtooth'; o.frequency.value = 96; o2.type = 'square'; o2.frequency.value = 48.5; f.type = 'lowpass'; f.frequency.value = 520; g.gain.value = 0; o.connect(f); o2.connect(f); f.connect(g); g.connect(A.destination); o.start(); o2.start(); aani = { o, o2, g }; }
+      if (aani) { const w = jalan(), d = w ? Math.hypot(w.x - nk.x, w.y - nk.y) : 30; aani.g.gain.setTargetAtTime(paalle ? 0.07 * Math.max(0, 1 - d / 22) : 0, A.currentTime, 0.08); aani.o.frequency.setTargetAtTime(N.tavoite > N.h ? 96 : 82, A.currentTime, 0.1); } } catch (e) {} };
+  const kolahdus = () => { try { const A = G.actx; if (!A || !G.soundOn) return; const o = A.createOscillator(), g = A.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(140, A.currentTime); o.frequency.exponentialRampToValueAtTime(55, A.currentTime + 0.12); g.gain.setValueAtTime(0.12, A.currentTime); g.gain.exponentialRampToValueAtTime(0.001, A.currentTime + 0.18); o.connect(g); g.connect(A.destination); o.start(); o.stop(A.currentTime + 0.2); } catch (e) {} };
   const nostin = dt => { if (!varret) return; const w = jalan(), lahella = !!w && Math.hypot(w.x - nk.x, w.y - nk.y) < NOSTIN.sade;
     nappi.style.display = lahella ? 'block' : 'none'; if (lahella) { const t = (N.tavoite > 0 ? 'Nostin alas' : autoNostimella() ? 'Nosta auto' : 'Nostin ylös') + ' (U)'; if (nappi.textContent !== t) nappi.textContent = t; }
-    if (N.auto && document.body.classList.contains('car')) { N.auto = false; N.tavoite = 0; }      // pelaaja nousi nostettuun autoon: peli laskee auton lattialle, varret tulevat perässä
-    if (N.h !== N.tavoite) N.h = N.tavoite > N.h ? Math.min(N.tavoite, N.h + NOSTIN.nopeus * dt) : Math.max(N.tavoite, N.h - NOSTIN.nopeus * dt);
-    varret.position.y = N.h;
-    if (N.auto && G.carG) { G.carG.position.y = lattia + N.h; G.carG.rotation.x = 0; G.carG.rotation.z = 0; if (N.h === 0 && N.tavoite === 0) N.auto = false; } };
+    if (N.auto && !voimassa(N.auto)) { irrota(); N.tavoite = 0; }      // pelaaja otti nostetun auton: peli siirtää sen lattialle, varret tulevat perässä
+    // järjestys: ylös = varret kääntyvät ensin auton alle, sitten nosto; alas = lasku, sitten varret takaisin sivuille
+    const ylos = N.tavoite > 0, kt = ylos ? 1 : 0; let liikkuu = false;
+    if (ylos && N.k < 1) { N.k = Math.min(1, N.k + dt / NOSTIN.kaantoAika); if (N.k === 1) kolahdus(); }
+    else if (N.h !== N.tavoite) { liikkuu = true; N.h = ylos ? Math.min(N.tavoite, N.h + NOSTIN.nopeus * dt) : Math.max(0, N.h - NOSTIN.nopeus * dt); if (N.h === N.tavoite) kolahdus(); }
+    else if (!ylos && N.k > 0) N.k = Math.max(0, N.k - dt / NOSTIN.kaantoAika);
+    hurina(liikkuu);
+    varret.position.y = varret.userData.y0 + N.h; const ke = N.k * N.k * (3 - 2 * N.k); for (const sa of varret.userData.saranat) sa.rotation.y = sa.userData.suunta * NOSTIN.kaanto * ke;
+    if (N.auto) { const a = N.auto; a.g.position.y = lattia + N.h + Math.min(0.06, N.h); a.g.rotation.x = 0; a.g.rotation.z = 0; a.o.lifted = N.h > ALLE; pyorat(a.g, Math.min(1, N.h / 0.25)); if (N.h === 0 && N.k === 0 && !ylos) irrota(); } };
 
   // oven liike
   let auki = 0, tavoite = 0, edell = performance.now();

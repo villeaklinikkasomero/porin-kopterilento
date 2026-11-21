@@ -579,6 +579,20 @@ openm = fillbox & ~fillm & (H.ravel() < 3.0)
 op = pts[openm]
 print('open pit cells', len(op), op.min(0) if len(op) else None, op.max(0) if len(op) else None)
 out['ter'] = ovr
+# Porttaalin jatke Helsingintien (vt 2) siltojen ali (omistaja 21.11.: "sillan alta ei voi kulkea portaalissa vaan se hyppää päälle"):
+# pinnan malli (THS) on silotettu ja nousee siltojen kohdalla kannen tasoon -> pinta lasketaan todelliseen maahan (THG) kaivannon kohdalta.
+# index.html: RATA.terS = [solu, arvo dm] -> THS = min(THS, arvo)
+terS = []
+for _k in range(len(pts)):
+    t_, l_ = tcoord(pts[_k])
+    if not (T1 + 26 < t_ < T1 + 136 and abs(l_ + 2) < 26): continue
+    w = min(1.0, (t_ - T1 - 26) / 8, (T1 + 136 - t_) / 20, (26 - abs(l_ + 2)) / 6)
+    j_, i_ = divmod(_k, nx); hs = Hs[j_, i_]; hg = float(fl[_k])
+    if hs <= hg + 0.05: continue
+    v = hs + (hg + 0.02 - hs) * max(0.0, w)
+    if v < hs - 0.04: terS += [int(_k), int(round(v * 10))]
+print('siltojen alitus: pintasoluja', len(terS) // 2)
+out['terS'] = terS
 out['tun'] = dict(gr=1, a=[round(float(v), 2) for v in TA], b=[round(float(v), 2) for v in TB], w=TW, t0=round(T0, 2), t1=round(T1, 2), ft0=-40, fz=[round(float(v), 2) for v in _fz])
 json.dump(out, open('rata_data.json', 'w'), separators=(',', ':'))
 
@@ -594,7 +608,9 @@ for j in range(ony):
     for i in range(onx):
         x = OX0 + (i + 0.5) * OXS; y = OY0 + (j + 0.5) * OXS
         if abs(x) < HW - 9 and YS + 9 < y < YN - 9: continue
-        if kd2.query([x, y])[0] < 17.5 or in_tun((x, y), 12): cells.append(j * onx + i)
+        _t, _l = tcoord((x, y))
+        _tr = T1 + 20 < _t < T1 + 140 and abs(_l + 2) < 34   # vt 2:n siltojen alitus: 18 m:n ruudukko teki kaivannon kohdalle kummun
+        if kd2.query([x, y])[0] < 17.5 or in_tun((x, y), 12) or _tr: cells.append(j * onx + i)
 print('outer cells', len(cells))
 out['osk'] = cells
 json.dump(out, open('rata_data.json', 'w'), separators=(',', ':'))

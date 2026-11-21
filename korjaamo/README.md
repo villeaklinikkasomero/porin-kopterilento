@@ -28,7 +28,9 @@ Tiedossa: valot eivät oikeasti valaise (hohtavat vain), ovella ei ole ääntä,
 
 Nostin ("Weathered Blue Car Lift", 4,1 × 3,8 × 3,4 m) on ajoruudun keskellä; vain pilarit ovat kiinteitä ja auto ajaa niiden välistä.
 
-**Nostin nostaa (21.11.2026):** aja auto pilarien väliin, nouse ulos ja paina **U** tai ruudun painiketta "Nosta auto" (näkyy jalan alle 4,5 m nostimesta) → varret ja auto
-nousevat 1,75 m (0,32 m/s); U uudestaan laskee. Ilman autoa varret nousevat tyhjinä. Jos nouset nostettuun autoon, auto palaa lattialle. Nostovarret irrotetaan mallista
-koodissa (`irrotaVarret`: kolmiot korkeudella 0,28–1,05 m pilarien sisäpuolella) – uusi nostinmalli → tarkista rajat. Tarvitsee `window.__game.carG` (index.html).
+**Nostin nostaa (21.11.2026):** aja auto pilarien väliin, nouse ulos ja paina **U** tai ruudun painiketta "Nosta auto" (näkyy jalan alle 4,5 m nostimesta) → varret kääntyvät ensin auton alle (62°, 1,3 s), sitten varret ja auto
+nousevat 1,75 m (0,32 m/s); U uudestaan laskee. Ilman autoa varret nousevat tyhjinä. Jos nouset nostettuun autoon, auto palaa lattialle.
+Nousee joko auto, josta juuri nousit, tai aiemmin jätetty auto (`window.__take.left`). Yli 1,25 m korkeudella auto ei ole este (`.lifted` → index.html `SOLID` ohittaa sen),
+joten sen alle voi kävellä. Pyörät roikkuvat 7 cm, ja nostin hurisee ja kolahtaa päätyasennossa, jos pelin äänet ovat päällä. Nostovarret irrotetaan mallista
+koodissa (`irrotaVarret`: kolmiot korkeudella 0,28–1,05 m pilarien sisäpuolella; kelkat + neljä vartta omiin saranoihinsa kohdassa x ±1,42, z ±0,30; koko ryhmä 0,27 m alemmas) – uusi nostinmalli → tarkista rajat. Tarvitsee `window.__game.carG` (index.html).
 Konsolista: `__korjaamo.nostinKayta()`, tila `__korjaamo.nostin` (`h`, `tavoite`, `auto`).
