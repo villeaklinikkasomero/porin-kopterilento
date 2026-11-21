@@ -341,6 +341,12 @@ function tunWallDepth(x, y, z, TZ) { const c = tunT(x, y); if (!c) return 0; con
   const top = cov ? (P ? P.ceil : f + 4) : Math.max(f + 0.3, TZ ? TZ(x, y) : f) + 0.25 + (c.t < TUN.t0 ? 1.25 : 0);   // rampin tukimuuri + kaide
   if (z > top + 0.2) return 0;                          // ylhäällä (ratapihalla, kannella): seinä on alapuolella
   return d; }
+// näkyvä maanpinta (x, y): korkeusmalli tai sen päälle piirretyt kolmiot (tarkka ilmakuvalaatta 6 m + 0,03, ulkokehä 18 m), korkein.
+// 21.11.2026 (omistaja: "huomaatko nurmikon portaalissa ja mäet"): nurmiluiskat ja maakaistat seuraavat tätä, ettei ilmakuvamaa pistä nurmikon läpi.
+function maaPinta(TZ, x, y) { const tri = (x0, y0, st, dy) => { const fx = (x - x0) / st, fy = (y - y0) / st, i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j, X = a => x0 + a * st, Y = b => y0 + b * st;
+    const z00 = TZ(X(i), Y(j)), z10 = TZ(X(i + 1), Y(j)), z11 = TZ(X(i + 1), Y(j + 1)), z01 = TZ(X(i), Y(j + 1)); return (u >= v ? z00 + (z10 - z00) * u + (z11 - z10) * v : z00 + (z11 - z01) * u + (z01 - z00) * v) + dy; };
+  const ti = Math.floor((x + 1280) / 512), tj = Math.floor((y + 1280) / 512);
+  return Math.max(TZ(x, y), tri(-1280 + ti * 512, -1280 + tj * 512, 6, 0.03), tri(-2504.1, -3501.6, 18, 0)); }
 function buildTunnel(root, G, plats) {
   if (!TUN) return; const TZ = G.TZg || G.TZs;
   const ux = (TUN.b[0] - TUN.a[0]), uy = (TUN.b[1] - TUN.a[1]), L = Math.hypot(ux, uy), u = [ux / L, uy / L], nrm = [u[1], -u[0]];
@@ -416,7 +422,7 @@ function buildTunnel(root, G, plats) {
   // maa rampin muurien takana (maan ruudukko on leikattu käytävän kohdalta): 1 m:n kaistat ilmakuvalla
   const OX0 = -2504.1, OY0 = -3501.6, OXS = 4954.9, OYS = 5396.0, gp = [], gu = [];
   for (const [ta, tb] of [[tA, TUN.t0], [TUN.t1, tB]]) for (let t = ta; t < tb; t += 2) { const t2 = Math.min(tb, t + 2);
-    for (const sd of [-1, 1]) for (let l = hw + 0.3; l < hw + 6.6; l += 1.2) { const l2 = l + 1.2, ex = tt => off(tt) + (sd < 0 && tt > TUN.t1 + 20 ? -(1 + (tt - TUN.t1 - 20) * 0.25) : 0), pts = [[t, l], [t2, l], [t2, l2], [t, l2]].map(([tt, ll]) => { const [x, y] = P(tt, ex(tt) + sd * ll); return [x, y, TZ(x, y) + 0.02]; });
+    for (const sd of [-1, 1]) for (let l = hw + 0.3; l < hw + 6.6; l += 1.2) { const l2 = l + 1.2, ex = tt => off(tt) + (sd < 0 && tt > TUN.t1 + 20 ? -(1 + (tt - TUN.t1 - 20) * 0.25) : 0), pts = [[t, l], [t2, l], [t2, l2], [t, l2]].map(([tt, ll]) => { const [x, y] = P(tt, ex(tt) + sd * ll); return [x, y, maaPinta(TZ, x, y) + 0.02]; });
       for (const k of (sd > 0 ? [0, 1, 2, 0, 2, 3] : [0, 2, 1, 0, 3, 2])) { const [x, y, z] = pts[k]; gp.push(x, z, -y); gu.push((x - OX0) / OXS, (y - OY0) / OYS); } } }
   { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(gu, 2)); g.computeVertexNormals();
     const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: G.outerMat ? G.outerMat.map : null, color: 0xffffff })); m.userData.noT = true; root.add(m); }
@@ -426,7 +432,7 @@ function buildTunnel(root, G, plats) {
     const gm = new THREE.MeshStandardMaterial({ map: na, normalMap: ld('nurmi_normal.jpg'), aoMap: ld('nurmi_orm.jpg'), color: 0xb8c0a8, roughness: 0.95, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 }); gm.userData.noT = true;
     const gp = [], gu = [], gI = []; const S = 1.5;
     for (const [T0g, LEN, WID] of [[TUN.t1 - 0.5, 34, 25.5], [TUN.t0 - 38, 37.5, 7.5]]) for (const sd of [-1, 1]) { const NT = Math.round(LEN / S), NL = Math.round(WID / S), base = gp.length / 3;   // lounaan luiskat ja koillisrampin reunat
-      for (let i = 0; i <= NT; i++) for (let j = 0; j <= NL; j++) { const t = T0g + i * S, l = sd * (hw + (T0g < TUN.t0 ? 0.35 : 0.4) + j * S) + (sd < 0 && t > TUN.t1 ? off(t) - (t > TUN.t1 + 20 ? 1 + (t - TUN.t1 - 20) * 0.25 : 0) : 0), [x, y] = P(t, l); gp.push(...W(x, y, TZ(x, y) + 0.06)); gu.push(x / 3, y / 3); }
+      for (let i = 0; i <= NT; i++) for (let j = 0; j <= NL; j++) { const t = T0g + i * S, l = sd * (hw + (T0g < TUN.t0 ? 0.35 : 0.4) + j * S) + (sd < 0 && t > TUN.t1 ? off(t) - (t > TUN.t1 + 20 ? 1 + (t - TUN.t1 - 20) * 0.25 : 0) : 0), [x, y] = P(t, l); gp.push(...W(x, y, maaPinta(TZ, x, y) + 0.06)); gu.push(x / 3, y / 3); }
       for (let i = 0; i < NT; i++) for (let j = 0; j < NL; j++) { const a = base + i * (NL + 1) + j, b = a + NL + 1; if (sd > 0) gI.push(a, b, b + 1, a, b + 1, a + 1); else gI.push(a, b + 1, b, a, a + 1, b + 1); } }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(gu, 2)); g.setIndex(gI); g.computeVertexNormals();
     const m = new THREE.Mesh(g, gm); m.userData.noT = true; root.add(m); }
@@ -665,19 +671,23 @@ function luoRata({ scene, TZg, G }) {
   // sille, joka on jo kannen tasolla; alhaalla tulevalle (kävelijä tai pelaajan auto alle 2 m kannen alapuolella) maa = kaivannon pohja (index.html)
   const SIL = (RATA.silta || []).map(S => { const dx = S.b[0] - S.a[0], dy = S.b[1] - S.a[1], L = Math.hypot(dx, dy), u = [dx / L, dy / L];
     const tg = p => (p[0] - S.a[0]) * u[0] + (p[1] - S.a[1]) * u[1]; return { S, L, u, hw: S.w / 2, t0: tg(S.ga) - 4, t1: tg(S.gb) + 4 }; });
-  const silZ = (x, y) => { for (const B of SIL) { const dx = x - B.S.a[0], dy = y - B.S.a[1], t = dx * B.u[0] + dy * B.u[1], l = dx * B.u[1] - dy * B.u[0];
+  const silZ = (x, y, r) => { for (const B of SIL) { const dx = x - B.S.a[0], dy = y - B.S.a[1], t = dx * B.u[0] + dy * B.u[1], l = dx * B.u[1] - dy * B.u[0];
       if (t < B.t0 || t > B.t1 || Math.abs(l) > B.hw) continue; const dz = B.S.za + (B.S.zb - B.S.za) * t / B.L + 0.14;
-      const W2 = G.WALK, C = window.__car; let ref = null;
-      if (W2 && W2.on && Math.hypot(W2.x - x, W2.y - y) < 25) ref = W2.z; else if (C && Math.hypot(C.x - x, C.y - y) < 25) ref = C.z;
+      const W2 = G.WALK, C = window.__car; let ref = r !== undefined && r !== null ? r : null;
+      if (ref === null) { if (W2 && W2.on && Math.hypot(W2.x - x, W2.y - y) < 25) ref = W2.z; else if (C && Math.hypot(C.x - x, C.y - y) < 25) ref = C.z; }
       return ref !== null && ref < dz - 2 ? null : dz; } return undefined; };
   // 21.11.2026 (omistaja: "auto törmäilee näkymättömään, hyppii oudosti tiellä"): ajopinta on täsmälleen piirretty asfaltti (buildTunnel zr + 0,04, lounaassa
   // kaarre tunOff) eikä pelkkä tunFloor, jonka alle auto ennen painui lounaan rampissa. Maasto on tasoitettu (010_maasto.js), joten ero on pieni.
   const TZr = G.TZg || G.TZs;
-  window.__rataZ = (x, y) => { { const s = silZ(x, y); if (s !== undefined) return s; } const c = inTun(x, y);
+  // 21.11.2026 (omistaja: "luvianpuistokadun junasillan alta kun ajaa, niin auto hyppää voltin"): sepelipenkka ja laituri vain sille, joka on niiden
+  // tasolla (viite r tai pelaajan auto / jalankulkija). Ennen radan alta ajavan auton pyörä osui 2,3 m:n säteelle raiteesta ja sai 5 m korkeamman pinnan.
+  const viite = (r, x, y) => { if (r !== undefined && r !== null) return r; const W2 = G.WALK, C = window.__car; if (W2 && W2.on) return W2.z; if (C && Math.hypot(C.x - x, C.y - y) < 30) return C.z; return null; };
+  window.__rataZ = (x, y, r) => { { const s = silZ(x, y, r); if (s !== undefined) return s; } const c = inTun(x, y);
     if (c) { const fl = c.t <= TUN.t1 ? tunFloor(c.t) : Math.max(tunFloor(c.t), TZr(x, y) + 0.04), f = fl + 0.04, W2 = G.WALK; const up = c.t > TUN.t0 && c.t < TUN.t1 && W2 && W2.on && W2.z > f + 2.2;   // tunnelissa: lattia, paitsi kävelijä ylhäällä laiturilla
       if (!up) { const l = c.l - tunOff(c.t); return f + (l > TUN.w / 2 - 1.4 && l < TUN.w / 2 + 0.3 ? 0.15 : 0); } }
-    for (const p of plats) if (inPoly(x, y, p.poly)) return p.z;
-    const b = NZ(x, y, 2.3); if (b && !b.a.lc) return b.a.z + 0.02; return null; };
+    const rf = viite(r, x, y);
+    for (const p of plats) if (inPoly(x, y, p.poly) && (rf === null || rf > p.z - 2)) return p.z;
+    const b = NZ(x, y, 2.3); if (b && !b.a.lc && (rf === null || rf > b.a.z - 2)) return b.a.z + 0.02; return null; };
   window.__rataSeina = (x, y, z) => tunWallDepth(x, y, z, TZr);
   // bottiautot (js/092): vt 2:n sillan kansi, jos piste on kannella ja auto ajaa sillan suuntaan (alla Ratapihantietä ajava jää alas)
   window.__rataSiltaAjo = (x, y, yaw) => { const sx = Math.sin(yaw), sy = Math.cos(yaw);

@@ -102,8 +102,8 @@ const ALIK_W = 4.2, ALIK_H = 2.7, ALIK_KANSI = 0.6;      // kulkuaukon leveys ja
   // pinta groundTop:lle (asfaltti, roads.js, kävelijä): kaivannossa hz, katetun osuuden alla lattia vain alhaalla kulkevalle (alikZ)
   window.__alikPinta = (x, y) => { for (const A of ALIK) { if (!inBB(A, x, y)) continue; const h = A.hz(x, y); if (h !== null) return h;
       if (A.inM(x, y)) { const p = A.proj(x, y); if (p && A.covered(p.s)) return z1(x, y); } } return null; };      // katetun osuuden päällä tie (kaivetut solmut eivät painu sen alle)
-  window.__alikZ = (x, y) => { for (const A of ALIK) { if (!inBB(A, x, y)) continue; const p = A.proj(x, y); if (!p) continue; const c = A.covered(p.s); if (!c || Math.abs(p.l) > ALIK_W / 2 + 0.6) continue;
-      const ref = (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : null); if (ref !== null && ref !== undefined && ref < c.zt - 1.6) return c.f + 0.04; } return null; };
+  window.__alikZ = (x, y, r) => { for (const A of ALIK) { if (!inBB(A, x, y)) continue; const p = A.proj(x, y); if (!p) continue; const c = A.covered(p.s); if (!c || Math.abs(p.l) > ALIK_W / 2 + 0.6) continue;
+      const ref = r !== undefined && r !== null ? r : (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : null); if (ref !== null && ref !== undefined && ref < c.zt - 1.6) return c.f + 0.04; } return null; };
   // seinät: katetun osuuden sivuseinät (alhaalla kulkevalle), otsamuurien kaiteet ja siivet (tiellä kulkevalle: ei pudota kaivantoon)
   window.__alikSeina = (x, y, z) => { let dep = 0; for (const A of ALIK) { if (!inBB(A, x, y)) continue; const p = A.proj(x, y); if (!p) continue; const al = Math.abs(p.l);
       for (const c of A.kat) { if (p.s > c.s0 - 0.3 && p.s < c.s1 + 0.3 && z < c.zt - 1.6 && al > ALIK_W / 2 - 0.05 && al < ALIK_W / 2 + 1.2) dep = Math.max(dep, al - (ALIK_W / 2 - 0.05));

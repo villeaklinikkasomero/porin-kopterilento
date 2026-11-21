@@ -76,21 +76,36 @@ function luoValo(G, A) {
 const VALI = { 3: 34, 2: 40, 1: 46 }, SIVU = { 3: 6.2, 2: 4.8, 1: 4.0 }, KOKO = { 3: 1, 2: 0.9, 1: 0.75 };      // katuluokittain: lamppuväli, etäisyys keskilinjasta, mittakaava
 const LAHI = 240, MAX = 380, PAA = { y: 7.74, z: 2.7 };      // lähialueen säde (m), lamppuja enintään, valaisimen alapinta mallissa
 
-function lamppuPaikat() {
+// 21.11.2026 (omistaja: "lyhtypylväät ovat kaikkialla keskellä tietä ... sijoittaa linjoille liikennevalojen mukaan"): lamppu menee reunakiven taakse
+// samoin kuin liikennevalot (src/js/092): keskilinjalta sivulle niin kauan kuin ajorataa (ROAD.asphAt) riittää, ja 0,8 m reunan yli. Alle 1,5 m:n
+// saarekkeen yli jatketaan. Jos ajorataa ei ole maskissa (roads.js:n ulkopuoli), käytetään katuluokan vakioetäisyyttä, mutta ei koskaan ajoradalle.
+function reunanTakana(R, cx, cy, nx, ny, oletus) {
+  const A = (x, y) => R && R.asphAt && R.asphAt(x, y);
+  if (!A(cx, cy) && !A(cx + nx * 1.5, cy + ny * 1.5)) { const x = cx + nx * oletus, y = cy + ny * oletus; return A(x, y) ? null : { x, y }; }
+  let nahty = false;
+  for (let q = 0.5; q <= 18; q += 0.5) { const x = cx + nx * q, y = cy + ny * q;
+    if (A(x, y)) { nahty = true; continue; }
+    if (!nahty) continue;
+    if (A(x + nx * 1.5, y + ny * 1.5)) continue;      // kapea saareke tai keskiviiva-alue: ajorata jatkuu
+    return { x: cx + nx * (q + 0.8), y: cy + ny * (q + 0.8) }; }
+  return null;
+}
+function lamppuPaikat(R) {
   const L = [], ruutu = new Map(), avain = (x, y) => Math.floor(x / 14) * 8192 + Math.floor(y / 14);
   const vapaa = (x, y) => { const cx = Math.floor(x / 14), cy = Math.floor(y / 14); for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const l = ruutu.get((cx + i) * 8192 + cy + j); if (l) for (const q of l) if ((q.x - x) ** 2 + (q.y - y) ** 2 < 196) return false; } return true; };
   // isot kadut ensin, jotta risteyksissä jää ison kadun lamppu
   for (const k of [3, 2, 1]) CITY.r.forEach((r, ri) => { if (r.k !== k) return; const p = r.p, vali = VALI[k]; let matka = vali * (0.3 + ((ri * 37) % 10) / 25), puoli = ri % 2 ? 1 : -1;
     for (let i = 0; i + 3 < p.length; i += 2) { const ax = p[i], ay = p[i + 1], dx = p[i + 2] - ax, dy = p[i + 3] - ay, len = Math.hypot(dx, dy); if (len < 0.5) continue;
-      while (matka <= len) { const u = matka / len, nx = dy / len, ny = -dx / len, x = ax + dx * u + nx * puoli * SIVU[k], y = ay + dy * u + ny * puoli * SIVU[k];
-        if (vapaa(x, y)) { const q = { x, y, s: KOKO[k], a: Math.atan2(-nx * puoli, -ny * puoli), z: undefined, ok: undefined }; L.push(q); const kk = avain(x, y); let l = ruutu.get(kk); if (!l) ruutu.set(kk, l = []); l.push(q); }
+      while (matka <= len) { const u = matka / len, nx = dy / len, ny = -dx / len, pk = reunanTakana(R, ax + dx * u, ay + dy * u, nx * puoli, ny * puoli, SIVU[k]);
+        const x = pk ? pk.x : 0, y = pk ? pk.y : 0;
+        if (pk && vapaa(x, y)) { const q = { x, y, s: KOKO[k], a: Math.atan2(-nx * puoli, -ny * puoli), z: undefined, ok: undefined }; L.push(q); const kk = avain(x, y); let l = ruutu.get(kk); if (!l) ruutu.set(kk, l = []); l.push(q); }
         puoli = -puoli; matka += vali; }
       matka -= len; } });
   return L;
 }
 
 function luoLamput(G, A) {
-  const sc = G.scene, L = lamppuPaikat(), iso = new Map();
+  const sc = G.scene, L = lamppuPaikat(window.__ROAD), iso = new Map();
   for (const q of L) { const k = Math.floor(q.x / 120) * 4096 + Math.floor(q.y / 120); let l = iso.get(k); if (!l) iso.set(k, l = []); l.push(q); }
   // lamppu kelpaa, jos se ei ole talon sisällä eikä joessa; korkeus pelin omasta maanpinnasta
   const tarkista = q => { if (q.ok !== undefined) return q.ok; let z = null; try { if (G.bldTopAt && G.bldTopAt(q.x, q.y) > -1e8) return q.ok = false; z = G.carGround(q.x, q.y); } catch (e) { return false; } if (z == null) return q.ok = false; q.z = z; return q.ok = true; };
@@ -175,6 +190,7 @@ export async function kaynnista() {
   if (window.__aika) return window.__aika;
   for (let i = 0; i < 600 && !(window.__game && window.__game.scene && window.__game.carGround); i++) await new Promise(r => setTimeout(r, 100));
   const G = window.__game; if (!G) throw new Error('[aika] peliä (window.__game) ei löytynyt');
+  for (let i = 0; i < 300 && !window.__ROAD; i++) await new Promise(r => setTimeout(r, 100));      // katujen ajorata-maski (lamput reunakiven taakse)
   const A = luoKello(), valo = luoValo(G, A), lamput = luoLamput(G, A), ikkunat = luoIkkunat(A), ajovalot = luoAjovalot(G, A), naytto = luoNaytto(A);
   A.valoOsa = valo; A.lamppuOsa = lamput; A.ajovaloOsa = ajovalot; window.__aika = A;
   let edell = performance.now();

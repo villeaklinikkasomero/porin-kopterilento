@@ -133,8 +133,8 @@ export default function kaynnista(_P) {
     // draw: one instanced mesh per kind
     const mat = new THREE.MeshLambertMaterial({ vertexColors: true }); mat.userData.noT = true; const m4 = new M4(), p3 = new V3(), q4 = new QQ(), s3 = new V3(), UPV = new V3(0, 1, 0);
     GEO.forEach((g, k) => { const L = FURN.filter(f => f.k === k); if (!L.length) return; const im = new THREE.InstancedMesh(g, mat, L.length); im.userData.noT = true; im.frustumCulled = false;
-      L.forEach((f, i) => { f.z = _P.carGround(f.x, f.y) ?? _P.TZs(f.x, f.y); p3.set(f.x, f.z, -f.y); q4.setFromAxisAngle(UPV, -f.yaw); s3.set(f.sx, 1, 1); im.setMatrixAt(i, m4.compose(p3, q4, s3)); }); _P.scene.add(im); });
-    SEATS.forEach((s, i) => { s.z = _P.carGround(s.x, s.y) ?? _P.TZs(s.x, s.y); s.st = hs(i, 7) < [0.2, 0.3, 0.3, 0.5][s.kind]; });
+      L.forEach((f, i) => { f.z = _P.carGround(f.x, f.y, -1e9) ?? _P.TZs(f.x, f.y); p3.set(f.x, f.z, -f.y); q4.setFromAxisAngle(UPV, -f.yaw); s3.set(f.sx, 1, 1); im.setMatrixAt(i, m4.compose(p3, q4, s3)); }); _P.scene.add(im); });
+    SEATS.forEach((s, i) => { s.z = _P.carGround(s.x, s.y, -1e9) ?? _P.TZs(s.x, s.y); s.st = hs(i, 7) < [0.2, 0.3, 0.3, 0.5][s.kind]; });
     window.__furn = FURN; seatsOn = true; seatFill = performance.now() + 8000; };
   const sitDown = (c, s) => { c.x = s.x; c.y = s.y; c.z = s.z; c.yaw = s.yaw; c.g.position.set(s.x, s.z + s.h, -s.y); c.g.rotation.y = -s.yaw; };
   const freeChar = c => { _P.scene.remove(c.g); c.mix.stopAllAction(); for (const m of c.g.mats || []) m.dispose(); if (c.seat) c.seat.occ = null; };
@@ -196,7 +196,7 @@ export default function kaynnista(_P) {
     if (!c.sat) { const dx = gx - c.x, dy = gy - c.y, d = Math.hypot(dx, dy), st = Math.min(d, (c.at2 ? 0.7 : 1.25) * dt); if (d > 1e-4) { c.x += dx / d * st; c.y += dy / d * st; sp = st / Math.max(dt, 1e-3); }
       let ty = c.at2 ? s.yaw : Math.atan2(dx, dy), a = ty - c.yaw; a = Math.atan2(Math.sin(a), Math.cos(a)); c.yaw += a * Math.min(1, dt * 7);
       if (d < 0.06) { if (up) { if (c.e >= 0.45) { s.occ = null; c.seat = null; c.at2 = false; c.zo = 0; c.ap = null; } } else if (!c.at2) c.at2 = true; else { c.sat = true; setAnim(c, 'Chair'); } } }
-    const g = _P.carGround(c.x, c.y); if (g !== null) c.z += (g - c.z) * Math.min(1, dt * 10); c.zo = (c.zo || 0) + ((c.sat ? s.h : 0) - (c.zo || 0)) * Math.min(1, dt * 6);
+    const g = _P.carGround(c.x, c.y, c.z); if (g !== null) c.z += (g - c.z) * Math.min(1, dt * 10); c.zo = (c.zo || 0) + ((c.sat ? s.h : 0) - (c.zo || 0)) * Math.min(1, dt * 6);
     c.g.position.set(c.x, c.z + c.zo, -c.y); c.g.rotation.y = -c.yaw; c.g.visible = vis;
     if (c.sat) { let foot = false; try { foot = _P.WALK.on && !_P.WALK.in; } catch (e) {} seatLook(c, s, dt, p.hold > 0 || (foot && Math.hypot(_P.S.x - c.x, _P.S.y - c.y) < 4.5)); }
     if (vis) { if (!c.sat) setAnim(c, sp > 0.3 ? 'Walk' : 'Idle'); if (c.act.Walk) c.act.Walk.timeScale = Math.max(0.6, sp / STRIDE[c.k]); c.mix.update(dt); if (c.sat) ARMS(c, dt); } };
@@ -205,7 +205,7 @@ export default function kaynnista(_P) {
     arrive: (x, y, ch) => { if (!net || count() > NMAX + 6) return;      /* ch: this very walker gets off (bicycle passenger) */ let b = null, bd = 30; for (const q of net) { const d = Math.hypot(q.x - x, q.y - y); if (d < bd) { bd = d; b = q; } } if (!b) return;   // people getting out of a car that has just parked: they walk to the nearest footway
       const r = rnd(), ks = ch ? [ch.k] : r < 0.5 ? [adult()] : r < 0.8 ? [adult(), adult()] : [guard(), child()]; if (ks.some(k => !MOD[k])) return;
       const p = { a: { x, y, nb: [{ n: b, c: 0 }] }, b, c: 0, pc: 0, t: 0, v: 1.2, wait: false, lat: (rnd() - 0.5) * 7, m: ch ? [ch] : ks.map(mkChar) };
-      p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.x = x; c.y = y; c.z = _P.carGround(x, y) ?? 0; c.new = true; }); parties.push(p); return true; },
+      p.m.forEach((c, i) => { c.off = i ? (i % 2 ? 0.6 : -0.6) * Math.ceil(i / 2) : 0; c.back = i ? 0.25 + rnd() * 0.3 : 0; c.x = x; c.y = y; c.z = _P.carGround(x, y, -1e9) ?? 0; c.new = true; }); parties.push(p); return true; },
     update: dt => { if (!net || dt <= 0) return; const px = _P.S.x, py = _P.S.y;
     _P.DANCE.tick();
     seatFrame(dt, px, py);
@@ -229,7 +229,7 @@ export default function kaynnista(_P) {
         const sp = Math.hypot(mx, my) / Math.max(dt, 1e-3); c.x += mx; c.y += my;
         if (p.hold > 0 || (p.dn && sp < 0.3)) { let d = Math.atan2(px - c.x, py - c.y) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6); }
         else if (sp > 0.15) { let d = Math.atan2(mx, my) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 8); }
-        const g = _P.carGround(c.x, c.y); if (g !== null) c.z += (g - c.z) * Math.min(1, dt * 10);
+        const g = _P.carGround(c.x, c.y, c.z); if (g !== null) c.z += (g - c.z) * Math.min(1, dt * 10);
         c.g.position.set(c.x, c.z, -c.y); c.g.rotation.y = -c.yaw; c.g.visible = near;
         if (near) { const dn = p.dn && sp < 0.3 && c.act.Dance ? (c.dk || (c.dk = Math.random() < 0.45 && c.act.Dance2 ? 'Dance2' : 'Dance')) : '';
           setAnim(c, sp > 0.3 ? 'Walk' : dn || 'Idle'); if (c.act.Walk) c.act.Walk.timeScale = Math.max(0.6, sp / STRIDE[c.k]); if (dn) _P.DANCE.sync(c.act[dn], c.dph === undefined ? (c.dph = Math.random() < 0.5 ? 0 : 2) : c.dph); c.mix.update(dt); } } } } };

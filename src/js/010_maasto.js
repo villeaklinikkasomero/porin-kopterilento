@@ -65,8 +65,7 @@ const TZg = (x, y) => tBil(THG, x, y), TZs = (x, y) => tBil(THS, x, y);
     if (bd > 22 || best.k === 'katettu') continue;
     let target, w;
     if (best.k === 'muuri') { const dx = x - T.a[0], dy = y - T.a[1], l = dx * nr[0] + dy * nr[1], t = dx * u[0] + dy * u[1], al = Math.abs(l);      // muurien rampit: pohja tai muurin takana aukion taso
-      if (al <= hw + 0.3) { target = prof(t); w = 1; }
-      else { target = bil0(...P(t, Math.sign(l) * 20)); w = al < 16 ? 1 : al > 22 ? 0 : 1 - sm((al - 16) / 6); } }
+      target = bil0(...P(t, (Math.sign(l) || 1) * 20)); w = al < 16 ? 1 : al > 22 ? 0 : 1 - sm((al - 16) / 6); }      // myös rampin kohdalla aukion / ratapihan taso: ramppi ja lattia ovat rata.js:n geometriaa (maan solut pois), ja muurin vierus pysyy tasaisena (ei nurmimäkiä)
     else { target = best.z; w = bd <= 8 ? 1 : bd >= 18 ? 0 : 1 - sm((bd - 8) / 10); }
     if (w <= 0) continue;
     THG[k] = Math.round(((G0[k] / 10) * (1 - w) + target * w) * 10); THS[k] = Math.round(((THS[k] / 10) * (1 - w) + target * w) * 10); n++; }

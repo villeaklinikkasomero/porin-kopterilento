@@ -18,15 +18,17 @@ function inHall(x, y) { const b = HALL.bb; if (x < b[0] || y < b[1] || x > b[2] 
   for (const l of HALL.lines) { const dx = l[2] - l[0], dy = l[3] - l[1], L = Math.hypot(dx, dy), nx = -dy / L * 0.06, ny = dx / L * 0.06, ya = hallZ(l[0], l[1]) + 0.012, yb = hallZ(l[2], l[3]) + 0.012;
     li.push(l[0] + nx, ya, -(l[1] + ny), l[2] + nx, yb, -(l[3] + ny), l[2] - nx, yb, -(l[3] - ny), l[0] + nx, ya, -(l[1] + ny), l[2] - nx, yb, -(l[3] - ny), l[0] - nx, ya, -(l[1] - ny)); }
   mk(fl, 0x4a4b4d); mk(ce, 0x6f6e6a); mk(wa, 0x8f8d87); mk(pi, 0xa3a19a); mk(li, 0xd9d6c8); }
-window.__hallTest = { HALL, inHall, carBlocked: (x, y, yaw) => carBlocked(x, y, yaw), carGround: (x, y) => carGround(x, y) };
+window.__hallTest = { HALL, inHall, carBlocked: (x, y, yaw) => carBlocked(x, y, yaw), carGround: (x, y, r) => carGround(x, y, r) };
 // ground under the car: the street surface (asphalt / pavement), bridge decks, the smoothed field elsewhere
-function carGround(x, y) {
+// ref (21.11.2026): kulkijan oma korkeus. Sillan kannelle / radalle vain se, joka on jo niiden tasolla; oletus pelaajan auto tai jalankulkija.
+// Kävelijäbotit antavat oman korkeutensa (moduulit/kavelijat.js), muuten ne nousivat sillalle, kun pelaaja ajoi sen yli.
+function carGround(x, y, ref) {
   if (onPorinsilta(x, y) !== null) return TZs(x, y) + bridgeZ(x, y);
   { const qz = window.__quayZ ? window.__quayZ(x, y) : null; if (qz !== null) return qz; }      // Eteläranta's hand-built quay
-  { const sz = window.__siltaZ ? window.__siltaZ(x, y) : null; if (sz !== null) return sz; }      // 21.11.2026: maasiltojen asfalttikansi (js/0301_sillat.js)
+  { const sz = window.__siltaZ ? window.__siltaZ(x, y, ref) : null; if (sz !== null) return sz; }      // 21.11.2026: maasiltojen asfalttikansi (js/0301_sillat.js)
   { const kz = window.__korjaamoZ ? window.__korjaamoZ(x, y) : null; if (kz !== null) return kz; }      // 21.11.2026: Tapsan korjaamon lattia ja ajoluiska (korjaamo/korjaamo.js)
-  { const az = window.__alikZ ? window.__alikZ(x, y) : null; if (az !== null) return az; }      // 21.11.2026: alikulun lattia kannen alla (0106)
-  { const rz = window.__rataZ ? window.__rataZ(x, y) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: "pelaaja uppoaa"): aseman laiturit ja ratapenkka (rata/rata.js)
+  { const az = window.__alikZ ? window.__alikZ(x, y, ref) : null; if (az !== null) return az; }      // 21.11.2026: alikulun lattia kannen alla (0106)
+  { const rz = window.__rataZ ? window.__rataZ(x, y, ref) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: "pelaaja uppoaa"): aseman laiturit ja ratapenkka (rata/rata.js)
   if (inRiver(x, y)) return onBridgeDeck(x, y) ? brDeckZ(x, y) ?? Math.max(TZs(x, y), TER.wl + 2.2) : null;
   if (!inCore(x, y) && !TIE.ext(x, y)) return Math.max(TZs(x, y), TZg(x, y) + 0.14);      // (21.11.2026: Tiilimäen ja Isomäen kadut ovat roads.js:ssä, 0105_tie_kaytava.js)      // outside the centre the airport and its roads lie 0.1-0.15 m above the true ground (20.11.2026)
   if (inHall(x, y)) return hallZ(x, y);   // parking hall floor (test)

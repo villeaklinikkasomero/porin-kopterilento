@@ -275,8 +275,7 @@ const TZg = (x, y) => tBil(THG, x, y), TZs = (x, y) => tBil(THS, x, y);
     if (bd > 22 || best.k === 'katettu') continue;
     let target, w;
     if (best.k === 'muuri') { const dx = x - T.a[0], dy = y - T.a[1], l = dx * nr[0] + dy * nr[1], t = dx * u[0] + dy * u[1], al = Math.abs(l);      // muurien rampit: pohja tai muurin takana aukion taso
-      if (al <= hw + 0.3) { target = prof(t); w = 1; }
-      else { target = bil0(...P(t, Math.sign(l) * 20)); w = al < 16 ? 1 : al > 22 ? 0 : 1 - sm((al - 16) / 6); } }
+      target = bil0(...P(t, (Math.sign(l) || 1) * 20)); w = al < 16 ? 1 : al > 22 ? 0 : 1 - sm((al - 16) / 6); }      // myös rampin kohdalla aukion / ratapihan taso: ramppi ja lattia ovat rata.js:n geometriaa (maan solut pois), ja muurin vierus pysyy tasaisena (ei nurmimäkiä)
     else { target = best.z; w = bd <= 8 ? 1 : bd >= 18 ? 0 : 1 - sm((bd - 8) / 10); }
     if (w <= 0) continue;
     THG[k] = Math.round(((G0[k] / 10) * (1 - w) + target * w) * 10); THS[k] = Math.round(((THS[k] / 10) * (1 - w) + target * w) * 10); n++; }
@@ -499,8 +498,8 @@ const ALIK_W = 4.2, ALIK_H = 2.7, ALIK_KANSI = 0.6;      // kulkuaukon leveys ja
   // pinta groundTop:lle (asfaltti, roads.js, kävelijä): kaivannossa hz, katetun osuuden alla lattia vain alhaalla kulkevalle (alikZ)
   window.__alikPinta = (x, y) => { for (const A of ALIK) { if (!inBB(A, x, y)) continue; const h = A.hz(x, y); if (h !== null) return h;
       if (A.inM(x, y)) { const p = A.proj(x, y); if (p && A.covered(p.s)) return z1(x, y); } } return null; };      // katetun osuuden päällä tie (kaivetut solmut eivät painu sen alle)
-  window.__alikZ = (x, y) => { for (const A of ALIK) { if (!inBB(A, x, y)) continue; const p = A.proj(x, y); if (!p) continue; const c = A.covered(p.s); if (!c || Math.abs(p.l) > ALIK_W / 2 + 0.6) continue;
-      const ref = (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : null); if (ref !== null && ref !== undefined && ref < c.zt - 1.6) return c.f + 0.04; } return null; };
+  window.__alikZ = (x, y, r) => { for (const A of ALIK) { if (!inBB(A, x, y)) continue; const p = A.proj(x, y); if (!p) continue; const c = A.covered(p.s); if (!c || Math.abs(p.l) > ALIK_W / 2 + 0.6) continue;
+      const ref = r !== undefined && r !== null ? r : (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : null); if (ref !== null && ref !== undefined && ref < c.zt - 1.6) return c.f + 0.04; } return null; };
   // seinät: katetun osuuden sivuseinät (alhaalla kulkevalle), otsamuurien kaiteet ja siivet (tiellä kulkevalle: ei pudota kaivantoon)
   window.__alikSeina = (x, y, z) => { let dep = 0; for (const A of ALIK) { if (!inBB(A, x, y)) continue; const p = A.proj(x, y); if (!p) continue; const al = Math.abs(p.l);
       for (const c of A.kat) { if (p.s > c.s0 - 0.3 && p.s < c.s1 + 0.3 && z < c.zt - 1.6 && al > ALIK_W / 2 - 0.05 && al < ALIK_W / 2 + 1.2) dep = Math.max(dep, al - (ALIK_W / 2 - 0.05));
@@ -700,7 +699,7 @@ const SILTA = { list: [] }; window.__SILTA = SILTA;
       for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
         if (t < -0.02 || t > 1.02) continue; const tc = Math.min(1, Math.max(0, t)), px = ax + dx * tc, py = ay + dy * tc; if (Math.hypot(x - px, y - py) > b.hw - 0.05) continue;
         return P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA; } } return null; };
-  window.__siltaZ = (x, y) => { const d = SILTA.deck(x, y); if (d === null) return null; const ref = (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : d);
+  window.__siltaZ = (x, y, r) => { const d = SILTA.deck(x, y); if (d === null) return null; const ref = r !== undefined && r !== null ? r : (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : d);
     return (ref === undefined || ref === null || ref > d - 2.2) ? d : null; };
   // 21.11.2026 (omistaja: "auto törmäilee näkymättömään, hyppii oudosti ... bottiautot eivät aja siltaa vaan maanmuotoja pitkin"):
   // SILTA.ajo(x, y, yaw): kannen pinta bottiautolle, jos se on kannella (leveämpi marginaali: OSM-tien keskilinja ei osu tarkasti sillan linjaan) ja ajaa
@@ -1541,7 +1540,7 @@ import('./roads.js').then(mod => {
   }
   if (R.ow) { const O = dec(R.ow); for (let i = 0; i < O.length; i += 3) ONEWAY.set(O[i] + ',' + O[i + 1], O[i + 2]); }
   if (R.tmv && TREES.move) { const s0 = atob(R.tmv), u8 = new Uint8Array(s0.length); for (let i = 0; i < s0.length; i++) u8[i] = s0.charCodeAt(i); TREES.move(new Int32Array(u8.buffer)); }
-  ROAD.on = true; window.__roads = { asph: R.asph.length, pave: R.pave.length };
+  ROAD.on = true; window.__roads = { asph: R.asph.length, pave: R.pave.length }; window.__ROAD = ROAD;      // 21.11.2026: aika/aika.js sijoittaa katulamput reunakiven taakse
 }).catch(e => console.log('roads.js not loaded', e));
 
 // @osa js/061_kaupunkilohkot.js
@@ -1841,15 +1840,17 @@ function inHall(x, y) { const b = HALL.bb; if (x < b[0] || y < b[1] || x > b[2] 
   for (const l of HALL.lines) { const dx = l[2] - l[0], dy = l[3] - l[1], L = Math.hypot(dx, dy), nx = -dy / L * 0.06, ny = dx / L * 0.06, ya = hallZ(l[0], l[1]) + 0.012, yb = hallZ(l[2], l[3]) + 0.012;
     li.push(l[0] + nx, ya, -(l[1] + ny), l[2] + nx, yb, -(l[3] + ny), l[2] - nx, yb, -(l[3] - ny), l[0] + nx, ya, -(l[1] + ny), l[2] - nx, yb, -(l[3] - ny), l[0] - nx, ya, -(l[1] - ny)); }
   mk(fl, 0x4a4b4d); mk(ce, 0x6f6e6a); mk(wa, 0x8f8d87); mk(pi, 0xa3a19a); mk(li, 0xd9d6c8); }
-window.__hallTest = { HALL, inHall, carBlocked: (x, y, yaw) => carBlocked(x, y, yaw), carGround: (x, y) => carGround(x, y) };
+window.__hallTest = { HALL, inHall, carBlocked: (x, y, yaw) => carBlocked(x, y, yaw), carGround: (x, y, r) => carGround(x, y, r) };
 // ground under the car: the street surface (asphalt / pavement), bridge decks, the smoothed field elsewhere
-function carGround(x, y) {
+// ref (21.11.2026): kulkijan oma korkeus. Sillan kannelle / radalle vain se, joka on jo niiden tasolla; oletus pelaajan auto tai jalankulkija.
+// Kävelijäbotit antavat oman korkeutensa (moduulit/kavelijat.js), muuten ne nousivat sillalle, kun pelaaja ajoi sen yli.
+function carGround(x, y, ref) {
   if (onPorinsilta(x, y) !== null) return TZs(x, y) + bridgeZ(x, y);
   { const qz = window.__quayZ ? window.__quayZ(x, y) : null; if (qz !== null) return qz; }      // Eteläranta's hand-built quay
-  { const sz = window.__siltaZ ? window.__siltaZ(x, y) : null; if (sz !== null) return sz; }      // 21.11.2026: maasiltojen asfalttikansi (js/0301_sillat.js)
+  { const sz = window.__siltaZ ? window.__siltaZ(x, y, ref) : null; if (sz !== null) return sz; }      // 21.11.2026: maasiltojen asfalttikansi (js/0301_sillat.js)
   { const kz = window.__korjaamoZ ? window.__korjaamoZ(x, y) : null; if (kz !== null) return kz; }      // 21.11.2026: Tapsan korjaamon lattia ja ajoluiska (korjaamo/korjaamo.js)
-  { const az = window.__alikZ ? window.__alikZ(x, y) : null; if (az !== null) return az; }      // 21.11.2026: alikulun lattia kannen alla (0106)
-  { const rz = window.__rataZ ? window.__rataZ(x, y) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: "pelaaja uppoaa"): aseman laiturit ja ratapenkka (rata/rata.js)
+  { const az = window.__alikZ ? window.__alikZ(x, y, ref) : null; if (az !== null) return az; }      // 21.11.2026: alikulun lattia kannen alla (0106)
+  { const rz = window.__rataZ ? window.__rataZ(x, y, ref) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: "pelaaja uppoaa"): aseman laiturit ja ratapenkka (rata/rata.js)
   if (inRiver(x, y)) return onBridgeDeck(x, y) ? brDeckZ(x, y) ?? Math.max(TZs(x, y), TER.wl + 2.2) : null;
   if (!inCore(x, y) && !TIE.ext(x, y)) return Math.max(TZs(x, y), TZg(x, y) + 0.14);      // (21.11.2026: Tiilimäen ja Isomäen kadut ovat roads.js:ssä, 0105_tie_kaytava.js)      // outside the centre the airport and its roads lie 0.1-0.15 m above the true ground (20.11.2026)
   if (inHall(x, y)) return hallZ(x, y);   // parking hall floor (test)

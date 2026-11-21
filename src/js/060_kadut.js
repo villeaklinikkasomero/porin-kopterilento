@@ -217,6 +217,6 @@ import('./roads.js').then(mod => {
   }
   if (R.ow) { const O = dec(R.ow); for (let i = 0; i < O.length; i += 3) ONEWAY.set(O[i] + ',' + O[i + 1], O[i + 2]); }
   if (R.tmv && TREES.move) { const s0 = atob(R.tmv), u8 = new Uint8Array(s0.length); for (let i = 0; i < s0.length; i++) u8[i] = s0.charCodeAt(i); TREES.move(new Int32Array(u8.buffer)); }
-  ROAD.on = true; window.__roads = { asph: R.asph.length, pave: R.pave.length };
+  ROAD.on = true; window.__roads = { asph: R.asph.length, pave: R.pave.length }; window.__ROAD = ROAD;      // 21.11.2026: aika/aika.js sijoittaa katulamput reunakiven taakse
 }).catch(e => console.log('roads.js not loaded', e));
 

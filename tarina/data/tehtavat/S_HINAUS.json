@@ -33,15 +33,15 @@
     [
      "TAPSA",
      "huolestunut",
-     "Asiakkaan auto sammu Kauppahallin eteen. Hae se tänne, mut varovasti – se on jo valmiiks kipee."
+     "Asiakkaan auto sammu Kauppahallin eteen Isolinnankadulle. Hae se tänne, mut varovasti – se on jo valmiiks kipee."
     ]
    ]
   },
   {
    "tyyppi": "mene",
-   "paikka": "LOC_KAUPPAHALLI",
+   "paikka": "LOC_KAUPPAHALLI_KATU",
    "r": 15,
-   "teksti": "Mene Kauppahallin eteen",
+   "teksti": "Mene Kauppahallin eteen Isolinnankadulle",
    "kulku": "maa",
    "merkki": "Asiakkaan auto"
   },
@@ -54,10 +54,10 @@
    "tyyppi": "toiminto",
    "nimi": "anna_ajoneuvo",
    "param": {
-    "paikka": "LOC_KAUPPAHALLI",
-    "dx": 4,
+    "paikka": "LOC_KAUPPAHALLI_KATU",
+    "dx": 0,
     "dy": 0,
-    "yaw": 0,
+    "yaw": -2.92,
     "tyyppi": "hatch",
     "viesti": "🚗 Asiakkaan auto",
     "vari": "#6a7f9a"

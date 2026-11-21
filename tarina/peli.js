@@ -33,7 +33,9 @@ export const KASITTELIJAT = {
     alku(p, api) {
       const T = window.__take, q = p.paikka ? api.paikka(p.paikka) : p;
       if (!T || !T.give || !q) { console.warn('[tarina] anna_ajoneuvo: pelin __take.give puuttuu'); return; }
-      const ok = T.give(q.x + (p.dx || 0), q.y + (p.dy || 0), p.yaw || 0, p.tyyppi || 'hatch', p.vari ? parseInt(String(p.vari).replace('#', ''), 16) : undefined);
+      // 21.11.2026 (omistaja: "auto on puoliksi kauppahallin sisällä ja sillä ei voi ajaa"): jos paikka osuu taloon, auto siirretään lähimpään vapaaseen kohtaan
+      const vapaa = vapaaAutolle(q.x + (p.dx || 0), q.y + (p.dy || 0), p.yaw || 0);
+      const ok = T.give(vapaa.x, vapaa.y, p.yaw || 0, p.tyyppi || 'hatch', p.vari ? parseInt(String(p.vari).replace('#', ''), 16) : undefined);
       if (ok && p.viesti && window.__game && window.__game.toast) window.__game.toast(p.viesti, 2.5);
     },
     paivita() { return 'valmis'; }
@@ -53,6 +55,16 @@ export const KASITTELIJAT = {
   // hiiviskely, vesiletku ja drooni: tarina/mekaniikat.js (liitetään käynnistyksessä, tarvitsee pelin scenen)
 };
 let UI = null, tahdetLoppuu = 0, NAUHA = null, kyytiPisteet = null;
+// auton paikka: kaikki kulmat (4,6 × 2 m + 0,5 m väli) maassa eikä talon sisällä; muuten lähin vapaa kohta 25 m:n säteeltä
+function vapaaAutolle(x, y, yaw) {
+  const G = window.__game; if (!G || !G.bldTopAt || !G.carGround) return { x, y };
+  const sn = Math.sin(yaw), cs = Math.cos(yaw);
+  const ok = (px, py) => { for (const [f, r] of [[2.8, 1.25], [2.8, -1.25], [-2.8, 1.25], [-2.8, -1.25], [0, 1.25], [0, -1.25], [0, 0]]) { const qx = px + sn * f + cs * r, qy = py + cs * f - sn * r, g = G.carGround(qx, qy);
+      if (g === null || g === undefined || G.bldTopAt(qx, qy) > g + 1.0) return false; } return true; };
+  if (ok(x, y)) return { x, y };
+  for (let r = 1.5; r <= 25; r += 1.5) for (let a = 0; a < 16; a++) { const px = x + Math.cos(a * Math.PI / 8) * r, py = y + Math.sin(a * Math.PI / 8) * r; if (ok(px, py)) return { x: px, y: py }; }
+  return { x, y };
+}
 // Kyydit: pelin pisteet = suora matka m / 10, enintään +50 % nopeusbonus, kolhut vähentävät → 1 km = 100–150 pistettä.
 // Omistaja 20.11.2026: kilometristä enintään 10 € → 10 € / 150 pistettä (perus 1 km ≈ 6,7 €, nopea ja ehjä ≈ 10 €).
 const KYYTI_EUROA_PISTE = 10 / 150;

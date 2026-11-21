@@ -57,7 +57,7 @@ const SILTA = { list: [] }; window.__SILTA = SILTA;
       for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
         if (t < -0.02 || t > 1.02) continue; const tc = Math.min(1, Math.max(0, t)), px = ax + dx * tc, py = ay + dy * tc; if (Math.hypot(x - px, y - py) > b.hw - 0.05) continue;
         return P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA; } } return null; };
-  window.__siltaZ = (x, y) => { const d = SILTA.deck(x, y); if (d === null) return null; const ref = (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : d);
+  window.__siltaZ = (x, y, r) => { const d = SILTA.deck(x, y); if (d === null) return null; const ref = r !== undefined && r !== null ? r : (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : d);
     return (ref === undefined || ref === null || ref > d - 2.2) ? d : null; };
   // 21.11.2026 (omistaja: "auto törmäilee näkymättömään, hyppii oudosti ... bottiautot eivät aja siltaa vaan maanmuotoja pitkin"):
   // SILTA.ajo(x, y, yaw): kannen pinta bottiautolle, jos se on kannella (leveämpi marginaali: OSM-tien keskilinja ei osu tarkasti sillan linjaan) ja ajaa
