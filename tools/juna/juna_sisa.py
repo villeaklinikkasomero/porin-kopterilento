@@ -74,6 +74,36 @@ def M():
         sign=J.mat('S_kyltti', J.srgb('#1d5d3a'), 0.0, 0.5),
     )
 
+# ---------------------------------------------------------------- Meshy-kalusteet (omistaja 21.11.2026): sisa_props.py -> sisa_props/*.glb
+PROPD = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sisa_props')
+PROPS = {}
+def load_props():
+    """tuo istuin/poyta/hylly-mallit piilotetuiksi pohjiksi (J.clear poistaa meshit, joten joka vaunulle uudelleen)"""
+    PROPS.clear(); INST.clear()
+    for k in ('istuin', 'poyta', 'hylly'):
+        before = set(bpy.data.objects)
+        bpy.ops.import_scene.gltf(filepath=os.path.join(PROPD, k + ('' if HI else '_m') + '.glb'))   # _m: sisa_props.py:n mobiiliversio
+        new = [o for o in bpy.data.objects if o not in before]
+        o = next(o for o in new if o.type == 'MESH')
+        for e in new:
+            if e is not o: bpy.data.objects.remove(e, do_unlink=True)
+        o.data.transform(o.matrix_world); o.parent = None; o.matrix_world = Matrix.Identity(4)
+        m = o.data.materials[0]; mn = 'M_' + k
+        if m.name != mn:   # toinen tuonti -> M_istuin.001: käytä ensimmäistä
+            if mn in bpy.data.materials: o.data.materials[0] = bpy.data.materials[mn]; bpy.data.materials.remove(m)
+            else: m.name = mn
+        o.hide_set(True); o.hide_render = True; o.name = 'pohja_' + k
+        PROPS[k] = o
+
+INST = {}
+def prop(k, name, loc, rotz, parent):
+    """kalusteen instanssi (linkitetty kopio, yhteinen mesh): sijainti vaunun koordinaateissa, kierto Z-akselin ympäri.
+    Kopiot ovat saman tyhjän solmun lapsia -> GLB:hen EXT_mesh_gpu_instancing (three: InstancedMesh, yksi piirtokutsu)."""
+    if k not in INST: INST[k] = J.empty('kalusteet_' + k, parent=parent)
+    src = PROPS[k]; o = src.copy(); o.name = name
+    bpy.context.collection.objects.link(o); o.hide_set(False); o.hide_render = False
+    o.parent = INST[k]; o.matrix_world = Matrix.Translation(Vector(loc)) @ Matrix.Rotation(rotz, 4, 'Z'); return o
+
 def B(name, x0, x1, y0, y1, z0, z1, m, parent):
     """laatikko rajoista"""
     if x1 - x0 < 1e-3 or y1 - y0 < 1e-3 or z1 - z0 < 1e-3: return None
@@ -153,8 +183,19 @@ def seat_pair(name, sx, yc, f, zf, mm, root, fab=None):
     # käsinojat (pyöristetyt): käytävän puoli ja keskellä
     for k, xx in enumerate((xa - 0.005, xa + w - 0.025) if sx > 0 else (xb - 0.045, xa + w - 0.025)):
         o = J.box(f'{name}_kasi{k}', 0.05, 0.4, 0.055, (xx + 0.025, yc - f * 0.02, zf + 0.655), mm['plastic'], root, 0.02)
-def bay(name, sx, c, zf, mm, root, table=True):
-    """pöytäosasto: kaksi penkkiä vastakkain ikkunan kohdalla"""
+SEAT_BACK = 0.88    # Meshy-istuimen selkänojan takapinta pöytäosaston keskeltä (osasto 1,8 m = ikkunaväli)
+def bay(name, sx, c, zf, mm, root, table=True, upper=False):
+    """pöytäosasto: kaksi penkkiä vastakkain ikkunan kohdalla, seinäpöytä ja yläkerrassa hattuhylly (Meshy-kalusteet)"""
+    if PROPS:
+        yc = SEAT_BACK - 0.30   # istuimen jalanjäljen keskikohta (syvyys 0,60)
+        for k, f in (('a', 1), ('b', -1)):
+            prop('istuin', f'{name}{k}', (sx * 0.80, c - f * yc, zf), 0 if f > 0 else math.pi, root)
+        if table: prop('poyta', name + '_poyta', (sx * 1.255, c, zf), 0 if sx > 0 else math.pi, root)
+        if upper:   # hylly ikkunan yläreunan yllä, takareuna katon vinon osan sisällä
+            prop('hylly', name + '_hylly', (sx * 1.27, c, WIN_U[1] + 0.03), 0 if sx > 0 else math.pi, root)
+            xl = sx * 0.95   # lukuvalot hyllyn alapinnassa
+            for d in (-0.5, 0.5): B(f'{name}_lukuvalo{d}', xl - 0.05, xl + 0.05, c + d - 0.05, c + d + 0.05, WIN_U[1] + 0.015, WIN_U[1] + 0.028, mm['lamp'], root)
+        return
     seat_pair(name + 'a', sx, c - 0.5, 1, zf, mm, root)
     seat_pair(name + 'b', sx, c + 0.5, -1, zf, mm, root, mm['fabric'])
     if table:
@@ -193,6 +234,8 @@ def stairs(name, xs, ya, yb, za, zb, mm, root, n=None):
 # ---------------------------------------------------------------- vaunu
 def build(name):
     T = TYPES[name]; mm = M(); root = J.empty(name.capitalize() + '_sisa')
+    if os.path.isdir(PROPD): load_props()
+    else: PROPS.clear(); print('sisa_props/ puuttuu: vanhat proseduraaliset penkit (aja sisa_props.py)')
     rects = []   # kävelyalueet: [x0, x1, y0, y1, z(y0), z(y1), tyyppi]
     def R(x0, x1, y0, y1, za, zb=None, kind=0): rects.append([round(x0, 3), round(x1, 3), round(y0, 3), round(y1, 3), round(za, 3), round(za if zb is None else zb, 3), kind])
     rz, rx, rzs = T['roof']
@@ -227,12 +270,13 @@ def build(name):
     for zf, lim, tag in ((ZL, min(Lf, Lr), 'a'), (ZU, min(Uf, Ur), 'y')):
         for c in (-4.5, -2.7, -0.9, 0.9, 2.7, 4.5):
             if abs(c) + 0.9 > lim + 0.01: continue
-            for sx in (-1, 1): bay(f'os_{tag}{c}{sx}', sx, c, zf, mm, root); nseat += 4
+            for sx in (-1, 1): bay(f'os_{tag}{c}{sx}', sx, c, zf, mm, root, upper=tag == 'y'); nseat += 4
     # --- lukuvalot penkkien yllä ja infonäytöt matkustamon päissä
     rz_, rx_, rzs_ = T['roof']
     for zf, zc, lim, tag in ((ZL, ZLC - 0.012, min(Lf, Lr), 'a'), (ZU, None, min(Uf, Ur), 'y')):
         for c in (-4.5, -2.7, -0.9, 0.9, 2.7, 4.5):
             if abs(c) + 0.9 > lim + 0.01: continue
+            if zc is None and PROPS: continue   # yläkerrassa lukuvalot ovat hattuhyllyn alla (bay)
             for sx in (-1, 1):
                 for d in (-0.5, 0.5):
                     if zc is None:
@@ -411,6 +455,7 @@ def build(name):
             u0, u1 = E[s]['v0'] - 2.6, E[s]['v0']
             side_wall(f'porras_seina{s}{sx}', sx, min(s * u0, s * u1), max(s * u0, s * u1), ZL, ZU, [], mm, root)
     # alakerran päätyseinät portaattomalla puolella (askelmien ohi eteiseen on aukko) – ei tarvita
+    for o in PROPS.values(): bpy.data.objects.remove(o, do_unlink=True)   # pohjat pois ennen yhdistämistä
     print(name, 'istumapaikkoja', nseat, 'kävelyalueita', len(rects))
     return root, rects
 
@@ -426,7 +471,7 @@ def boxuv(ob, sc):
             uv.data[li].uv = (a / sc, b / sc)
 
 def join_by_material(root):
-    objs = [o for o in bpy.data.objects if o.type == 'MESH']
+    objs = [o for o in bpy.data.objects if o.type == 'MESH' and not (o.data.materials and o.data.materials[0].name.startswith('M_'))]   # Meshy-kalusteet jäävät instansseiksi
     by = {}
     for o in objs:
         m = o.data.materials[0].name if o.data.materials else ''
@@ -440,13 +485,25 @@ def join_by_material(root):
         ob = bpy.context.view_layer.objects.active; ob.name = 'sisa_' + m; ob.parent = root
         if m in TEXSCALE: boxuv(ob, TEXSCALE[m])
 
+def export(root, name):
+    """kuten J.export, mutta kalusteet EXT_mesh_gpu_instancing-instansseina"""
+    bpy.ops.object.select_all(action='DESELECT')
+    for o in bpy.data.objects:
+        if not o.hide_get(): o.select_set(True)
+    path = os.path.join(OUTD, name + ('' if HI else '_m') + '.glb')
+    bpy.ops.export_scene.gltf(filepath=path, export_format='GLB', use_selection=True, export_apply=True, export_yup=True,
+                              export_image_format='JPEG', export_jpeg_quality=86, export_gpu_instances=True)
+    tris = sum(len(p.vertices) - 2 for o in bpy.data.objects if o.type == 'MESH' for p in o.data.polygons)
+    print('EXPORT', path, 'tris (instanssit kerran)', sum(len(p.vertices) - 2 for m in {o.data for o in bpy.data.objects if o.type == 'MESH'} for p in m.polygons),
+          'piirrettynä', tris, os.path.getsize(path) // 1000, 'kt')
+
 os.makedirs(OUTD, exist_ok=True)
 meta = {}
 for name in ('ed', 'edo'):
     J.clear()
     root, rects = build(name)
     join_by_material(root)
-    J.export(root, name + '_sisa')
+    export(root, name + '_sisa')
     meta[name] = dict(rects=rects, z=dict(ala=ZL, eteinen=ZV, yla=ZU))
 if HI:
     json.dump(meta, open(os.path.join(OUTD, 'sisa.json'), 'w'), separators=(',', ':'))

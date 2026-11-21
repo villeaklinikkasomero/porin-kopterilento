@@ -22,6 +22,16 @@
 - Vanhat proseduraaliset mallit: `tools/juna/juna_blender.py`
   (`bl313/bin/python tools/juna/juna_blender.py -- --out juna --detail high|low`). Solmut: `Bogie_F/R`, `Wheel_*`, `Door_*`, `Panto_1/2`, `Lamp_F/R`.
   Esikatselu: `tools/juna/view.html?f=edo,ed,sr3&az=40&el=10&d=40` pelin palvelimelta.
+- **Sisätilat `ed_sisa.glb` / `edo_sisa.glb` (+ `_m`)** (`tools/juna/juna_sisa.py`, kävelyalueet `sisa.json`). 21.11.2026: istuimet, pöydät ja hattuhyllyt
+  omistajan Meshy-malleista (Twin Transit Seats, Wall Mounted Folding Table, Modern Glass Wall Shelf; lähteet `tools/juna/src/{istuin,poyta,hylly}_meshy.glb`, ei repossa).
+  `tools/juna/sisa_props.py` kääntää ja skaalaa ne (istuinpari 0,88 × 0,60 × 1,21 m, pöytä 0,60 × 0,50 m kansi 0,75 m:ssä, hylly 1,75 × 0,40 m),
+  yhdistää Meshyn UV-saumoista pilkotut kärkipisteet, harventaa (istuin 3 000, pöytä 1 500, hylly 1 200 kolmiota; `_m` 35 %) ja paistaa värin
+  ja normaalikartan uudelle UV:lle (1024 / 512 px) -> `tools/juna/sisa_props/*.glb` (repossa). `juna_sisa.py` sijoittaa ne pöytäosastoihin
+  (selkänojat 0,88 m osaston keskeltä, pöytä ikkunaseinässä, hylly vain yläkerrassa ikkunan yläreunan yllä, lukuvalot hyllyn alla)
+  linkitettyinä kopioina -> GLB:ssä `EXT_mesh_gpu_instancing` (three: `InstancedMesh`, 3 piirtokutsua kalusteille). Vaunussa 48 istuinparia
+  (96 paikkaa), 24 pöytää, 12 hyllyä; ed_sisa 1,9 Mt (ennen 3,1 Mt), piirrettynä n. 205 000 kolmiota (`_m` 81 000). Kävelyalueet ennallaan.
+  Ajo: `bl313/bin/python tools/juna/sisa_props.py` (vain kun Meshy-mallit vaihtuvat), sitten `juna_sisa.py -- --out juna --detail high|low`.
+  Ilman `sisa_props/`-kansiota `juna_sisa.py` tekee vanhat proseduraaliset penkit ja pöydät.
 - `yhdista.js`: staattiset osat yhteen materiaaleittain (myös rata.js käyttää).
 
 ## Meshy (omistajan kysymys 20.11.)
