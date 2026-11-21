@@ -74,7 +74,7 @@ function walkNear() {   // what Enter would do here: 'in' (church door), 'out' (
     return ''; }
   for (const P of PLACES) { const d = placeDoor(P); if (d && Math.hypot(WALK.x - d.x, WALK.y - d.y) < 4.2) { WALK.at = P; return 'in'; } }
   if (window.__bus) { const b = window.__bus.rideNear(WALK.x, WALK.y); if (b) return b; }      // 'bus' (a live bus standing here, it will not wait) or 'busout' (riding one)
-  const v = WALK.veh; if (v && Math.hypot(WALK.x - v.x, WALK.y - v.y) < (VEH === 'car' ? (CAR.type === 'bus' ? 7.5 : 4.2) : 6)) return 'veh';
+  const v = WALK.veh; if (v && !(window.__heliLukko && VEH !== 'car') && Math.hypot(WALK.x - v.x, WALK.y - v.y) < (VEH === 'car' ? (CAR.type === 'bus' ? 7.5 : 4.2) : 6)) return 'veh';   /* story lock: no boarding the helicopter */
   if (window.__plane && window.__plane.near(WALK.x, WALK.y)) return 'plane';      // the jump plane on the apron
   return takeNear();      // 'heli' (the helicopter left behind), 'take' (a parked car to borrow) or ''
 }

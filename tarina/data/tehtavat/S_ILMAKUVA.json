@@ -8,7 +8,7 @@
  "merkki": "€",
  "rautalanka": true,
  "vaatii": [
-  "FLAG_M02_DONE"
+  "FLAG_HELI_AUKI"
  ],
  "laukaisu": {
   "tyyppi": "merkki",

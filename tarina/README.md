@@ -185,3 +185,6 @@ Kokeilusivulla **Z** vaihtaa lähikuvaan, jossa hahmot näkyvät.
 - **Talous (`talous.js`):** ENERGIA laskee, AUTON_VAURIO korjaamon ehtoon, käsittelijät `korjaa_auto` ja `tuunaa`, tuunausten vaikutus Ramin farmariin, HUD `#tr-energia`.
 - **Valmiit käsittelijät:** `varjo_mittari` (vain tähdet), `anna_ajoneuvo`, `korjaa_auto`, `tuunaa`.
 - Valinnoissa näppäimet 1–9.
+- **Aloitus ja kopterilukko (21.11.2026):** uusi tarina alkaa jalan Kirjurinluodon nokasta (`LOC_ALOITUS` [-169, 676]), josta Taavi-silta vie Etelärannalle Tapsan luo;
+  jatkettu tarina korjaamon pihalta. Kopteri on lukossa (`window.__heliLukko`, piilossa eikä siihen pääse), kunnes M16:n `anna_kopteri` antaa sen (`FLAG_HELI_AUKI`).
+  Sen jälkeen peli alkaa kuten ennen. Pelin puolella `__take.giveHeli(x, y, yaw)` (src/js/155) ja lukon tarkistus `walkNear`issa (src/js/121).

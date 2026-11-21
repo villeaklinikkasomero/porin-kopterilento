@@ -1,6 +1,6 @@
 {
  "id": "S_SIIVET",
- "nimi": "Rattiksen siipilähetti",
+ "nimi": "Vauhtiksen siipilähetti",
  "luku": 0,
  "toistuva": true,
  "jaahtyy": 300,
@@ -9,7 +9,7 @@
  "rautalanka": true,
  "antaja": "BAARIMIKKO",
  "antajaPaikka": {
-  "paikka": "LOC_RATTIS_OVI",
+  "paikka": "LOC_VAUHTIS_OVI",
   "dx": 6,
   "dy": 0
  },
@@ -19,7 +19,7 @@
  "laukaisu": {
   "tyyppi": "merkki",
   "paikka": {
-   "paikka": "LOC_RATTIS_OVI",
+   "paikka": "LOC_VAUHTIS_OVI",
    "dx": 5,
    "dy": 0
   },

@@ -40,7 +40,7 @@ testi('kaikki paikat ja vaihetyypit löytyvät', () => {
 testi('alussa tarinasta vain M01 on saatavilla (lisäksi ruokapaikat) ja sen merkki näkyy', () => {
   const { m, aja, log } = uusi(); aja(0.2);
   ass(JSON.stringify(m.saatavilla().filter(t => !t.toistuva).map(t => t.id)) === '["M01"]', JSON.stringify(m.saatavilla()));
-  ass(JSON.stringify(m.saatavilla().filter(t => t.toistuva).map(t => t.id).sort()) === '["K_GRILLI","K_RATTIS"]', 'alussa vain ruoka: ' + JSON.stringify(m.saatavilla()));
+  ass(JSON.stringify(m.saatavilla().filter(t => t.toistuva).map(t => t.id).sort()) === '["K_GRILLI","K_VAUHTIS"]', 'alussa vain ruoka: ' + JSON.stringify(m.saatavilla()));
   const mk = log.filter(e => e[0] === 'merkit').pop()[1].filter(q => q.laji === 'tehtava'); ass(mk.length === 1 && mk[0].id === 'M01');
 });
 
@@ -56,10 +56,10 @@ testi('M01: kehote merkillä, cut, Tapsan fillari, tori, Rattis, korjaamo → l�
   ass(m.kehittaja.vaihe().tyyppi === 'mene', 'odottaa torille: ' + m.kehittaja.vaihe().tyyppi);
   mene('LOC_TERTUN_KOJU', 'auto'); aja(0.3); ass(m.kehittaja.vaihe().tyyppi === 'mene', 'autolla ei pidä kelvata');
   mene('LOC_TERTUN_KOJU', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 4); aja(0.3);
-  ass(m.tila.esineet.ITEM_SIIVET, 'siivet eivät tarttuneet');
-  mene('LOC_RATTIS', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 3);
+  ass(m.tila.esineet.ITEM_PERUNAT, 'siivet eivät tarttuneet');
+  mene('LOC_VAUHTIS', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 3);
   mene('LOC_KORJAAMO', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 4); aja(1);
-  ass(!m.kaynnissa, 'ei päättynyt: ' + JSON.stringify(m.kehittaja.vaihe() && m.kehittaja.vaihe().tyyppi)); ass(m.tila.liput.FLAG_M01_DONE); ass(!m.tila.esineet.ITEM_SIIVET);
+  ass(!m.kaynnissa, 'ei päättynyt: ' + JSON.stringify(m.kehittaja.vaihe() && m.kehittaja.vaihe().tyyppi)); ass(m.tila.liput.FLAG_M01_DONE); ass(!m.tila.esineet.ITEM_PERUNAT);
   const l = log.find(e => e[0] === 'lapi'); ass(l && l[1].avautui.some(a => a.id === 'M02'), 'M02 ei avautunut');
 });
 
@@ -71,7 +71,7 @@ testi('M01: fillari hajoaa → epäonnistuu, uudelleen jatkaa tarkistuspisteest�
   W.rikki = true; aja(0.1);
   ass(m.kaynnissa.tila === 'epaonnistui'); const f = log.find(e => e[0] === 'epaonnistui'); ass(f[1].teksti.includes('Tapsan fillari'), f[1].teksti); ass(f[1].tarkistuspiste);
   W.rikki = false; m.uudelleen(); ass(m.kehittaja.vaihe().tyyppi === 'mene', 'jatkaa väärästä vaiheesta');
-  mene('LOC_RATTIS', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 3); mene('LOC_KORJAAMO', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 4); aja(1); ass(!m.kaynnissa);
+  mene('LOC_VAUHTIS', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 3); mene('LOC_KORJAAMO', 'pyora'); aja(0.3); ohitaRepliikit(m, aja, 4); aja(1); ass(!m.kaynnissa);
 });
 
 testi('M02: kilpa – liian hidas häviää, nopea voittaa; valinta asettaa radion', () => {
@@ -233,7 +233,7 @@ for (const [loppu, valinnat] of [['A', { 'M25:1': 0 }], ['B', { 'M25:1': 1, 'M13
 
 testi('ruoka: raha ei riitä → valinta jää auki; rahalla energia nousee', () => {
   let nyt = 5e6; const T = uusi({ kello: () => nyt }); const { m, W, aja, mene, log } = T;
-  m.kehittaja.aseta({ muuttujat: { ENERGIA: 20 } }); mene('LOC_GRILLIPORI', 'jalan'); aja(0.2);
+  m.kehittaja.aseta({ muuttujat: { ENERGIA: 20 } }); mene('LOC_GRILLI', 'jalan'); aja(0.2);
   ass(m.toiminta() === 'aloitettu', 'grilli ei alkanut'); aja(0.1);
   ass(!m.valitse(0), 'ilman rahaa ei saa'); ass(log.some(e => e[0] === 'vihje' && /Rahat eivät riitä/.test(e[1])), 'vihje puuttuu');
   m.kehittaja.aseta({ raha: 20 }); ass(m.valitse(0), 'rahalla ei saa'); ohitaRepliikit(m, aja, 1); aja(0.3);
@@ -247,7 +247,7 @@ testi('nälkä: energia 0 estää keikat, mutta ruokapaikka toimii', () => {
   const T = uusi({ esto }); const { m, aja, mene, log } = T;
   m.kehittaja.aseta({ muuttujat: { ENERGIA: 0 }, raha: 10 });
   mene('LOC_ETELARANTA', 'jalan'); aja(0.2); ass(m.toiminta() !== 'aloitettu', 'M01 alkoi nälkäisenä'); ass(log.some(e => e[0] === 'vihje' && /nälkäinen/.test(e[1])));
-  mene('LOC_GRILLIPORI', 'jalan'); aja(0.2); ass(m.toiminta() === 'aloitettu', 'grilli ei auennut'); m.valitse(2); aja(0.3);
+  mene('LOC_GRILLI', 'jalan'); aja(0.2); ass(m.toiminta() === 'aloitettu', 'grilli ei auennut'); m.valitse(2); aja(0.3);
   ass(m.tila.muuttujat.ENERGIA === 15);
   mene('LOC_ETELARANTA', 'jalan'); aja(0.2); ass(m.toiminta() === 'aloitettu', 'syömisen jälkeen M01 ei alkanut');
 });

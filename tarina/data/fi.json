@@ -31,8 +31,8 @@
   "KULKU_AUTO_SEDAN": "sedan",
   "KULKU_AUTO_BUS": "bussi",
   "SYS_NO_MONEY": "Rahat eivät riitä: {hinta} € (sinulla {raha} €)",
-  "SYS_HUNGRY": "Rami on liian nälkäinen keikalle. Hae syötävää: Grilli-Pori tai Rattis.",
+  "SYS_HUNGRY": "Rami on liian nälkäinen keikalle. Hae syötävää: Grilli Kaksi Siivua tai Vauhtis.",
   "SYS_ENERGY_LOW": "Rami alkaa olla nälkäinen.",
-  "SYS_ENERGY_VERY_LOW": "Rami on tosi nälkäinen – syö pian (Grilli-Pori, Rattis).",
+  "SYS_ENERGY_VERY_LOW": "Rami on tosi nälkäinen – syö pian (Kaksi Siivua, Vauhtis).",
   "KULKU_AUTO_ESTATE_RAMI": "Ramin farmari"
 }

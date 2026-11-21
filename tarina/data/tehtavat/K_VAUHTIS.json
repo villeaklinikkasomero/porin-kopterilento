@@ -1,0 +1,73 @@
+{
+ "id": "K_VAUHTIS",
+ "nimi": "Vauhtis",
+ "luku": 0,
+ "toistuva": true,
+ "jaahtyy": 3,
+ "laji": "kauppa",
+ "merkki": "🍗",
+ "rautalanka": true,
+ "ruoka": true,
+ "laukaisu": {
+  "tyyppi": "merkki",
+  "paikka": "LOC_VAUHTIS_OVI",
+  "r": 7,
+  "kulku": "jalan"
+ },
+ "vaiheet": [
+  {
+   "tyyppi": "valinta",
+   "kysymys": "Ravintola Vauhtipyörä – mitä otetaan?",
+   "vaihtoehdot": [
+    {
+     "teksti": "Hot wingsit – 12 € (+65 ⚡)",
+     "asettaa": {
+      "muuttujat": {
+       "ENERGIA": "+65"
+      }
+     },
+     "rivit": [
+      [
+       "BAARIMIKKO",
+       "iloinen",
+       "Wingsit tulee. Talon kastike, niinku aina."
+      ]
+     ],
+     "hinta": 12,
+     "lahde": "Vauhtis"
+    },
+    {
+     "teksti": "Wings-kori ja crispers – 16 € (+90 ⚡)",
+     "asettaa": {
+      "muuttujat": {
+       "ENERGIA": "+90"
+      }
+     },
+     "rivit": [
+      [
+       "BAARIMIKKO",
+       "ovela",
+       "Iso kori rallikuskille."
+      ]
+     ],
+     "hinta": 16,
+     "lahde": "Vauhtis"
+    },
+    {
+     "teksti": "Kahvi ja munkki – 4 € (+20 ⚡)",
+     "asettaa": {
+      "muuttujat": {
+       "ENERGIA": "+20"
+      }
+     },
+     "hinta": 4,
+     "lahde": "Vauhtis"
+    },
+    {
+     "teksti": "Ei kiitos"
+    }
+   ]
+  }
+ ],
+ "_huom": "Keksitty ravintola Vauhtipyörä (Vauhtis), rakennus b109 (omistaja 21.11.2026: omat nimet). Sisätila ja baarimikon malli puuttuvat."
+}

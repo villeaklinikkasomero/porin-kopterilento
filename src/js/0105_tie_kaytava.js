@@ -17,7 +17,7 @@ const TIE = (() => {
   const has = (x, y) => { const v = at(Math.floor(x - D.x0), Math.floor(y - D.y0)); return v === v; };
   const skip = (cx, cy) => { if (cx < D.x0 - 3 || cy < D.y0 - 3 || cx > D.x0 + D.nx + 3 || cy > D.y0 + D.ny + 3) return false;
     for (let dy = -2.5; dy <= 2.5; dy += 1) for (let dx = -2.5; dx <= 2.5; dx += 1) if (has(cx + dx, cy + dy)) return true; return false; };
-  const ext = (x, y) => x > -1785 && x < -768 && y > -1490 && y < -669;      // laajennetun roads.js:n OSM-alue ytimen ulkopuolella
+  const ext = (x, y) => (x > -1785 && x < -768 && y > -1490 && y < -669) || (x > -1785 && x < -790 && y > -669 && y < -150) || (x > -790 && x < -560 && y > -1300 && y < -995);   // laajennetun roads.js:n OSM-alueet (osm_ways_tie.json)
   return { D, z, has, skip, ext };
 })();
 window.__tieZ = TIE.z; window.__tieSkip = TIE.skip; window.__tieExt = TIE.ext;

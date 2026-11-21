@@ -257,7 +257,7 @@ teht("M16", "Satamalaituri", 3, [
     mene("LOC_VARASTO", "Lennä Varjon varastolle", r=40, kulku="heli", merkki="Kontti", cp=True),
     toim("vaijeri", "Laske vaijeri ja kiinnitä kontti (tarkkuuslasku)", cp=True),
     mene("LOC_PIILO", "Lennä kontti joen yli Lumin piilolle – vältä nostureita", r=40, kulku="heli", merkki="Piilo"),
-], antaja="LUMI", laukaisu=merkki("LOC_PIILO"), vaatii=["FLAG_M15_DONE"], asettaa={"esineet": ["ITEM_PIENOISMALLI"]},
+], antaja="LUMI", laukaisu=merkki("LOC_PIILO"), vaatii=["FLAG_M15_DONE"], asettaa={"esineet": ["ITEM_PIENOISMALLI"], "liput": ["FLAG_HELI_AUKI"]},
    palkinto={"raha": 450, "teksti": "Pienoismalli ja muistiot"}, fail=[{"ehto": "kulkuneuvo_rikki", "alkaen": 4}],
    huom="Kopterin vaijeri ja kontti (fysiikka, malli) puuttuvat. anna_kopteri: kopterin siirto laiturille puuttuu.")
 

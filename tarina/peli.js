@@ -36,7 +36,19 @@ export const KASITTELIJAT = {
       if (ok && p.viesti && window.__game && window.__game.toast) window.__game.toast(p.viesti, 2.5);
     },
     paivita() { return 'valmis'; }
-  }
+  },
+  // Tarina antaa helikopterin (21.11.2026: omistaja "helikopteri voidaan vapauttaa käyttöön myöhemmin"; M16 ja M20). Kopteri laskeutuu pelaajan viereen
+  // (param: paikka, dx, dy, yaw) ja pelaaja istuu siinä. Lippu FLAG_HELI_AUKI pitää kopterin vapaana tästä eteenpäin (peli: window.__heliLukko).
+  anna_kopteri: {
+    alku(p, api) {
+      api.aseta({ liput: ['FLAG_HELI_AUKI'] }); window.__heliLukko = false;
+      const T = window.__take, w = maailma(); const q = p.paikka ? api.paikka(p.paikka) : w;
+      if (!T || !T.giveHeli || !q) return;
+      T.giveHeli(q.x + (p.dx ?? 8), q.y + (p.dy ?? 0), p.yaw || 0);
+      if (window.__game && window.__game.toast) window.__game.toast('🚁 Helikopteri on nyt käytössäsi', 3);
+    },
+    paivita() { return 'valmis'; }
+  },
   // tulossa: hiiviskely, vesiletku, drooni (ks. tarvittavat_ominaisuudet/README.md)
 };
 let UI = null, tahdetLoppuu = 0, NAUHA = null, kyytiPisteet = null;
@@ -147,6 +159,17 @@ export async function kaynnista() {
   }, true);
 
   // silmukka
+  // Aloitus (omistaja 21.11.2026): uusi tarina alkaa jalan Kirjurinluodon nokasta, josta Taavi-siltaa pitkin pääsee Tapsalle Etelärannalle; jatkettu tarina
+  // korjaamon pihalta. Kopteri on lukossa, kunnes tarina antaa sen (FLAG_HELI_AUKI, M16) – silloin peli alkaa kuten ennenkin.
+  let aloitettu = false;
+  function aloitus() {
+    if (M.tila.liput.FLAG_HELI_AUKI) return;
+    const uusi = !M.tila.liput.FLAG_M01_DONE, p = M.paikka(uusi ? 'LOC_ALOITUS' : 'LOC_KORJAAMO_PIHA');
+    if (p && G.walkOutAt) G.walkOutAt(p.x, p.y, uusi ? 3.02 : 0);
+    // korvaa päivän kierroksen ilmoituksen "Nouse ilmaan ja lennä valopylvääseen" (kopteri on vielä lukossa)
+    if (G.toast) setTimeout(() => G.toast(uusi ? 'Kävele Taavi-siltaa pitkin Etelärannalle – Tapsa odottaa laiturilla' : 'Tapsan korjaamon piha', 5), 300);
+  }
+  M.on('nollattu', () => { aloitettu = false; });
   let edell = performance.now(), dtKehitys = 0;
   const v = new THREE.Vector3();
   function kierros(nyt) {
@@ -154,6 +177,8 @@ export async function kaynnista() {
     const w = maailma();
     if (w) M.paivita(dt, w);
     if (w && TAL) TAL.paivita(dt, w);
+    window.__heliLukko = !M.tila.liput.FLAG_HELI_AUKI;
+    if (!aloitettu) { const st = document.getElementById('start'); if (st && st.style.display === 'none') { aloitettu = true; aloitus(); } }
     if (NAUHA && w) { const l = NAUHA[NAUHA.length - 1]; if (!l || Math.hypot(w.x - l[0], w.y - l[1]) >= 40) NAUHA.push([+w.x.toFixed(1), +w.y.toFixed(1)]); }
     UI.ruutu(dt);
     MK.animoi(nyt / 1000);

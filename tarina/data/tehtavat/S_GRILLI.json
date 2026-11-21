@@ -1,6 +1,6 @@
 {
  "id": "S_GRILLI",
- "nimi": "Grilli-Porin yölähetti",
+ "nimi": "Kaksi Siivun yölähetti",
  "luku": 0,
  "toistuva": true,
  "jaahtyy": 300,
@@ -9,7 +9,7 @@
  "rautalanka": true,
  "antaja": "GRILLI",
  "antajaPaikka": {
-  "paikka": "LOC_GRILLIPORI",
+  "paikka": "LOC_GRILLI",
   "dx": 7,
   "dy": 0
  },
@@ -19,7 +19,7 @@
  "laukaisu": {
   "tyyppi": "merkki",
   "paikka": {
-   "paikka": "LOC_GRILLIPORI",
+   "paikka": "LOC_GRILLI",
    "dx": 6,
    "dy": 0
   },

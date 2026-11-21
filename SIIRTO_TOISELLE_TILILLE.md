@@ -2561,3 +2561,43 @@ aikataulujen kellonaikoja pelin kellosta; kaikki valo lämpimän keltaista **pai
 - **Peli:** uudet palat `js/0105_tie_kaytava.js` (TIE: `__tieZ`, `__tieSkip`, `__tieExt`) ja `js/0335_tie_maa.js` (6 m maaruudukoista leikattu aukko täytetään 1 m pinnalla, ilmakuva ytimen kuvasta / tarkasta laatasta ROOFT:n kautta). Koukut: `010_maasto.js` tSkip, `060_kadut.js` groundTop + roadDZ, `082_pysakointihalli.js` carGround (laajennusalue asfalttina), `180_lentoasema.js` (nauhatiet pois laajennusalueelta).
 - **roads.js laajennettu:** OSM (api.openstreetmap.org map.json, sovelluksen selaimella) lon 21.7625–21.7816, lat 61.4726–61.4800 → `tools/roads/osm_ways_tie.json` (keskusta + 397 uutta tietä, rajattu x −1785…−768, y −1490…−669). bb −1790 −1495 900 995 (roads_ao.png 2690×2490). `build_roads.py --rinteet=tools/roads/tie_rinteet.json`: luiskilta pois ajorata ja jalkakäytävä, tilalle nurmi. Koko ajo: `sh tools/roads/tie_aja.sh` (järjestys: roads ilman luiskia → käytävä → roads luiskilla). Tarkistettu: alkuperäisillä syötteillä build_roads.py tuottaa tavulleen saman roads.js:n kuin repossa oli.
 - Avoinna: laajennusalueen pohjoisraja y −669 (Ratakatu, Malminkatu, Päärnäistenkatu, Kustaanpolku katkeavat siihen) ja itäraja x −768 y < −995 (Tiilimäentie itään) – jatko vaatii lisää OSM-dataa. Pyörätien tasoristeyksissä reunakivi 13 cm kuten muuallakin.
+
+## 21.11.2026 klo 14 – Maasillat uusiksi: Maantiekadun silta radan yli ja kaikki muut TER.bd-sillat (omistaja: "maantienkadun junaradan ylittävä silta on väärin ... voidaanko rakentaa kaikki tällaiset sillat samanlaisella betonitekstuurilla ja vain pidentää siltaa. Sillan pinta tulee myös asfaltoida ja pitää pinta sillä tasolla")
+- **Vika:** kansi oli ilmakuvaa, reunat tasaväriä, ja `carGround` ei tuntenut kantta: auto ajoi Maantiekadulla kannen (7,8 m) läpi radan leikkaukseen (1,4 m).
+- **Uusi pala `js/0301_sillat.js`** (vanha TER.bd-lohko poistettu `030_maa_ilmakuva.js`:stä) rakentaa jokaisen TER.bd-maasillan (23 kpl, rautatiesillat edelleen rata/rata.js) samoin osin: kansi pidennetään päistä kunnes se kohtaa penkereen (≤ 12 m), asfalttipinta (road_asph.jpg) ja keskiviiva ≥ 8 m leveissä, betoninen reunapalkki + kaide + alapinta, päissä betoniset maatuet leikkauksen pohjaan. Betoni: tex/Concrete034 (ambientCG CC0) → `silta/betoni_albedo.jpg`, `silta/betoni_normal.jpg`.
+- **Ajo:** `window.__siltaZ(x, y)` → `082 carGround`: kannen pinta, jos ajaja (CAR.z, jalan WALK.z) on enintään 2,2 m kannen alapuolella; alla kulkeva (Maamiehenkatu Helsingintien sillan alla) jää alas. Mitattu: Maantiekatu ylittää radan 7,9 m:n tasossa (ennen 1,4 m pohjalla).
+
+## 21.11.2026 klo 14 – Tarina alkaa Kirjurinluodolta, kopteri lukossa M16:een (omistaja: "helikopteri voidaan vapauttaa käyttöön myöhemmin, kun pelaaja on edennyt pelissä. joten Hahmo voisi syntyä Kirjurinluodon nokkaan, josta siltaa pitkin pääsee Tapsalle.")
+
+- **Aloitus:** uusi tarina → jalan `LOC_ALOITUS` [-169, 676] (Kirjurinluodon nokka, maa tarkistettu `inRiver`), katse Taavi-siltaan ([-166, 652] → [-149, 526]), ohje
+  "Kävele Taavi-siltaa pitkin Etelärannalle – Tapsa odottaa laiturilla" korvaa kierroksen "Nouse ilmaan…"-ilmoituksen. Jatkettu tarina → korjaamon piha. Kun FLAG_HELI_AUKI → kuten ennen.
+- **Kopterilukko:** `tarina/peli.js` pitää `window.__heliLukko = !FLAG_HELI_AUKI`. Peli: src/js/155 `__takeTick` piilottaa pysäköidyn kopterin, `takeNear` ei tarjoa sitä,
+  src/js/121 `walkNear` ei anna nousta kopteriin. Uusi `__take.giveHeli(x, y, yaw)` (laskeuttaa kopterin pelaajan viereen ja istuttaa siihen). Korjattu samalla: `takeDo`
+  kaatui, jos peli alkoi jalan (WALK.veh tyhjä) ja pelaaja lainasi auton/pyörän.
+- **Tarina:** käsittelijä `anna_kopteri` (M16, M20) asettaa FLAG_HELI_AUKI; M16:n palkinto avaa kopterin pysyvästi; S_ILMAKUVA vaatii FLAG_HELI_AUKI.
+- **Testattu** tuoreella index.html:llä (muiden chattien 21.11. muutokset mukana, kokoa → tavu tavulta sama ennen omia muutoksia): alku jalan Kirjurinluodolla, lukko päällä,
+  kopteriin ei pääse, pyörän lainaus toimii ilman virhettä, M16:n anna_kopteri → pelaaja kopterissa, lukko pois. `node tarina/testi.mjs` 23/23.
+
+## 21.11.2026 klo 14.30 – Tarinan alun paikat: keksityt nimet, M01 perunat, piilo Isosantaan (omistaja: "keksitään niihin omat · teollisuusalueet ovat hyvät, näihin voidaan johonkin tilaan rakentaa meshyssä uusi julkisu · kirjuri huono, isosanta parempi · perunat ja sipuli ok · olen tekemässä teatteriin ylimääräisiä hahmoja näyttelijöiksi")
+
+- **Suunnitelma:** `tarvittavat_ominaisuudet/PAIKAT_TARINAN_ALKU.md` – periaate "talosta haetaan → mennään sisään", sisätilojen kaksi tapaa (ovi + oma sisätila / kävelykuori),
+  paikat tärkeysjärjestyksessä, teatterin näyttelijöiden käyttö, Meshy-pyynnöt ja seuraavat askeleet (mittaukset, moottorin sisätilatuki, Vauhtiksen sisätila).
+- **Nimet:** Rattis → Ravintola Vauhtipyörä / Vauhtis (`LOC_VAUHTIS`, `LOC_VAUHTIS_OVI`, `K_VAUHTIS`; `K_RATTIS.json` on tyhjä poistomerkintä, ei ladata),
+  Grilli-Pori → Grilli Kaksi Siivua (`LOC_GRILLI`). Uusi tekstihahmo KOKKI.
+- **M01:** perunat ja sipulit (`ITEM_PERUNAT`) Vauhtiksen keittiöön, kokki vastaanottaa, Tapsa vetää pressun Ramin farmarin päältä.
+- **Paikat:** Kiilto → halli b557 [-550, -427], Satakunnan Varaosa → halli b558 (ovi [-490, -441], laituri [-490, -468]), Lumin piilo → Isosannan sähköasema b1307 [-80, 903].
+  Kaikki `tarkista` (ovet mitattava). Teollisuushalleihin uusi julkisivu Meshyllä.
+- `node tarina/testi.mjs` 23/23.
+
+## 21.11.2026 klo 15 – UI-konseptin toteutussuunnitelma (omistaja: "tässä ui-suunnitelmaa. Muista että autoa ja helikopteria ei tarvitse nyt alussa valita, koska pelistä tulee tarinallinen")
+
+- **`tarvittavat_ominaisuudet/UI_KONSEPTI_PELIIN.md`**: kanvaasi "Porikopteri – tyylikonsepti 2010 ja VIUH-kuljetussovellus" (https://claude.ai/artifact/75MbscYSPQzHZ9wPUCMYkw)
+  → peliin. Aloitussivulta pois kopteri/auto-valinta (Aloita/Jatka tarinaa; päivän kierros ja top-10 lukossa kopteriin M16 asti), HUDin osat nykyisiin elementteihin,
+  energia mittaristoon, emojit → glyfi-ikonit (myös tarinan karttamerkit), mikrotehtävät S_* → VIUH-keikoiksi puhelimeen (kaupat ja korjaamo pysyvät paikkoina),
+  tarinan soitot/viestit samaan puhelimeen. Toteutusjärjestys 1–6 ja työnjako keskustelujen kesken.
+- `PAIKAT_TARINAN_ALKU.md` kohta 8: seuraavat askeleet yhdistetty UI-suunnitelman kanssa.
+
+## 21.11.2026 klo 14.30 – Jatkokorjaukset: jalkakäytävä pois jyrkiltä luiskilta, katuverkkoa lisää (omistaja: "korjataan noita huomaamasia asioita")
+- **Jyrkät luiskat:** uusi `tools/roads/jyrkat.py` etsii korkeusmallista (terrain.js + ratapenkka) rinteet, joiden kaltevuus > 0,25, → `tools/roads/jyrkat.json`; `build_roads.py --jyrkat=...` poistaa ne jalkakäytäväkaistalta (ei ajoradalta eikä OSM:n kävely-/pyöräteiltä) ja tekee niistä nurmea. Korjaa mm. Maantiekadun sillan ympäristön (radan leikkauksen luiskat olivat harmaata jalkakäytävää) ja muut penkereet koko roads.js-alueella.
+- **Katuverkko laajennettu:** OSM lisäksi lon 21.7625–21.7812 / lat 61.4799–61.4847 (Kalevanpuisto, Malminkatu, Ratakatu, Päärnäistenkatu, Maantiekatu länteen; rajattu x −1785…−790, y −669…−150) ja lon 21.7811–21.7876 / lat 61.4743–61.4771 (Tiilimäentie itään Lentoasemantielle; x −790…−560, y −1300…−995). `TIE.ext` (js/0105_tie_kaytava.js) kattaa nämä alueet: auto asfaltilla, lentoaseman nauhatiet pois.
+- Ajo uudelleen: `sh tools/roads/tie_aja.sh` (jyrkät → roads ilman luiskia → käytävä → roads luiskilla ja jyrkillä). Luvianpuistokatu edelleen 0,3–0,4 / 0,13 m/s² (huippu / rms 50 km/h).

@@ -1,6 +1,6 @@
 """Streets as geometry (18.11.2026): carriageways, raised pavements with kerbs, traffic islands and zebra crossings for the game.
 
-usage: python3 tools/roads/build_roads.py ways.json out_roads.js [x0 y0 x1 y1] [--rinteet=tools/roads/tie_rinteet.json]
+usage: python3 tools/roads/build_roads.py ways.json out_roads.js [x0 y0 x1 y1] [--rinteet=tools/roads/tie_rinteet.json] [--jyrkat=tools/roads/jyrkat.json]
   21.11.2026 laajennus Tiilimäelle ja Isomäelle: ways = tools/roads/osm_ways_tie.json, bb -1790 -1495 900 995;
   --rinteet: luiskat (tools/roads/tie_luvianpuisto.py), joilta ajorata ja jalkakäytävä poistetaan ja tilalle nurmi
   ways.json  OSM ways in game metres: [{"id", "t": {h: highway, f: footway, l: lanes, a: area:highway, o: oneway, n: name, br, tu, ly ...},
@@ -194,6 +194,8 @@ PAVE = unary_union([strip, WALK.intersection(CARR.buffer(12.0)), ISL])
 PAVE = PAVE.difference(CARR).difference(BLD).difference(GREEN.buffer(-0.3)).difference(SQ).difference(PK)
 PAVE = PAVE.difference(STONE).difference(MED)
 if not RINNE.is_empty: PAVE = PAVE.difference(RINNE)
+JYRKKA = _shape(json.load(open(OPT['jyrkat']))).buffer(0).difference(WALK) if 'jyrkat' in OPT else Polygon()   # jyrkät luiskat (tools/roads/jyrkat.py), kävely- ja pyörätiet jäävät
+if not JYRKKA.is_empty: PAVE = PAVE.difference(JYRKKA)
 PAVE = PAVE.buffer(-0.35).buffer(0.35)
 tick('PAVE')
 PAVE = PAVE.intersection(CLIP).simplify(0.25); CARR = CARR.intersection(CLIP).simplify(0.2)
@@ -203,6 +205,7 @@ FLATW = WALK.difference(CARR.buffer(12.0)).difference(BLD).intersection(CLIP).bu
 LAWN = GREEN.intersection(CLIP).difference(MED.buffer(0.2)).difference(CARR.buffer(0.2)).difference(PAVE).difference(STONE).difference(BLD).difference(SQ).difference(FLATW)
 if BB[0] < -1012.3: LAWN = LAWN.intersection(box(-1012.3, -995, 1012.3, 1281.5))      # nurmishaderi lukee ytimen ilmakuvaa: sen ulkopuolella koko nurmikkoalue muuttui tasavihreäksi (21.11.2026)
 if not RINNE.is_empty: LAWN = LAWN.union(RINNE.intersection(CLIP).difference(PAVE).difference(CARR.buffer(0.2)))
+LAWN = LAWN.union(JYRKKA.intersection(CLIP).difference(PAVE).difference(CARR.buffer(0.2)).difference(BLD))
 LAWN = LAWN.buffer(-0.3).buffer(0.3).simplify(0.3)
 PATHS = FLATW.difference(MED).simplify(0.2)
 

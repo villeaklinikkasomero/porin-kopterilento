@@ -91,7 +91,8 @@
  ],
  "asettaa": {
   "liput": [
-   "FLAG_M16_DONE"
+   "FLAG_M16_DONE",
+   "FLAG_HELI_AUKI"
   ],
   "esineet": [
    "ITEM_PIENOISMALLI"

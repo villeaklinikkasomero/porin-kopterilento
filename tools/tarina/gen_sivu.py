@@ -26,22 +26,22 @@ def ruoka(teksti, hinta, energia, lahde, rivi=None):
 L = lambda p, dx=0, dy=0: {"paikka": p, "dx": dx, "dy": dy}
 
 # ---------- ruoka ----------
-sivu("K_GRILLI", "Grilli-Pori", "kauppa", [
-    valinta("Grilli-Pori – mitä saisi olla?",
-            ruoka("Porilainen", 8, 50, "Grilli-Pori", r("GRILLI", "iloinen", "Porilainen, tuplana sipulia. Seuraava!")),
-            ruoka("Lihapiirakka kahdella nakilla", 6, 35, "Grilli-Pori", r("GRILLI", "iloinen", "Kaikilla mausteilla. Ole hyvä.")),
-            ruoka("Ranskalaiset", 3, 15, "Grilli-Pori"),
+sivu("K_GRILLI", "Grilli Kaksi Siivua", "kauppa", [
+    valinta("Grilli Kaksi Siivua – mitä saisi olla?",
+            ruoka("Porilainen", 8, 50, "Grilli Kaksi Siivua", r("GRILLI", "iloinen", "Porilainen, tuplana sipulia. Seuraava!")),
+            ruoka("Lihapiirakka kahdella nakilla", 6, 35, "Grilli Kaksi Siivua", r("GRILLI", "iloinen", "Kaikilla mausteilla. Ole hyvä.")),
+            ruoka("Ranskalaiset", 3, 15, "Grilli Kaksi Siivua"),
             vo("Ei tällä kertaa")),
-], laukaisu=merkki("LOC_GRILLIPORI", r=7), merkkiK="🍔", ruoka=True, jaahtyy=3,
-   huom="Omistaja 21.11.2026: Ramin pitää syödä. Grilli-Pori, Juhana Herttuan katu 19 (paikka arvio). Myyjän malli ja grillikioskin luukku puuttuvat.")
+], laukaisu=merkki("LOC_GRILLI", r=7), merkkiK="🍔", ruoka=True, jaahtyy=3,
+   huom="Omistaja 21.11.2026: Ramin pitää syödä. Grilli Kaksi Siivua, Juhana Herttuan katu 19 (paikka arvio). Myyjän malli ja grillikioskin luukku puuttuvat.")
 
-sivu("K_RATTIS", "Rattis", "kauppa", [
+sivu("K_VAUHTIS", "Vauhtis", "kauppa", [
     valinta("Ravintola Rattaanpyörä – mitä otetaan?",
-            ruoka("Hot wingsit", 12, 65, "Rattis", r("BAARIMIKKO", "iloinen", "Wingsit tulee. Talon kastike, niinku aina.")),
-            ruoka("Wings-kori ja crispers", 16, 90, "Rattis", r("BAARIMIKKO", "ovela", "Iso kori rallikuskille.")),
-            ruoka("Kahvi ja munkki", 4, 20, "Rattis"),
+            ruoka("Hot wingsit", 12, 65, "Vauhtis", r("BAARIMIKKO", "iloinen", "Wingsit tulee. Talon kastike, niinku aina.")),
+            ruoka("Wings-kori ja crispers", 16, 90, "Vauhtis", r("BAARIMIKKO", "ovela", "Iso kori rallikuskille.")),
+            ruoka("Kahvi ja munkki", 4, 20, "Vauhtis"),
             vo("Ei kiitos")),
-], laukaisu=merkki("LOC_RATTIS_OVI", r=7), merkkiK="🍗", ruoka=True, jaahtyy=3,
+], laukaisu=merkki("LOC_VAUHTIS_OVI", r=7), merkkiK="🍗", ruoka=True, jaahtyy=3,
    huom="Rattaanpyörä, Yrjönkatu 27 (oven paikka arvio). Sisätila ja baarimikon malli puuttuvat.")
 
 # ---------- korjaamo ----------
@@ -104,18 +104,18 @@ sivu("S_KUKAT", "Tertun kukkalähetys", "sivu", [
 ], laukaisu=merkki(L("LOC_TERTUN_KOJU", dx=-6, dy=4), r=3), merkkiK="€", vaatii=["FLAG_M01_DONE"], jaahtyy=240,
    palkinto={"raha": 12, "teksti": "Kukat perillä"})
 
-sivu("S_SIIVET", "Rattiksen siipilähetti", "sivu", [
+sivu("S_SIIVET", "Vauhtiksen siipilähetti", "sivu", [
     rep(r("BAARIMIKKO", "iloinen", "Kaks laatikkoo wingsejä Kirjurinluodon jazzlavalle. Kuumana!")),
     kulku(["pyora", "auto"], "Ota pyörä tai auto"),
     mene("LOC_KIRJURINLUOTO", "Vie wingsit Kirjurinluodon jazzlavalle (4 min)", r=35, kulku=["pyora", "auto"], merkki="Jazzlava", aikaraja=240),
-], laukaisu=merkki(L("LOC_RATTIS_OVI", dx=5), r=3), merkkiK="€", antaja="BAARIMIKKO", antajaPaikka=L("LOC_RATTIS_OVI", dx=6),
+], laukaisu=merkki(L("LOC_VAUHTIS_OVI", dx=5), r=3), merkkiK="€", antaja="BAARIMIKKO", antajaPaikka=L("LOC_VAUHTIS_OVI", dx=6),
    vaatii=["FLAG_M01_DONE"], jaahtyy=300, palkinto={"raha": 18, "teksti": "Wingsit perillä kuumana"})
 
-sivu("S_GRILLI", "Grilli-Porin yölähetti", "sivu", [
+sivu("S_GRILLI", "Kaksi Siivun yölähetti", "sivu", [
     rep(r("GRILLI", "ovela", "Teatterin väki tilas kuus porilaista väliajalle. Ehdiksää?")),
     kulku(["pyora", "auto"], "Ota pyörä tai auto"),
     mene("LOC_TEATTERI", "Vie porilaiset Porin Teatterin takaovelle (3 min 20 s)", r=12, kulku=["pyora", "auto"], merkki="Teatteri", aikaraja=200),
-], laukaisu=merkki(L("LOC_GRILLIPORI", dx=6), r=3), merkkiK="€", antaja="GRILLI", antajaPaikka=L("LOC_GRILLIPORI", dx=7),
+], laukaisu=merkki(L("LOC_GRILLI", dx=6), r=3), merkkiK="€", antaja="GRILLI", antajaPaikka=L("LOC_GRILLI", dx=7),
    vaatii=["FLAG_M01_DONE"], jaahtyy=300, palkinto={"raha": 14, "teksti": "Väliaika pelastettu"})
 
 sivu("S_HINAUS", "Asiakkaan auto", "sivu", [
@@ -141,7 +141,7 @@ sivu("S_ILMAKUVA", "Liikennekuvaus Radio Kirjurille", "sivu", [
     pysy("LOC_ISOSILTA", 5, "Kuvaa Isosilta (leijaile yllä)", r=50, kulku="heli", mittari="Kuvaus"),
     pysy("LOC_TORI", 5, "Kuvaa Kauppatori", r=50, kulku="heli", mittari="Kuvaus"),
     pysy("LOC_KIRKKO", 5, "Kuvaa Keski-Porin kirkko", r=50, kulku="heli", mittari="Kuvaus"),
-], laukaisu=merkki(L("LOC_ETELARANTA", dx=30), r=30, kulku="heli"), merkkiK="€", vaatii=["FLAG_M02_DONE"], jaahtyy=420,
+], laukaisu=merkki(L("LOC_ETELARANTA", dx=30), r=30, kulku="heli"), merkkiK="€", vaatii=["FLAG_HELI_AUKI"], jaahtyy=420,
    palkinto={"raha": 30, "teksti": "Ilmakuvat radiolle"},
    huom="Lennä kopterilla Etelärannan merkin yli aloittaaksesi.")
 

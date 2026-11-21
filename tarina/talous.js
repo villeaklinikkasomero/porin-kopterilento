@@ -7,6 +7,7 @@
 //  - ENERGIA (muuttuja 0–100): laskee pelatessa, ruoka nostaa (tehtävän valinta: "muuttujat": { "ENERGIA": "+50" }). 0 → uudet keikat eivät ala (moottorin esto).
 //  - AUTON_VAURIO (muuttuja 0–100) = 100 − auton kunto, päivittyy ajaessa → korjaamon merkki näkyy vain kun autossa on korjattavaa.
 //  - käsittelijät 'korjaa_auto' ja 'tuunaa' sekä tuunausten vaikutus Ramin farmariin (estate).
+// Ravintolat ovat pelissä keksittyjä (omistaja 21.11.2026): Grilli Kaksi Siivua (K_GRILLI) ja Ravintola Vauhtipyörä (K_VAUHTIS).
 // HUD-elementti #tr-energia on tarkoituksella pelkistetty: ulkoasu suunnitellaan toisessa langassa (viestien ja HUDin konsepti).
 
 export const ENERGIA = {

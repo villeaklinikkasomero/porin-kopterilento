@@ -5,7 +5,7 @@
 // the landmark round pauses meanwhile, so a car cannot finish a helicopter round.
 const TAKE = { left: null, heli: null, hex: null, applied: null, tgt: null }; window.__take = TAKE;
 const takeType = T => T.l ? T.l.type : T.bp ? 'bus' : T.b ? 'bike' : ['hatch', 'estate', 'estate', 'van'][T.p ? T.p.k : T.c.k] || 'hatch';      /* parked types: hatch, saloon, SUV, van */
-function takeNear() { const x = WALK.x, y = WALK.y; if (TAKE.heli && VEH === 'car' && Math.hypot(TAKE.heli.x - x, TAKE.heli.y - y) < 6) return 'heli';
+function takeNear() { const x = WALK.x, y = WALK.y; if (TAKE.heli && VEH === 'car' && !window.__heliLukko && Math.hypot(TAKE.heli.x - x, TAKE.heli.y - y) < 6) return 'heli';
   let best = null, bd = 3.4; if (TAKE.left && Math.hypot(TAKE.left.x - x, TAKE.left.y - y) < 4.2) { TAKE.tgt = { l: TAKE.left }; return 'take'; }
   if (window.__parked) for (const p of window.__parked) { if (p.gone) continue; const dx = p.x - x; if (dx > 3.4 || dx < -3.4) continue; const d = Math.hypot(dx, p.y - y); if (d < bd) { bd = d; best = { p }; } }
   for (const c of cars) if (c.pk && c.pk.ph === 1 && c.wx !== undefined) { const d = Math.hypot(c.wx - x, c.wy - y); if (d < bd) { bd = d; best = { c }; } }
@@ -26,7 +26,7 @@ function takeDo(k) { if (window.__race && (window.__race.st === 1 || window.__ra
     else if (T.bp) { ({ x, y, yaw, hex } = T.bp); }
     else if (T.b) { ({ x, y, yaw, hex } = T.b); T.b.gone = true; const z0 = new THREE.Matrix4().makeScale(0, 0, 0); for (const im of window.__bikes.ims) { im.setMatrixAt(T.b.i, z0); im.instanceMatrix.needsUpdate = true; } }
     else { x = T.c.wx; y = T.c.wy; yaw = T.c.yaw; hex = T.c.paint || 0x8b9096; cars.vanish(T.c); } }
-  if (VEH !== 'car') { TAKE.heli = { x: WALK.veh.x, y: WALK.veh.y, alt: WALK.veh.alt, yaw: WALK.veh.yaw, hp: S.hp, tour: tourOn }; tourOn = false; VEH = 'car'; document.body.classList.add('car'); }
+  if (VEH !== 'car') { const h = WALK.veh || { x: S.x, y: S.y, alt: S.alt, yaw: S.yaw }; TAKE.heli = { x: h.x, y: h.y, alt: h.alt, yaw: h.yaw, hp: S.hp, tour: tourOn };      /* WALK.veh is unset when the game started on foot (story) */ tourOn = false; VEH = 'car'; document.body.classList.add('car'); }
   setCarType(ty);
   carG.visible = true; Object.assign(CAR, { x, y, yaw, v: 0, steer: 0, pitch: 0, roll: 0 }); CAR.z = carGround(x, y) ?? TZs(x, y); S.hp = hp; TAKE.hex = hex; TAKE.tgt = null;
   WALK.veh = { x, y, alt: CAR.z, yaw }; walkBoard(); if (T.bp) { window.__bus.take(T.bp); return; } toast(T.l ? (ty === 'bike' ? 'Takaisin pyörän selässä' : 'Takaisin edellisessä autossa') : (ty === 'bike' ? '🚲 Lainasit pyörän' : ty === 'van' ? '🚐 Lainasit pakettiauton' : ty === 'estate' ? '🚗 Lainasit farmarin' : '🚗 Lainasit auton') + (ty !== 'bike' && Math.random() < 0.4 ? ' – "Hei! Se o mnuu auto!"' : ''), 2.6); }
@@ -40,7 +40,16 @@ TAKE.give = (x, y, yaw, type, hex) => { if (window.__race && (window.__race.st =
   setCarType(type || 'hatch');
   carG.visible = true; Object.assign(CAR, { x, y, yaw: yaw || 0, v: 0, steer: 0, pitch: 0, roll: 0 }); CAR.z = carGround(x, y) ?? TZs(x, y); S.hp = 100; TAKE.hex = hex ?? 0x8b9096; TAKE.applied = null; TAKE.tgt = null;
   WALK.veh = { x, y, alt: CAR.z, yaw: yaw || 0 }; if (!WALK.on) { WALK.on = true; scene.add(walkG); } walkBoard(); return true; };
-window.__takeTick = dt => { if (TAKE.hex !== TAKE.applied && carG.children.length) { carG.traverse(q => { if (q.isMesh && q.material && /^(Car|Bike)Paint$/.test(q.material.name)) q.material.color.setHex(TAKE.hex); }); TAKE.applied = TAKE.hex; }
+// 21.11.2026 (owner: "helikopteri voidaan vapauttaa käyttöön myöhemmin, kun pelaaja on edennyt pelissä"): the story keeps window.__heliLukko on until it
+// hands the helicopter over (tarina M16, handler 'anna_kopteri'): while locked the parked helicopter is hidden and cannot be boarded.
+// TAKE.giveHeli lifts the lock, lands the helicopter at x, y and puts the player in it (the car or bike stays behind like a borrowed one).
+TAKE.giveHeli = (x, y, yaw) => { window.__heliLukko = false; TAKE.lukkoPiilotti = false;
+  if (VEH === 'car') { takeLeave(); carG.visible = false; VEH = 'heli'; document.body.classList.remove('car'); }
+  const alt = roofAt(x, y) + SKID; Object.assign(S, { x, y, alt, yaw: yaw || 0, vx: 0, vy: 0, vz: 0, landed: true, hp: 100, dead: 0 }); heli.visible = true; TAKE.heli = null;
+  WALK.veh = { x, y, alt, yaw: yaw || 0 }; if (!WALK.on) { WALK.on = true; scene.add(walkG); } walkBoard(); return true; };
+window.__takeTick = dt => {
+  if (window.__heliLukko) { if (heli.visible && (WALK.on || VEH === 'car')) { heli.visible = false; TAKE.lukkoPiilotti = true; } }      /* story: helicopter locked and hidden until the story hands it over */
+  else if (TAKE.lukkoPiilotti) { TAKE.lukkoPiilotti = false; if (VEH !== 'car' || TAKE.heli) heli.visible = true; } if (TAKE.hex !== TAKE.applied && carG.children.length) { carG.traverse(q => { if (q.isMesh && q.material && /^(Car|Bike)Paint$/.test(q.material.name)) q.material.color.setHex(TAKE.hex); }); TAKE.applied = TAKE.hex; }
   if (TAKE.heli && VEH === 'car' && !S.dead && !heli.visible) heli.visible = true;
   /* riding a bicycle: the walker model sits on it and pedals (clip Cycle, one crank turn a second at 5 m/s), cranks and pedals in step with the clip, the
      handlebar follows the steering, bike and rider lean into the bend */

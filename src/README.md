@@ -81,6 +81,7 @@ Siirrä lisää samalla mallilla, kun pala alkaa olla usean chatin työmaa. Test
 | `js/0105_tie_kaytava.js` | 20 | Luvianpuistokadun/Maamiehenkadun käytävä kahdessa tasossa (`tie/tie_data.js`), roads.js-laajennus Tiilimäelle ja Isomäelle |
 | `js/020_renderoija.js` | 83 | renderer, scene, kamera, valot |
 | `js/030_maa_ilmakuva.js` | 45 | maa ja ilmakuva |
+| `js/0301_sillat.js` | 60 | maasillat (TER.bd): betoni, asfalttikansi, maatuet, auto kannella (`silta/`) |
 | `js/031_maa_nurmi.js` | 24 | nurmitekstuuri |
 | `js/032_heina.js` | 71 | korkea heinä (instanssit) |
 | `js/033_ilmakuva_tarkka.js` | 26 | tarkka ilmakuva (WMS-ruudut) |

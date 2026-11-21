@@ -3,7 +3,8 @@
      TÄMÄ TIEDOSTO ON NYT PÄÄVERSIO: muokkaa tätä, ei dokumenttia. -->
 
 > **Muutokset käsikirjoituksen jälkeen (pelin data on ajantasaisempi kuin tämä teksti):**
-> - **M01** (21.11.2026): alkaa polkupyörästä. Eteläranta → Tapsan fillari → tori (Terttu, siipilaatikot) → Rattis (Yrjönkatu 27) → korjaamo → Tapsa antaa Ramin vanhan farmarin. Repliikit: `tarina/data/tehtavat/M01.json`.
+> - **M01** (21.11.2026): alkaa jalan Kirjurinluodon nokasta, Taavi-silta → Eteläranta → Tapsan fillari → tori (Terttu, perunat ja sipulit) → Ravintola Vauhtipyörän (Vauhtis) keittiö → korjaamo → Tapsa vetää pressun Ramin vanhan farmarin päältä. Repliikit: `tarina/data/tehtavat/M01.json`.
+> - **Keksityt paikat** (omistaja 21.11.2026): ravintolat Vauhtis ja Grilli Kaksi Siivua, Lumin piilo Isosannan vanhassa sähköasemassa, Kiilto ja Satakunnan Varaosa teollisuusalueen halleissa korjaamon vieressä. Kopteri käyttöön vasta M16:ssa.
 > - **M02:** Kespan lenkki Mikonkadun valoilta (ei Kirjurinluoto → tori). Ajetaan Ramin farmarilla.
 > - **Tapsan korjaamo** on Äestäjänkadulla [-598.9, -443.0], ei joen pohjoispuolella. Paikkojen koordinaatit: `tarina/data/paikat.json`.
 > - **Radio Kirjuri** on pelissä kanava "Porikopteri"; vanha "Outojen asioiden toimitus" -konsepti (tapaus 1) on poistettu.

@@ -9,6 +9,7 @@ js    js/010_maasto.js
 js    js/0105_tie_kaytava.js
 js    js/020_renderoija.js
 js    js/030_maa_ilmakuva.js
+js    js/0301_sillat.js
 js    js/031_maa_nurmi.js
 js    js/032_heina.js
 js    js/033_ilmakuva_tarkka.js

@@ -1,6 +1,6 @@
 {
  "id": "K_GRILLI",
- "nimi": "Grilli-Pori",
+ "nimi": "Grilli Kaksi Siivua",
  "luku": 0,
  "toistuva": true,
  "jaahtyy": 3,
@@ -10,14 +10,14 @@
  "ruoka": true,
  "laukaisu": {
   "tyyppi": "merkki",
-  "paikka": "LOC_GRILLIPORI",
+  "paikka": "LOC_GRILLI",
   "r": 7,
   "kulku": "jalan"
  },
  "vaiheet": [
   {
    "tyyppi": "valinta",
-   "kysymys": "Grilli-Pori – mitä saisi olla?",
+   "kysymys": "Grilli Kaksi Siivua – mitä saisi olla?",
    "vaihtoehdot": [
     {
      "teksti": "Porilainen – 8 € (+50 ⚡)",
@@ -34,7 +34,7 @@
       ]
      ],
      "hinta": 8,
-     "lahde": "Grilli-Pori"
+     "lahde": "Kaksi Siivua"
     },
     {
      "teksti": "Lihapiirakka kahdella nakilla – 6 € (+35 ⚡)",
@@ -51,7 +51,7 @@
       ]
      ],
      "hinta": 6,
-     "lahde": "Grilli-Pori"
+     "lahde": "Kaksi Siivua"
     },
     {
      "teksti": "Ranskalaiset – 3 € (+15 ⚡)",
@@ -61,7 +61,7 @@
       }
      },
      "hinta": 3,
-     "lahde": "Grilli-Pori"
+     "lahde": "Kaksi Siivua"
     },
     {
      "teksti": "Ei tällä kertaa"
@@ -69,5 +69,5 @@
    ]
   }
  ],
- "_huom": "Omistaja 21.11.2026: Ramin pitää syödä. Grilli-Pori, Juhana Herttuan katu 19 (paikka arvio). Myyjän malli ja grillikioskin luukku puuttuvat."
+ "_huom": "Keksitty grilli Kaksi Siivua (omistaja 21.11.2026: omat nimet), rakennus b917. Myyjän malli ja sisätila puuttuvat."
 }

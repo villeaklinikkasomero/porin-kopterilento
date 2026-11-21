@@ -15,7 +15,6 @@ Järjestetty sen mukaan, kuinka moni tehtävä hyötyy ja kuinka aikaisin ne tul
 | **1** | Varjo-mittarin jahti (`varjo_mittari` näyttää nyt vain tähdet) + `karista_jahtaajat` | M03, M13, M18, M26 | Vartijabotit ja uutiskopteri jahtaavat; tähdet laskevat katveessa/sillan alla; kiinni jäänti = FAIL "Ammattilaisia ei jää kiinni". PEGI 7: ei vahinkoa, vain kiinniotto. |
 | **1** | `hiiviskely` | M03, M22 (+ M13, M14, M17 käyttävät samaa) | Näkökartiot (vartija, myyjä), kyykky/hidas kävely, huomattu-mittari, laserit (M22). |
 | **2** | `vene` + `veneen_takaa_ajo` + `soutukilpa` | M19, M26 | Vene on pelissä (vene.js, perämoottori). Tarvitaan kulku `vene` moottoriin (`maailma()` peli.js:ssä), veneeseen nousu tarinasta ja Varjon veneen botti joella. |
-| **2** | `anna_kopteri` | M16, M20 | Kopteri siirretään annettuun paikkaan, ja pelaaja nousee siihen (kuten `__take.give` autoille). |
 | **2** | `torni_sisatila`, `torni_kerros20`, `kassakaappi` | M13, M17, M21, M24 | Varjo-tornin sisätila (näyttelykerros, 12. krs palvelinsali, 20. krs toimisto, kattoravintola) – sisätilajärjestelmä on jo olemassa (kirkko, teatteri, kauppahalli). |
 | **2** | `hakkerointi`, `holvi_rytmipeli`, `tiirikka`, `kassakaappi` | M14, M23, M24 | Minipelit (johtojen yhdistäminen, rytmi, tiirikka, kolmivaiheinen kassakaappi). Yksi yhteinen minipelikehys riittää. |
 | **3** | `vesiletku` | M04 | Vesisuihku, vartija liukastuu ja pakenee, tarran repiminen. |
@@ -36,15 +35,16 @@ Järjestetty sen mukaan, kuinka moni tehtävä hyötyy ja kuinka aikaisin ne tul
 ## 2. Talous (tehty rautalankana) – mitä vielä puuttuu
 
 Tehty (`tarina/talous.js` + `K_*`-tehtävät):
+- **Aloitus ja kopteri:** tarina alkaa jalan Kirjurinluodon nokasta (Taavi-silta → Tapsa). Kopteri on lukossa ja piilossa M16:een asti (`anna_kopteri` valmis).
 - **Energia** 0–100 laskee pelatessa (jalan ×1,5, pyörällä ×1,8). Varoitukset 30 ja 10. Nollassa uudet keikat eivät ala, mutta kaupat ja korjaamo toimivat.
-- **Ruoka:** Grilli-Pori (porilainen 8 €, lihapiirakka 6 €, ranskalaiset 3 €) ja Rattis (wingsit 12 €, wings-kori 16 €, kahvi ja munkki 4 €).
+- **Ruoka:** Grilli Kaksi Siivua (porilainen 8 €, lihapiirakka 6 €, ranskalaiset 3 €) ja Vauhtis (wingsit 12 €, wings-kori 16 €, kahvi ja munkki 4 €).
 - **Korjaus** Tapsan hallissa: Tapsa veloittaa vain osat (10/25/45 € vaurion mukaan). Auto ei korjaannu muualla.
 - **Tuunaus:**
   - Osat ostetaan Satakunnan Varaosasta (60–280 €) ja noudetaan Tapsan pakulla lastauslaiturilta.
   - Asennus tehdään hallissa Ramin farmariin.
   - Maalaus ja moottorin viritys vaikuttavat jo ajoon ja ulkonäköön.
 - **Mikrotehtävät** (12–30 €):
-  - Tertun kukkalähetys pyörällä, Rattiksen siipilähetti, Grilli-Porin yölähetti
+  - Tertun kukkalähetys pyörällä, Vauhtiksen siipilähetti, Kaksi Siivun yölähetti
   - asiakkaan auto korjaamolle, rengaskuljetus pakulla
   - liikennekuvaus kopterilla Radio Kirjurille
   - Lisäksi pelin omat kyydit tuovat rahaa (enintään 10 €/km).
@@ -54,7 +54,7 @@ Puuttuu:
 - **Tuunaus koskee nyt mitä tahansa farmaria,** jolla pelaaja ajaa. Tarvitaan "Ramin farmari" omana pysyvänä autonaan: tallennus, paikka korjaamon pihalla ja kutsuminen.
 - **Tapsan paku** ilmestyy pihalle vasta, kun noutotehtävä alkaa. Pysyvä pysäköity paku pihalla puuttuu.
 - **Energian vaikutus pelaamiseen:** nyt nälkä vain estää keikat. Esimerkiksi juoksun estäminen tai hitaampi pyöräily matalalla energialla puuttuu.
-- **Kauppojen aukioloajat** (Rattis 11–22/24, Grilli-Pori yöhön) ja pelin kellonaika puuttuvat.
+- **Kauppojen aukioloajat** (Vauhtis 11–22/24, Grilli Kaksi Siivua yöhön) ja pelin kellonaika puuttuvat.
 - **Tasapaino:** palkkiot ja hinnat ovat arvioita, ja ne pitää testata pelaamalla.
 - **Keräiltävät:** 50 lokkipatsasta (`SYS_COLLECTIBLE`) ja "tiesitkö"-faktat puuttuvat.
 
@@ -64,8 +64,8 @@ Puuttuu:
 | Hahmo | Tilanne |
 |---|---|
 | Tapsa, Lumi, Terttu, Harju, Varjo, vartija (3 muunnelmaa), myyjä, kuriiri | Mallit valmiina (`npc_*.js`) |
-| **Grilli-Porin myyjä** (GRILLI) | puuttuu – nyt vain tekstinä |
-| **Rattiksen baarimikko** (BAARIMIKKO) | puuttuu |
+| **Kaksi Siivun myyjä** (GRILLI) | puuttuu – nyt vain tekstinä |
+| **Vauhtiksen baarimikko** (BAARIMIKKO) | puuttuu |
 | **Kake, Satakunnan Varaosan myyjä** (VARAOSAMYYJA) | puuttuu |
 | **Radio Kirjurin juontaja** (RADIO) | ääni riittää; kasvokuva viestipaneeliin, jos UI-konsepti tarvitsee |
 | Liittolaiset M19: kalastaja, koiranomistaja + koira, soutaja | puuttuvat |
@@ -74,10 +74,10 @@ Puuttuu:
 ### Paikat ja rakennukset
 | Paikka | Tarvitaan |
 |---|---|
-| Grilli-Pori (Juhana Herttuan katu 19) | grillikioskin luukku/kyltti; paikka mitattava (nyt arvio) |
-| Rattis (Yrjönkatu 27) | kyltti ja ovi; sisätila (valinnainen); oven paikka mitattava |
+| Grilli Kaksi Siivua (keksitty, b917) | grillikioskin luukku/kyltti; paikka mitattava (nyt arvio) |
+| Vauhtis (keksitty, b109) | kyltti ja ovi; sisätila (valinnainen); oven paikka mitattava |
 | Satakunnan Varaosa (keksitty, Äestäjänkatu) | liikerakennus + lastauslaituri korjaamon lähelle |
-| Lumin piilo (vanha tiilivarasto) | rakennus + sisätila (briefing-valkotaulu) |
+| Lumin piilo (Isosannan vanha sähköasema, b1307) | rakennus + sisätila (briefing-valkotaulu) |
 | Varjo-torni (keksitty) | korkea torni + työmaa, sisätilat (ks. mekaniikat) |
 | Hotelli Varjo (keksitty) | aula, holvi, pyykkiovi |
 | Varjon varasto / satamakontit | kontit, kellari, kattoikkuna |
@@ -86,7 +86,7 @@ Puuttuu:
 | Kirjurinluoto | jazzlava ja juhlan iso näyttö (loppu B) |
 | Lentoasema | huoltohalli ja Varjon yksityiskone |
 
-**Mitattavat paikat** (`"tarkista": true` tiedostossa `paikat.json`): mittaa kehittäjätilassa, ensin Ctrl+Shift+D ja sitten Ctrl+Shift+K. Listalla ovat Pohjoisranta, Kirjurinluoto, asema, lentoasema, Rattis + ovi, Grilli-Pori, varaosaliike + laituri, hotelli, varasto, tuholaistorjuja, museon takaovi, lentoaseman halli, piilo, Varjo-torni ja Kiilto.
+**Mitattavat paikat** (`"tarkista": true` tiedostossa `paikat.json`): mittaa kehittäjätilassa, ensin Ctrl+Shift+D ja sitten Ctrl+Shift+K. Listalla ovat Pohjoisranta, Kirjurinluoto, asema, lentoasema, Vauhtis + ovi, Grilli Kaksi Siivua, varaosaliike + laituri, hotelli, varasto, tuholaistorjuja, museon takaovi, lentoaseman halli, piilo, Varjo-torni ja Kiilto.
 
 ### Kulkuneuvot ja esineet
 - **Kulkuneuvot:** moottoripyörä, hinausauto, panssariauto, Varjon yksityisvene, Varjon yksityiskone (AI), RC-lentokone, RC-auto, drooni, lentoreppu, Tertun miehen vanha vene.
@@ -106,3 +106,5 @@ Rautalanka käyttää nykyistä `tarina/ui.js`:ää. Uudet, tarkoituksella pelki
 - **Karttamerkkien lajit:** tarina (`tehtava`), kaupat (`kauppa`: 🍔 🍗 ⚙), korjaamo (`korjaamo`: 🔧 🚐) ja mikrotehtävät (`sivu`: €). Merkit piirtyvät nyt samannäköisinä, ja UI-konsepti päättää niiden ulkoasun.
 - **Valikon laskuri** "x/y keikkaa" laskee nyt mukaan myös toistuvat tehtävät. Tarina ja sivutehtävät kannattaa erottaa.
 - **Puuttuu:** inventaario (esineet, osat), tuunausvalikko (asennettujen osien vaihto ja poisto), kartta-/puhelinnäkymä mikrotehtävien listalle.
+
+**Paikat ja sisätilat tarinan alkuun:** [`PAIKAT_TARINAN_ALKU.md`](PAIKAT_TARINAN_ALKU.md) (21.11.2026: mitkä talot rakennetaan sisältä, Meshy-pyynnöt, seuraavat askeleet).

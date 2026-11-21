@@ -42,7 +42,7 @@
     [
      "TAPSA",
      "ovela",
-     "On se. Mut kaikki muu ei kohta oo. Ota mun fillari – ja tee mulle palvelus matkalla: Tertulla on torilla siipilähetys Rattikseen. Mä meen hallille edeltä."
+     "On se. Mut kaikki muu ei kohta oo. Ota mun fillari – ja tee mulle palvelus matkalla: Tertulla on torilla perunat ja sipulit Vauhtiksen keittiöön. Mä meen hallille edeltä."
     ]
    ]
   },
@@ -96,7 +96,7 @@
     [
      "TERTTU",
      "iloinen",
-     "Rami! Tapsa sano et sää tuut. Tässä, kaks laatikkoo siipii Rattikseen. Keittiön ovelle, ja äkkiä – ne on vielä lämpimii."
+     "Rami! Tapsa sano et sää tuut. Tässä: säkki perunoita ja sipulit Vauhtiksen keittiöön. Takaovelle, ja ennen lounasta – ilman näitä ei oo crispersejä."
     ],
     [
      "RAMI",
@@ -112,28 +112,38 @@
   },
   {
    "tyyppi": "keraa",
-   "teksti": "Ota siipilaatikot tarakalle",
+   "teksti": "Ota perunasäkki ja sipulit tarakalle",
    "kulku": "pyora",
    "kohteet": [
     {
-     "id": "siivet",
+     "id": "perunat",
      "paikka": "LOC_TERTUN_KOJU",
      "r": 6,
-     "nimi": "Siipilaatikot",
-     "esine": "ITEM_SIIVET"
+     "nimi": "Perunat ja sipulit",
+     "esine": "ITEM_PERUNAT"
     }
    ]
   },
   {
    "tyyppi": "mene",
-   "paikka": "LOC_RATTIS",
+   "paikka": "LOC_VAUHTIS",
    "r": 18,
    "kulku": "pyora",
-   "teksti": "Vie siivet Rattikseen (Yrjönkatu 27)",
-   "merkki": "Rattis",
+   "teksti": "Vie perunat ja sipulit Vauhtiksen keittiön ovelle (Yrjönkatu)",
+   "merkki": "Vauhtis",
    "cp": true,
    "aikaraja": 240,
-   "aikarajaTeksti": "Siivet jäähtyi. Terttu paistaa uudet – yritä uudelleen."
+   "aikarajaTeksti": "Lounas alkoi ilman perunoita. Terttu pakkaa uudet – yritä uudelleen."
+  },
+  {
+   "tyyppi": "repliikit",
+   "rivit": [
+    [
+     "KOKKI",
+     "iloinen",
+     "Vihdoinkin! Laita säkki tohon kylmiön viereen. Kerro Tertulle, et sipulit on taas parhaita."
+    ]
+   ]
   },
   {
    "tyyppi": "soitto",
@@ -142,7 +152,7 @@
     [
      "TAPSA",
      "iloinen",
-     "Perillä? Hyvä. Rattiksessa muistetaan sut vielä – kuulemma rallikuski, joka ei osannu pyöräillä."
+     "Perillä? Hyvä. Vauhtiksessa muistetaan sut vielä – kuulemma rallikuski, joka ei osannu pyöräillä."
     ],
     [
      "TAPSA",
@@ -168,6 +178,11 @@
     "kohti": "LOC_KORJAAMO"
    },
    "rivit": [
+    {
+     "h": "KERTOJA",
+     "tu": "neutraali",
+     "te": "[Korjaamon pihalla on pressulla peitetty auto. Tapsa vetää pressun pois.]"
+    },
     [
      "TAPSA",
      "iloinen",
@@ -203,7 +218,7 @@
    "FLAG_M01_DONE"
   ],
   "poistaEsineet": [
-   "ITEM_SIIVET"
+   "ITEM_PERUNAT"
   ]
  },
  "palkinto": {
@@ -231,8 +246,8 @@
     "dy": -1.5
    },
    "suunta": "pelaaja",
-   "alkaen": 8
+   "alkaen": 9
   }
  ],
- "_huom": "21.11.2026 omistaja: tarina alkaa polkupyörästä ja etenee vaativampiin ajoneuvoihin. Eteläranta → Tapsan fillari → tori (Terttu, siipilaatikot) → Rattis → korjaamo → Ramin vanha farmari (M02:n Kespan lenkki)."
+ "_huom": "21.11.2026 omistaja: tarina alkaa polkupyörästä ja etenee vaativampiin ajoneuvoihin. Eteläranta → Tapsan fillari → tori (Terttu, perunat ja sipulit) → Vauhtiksen keittiö → korjaamo → Ramin vanha farmari (M02:n Kespan lenkki). 21.11.2026: perunat ja sipulit kanansiipien sijaan, ravintola keksitty (Vauhtis)."
 }
