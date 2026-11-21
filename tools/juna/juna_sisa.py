@@ -40,17 +40,30 @@ TYPES = {
 END = 12.75   # päätyseinä (yhdyskäytävän ovi)
 
 # ---------------------------------------------------------------- materiaalit (VR IC2: vaaleat seinät, sinertävänharmaa verhoilu)
+TEXD = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'sisa_tex')   # sisa_tex.py
+TEXSCALE = {}   # materiaali -> tekstuurin toistoväli (m), laatikkoprojisoidut UV:t join_by_material:issa
+def tmat(name, img, scale, rough=0.8, metal=0.0):
+    if name in J.MATS: return J.MATS[name]
+    m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree; b = nt.nodes['Principled BSDF']
+    t = nt.nodes.new('ShaderNodeTexImage'); t.image = bpy.data.images.load(os.path.join(TEXD, img + '.png')); nt.links.new(t.outputs['Color'], b.inputs['Base Color'])
+    b.inputs['Roughness'].default_value = rough; b.inputs['Metallic'].default_value = metal
+    J.MATS[name] = m; TEXSCALE[name] = scale; return m
 def M():
     return dict(
-        wall=J.mat('S_seina', J.srgb('#e4e5e1'), 0.0, 0.55),
-        ceil=J.mat('S_katto', J.srgb('#f1f2ef'), 0.0, 0.6),
-        carpet=J.mat('S_matto', J.srgb('#4a5361'), 0.0, 0.95),
-        vinyl=J.mat('S_muovimatto', J.srgb('#8d9192'), 0.0, 0.7),
-        fabric=J.mat('S_verhoilu', J.srgb('#3e4b63'), 0.0, 0.9),
-        fabric2=J.mat('S_verhoilu2', J.srgb('#2f3a4e'), 0.0, 0.9),
+        wall=tmat('S_seina', 'seina', 1.8, 0.5),
+        ceil=tmat('S_katto', 'katto', 0.6, 0.7),
+        carpet=tmat('S_matto', 'matto', 0.7, 0.95),
+        vinyl=tmat('S_muovimatto', 'muovimatto', 0.9, 0.6),
+        fabric=tmat('S_verhoilu', 'verhoilu', 0.32, 0.95),
+        fabric2=tmat('S_verhoilu2', 'verhoilu', 0.32, 0.95),
+        grille=tmat('S_saleikko', 'saleikko', 0.16, 0.6),
+        glass=J.mat('S_ikkunalasi', J.srgb('#bcd2d8'), 0.0, 0.05, alpha=0.14),
+        blind=J.mat('S_verho', J.srgb('#c9c6bd'), 0.0, 0.9),
+        alu=J.mat('S_alumiini', J.srgb('#b9bdc0'), 0.7, 0.35),
+        plastic=J.mat('S_muovi', J.srgb('#5a5f63'), 0.0, 0.5),
         head=J.mat('S_niskatuki', J.srgb('#cfd3d6'), 0.0, 0.8),
         green=J.mat('S_vihrea', J.srgb('#5cb532'), 0.0, 0.5),
-        table=J.mat('S_poyta', J.srgb('#a7abad'), 0.1, 0.4),
+        table=tmat('S_poyta', 'poyta', 0.5, 0.35),
         steel=J.mat('S_teras', J.srgb('#9a9fa3'), 0.8, 0.35),
         dark=J.mat('S_tumma', J.srgb('#2a2d30'), 0.1, 0.6),
         frame=J.mat('S_kehys', J.srgb('#6f7477'), 0.2, 0.5),
@@ -67,7 +80,7 @@ def B(name, x0, x1, y0, y1, z0, z1, m, parent):
     return J.box(name, x1 - x0, y1 - y0, z1 - z0, ((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2), m, parent)
 
 def text(name, s, loc, size, rotz, m, parent, extrude=0.004):
-    bpy.ops.object.text_add(location=loc); t = bpy.context.active_object; t.data.body = s; t.data.size = size; t.data.extrude = extrude
+    bpy.ops.object.text_add(location=loc); t = bpy.context.active_object; t.data.body = s; t.data.size = size; t.data.extrude = 0; t.data.resolution_u = 3 if HI else 1
     t.data.align_x = 'CENTER'; t.data.align_y = 'CENTER'; t.rotation_euler = (math.pi / 2, 0, rotz); t.name = name
     bpy.ops.object.convert(target='MESH'); t = bpy.context.active_object; t.data.materials.clear(); t.data.materials.append(m)
     t.parent = parent; return t
@@ -97,25 +110,49 @@ def side_wall(name, sx, y0, y1, zf, zc, wins, mm, root):
         if HI:
             for yy in (yc - w / 2, yc + w / 2 - 0.03): B(f'{name}_k{i}c{yy}', min(xi, xi - sx * 0.03), max(xi, xi - sx * 0.03), yy, yy + 0.03, za, zb, mm['frame'], root)
     B(name + '_pl', x0, x1, y, y1, lo, hi, mm['wall'], root)
+    # ikkunalasi, rullaverhon kotelo (joka neljäs verho puoliksi alhaalla) ja patterin säleikkö ikkunoiden alla
+    for i, (yc, w, za, zb) in enumerate(ws):
+        xg = sx * (XW + 0.025)
+        B(f'{name}_lasi{i}', xg - 0.002, xg + 0.002, yc - w / 2, yc + w / 2, za, zb, mm['glass'], root)
+        xa_, xb_ = (XW - 0.07, XW) if sx > 0 else (-XW, -XW + 0.07)
+        J.box(f'{name}_rulla{i}', xb_ - xa_, w - 0.04, 0.06, ((xa_ + xb_) / 2, yc, zb - 0.03), mm['frame'], root, 0.02)
+        if int(abs(yc) * 10 + (zf > 2) * 3 + (sx > 0)) % 4 == 0:
+            xv = sx * (XW - 0.035); B(f'{name}_verho{i}', xv - 0.003, xv + 0.003, yc - w / 2 + 0.03, yc + w / 2 - 0.03, zb - 0.42, zb - 0.06, mm['blind'], root)
+    xa_, xb_ = (XW - 0.05, XW) if sx > 0 else (-XW, -XW + 0.05)
+    B(name + '_patteri', xa_, xb_, y0 + 0.05, y1 - 0.05, zf + 0.06, zf + 0.26, mm['grille'], root)
+
+# istuimen sivuprofiili (u = katseen suuntaan istuinosan keskeltä, z = lattiasta): pyöristetty istuinosa, kaareva selkänoja, niskatuki
+SEAT_P = [(0.25, 0.30), (0.275, 0.37), (0.265, 0.45), (0.21, 0.495), (0.0, 0.505), (-0.17, 0.49), (-0.215, 0.56), (-0.205, 0.70), (-0.235, 0.88),
+          (-0.255, 1.02), (-0.235, 1.12), (-0.265, 1.215), (-0.315, 1.255), (-0.385, 1.235), (-0.37, 1.0), (-0.345, 0.70), (-0.315, 0.45), (-0.28, 0.32), (-0.05, 0.29)]
+HEAD_P = [(-0.248, 0.985), (-0.228, 1.12), (-0.258, 1.222), (-0.285, 1.236), (-0.252, 1.12), (-0.272, 0.985)]
+def extrude(name, prof, x0, x1, yc, f, zf, m, parent, bev=0.0):
+    bm = bmesh.new()
+    a = [bm.verts.new((x0, yc + f * u, zf + z)) for u, z in prof]; b = [bm.verts.new((x1, yc + f * u, zf + z)) for u, z in prof]
+    n = len(prof); bm.faces.new(a[::-1]); bm.faces.new(b)
+    for i in range(n): k = (i + 1) % n; bm.faces.new((a[i], a[k], b[k], b[i]))
+    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
+    if bev > 0 and HI:
+        caps = [e for e in bm.edges if all(abs(v.co.x - x0) < 1e-6 for v in e.verts) or all(abs(v.co.x - x1) < 1e-6 for v in e.verts)]
+        bmesh.ops.bevel(bm, geom=caps, offset=bev, segments=2, affect='EDGES', profile=0.5)
+    return J.obj_from(bm, name, m, parent)
 
 def seat_pair(name, sx, yc, f, zf, mm, root, fab=None):
     """kahden istuimen penkki: sx kylki (-1/1), yc istuinosan keskikohta, f = katseen suunta (+1 = +Y)"""
     fab = fab or mm['fabric']
     xa, xb = (0.36, 1.24) if sx > 0 else (-1.24, -0.36)
-    # jalusta ja istuinosa
-    B(name + '_jalka', xa + 0.2, xb - 0.2, yc - 0.12, yc + 0.12, zf, zf + 0.36, mm['dark'], root)
-    B(name + '_istuin', xa, xb, yc - 0.24, yc + 0.22 if f > 0 else yc + 0.24, zf + 0.36, zf + 0.48, fab, root)
-    # selkänoja (hieman kallistettu) ja niskatuet
-    yb = yc - f * 0.27
-    back = B(name + '_selka', xa, xb, yb - 0.05, yb + 0.05, zf + 0.46, zf + 1.18, fab, root)
-    if back:
-        back.data.transform(Matrix.Translation(Vector((0, yb, zf + 0.46))) @ Matrix.Rotation(f * 0.16, 4, 'X') @ Matrix.Translation(Vector((0, -yb, -(zf + 0.46)))))
-    for k, xc in enumerate(((xa + 0.03 + (xb - xa) / 4), (xb - 0.03 - (xb - xa) / 4))):
-        h = B(f'{name}_niska{k}', xc - 0.17, xc + 0.17, yb - f * 0.05 - 0.035, yb - f * 0.05 + 0.035, zf + 1.0, zf + 1.2, mm['head'], root)
-    # käsinojat
-    for k, xx in enumerate((xa, (xa + xb) / 2 - 0.025, xb - 0.05) if HI else (xa, xb - 0.05)):
-        B(f'{name}_kasi{k}', xx, xx + 0.05, yc - 0.22, yc + 0.18, zf + 0.6, zf + 0.66, mm['dark'], root)
-
+    w = (xb - xa) / 2
+    for k in range(2):
+        x0, x1 = xa + k * w + 0.012, xa + (k + 1) * w - 0.012
+        extrude(f'{name}_s{k}', SEAT_P, x0, x1, yc, f, zf, fab, root, 0.028)
+        extrude(f'{name}_n{k}', HEAD_P, x0 + 0.05, x1 - 0.05, yc, f, zf, mm['head'], root, 0.008)
+    # runko: alumiininen jalusta ja kiinnitys seinään, selkänojan takana kahva käytävän puolella
+    B(name + '_jalka', xa + 0.25, xb - 0.25, yc - f * 0.05 - 0.04, yc - f * 0.05 + 0.04, zf, zf + 0.30, mm['alu'], root)
+    B(name + '_jalka2', xa + 0.1, xb - 0.1, yc - 0.18, yc + 0.18, zf + 0.26, zf + 0.30, mm['alu'], root)
+    xr = xa if sx > 0 else xb
+    rod(name + '_kahva', (xr + sx * 0.04, yc - f * 0.36, zf + 1.17), (xr + sx * 0.04, yc - f * 0.40, zf + 1.24), 0.014, mm['steel'], root)
+    # käsinojat (pyöristetyt): käytävän puoli ja keskellä
+    for k, xx in enumerate((xa - 0.005, xa + w - 0.025) if sx > 0 else (xb - 0.045, xa + w - 0.025)):
+        o = J.box(f'{name}_kasi{k}', 0.05, 0.4, 0.055, (xx + 0.025, yc - f * 0.02, zf + 0.655), mm['plastic'], root, 0.02)
 def bay(name, sx, c, zf, mm, root, table=True):
     """pöytäosasto: kaksi penkkiä vastakkain ikkunan kohdalla"""
     seat_pair(name + 'a', sx, c - 0.5, 1, zf, mm, root)
@@ -124,6 +161,13 @@ def bay(name, sx, c, zf, mm, root, table=True):
         xa, xb = (0.62, 1.25) if sx > 0 else (-1.25, -0.62)
         B(name + '_poyta', xa, xb, c - 0.22, c + 0.22, zf + 0.72, zf + 0.75, mm['table'], root)
         B(name + '_poytaj', xb - 0.05 if sx > 0 else xa, xb if sx > 0 else xa + 0.05, c - 0.05, c + 0.05, zf + 0.4, zf + 0.72, mm['steel'], root)
+        J.box(name + '_poytareuna', xb - xa, 0.03, 0.035, ((xa + xb) / 2, c - 0.22, zf + 0.735), mm['plastic'], root, 0.012)
+        J.box(name + '_poytareuna2', xb - xa, 0.03, 0.035, ((xa + xb) / 2, c + 0.22, zf + 0.735), mm['plastic'], root, 0.012)
+        # roskis ja pistorasiat seinässä pöydän alla
+        xa2, xb2 = (1.10, 1.24) if sx > 0 else (-1.24, -1.10)
+        J.box(name + '_roskis', xb2 - xa2, 0.26, 0.26, ((xa2 + xb2) / 2, c, zf + 0.44), mm['plastic'], root, 0.02)
+        xs_ = sx * 1.262
+        for d in (-0.07, 0.07): B(f'{name}_pistorasia{d}', xs_ - 0.008, xs_ + 0.008, c + d - 0.035, c + d + 0.035, zf + 0.6, zf + 0.67, mm['dark'], root)
 
 def light_strip(name, y0, y1, z, mm, root, w=0.12):
     return B(name, -w / 2, w / 2, y0, y1, z - 0.02, z, mm['lamp'], root)
@@ -184,6 +228,24 @@ def build(name):
         for c in (-4.5, -2.7, -0.9, 0.9, 2.7, 4.5):
             if abs(c) + 0.9 > lim + 0.01: continue
             for sx in (-1, 1): bay(f'os_{tag}{c}{sx}', sx, c, zf, mm, root); nseat += 4
+    # --- lukuvalot penkkien yllä ja infonäytöt matkustamon päissä
+    rz_, rx_, rzs_ = T['roof']
+    for zf, zc, lim, tag in ((ZL, ZLC - 0.012, min(Lf, Lr), 'a'), (ZU, None, min(Uf, Ur), 'y')):
+        for c in (-4.5, -2.7, -0.9, 0.9, 2.7, 4.5):
+            if abs(c) + 0.9 > lim + 0.01: continue
+            for sx in (-1, 1):
+                for d in (-0.5, 0.5):
+                    if zc is None:
+                        xl = 1.02; zl = rzs_ + (XW - xl) / (XW - rx_) * (rz_ - rzs_) - 0.03
+                    else: xl, zl = 0.85, zc - 0.01
+                    B(f'lukuvalo_{tag}{c}{sx}{d}', sx * xl - 0.05, sx * xl + 0.05, c + d - 0.05, c + d + 0.05, zl - 0.015, zl, mm['lamp'], root)
+    nayttoT = J.mat('S_naytto_t', (1, 0.8, 0.2), 0, 0.5, emit=(1, 0.75, 0.15))
+    for zc, lim, tag in ((ZLC, min(Lf, Lr), 'a'), (rz_, min(Uf, Ur), 'y')):
+        for s2 in (-1, 1):
+            yd = s2 * (lim - 0.4)
+            B(f'info_{tag}{s2}', -0.42, 0.42, yd - 0.03, yd + 0.03, zc - 0.26, zc - 0.06, mm['screen'], root)
+            B(f'info_kiinn_{tag}{s2}', -0.02, 0.02, yd - 0.01, yd + 0.01, zc - 0.07, zc, mm['steel'], root)
+            text(f'info_t_{tag}{s2}', 'Seuraava: Tampere', (0, yd - s2 * 0.035, zc - 0.16), 0.07, 0 if s2 > 0 else math.pi, nayttoT, root)
     # --- päät
     for s in (-1, 1):
         e = E[s]; v0, v1, xs = e['v0'], e['v1'], e['xs']
@@ -352,6 +414,17 @@ def build(name):
     print(name, 'istumapaikkoja', nseat, 'kävelyalueita', len(rects))
     return root, rects
 
+def boxuv(ob, sc):
+    """laatikkoprojektio: pinnan normaalin pääakselin mukaan, sc metriä per tekstuuri (kohteen kärkipisteet ovat maailman koordinaateissa)"""
+    me = ob.data; M_ = ob.matrix_world
+    uv = me.uv_layers[0] if me.uv_layers else me.uv_layers.new(name='UVMap')
+    for p in me.polygons:
+        n = p.normal; ax = max(range(3), key=lambda i: abs(n[i]))
+        for li in p.loop_indices:
+            v = M_ @ me.vertices[me.loops[li].vertex_index].co
+            a, b = (v.x, v.y) if ax == 2 else (v.y, v.z) if ax == 0 else (v.x, v.z)
+            uv.data[li].uv = (a / sc, b / sc)
+
 def join_by_material(root):
     objs = [o for o in bpy.data.objects if o.type == 'MESH']
     by = {}
@@ -365,6 +438,7 @@ def join_by_material(root):
         bpy.context.view_layer.objects.active = L[0]
         if len(L) > 1: bpy.ops.object.join()
         ob = bpy.context.view_layer.objects.active; ob.name = 'sisa_' + m; ob.parent = root
+        if m in TEXSCALE: boxuv(ob, TEXSCALE[m])
 
 os.makedirs(OUTD, exist_ok=True)
 meta = {}

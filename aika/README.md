@@ -5,7 +5,7 @@ valot **lämpimän keltaisia** (katulamput, ikkunat, kaikki muu) – **paitsi ne
 
 | Tiedosto | Sisältö |
 |---|---|
-| `aika.js` | Kello (`window.__aika`), koko kuvan valosävytys, tähdet, katulamput, kello ruudulla. Ladataan `src/html/99_loppu.html`:ssä. |
+| `aika.js` | Kello (`window.__aika`), koko kuvan valosävytys, tähdet, katulamput, ikkunoiden hohka, autojen valot, kello ruudulla. Ladataan `src/html/99_loppu.html`:ssä. |
 | `katuvalo_malli.js` | Katulamppu (omistajan Meshy-malli, harvennettu 1 200 kolmioon): `python tools/aika/tee_katuvalo.py katuvalo_meshy.glb aika/katuvalo_malli.js` |
 | Lähde | `hahmot/konseptit/3d_lahde/katuvalo/katuvalo_meshy.glb` |
 
@@ -37,8 +37,22 @@ kadun eri puolilla, ei 14 m lähempänä toista. Talon sisään tai jokeen osuva
 Lähellä (240 m, enintään 380 kpl) piirretään malli, hohtava lasi ja valoläikkä maahan; kaikki lamput näkyvät lisäksi valopisteinä (yöllä kaupunki erottuu kopterista).
 Oikeita valonlähteitä ei ole – läikkä on kuva maassa.
 
+## Ikkunoiden valo ja autojen valot (21.11.2026)
+
+Omistaja: "ei valaista kaikkia ikkunoita ja tehdään vain haalean keltainen hohka".
+
+- `aika.js` asettaa joka ruudulla `window.__winGlow` ja `window.__winGlowB` = (väri × voimakkuus, valaistujen ikkunoiden osuus). Osuus kellon mukaan (`ikkunaOsuus`): illalla 36 %, puolenyön jälkeen 7 %, aamulla 24 %.
+  Voimakkuus `HOHKAN_VOIMA` (0,2), väri `HOHKA`.
+- **Koodista piirretyt julkisivut** (`src/js/040_rakennukset.js`): lasi = julkisivutekstuurin tumma sinertävä tekseli, ikkunaruutu = julkisivun jako (väli × kerros). Seuraa inventaarin muutoksia itsestään.
+- **Poltetut lohkot** (`yovalo()` palassa `020`, käytössä paloissa `040` ja `061`): väliaikainen arvio – lasi = tumma sinertävä tekseli pystypinnalla, ruutu maailman koordinaateista
+  (1,45 × 2,95 m), koska poltetussa kuvassa ei ole ikkunajakoa. Osuu useimpiin ikkunoihin, mutta lasijulkisivuissa näkyy ruudukkona ja osa ikkunoista jää pimeäksi.
+  Säätö tai sammutus konsolista: `__aika.poltetutIkkunat = 0…1`. Korvataan ikkunamaskilla, kun lohkot poltetaan inventaarin jälkeen uudelleen.
+- **Autot:** liikenteen autoille (450 m säteellä, enintään 150) ja pelaajan autolle kaksi lämmintä ajovalopistettä, kaksi punaista takavaloa ja valokeila tiessä (60 lähintä).
+- Huom. `terrainizeScene` tekee varjostinohjelman välimuistiavaimen `onBeforeCompile`-kääreen lähdekoodin pituudesta. `yovalo` käyttää siksi kahta eri mittaista käärettä
+  (tiilitetty / tiilittämätön lohko); uusi kääre → varmista, ettei pituus osu yhteen toisen kanssa.
+
 ## Tekemättä (sovittu järjestys)
 
-3. Ikkunoiden valot (julkisivuvarjostin tunnistaa jo lasin: `isG`) ja autojen ajo- ja takavalot. 4. Neonkyltit liiketiloihin (`styles.json` `shop`).
+3. Ikkunamaski polttoon (inventaarin jälkeen). 4. Neonkyltit liiketiloihin (`styles.json` `shop`).
 5. Ihmisten ja liikenteen määrä kellon mukaan, kojut ja hahmot aikataulussa, bussi ja juna oikeilla kellonajoilla.
 Tiedossa: lamput eivät ole kiinteitä esteitä; lamppuja voi osua pihoille tai puiden sisään (paikat katuverkosta, ei kartoitettu); pilvet eivät himmene yöllä.

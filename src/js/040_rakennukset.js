@@ -265,7 +265,12 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
       const ob = m.onBeforeCompile, sc = si === 6 ? [BAYW[si] / 2.4, 3 / 2.4] : [BAYW[si] / 2.2, FLH[si] / 2.2], amp = si === 6 ? 0.55 : si === 5 ? 1.5 : 0.4;
       m.onBeforeCompile = sh => { ob(sh); sh.uniforms.detMap = { value: dt };
         sh.fragmentShader = 'uniform sampler2D detMap;\n' + sh.fragmentShader.replace('#include <alphamap_fragment>', `diffuseColor.rgb *= 1.0 + ( texture2D( detMap, fract( vMapUv ) * vec2( ${sc[0].toFixed(3)}, ${sc[1].toFixed(3)} ) ).r - 0.5 ) * ${amp.toFixed(2)};\n#include <alphamap_fragment>`); }; }
-    m.customProgramCacheKey = () => 'wall' + si + (g.attributes.color2 ? 'c2' : '') + 'd';   // every style has its own shader: identical onBeforeCompile source made three.js reuse one style's program for another
+    { const obY = m.onBeforeCompile; m.onBeforeCompile = sh => { obY(sh); sh.uniforms.winGlow = WINGLOW;      // 21.11.2026: ikkunoiden yövalo (aika/aika.js); ruutu = julkisivun jako (väli × kerros), lasi = tumma sinertävä tekseli
+        sh.vertexShader = 'varying vec3 vYW;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvYW = ( modelMatrix * vec4( position, 1.0 ) ).xyz;');
+        sh.fragmentShader = 'uniform vec4 winGlow;\nvarying vec3 vYW;\n' + YOHASH + sh.fragmentShader.replace('#include <tonemapping_fragment>',
+          '{ float yS = dot( floor( vYW.xz / 30.0 ), vec2( 7.1, 3.3 ) ); float yG = step( dot( fT.rgb, vec3( 0.3, 0.59, 0.11 ) ), 0.34 ) * step( fT.r * 1.04, fT.b ) * step( 0.0, vMapUv.y ) * step( vMapUv.x, 900.0 );\n' +
+          '  gl_FragColor.rgb += winGlow.rgb * yG * step( yoH( floor( vMapUv ), yS ), winGlow.a ) * ( 0.55 + 0.45 * yoH( floor( vMapUv ), yS + 3.1 ) ); }\n#include <tonemapping_fragment>'); }; }
+    m.customProgramCacheKey = () => 'wall' + si + (g.attributes.color2 ? 'c2' : '') + 'dy';   // every style has its own shader: identical onBeforeCompile source made three.js reuse one style's program for another
     scene.add(new THREE.Mesh(g, m)); });
   Object.values(PB).forEach(B => {
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(B.p, 3)); g.setAttribute('normal', new THREE.Float32BufferAttribute(B.n, 3));
@@ -290,7 +295,7 @@ const roofMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a, side: 
   KW.forEach((k, ci) => { if (!k.p.length && !KWP[ci].p.length) return;
     const me0 = kwMesh(k, wallMat), me1 = kwMesh(KWP[ci], wallMat2), me = new THREE.Group(); for (const q of [me0, me1]) if (q) { scene.remove(q); me.add(q); } scene.add(me);
     if (CZ.zones[KN[ci]]) { const z = CZ.zones[KN[ci]]; STREAM.push({ name: KN[ci], me, x: z.x, y: z.y, st: 0, gr: null }); return; }
-    loadModel('bl_' + KN[ci], (root, K) => { root.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { map.anisotropy = 8; TEXLOD.add(map, K.x, K.y); } q.material = glassify(new THREE.MeshBasicMaterial({ map })); } });
+    loadModel('bl_' + KN[ci], (root, K) => { root.traverse(q => { if (q.isMesh) { const map = q.material.map; if (map) { map.anisotropy = 8; TEXLOD.add(map, K.x, K.y); } q.material = yovalo(glassify(new THREE.MeshBasicMaterial({ map }))); } });
       const gr = new THREE.Group(); gr.position.set(K.x, 0, -K.y); gr.add(root); if (K.shells) liftBlock(gr, K.shells); scene.add(gr); scene.remove(me); (window.__bl = window.__bl || []).push(KN[ci]); });
   });
   // roofs are cut along the 512 m aerial tiles: each piece shows the sharp 0.25 m tile once it is loaded, the coarse image until then

@@ -4,7 +4,8 @@
 // 1) Kello: window.__aika (t = pelin kellonaika tunteina 0–24). Bussit, junat ja tehtävät voivat lukea sitä ja ajaa oikeiden aikataulujen kellonaikoja.
 // 2) Valo: aamu, päivä, ilta ja yö koko kuvaan yhdellä sävytyksellä (rendererin CustomToneMapping). Pelin valot ja varjot on poltettu ilmakuvaan ja
 //    rakennuksiin, joten varjot eivät käänny – vain valon määrä ja sävy muuttuvat. Hohtavat pinnat (toneMapped: false) eivät himmene.
-// 3) Katulamput kaikille kaduille (city.js:n katuverkko, omistajan Meshy-malli): syttyvät hämärässä, lämmin keltainen valo, valoläikkä maassa,
+// 3) Ikkunoiden haalea keltainen hohka osassa ikkunoista (window.__winGlow → julkisivuvarjostimet) ja autojen ajo- ja takavalot.
+// 4) Katulamput kaikille kaduille (city.js:n katuverkko, omistajan Meshy-malli): syttyvät hämärässä, lämmin keltainen valo, valoläikkä maassa,
 //    kaukaa valopisteinä.
 // index.html:ään ei tarvita muuta kuin <script type="module" src="aika/aika.js"></script>.
 import * as THREE from '../three.module.min.js';
@@ -123,7 +124,43 @@ function luoLamput(G, A) {
     for (let i = 0; i < n; i++) { const q = lahi[i][1]; Q.setFromAxisAngle(Y, Math.PI - q.a); M.compose(V.set(q.x, q.z, -q.y), Q, S.set(q.s, q.s, q.s)); pylvaat.setMatrixAt(i, M); lasi.setMatrixAt(i, M); laikka.setMatrixAt(i, M); }
     for (const o of [pylvaat, lasi, laikka]) { o.count = n; o.instanceMatrix.needsUpdate = true; }
   }
-  return { paivita, lista: L, get kelpaa() { return kelpaa; }, get valmis() { return valmis; }, get lahella() { return pylvaat ? pylvaat.count : 0; } };
+  return { paivita, pelaaja, lista: L, get kelpaa() { return kelpaa; }, get valmis() { return valmis; }, get lahella() { return pylvaat ? pylvaat.count : 0; } };
+}
+
+// ---------- ikkunoiden valo ----------
+// Julkisivujen varjostimet (src/js/020, 040, 061: WINGLOW, yovalo) lukevat arvon window.__winGlow = (väri × voimakkuus, valaistujen ikkunoiden osuus).
+// Omistaja: "ei valaista kaikkia ikkunoita ja tehdään vain haalean keltainen hohka". Väri jaetaan yön sävytyksellä, koska se lisätään kuvaan ennen sävytystä.
+const HOHKA = [0.95, 0.70, 0.30], HOHKAN_VOIMA = 0.2;
+export const ikkunaOsuus = t => t >= 16 && t < 22 ? 0.36 : t >= 22 ? 0.36 - 0.20 * (t - 22) / 2 : t < 1.5 ? 0.16 - 0.09 * t / 1.5 : t < 5 ? 0.07 : t < 7 ? 0.07 + 0.17 * (t - 5) / 2 : 0.24;
+function luoIkkunat(A) {
+  const WG = window.__winGlow = window.__winGlow || { value: new THREE.Vector4(0, 0, 0, 0) }, WB = window.__winGlowB = window.__winGlowB || { value: new THREE.Vector4(0, 0, 0, 0) };
+  A.poltetutIkkunat = 1;      // poltettujen lohkojen ikkunavalon voimakkuus 0..1 (tunnistus on arvio tummasta lasista; 0 = pois)
+  return { paivita() { const d = A.valo, voima = A.lamput ? pehmea(0.45, 0.8, 1 - d) : 0; if (voima <= 0) { WG.value.set(0, 0, 0, 0); WB.value.set(0, 0, 0, 0); return; }
+      const m = savy(Math.round(d * 200) / 200, A.rusko * 0.98), k = HOHKAN_VOIMA * voima; WG.value.set(HOHKA[0] * k / m[0], HOHKA[1] * k / m[1], HOHKA[2] * k / m[2], ikkunaOsuus(A.t)); WB.value.copy(WG.value); WB.value.x *= A.poltetutIkkunat; WB.value.y *= A.poltetutIkkunat; WB.value.z *= A.poltetutIkkunat; } };
+}
+
+// ---------- autojen valot ----------
+// Liikenteen autot (window.__sig.cars) ja pelaajan auto: kaksi lämmintä ajovaloa, kaksi punaista takavaloa ja valokeila tiessä. Pisteitä ja läikkiä, ei oikeita valoja.
+function luoAjovalot(G, A) {
+  const sc = G.scene, MAXA = 150, MAXK = 60;
+  const pyorea = (sisa, ulko) => { const c = document.createElement('canvas'); c.width = c.height = 64; const k = c.getContext('2d'), g = k.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, sisa); g.addColorStop(0.4, ulko); g.addColorStop(1, 'rgba(0,0,0,0)'); k.fillStyle = g; k.fillRect(0, 0, 64, 64); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; };
+  const pos = new Float32Array(MAXA * 12), col = new Float32Array(MAXA * 12), geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3).setUsage(THREE.DynamicDrawUsage)); geo.setAttribute('color', new THREE.BufferAttribute(col, 3).setUsage(THREE.DynamicDrawUsage)); geo.setDrawRange(0, 0);
+  const pm = new THREE.PointsMaterial({ map: pyorea('rgba(255,255,255,1)', 'rgba(255,255,255,0.5)'), vertexColors: true, size: 5 * Math.min(2, window.devicePixelRatio || 1), sizeAttenuation: false, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
+  pm.userData.noT = true; const pts = new THREE.Points(geo, pm); pts.userData.noT = true; pts.frustumCulled = false; pts.renderOrder = 5; pts.visible = false; sc.add(pts);
+  const km = new THREE.MeshBasicMaterial({ map: pyorea('rgba(255,214,150,0.9)', 'rgba(255,190,110,0.35)'), transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
+  km.userData.noT = true; const keila = new THREE.InstancedMesh(new THREE.PlaneGeometry(6.5, 12).rotateX(-Math.PI / 2).translate(0, 0.08, -7.6), km, MAXK); keila.userData.noT = true; keila.frustumCulled = false; keila.count = 0; keila.renderOrder = 3; keila.visible = false; sc.add(keila);
+  const M = new THREE.Matrix4(), Q = new THREE.Quaternion(), V = new THREE.Vector3(), S1 = new THREE.Vector3(1, 1, 1), Y = new THREE.Vector3(0, 1, 0), ETU = [1.0, 0.84, 0.56], TAKA = [1.0, 0.10, 0.06];
+  const maa = (x, y, tarkka) => { try { if (tarkka) { const z = G.carGround(x, y); if (z != null) return z; } return G.TZs(x, y); } catch (e) { return 0; } };
+  return { paivita(p) { const voima = A.lamput ? pehmea(0.35, 0.7, A.yo) : 0; pts.visible = keila.visible = voima > 0.02; if (!pts.visible || !p) return; pm.opacity = voima; km.opacity = voima * 0.4;
+      const L = []; const T = window.__sig && window.__sig.cars; if (T) for (const c of T) { if (c.wx === undefined) continue; const d = (c.wx - p.x) ** 2 + (c.wy - p.y) ** 2; if (d < 450 * 450) L.push([d, c.wx, c.wy, c.yaw, null]); }
+      const C = window.__car; if (C && G.carG && G.carG.visible) L.push([0, C.x, C.y, C.yaw, C.z]);
+      L.sort((a, b) => a[0] - b[0]); const n = Math.min(MAXA, L.length); let k = 0, nk = 0;
+      for (let i = 0; i < n; i++) { const [d, x, y, yaw, z0] = L[i], sn = Math.sin(yaw), cs = Math.cos(yaw), z = z0 ?? maa(x, y, i < 45);
+        for (const [f, s, h, v] of [[1.9, 0.6, 0.66, ETU], [1.9, -0.6, 0.66, ETU], [-1.95, 0.6, 0.82, TAKA], [-1.95, -0.6, 0.82, TAKA]]) { pos[k] = x + sn * f + cs * s; pos[k + 1] = z + h; pos[k + 2] = -(y + cs * f - sn * s); col[k] = v[0]; col[k + 1] = v[1]; col[k + 2] = v[2]; k += 3; }
+        if (nk < MAXK && d < 160 * 160) { Q.setFromAxisAngle(Y, -yaw); M.compose(V.set(x, z, -y), Q, S1); keila.setMatrixAt(nk++, M); } }
+      geo.setDrawRange(0, k / 3); geo.attributes.position.needsUpdate = true; geo.attributes.color.needsUpdate = true; keila.count = nk; keila.instanceMatrix.needsUpdate = true; },
+    get autoja() { return geo.drawRange.count / 4; } };
 }
 
 // ---------- kello ruudulle ----------
@@ -138,10 +175,10 @@ export async function kaynnista() {
   if (window.__aika) return window.__aika;
   for (let i = 0; i < 600 && !(window.__game && window.__game.scene && window.__game.carGround); i++) await new Promise(r => setTimeout(r, 100));
   const G = window.__game; if (!G) throw new Error('[aika] peliä (window.__game) ei löytynyt');
-  const A = luoKello(), valo = luoValo(G, A), lamput = luoLamput(G, A), naytto = luoNaytto(A);
-  A.valoOsa = valo; A.lamppuOsa = lamput; window.__aika = A;
+  const A = luoKello(), valo = luoValo(G, A), lamput = luoLamput(G, A), ikkunat = luoIkkunat(A), ajovalot = luoAjovalot(G, A), naytto = luoNaytto(A);
+  A.valoOsa = valo; A.lamppuOsa = lamput; A.ajovaloOsa = ajovalot; window.__aika = A;
   let edell = performance.now();
-  const kierros = nyt => { const dt = Math.min(0.25, (nyt - edell) / 1000); edell = nyt; A.etene(dt); valo.paivita(); try { lamput.paivita(dt); } catch (e) { console.warn('[aika] lamput', e); } naytto.paivita(); requestAnimationFrame(kierros); };
+  const kierros = nyt => { const dt = Math.min(0.25, (nyt - edell) / 1000); edell = nyt; A.etene(dt); valo.paivita(); ikkunat.paivita(); try { lamput.paivita(dt); ajovalot.paivita(lamput.pelaaja()); } catch (e) { console.warn('[aika] lamput', e); } naytto.paivita(); requestAnimationFrame(kierros); };
   requestAnimationFrame(kierros);
   console.log('[aika] kello', A.teksti(), '· vuorokausi', (TUNTI_S * 24 / 60) + ' min ·', lamput.lista.length, 'katulamppua ehdolla');
   return A;

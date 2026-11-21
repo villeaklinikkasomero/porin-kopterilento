@@ -32,6 +32,24 @@ renderer.toneMapping = THREE.NoToneMapping;   // ACES and AgX were tried: both w
 scene.fog = new THREE.FogExp2(0xb4cfe4, 0.00042);
 // (a sky reflection on dark window texels was tried here: it veiled dark facades in white, so baked blocks are drawn as baked)
 function glassify(m) { return m; }
+// 21.11.2026 (aika/aika.js): ikkunoiden yövalo, haalea keltainen hohka vain osassa ikkunoista (omistaja). winGlow = (väri × voimakkuus, valaistujen osuus);
+// arvon asettaa aika.js, päivällä se on nolla. Lisätään juuri ennen sävytystä (tonemapping), jotta hohka ei himmene yön mukana.
+const WINGLOW = window.__winGlow = window.__winGlow || { value: new THREE.Vector4(0, 0, 0, 0) };
+const WINGLOWB = window.__winGlowB = window.__winGlowB || { value: new THREE.Vector4(0, 0, 0, 0) };      // sama poltetuille lohkoille (aika.js voi säätää tai sammuttaa erikseen)
+const YOHASH = 'float yoH( vec2 c, float s ) { return fract( sin( dot( c, vec2( 12.9898, 78.233 ) ) + s ) * 43758.5453 ); }\n';
+// Blenderissä poltetut lohkot: ikkuna = tumma, sinertävä tekseli pystypinnalla; "ikkunaruutu" maailman koordinaateista (1,45 m × 2,95 m), koska poltetussa kuvassa ei ole ikkunajakoa.
+// Väliaikainen, kunnes poltto tuottaa ikkunamaskin (inventaarin jälkeen).
+function yovalo(m) { const ob = m.onBeforeCompile, yo = sh => { sh.uniforms.winGlow = WINGLOWB;
+    sh.vertexShader = 'varying vec3 vYW;\nvarying vec3 vYN;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvYW = ( modelMatrix * vec4( position, 1.0 ) ).xyz; vYN = normalize( mat3( modelMatrix ) * normal );');
+    sh.fragmentShader = 'uniform vec4 winGlow;\nvarying vec3 vYW;\nvarying vec3 vYN;\n' + YOHASH + sh.fragmentShader.replace('#include <tonemapping_fragment>',
+      '#ifdef USE_MAP\n{ vec3 yc = sampledDiffuseColor.rgb; float yl = dot( yc, vec3( 0.3, 0.59, 0.11 ) );\n' +
+      '  float yg = smoothstep( 0.26, 0.13, yl ) * step( yc.r * 0.94, yc.b ) * ( 1.0 - smoothstep( 0.2, 0.5, abs( vYN.y ) ) );\n' +
+      '  vec2 yu = vec2( ( abs( vYN.x ) > abs( vYN.z ) ? vYW.z : vYW.x ) / 1.45, vYW.y / 2.95 ), yq = floor( yu ), yf = fract( yu ); float yh = yoH( yq, floor( vYW.x / 40.0 ) * 7.1 + floor( vYW.z / 40.0 ) * 3.3 );\n' +
+      '  float ym = smoothstep( 0.0, 0.07, yf.x ) * smoothstep( 1.0, 0.93, yf.x ) * smoothstep( 0.0, 0.07, yf.y ) * smoothstep( 1.0, 0.93, yf.y );\n' +
+      '  gl_FragColor.rgb += winGlow.rgb * yg * ym * step( yh, winGlow.a ) * ( 0.5 + 0.5 * fract( yh * 37.0 ) ); }\n#endif\n#include <tonemapping_fragment>'); };
+  // kaksi eri mittaista kääröä: terrainize tekee ohjelman välimuistiavaimen kääreen lähdekoodin pituudesta, ja tiilitetyn ja tiilittämättömän lohkon varjostimet eivät saa mennä sekaisin
+  m.onBeforeCompile = ob ? (sh, r) => { ob(sh, r); yo(sh); } : (sh, r) => { yo(sh); /* ei tiilitystä */ };
+  return m; }
 // brick bond (Poly Haven red_brick_03, CC0; luminance only) on the brick-red surfaces of the old brick landmarks: world-space, so no UVs needed,
 // and only where the surface is brick red and vertical (the building's own colour and the baked light stay)
 const DETB = new THREE.TextureLoader().load('./det_brick.jpg'); DETB.wrapS = DETB.wrapT = THREE.RepeatWrapping; DETB.anisotropy = 4;

@@ -23,7 +23,8 @@ const SOLID = (() => {
       if (TAKE.heli && VEH === 'car') dyn.push(mk(TAKE.heli.x, TAKE.heli.y, TAKE.heli.yaw, 2.6, 1.0, 0, 0));
       // 21.11.2026 (omistaja: junien läpi ei saa kävellä): IC-junan (juna/juna.js) ja tavarajunien (juna/tavarajuna.js) vaunut seisovina laatikoina (kind 0):
       // kävelijä ei astu vaunuun, liikkuva juna työntää kävelijän sivuun (pushOut), eikä pelaajan auto aja vaunuun (carHit)
-      const juna = (cars, v) => { for (const c of cars) { const g = c.g; if (!g || !g.visible) continue; const x = g.position.x, y = -g.position.z;
+      // IC-vaunu, jonka ovet ovat auki, jätetään pois: sisään noustaan ovista (juna.js __walkBlock, __aboard; kyydissä SOLIDia ei käytetä)
+      const juna = (cars, v) => { for (const c of cars) { const g = c.g; if (!g || !g.visible || c.rects && c.open && (c.open.L || c.open.R)) continue; const x = g.position.x, y = -g.position.z;
         if (Math.abs(x - S.x) > 190 || Math.abs(y - S.y) > 190) continue; const b = mk(x, y, 0, c.half - 0.35, 1.55, v, 0); b.sn = Math.sin(g.rotation.y); b.cs = -Math.cos(g.rotation.y); dyn.push(b); } };
       if (window.__juna) juna(window.__juna.cars, window.__juna.T.v);
       if (window.__tavara) { const TS = window.__tavara.S; for (const T of TS.junat) juna(T.cars, T.v); for (const P of Object.values(TS.pysak)) juna(P.cars, 0); }
