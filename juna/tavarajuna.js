@@ -85,7 +85,8 @@ async function luoTavarajunat(G) {
     yhdista(o, c => /^(Bogie_|Wheel_)/.test(c.name));
     const b = new THREE.Box3().setFromObject(o); o.userData.half = Math.max(-b.min.z, b.max.z) + 0.05;   // puskimesta keskelle
   }
-  const IC = route(RATA.r['1']);
+  // IC-junien reitit raiteille 1 ja 2 (juna/juna.js) yhtenä pisteketjuna
+  const IC1 = route(RATA.r['1']), IC2 = route(RATA.r['2']), IC = { P: [...IC1.P, ...IC2.P.map(p => ({ ...p, s: p.s + IC1.L + 1000 }))], L: IC1.L + 1000 + IC2.L };
   const R = {}; for (const [k, v] of Object.entries(REITIT)) { const r = R[k] = route(v.p); r.nimi = k; r.yht = yhteiset(r, IC); r.info = v;
     r.lim = new Float32Array(r.P.length); r.P.forEach((p, i) => r.lim[i] = Math.hypot(p.x - PIHA.x, p.y - PIHA.y) < PIHA.r ? V_PIHA : V_LINJA); }
   const limAt = (Rt, s) => Rt.lim[idx(Rt, Math.max(0, Math.min(Rt.L, s)))];
@@ -151,10 +152,11 @@ async function luoTavarajunat(G) {
   function vapaa(T) {
     const Gs = ruudukko(pisteet(T.R, T.s - T.LEN, kohde(T)));
     for (const Y of [...S.junat, ...Object.values(S.pysak)]) { if (Y === T) continue; for (const p of varattu(Y)) if (osuu(Gs, p, 2.6)) return false; }
+    const J = window.__juna; if (J && J.varatut) for (const p of J.varatut()) if (osuu(Gs, p, 2.6)) return false;      // IC-junat (myös yöksi raiteelle 2 jäävät)
     return true;
   }
   const tarvitseeLuvan = (T, a, b) => T.R.yht.some(([za, zb]) => za < b && zb > a - T.LEN);
-  function lupaOK() { const t = ic(); if (!t) return true; return t.mode === 'away' || (t.mode === 'dwell' && t.t < 100); }
+  function lupaOK() { const J = window.__juna; if (J && J.vapaaTavaralle) return J.vapaaTavaralle(); const t = ic(); if (!t) return true; return t.mode === 'away' || (t.mode === 'dwell' && t.t < 100); }
 
   // aikataulun junan käynnistyshetki (pelitunteina): saapuva juna lähtee kartan reunalta ajoajan verran ennen Porin aikaa
   function laukaisu(J) {

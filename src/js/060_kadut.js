@@ -117,12 +117,23 @@ import('./roads.js').then(mod => {
   const mGrass = pbr('nurmi', 1.2, false), mLawn = pbr('nurmi', 1.2, true), mGravel = pbr('sepeli', 0.6, false);
   if (R.medg) add(withUV(flat(dec(R.medg), ROAD.pave), 1.2), mGrass);
   if (R.medp) add(withUV(flat(dec(R.medp), ROAD.pave + 0.005), 0.6), mGravel);
+  // 21.11.2026 (omistaja: "muotoillaan liikenteenjakajat, ympyrät ... Nostetaan ne hieman ylemmäs asfaltista"): korotetut liikenteenjakajat ja ympyröiden
+  // keskisaarekkeet (tools/roads/build_roads.py: isl = kivetty/betoni, islg = nurmi, isla = ympyrän kivetty reunus) 3 cm jalkakäytävää ylempänä
+  // (16 cm asfaltista), omat reunakivet kerbi. Suojatien kohdalla saareke on madallettu (rampp).
+  ROAD.isl = ROAD.pave + 0.03;
+  if (R.isl) add(flat(dec(R.isl), ROAD.isl), mPave);
+  if (R.islg) add(withUV(flat(dec(R.islg), ROAD.isl + 0.004), 1.2), mGrass);
+  if (R.isla) add(withUV(flat(dec(R.isla), ROAD.isl + 0.002), 2.2), ROAD.mK || mPave);
+  if (R.kerbi) { const K = dec(R.kerbi), P = [];
+    for (let i = 0; i < K.length; i += 4) { const ax = K[i] / 10, ay = K[i + 1] / 10, bx = K[i + 2] / 10, by = K[i + 3] / 10, za = groundTop(ax, ay), zb = groundTop(bx, by);
+      P.push(ax, za + ROAD.isl, -ay, ax, za - 0.05, -ay, bx, zb - 0.05, -by, ax, za + ROAD.isl, -ay, bx, zb - 0.05, -by, bx, zb + ROAD.isl, -by); }
+    const kg = new THREE.BufferGeometry(); kg.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); kg.computeVertexNormals(); add(kg, mKerb); }
   if (R.lawn) add(withUV(flat(dec(R.lawn), 0.05), 1.2), mLawn);
   if (R.path) add(withUV(flat(dec(R.path), 0.07), 0.6), mGravel);
   if (R.tadd && TREES.add) TREES.add(dec(R.tadd));
   { // 1 m raster of the pavements for the car: driving over a kerb lifts it onto the pavement
     const [x0, y0, x1, y1] = R.bb, nx = Math.ceil(x1 - x0), ny = Math.ceil(y1 - y0), M = new Uint8Array(nx * ny);          // bit 1 pavement, bit 2 carriageway (for the signal posts: where the kerb is)
-    for (const [T, bit] of [[dec(R.pave), 1], ...(R.kivi ? [[dec(R.kivi), 1]] : []), [dec(R.asph), 2]])   /* the stone paving lies at pavement height too (19.11: walkers sank into it) */ for (let i = 0; i < T.length; i += 6) { const ax = T[i] / 10, ay = T[i + 1] / 10, bx = T[i + 2] / 10, by = T[i + 3] / 10, cx = T[i + 4] / 10, cy = T[i + 5] / 10;
+    for (const [T, bit] of [[dec(R.pave), 1], ...(R.kivi ? [[dec(R.kivi), 1]] : []), ...['isl', 'islg', 'isla'].filter(k => R[k]).map(k => [dec(R[k]), 1]), [dec(R.asph), 2]])   /* the stone paving lies at pavement height too (19.11: walkers sank into it) */ for (let i = 0; i < T.length; i += 6) { const ax = T[i] / 10, ay = T[i + 1] / 10, bx = T[i + 2] / 10, by = T[i + 3] / 10, cx = T[i + 4] / 10, cy = T[i + 5] / 10;
       const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy); if (Math.abs(d) < 1e-6) continue;
       for (let gy = Math.floor(Math.min(ay, by, cy) - y0); gy <= Math.ceil(Math.max(ay, by, cy) - y0); gy++) for (let gx = Math.floor(Math.min(ax, bx, cx) - x0); gx <= Math.ceil(Math.max(ax, bx, cx) - x0); gx++) {
         if (gx < 0 || gy < 0 || gx >= nx || gy >= ny) continue; const px = x0 + gx + 0.5, py = y0 + gy + 0.5;

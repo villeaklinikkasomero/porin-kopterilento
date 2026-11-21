@@ -1,4 +1,4 @@
-# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 21.11.2026 ilta; LUE ENSIN: osio "TILANNE 21.11.2026" ja aivan lopussa "JATKO-OHJE: vuorokausirytmin loppuosa ja mainokset")
+# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 21.11.2026 ilta; LUE ENSIN: osio "TILANNE 21.11.2026", osio "JATKO-OHJE: vuorokausirytmin loppuosa ja mainokset" ja tarinasta ja käyttöliittymästä tiedoston lopussa "TARINA JA UI – ALOITA TÄSTÄ (21.11.2026 klo 15)")
 
 Liitä tämä tiedosto uuden keskustelun alkuun. Pyydä Claudea lukemaan myös repon `SIIRTO.md`, `pipeline/README.md` ja `HANDOFF_Y-PAKKI.md` (jos repossa).
 Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
@@ -2642,3 +2642,74 @@ aikataulujen kellonaikoja pelin kellosta; kaikki valo lämpimän keltaista **pai
 - `.gitignore`: `tools/maa/kuvat/`, `maa/ot_s/`.
 - Puuttuu: 5 tekstuuria (sora, hiekka, metsänpohja, niitty, puu – ambientCG 1K-JPG, lataus vaatii omistajan luvan), pelin `maa/maa.js`-moduuli (vaihe 2).
   Tila ja seuraavat askeleet: `tarvittavat_ominaisuudet/MAAN_PINTA_SUUNNITELMA.md` osa 8.
+
+## 21.11.2026 ilta – Liikenneympyrät, liikenteenjakajat, kadunkulmat ja pyörätiet muotoiltu (omistaja: "muotoillaan liikenteenjakajat, ympyrät, pyörätiet. nyt niissä on heittoa. Pääsääntöisesti ympyrät on ympyröitä tai soikeita. Kadunkulma pyöritettyjä samoin liikenteenjakat. Nostetaan ne hieman ylemmäs asfaltista.")
+- `tools/roads/build_roads.py` (ajo kuten ennen, tie_aja.sh:n viimeinen rivi riittää, jos rinteet/jyrkat eivät muutu):
+  - **Liikenneympyrät**: OSM-renkaat (ROUND-tunnisteet, nyt tiedoston alussa) kootaan, niihin sovitetaan ellipsi (Fitzgibbon; a/b < 1,12 → ympyrä,
+    säde < 7 m tai muoto ei ellipsi (IoU < 0,9, esim. Risto Rytin aukio) → ennallaan). Ajorata = ellipsirengas keskiviiva ± mitattu puolileveys (3–4,5 m),
+    keskisaareke = sisäellipsi: nurmi + 1,6 m kivetty ajettava reunus (rekat). 8 ympyrää alueella.
+  - **Kadunkulmat**: ajoradan sisäkulmien säde RK = 4,5 m (ennen 2,5), ulkokulmat ja leveysporrastukset pyöristetään (RKUP 1,6 m).
+  - **Heitto pois**: OSM-keskiviivat ja kävely-/pyörätiet tasoitetaan (simplify 0,35 m + Chaikin, kulmasta enintään 3 m); pyöräteiden liitokset sulkeutuvat 0,8 m:llä,
+    päät pyöreät. Esplanadien keskikaistojen päät pyöreät (1,2 m).
+  - **Liikenteenjakajat**: OSM-saarekkeet nokat pyöristettyinä (0,9 m), ajoradan sisään jäävät aukot ≥ 25 m² saarekkeiksi (pienemmät sirpaleet asfaltiksi).
+  - Uudet roads.js-avaimet: `isl` (kivetty saareke), `islg` (nurmisaareke), `isla` (ympyrän kivetty reunus), `kerbi` (saarekkeiden reunakivet).
+- `src/js/060_kadut.js`: saarekkeet piirretään `ROAD.isl = ROAD.pave + 0,03` (16 cm asfaltista, jalkakäytävä 13 cm), omat reunakivet; saarekkeet ovat
+  autolle/kävelijälle "jalkakäytävää" (1 m rasterin bitti 1). Suojatien kohdalla saareke on madallettu (rampp).
+- index.html koottu paloista (`kokoa.py --pakota`): laitteen index.html:stä puuttui 0301_sillat.js:n `SILTA.alla` (082 carGround käyttää sitä).
+- Kuvat: `Claude outputs`-kansioon ei viety; testikuvat pelistä otettu (Ratakadun ympyrä, kaksikaistainen ympyrä [-580, -589]).
+- Rajaus: koskee katugeometria-aluetta (roads.js bb x −1790…900, y −1495…995). Ulkoalueen tiet (tie/tie_data.js, 180_lentoasema.js) ennallaan.
+
+## 21.11.2026 klo 19.30 – UI-pohja ja aloitussivu tarinalle (omistaja: "tehdään tuo UI nyt ensiksi"; "ei käytetä muita kuin renderöityjä kuvia"; "tuolla toisessa oli myös nuo geminillä renderöidyt")
+- **Fontit** `fonts/nunito.woff2`, `fonts/fredoka.woff2` (latin, muuttuvat, @fontsource-variable 5.3.0) + `fonts/OFL.txt`; `@font-face`, väripaletti ja lasi-HUD CSS-muuttujina `src/css/peli.css`:n alussa (`--viuh --sininen --kulta --raha --lasi --kiilto`), apuluokat `.ik .iso .kapea .lab`.
+  `.panel` on nyt konseptin tumma lasi; mittariston numerot, kadunnimi, ilmoitus ja navigaattori Fredokalla.
+- **`ikonit.js`** (repon juuri, tavallinen skripti `<body>`:n alussa): konseptin 25 glyfiä + 15 uutta samaan tyyliin. `<svg class="ik"><use href="#ik-radio"/></svg>` tai `window.ikoni('radio')`. Kosketusnapit, radio ja kävelyvihje ilman emojeja.
+- **Aloitussivu** (`src/html/01_runko.html` #start + `src/js/130_tulostaulu.js`): ei ajoneuvovalintaa. *Aloita tarina* / *Jatka tarinaa* (Enter), rivi "Luku 3 · tehtävä · 340 €", *Aloita alusta* (varmistus sivulla).
+  Kolme tapaa pelata -kortit; päivän kierros lukossa. Kun tallennuksessa on `FLAG_HELI_AUKI`: kopteri/auto-valinta, reitti ja *Lennä/Aja päivän kierros* (`begin('kierros')`). HUD piilossa ennen aloitusta (`body.aloitettu`).
+  `begin(tila)` → `window.__pelitila` + tapahtuma `pori-aloita`; `tarina/peli.js` näyttää kierroksen kortin vain kierroksella ja kirjoittaa `localStorage['pori-tarina-yhteenveto']` = { luku, nimi }.
+- **Hahmokuvat** `ui/hahmot/{rami,tapsa,lumi,terttu,varjo,vartija,myyja}.webp`: omistajan Gemini-renderöinnit UI-kanvaasista (läpinäkyvä tausta). Vain renderöityjä kuvia UI:hin, ei piirrettyjä muotokuvia.
+- **Meshy-lähteet talteen** (ei vielä pelissä): `hahmot/konseptit/3d_lahde/m01/perunasakki_meshy.glb` ja `hahmot/konseptit/3d_lahde/kiilto/paviljonki_meshy.glb` + README:t (mitat ja suunnitelma).
+- Testattu headless: uusi tallennus → "Aloita tarina", Enter → jalan Kirjurinluodolla [-169, 676], kierroskortti piilossa, `pori-veh` ennallaan; kopteri-tallennus → "Jatka tarinaa · Luku 3 · 340 €", kierros näkyy ja käynnistyy; mobiili 390 px; fontit latautuvat; `node tarina/testi.mjs` 23/23.
+
+## TARINA JA UI – ALOITA TÄSTÄ (21.11.2026 klo 15, siirto uudelle tilille)
+
+Tämä osio kokoaa tarinan (Satamakaupunki) ja käyttöliittymän tilanteen. Muut langat (kartta, tiet, sillat, junat, vuorokausirytmi) ovat omissa osioissaan yllä.
+
+**Lue ensin nämä repon tiedostot:**
+1. `tarina/README.md` – moottori, vaihetyypit, talous, aloitus, kopterilukko.
+2. `tarina/KASIKIRJOITUS.md` – koko käsikirjoitus (M01–M26, loput A/B/C, sivutehtävät), PEGI 7.
+3. `tarvittavat_ominaisuudet/UI_KONSEPTI_PELIIN.md` – UI-konsepti → peli, vaiheet 1–6 (1 ja 2 tehty).
+4. `tarvittavat_ominaisuudet/PAIKAT_TARINAN_ALKU.md` – sisätilat ja paikat, päätökset (kohta 5), teatterin näyttelijät (6), Meshy (7), seuraavat askeleet (8).
+5. `tarvittavat_ominaisuudet/PUUTTUU_RAUTALANGASTA.md` – puuttuvat mekaniikat tärkeysjärjestyksessä.
+6. `tarvittavat_ominaisuudet/MESHY_PROMPTIT.md` – 44 promptia; omistaja tekee mallit Meshyssä.
+7. `src/README.md` – index.html kootaan paloista: muokkaa `src/`-paloja, aja `python tools/osat/kokoa.py` (tarkistus `--tarkista`). Älä muokkaa index.html:ää suoraan.
+
+**Työtapa (sovittu):**
+- Lue tiedosto laitteelta juuri ennen kirjoitusta ja kirjoita mtime-vartijalla; useampi keskustelu muokkaa samaa repoa. Älä kirjoita toisen langan tiedostoihin.
+- Kirjoita vain testattuja muutoksia. Testaus: `node tarina/testi.mjs` (moottori, 23 testiä, automaattipelaaja M01–M26) ja peli selaimessa (`pelaa_paikallisesti.cmd` / `tools/palvelin.ps1`, ei Pythonia omistajan koneella). Headless-testi: Playwright + swiftshader, `testi.html?nocity`, `__game.begin()` ennen kuin `window.__tarina` on olemassa.
+- Kirjaa jokainen muutos tähän tiedostoon. `.github` on suojattu.
+- Vastaukset suomeksi, lyhyesti, kuva todisteeksi.
+
+**Pelin tila nyt:**
+- Uusi tarina alkaa jalan Kirjurinluodon nokasta (LOC_ALOITUS [-169, 676]), Taavi-silta → Eteläranta, Tapsa. M01: pyörä → Tertun koju (perunat ja sipulit) → Ravintola Vauhtipyörä (Vauhtis, keksitty, b109) keittiön ovi → Tapsan halli → Ramin farmari pressun alta → Kespan kisa.
+- Luvun 1 mekaniikat (hiiviskely, vesiletku, drooni) ovat toisen keskustelun työtä: `tarina/mekaniikat.js`, ks. `tarina/README.md`.
+- Kopteri lukossa ja piilossa M16:een (`FLAG_HELI_AUKI`, `window.__heliLukko`). Talous: energia (syöminen Grilli Kaksi Siivua / Vauhtis), korjaus ja tuunaus Tapsan hallissa, osat Satakunnan Varaosasta pakulla.
+- Keksityt nimet: Vauhtis (ei Rattis), Grilli Kaksi Siivua (ei Grilli-Pori), Autoliike Kiilto ja Satakunnan Varaosa teollisuushalleissa b557/b558 korjaamon vieressä, Lumin piilo Isosannan vanhassa sähköasemassa b1307.
+
+**Odottaa omistajaa:**
+- Ovien mittaukset pelissä (Ctrl+Shift+D, Ctrl+Shift+K): Vauhtiksen etu- ja keittiön ovi, Kaksi Siivua, Kiilto, Varaosa + laituri, sähköasema.
+- Teatterin näyttelijähahmojen nimet ja roolit (ehdotukset PAIKAT_TARINAN_ALKU.md kohta 6).
+- **Kiillon paviljonki:** Meshy teki julkisivumoduulin sijaan kokonaisen 22 × 21,5 × 6 m lasipaviljongin. Kysy: korvataanko halli b557 sillä (piilotus `styles.json` b[557].gone) vai vapaalle tontille samaan kortteliin?
+- Lisää Meshy-malleja listasta (ensin Vauhtiksen kalusteet).
+
+**Seuraavat työt järjestyksessä:**
+1. **UI vaihe 3:** tarinan dialogi uuteen asuun (`tarina/ui.js`): lasipaneeli, puhujan kuva `ui/hahmot/<hahmo>.webp` (rajaa yläosa CSS:llä, `object-position:top`), numeroidut vastaukset, luvun otsikko Fredokalla, puhelin soitoille ja viesteille, karttamerkkien emojit → `window.ikoni(...)`.
+   Hahmoille, joilla ei ole kuvaa (kokki, baarimikko, varaosamyyjä Kake, grillin myyjä, kertoja), pyydä omistajalta Gemini-renderöinnit samaan tyyliin; siihen asti nimikyltti ilman kuvaa.
+2. **UI vaihe 4:** HUD (energia mittaristoon `#tr-energia` tilalle, kunto 10 palana, radion kansikuva, kadunnimi sisätiloissa).
+3. **Perunasäkki M01:een** (`hahmot/konseptit/3d_lahde/m01/`): muunnos `tools/korjaamo/tee_mallit.py`:n tapaan, säkki Tertun kojulla → tarakalla → Vauhtiksen keittiön ovella.
+4. **Sisätilatuki tarinaan** (`sisa`-paikat, hahmot ja tavarat sisällä, aukioloajat `__aika`-kellosta) ja Vauhtiksen sali + keittiö.
+5. VIUH (UI vaihe 5), top-10 ja päivän kierros uuteen asuun (vaihe 6), Lumin piilo, Varaosa, Kaksi Siivua, Kiilto.
+
+## 21.11.2026 klo 19.50 – Aloitussivun teksti draaman kautta (omistaja: "mietitään tuo copy vähän myyvemmäksi. kopterista ei tarvitse mainita mitään esittelyssä. Draaman kautta.")
+- `src/html/01_runko.html`: esittely kahtena kappaleena (Rami palaa, Pori on myynnissä; Varjo ostaa kaupunkia talo kerrallaan, Tapsan korjaamo seuraavana, väärennetyt paperit, joku seuraa Ramia) + kultainen koukku "Kenen kaupunki tämä on, kun Varjo on valmis?" (`p.koukku`).
+- Sarjakuvaruudussa kaksi puhekuplaa käsikirjoituksen M01:stä: Rami "Tulin katsomaan, onko joki vielä paikallaan." / Tapsa "On se. Mut kaikki muu ei kohta oo." (`.kupla.k2`).
+- Kopteri poistettu esittelystä ja korteista: päivän kierros "Avautuu tarinan edetessä." (myös `130_tulostaulu.js` Aloita alusta), VIUH "Keikkoja ympäri Poria. Avautuu tarinassa." / M01:n jälkeen "Jokainen keikka kasvattaa kassaa."

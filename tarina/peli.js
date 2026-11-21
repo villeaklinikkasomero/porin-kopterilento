@@ -134,6 +134,9 @@ export async function kaynnista() {
   asetukset.muuttui = () => { varasto.set('pori-tarina-kierros', asetukset.kierros ? '1' : '0'); document.body.classList.toggle('tarina-ei-kierrosta', !asetukset.kierros); if (asetukset.kierros && majakka && !G.tour().tourDone) majakka.visible = true; };
   let majakka = null;
   asetukset.muuttui();
+  // aloitussivu (src/js/130_tulostaulu.js begin): 'tarina' tai 'kierros' (kierros vain, kun kopteri on auki). Kierroksen kortti ja majakka näkyvät vain kierroksella.
+  const aloitusTila = t => { asetukset.kierros = t === 'kierros' && !!M.tila.liput.FLAG_HELI_AUKI; asetukset.muuttui(); };
+  addEventListener('pori-aloita', e => aloitusTila(e.detail && e.detail.tila));
   const etsiMajakka = () => { const r = G.scene.getObjectByName('ring2'); return r && r.parent && r.parent.getObjectByName('ring') ? r.parent : null; };
   UI = luoUI(M, { kosketus, asetukset });
   const MK = luoMerkit(G.scene);
@@ -177,6 +180,7 @@ export async function kaynnista() {
   // korjaamon pihalta. Kopteri on lukossa, kunnes tarina antaa sen (FLAG_HELI_AUKI, M16) – silloin peli alkaa kuten ennenkin.
   let aloitettu = false;
   function aloitus() {
+    if (window.__pelitila) aloitusTila(window.__pelitila);   // tarina latautui vasta aloituksen jälkeen
     if (M.tila.liput.FLAG_HELI_AUKI) return;
     const uusi = !M.tila.liput.FLAG_M01_DONE, p = M.paikka(uusi ? 'LOC_ALOITUS' : 'LOC_KORJAAMO_PIHA');
     if (p && G.walkOutAt) G.walkOutAt(p.x, p.y, uusi ? 3.02 : 0);
@@ -184,7 +188,14 @@ export async function kaynnista() {
     if (G.toast) setTimeout(() => G.toast(uusi ? 'Kävele Taavi-siltaa pitkin Etelärannalle – Tapsa odottaa laiturilla' : 'Tapsan korjaamon piha', 5), 300);
   }
   M.on('nollattu', () => { aloitettu = false; });
-  let edell = performance.now(), dtKehitys = 0;
+  let edell = performance.now(), dtKehitys = 0, dtYhteenveto = 2, yhteenveto = '';
+  // aloitussivun "Jatka tarinaa" -rivi (01_runko.html lukee tämän ennen kuin peli on ladattu): luku ja seuraavan tehtävän nimi
+  function kirjoitaYhteenveto() {
+    const pl = M.tehtavat().filter(t => /^M\d/.test(t.id)); const k = M.kaynnissa && pl.find(t => t.id === M.kaynnissa.id);
+    const seur = k || pl.filter(t => t.saatavilla && !t.valmis).sort((a, b) => (a.luku || 0) - (b.luku || 0))[0];
+    const tehdyt = pl.filter(t => t.valmis); const luku = seur ? seur.luku : tehdyt.reduce((m, t) => Math.max(m, t.luku || 1), 1);
+    const j = JSON.stringify({ luku: luku || 1, nimi: seur ? seur.nimi : '' }); if (j !== yhteenveto) { yhteenveto = j; varasto.set('pori-tarina-yhteenveto', j); }
+  }
   const v = new THREE.Vector3();
   function kierros(nyt) {
     const dt = Math.min(0.1, (nyt - edell) / 1000); edell = nyt;
@@ -192,6 +203,7 @@ export async function kaynnista() {
     if (w) M.paivita(dt, w);
     if (w && TAL) TAL.paivita(dt, w);
     window.__heliLukko = !M.tila.liput.FLAG_HELI_AUKI;
+    if ((dtYhteenveto += dt) > 2) { dtYhteenveto = 0; kirjoitaYhteenveto(); }
     if (!aloitettu) { const st = document.getElementById('start'); if (st && st.style.display === 'none') { aloitettu = true; aloitus(); } }
     if (NAUHA && w) { const l = NAUHA[NAUHA.length - 1]; if (!l || Math.hypot(w.x - l[0], w.y - l[1]) >= 40) NAUHA.push([+w.x.toFixed(1), +w.y.toFixed(1)]); }
     UI.ruutu(dt);

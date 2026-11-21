@@ -15,7 +15,7 @@ RADIO.load = (L, i, x) => { const el = RADIO.el, t = L[i]; el.src = './radio/' +
   el.addEventListener('loadedmetadata', go); RADIO.cur = t; RADIO.show(); };
 RADIO.next = () => { do { RADIO.ch = (RADIO.ch + 1) % RADIO.names.length; } while (RADIO.ch && RADIO.list && !RADIO.list[RADIO.names[RADIO.ch].toLowerCase()]); RADIO.play(RADIO.ch); toast('📻 ' + (RADIO.ch ? 'Radio ' + RADIO.names[RADIO.ch] : 'Radio pois'), 1.4); };
 RADIO.show = () => { const n = RADIO.ch ? 'Radio ' + RADIO.names[RADIO.ch] : 'Radio pois', t = RADIO.ch && RADIO.cur ? RADIO.cur.t : '';
-  $('rch').textContent = '📻 ' + n; $('rsong').textContent = t; $('rch2').textContent = n; $('rsong2').textContent = t; };
+  $('rch').textContent = n; $('rsong').textContent = t; $('rch2').textContent = n; $('rsong2').textContent = t; };
 RADIO.prev = () => { do { RADIO.ch = (RADIO.ch + RADIO.names.length - 1) % RADIO.names.length; } while (RADIO.ch && RADIO.list && !RADIO.list[RADIO.names[RADIO.ch].toLowerCase()]); RADIO.play(RADIO.ch); };
 for (const [id, f] of [['rprev', () => RADIO.prev()], ['rnext', () => RADIO.next()]]) $(id).addEventListener('click', e => { e.preventDefault(); e.currentTarget.blur(); if (started) f(); });
 $('rvol').addEventListener('input', e => { RADIO.vol = +e.target.value; RADIO.mute(); }); $('rvol').addEventListener('change', e => e.target.blur());

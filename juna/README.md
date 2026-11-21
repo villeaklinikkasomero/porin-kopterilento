@@ -34,6 +34,21 @@
   Ilman `sisa_props/`-kansiota `juna_sisa.py` tekee vanhat proseduraaliset penkit ja pöydät.
 - `yhdista.js`: staattiset osat yhteen materiaaleittain (myös rata.js käyttää).
 
+
+## IC-junat pelin kellon mukaan (21.11.2026)
+- `juna.js` ajaa **kolmea junayksikköä** (Sr3 + Edo + 3 Ed, 123 m; kaksi yksikköä Sr3 + Edo + 2 Ed, 97 m; oikeasti Edo + CEd + Edfs 99 m tai 4 vaunua 125 m)
+  pelin kellon (`window.__aika`) mukaan Porin todellisella aikataululla (`OHJELMA`, Digitraffic 14.–20.11.2026): arkena lähdöt 5.17, 6.12, 7.17, 8.04, 10.03 … 18.12
+  ja saapumiset 7.47, 9.40 … 19.44 raiteelle 1, 21.45 ja 23.49 raiteelle 2; lauantaina ja sunnuntaina omat vuorot (la mukana Helsingin junat 164, 175, 186).
+  Viikonpäivä: pelin päivä 1 = maanantai. Yöksi Poriin jää kolme junaa (raide 1 ja kaksi peräkkäin raiteelle 2), kuten oikeastikin.
+- Saapuva juna lähtee kartan reunalta ajoajan (~23 pelimin) verran ennen Porin aikaa. Samalle raiteelle tuleva pysähtyy edellisen taakse; raiteelta lähtee takimmainen
+  (jos raiteella ei ole junaa, lähtee toiselta raiteelta). Ovet: auki seistessä, kiinni ennen lähtöä; yöksi jäävä juna sulkee ovet minuutin päästä.
+- Kulunvarmistus: pääraiteella liikkuu kerrallaan yksi IC; IC ei lähde liikkeelle, kun tavarajunalla on lupa (`__tavara.estaaIC`). Tavarajuna saa luvan vain, kun
+  `__juna.vapaaTavaralle()` (yksikään IC ei liiku, ei ole lähdössä eikä tule 15 pelimin sisällä); `__juna.varatut()` antaa IC-vaunujen kohdat tavarajunien reittitarkistukseen.
+  Simuloitu ma ja la–su: ei päällekkäisiä junia; 7.47-juna voi myöhästyä ~10 pelimin, koska 7.17-juna on vielä pääraiteella.
+- Pelin alussa ja kellon siirrossa asemalle asetetaan aikataulun mukaan seisovat junat (tapahtumat edellisestä 18.15:stä, jolloin asema on aina tyhjä).
+  Ilman aika.js:ää oma kello klo 9 alkaen (20 s odotuksen jälkeen).
+- Kyydissä (sisätilat): kuten ennen; kartan reunalla juna kääntyy takaisin samalle raiteelle ja jää asemalle (seuraava aikataulun saapuminen jää silloin pois, jos vapaita yksiköitä ei ole).
+- `window.__juna`: `sets` (yksiköt: `T` = {s, v, mode odota/in/dwell/out/term/away}, `raide`, `lahto`), `cars` (kaikki vaunut), `RT` (reitit 1 ja 2), `T` (liikkuvan tai seisovan yksikön tila, vanha rajapinta).
 ## Meshy (omistajan kysymys 20.11.)
 Korit voi tehdä Meshyllä: kolme erillistä image-to-3D-mallia (Sr3, kaksikerrosvaunu, Edo). Ne skaalataan Blenderissä oikeisiin mittoihin
 (Sr3 18,98 m, vaunu 26,4 m, origo kiskon tasossa, +Z eteen). Telit, pyöräkerrat, ovet ja virroittimet otetaan `juna_blender.py`:stä samoilla solmunimillä, jolloin `juna.js` toimii sellaisenaan.

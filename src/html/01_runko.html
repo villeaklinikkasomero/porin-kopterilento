@@ -1,6 +1,7 @@
 </style>
 </head>
 <body>
+<script src="ikonit.js"></script>
 <canvas id="gl"></canvas>
 
 <div id="mission" class="hud panel">
@@ -15,13 +16,13 @@
   <div class="g heli-only"><div class="v" id="ga">0</div><div class="u">korkeus m</div></div>
   <div class="g"><div class="v" id="gh">P</div><div class="u">suunta</div></div>
   <div class="g hpg"><div id="hp"><i></i></div><div class="u">kunto</div></div>
-  <div class="g ride-only" id="gradio"><div id="rctl"><button id="rprev" aria-label="Edellinen kanava">◀</button><div id="rinfo"><b id="rch2">Radio pois</b><span id="rsong2"></span></div><button id="rnext" aria-label="Seuraava kanava">▶</button><input id="rvol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Radion äänenvoimakkuus"></div><div class="u">radio · R</div></div>
+  <div class="g ride-only" id="gradio"><div id="rctl"><button id="rprev" aria-label="Edellinen kanava"><svg class="ik"><use href="#ik-edellinen"/></svg></button><div id="rinfo"><b id="rch2">Radio pois</b><span id="rsong2"></span></div><button id="rnext" aria-label="Seuraava kanava"><svg class="ik"><use href="#ik-seuraava"/></svg></button><input id="rvol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Radion äänenvoimakkuus"></div><div class="u">radio · R</div></div>
 </div>
 <div id="street" class="hud"><div class="s" id="sn"></div><div class="p" id="sp"></div></div>
 <div id="nav" class="hud panel"><canvas id="navc" width="116" height="116"></canvas><div><div class="nd" id="navd"></div><div class="nn" id="navn"></div></div></div>
 <div id="toast" class="hud panel"></div>
 <div id="hint" class="hud panel"></div><div id="fade"></div>
-<div id="radio" class="hud panel ride-only"><span id="rch">📻 Radio pois</span><span id="rsong"></span></div>
+<div id="radio" class="hud panel ride-only"><svg class="ik"><use href="#ik-radio"/></svg><span id="rch">Radio pois</span><span id="rsong"></span></div>
 <div id="board" class="hud panel"><h2>Päivän top-10</h2><div class="sub" id="bsub"></div><div id="nickrow" style="display:none;margin:10px 0 4px"><label for="nick">Pääsit listalle! Nimimerkki</label><input id="nick" maxlength="5" autocomplete="off" spellcheck="false" placeholder="5 merkkiä"><button id="nicksave" >Tallenna</button><span style="font-size:12px;width:100%">Älä käytä oikeaa nimeäsi.</span></div><ol class="top" id="top1"></ol><div class="topnote" id="note1"></div></div>
 <div id="help" class="hud panel">
   <span class="heli-only"><kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
@@ -31,45 +32,75 @@
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
-  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb ride-only" id="tradio">📻</div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta">🚶</div><div class="tb walk-only" id="thei" aria-label="Tervehdi kävelijää">💬</div><div class="tb walk-only" id="tdance" aria-label="Musiikki ja tanssi">🎵</div><div class="tb walk-only" id="trun" aria-label="Juokse">🏃</div>
+  <div class="tb heli-only" id="tup"><svg class="ik"><use href="#ik-ylos"/></svg></div><div class="tb heli-only" id="tdn"><svg class="ik"><use href="#ik-alas"/></svg></div><div class="tb ride-only" id="tradio"><svg class="ik"><use href="#ik-radio"/></svg></div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta"><svg class="ik"><use href="#ik-kavely"/></svg></div><div class="tb walk-only" id="thei" aria-label="Tervehdi kävelijää"><svg class="ik"><use href="#ik-puhe"/></svg></div><div class="tb walk-only" id="tdance" aria-label="Musiikki ja tanssi"><svg class="ik"><use href="#ik-musiikki"/></svg></div><div class="tb walk-only" id="trun" aria-label="Juokse"><svg class="ik"><use href="#ik-juoksu"/></svg></div>
 </div>
 
 <div id="start">
-  <div id="card" class="panel">
-    <h1>Pori<span>kopteri</span></h1>
-    <p>Lennä helikopterilla tai aja autolla Porin keskustassa. Joka päivä arvotaan uusi kierros: lähde Kirjurinluodon areenalta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja palaa Kirjurinluotoon. Voit myös nousta ulos ja kävellä: Keski-Porin kirkkoon (tornin ovi) ja Juseliuksen mausoleumiin pääsee sisälle. Nopeimmat ajat pääsevät päivän top-10:een – kopterille ja autolle on omat listansa.</p>
-    <div id="vehs" role="group" aria-label="Valitse kulkuneuvo">
-      <button class="veh" id="vheli" aria-pressed="true"><video poster="./veh_heli.jpg" autoplay muted loop playsinline><source src="./veh_heli.webm" type="video/webm"><source src="./veh_heli.mp4" type="video/mp4"></video><span>Helikopteri</span></button>
-      <button class="veh" id="vcar" aria-pressed="false"><video poster="./veh_auto.jpg" autoplay muted loop playsinline><source src="./veh_auto.webm" type="video/webm"><source src="./veh_auto.mp4" type="video/mp4"></video><span>Auto</span></button>
+  <!-- 21.11.2026 aloitussivu tarinalle (UI_KONSEPTI_PELIIN.md): ei ajoneuvovalintaa; päivän kierros ja sen kopteri/auto-valinta avautuvat, kun tarina antaa kopterin (FLAG_HELI_AUKI, luku 3) -->
+  <div id="card">
+    <div id="aloitus-kuva" aria-hidden="true">
+      <div class="paikka">Kirjurinluoto</div>
+      <div class="kupla">Tulin katsomaan, onko joki vielä paikallaan.</div>
+      <div class="kupla k2">On se. Mut kaikki muu ei kohta oo.</div>
+      <div class="kuvat"><img class="h-rami" src="./ui/hahmot/rami.webp" alt=""><img class="h-tapsa" src="./ui/hahmot/tapsa.webp" alt=""></div>
+      <div class="nimi"><i></i><span>Rami Koski</span><small>entinen rallikuski, palasi kotiin</small></div>
     </div>
-    <div id="keys" class="heli-only">
-      <div><kbd>W</kbd> <kbd>S</kbd> / <kbd>↑</kbd> <kbd>↓</kbd></div><div>eteen ja taakse</div>
-      <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>käännä</div>
-      <div><kbd>Q</kbd> <kbd>E</kbd></div><div>liu'u sivulle</div>
-      <div><kbd>Väli</kbd> / <kbd>Shift</kbd></div><div>ylös ja alas</div>
-      <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään (maassa) ja takaisin kyytiin</div>
-      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Rock, pois</div>
-      <div><kbd>Y</kbd></div><div>kyyti: ota kyytiä pyytävä kyytiin (pysähdy viereen)</div>
-      <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
+    <div id="aloitus-teksti">
+      <div class="lab" style="color:var(--kulta)">Satamakaupunki · Pori</div>
+      <h1 class="iso">PORI<span>KOPTERI</span></h1>
+      <div class="raita" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p>Kymmenen vuotta Rami ajoi rallia maailmalla ja vältteli kotia. Nyt hän nousee Etelärannan laiturille, ja Pori on myynnissä.</p>
+      <p>Varjo Holdings ostaa kaupunkia talo kerrallaan: Tertun torikojun, rannan kioskin, kokonaisia kortteleita. Tapsan korjaamo on listalla seuraavana. Joku väärentää papereita, joku katsoo muualle – ja joku seuraa Ramia jo ensimmäisestä päivästä.</p>
+      <p class="koukku">Kenen kaupunki tämä on, kun Varjo on valmis?</p>
+      <div class="napit">
+        <button id="go" disabled><svg class="ik"><use href="#ik-pelaa"/></svg><span id="go-t">Ladataan ilmakuvaa…</span></button>
+      </div>
+      <div id="tallennus"><span id="tall-tiedot"></span><button id="alusta" type="button">Aloita alusta</button><span id="alusta-varmista" hidden>Kaikki edistyminen katoaa. <button id="alusta-kylla" type="button">Kyllä, alusta</button> <button id="alusta-peru" type="button">Peru</button></span></div>
+      <div class="tapat">
+        <div class="tapa"><div class="ikk" style="background-color:var(--kulta)"><svg class="ik"><use href="#ik-tarina"/></svg></div><div><b>Tarina</b><span>Viisi lukua: paluusta Varjo-tornin huipulle.</span></div></div>
+        <div class="tapa" id="tapa-viuh"><div class="ikk" style="background-color:var(--viuh)"><span class="v">v</span></div><div><b>VIUH-keikat</b><span>Keikkoja ympäri Poria. Avautuu tarinassa.</span></div></div>
+        <div class="tapa lukossa" id="tapa-kierros"><div class="ikk" style="background-color:var(--sininen)"><svg class="ik"><use href="#ik-lukko"/></svg></div><div><b>Päivän kierros</b><span id="kierros-t">Avautuu tarinan edetessä.</span></div></div>
+      </div>
+      <div id="kierros-osa" hidden>
+        <div id="vehs" role="group" aria-label="Valitse kulkuneuvo päivän kierrokselle">
+          <button class="veh" id="vheli" aria-pressed="true"><img src="./veh_heli.jpg" alt=""><span>Helikopteri</span></button>
+          <button class="veh" id="vcar" aria-pressed="false"><img src="./veh_auto.jpg" alt=""><span>Auto</span></button>
+        </div>
+        <div id="daily">
+          <div class="dh">Päivän kierros <b id="dday"></b></div>
+          <div id="droute"></div>
+          <button id="gotour" type="button" disabled><svg class="ik"><use href="#ik-nouto"/></svg><span>Aja päivän kierros</span></button>
+        </div>
+      </div>
+      <details id="nappaimet"><summary>Näppäimet</summary>
+      <div id="keys">
+        <div><kbd>W</kbd> <kbd>S</kbd> / <kbd>↑</kbd> <kbd>↓</kbd></div><div>kävele, kaasu ja jarru (kopterissa eteen ja taakse)</div>
+        <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>käänny ja ohjaa</div>
+        <div><kbd>Shift</kbd></div><div>juokse (kopterissa alas)</div>
+        <div><kbd>Enter</kbd></div><div>kyytiin, ulos ja ovista sisään</div>
+        <div><kbd>X</kbd></div><div>puhu, ota tavara, jatka keskustelua</div>
+        <div><kbd>1</kbd>–<kbd>9</kbd></div><div>vastausvaihtoehdot ja kauppojen valikot</div>
+        <div><kbd>P</kbd></div><div>tarinan valikko: tehtävät, raha, energia</div>
+        <div><kbd>R</kbd></div><div>radio (autossa ja kopterissa)</div>
+        <div><kbd>C</kbd> <kbd>M</kbd></div><div>kamera, ääni</div>
+      </div>
+      </details>
+      <p id="src">Ilmakuva © Maanmittauslaitos (CC BY 4.0) · Kartta-aineisto © OpenStreetMapin tekijät · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos · Rakennusten korkeudet ovat osin arvioita. Kaikki hahmot ja yritykset ovat keksittyjä.</p>
     </div>
-    <div id="keys2" class="car-only" style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0;font-size:14px;align-items:center">
-      <div><kbd>W</kbd> / <kbd>↑</kbd></div><div>kaasu</div>
-      <div><kbd>S</kbd> / <kbd>↓</kbd></div><div>jarru ja peruutus</div>
-      <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>ohjaus</div>
-      <div><kbd>Väli</kbd></div><div>käsijarru</div>
-      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Rock, pois</div>
-      <div><kbd>Y</kbd></div><div>kyyti: ota kyytiä pyytävä kyytiin (pysähdy viereen)</div>
-      <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään ja takaisin kyytiin</div>
-      <div><kbd>N</kbd></div><div>bussi: Kauppatorin laiturilta tai Matkakeskuksesta saa bussin (Enter), pysäkillä pysähdy niin ovet aukeavat. Oikeaan bussiin nouset pysäkillä Enterillä, N painaa pysähtyy-nappia</div>
-      <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
-    </div>
-    <div id="daily">
-      <div class="dh">Päivän kierros <b id="dday"></b></div>
-      <div id="droute"></div>
-    </div>
-    <button id="go" disabled>Ladataan ilmakuvaa…</button>
-    <p id="src">Rakennukset, kadut ja puut: © OpenStreetMapin tekijät (ODbL). Ilmakuva: Porin kaupungin avoin WMS-rajapinta. Rakennusten korkeudet ovat osin arvioita.</p>
   </div>
+  <script>
+  // tallennuksen tiedot heti, ennen kuin peli on ladattu (tarina/moottori.js TALLENNUSAVAIN, tarina/peli.js kirjoittaa yhteenvedon)
+  (function () { var j = null, y = null; try { j = JSON.parse(localStorage.getItem('pori-tarina-v1') || 'null'); y = JSON.parse(localStorage.getItem('pori-tarina-yhteenveto') || 'null'); } catch (e) {}
+    var t = j && j.tila, alkanut = !!(t && ((t.valmiit && t.valmiit.length) || t.kaynnissa || (t.liput && Object.keys(t.liput).length)));
+    window.__aloitus = { alkanut: alkanut, heli: !!(t && t.liput && t.liput.FLAG_HELI_AUKI) };
+    var e = document.getElementById('tall-tiedot');
+    if (alkanut) { var osat = ['Luku ' + ((y && y.luku) || 1)]; if (y && y.nimi) osat.push(y.nimi); osat.push((t.raha || 0) + ' €'); e.textContent = osat.join(' · '); }
+    else { e.textContent = 'Luku 1 · Eteläranta'; document.getElementById('alusta').hidden = true; }
+    document.body.classList.toggle('tarina-alkanut', alkanut); document.body.classList.toggle('kierros-auki', window.__aloitus.heli);
+    if (window.__aloitus.heli) { document.getElementById('kierros-osa').hidden = false; var k = document.getElementById('tapa-kierros'); k.classList.remove('lukossa'); k.querySelector('use').setAttribute('href', '#ik-nouto'); document.getElementById('kierros-t').textContent = 'Joka päivä uusi kymmenen maamerkin reitti ja top-10.'; }
+    if (t && t.liput && t.liput.FLAG_M01_DONE) { var v = document.getElementById('tapa-viuh'); v.querySelector('span:not(.v)').textContent = 'Keikkoja ympäri Poria. Jokainen keikka kasvattaa kassaa.'; }
+  })();
+  </script>
 </div>
 
 <script type="module">

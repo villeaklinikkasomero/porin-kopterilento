@@ -28,6 +28,66 @@ s = open(G + '/city.js').read(); C = json.loads(s[s.index('{'):s.rindex('}') + 1
 ST = json.load(open(G + '/styles.json'))['b']
 CLIP = box(*BB)
 
+# ---------------------------------------------------------------- muotoilu (omistaja 21.11.2026: "muotoillaan liikenteenjakajat, ympyrät, pyörätiet. nyt niissä on
+# heittoa. Pääsääntöisesti ympyrät on ympyröitä tai soikeita. Kadunkulma pyöritettyjä samoin liikenteenjakat. Nostetaan ne hieman ylemmäs asfaltista.")
+RK = 4.5            # kadunkulman (ajoradan sisäkulma) pyöristyssäde, ennen 2,5
+RKUP = 1.6          # ajoradan ulkokulmien ja leveysporrastusten pyöristys (avaus)
+RSAAR = 0.9         # liikenteenjakajan nokkien pyöristys
+def chaikin(c, n=3, dmax=4.0):
+    """pehmentää murtoviivan kulmat (päätepisteet pysyvät); leikkaus enintään dmax metriä kulmasta, jotta liittymät eivät siirry"""
+    c = [tuple(q) for q in c]
+    for _ in range(n):
+        if len(c) < 3: break
+        out = [c[0]]
+        for i in range(1, len(c) - 1):
+            a, b, d = c[i - 1], c[i], c[i + 1]
+            la, ld = math.dist(a, b), math.dist(b, d)
+            if la < 1e-6 or ld < 1e-6: out.append(b); continue
+            ka, kd = min(0.25 * la, dmax) / la, min(0.25 * ld, dmax) / ld
+            out += [(b[0] + (a[0] - b[0]) * ka, b[1] + (a[1] - b[1]) * ka), (b[0] + (d[0] - b[0]) * kd, b[1] + (d[1] - b[1]) * kd)]
+        out.append(c[-1]); c = out
+    return c
+def tasoita(L):
+    """OSM-keskiviivan heitto pois: pienet sahaukset (simplify 0,35 m) ja kulmien pehmennys"""
+    if L.length < 3: return L
+    return LineString(chaikin(L.simplify(0.35).coords, 3, 3.0))
+def pyorista(g, r_out, r_in=0.0):
+    """kuperat kulmat säteellä r_out (avaus), koverat säteellä r_in (sulkeminen)"""
+    if g.is_empty: return g
+    if r_in > 0: g = g.buffer(r_in, join_style='round', quad_segs=12).buffer(-r_in, join_style='round', quad_segs=12)
+    if r_out > 0: g = g.buffer(-r_out, join_style='round', quad_segs=12).buffer(r_out, join_style='round', quad_segs=12)
+    return g
+def sovita_ellipsi(P):
+    """Fitzgibbonin suora ellipsisovitus -> (cx, cy, a, b, kulma); lähes pyöreä (a/b < 1,12) -> ympyrä"""
+    P = np.asarray(P, float); m = P.mean(0); s = max(np.abs(P - m).max(), 1e-6); x, y = ((P - m) / s).T
+    D1 = np.vstack([x * x, x * y, y * y]).T; D2 = np.vstack([x, y, np.ones_like(x)]).T
+    S1, S2, S3 = D1.T @ D1, D1.T @ D2, D2.T @ D2
+    T = -np.linalg.inv(S3) @ S2.T; M = S1 + S2 @ T
+    M = np.array([M[2] / 2, -M[1], M[0] / 2])
+    w, v = np.linalg.eig(M); v = v.real
+    cond = 4 * v[0] * v[2] - v[1] ** 2
+    a1 = v[:, np.where(cond > 0)[0][0]]; A, B, C = a1; Dd, E, F = T @ a1
+    den = B * B - 4 * A * C
+    cx, cy = (2 * C * Dd - B * E) / den, (2 * A * E - B * Dd) / den
+    num = 2 * (A * E * E + C * Dd * Dd - B * Dd * E + den * F)
+    r1 = -math.sqrt(abs(num * (A + C + math.sqrt((A - C) ** 2 + B * B)))) / den
+    r2 = -math.sqrt(abs(num * (A + C - math.sqrt((A - C) ** 2 + B * B)))) / den
+    ang = 0.5 * math.atan2(-B, C - A)
+    a, b = max(abs(r1), abs(r2)) * s, min(abs(r1), abs(r2)) * s
+    if abs(r1) < abs(r2): ang += math.pi / 2
+    cx, cy = cx * s + m[0], cy * s + m[1]
+    if a / b < 1.12:
+        r = float(np.hypot(*(P - [cx, cy]).T).mean()); a = b = r; ang = 0.0
+    return cx, cy, a, b, ang
+def ellipsi(cx, cy, a, b, ang):
+    import shapely.affinity as AF
+    e = Point(0, 0).buffer(1.0, quad_segs=32)
+    return AF.translate(AF.rotate(AF.scale(e, a, b, origin=(0, 0)), ang, origin=(0, 0), use_radians=True), cx, cy)
+ROUND = {4445264,5071122,5071124,5410262,46115386,302861256,302861258,302861265,302861267,302861268,302861271,302923083,302923093,519692022,519692026,
+         519692027,525420999,525421000,1137365068,1137365069,1231162792,1238644900,1238644901,1240126246,1240362611,1187426430,6022401,41757090,46124957,
+         46128379,46128380,302770115,302772031,302772033,302923105,383336587,386333303,386333304,386333305,386333306,1240398064,5867771,23898487,302709989,
+         302709994,302755559,302760330,302923080,302923082,302923117,302923119,1240088656,1240375897,1240376442}   # junction=roundabout (implies one-way)
+
 # ---------------------------------------------------------------- inputs
 blds = []
 for i, b in enumerate(C['b']):
@@ -57,12 +117,12 @@ tick('GREEN')
 MOTOR = {'primary': 2, 'secondary': 2, 'tertiary': 2, 'residential': 2, 'unclassified': 2, 'living_street': 2, 'trunk': 2,
          'primary_link': 1, 'secondary_link': 1, 'tertiary_link': 1, 'trunk_link': 1}
 DEFHW = {'primary': 4.5, 'secondary': 4.5, 'tertiary': 4.0, 'residential': 3.5, 'unclassified': 3.25, 'living_street': 3.0, 'trunk': 5.0}
-roads, sidel, walks, islands, squares, parking, pedl, peda = [], [], [], [], [], [], [], []
+roads, sidel, walks, islands, squares, parking, pedl, peda, isl_grass = [], [], [], [], [], [], [], [], []
 for w in W:
-    t = w['t']; g = [tuple(q) for q in w['g']]
+    t = dict(w['t'], _id=w['id']); g = [tuple(q) for q in w['g']]
     if len(g) < 2: continue
     h = t.get('h')
-    if t.get('a') == 'traffic_island' and len(g) >= 4: islands.append(Polygon(g).buffer(0)); continue
+    if t.get('a') == 'traffic_island' and len(g) >= 4: islands.append(Polygon(g).buffer(0)); isl_grass.append(t.get('su') == 'grass'); continue
     if t.get('pl') == 'square' or (h == 'pedestrian' and t.get('ar') == 'yes'):
         if len(g) >= 4: squares.append(Polygon(g).buffer(0))
         continue
@@ -74,11 +134,12 @@ for w in W:
     if t.get('br') or t.get('tu') or (t.get('ly') and t.get('ly') != '0'): continue
     L = LineString(g)
     if not L.intersects(CLIP.buffer(40)): continue
+    if w['id'] not in ROUND: L = tasoita(L)               # liikenneympyrät sovitetaan ellipseiksi erikseen
     if h in MOTOR: roads.append((L, t))
     elif h in ('footway', 'cycleway', 'path', 'pedestrian', 'steps'):
         wd = 3.0 if h == 'cycleway' else (2.4 if t.get('f') == 'sidewalk' else 2.0)
         if h == 'pedestrian': wd = 4.0
-        walks.append((L, t, wd))
+        walks.append((tasoita(L), t, wd))
         if t.get('f') in ('sidewalk',) or h == 'cycleway' or (h == 'footway' and t.get('f') != 'crossing'): sidel.append(L)
 SQ = unary_union(squares) if squares else Polygon()
 PK = unary_union(parking) if parking else Polygon()
@@ -99,7 +160,27 @@ def ray_hit(p, n, geoms, tree, dmin, dmax):
     return best
 
 # ---------------------------------------------------------------- carriageways: measured half widths per side
-carr = []; log = []
+carr = []; log = []; ring_hw = collections.defaultdict(list)
+# liikenneympyrät: OSM-renkaat koottuina (vain suljetut, säde >= 7 m)
+_rw = {w['id']: [tuple(q) for q in w['g']] for w in W if w['id'] in ROUND}
+_segs = list(_rw.items()); RINGS = []
+while _segs:
+    ids, r = [_segs[0][0]], list(_segs[0][1]); _segs.pop(0); ch = True
+    while ch and r[0] != r[-1]:
+        ch = False
+        for k, (wid, sg) in enumerate(_segs):
+            if sg[0] == r[-1]: r += sg[1:]
+            elif sg[-1] == r[0]: r = sg[:-1] + r
+            else: continue
+            ids.append(wid); _segs.pop(k); ch = True; break
+    if r[0] != r[-1] or len(r) < 6 or not LineString(r).intersects(CLIP): continue
+    e = sovita_ellipsi(np.array(LineString(r).segmentize(1.0).coords)[:-1])
+    if e[3] < 7.0: continue
+    _rp = Polygon(r).buffer(0); _ep = ellipsi(*e)
+    if _rp.intersection(_ep).area / _rp.union(_ep).area < 0.9: continue      # neliön muotoinen kierto (Risto Rytin aukio): jätetään OSM:n mukaiseksi
+    RINGS.append(dict(ids=set(ids), e=e))
+RING_IDS = set().union(*[R_['ids'] for R_ in RINGS]) if RINGS else set()
+tick('RINGS %d: ' % len(RINGS) + ', '.join('%.0f,%.0f %.1fx%.1f' % (R_['e'][0], R_['e'][1], R_['e'][2], R_['e'][3]) for R_ in RINGS))
 for L, t in roads:
     h = t['h']; lanes = int(t['l']) if t.get('l', '').isdigit() else None
     one = t.get('o') == 'yes'
@@ -126,6 +207,7 @@ for L, t in roads:
     for sg in (1, -1):
         v = sorted(side[sg]); hw[sg] = v[len(v) // 2] if len(v) >= 2 else dflt
     log.append((t.get('n'), h, round(hw[1], 1), round(hw[-1], 1)))
+    if t['_id'] in RING_IDS: ring_hw[t['_id']] += [hw[1], hw[-1]]; continue
     left = L.buffer(hw[1], cap_style='flat', join_style='round', single_sided=True)
     right = L.buffer(-hw[-1], cap_style='flat', join_style='round', single_sided=True)
     carr.append(unary_union([left, right]).buffer(0.05))
@@ -133,9 +215,28 @@ for L, t in roads:
     for e in (L.coords[0], L.coords[-1]): carr.append(Point(e).buffer(min(hw[1], hw[-1]) * 0.98))
 CARR = unary_union(carr)
 tick('CARR')
-CARR = CARR.buffer(2.5, join_style='round').buffer(-2.5, join_style='round')      # kerb radii at the junctions
+# ympyrät: ajorata = ellipsirengas (keskiviiva ± puolileveys), keskisaareke = sisäellipsi
+ANN, CISL = [], []
+for R_ in RINGS:
+    v = sorted(sum((ring_hw[i] for i in R_['ids']), [])); hwr = min(4.5, max(3.0, v[len(v) // 2] if v else 3.5))
+    cx, cy, a, b, ang = R_['e']; R_['hw'] = hwr
+    ANN.append(ellipsi(cx, cy, a + hwr, b + hwr, ang)); CISL.append(ellipsi(cx, cy, a - hwr, b - hwr, ang))
+CI = unary_union(CISL) if CISL else Polygon()
+CARR = unary_union([CARR] + ANN)
+CARR = pyorista(CARR, RKUP, RK)                        # kadunkulmat säteellä RK, leveysporrastukset ja sahaus pois
+CARR = CARR.difference(CI)
 CARR = CARR.difference(BLD.buffer(0.8)).difference(SQ)
-ISL = unary_union([i.intersection(CARR.buffer(1)) for i in islands]) if islands else Polygon()
+_isl = [pyorista(i.intersection(CARR.buffer(1)), RSAAR, 0.4) for i in islands]
+ISL = unary_union(_isl) if islands else Polygon()
+ISLG = unary_union([g for g, gr in zip(_isl, isl_grass) if gr]) if islands else Polygon()
+# ajoradan sisään jäävät pienet aukot (kanavointisaarekkeet, joita OSM:ssä ei ole alueena) ovat myös saarekkeita
+_holes = [Polygon(r) for pg in getattr(CARR, 'geoms', [CARR]) if pg.geom_type == 'Polygon' for r in pg.interiors]
+_holes = [hh for hh in _holes if hh.area < 400 and not hh.intersects(BLD) and not hh.intersects(CI.buffer(0.5))]
+_pien = [hh for hh in _holes if hh.area < 25 or hh.buffer(-1.0).is_empty]          # sirpaleet (päällekkäisten OSM-viivojen väliin jääneet): asfalttia
+_holes = [pyorista(hh, RSAAR, 0.4) for hh in _holes if not (hh.area < 25 or hh.buffer(-1.0).is_empty)]
+if _pien: CARR = unary_union([CARR] + [hh.buffer(0.05) for hh in _pien])
+ISL = unary_union([ISL] + _holes)
+ISLG = unary_union([ISLG] + [hh.buffer(-0.8) for hh in _holes if hh.area > 60 and not hh.buffer(-1.6).is_empty])
 CARR = CARR.difference(ISL)
 from shapely.geometry import shape as _shape
 RINNE = _shape(json.load(open(OPT['rinteet']))).buffer(0) if 'rinteet' in OPT else Polygon()   # luiskat (21.11.2026)
@@ -166,7 +267,7 @@ for nm in ESPN:
             if tx * ref[0] + ty * ref[1] < 0: sg = -sg                     # the two carriageways run in opposite directions
             sides.add(sg)
         if len(sides) < 2: continue
-        g = g.buffer(-0.4).buffer(0.4)
+        g = pyorista(g, 1.2, 0.4)                       # päät pyöreiksi (omistaja 21.11.2026)
         if g.is_empty: continue
         MEDS.append(g)
         # walk down the middle: the median's long axis from the minimum rotated rectangle, clipped to the piece
@@ -187,12 +288,16 @@ STONE = unary_union([g for g in getattr(STONE, 'geoms', [STONE]) if g.area > 30]
 MED = MED.difference(STONE); MPATH = MPATH.difference(STONE); MGRASS = MGRASS.difference(STONE)
 
 # ---------------------------------------------------------------- pavements
-walkp = [L.buffer(wd / 2, cap_style='flat') for L, t, wd in walks]
-WALK = unary_union(walkp) if walkp else Polygon()
-strip = CARR.buffer(7.0, join_style='mitre').difference(CARR)
-PAVE = unary_union([strip, WALK.intersection(CARR.buffer(12.0)), ISL])
+walkp = [L.buffer(wd / 2, cap_style='round', quad_segs=6) for L, t, wd in walks]
+WALK = pyorista(unary_union(walkp), 0.0, 0.8) if walkp else Polygon()       # pyöräteiden liitokset sileiksi
+strip = CARR.buffer(7.0, join_style='round').difference(CARR)
+# korotetut saarekkeet omaksi kerrokseksi (+3 cm jalkakäytävää ylempänä, 16 cm asfaltista): OSM-saarekkeet, kanavointiaukot ja ympyröiden keskusta
+CI_ap = CI.difference(CI.buffer(-1.6)) if not CI.is_empty else Polygon()     # ympyrän keskisaarekkeen ajettava kivetty reunus (rekat)
+ISLE = unary_union([ISL, CI]).intersection(CLIP)
+ISLG = unary_union([ISLG.intersection(ISL), CI.buffer(-1.6)]).intersection(CLIP)
+PAVE = unary_union([strip, WALK.intersection(CARR.buffer(12.0))])
 PAVE = PAVE.difference(CARR).difference(BLD).difference(GREEN.buffer(-0.3)).difference(SQ).difference(PK)
-PAVE = PAVE.difference(STONE).difference(MED)
+PAVE = PAVE.difference(STONE).difference(MED).difference(ISLE)
 if not RINNE.is_empty: PAVE = PAVE.difference(RINNE)
 JYRKKA = _shape(json.load(open(OPT['jyrkat']))).buffer(0).difference(WALK) if 'jyrkat' in OPT else Polygon()   # jyrkät luiskat (tools/roads/jyrkat.py), kävely- ja pyörätiet jäävät
 if not JYRKKA.is_empty: PAVE = PAVE.difference(JYRKKA)
@@ -202,12 +307,12 @@ PAVE = PAVE.intersection(CLIP).simplify(0.25); CARR = CARR.intersection(CLIP).si
 FLATW = WALK.difference(CARR.buffer(12.0)).difference(BLD).intersection(CLIP).buffer(-0.2).buffer(0.2)   # paths in parks: flat, not raised
 
 # other lawns: OSM grass and parks in the centre (the game blends back to the photo where the photo is not green: paths, sand, flower beds)
-LAWN = GREEN.intersection(CLIP).difference(MED.buffer(0.2)).difference(CARR.buffer(0.2)).difference(PAVE).difference(STONE).difference(BLD).difference(SQ).difference(FLATW)
+LAWN = GREEN.intersection(CLIP).difference(ISLE.buffer(0.2)).difference(MED.buffer(0.2)).difference(CARR.buffer(0.2)).difference(PAVE).difference(STONE).difference(BLD).difference(SQ).difference(FLATW)
 if BB[0] < -1012.3: LAWN = LAWN.intersection(box(-1012.3, -995, 1012.3, 1281.5))      # nurmishaderi lukee ytimen ilmakuvaa: sen ulkopuolella koko nurmikkoalue muuttui tasavihreäksi (21.11.2026)
 if not RINNE.is_empty: LAWN = LAWN.union(RINNE.intersection(CLIP).difference(PAVE).difference(CARR.buffer(0.2)))
 LAWN = LAWN.union(JYRKKA.intersection(CLIP).difference(PAVE).difference(CARR.buffer(0.2)).difference(BLD))
 LAWN = LAWN.buffer(-0.3).buffer(0.3).simplify(0.3)
-PATHS = FLATW.difference(MED).simplify(0.2)
+PATHS = FLATW.difference(MED).difference(ISLE).simplify(0.2)
 
 # ---------------------------------------------------------------- zebra crossings: footway/cycleway lines crossing the carriageway
 marks = []; RAMPS = []   # crossing ends: (kerb point, inward unit, lateral unit, half width)
@@ -230,7 +335,7 @@ for L, t in roads:
     d = 2.0
     while d + 3 < L.length:
         seg = shapely.ops.substring(L, d, d + 3.0); marks.append(seg.buffer(0.06, cap_style='flat')); d += 9.0
-MARK = unary_union(marks).intersection(CARR.buffer(-0.3)) if marks else Polygon()
+MARK = unary_union(marks).intersection(CARR.buffer(-0.3)).difference(ISLE.buffer(0.3)) if marks else Polygon()
 tick('MARK')
 
 # ---------------------------------------------------------------- lowered kerbs at the crossings (owner 18.11.2026)
@@ -252,7 +357,8 @@ def ramp_h(x, y):
         din, lat = px * ux + py * uy, abs(px * nx + py * ny)
         h = min(h, max(min(1.0, max(0.0, din) / RD), min(1.0, max(0.0, lat - hw - 0.25) / RF)))
     return h
-RAMP_P = unary_union([PAVE.intersection(RZ), MED.intersection(RZ)]); RAMP_K = STONE.intersection(RZ)
+RAMP_P = unary_union([PAVE.intersection(RZ), MED.intersection(RZ), ISLE.intersection(RZ)]); RAMP_K = STONE.intersection(RZ)
+ISLE = ISLE.difference(RZ); ISLG = ISLG.difference(RZ); CI_ap = CI_ap.difference(RZ)
 PAVE = PAVE.difference(RZ); STONE = STONE.difference(RZ); MGRASS = MGRASS.difference(RZ); MPATH = MPATH.difference(RZ)
 tick('RAMPS ' + str(len(RAMPS)))
 
@@ -328,10 +434,6 @@ def edges_h(geom):
     return full, out
 
 # ---------------------------------------------------------------- one-way streets for the game's street graph (CITY.r segments)
-ROUND = {4445264,5071122,5071124,5410262,46115386,302861256,302861258,302861265,302861267,302861268,302861271,302923083,302923093,519692022,519692026,
-         519692027,525420999,525421000,1137365068,1137365069,1231162792,1238644900,1238644901,1240126246,1240362611,1187426430,6022401,41757090,46124957,
-         46128379,46128380,302770115,302772031,302772033,302923105,383336587,386333303,386333304,386333305,386333306,1240398064,5867771,23898487,302709989,
-         302709994,302755559,302760330,302923080,302923082,302923117,302923119,1240088656,1240375897,1240376442}   # junction=roundabout (implies one-way)
 ONE = []
 for w in W:
     t = w['t']
@@ -398,18 +500,20 @@ def rast(geoms, img=None):
 bm = np.asarray(rast(blds)) > 0
 dist = distance_transform_edt(~bm) * PX
 ao = 1.0 - 0.42 * np.exp(-dist / 1.0)
-sm = np.asarray(rast([CARR, PAVE, STONE, RAMP_P, RAMP_K, ISL, MPATH]))
+sm = np.asarray(rast([CARR, PAVE, STONE, RAMP_P, RAMP_K, ISLE, MPATH]))
 Image.fromarray(np.stack([(ao * 255).astype(np.uint8), sm, np.zeros_like(sm)], -1)).save(OUT.replace('.js', '_ao.png'), optimize=True)
 
 def b64(a): return base64.b64encode(np.array(a, dtype=np.int16).tobytes()).decode()
 KF, KH = edges_h(unary_union([PAVE, STONE, RAMP_P, RAMP_K, MGRASS, MPATH]))
-R = dict(asph=tri(CARR.buffer(0.35, join_style='mitre').difference(BLD)), pave=tri(PAVE), kivi=tri(STONE), medg=tri(MGRASS), medp=tri(MPATH), lawn=tri(LAWN, 8.0), path=tri(PATHS), kerb=KF, kerbh=KH, mark=tri(MARK, 50),
+ISLP = ISLE.difference(ISLG).difference(CI_ap)
+KI = edges(ISLE.buffer(0))                              # saarekkeiden reunakivet (täysi korkeus; madalletut kohdat ovat RAMP_P:ssä)
+R = dict(isl=tri(ISLP), islg=tri(ISLG), isla=tri(CI_ap), kerbi=KI, asph=tri(CARR.buffer(0.35, join_style='round').difference(BLD)), pave=tri(PAVE), kivi=tri(STONE), medg=tri(MGRASS), medp=tri(MPATH), lawn=tri(LAWN, 8.0), path=tri(PATHS), kerb=KF, kerbh=KH, mark=tri(MARK, 50),
          rampp=tri_h(RAMP_P), rampk=tri_h(RAMP_K))
 js = 'export default ' + json.dumps({k: b64(v) for k, v in R.items()} | {'bb': BB, 'ow': b64(ow), 'tmv': base64.b64encode(np.array(tmv, dtype=np.int32).tobytes()).decode(), 'tadd': b64(tadd), 'aopx': PX}) + ';\n'
 open(OUT, 'w').write(js)
 print('carriageway m2', round(CARR.area), 'pavement m2', round(PAVE.area), 'paths', round(FLATW.area), 'marks', round(MARK.area),
       {k: len(v) for k, v in R.items()}, 'KB', len(js) // 1024)
 json.dump(log, open('/home/claude/work/road_widths.json', 'w'), ensure_ascii=False, indent=0)
-import pickle; pickle.dump(dict(MED=MED, MPATH=MPATH, LAWN=LAWN, PATHS=PATHS, RAMPS=RAMPS, STONE=STONE, CARR=CARR, PAVE=PAVE, FLATW=FLATW, MARK=MARK, ISL=ISL), open('/home/claude/work/roads_geom.pkl', 'wb'))
+import pickle; pickle.dump(dict(ISLE=ISLE, ISLG=ISLG, CI=CI, RINGS=RINGS, MED=MED, MPATH=MPATH, LAWN=LAWN, PATHS=PATHS, RAMPS=RAMPS, STONE=STONE, CARR=CARR, PAVE=PAVE, FLATW=FLATW, MARK=MARK, ISL=ISL), open('/home/claude/work/roads_geom.pkl', 'wb'))
 if os.environ.get('MEDDBG'):
     import pickle as _p; _p.dump(dict(CAND=[c for c in locals().get('_cands', [])]), open('/home/claude/work/med_dbg.pkl', 'wb'))

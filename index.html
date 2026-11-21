@@ -6,26 +6,38 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <style>
 /* @osa css/peli.css */
-  :root { --ink:#f4f1e8; --dim:rgba(244,241,232,.68); --panel:rgba(14,22,30,.62); --line:rgba(244,241,232,.16); --accent:#ffc928; --ok:#7be08a; --bad:#ff6a57; }
+  /* 21.11.2026 UI-konsepti (tarvittavat_ominaisuudet/UI_KONSEPTI_PELIIN.md): vuoden 2011 lasi-HUD, fontit Nunito + Fredoka (fonts/, SIL OFL), glyfi-ikonit (ikonit.js) */
+  @font-face { font-family:'Nunito'; src:url('fonts/nunito.woff2') format('woff2'); font-weight:200 1000; font-style:normal; font-display:swap; }
+  @font-face { font-family:'Fredoka'; src:url('fonts/fredoka.woff2') format('woff2'); font-weight:300 700; font-stretch:75% 125%; font-style:normal; font-display:swap; }
+  :root { --ink:#ffffff; --dim:#C8CCD1; --panel:rgba(36,40,46,.86); --line:rgba(255,255,255,.18); --accent:#E0A526; --ok:#7BD957; --bad:#E5483B;
+    --viuh:#FF6A13; --sininen:#1E2D6E; --kulta:#E0A526; --raha:#7BD957; --linkki:#3B7DD8;
+    --lasi:linear-gradient(180deg,rgba(46,52,60,.86),rgba(18,21,26,.86)); --lasireuna:1px solid rgba(0,0,0,.6);
+    --lasivarjo:inset 0 1px 0 rgba(255,255,255,.18),0 2px 8px rgba(0,0,0,.45);
+    --kiilto:linear-gradient(180deg,rgba(255,255,255,.22),rgba(255,255,255,.06) 50%,rgba(0,0,0,0) 50%,rgba(0,0,0,.12));
+    --fontti:'Nunito',ui-sans-serif,system-ui,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; --numero:'Fredoka','Nunito',ui-sans-serif,system-ui,sans-serif; }
+  .ik { width:1em; height:1em; flex:none; vertical-align:-.15em; fill:none; stroke:currentColor; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+  .iso { font-family:var(--numero); font-stretch:85%; font-weight:700; letter-spacing:0; }
+  .kapea { font-family:var(--numero); font-stretch:75%; font-weight:600; font-variant-numeric:tabular-nums; }
+  .lab { font-weight:700; font-size:11px; letter-spacing:.08em; text-transform:uppercase; }
   * { box-sizing:border-box; }
   html,body { margin:0; height:100%; overflow:hidden; background:#0e161e; color:var(--ink);
-    font-family: ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-user-select:none; user-select:none; touch-action:none; }
+    font-family: var(--fontti); -webkit-user-select:none; user-select:none; touch-action:none; }
   canvas#gl { position:fixed; inset:0; width:100%; height:100%; display:block; }
   .hud { position:fixed; pointer-events:none; }
-  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
+  .panel { background:var(--lasi); border:var(--lasireuna); box-shadow:var(--lasivarjo); border-radius:8px; color:#fff; backdrop-filter:blur(6px); -webkit-backdrop-filter:blur(6px); }
   #mission { top:14px; left:14px; padding:12px 14px; min-width:230px; max-width:min(320px,60vw); }
-  #mission .k { font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--dim); }
-  #mission .t { font-size:20px; font-weight:700; margin:2px 0 6px; line-height:1.15; }
+  #mission .k { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kulta); }
+  #mission .t { font-size:20px; font-weight:800; margin:2px 0 6px; line-height:1.15; }
   #mission .row { display:flex; gap:14px; font-variant-numeric:tabular-nums; font-size:14px; color:var(--dim); }
   #mission .row b { color:var(--ink); font-weight:600; }
-  #prog { height:4px; background:var(--line); border-radius:2px; margin-top:9px; overflow:hidden; }
-  #prog i { display:block; height:100%; width:0; background:var(--accent); transition:width .4s; }
+  #prog { height:6px; background:rgba(0,0,0,.45); box-shadow:inset 0 1px 2px rgba(0,0,0,.6); border-radius:3px; margin-top:9px; overflow:hidden; }
+  #prog i { display:block; height:100%; width:0; background:linear-gradient(180deg,#F6C453,#E0A526 50%,#CF9416 51%,#B98210); transition:width .4s; }
   #mapwrap { top:14px; right:14px; padding:6px; }
   #mini { display:block; width:170px; height:170px; border-radius:6px; }
   #gauges { left:14px; bottom:14px; padding:10px 14px; display:flex; gap:18px; align-items:flex-end; font-variant-numeric:tabular-nums; }
-  .g .v { font-size:26px; font-weight:700; line-height:1; }
-  .g .u { font-size:11px; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; margin-top:3px; }
-  #hp { width:90px; height:8px; background:var(--line); border-radius:4px; overflow:hidden; margin-bottom:4px; }
+  .g .v { font-family:var(--numero); font-stretch:75%; font-weight:600; font-size:28px; line-height:1; }
+  .g .u { font-size:11px; font-weight:700; color:var(--dim); letter-spacing:.08em; text-transform:uppercase; margin-top:3px; }
+  #hp { width:90px; height:8px; background:rgba(0,0,0,.45); box-shadow:inset 0 1px 2px rgba(0,0,0,.6); border-radius:4px; overflow:hidden; margin-bottom:4px; }
   #gradio { display:none; }
   body.car:not(.touch) #gradio { display:block; } body.car:not(.touch) .hpg, body.car:not(.touch) #radio { display:none !important; }
   #rctl { display:flex; align-items:center; gap:6px; pointer-events:auto; }
@@ -37,31 +49,66 @@
   #rvol { pointer-events:auto; width:64px; accent-color:var(--accent); cursor:pointer; }
   #hp i { display:block; height:100%; width:100%; background:var(--ok); transition:width .2s, background .2s; }
   #street { left:50%; bottom:18px; transform:translateX(-50%); text-align:center; text-shadow:0 2px 10px rgba(0,0,0,.75); white-space:nowrap; }
-  #street .s { font-size:26px; font-weight:700; letter-spacing:.01em; }
+  #street .s { font-family:var(--numero); font-stretch:85%; font-size:28px; font-weight:700; letter-spacing:0; }
   #street .p { font-size:13px; color:var(--dim); min-height:17px; }
-  #toast { left:50%; top:22%; transform:translateX(-50%); font-size:24px; font-weight:700; padding:10px 20px; opacity:0; transition:opacity .35s; text-align:center; }
+  #toast { left:50%; top:22%; transform:translateX(-50%); font-family:var(--numero); font-stretch:85%; font-size:26px; font-weight:700; text-shadow:0 2px 0 rgba(0,0,0,.35); padding:10px 20px; opacity:0; transition:opacity .35s; text-align:center; }
   #toast.on { opacity:1; }
   #help { right:14px; bottom:14px; padding:10px 12px; font-size:12.5px; line-height:1.7; color:var(--dim); }
   #help kbd { font:600 11.5px ui-monospace, Menlo, Consolas, monospace; color:var(--ink); border:1px solid var(--line); border-radius:4px; padding:1px 5px; background:rgba(255,255,255,.06); }
   #credit { position:fixed; right:10px; bottom:2px; font-size:10px; color:rgba(244,241,232,.55); text-shadow:0 1px 3px #000; pointer-events:none; }
+  /* aloitussivu (21.11.2026): sarjakuvaruutu (pelin 3D-hahmojen kuvat ui/aloitus_*.webp) + sininen tekstiruutu, konseptin työpöytä "Aloitussivu" */
+  body:not(.aloitettu) :is(.hud, #tr-energia, #credit, #touch) { opacity:0 !important; pointer-events:none !important; }   /* HUD piiloon aloitussivun ajaksi */
   #start { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; padding:20px;
-    background:linear-gradient(180deg, rgba(14,22,30,.35), rgba(14,22,30,.82)); z-index:5; overflow:auto; }
-  #card { max-width:560px; width:100%; padding:26px 28px; }
-  #card h1 { margin:0 0 4px; font-size:34px; letter-spacing:-.01em; text-wrap:balance; }
-  #card h1 span { color:var(--accent); }
-  #card p { margin:8px 0; color:var(--dim); line-height:1.5; font-size:15px; }
-  #keys { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; margin:16px 0; font-size:14px; align-items:center; }
-  #keys kbd, #keys2 kbd { font:600 12px ui-monospace, Menlo, Consolas, monospace; border:1px solid var(--line); border-radius:5px; padding:3px 7px; background:rgba(255,255,255,.07); white-space:nowrap; }
+    background:linear-gradient(180deg, rgba(16,19,23,.25), rgba(16,19,23,.85)); z-index:5; overflow:auto; }
+  #card { max-width:980px; width:100%; display:grid; grid-template-columns:minmax(0,5fr) minmax(0,7fr); border:3px solid #15171A; border-radius:4px; box-shadow:0 10px 40px rgba(0,0,0,.55); overflow:hidden; margin:auto; }
+  #aloitus-kuva { position:relative; min-height:440px; overflow:hidden; background-color:#f4c95d; border-right:3px solid #15171A;
+    background-image:radial-gradient(rgba(20,20,20,.16) 1.3px,transparent 1.7px),linear-gradient(135deg,rgba(255,255,255,.18),rgba(0,0,0,.12)); background-size:8px 8px,100% 100%; }
+  #aloitus-kuva .kuvat { position:absolute; left:0; right:0; bottom:0; height:min(100%,600px); }   /* kuvat ankkuroitu alas kiinteään korkeuteen: kortin pituus ei venytä hahmoja */
+  #aloitus-kuva img { position:absolute; width:auto; max-width:none; filter:drop-shadow(0 6px 10px rgba(0,0,0,.35)); }
+  #aloitus-kuva .h-rami { left:4%; bottom:-46%; height:132%; z-index:2; } #aloitus-kuva .h-tapsa { right:-6%; bottom:-22%; height:84%; z-index:1; }
+  #aloitus-kuva .paikka { position:absolute; right:10px; top:10px; z-index:3; background:var(--sininen); color:#fff; font-weight:800; font-size:12px; padding:3px 8px; border-radius:4px; box-shadow:0 0 0 2px #fff,0 2px 4px rgba(0,0,0,.4); }
+  #aloitus-kuva .kupla { position:absolute; left:14px; top:46px; z-index:3; max-width:62%; background:#fff; border:3px solid #15171A; border-radius:16px; padding:7px 12px; font-weight:800; font-size:15px; line-height:1.25; color:#15171A; }
+  #aloitus-kuva .kupla.k2 { left:auto; right:12px; top:150px; max-width:46%; }   /* Tapsan vastaus oikealla */
+  #card p.koukku { font-family:var(--numero); font-stretch:85%; font-weight:700; font-size:22px; line-height:1.2; color:var(--kulta); }
+  #aloitus-kuva .nimi { position:absolute; left:0; bottom:12px; z-index:3; background:#15171A; color:#fff; font-family:var(--numero); font-weight:700; font-size:20px; padding:4px 14px 4px 10px; display:flex; gap:8px; align-items:center; }
+  #aloitus-kuva .nimi i { display:block; width:6px; height:22px; background:#f4c95d; }
+  #aloitus-kuva .nimi small { font-family:var(--fontti); font-weight:600; font-size:12px; color:var(--dim); }
+  #aloitus-teksti { padding:28px 32px 20px; display:flex; flex-direction:column; gap:12px; color:#fff;
+    background-color:var(--sininen); background-image:radial-gradient(rgba(255,255,255,.07) 1.3px,transparent 1.7px),linear-gradient(160deg,#2A3D8A,#152052); background-size:8px 8px,100% 100%; }
+  #card h1 { margin:0; font-size:clamp(44px,6vw,80px); line-height:.9; color:#fff; text-shadow:0 4px 0 #0B1230; }
+  #card h1 span { color:var(--kulta); }
+  .raita { display:flex; height:8px; width:min(380px,80%); border-radius:4px; overflow:hidden; } .raita i { flex:6; background:#fff; } .raita i:nth-child(2) { flex:1; background:var(--kulta); } .raita i:nth-child(3) { flex:2; }
+  #card p { margin:0; color:#DCE2F2; line-height:1.55; font-size:16px; max-width:520px; }
+  #card .napit { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin-top:4px; }
+  #go { pointer-events:auto; display:inline-flex; align-items:center; gap:10px; font:900 22px var(--fontti); color:#fff; text-shadow:0 -1px 0 rgba(0,0,0,.35); cursor:pointer; padding:13px 30px 13px 22px; border-radius:10px;
+    background:linear-gradient(180deg,#F6C453,#E0A526 50%,#CF9416 51%,#B98210); border:1px solid #7A5408; box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 3px 0 #7A5408,0 6px 14px rgba(0,0,0,.4); }
+  #go .ik { stroke-width:3.2; font-size:24px; }
+  #go:hover:not(:disabled) { filter:brightness(1.06); } #go:active:not(:disabled) { transform:translateY(2px); box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 1px 0 #7A5408,0 3px 8px rgba(0,0,0,.4); }
+  #go:disabled, #gotour:disabled { opacity:.6; cursor:progress; }
+  #go:focus-visible, #gotour:focus-visible, .veh:focus-visible, #tallennus button:focus-visible, #nappaimet summary:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+  #tallennus { display:flex; gap:12px; align-items:center; flex-wrap:wrap; font-size:14px; color:#AAB4D0; min-height:22px; }
+  #tall-tiedot { font-weight:700; color:#DCE2F2; }
+  #tallennus button { pointer-events:auto; font:700 13px var(--fontti); color:#AAB4D0; background:none; border:0; padding:2px 0; text-decoration:underline; cursor:pointer; }
+  #alusta-kylla { color:#fff !important; } #alusta-varmista { color:#fff; }
+  .tapat { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:6px; }
+  .tapa { display:flex; gap:10px; align-items:flex-start; padding:10px; border-radius:8px; background:rgba(11,18,48,.45); border:1px solid rgba(255,255,255,.12); min-width:0; }
+  .tapa b { display:block; font-size:14px; font-weight:800; } .tapa span { display:block; font-size:12.5px; line-height:1.35; color:#AAB4D0; }
+  .tapa .ikk { width:36px; height:36px; flex:none; border-radius:9px; display:flex; align-items:center; justify-content:center; color:#fff; font-size:20px; background-image:var(--kiilto); box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 2px 4px rgba(0,0,0,.5); }
+  .tapa .ikk .v { font-weight:800; font-style:italic; font-size:22px; line-height:1; }
+  .tapa.lukossa { opacity:.7; } .tapa.lukossa .ikk { filter:grayscale(.6); }
+  #kierros-osa { border-top:1px solid rgba(255,255,255,.15); padding-top:12px; }
+  #gotour { pointer-events:auto; display:inline-flex; align-items:center; gap:8px; font:800 15px var(--fontti); color:#2B2F35; cursor:pointer; padding:9px 16px; border-radius:6px;
+    background:linear-gradient(180deg,#FDFDFD,#E9EAEC 50%,#DADCDF 51%,#D0D3D6); border:1px solid #9EA2A8; box-shadow:inset 0 1px 0 #fff,0 1px 2px rgba(0,0,0,.2); }
+  #nappaimet { font-size:13.5px; color:#DCE2F2; } #nappaimet summary { cursor:pointer; pointer-events:auto; font-weight:700; color:#AAB4D0; width:max-content; }
+  #keys { display:grid; grid-template-columns:auto 1fr; gap:6px 14px; margin:10px 0 2px; font-size:13.5px; align-items:center; }
+  #keys kbd { font:700 12px var(--fontti); border:1px solid rgba(255,255,255,.3); border-bottom-width:2px; border-radius:5px; padding:2px 7px; background:rgba(255,255,255,.1); white-space:nowrap; }
   #keys div:nth-child(odd) { white-space:nowrap; }
-  #go { pointer-events:auto; font:700 17px inherit; font-family:inherit; color:#16110a; background:var(--accent); border:0; border-radius:8px; padding:12px 26px; cursor:pointer; margin-top:6px; }
-  #go:disabled { opacity:.55; cursor:progress; }
-  #go:focus-visible { outline:3px solid #fff; outline-offset:2px; }
-  #src { font-size:11.5px !important; margin-top:14px !important; }
-  #src a { color:var(--ink); }
-  #daily { margin:14px 0 4px; padding:12px 14px; border:1px solid var(--line); border-radius:8px; background:rgba(255,255,255,.04); }
-  #daily .dh { font-size:13px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); }
-  #daily .dh b { color:var(--accent); letter-spacing:0; }
-  #droute { font-size:13.5px; line-height:1.45; margin:6px 0 10px; color:var(--ink); }
+  #src { font-size:11px !important; color:#8E9AC0 !important; margin-top:4px !important; }
+  #daily { margin:10px 0 0; }
+  #daily .dh { font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--kulta); }
+  #daily .dh b { color:#fff; letter-spacing:0; }
+  #droute { font-size:13.5px; line-height:1.45; margin:4px 0 10px; color:#DCE2F2; }
+  @media (max-width:760px) { #card { grid-template-columns:1fr; } #aloitus-kuva { min-height:250px; border-right:0; border-bottom:3px solid #15171A; } #aloitus-kuva .kuvat { height:100%; } #aloitus-kuva .h-rami { height:220%; bottom:-150%; left:30%; } #aloitus-kuva .h-tapsa { height:125%; bottom:-38%; right:-4%; } #aloitus-kuva .kupla { max-width:48%; } #aloitus-kuva .kupla.k2 { top:122px; max-width:44%; } #card p.koukku { font-size:19px; } #aloitus-kuva .kupla { font-size:13px; } .tapat { grid-template-columns:1fr; } #aloitus-teksti { padding:20px; } #go { font-size:19px; } }
   #nickrow { display:flex; gap:10px; align-items:center; font-size:14px; color:var(--dim); flex-wrap:wrap; }
   #nick { pointer-events:auto; font:700 17px ui-monospace, Menlo, Consolas, monospace; letter-spacing:.18em; width:7.2em; padding:6px 8px; text-transform:uppercase;
     color:var(--ink); background:rgba(0,0,0,.35); border:1px solid var(--line); border-radius:6px; }
@@ -79,18 +126,17 @@
   #board .sub { font-size:12.5px; color:var(--dim); }
   #nav { left:50%; top:14px; transform:translateX(-50%); padding:8px 14px 8px 8px; display:none; align-items:center; gap:10px; }
   #nav canvas { width:58px; height:58px; display:block; }
-  #nav .nd { font-size:26px; font-weight:700; font-variant-numeric:tabular-nums; line-height:1; }
+  #nav .nd { font-family:var(--numero); font-stretch:75%; font-size:28px; font-weight:600; font-variant-numeric:tabular-nums; line-height:1; }
   #nav .nn { font-size:13px; color:var(--dim); margin-top:3px; max-width:46vw; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   #radio { left:14px; bottom:84px; padding:6px 10px; font-size:13px; display:flex; gap:8px; align-items:baseline; color:var(--ink); }
   #radio #rsong { color:var(--dim); font-size:12px; }
   .touch #radio { bottom:auto; top:178px; }
   #thei { bottom:162px; } #tdance { bottom:232px; } #tradio { bottom:22px; } body:not(.car) #tradio { bottom:232px; } body.walk .ride-only { display:none !important; }   /* radio: car and helicopter, not on foot */
-  #vehs { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:14px 0 6px; }
+  #vehs { display:grid; grid-template-columns:1fr 1fr; gap:10px; max-width:340px; }
   .veh { pointer-events:auto; position:relative; padding:0; border:2px solid var(--line); border-radius:10px; overflow:hidden; background:#0e161e; cursor:pointer; color:var(--ink); font:inherit; text-align:left; }
   .veh video, .veh img { display:block; width:100%; aspect-ratio:16/9; object-fit:cover; }
   .veh span { position:absolute; left:8px; bottom:6px; font-weight:700; font-size:15px; text-shadow:0 1px 6px rgba(0,0,0,.8); }
-  .veh[aria-pressed="true"] { border-color:var(--accent); box-shadow:0 0 0 2px rgba(255,201,40,.35); }
-  .veh:focus-visible { outline:3px solid #fff; outline-offset:2px; }
+  .veh[aria-pressed="true"] { border-color:var(--kulta); box-shadow:0 0 0 3px rgba(224,165,38,.35); }
   .car .heli-only { display:none !important; } body:not(.car) .car-only { display:none !important; }
   /* touch */
   #touch { display:none; }
@@ -100,21 +146,22 @@
   #hint { left:50%; top:31%; transform:translateX(-50%); font-size:18px; font-weight:700; padding:9px 18px; opacity:0; transition:opacity .25s; text-align:center; white-space:nowrap; }
   #hint.on { opacity:1; } #hint kbd { font:700 15px ui-monospace, Menlo, Consolas, monospace; border:1px solid var(--line); border-radius:4px; padding:1px 7px; background:rgba(255,255,255,.1); }
   #fade { position:fixed; inset:0; background:#000; opacity:0; pointer-events:none; transition:opacity .22s; z-index:5; } #fade.on { opacity:1; }
-  #tact { bottom:162px; font-size:26px; } body.walk #tact { bottom:22px; } #trun { bottom:92px; }
+  #tact { bottom:162px; } body.walk #tact { bottom:22px; } #trun { bottom:92px; }
   .touch #gauges { bottom:auto; top:118px; left:14px; gap:12px; padding:8px 10px; }
   .touch .g .v { font-size:19px; }
   .touch #street { bottom:150px; }
   .touch #street .s { font-size:19px; }
   #stick { position:fixed; left:22px; bottom:22px; width:130px; height:130px; border-radius:50%; background:rgba(14,22,30,.45); border:1px solid var(--line); pointer-events:auto; }
   #knob { position:absolute; left:50%; top:50%; width:54px; height:54px; margin:-27px; border-radius:50%; background:rgba(244,241,232,.75); }
-  .tb { position:fixed; right:22px; width:74px; height:60px; border-radius:12px; background:rgba(14,22,30,.5); border:1px solid var(--line); color:var(--ink); font-size:24px; pointer-events:auto; display:flex; align-items:center; justify-content:center; }
+  .tb { position:fixed; right:22px; width:74px; height:60px; border-radius:10px; background:var(--kiilto),var(--lasi); border:var(--lasireuna); box-shadow:var(--lasivarjo); color:var(--ink); font-size:28px; pointer-events:auto; display:flex; align-items:center; justify-content:center; }
   #tup { bottom:92px; } #tdn { bottom:22px; }
-  .tb.on { background:rgba(255,201,40,.55); }
-  @media (max-width:640px) { #mini { width:118px; height:118px; } #mission .t { font-size:17px; } #card h1 { font-size:27px; } }
+  .tb.on { background:var(--kiilto),var(--kulta); }
+  @media (max-width:640px) { #mini { width:118px; height:118px; } #mission .t { font-size:17px; } }
 /* @osa html/01_runko.html */
 </style>
 </head>
 <body>
+<script src="ikonit.js"></script>
 <canvas id="gl"></canvas>
 
 <div id="mission" class="hud panel">
@@ -129,13 +176,13 @@
   <div class="g heli-only"><div class="v" id="ga">0</div><div class="u">korkeus m</div></div>
   <div class="g"><div class="v" id="gh">P</div><div class="u">suunta</div></div>
   <div class="g hpg"><div id="hp"><i></i></div><div class="u">kunto</div></div>
-  <div class="g ride-only" id="gradio"><div id="rctl"><button id="rprev" aria-label="Edellinen kanava">◀</button><div id="rinfo"><b id="rch2">Radio pois</b><span id="rsong2"></span></div><button id="rnext" aria-label="Seuraava kanava">▶</button><input id="rvol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Radion äänenvoimakkuus"></div><div class="u">radio · R</div></div>
+  <div class="g ride-only" id="gradio"><div id="rctl"><button id="rprev" aria-label="Edellinen kanava"><svg class="ik"><use href="#ik-edellinen"/></svg></button><div id="rinfo"><b id="rch2">Radio pois</b><span id="rsong2"></span></div><button id="rnext" aria-label="Seuraava kanava"><svg class="ik"><use href="#ik-seuraava"/></svg></button><input id="rvol" type="range" min="0" max="1" step="0.05" value="0.6" aria-label="Radion äänenvoimakkuus"></div><div class="u">radio · R</div></div>
 </div>
 <div id="street" class="hud"><div class="s" id="sn"></div><div class="p" id="sp"></div></div>
 <div id="nav" class="hud panel"><canvas id="navc" width="116" height="116"></canvas><div><div class="nd" id="navd"></div><div class="nn" id="navn"></div></div></div>
 <div id="toast" class="hud panel"></div>
 <div id="hint" class="hud panel"></div><div id="fade"></div>
-<div id="radio" class="hud panel ride-only"><span id="rch">📻 Radio pois</span><span id="rsong"></span></div>
+<div id="radio" class="hud panel ride-only"><svg class="ik"><use href="#ik-radio"/></svg><span id="rch">Radio pois</span><span id="rsong"></span></div>
 <div id="board" class="hud panel"><h2>Päivän top-10</h2><div class="sub" id="bsub"></div><div id="nickrow" style="display:none;margin:10px 0 4px"><label for="nick">Pääsit listalle! Nimimerkki</label><input id="nick" maxlength="5" autocomplete="off" spellcheck="false" placeholder="5 merkkiä"><button id="nicksave" >Tallenna</button><span style="font-size:12px;width:100%">Älä käytä oikeaa nimeäsi.</span></div><ol class="top" id="top1"></ol><div class="topnote" id="note1"></div></div>
 <div id="help" class="hud panel">
   <span class="heli-only"><kbd>W</kbd><kbd>S</kbd> eteen/taakse · <kbd>A</kbd><kbd>D</kbd> käännös · <kbd>Q</kbd><kbd>E</kbd> sivulle<br>
@@ -145,45 +192,75 @@
 
 <div id="touch">
   <div id="stick"><div id="knob"></div></div>
-  <div class="tb heli-only" id="tup">▲</div><div class="tb heli-only" id="tdn">▼</div><div class="tb ride-only" id="tradio">📻</div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta">🚶</div><div class="tb walk-only" id="thei" aria-label="Tervehdi kävelijää">💬</div><div class="tb walk-only" id="tdance" aria-label="Musiikki ja tanssi">🎵</div><div class="tb walk-only" id="trun" aria-label="Juokse">🏃</div>
+  <div class="tb heli-only" id="tup"><svg class="ik"><use href="#ik-ylos"/></svg></div><div class="tb heli-only" id="tdn"><svg class="ik"><use href="#ik-alas"/></svg></div><div class="tb ride-only" id="tradio"><svg class="ik"><use href="#ik-radio"/></svg></div><div class="tb" id="tact" aria-label="Nouse ulos, kyytiin tai ovesta"><svg class="ik"><use href="#ik-kavely"/></svg></div><div class="tb walk-only" id="thei" aria-label="Tervehdi kävelijää"><svg class="ik"><use href="#ik-puhe"/></svg></div><div class="tb walk-only" id="tdance" aria-label="Musiikki ja tanssi"><svg class="ik"><use href="#ik-musiikki"/></svg></div><div class="tb walk-only" id="trun" aria-label="Juokse"><svg class="ik"><use href="#ik-juoksu"/></svg></div>
 </div>
 
 <div id="start">
-  <div id="card" class="panel">
-    <h1>Pori<span>kopteri</span></h1>
-    <p>Lennä helikopterilla tai aja autolla Porin keskustassa. Joka päivä arvotaan uusi kierros: lähde Kirjurinluodon areenalta, kierrä päivän kymmenen maamerkkiä valopylväiden kautta ja palaa Kirjurinluotoon. Voit myös nousta ulos ja kävellä: Keski-Porin kirkkoon (tornin ovi) ja Juseliuksen mausoleumiin pääsee sisälle. Nopeimmat ajat pääsevät päivän top-10:een – kopterille ja autolle on omat listansa.</p>
-    <div id="vehs" role="group" aria-label="Valitse kulkuneuvo">
-      <button class="veh" id="vheli" aria-pressed="true"><video poster="./veh_heli.jpg" autoplay muted loop playsinline><source src="./veh_heli.webm" type="video/webm"><source src="./veh_heli.mp4" type="video/mp4"></video><span>Helikopteri</span></button>
-      <button class="veh" id="vcar" aria-pressed="false"><video poster="./veh_auto.jpg" autoplay muted loop playsinline><source src="./veh_auto.webm" type="video/webm"><source src="./veh_auto.mp4" type="video/mp4"></video><span>Auto</span></button>
+  <!-- 21.11.2026 aloitussivu tarinalle (UI_KONSEPTI_PELIIN.md): ei ajoneuvovalintaa; päivän kierros ja sen kopteri/auto-valinta avautuvat, kun tarina antaa kopterin (FLAG_HELI_AUKI, luku 3) -->
+  <div id="card">
+    <div id="aloitus-kuva" aria-hidden="true">
+      <div class="paikka">Kirjurinluoto</div>
+      <div class="kupla">Tulin katsomaan, onko joki vielä paikallaan.</div>
+      <div class="kupla k2">On se. Mut kaikki muu ei kohta oo.</div>
+      <div class="kuvat"><img class="h-rami" src="./ui/hahmot/rami.webp" alt=""><img class="h-tapsa" src="./ui/hahmot/tapsa.webp" alt=""></div>
+      <div class="nimi"><i></i><span>Rami Koski</span><small>entinen rallikuski, palasi kotiin</small></div>
     </div>
-    <div id="keys" class="heli-only">
-      <div><kbd>W</kbd> <kbd>S</kbd> / <kbd>↑</kbd> <kbd>↓</kbd></div><div>eteen ja taakse</div>
-      <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>käännä</div>
-      <div><kbd>Q</kbd> <kbd>E</kbd></div><div>liu'u sivulle</div>
-      <div><kbd>Väli</kbd> / <kbd>Shift</kbd></div><div>ylös ja alas</div>
-      <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään (maassa) ja takaisin kyytiin</div>
-      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Rock, pois</div>
-      <div><kbd>Y</kbd></div><div>kyyti: ota kyytiä pyytävä kyytiin (pysähdy viereen)</div>
-      <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
+    <div id="aloitus-teksti">
+      <div class="lab" style="color:var(--kulta)">Satamakaupunki · Pori</div>
+      <h1 class="iso">PORI<span>KOPTERI</span></h1>
+      <div class="raita" aria-hidden="true"><i></i><i></i><i></i></div>
+      <p>Kymmenen vuotta Rami ajoi rallia maailmalla ja vältteli kotia. Nyt hän nousee Etelärannan laiturille, ja Pori on myynnissä.</p>
+      <p>Varjo Holdings ostaa kaupunkia talo kerrallaan: Tertun torikojun, rannan kioskin, kokonaisia kortteleita. Tapsan korjaamo on listalla seuraavana. Joku väärentää papereita, joku katsoo muualle – ja joku seuraa Ramia jo ensimmäisestä päivästä.</p>
+      <p class="koukku">Kenen kaupunki tämä on, kun Varjo on valmis?</p>
+      <div class="napit">
+        <button id="go" disabled><svg class="ik"><use href="#ik-pelaa"/></svg><span id="go-t">Ladataan ilmakuvaa…</span></button>
+      </div>
+      <div id="tallennus"><span id="tall-tiedot"></span><button id="alusta" type="button">Aloita alusta</button><span id="alusta-varmista" hidden>Kaikki edistyminen katoaa. <button id="alusta-kylla" type="button">Kyllä, alusta</button> <button id="alusta-peru" type="button">Peru</button></span></div>
+      <div class="tapat">
+        <div class="tapa"><div class="ikk" style="background-color:var(--kulta)"><svg class="ik"><use href="#ik-tarina"/></svg></div><div><b>Tarina</b><span>Viisi lukua: paluusta Varjo-tornin huipulle.</span></div></div>
+        <div class="tapa" id="tapa-viuh"><div class="ikk" style="background-color:var(--viuh)"><span class="v">v</span></div><div><b>VIUH-keikat</b><span>Keikkoja ympäri Poria. Avautuu tarinassa.</span></div></div>
+        <div class="tapa lukossa" id="tapa-kierros"><div class="ikk" style="background-color:var(--sininen)"><svg class="ik"><use href="#ik-lukko"/></svg></div><div><b>Päivän kierros</b><span id="kierros-t">Avautuu tarinan edetessä.</span></div></div>
+      </div>
+      <div id="kierros-osa" hidden>
+        <div id="vehs" role="group" aria-label="Valitse kulkuneuvo päivän kierrokselle">
+          <button class="veh" id="vheli" aria-pressed="true"><img src="./veh_heli.jpg" alt=""><span>Helikopteri</span></button>
+          <button class="veh" id="vcar" aria-pressed="false"><img src="./veh_auto.jpg" alt=""><span>Auto</span></button>
+        </div>
+        <div id="daily">
+          <div class="dh">Päivän kierros <b id="dday"></b></div>
+          <div id="droute"></div>
+          <button id="gotour" type="button" disabled><svg class="ik"><use href="#ik-nouto"/></svg><span>Aja päivän kierros</span></button>
+        </div>
+      </div>
+      <details id="nappaimet"><summary>Näppäimet</summary>
+      <div id="keys">
+        <div><kbd>W</kbd> <kbd>S</kbd> / <kbd>↑</kbd> <kbd>↓</kbd></div><div>kävele, kaasu ja jarru (kopterissa eteen ja taakse)</div>
+        <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>käänny ja ohjaa</div>
+        <div><kbd>Shift</kbd></div><div>juokse (kopterissa alas)</div>
+        <div><kbd>Enter</kbd></div><div>kyytiin, ulos ja ovista sisään</div>
+        <div><kbd>X</kbd></div><div>puhu, ota tavara, jatka keskustelua</div>
+        <div><kbd>1</kbd>–<kbd>9</kbd></div><div>vastausvaihtoehdot ja kauppojen valikot</div>
+        <div><kbd>P</kbd></div><div>tarinan valikko: tehtävät, raha, energia</div>
+        <div><kbd>R</kbd></div><div>radio (autossa ja kopterissa)</div>
+        <div><kbd>C</kbd> <kbd>M</kbd></div><div>kamera, ääni</div>
+      </div>
+      </details>
+      <p id="src">Ilmakuva © Maanmittauslaitos (CC BY 4.0) · Kartta-aineisto © OpenStreetMapin tekijät · 3D-rakennukset ja korkeusmalli © Maanmittauslaitos · Rakennusten korkeudet ovat osin arvioita. Kaikki hahmot ja yritykset ovat keksittyjä.</p>
     </div>
-    <div id="keys2" class="car-only" style="display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:16px 0;font-size:14px;align-items:center">
-      <div><kbd>W</kbd> / <kbd>↑</kbd></div><div>kaasu</div>
-      <div><kbd>S</kbd> / <kbd>↓</kbd></div><div>jarru ja peruutus</div>
-      <div><kbd>A</kbd> <kbd>D</kbd> / <kbd>←</kbd> <kbd>→</kbd></div><div>ohjaus</div>
-      <div><kbd>Väli</kbd></div><div>käsijarru</div>
-      <div><kbd>R</kbd></div><div>radio: Radio Porikopteri, Rock, pois</div>
-      <div><kbd>Y</kbd></div><div>kyyti: ota kyytiä pyytävä kyytiin (pysähdy viereen)</div>
-      <div><kbd>Enter</kbd></div><div>nouse ulos kävelemään ja takaisin kyytiin</div>
-      <div><kbd>N</kbd></div><div>bussi: Kauppatorin laiturilta tai Matkakeskuksesta saa bussin (Enter), pysäkillä pysähdy niin ovet aukeavat. Oikeaan bussiin nouset pysäkillä Enterillä, N painaa pysähtyy-nappia</div>
-      <div><kbd>C</kbd> <kbd>M</kbd> <kbd>N</kbd> <kbd>T</kbd></div><div>kamera, ääni, uusi yritys, tulostaulu</div>
-    </div>
-    <div id="daily">
-      <div class="dh">Päivän kierros <b id="dday"></b></div>
-      <div id="droute"></div>
-    </div>
-    <button id="go" disabled>Ladataan ilmakuvaa…</button>
-    <p id="src">Rakennukset, kadut ja puut: © OpenStreetMapin tekijät (ODbL). Ilmakuva: Porin kaupungin avoin WMS-rajapinta. Rakennusten korkeudet ovat osin arvioita.</p>
   </div>
+  <script>
+  // tallennuksen tiedot heti, ennen kuin peli on ladattu (tarina/moottori.js TALLENNUSAVAIN, tarina/peli.js kirjoittaa yhteenvedon)
+  (function () { var j = null, y = null; try { j = JSON.parse(localStorage.getItem('pori-tarina-v1') || 'null'); y = JSON.parse(localStorage.getItem('pori-tarina-yhteenveto') || 'null'); } catch (e) {}
+    var t = j && j.tila, alkanut = !!(t && ((t.valmiit && t.valmiit.length) || t.kaynnissa || (t.liput && Object.keys(t.liput).length)));
+    window.__aloitus = { alkanut: alkanut, heli: !!(t && t.liput && t.liput.FLAG_HELI_AUKI) };
+    var e = document.getElementById('tall-tiedot');
+    if (alkanut) { var osat = ['Luku ' + ((y && y.luku) || 1)]; if (y && y.nimi) osat.push(y.nimi); osat.push((t.raha || 0) + ' €'); e.textContent = osat.join(' · '); }
+    else { e.textContent = 'Luku 1 · Eteläranta'; document.getElementById('alusta').hidden = true; }
+    document.body.classList.toggle('tarina-alkanut', alkanut); document.body.classList.toggle('kierros-auki', window.__aloitus.heli);
+    if (window.__aloitus.heli) { document.getElementById('kierros-osa').hidden = false; var k = document.getElementById('tapa-kierros'); k.classList.remove('lukossa'); k.querySelector('use').setAttribute('href', '#ik-nouto'); document.getElementById('kierros-t').textContent = 'Joka päivä uusi kymmenen maamerkin reitti ja top-10.'; }
+    if (t && t.liput && t.liput.FLAG_M01_DONE) { var v = document.getElementById('tapa-viuh'); v.querySelector('span:not(.v)').textContent = 'Keikkoja ympäri Poria. Jokainen keikka kasvattaa kassaa.'; }
+  })();
+  </script>
 </div>
 
 <script type="module">
@@ -614,7 +691,7 @@ const orto = new THREE.Texture();
 orto.colorSpace = THREE.SRGBColorSpace;
 orto.anisotropy = renderer.capabilities.getMaxAnisotropy();
 const groundMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a });
-const outerTex = new THREE.TextureLoader().load('./outer.jpg'); outerTex.colorSpace = THREE.SRGBColorSpace; outerTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+const outerTex = new THREE.TextureLoader().load('./maa/ot_s/outer.jpg'); outerTex.colorSpace = THREE.SRGBColorSpace; outerTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 const outerMat = new THREE.MeshBasicMaterial({ map: outerTex }), roofMat2 = new THREE.MeshBasicMaterial({ map: outerTex, side: THREE.DoubleSide });
 {
   // ground with the river cut out: the core photo, the coarser frame around it, sloped banks / stone quays and the water
@@ -718,6 +795,13 @@ const SILTA = { list: [] }; window.__SILTA = SILTA;
       for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
         if (t < -0.02 || t > 1.02) continue; const tc = Math.min(1, Math.max(0, t)); if (Math.hypot(x - ax - dx * tc, y - ay - dy * tc) > wi - 0.1) continue;
         if (Math.abs(z - (P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA)) < 1.6) return true; } } return false; };
+  // sillan alla ja vieressä: paino 1 (maa TZg:n mukaan, js/082 carGround) 4 m:iin kannen reunasta, siitä 12 m:n matkalla liukuen 0:aan (pinnan malli),
+  // vain jos kansi on yli 2,5 m maan yläpuolella (sillan päiden penkereet jäävät ennalleen)
+  SILTA.alla = (x, y) => { let w = 0; for (const b of SILTA.list) { if (x < b.bb[0] - 16 || y < b.bb[1] - 16 || x > b.bb[2] + 16 || y > b.bb[3] + 16) continue; const P = b.P;
+      for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L2));
+        const d = Math.hypot(x - ax - dx * t, y - ay - dy * t) - b.hw; if (d > 16) continue;
+        if (P[k][2] + (P[k + 1][2] - P[k][2]) * t - TZg(ax + dx * t, ay + dy * t) <= 2.5) continue;
+        w = Math.max(w, d < 4 ? 1 : 1 - (d - 4) / 12); } } return w; };
   SILTA.kaide = (x, y, z) => { let best = 0; if (SILTA.ajorata(x, y, z)) return 0;
     for (const b of SILTA.list) { if (x < b.bb[0] - 1 || y < b.bb[1] - 1 || x > b.bb[2] + 1 || y > b.bb[3] + 1) continue; const P = b.P, wi = b.hw - PW;
       for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
@@ -839,6 +923,7 @@ function waterify(mat) {          // sky reflection grows towards grazing angles
 // 0.25 m/px tiles over the centre (i 0..5, j 0..4), 0.33 m/px tiles over the rest of the map (i -3..7, j -1..6)
 const HR = { S: 512, X0: -1280, Y0: -1280, I0: -3, I1: 7, J0: -5, J1: 6,      /* J -2..-5: only i 0..4 (the airport, 20.11.2026) */
   t: new Map(), loader: new THREE.TextureLoader(), last: -1e9 };
+// 21.11.2026: laatat ja katot sävykorjattuina maa/ot_s/ (tools/maa/orto_savy.py, omistaja hyväksyi); alkuperäiset ot/ ennallaan. Maan materiaali lähellä: maa/maa.js (0337)
 const ROOFT = new Map();   // aerial tile key -> roof meshes that switch to that tile's texture
 function roofTile(k, tex) {
   for (const me of ROOFT.get(k) || []) {
@@ -855,7 +940,7 @@ function hrUpdate(x, y) {
       const x0t = cx - HR.S / 2, y0t = cy - HR.S / 2, g = gridGeo(x0t, y0t, x0t + HR.S, y0t + HR.S, 6, (x, y) => [(x - x0t) / HR.S, (y - y0t) / HR.S], tSkip, 0.03); g.translate(-cx, 0, cy);
       const me = noT(new THREE.Mesh(g, m)); me.position.set(cx, 0, -cy); me.renderOrder = -1;
       const rec = { me, m, alive: true }; HR.t.set(k, rec);
-      HR.loader.load(`./ot/ot_${i}_${j}.jpg`, tex => { if (!rec.alive) { tex.dispose(); return; } tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      HR.loader.load(`./maa/ot_s/ot_${i}_${j}.jpg`, tex => { if (!rec.alive) { tex.dispose(); return; } tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
         m.map = tex; m.transparent = false; m.opacity = 1; m.needsUpdate = true; scene.add(me); roofTile(k, tex); });
     } else if (e && d > (isTouch ? 380 : 520)) { roofTile(k, null); e.alive = false; scene.remove(e.me); e.me.geometry.dispose(); if (e.m.map) e.m.map.dispose(); e.m.dispose(); HR.t.delete(k); }
   }
@@ -885,6 +970,12 @@ function hrUpdate(x, y) {
     if (!ROOFT.has(key)) ROOFT.set(key, []); ROOFT.get(key).push(me);
     const e = HR.t.get(key); if (e && e.m.map) { const t = e.m.map.clone(); t.channel = 1; t.needsUpdate = true; me.material = groundTileMat(t); } }
   window.__tieMaa = nq; }
+// @osa js/0337_maa.js
+// 21.11.2026 (omistaja: "maasta katsottuna maa näyttää materiaaleilta eikä venytetyltä ilmakuvalta. Ei lunta eikä ilmakuvaan palaneita autoja tai varjoja"):
+// maan pinta 0–150 m (puhelimella 0–90 m) maankäyttökartan (maa/peite/) mukaisina PBR-materiaaleina (maa/tex/). Koodi: maa/maa.js.
+// Laajentaa 033:n tarkkojen ilmakuvalaattojen materiaalia (HR.t); kaukana ja kopterista ilmakuva ennallaan. Vertailu: window.__maa.pois() / .paalle().
+import kaynnista_maa from './maa/maa.js';
+kaynnista_maa({ HR, renderer, isTouch });
 // @osa js/0336_alikulut.js
 // ---------- Pyörätien alikulut (21.11.2026, maasto ja data: js/0106_maastokorjaukset.js ALIK) ----------
 // Omistaja: "Sielläkin alikulku" (Tiilimäki, Luvianpuistokatu). Rakenne kuten tyypillinen Porin kevyen liikenteen alikulku: betoninen kehä (seinät ja
@@ -1446,12 +1537,23 @@ import('./roads.js').then(mod => {
   const mGrass = pbr('nurmi', 1.2, false), mLawn = pbr('nurmi', 1.2, true), mGravel = pbr('sepeli', 0.6, false);
   if (R.medg) add(withUV(flat(dec(R.medg), ROAD.pave), 1.2), mGrass);
   if (R.medp) add(withUV(flat(dec(R.medp), ROAD.pave + 0.005), 0.6), mGravel);
+  // 21.11.2026 (omistaja: "muotoillaan liikenteenjakajat, ympyrät ... Nostetaan ne hieman ylemmäs asfaltista"): korotetut liikenteenjakajat ja ympyröiden
+  // keskisaarekkeet (tools/roads/build_roads.py: isl = kivetty/betoni, islg = nurmi, isla = ympyrän kivetty reunus) 3 cm jalkakäytävää ylempänä
+  // (16 cm asfaltista), omat reunakivet kerbi. Suojatien kohdalla saareke on madallettu (rampp).
+  ROAD.isl = ROAD.pave + 0.03;
+  if (R.isl) add(flat(dec(R.isl), ROAD.isl), mPave);
+  if (R.islg) add(withUV(flat(dec(R.islg), ROAD.isl + 0.004), 1.2), mGrass);
+  if (R.isla) add(withUV(flat(dec(R.isla), ROAD.isl + 0.002), 2.2), ROAD.mK || mPave);
+  if (R.kerbi) { const K = dec(R.kerbi), P = [];
+    for (let i = 0; i < K.length; i += 4) { const ax = K[i] / 10, ay = K[i + 1] / 10, bx = K[i + 2] / 10, by = K[i + 3] / 10, za = groundTop(ax, ay), zb = groundTop(bx, by);
+      P.push(ax, za + ROAD.isl, -ay, ax, za - 0.05, -ay, bx, zb - 0.05, -by, ax, za + ROAD.isl, -ay, bx, zb - 0.05, -by, bx, zb + ROAD.isl, -by); }
+    const kg = new THREE.BufferGeometry(); kg.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); kg.computeVertexNormals(); add(kg, mKerb); }
   if (R.lawn) add(withUV(flat(dec(R.lawn), 0.05), 1.2), mLawn);
   if (R.path) add(withUV(flat(dec(R.path), 0.07), 0.6), mGravel);
   if (R.tadd && TREES.add) TREES.add(dec(R.tadd));
   { // 1 m raster of the pavements for the car: driving over a kerb lifts it onto the pavement
     const [x0, y0, x1, y1] = R.bb, nx = Math.ceil(x1 - x0), ny = Math.ceil(y1 - y0), M = new Uint8Array(nx * ny);          // bit 1 pavement, bit 2 carriageway (for the signal posts: where the kerb is)
-    for (const [T, bit] of [[dec(R.pave), 1], ...(R.kivi ? [[dec(R.kivi), 1]] : []), [dec(R.asph), 2]])   /* the stone paving lies at pavement height too (19.11: walkers sank into it) */ for (let i = 0; i < T.length; i += 6) { const ax = T[i] / 10, ay = T[i + 1] / 10, bx = T[i + 2] / 10, by = T[i + 3] / 10, cx = T[i + 4] / 10, cy = T[i + 5] / 10;
+    for (const [T, bit] of [[dec(R.pave), 1], ...(R.kivi ? [[dec(R.kivi), 1]] : []), ...['isl', 'islg', 'isla'].filter(k => R[k]).map(k => [dec(R[k]), 1]), [dec(R.asph), 2]])   /* the stone paving lies at pavement height too (19.11: walkers sank into it) */ for (let i = 0; i < T.length; i += 6) { const ax = T[i] / 10, ay = T[i + 1] / 10, bx = T[i + 2] / 10, by = T[i + 3] / 10, cx = T[i + 4] / 10, cy = T[i + 5] / 10;
       const d = (by - cy) * (ax - cx) + (cx - bx) * (ay - cy); if (Math.abs(d) < 1e-6) continue;
       for (let gy = Math.floor(Math.min(ay, by, cy) - y0); gy <= Math.ceil(Math.max(ay, by, cy) - y0); gy++) for (let gx = Math.floor(Math.min(ax, bx, cx) - x0); gx <= Math.ceil(Math.max(ax, bx, cx) - x0); gx++) {
         if (gx < 0 || gy < 0 || gx >= nx || gy >= ny) continue; const px = x0 + gx + 0.5, py = y0 + gy + 0.5;
@@ -2348,7 +2450,7 @@ addEventListener('keydown', e => {
   if (e.target && e.target.tagName === 'INPUT') { if (e.code === 'Enter') { e.target.blur(); LB.save(); } return; }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (e.repeat) return; keys.add(e.code);
-  if (!started) { if (e.code === 'Enter' && !$('go').disabled) begin(); return; }
+  if (!started) { if (e.code === 'Enter' && !$('go').disabled && !(e.target && /BUTTON|SUMMARY/.test(e.target.tagName))) begin('tarina'); return; }   // painike tai Näppäimet-otsake hoitaa oman Enterinsä
   if (e.code === 'KeyC') camMode = (camMode + 1) % 3;
   if (e.code === 'Enter' || e.code === 'NumpadEnter' || (e.code === 'KeyF' && (WALK.on || VEH === 'car'))) walkAction();
   if (e.code === 'KeyT') LB.show(!LB.open);
@@ -2404,7 +2506,7 @@ RADIO.load = (L, i, x) => { const el = RADIO.el, t = L[i]; el.src = './radio/' +
   el.addEventListener('loadedmetadata', go); RADIO.cur = t; RADIO.show(); };
 RADIO.next = () => { do { RADIO.ch = (RADIO.ch + 1) % RADIO.names.length; } while (RADIO.ch && RADIO.list && !RADIO.list[RADIO.names[RADIO.ch].toLowerCase()]); RADIO.play(RADIO.ch); toast('📻 ' + (RADIO.ch ? 'Radio ' + RADIO.names[RADIO.ch] : 'Radio pois'), 1.4); };
 RADIO.show = () => { const n = RADIO.ch ? 'Radio ' + RADIO.names[RADIO.ch] : 'Radio pois', t = RADIO.ch && RADIO.cur ? RADIO.cur.t : '';
-  $('rch').textContent = '📻 ' + n; $('rsong').textContent = t; $('rch2').textContent = n; $('rsong2').textContent = t; };
+  $('rch').textContent = n; $('rsong').textContent = t; $('rch2').textContent = n; $('rsong2').textContent = t; };
 RADIO.prev = () => { do { RADIO.ch = (RADIO.ch + RADIO.names.length - 1) % RADIO.names.length; } while (RADIO.ch && RADIO.list && !RADIO.list[RADIO.names[RADIO.ch].toLowerCase()]); RADIO.play(RADIO.ch); };
 for (const [id, f] of [['rprev', () => RADIO.prev()], ['rnext', () => RADIO.next()]]) $(id).addEventListener('click', e => { e.preventDefault(); e.currentTarget.blur(); if (started) f(); });
 $('rvol').addEventListener('input', e => { RADIO.vol = +e.target.value; RADIO.mute(); }); $('rvol').addEventListener('change', e => e.target.blur());
@@ -2676,7 +2778,7 @@ function stepWalk(dt) {
   if (VEH !== 'car') { S.rotorSpd += (0 - S.rotorSpd) * Math.min(1, dt * 0.6); rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt; }
   if (actx && sGain) sGain.gain.value += ((VEH !== 'car' && soundOn && !WALK.in ? 0.05 * S.rotorSpd : 0) - sGain.gain.value) * Math.min(1, dt * 4);
   const k = walkNear(), h = $('hint'), msg = k === 'in' ? WALK.at.hint : k === 'out' ? 'ulos' : k === 'port' ? WALK.port[6] : k === 'veh' ? (VEH === 'car' ? (CAR.type === 'bike' ? 'nouse pyörälle' : CAR.type === 'bus' ? 'nouse bussiin' : 'nouse autoon') : 'nouse kopteriin') : k === 'plane' ? 'nouse hyppykoneeseen' : k === 'heli' ? 'nouse kopteriin' : k === 'take' ? (TAKE.tgt && TAKE.tgt.bp ? 'aja bussia (linja ' + TAKE.tgt.bp.dep.line + ')' : TAKE.tgt && (TAKE.tgt.b || TAKE.tgt.l && TAKE.tgt.l.type === 'bike') ? 'ota pyörä' : 'ota auto') : (k === 'bus' || k === 'busout') ? window.__bus.hint(k) : '';
-  if (msg) { if (h.dataset.m !== msg) { h.dataset.m = msg; h.innerHTML = (isTouch ? '🚶 ' : '<kbd>Enter</kbd> ') + msg; } h.classList.add('on'); } else h.classList.remove('on');
+  if (msg) { if (h.dataset.m !== msg) { h.dataset.m = msg; h.innerHTML = (isTouch ? (window.ikoni ? window.ikoni('kavely') + ' ' : '') : '<kbd>Enter</kbd> ') + msg; } h.classList.add('on'); } else h.classList.remove('on');
 }
 function walkCamera(dt) {
   const ins = WALK.in, px = ins ? WALK.ix : WALK.x, py = ins ? WALK.iy : WALK.y, yaw = ins ? WALK.iyaw : WALK.yaw, sn = Math.sin(yaw), cs = Math.cos(yaw);
@@ -2869,31 +2971,56 @@ const LB = { open: false, rows: [], uid: null, ref: null, field: 'd' + DAY.key, 
     LB.db = db; LB.listen();
   })();
 }
-function pickVeh(v) {
-  VEH = v; try { localStorage.setItem('pori-veh', v); } catch (e) {}
+// 21.11.2026 aloitussivu tarinalle (UI_KONSEPTI_PELIIN.md): pääpainike aloittaa tai jatkaa tarinaa ilman ajoneuvovalintaa. Kopteri/auto-valinta ja
+// päivän kierros (#kierros-osa) näkyvät vasta, kun tarina on antanut kopterin (FLAG_HELI_AUKI). window.__aloitus tulee aloitussivun skriptistä (01_runko.html).
+const ALOITUS = window.__aloitus || { alkanut: false, heli: false };
+let PELITILA = 'tarina';
+function pickVeh(v, muista = true) {
+  VEH = v; if (muista) try { localStorage.setItem('pori-veh', v); } catch (e) {}
   document.body.classList.toggle('car', v === 'car');
   $('vheli').setAttribute('aria-pressed', String(v === 'heli')); $('vcar').setAttribute('aria-pressed', String(v === 'car'));
   heli.visible = v === 'heli'; carG.visible = v === 'car'; if (v === 'car') { loadCar(); resetCar(); }
-  if (!$('go').disabled) $('go').textContent = v === 'car' ? 'Aloita ajo (Enter)' : 'Aloita lento (Enter)';
+  goTeksti();
+}
+function goTeksti(virhe) {
+  const t = $('go-t'), kt = $('gotour').querySelector('span');
+  if ($('go').disabled) return;
+  t.textContent = (virhe ? '(ei ilmakuvaa) ' : '') + (ALOITUS.alkanut ? 'Jatka tarinaa' : 'Aloita tarina');
+  kt.textContent = VEH === 'car' ? 'Aja päivän kierros' : 'Lennä päivän kierros';
 }
 $('vheli').addEventListener('click', () => pickVeh('heli')); $('vcar').addEventListener('click', () => pickVeh('car'));
-pickVeh(VEH);
-function begin() {
-  if (started) return; started = true; $('start').style.display = 'none';
+pickVeh(ALOITUS.heli ? VEH : 'heli', false);
+function begin(tila) {
+  if (started) return; started = true; $('start').style.display = 'none'; document.body.classList.add('aloitettu');
+  PELITILA = tila === 'kierros' && ALOITUS.heli ? 'kierros' : 'tarina';
+  if (PELITILA === 'tarina' && !ALOITUS.heli && VEH !== 'heli') pickVeh('heli', false);   // kopteri on lukossa ja piilossa (155 __heliLukko); tarina laittaa pelaajan jalan aloituspaikkaan
+  window.__pelitila = PELITILA; dispatchEvent(new CustomEvent('pori-aloita', { detail: { tila: PELITILA } }));   // tarina/peli.js: kierroksen HUD-kortti näkyviin vain kierroksella
   if (VEH === 'car') { BESTKEY = 'pori-auto-best-' + DAY.key; try { best = parseFloat(localStorage.getItem(BESTKEY)) || null; } catch (e) { best = null; } LB.useField('c' + DAY.key); }
   camPos.copy(camera.position); camLook.set(HOME.x, 5, -HOME.y);
   initSound(); newTour();
   { const go = () => { if (RADIO.list) { RADIO.ch = 1; RADIO.play(1); } else setTimeout(go, 500); }; go(); }   // Radio Porikopteri is on at the start, in the helicopter too
 }
-$('go').addEventListener('click', begin);
+$('go').addEventListener('click', () => begin('tarina'));
+$('gotour').addEventListener('click', () => begin('kierros'));
+// Aloita alusta: kaksivaiheinen varmistus sivulla (ei selaimen confirm-ikkunaa)
+$('alusta').addEventListener('click', () => { $('alusta').hidden = true; $('alusta-varmista').hidden = false; $('alusta-kylla').focus(); });
+$('alusta-peru').addEventListener('click', () => { $('alusta-varmista').hidden = true; $('alusta').hidden = false; });
+$('alusta-kylla').addEventListener('click', () => {
+  try { localStorage.removeItem('pori-tarina-v1'); localStorage.removeItem('pori-tarina-yhteenveto'); } catch (e) {}
+  const T = window.__tarina; if (T && T.moottori) T.moottori.nollaa();
+  Object.assign(ALOITUS, { alkanut: false, heli: false }); document.body.classList.remove('tarina-alkanut', 'kierros-auki');
+  $('alusta-varmista').hidden = true; $('tall-tiedot').textContent = 'Luku 1 · Eteläranta'; $('kierros-osa').hidden = true;
+  const k = $('tapa-kierros'); k.classList.add('lukossa'); k.querySelector('use').setAttribute('href', '#ik-lukko'); $('kierros-t').textContent = 'Avautuu tarinan edetessä.';
+  pickVeh('heli', false); goTeksti(); $('go').focus();
+});
 for (const id of ['mission', 'mapwrap', 'gauges', 'street', 'help', 'radio']) $(id).style.visibility = 'visible';
 
 // load the aerial image
 {
   const img = new Image();
-  img.onload = () => { orto.image = img; orto.needsUpdate = true; groundMat.color.set(0xffffff); roofMat.color.set(0xffffff); groundMat.needsUpdate = roofMat.needsUpdate = true; $('go').disabled = false; $('go').textContent = isTouch ? 'Aloita lento' : (VEH === 'car' ? 'Aloita ajo (Enter)' : 'Aloita lento (Enter)'); window.__ready = true; };
-  img.onerror = () => { $('go').disabled = false; $('go').textContent = 'Aloita ilman ilmakuvaa'; groundMat.map = null; roofMat.map = null; groundMat.color.set(0x6f7a70); roofMat.color.set(0x8a8f92); groundMat.needsUpdate = roofMat.needsUpdate = true; };
-  img.src = './orto.jpg';
+  img.onload = () => { orto.image = img; orto.needsUpdate = true; groundMat.color.set(0xffffff); roofMat.color.set(0xffffff); groundMat.needsUpdate = roofMat.needsUpdate = true; $('go').disabled = false; $('gotour').disabled = false; goTeksti(); window.__ready = true; };
+  img.onerror = () => { $('go').disabled = false; $('gotour').disabled = false; goTeksti(true); groundMat.map = null; roofMat.map = null; groundMat.color.set(0x6f7a70); roofMat.color.set(0x8a8f92); groundMat.needsUpdate = roofMat.needsUpdate = true; };
+  img.src = './maa/ot_s/orto.jpg';   // 21.11.2026 sävykorjattu (tools/maa/orto_savy.py)
 }
 setTarget();
 // @osa js/140_kavelijat.js

@@ -2,6 +2,7 @@
 // 0.25 m/px tiles over the centre (i 0..5, j 0..4), 0.33 m/px tiles over the rest of the map (i -3..7, j -1..6)
 const HR = { S: 512, X0: -1280, Y0: -1280, I0: -3, I1: 7, J0: -5, J1: 6,      /* J -2..-5: only i 0..4 (the airport, 20.11.2026) */
   t: new Map(), loader: new THREE.TextureLoader(), last: -1e9 };
+// 21.11.2026: laatat ja katot sävykorjattuina maa/ot_s/ (tools/maa/orto_savy.py, omistaja hyväksyi); alkuperäiset ot/ ennallaan. Maan materiaali lähellä: maa/maa.js (0337)
 const ROOFT = new Map();   // aerial tile key -> roof meshes that switch to that tile's texture
 function roofTile(k, tex) {
   for (const me of ROOFT.get(k) || []) {
@@ -18,7 +19,7 @@ function hrUpdate(x, y) {
       const x0t = cx - HR.S / 2, y0t = cy - HR.S / 2, g = gridGeo(x0t, y0t, x0t + HR.S, y0t + HR.S, 6, (x, y) => [(x - x0t) / HR.S, (y - y0t) / HR.S], tSkip, 0.03); g.translate(-cx, 0, cy);
       const me = noT(new THREE.Mesh(g, m)); me.position.set(cx, 0, -cy); me.renderOrder = -1;
       const rec = { me, m, alive: true }; HR.t.set(k, rec);
-      HR.loader.load(`./ot/ot_${i}_${j}.jpg`, tex => { if (!rec.alive) { tex.dispose(); return; } tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      HR.loader.load(`./maa/ot_s/ot_${i}_${j}.jpg`, tex => { if (!rec.alive) { tex.dispose(); return; } tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
         m.map = tex; m.transparent = false; m.opacity = 1; m.needsUpdate = true; scene.add(me); roofTile(k, tex); });
     } else if (e && d > (isTouch ? 380 : 520)) { roofTile(k, null); e.alive = false; scene.remove(e.me); e.me.geometry.dispose(); if (e.m.map) e.m.map.dispose(); e.m.dispose(); HR.t.delete(k); }
   }

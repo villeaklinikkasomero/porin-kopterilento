@@ -69,6 +69,12 @@ Siirrä lisää samalla mallilla, kun pala alkaa olla usean chatin työmaa. Test
 **Työkalut, jotka lukevat index.html:ää** toimivat ennallaan: `tools/solid_test.js` (SOLID on palassa `js/090_tormaykset.js`) ja
 `tools/rata/patch_index.py` (muokkaa index.html:ää → aja sen jälkeen `pilko.py`).
 
+## Käyttöliittymän pohja (21.11.2026)
+
+- **Fontit** `fonts/` (Nunito + Fredoka, SIL OFL, `fonts/OFL.txt`) ja **värit** CSS-muuttujina `css/peli.css`:n alussa. Ei Google Fonts -linkkejä.
+- **Ikonit** `ikonit.js` (repon juuressa, tavallinen skripti, ladataan `html/01_runko.html`:ssä `<body>`:n alussa). Ei emojeja käyttöliittymään.
+- **Kuvat** `ui/hahmot/*.webp` (renderöidyt hahmot). Suunnitelma: `tarvittavat_ominaisuudet/UI_KONSEPTI_PELIIN.md`.
+
 ## Palat
 
 | Pala | Rivejä | Sisältö |

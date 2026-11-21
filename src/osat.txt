@@ -15,6 +15,7 @@ js    js/031_maa_nurmi.js
 js    js/032_heina.js
 js    js/033_ilmakuva_tarkka.js
 js    js/0335_tie_maa.js
+js    js/0337_maa.js
 js    js/0336_alikulut.js
 js    js/040_rakennukset.js
 js    js/041_kivipori_maamerkit.js

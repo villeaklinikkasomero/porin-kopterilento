@@ -65,10 +65,22 @@ Konseptin aloitussivussa on valinta Helikopteri / Auto ja painike "Pelaa kopteri
 
 ## 3. Toteutusjärjestys
 
+**Tehty 21.11.2026 (vaiheet 1 ja 2):**
+- `fonts/nunito.woff2`, `fonts/fredoka.woff2` (latin, muuttuvat fontit, @fontsource-variable 5.3.0) + `fonts/OFL.txt`. `@font-face` ja CSS-muuttujat (`--viuh`, `--sininen`, `--kulta`, `--raha`, `--lasi`, `--kiilto` …) tiedoston `src/css/peli.css` alussa; apuluokat `.ik`, `.iso` (Fredoka-otsikot), `.kapea` (numerot), `.lab`.
+- `.panel` = konseptin lasi (tumma liukuväri 86 %, 1 px valoreuna, varjo). Mittariston numerot, kadunnimi, ilmoitus ja navigaattorin matka Fredokalla; edistymispalkki kultaa.
+- `ikonit.js` (tavallinen skripti `<body>`:n alussa): konseptin 25 glyfiä + 15 lisättyä samaan tyyliin (ruoka, kauppa, korjaamo, pakettiauto, auto, kopteri, lukko, energia, tarina, kartta, kello, varoitus, toisto, edellinen, alas).
+  HTML: `<svg class="ik"><use href="#ik-radio"/></svg>`, JS: `window.ikoni('radio')`. Kosketusnapit, radio ja kävelyvihje käyttävät niitä; emojit poistettu niistä.
+- **Aloitussivu** (`src/html/01_runko.html` #start, logiikka `src/js/130_tulostaulu.js`): vasemmalla sarjakuvaruutu (Rami ja Tapsa, omistajan Gemini-renderöinnit `ui/hahmot/`), oikealla sininen ruutu: otsikko, tarinateksti,
+  pääpainike *Aloita tarina* / *Jatka tarinaa* (Enter), tallennuksen rivi "Luku 3 · tehtävän nimi · 340 €" ja *Aloita alusta* (varmistus sivulla). "Kolme tapaa pelata" -kortit; päivän kierros lukossa.
+  Kun tallennuksessa on `FLAG_HELI_AUKI`, näkyvät kopteri/auto-valinta, päivän reitti ja painike *Lennä/Aja päivän kierros* (`begin('kierros')`). Näppäimet kokoontaitettavana.
+- `begin(tila)`: `window.__pelitila` = 'tarina' | 'kierros' ja tapahtuma `pori-aloita`; `tarina/peli.js` näyttää kierroksen kortin ja majakan vain kierroksella. Tarinassa ajoneuvoksi pakotetaan kopteri (piilossa lukon takia) eikä `pori-veh`-valintaa muuteta.
+- `tarina/peli.js` kirjoittaa 2 s välein `localStorage['pori-tarina-yhteenveto']` = { luku, nimi } aloitussivua varten. HUD on piilossa, kunnes peli alkaa (`body.aloitettu`).
+- Omistajan linjaus: **käyttöliittymässä vain renderöidyt kuvat** (ei piirrettyjä muotokuvia `hahmot/konseptit/muotokuvat`).
+
 | # | Työ | Tiedostot | Koko |
 |---|---|---|---|
-| 1 | **Pohja:** fontit repoon, HUD-lasin CSS-muuttujat ja -luokat, `ikonit.js` (konseptin sarja) | `src/css/peli.css`, `fonts/`, `ikonit.js` | 1 istunto |
-| 2 | **Aloitussivu tarinalle:** ei ajoneuvovalintaa, Aloita/Jatka tarinaa, päivän kierros lukossa M16:een | `src/html/01_runko.html`, `src/js/130_tulostaulu.js` (`begin`), `src/js/081_auto.js` (`pori-veh`) | 1 istunto |
+| 1 ✅ | **Pohja:** fontit repoon, HUD-lasin CSS-muuttujat ja -luokat, `ikonit.js` (konseptin sarja) | `src/css/peli.css`, `fonts/`, `ikonit.js` | 1 istunto |
+| 2 ✅ | **Aloitussivu tarinalle:** ei ajoneuvovalintaa, Aloita/Jatka tarinaa, päivän kierros lukossa M16:een | `src/html/01_runko.html`, `src/js/130_tulostaulu.js` (`begin`), `src/js/081_auto.js` (`pori-veh`) | 1 istunto |
 | 3 | **Tarinan UI uuteen asuun:** dialogi muotokuvin, valinta, luvun otsikko, ilmoitukset, puhelin tarinan puheluille ja viesteille | `tarina/ui.js`, `tarina/peli.js` | 1–2 istuntoa |
 | 4 | **HUD:** tehtäväpaneeli, mittaristo + kunto + energia, radio, kadunnimi, kosketusnapit glyfeinä, karttamerkit glyfeinä | `src/js/123_hud.js`, `111_radio.js`, `tarina/talous.js`, `tarina/ui.js` | 2 istuntoa |
 | 5 | **VIUH:** `moduulit/viuh.js` (logiikka), `viuh/puhelin.js` (UI), `viuh/keikat.json`. Mikrotehtävät S_* siirretään, ja kyydit kulkevat puhelimen kautta. | uusi + `moduulit/kyydit.js` | 2–3 istuntoa |

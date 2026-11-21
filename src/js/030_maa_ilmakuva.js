@@ -3,7 +3,7 @@ const orto = new THREE.Texture();
 orto.colorSpace = THREE.SRGBColorSpace;
 orto.anisotropy = renderer.capabilities.getMaxAnisotropy();
 const groundMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a });
-const outerTex = new THREE.TextureLoader().load('./outer.jpg'); outerTex.colorSpace = THREE.SRGBColorSpace; outerTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+const outerTex = new THREE.TextureLoader().load('./maa/ot_s/outer.jpg'); outerTex.colorSpace = THREE.SRGBColorSpace; outerTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 const outerMat = new THREE.MeshBasicMaterial({ map: outerTex }), roofMat2 = new THREE.MeshBasicMaterial({ map: outerTex, side: THREE.DoubleSide });
 {
   // ground with the river cut out: the core photo, the coarser frame around it, sloped banks / stone quays and the water

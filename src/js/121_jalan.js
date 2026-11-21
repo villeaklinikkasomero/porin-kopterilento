@@ -153,7 +153,7 @@ function stepWalk(dt) {
   if (VEH !== 'car') { S.rotorSpd += (0 - S.rotorSpd) * Math.min(1, dt * 0.6); rotor.rotation.y -= S.rotorSpd * 38 * dt; tailRotor.rotation.x += S.rotorSpd * 55 * dt; }
   if (actx && sGain) sGain.gain.value += ((VEH !== 'car' && soundOn && !WALK.in ? 0.05 * S.rotorSpd : 0) - sGain.gain.value) * Math.min(1, dt * 4);
   const k = walkNear(), h = $('hint'), msg = k === 'in' ? WALK.at.hint : k === 'out' ? 'ulos' : k === 'port' ? WALK.port[6] : k === 'veh' ? (VEH === 'car' ? (CAR.type === 'bike' ? 'nouse pyörälle' : CAR.type === 'bus' ? 'nouse bussiin' : 'nouse autoon') : 'nouse kopteriin') : k === 'plane' ? 'nouse hyppykoneeseen' : k === 'heli' ? 'nouse kopteriin' : k === 'take' ? (TAKE.tgt && TAKE.tgt.bp ? 'aja bussia (linja ' + TAKE.tgt.bp.dep.line + ')' : TAKE.tgt && (TAKE.tgt.b || TAKE.tgt.l && TAKE.tgt.l.type === 'bike') ? 'ota pyörä' : 'ota auto') : (k === 'bus' || k === 'busout') ? window.__bus.hint(k) : '';
-  if (msg) { if (h.dataset.m !== msg) { h.dataset.m = msg; h.innerHTML = (isTouch ? '🚶 ' : '<kbd>Enter</kbd> ') + msg; } h.classList.add('on'); } else h.classList.remove('on');
+  if (msg) { if (h.dataset.m !== msg) { h.dataset.m = msg; h.innerHTML = (isTouch ? (window.ikoni ? window.ikoni('kavely') + ' ' : '') : '<kbd>Enter</kbd> ') + msg; } h.classList.add('on'); } else h.classList.remove('on');
 }
 function walkCamera(dt) {
   const ins = WALK.in, px = ins ? WALK.ix : WALK.x, py = ins ? WALK.iy : WALK.y, yaw = ins ? WALK.iyaw : WALK.yaw, sn = Math.sin(yaw), cs = Math.cos(yaw);

@@ -3,7 +3,7 @@ addEventListener('keydown', e => {
   if (e.target && e.target.tagName === 'INPUT') { if (e.code === 'Enter') { e.target.blur(); LB.save(); } return; }
   if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
   if (e.repeat) return; keys.add(e.code);
-  if (!started) { if (e.code === 'Enter' && !$('go').disabled) begin(); return; }
+  if (!started) { if (e.code === 'Enter' && !$('go').disabled && !(e.target && /BUTTON|SUMMARY/.test(e.target.tagName))) begin('tarina'); return; }   // painike tai Näppäimet-otsake hoitaa oman Enterinsä
   if (e.code === 'KeyC') camMode = (camMode + 1) % 3;
   if (e.code === 'Enter' || e.code === 'NumpadEnter' || (e.code === 'KeyF' && (WALK.on || VEH === 'car'))) walkAction();
   if (e.code === 'KeyT') LB.show(!LB.open);

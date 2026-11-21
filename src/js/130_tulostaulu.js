@@ -58,30 +58,55 @@ const LB = { open: false, rows: [], uid: null, ref: null, field: 'd' + DAY.key, 
     LB.db = db; LB.listen();
   })();
 }
-function pickVeh(v) {
-  VEH = v; try { localStorage.setItem('pori-veh', v); } catch (e) {}
+// 21.11.2026 aloitussivu tarinalle (UI_KONSEPTI_PELIIN.md): pääpainike aloittaa tai jatkaa tarinaa ilman ajoneuvovalintaa. Kopteri/auto-valinta ja
+// päivän kierros (#kierros-osa) näkyvät vasta, kun tarina on antanut kopterin (FLAG_HELI_AUKI). window.__aloitus tulee aloitussivun skriptistä (01_runko.html).
+const ALOITUS = window.__aloitus || { alkanut: false, heli: false };
+let PELITILA = 'tarina';
+function pickVeh(v, muista = true) {
+  VEH = v; if (muista) try { localStorage.setItem('pori-veh', v); } catch (e) {}
   document.body.classList.toggle('car', v === 'car');
   $('vheli').setAttribute('aria-pressed', String(v === 'heli')); $('vcar').setAttribute('aria-pressed', String(v === 'car'));
   heli.visible = v === 'heli'; carG.visible = v === 'car'; if (v === 'car') { loadCar(); resetCar(); }
-  if (!$('go').disabled) $('go').textContent = v === 'car' ? 'Aloita ajo (Enter)' : 'Aloita lento (Enter)';
+  goTeksti();
+}
+function goTeksti(virhe) {
+  const t = $('go-t'), kt = $('gotour').querySelector('span');
+  if ($('go').disabled) return;
+  t.textContent = (virhe ? '(ei ilmakuvaa) ' : '') + (ALOITUS.alkanut ? 'Jatka tarinaa' : 'Aloita tarina');
+  kt.textContent = VEH === 'car' ? 'Aja päivän kierros' : 'Lennä päivän kierros';
 }
 $('vheli').addEventListener('click', () => pickVeh('heli')); $('vcar').addEventListener('click', () => pickVeh('car'));
-pickVeh(VEH);
-function begin() {
-  if (started) return; started = true; $('start').style.display = 'none';
+pickVeh(ALOITUS.heli ? VEH : 'heli', false);
+function begin(tila) {
+  if (started) return; started = true; $('start').style.display = 'none'; document.body.classList.add('aloitettu');
+  PELITILA = tila === 'kierros' && ALOITUS.heli ? 'kierros' : 'tarina';
+  if (PELITILA === 'tarina' && !ALOITUS.heli && VEH !== 'heli') pickVeh('heli', false);   // kopteri on lukossa ja piilossa (155 __heliLukko); tarina laittaa pelaajan jalan aloituspaikkaan
+  window.__pelitila = PELITILA; dispatchEvent(new CustomEvent('pori-aloita', { detail: { tila: PELITILA } }));   // tarina/peli.js: kierroksen HUD-kortti näkyviin vain kierroksella
   if (VEH === 'car') { BESTKEY = 'pori-auto-best-' + DAY.key; try { best = parseFloat(localStorage.getItem(BESTKEY)) || null; } catch (e) { best = null; } LB.useField('c' + DAY.key); }
   camPos.copy(camera.position); camLook.set(HOME.x, 5, -HOME.y);
   initSound(); newTour();
   { const go = () => { if (RADIO.list) { RADIO.ch = 1; RADIO.play(1); } else setTimeout(go, 500); }; go(); }   // Radio Porikopteri is on at the start, in the helicopter too
 }
-$('go').addEventListener('click', begin);
+$('go').addEventListener('click', () => begin('tarina'));
+$('gotour').addEventListener('click', () => begin('kierros'));
+// Aloita alusta: kaksivaiheinen varmistus sivulla (ei selaimen confirm-ikkunaa)
+$('alusta').addEventListener('click', () => { $('alusta').hidden = true; $('alusta-varmista').hidden = false; $('alusta-kylla').focus(); });
+$('alusta-peru').addEventListener('click', () => { $('alusta-varmista').hidden = true; $('alusta').hidden = false; });
+$('alusta-kylla').addEventListener('click', () => {
+  try { localStorage.removeItem('pori-tarina-v1'); localStorage.removeItem('pori-tarina-yhteenveto'); } catch (e) {}
+  const T = window.__tarina; if (T && T.moottori) T.moottori.nollaa();
+  Object.assign(ALOITUS, { alkanut: false, heli: false }); document.body.classList.remove('tarina-alkanut', 'kierros-auki');
+  $('alusta-varmista').hidden = true; $('tall-tiedot').textContent = 'Luku 1 · Eteläranta'; $('kierros-osa').hidden = true;
+  const k = $('tapa-kierros'); k.classList.add('lukossa'); k.querySelector('use').setAttribute('href', '#ik-lukko'); $('kierros-t').textContent = 'Avautuu tarinan edetessä.';
+  pickVeh('heli', false); goTeksti(); $('go').focus();
+});
 for (const id of ['mission', 'mapwrap', 'gauges', 'street', 'help', 'radio']) $(id).style.visibility = 'visible';
 
 // load the aerial image
 {
   const img = new Image();
-  img.onload = () => { orto.image = img; orto.needsUpdate = true; groundMat.color.set(0xffffff); roofMat.color.set(0xffffff); groundMat.needsUpdate = roofMat.needsUpdate = true; $('go').disabled = false; $('go').textContent = isTouch ? 'Aloita lento' : (VEH === 'car' ? 'Aloita ajo (Enter)' : 'Aloita lento (Enter)'); window.__ready = true; };
-  img.onerror = () => { $('go').disabled = false; $('go').textContent = 'Aloita ilman ilmakuvaa'; groundMat.map = null; roofMat.map = null; groundMat.color.set(0x6f7a70); roofMat.color.set(0x8a8f92); groundMat.needsUpdate = roofMat.needsUpdate = true; };
-  img.src = './orto.jpg';
+  img.onload = () => { orto.image = img; orto.needsUpdate = true; groundMat.color.set(0xffffff); roofMat.color.set(0xffffff); groundMat.needsUpdate = roofMat.needsUpdate = true; $('go').disabled = false; $('gotour').disabled = false; goTeksti(); window.__ready = true; };
+  img.onerror = () => { $('go').disabled = false; $('gotour').disabled = false; goTeksti(true); groundMat.map = null; roofMat.map = null; groundMat.color.set(0x6f7a70); roofMat.color.set(0x8a8f92); groundMat.needsUpdate = roofMat.needsUpdate = true; };
+  img.src = './maa/ot_s/orto.jpg';   // 21.11.2026 sävykorjattu (tools/maa/orto_savy.py)
 }
 setTarget();
