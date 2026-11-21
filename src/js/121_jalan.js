@@ -46,6 +46,11 @@ const churchDoor = () => placeDoor(PLACES[0]);
 // 21.11.2026: Porttaalin seinät ja maasiltojen kaiteet kiinteitä myös jalan (rata/rata.js __rataSeina, js/0301 __siltaKaide): askel syvemmälle estetään
 function wallIn(x, y) { const z = WALK.z;
   for (const F of [window.__rataSeina, window.__siltaKaide, window.__alikSeina]) if (F && F(x, y, z) > F(WALK.x, WALK.y, z) + 1e-4) return true; return false; }
+// 21.11.2026 (omistaja: "kävellessä pelaaja hyppää sillalle" (-714, -691)): jyrkkää (yli ~33°) penkkaa tai korkeaa reunaa ei kävellä ylös (Luvianpuistokadun
+// 2 m pyörätiepenger, radan penkka sillalle). Katsotaan 0,8 m eteenpäin: portaat (Etelärannassa enintään 0,4 m / 0,8 m) ja reunakivet menevät.
+function walkSteep(x, y) { const dx = x - WALK.x, dy = y - WALK.y, d = Math.hypot(dx, dy); if (d < 1e-6) return false;
+  const ax = WALK.x + dx / d * 0.8, ay = WALK.y + dy / d * 0.8, g = carGround(ax, ay);
+  return g !== null && g - WALK.z > 0.52; }
 function walkFree(x, y) {
   const g = carGround(x, y); if (g === null) return false; const tb = Math.max(TZs(x, y), TZg(x, y));
   if (onPorinsilta(x, y) !== null) return true;
@@ -125,7 +130,7 @@ function stepWalk(dt) {
     const m0 = WALK.in.map(WALK.ix, WALK.iy), m1 = WALK.in.map(WALK.ix + sn, WALK.iy + cs); S.x = WALK.x = m0[0]; S.y = WALK.y = m0[1]; S.yaw = WALK.yaw = Math.atan2(m1[0] - m0[0], m1[1] - m0[1]);
   } else {
     WALK.yaw += tr; const sn = Math.sin(WALK.yaw), cs = Math.cos(WALK.yaw), dx = (sn * WALK.v + cs * WALK.vs) * dt, dy = (cs * WALK.v - sn * WALK.vs) * dt;
-    const ride = window.__aboard && window.__aboard(), wf = (x, y) => ride ? !window.__walkBlock(x, y) : walkFree(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y) && !(window.__walkBlock && window.__walkBlock(x, y)) && !wallIn(x, y);      // houses, and (20.11.2026) cars and people; 21.11.2026: junassa vain vaunun seinät ja penkit (juna/juna.js)
+    const ride = window.__aboard && window.__aboard(), wf = (x, y) => ride ? !window.__walkBlock(x, y) : walkFree(x, y) && !walkSteep(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y) && !(window.__walkBlock && window.__walkBlock(x, y)) && !wallIn(x, y);      // houses, and (20.11.2026) cars and people; 21.11.2026: junassa vain vaunun seinät ja penkit (juna/juna.js)
     if (moving) { if (wf(WALK.x + dx, WALK.y + dy)) { WALK.x += dx; WALK.y += dy; } else if (wf(WALK.x + dx, WALK.y)) WALK.x += dx; else if (wf(WALK.x, WALK.y + dy)) WALK.y += dy; else WALK.v *= 0.5; }
     if (!ride) { const q = SOLID.pushOut(WALK.x, WALK.y); if (q && walkFree(q[0], q[1])) { const k = Math.min(1, dt * 10); WALK.x += (q[0] - WALK.x) * k; WALK.y += (q[1] - WALK.y) * k; } }      // a car drove onto the player: step out beside it
     WALK.x = Math.max(OX0 - 100, Math.min(OX1 + 100, WALK.x)); WALK.y = Math.max(OY0 - 100, Math.min(OY1 + 100, WALK.y));

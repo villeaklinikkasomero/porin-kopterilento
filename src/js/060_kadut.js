@@ -55,9 +55,18 @@ import('./roads.js').then(mod => {
   const mAsph = surf(tAsph, 1.6, 0xaab0b8, 0.30, -6, 0.9), mPave = surf(tPave, 1.2, 0xd9dde2, 0.42, -6, 0.3);
   const mMark = new THREE.MeshLambertMaterial({ color: 0xe9e9e4, polygonOffset: true, polygonOffsetFactor: -8, polygonOffsetUnits: -8 });
   const mKerb = new THREE.MeshLambertMaterial({ color: 0x9a9893, side: THREE.DoubleSide });
-  const flat = (a, dz) => { const P = new Float32Array(a.length / 2 * 3);
-    for (let i = 0, k = 0; i < a.length; i += 2, k += 3) { const x = a[i] / 10, y = a[i + 1] / 10; P[k] = x; P[k + 1] = groundTop(x, y) + dz; P[k + 2] = -y; }
-    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.computeVertexNormals(); return g; };
+  // 21.11.2026 (omistaja: "pelaajan jalat uppoavat asfaltin sisään"): roads.js:n kolmiot ovat jopa 10 m kokoisia, ja kärkien välissä maa (groundTop: käytävän
+  // 1 m pinta, tasoitukset, alikulut) taipuu – piirretty asfaltti oli paikoin 0,4 m sen pinnan yllä, jolla auto ja jalankulkija seisovat. Kolmio jaetaan
+  // neljään (enintään 5 kertaa), kun maa sen keskellä tai sivujen puolivälissä poikkeaa tasosta yli 4 cm.
+  const flat = (a, dz) => { const out = [];
+    const tri = (A, B, C, d) => { const m = (p, q) => { const x = (p[0] + q[0]) / 2, y = (p[1] + q[1]) / 2; return [x, y, groundTop(x, y)]; };
+      if (d < 5 && Math.max(Math.hypot(A[0] - B[0], A[1] - B[1]), Math.hypot(B[0] - C[0], B[1] - C[1]), Math.hypot(C[0] - A[0], C[1] - A[1])) > 0.7) {
+        const ab = m(A, B), bc = m(B, C), ca = m(C, A), cx = (A[0] + B[0] + C[0]) / 3, cy = (A[1] + B[1] + C[1]) / 3;
+        const dev = Math.max(Math.abs(ab[2] - (A[2] + B[2]) / 2), Math.abs(bc[2] - (B[2] + C[2]) / 2), Math.abs(ca[2] - (C[2] + A[2]) / 2), Math.abs(groundTop(cx, cy) - (A[2] + B[2] + C[2]) / 3));
+        if (dev > 0.04) { tri(A, ab, ca, d + 1); tri(ab, B, bc, d + 1); tri(ca, bc, C, d + 1); tri(ab, bc, ca, d + 1); return; } }
+      for (const p of [A, B, C]) out.push(p[0], p[2] + dz, -p[1]); };
+    for (let i = 0; i + 5 < a.length; i += 6) { const v = [0, 2, 4].map(o => { const x = a[i + o] / 10, y = a[i + o + 1] / 10; return [x, y, groundTop(x, y)]; }); tri(v[0], v[1], v[2], 0); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(out), 3)); g.computeVertexNormals(); return g; };
   const add = (g, m) => { const me = noT(new THREE.Mesh(g, m)); me.matrixAutoUpdate = false; scene.add(me); (window.__roadM = window.__roadM || []).push(me); return me; };
   add(flat(dec(R.asph), ROAD.asph), mAsph); add(flat(dec(R.pave), ROAD.pave), mPave); add(flat(dec(R.mark), ROAD.mark), mMark);
   // stone paving on the pedestrian streets, Eetunaukio and Kauppatori (owner's PBR set pori_kivetys_harmaanpunainen, one repeat = 2.2 m)

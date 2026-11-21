@@ -409,6 +409,11 @@ function buildTunnel(root, G, plats) {
     for (const sd of [-1, 1]) { Q(deckM, V(t, sd * (hw + 0.6), dk), V(t2, sd * (hw + 0.6), dk), V(t2, sd * DW, dk), V(t, sd * DW, dk));
       const g1 = Math.min(dk - 0.3, TZ(...P(t, sd * (DW + 0.8)))), g2 = Math.min(dk - 0.3, TZ(...P(t2, sd * (DW + 0.8))));
       Q(wallM, V(t, sd * DW, g1 - 0.4), V(t2, sd * DW, g2 - 0.4), V(t2, sd * DW, dk), V(t, sd * DW, dk)); } }
+  // 21.11.2026 (omistaja: "pelaaja tippuu katon läpi, puuttuu kansi" (-422, -1000.5)): tunnelin päällä raiteiden ja laitureiden ulkopuolella kansilaatta
+  // jäi 0,55 m kiveystä alemmas ja näkyi kuoppana. Kiveys myös tunnelin päälle 1 m ruuduin, paitsi raiteiden (2,4 m) ja laitureiden kohdalle.
+  for (let t = TUN.t0; t < TUN.t1 - 1e-6; t += 1) for (let l = -(hw + 0.6); l < hw + 0.6 - 1e-6; l += 1) { const t2 = Math.min(TUN.t1, t + 1), l2 = Math.min(hw + 0.6, l + 1), [cx, cy] = P((t + t2) / 2, (l + l2) / 2);
+    if (NEARIDX && NEARIDX(cx, cy, 2.4)) continue; if (plats.some(p => inPoly(cx, cy, p.poly))) continue;
+    Q(deckM, V(t, l, dk), V(t2, l, dk), V(t2, l2, dk), V(t, l2, dk)); }
   for (const [t0, s] of [[TUN.t0, -1], [TUN.t1, 1]]) for (const sd of [-1, 1])   // päätypinnat kannen reunalle portaalin vierestä
     Q(wallM, V(t0, sd * (hw + 0.6), dk), V(t0, sd * DW, dk), V(t0, sd * DW, tunFloor(t0) - 0.2), V(t0, sd * (hw + 0.6), tunFloor(t0) - 0.2));
   for (const [m, arr] of quads) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(arr.flat(), 3));
@@ -687,7 +692,12 @@ function luoRata({ scene, TZg, G }) {
       if (!up) { const l = c.l - tunOff(c.t); return f + (l > TUN.w / 2 - 1.4 && l < TUN.w / 2 + 0.3 ? 0.15 : 0); } }
     const rf = viite(r, x, y);
     for (const p of plats) if (inPoly(x, y, p.poly) && (rf === null || rf > p.z - 2)) return p.z;
-    const b = NZ(x, y, 2.3); if (b && !b.a.lc && (rf === null || rf > b.a.z - 2)) return b.a.z + 0.02; return null; };
+    // jalankulkija (viite oma korkeus): ratapenkalle vain 0,8 m:n päästä (omistaja 21.11.: "kävellessä pelaaja hyppää sillalle" – ennen 2 m:n nousu kerralla)
+    const tol = (r === undefined || r === null) && G.WALK && G.WALK.on ? 0.8 : 2;
+    const b = NZ(x, y, 2.3); if (b && !b.a.lc && (rf === null || rf > b.a.z - tol)) return b.a.z + 0.02;
+    // tunnelin katetun osan päällä (ylhäällä kulkeva): kiveyskansi (buildTunnel dk), ei kaivannon pohja
+    if (c && c.t >= TUN.t0 && c.t <= TUN.t1 && window.__porttaali) return window.__porttaali.slabTop + 0.55 + 0.02;
+    return null; };
   window.__rataSeina = (x, y, z) => tunWallDepth(x, y, z, TZr);
   // bottiautot (js/092): vt 2:n sillan kansi, jos piste on kannella ja auto ajaa sillan suuntaan (alla Ratapihantietä ajava jää alas)
   window.__rataSiltaAjo = (x, y, yaw) => { const sx = Math.sin(yaw), sy = Math.cos(yaw);

@@ -1378,9 +1378,18 @@ import('./roads.js').then(mod => {
   const mAsph = surf(tAsph, 1.6, 0xaab0b8, 0.30, -6, 0.9), mPave = surf(tPave, 1.2, 0xd9dde2, 0.42, -6, 0.3);
   const mMark = new THREE.MeshLambertMaterial({ color: 0xe9e9e4, polygonOffset: true, polygonOffsetFactor: -8, polygonOffsetUnits: -8 });
   const mKerb = new THREE.MeshLambertMaterial({ color: 0x9a9893, side: THREE.DoubleSide });
-  const flat = (a, dz) => { const P = new Float32Array(a.length / 2 * 3);
-    for (let i = 0, k = 0; i < a.length; i += 2, k += 3) { const x = a[i] / 10, y = a[i + 1] / 10; P[k] = x; P[k + 1] = groundTop(x, y) + dz; P[k + 2] = -y; }
-    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3)); g.computeVertexNormals(); return g; };
+  // 21.11.2026 (omistaja: "pelaajan jalat uppoavat asfaltin sisään"): roads.js:n kolmiot ovat jopa 10 m kokoisia, ja kärkien välissä maa (groundTop: käytävän
+  // 1 m pinta, tasoitukset, alikulut) taipuu – piirretty asfaltti oli paikoin 0,4 m sen pinnan yllä, jolla auto ja jalankulkija seisovat. Kolmio jaetaan
+  // neljään (enintään 5 kertaa), kun maa sen keskellä tai sivujen puolivälissä poikkeaa tasosta yli 4 cm.
+  const flat = (a, dz) => { const out = [];
+    const tri = (A, B, C, d) => { const m = (p, q) => { const x = (p[0] + q[0]) / 2, y = (p[1] + q[1]) / 2; return [x, y, groundTop(x, y)]; };
+      if (d < 5 && Math.max(Math.hypot(A[0] - B[0], A[1] - B[1]), Math.hypot(B[0] - C[0], B[1] - C[1]), Math.hypot(C[0] - A[0], C[1] - A[1])) > 0.7) {
+        const ab = m(A, B), bc = m(B, C), ca = m(C, A), cx = (A[0] + B[0] + C[0]) / 3, cy = (A[1] + B[1] + C[1]) / 3;
+        const dev = Math.max(Math.abs(ab[2] - (A[2] + B[2]) / 2), Math.abs(bc[2] - (B[2] + C[2]) / 2), Math.abs(ca[2] - (C[2] + A[2]) / 2), Math.abs(groundTop(cx, cy) - (A[2] + B[2] + C[2]) / 3));
+        if (dev > 0.04) { tri(A, ab, ca, d + 1); tri(ab, B, bc, d + 1); tri(ca, bc, C, d + 1); tri(ab, bc, ca, d + 1); return; } }
+      for (const p of [A, B, C]) out.push(p[0], p[2] + dz, -p[1]); };
+    for (let i = 0; i + 5 < a.length; i += 6) { const v = [0, 2, 4].map(o => { const x = a[i + o] / 10, y = a[i + o + 1] / 10; return [x, y, groundTop(x, y)]; }); tri(v[0], v[1], v[2], 0); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(out), 3)); g.computeVertexNormals(); return g; };
   const add = (g, m) => { const me = noT(new THREE.Mesh(g, m)); me.matrixAutoUpdate = false; scene.add(me); (window.__roadM = window.__roadM || []).push(me); return me; };
   add(flat(dec(R.asph), ROAD.asph), mAsph); add(flat(dec(R.pave), ROAD.pave), mPave); add(flat(dec(R.mark), ROAD.mark), mMark);
   // stone paving on the pedestrian streets, Eetunaukio and Kauppatori (owner's PBR set pori_kivetys_harmaanpunainen, one repeat = 2.2 m)
@@ -2551,6 +2560,11 @@ const churchDoor = () => placeDoor(PLACES[0]);
 // 21.11.2026: Porttaalin seinät ja maasiltojen kaiteet kiinteitä myös jalan (rata/rata.js __rataSeina, js/0301 __siltaKaide): askel syvemmälle estetään
 function wallIn(x, y) { const z = WALK.z;
   for (const F of [window.__rataSeina, window.__siltaKaide, window.__alikSeina]) if (F && F(x, y, z) > F(WALK.x, WALK.y, z) + 1e-4) return true; return false; }
+// 21.11.2026 (omistaja: "kävellessä pelaaja hyppää sillalle" (-714, -691)): jyrkkää (yli ~33°) penkkaa tai korkeaa reunaa ei kävellä ylös (Luvianpuistokadun
+// 2 m pyörätiepenger, radan penkka sillalle). Katsotaan 0,8 m eteenpäin: portaat (Etelärannassa enintään 0,4 m / 0,8 m) ja reunakivet menevät.
+function walkSteep(x, y) { const dx = x - WALK.x, dy = y - WALK.y, d = Math.hypot(dx, dy); if (d < 1e-6) return false;
+  const ax = WALK.x + dx / d * 0.8, ay = WALK.y + dy / d * 0.8, g = carGround(ax, ay);
+  return g !== null && g - WALK.z > 0.52; }
 function walkFree(x, y) {
   const g = carGround(x, y); if (g === null) return false; const tb = Math.max(TZs(x, y), TZg(x, y));
   if (onPorinsilta(x, y) !== null) return true;
@@ -2630,7 +2644,7 @@ function stepWalk(dt) {
     const m0 = WALK.in.map(WALK.ix, WALK.iy), m1 = WALK.in.map(WALK.ix + sn, WALK.iy + cs); S.x = WALK.x = m0[0]; S.y = WALK.y = m0[1]; S.yaw = WALK.yaw = Math.atan2(m1[0] - m0[0], m1[1] - m0[1]);
   } else {
     WALK.yaw += tr; const sn = Math.sin(WALK.yaw), cs = Math.cos(WALK.yaw), dx = (sn * WALK.v + cs * WALK.vs) * dt, dy = (cs * WALK.v - sn * WALK.vs) * dt;
-    const ride = window.__aboard && window.__aboard(), wf = (x, y) => ride ? !window.__walkBlock(x, y) : walkFree(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y) && !(window.__walkBlock && window.__walkBlock(x, y)) && !wallIn(x, y);      // houses, and (20.11.2026) cars and people; 21.11.2026: junassa vain vaunun seinät ja penkit (juna/juna.js)
+    const ride = window.__aboard && window.__aboard(), wf = (x, y) => ride ? !window.__walkBlock(x, y) : walkFree(x, y) && !walkSteep(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y) && !(window.__walkBlock && window.__walkBlock(x, y)) && !wallIn(x, y);      // houses, and (20.11.2026) cars and people; 21.11.2026: junassa vain vaunun seinät ja penkit (juna/juna.js)
     if (moving) { if (wf(WALK.x + dx, WALK.y + dy)) { WALK.x += dx; WALK.y += dy; } else if (wf(WALK.x + dx, WALK.y)) WALK.x += dx; else if (wf(WALK.x, WALK.y + dy)) WALK.y += dy; else WALK.v *= 0.5; }
     if (!ride) { const q = SOLID.pushOut(WALK.x, WALK.y); if (q && walkFree(q[0], q[1])) { const k = Math.min(1, dt * 10); WALK.x += (q[0] - WALK.x) * k; WALK.y += (q[1] - WALK.y) * k; } }      // a car drove onto the player: step out beside it
     WALK.x = Math.max(OX0 - 100, Math.min(OX1 + 100, WALK.x)); WALK.y = Math.max(OY0 - 100, Math.min(OY1 + 100, WALK.y));
