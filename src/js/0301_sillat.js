@@ -58,7 +58,7 @@ const SILTA = { list: [] }; window.__SILTA = SILTA;
         if (t < -0.02 || t > 1.02) continue; const tc = Math.min(1, Math.max(0, t)), px = ax + dx * tc, py = ay + dy * tc; if (Math.hypot(x - px, y - py) > b.hw - 0.05) continue;
         return P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA; } } return null; };
   window.__siltaZ = (x, y, r) => { const d = SILTA.deck(x, y); if (d === null) return null; const ref = r !== undefined && r !== null ? r : (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : d);
-    return (ref === undefined || ref === null || ref > d - 2.2) ? d : null; };
+    return (ref === undefined || ref === null || ref > d - 1.0) ? d : null; };      // 21.11.: 2,2 -> 1,0 m: kannen viereinen tie (Isomäentie, Vähäraumantie) ei enää nosta autoa rinnakkaiselle kannelle
   // 21.11.2026 (omistaja: "auto törmäilee näkymättömään, hyppii oudosti ... bottiautot eivät aja siltaa vaan maanmuotoja pitkin"):
   // SILTA.ajo(x, y, yaw): kannen pinta bottiautolle, jos se on kannella (leveämpi marginaali: OSM-tien keskilinja ei osu tarkasti sillan linjaan) ja ajaa
   //   sillan suuntaan; alla ristiin kulkeva tie jää alas. Ajosuunta (sin yaw, cos yaw) kuten muuallakin.
@@ -70,7 +70,13 @@ const SILTA = { list: [] }; window.__SILTA = SILTA;
         return P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA; } } return null; };
   // SILTA.kaide(x, y, z): kuinka syvällä (m) piste on kaiteessa, kun kulkija on kannen tasolla (z); 0 = vapaa. carBlocked (js/090) estää liikkeen syvemmälle,
   //   joten auto ei enää aja kaiteen läpi ja putoa kannelta alla olevaan leikkaukseen.
-  SILTA.kaide = (x, y, z) => { let best = 0;
+  // 21.11.2026: kaide ei estä kohdassa, joka on toisen (samalla tasolla olevan) kannen ajoradalla: rinnakkaiset ja päällekkäiset kannet
+  //   (TER.bd + automaattiset sillat) piirsivät kaiteen toisen kannen ajoradan poikki -> "näkymätön este".
+  SILTA.ajorata = (x, y, z) => { for (const b of SILTA.list) { if (x < b.bb[0] || y < b.bb[1] || x > b.bb[2] || y > b.bb[3]) continue; const P = b.P, wi = b.hw - PW;
+      for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
+        if (t < -0.02 || t > 1.02) continue; const tc = Math.min(1, Math.max(0, t)); if (Math.hypot(x - ax - dx * tc, y - ay - dy * tc) > wi - 0.1) continue;
+        if (Math.abs(z - (P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA)) < 1.6) return true; } } return false; };
+  SILTA.kaide = (x, y, z) => { let best = 0; if (SILTA.ajorata(x, y, z)) return 0;
     for (const b of SILTA.list) { if (x < b.bb[0] - 1 || y < b.bb[1] - 1 || x > b.bb[2] + 1 || y > b.bb[3] + 1) continue; const P = b.P, wi = b.hw - PW;
       for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
         if (t < 0 || t > 1) continue; const s = Math.hypot(x - ax - dx * t, y - ay - dy * t), d = s - (wi - 0.05); if (d <= 0 || s > b.hw + 0.8) continue;

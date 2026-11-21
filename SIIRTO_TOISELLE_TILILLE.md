@@ -2604,3 +2604,22 @@ aikataulujen kellonaikoja pelin kellosta; kaikki valo lämpimän keltaista **pai
 
 ## 21.11.2026 klo 14.35 – Meshy-promptit tarinan alkuun (omistaja: "kirjoita minulle promptit meshyyn")
 - Uusi `tarvittavat_ominaisuudet/MESHY_PROMPTIT.md`: 44 englanninkielistä Text to 3D -promptia (Vauhtiksen sali ja keittiö, M01:n tavarat, Kaksi Siivua, Satakunnan Varaosa, Kiilto, Lumin piilo, korjaamon toimisto, julkisivumoduulit), koot metreinä ja tiedostonimet. Periaate: ei tekstiä malliin (kyltit koodissa), yksi esine kerrallaan, julkisivut moduuleina olemassa olevan hallin seinään.
+
+## 21.11.2026 – Näkymättömät esteet: koko kartan skannaus (asema-alue pois, toisen chatin työ) + grilli siirretty
+- Skannaus: kaikki CITY.r-ajotiet 1,5 m välein, molemmat kaistat (±1,7 m) ja suunnat, oikea `carBlocked` (liikenne pois, pelaaja autossa, CAR.z jatkuvana
+  tietä pitkin). 556 000 näytettä; syyt luokiteltu. Rakennus- (669) ja pysäköidyt autot -osumat (467) ovat näkyviä esteitä (kapeat kujat talojen vieressä,
+  ilmakuvan autot kadunvarressa; tarkistettu kuvista ja instanssimatriiseista) → ei muutettu.
+- **Korjattu** (näkymättömät):
+  - `src/js/0301_sillat.js`: `SILTA.ajorata(x, y, z)`; kaide ei estä toisen samalla tasolla olevan kannen ajoradalla (rinnakkaiset/päällekkäiset kannet
+    Helsingintiellä, Koillisväylällä jne. piirsivät kaiteen ajoradan poikki). `__siltaZ` nostaa kannelle vain alle 1,0 m (ennen 2,2 m) kannen alapuolelta
+    tulevan → kannen viereinen tie (Isomäentie, Vähäraumantie) ei enää loikkaa rinnakkaiselle kannelle.
+  - `src/js/090_tormaykset.js`: kaide estää vain kannen ajoradalla olevaa autoa ja vain jos kaiteen takana ei ole samassa tasossa olevaa tietä.
+  - `src/js/082_pysakointihalli.js` (carGround): jokisillan (RIV.br) kansi myös rannan puolella sillan linjalla → Linnansillan ja Kirjurinluodontien
+    päissä ei enää 4 m "seinää" (rannalla maa -2,7, kansi 1,3; js/090:n "yli 1 m nousu = seinä" pysäytti auton).
+  - Tulos: siltakaide-/nousuosumat 430 → 44. Jäljellä Raumantie/Helsingintie-, Isomäentie-, Musanportti- ja Vähäraumantie-kansien päissä tiet, jotka
+    tulevat kannelle vinosti 1–1,5 m tasoerolla (kansi ja tie eri korkeudella, näkyvä porras/kaide) – vaatisi kansien sovittamisen teiden linjaan.
+- **juna/juna.js oli rikki** (toisen chatin kommentti `//` sulki pois rivin `}, 500); }` → "missing ) after argument list", IC-juna ei latautunut) → korjattu.
+- **Grilli** (omistaja: "[220.4, -209.7] Grilli tähän paikkaan, Ramilla nälkä, mutta nyt ei saa ruokaa"): `tarina/data/paikat.json` LOC_GRILLI → [220.4, -209.7]
+  (S_GRILLI seuraa). `K_GRILLI.json`: uusi vaihtoehto "Kahvi ja munkki talon piikkiin (+20 ⚡)", näkyy kun ENERGIA ≤ 10 – muuten tyhjällä kukkarolla
+  nälkäinen Rami jäi jumiin (nälkä estää keikat → rahaa ei saa → ruokaa ei saa).
+- Skannausskripti (pilvi): juna/test/scan.mjs – ks. keskustelu; työkaluksi `tools/`:iin tarvittaessa.

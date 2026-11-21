@@ -101,7 +101,7 @@ function carBlocked(x, y, yaw) {   // a corner of the car inside a house or over
     // kulman syvemmälle kaiteeseen / seinään, estetään (kiinni jäänyt pääsee aina pois). Lisäksi yli 1 m pystysuora nousu kulman alla on seinä,
     // ei ramppi: ennen auto loikkasi seinän läpi ratapihan tai kannen tasolle.
     const ox = CAR.x + so * f + co * r, oy = CAR.y + co * f - so * r;
-    if (SK && SK(px, py, CAR.z) > SK(ox, oy, CAR.z) + 1e-4) return true;
+    if (SK && SK(px, py, CAR.z) > SK(ox, oy, CAR.z) + 1e-4 && window.__SILTA.ajorata(ox, oy, CAR.z) && !(Math.abs((carGround(px, py, -1e9) ?? -1e9) - CAR.z) < 0.8)) return true;      // 21.11.: kaide pitää kannen ajoradalla olevan auton kannella; kannen ulkopuolelta (vino tie) ei estetä
     if (RS && RS(px, py, CAR.z) > RS(ox, oy, CAR.z) + 1e-4) return true;
     if (AS && AS(px, py, CAR.z) > AS(ox, oy, CAR.z) + 1e-4) return true;
     { const g0 = carGround(ox, oy); if (g0 !== null && gz - g0 > 1.0 && Math.hypot(px - ox, py - oy) < 3) return true; }

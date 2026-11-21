@@ -64,10 +64,29 @@
      "lahde": "Kaksi Siivua"
     },
     {
+     "teksti": "Kahvi ja munkki talon piikkiin (+20 ⚡)",
+     "ehto": {
+      "muuttuja": "ENERGIA",
+      "enint": 10
+     },
+     "asettaa": {
+      "muuttujat": {
+       "ENERGIA": "+20"
+      }
+     },
+     "rivit": [
+      [
+       "GRILLI",
+       "iloinen",
+       "Näytät siltä, että tarvitset tätä. Maksat ens kerralla."
+      ]
+     ]
+    },
+    {
      "teksti": "Ei tällä kertaa"
     }
    ]
   }
  ],
- "_huom": "Keksitty grilli Kaksi Siivua (omistaja 21.11.2026: omat nimet), rakennus b917. Myyjän malli ja sisätila puuttuvat."
+ "_huom": "Keksitty grilli Kaksi Siivua (omistaja 21.11.2026: omat nimet), rakennus b917. Myyjän malli ja sisätila puuttuvat. 21.11.2026: piikkivaihtoehto, kun energia ≤ 10 – ilman sitä tyhjällä kukkarolla nälkäinen Rami jäi jumiin (nälkä estää keikat, rahaa ei saa)."
 }

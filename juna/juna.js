@@ -132,7 +132,7 @@ async function luoJuna(G) {
     return undefined;
   }
   { let wrapped = null; setInterval(() => { const f = window.__rataZ; if (f && f === wrapped) return; const prev = f;
-      wrapped = window.__rataZ = (x, y, r) => { const j = junaZ(x, y); if (j !== undefined) return j; return prev ? prev(x, y, r) : null; };   // 21.11.2026: viitekorkeus r eteenpäin (rata.js: sillan alla kulkeva ei nouse ratapenkalle) }, 500); }
+      wrapped = window.__rataZ = (x, y, r) => { const j = junaZ(x, y); if (j !== undefined) return j; return prev ? prev(x, y, r) : null; }; }, 500); }   // 21.11.2026: viitekorkeus r eteenpäin (rata.js: sillan alla kulkeva ei nouse ratapenkalle)
   // kyydissä: pelaaja jonkin vaunun kuoren sisällä (vaunun koordinaateissa) – ei riipu kuvataajuudesta
   const inside = c => { const W = G.WALK; rv.set(W.x, W.z, -W.y).applyMatrix4(c.Mi); return Math.abs(rv.x) < 1.5 && Math.abs(rv.z) < 13.1 && rv.y > 0.6 && rv.y < 4.6; };
   const aboard = () => { const W = G.WALK; if (!W || !W.on || W.in) return false; if (ab.c && ab.c.g.visible && inside(ab.c)) return true;

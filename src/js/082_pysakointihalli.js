@@ -30,6 +30,9 @@ function carGround(x, y, ref) {
   { const az = window.__alikZ ? window.__alikZ(x, y, ref) : null; if (az !== null) return az; }      // 21.11.2026: alikulun lattia kannen alla (0106)
   { const rz = window.__rataZ ? window.__rataZ(x, y, ref) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: "pelaaja uppoaa"): aseman laiturit ja ratapenkka (rata/rata.js)
   if (inRiver(x, y)) return onBridgeDeck(x, y) ? brDeckZ(x, y) ?? Math.max(TZs(x, y), TER.wl + 2.2) : null;
+  // 21.11.2026 (omistaja: "näkymättömiä esteitä, joihin auto törmää"): jokisillan kansi jatkuu myös rannan puolella (sillan linja, RIV.br). Ennen auto oli rannalla
+  // maan tasolla (Linnansilta: -2,7 m) ja kansi alkoi 4 m korkeampana joen reunasta -> js/090:n "yli 1 m nousu on seinä" pysäytti auton sillan päähän.
+  { const bz = brDeckZ(x, y, 0); if (bz !== null) { const rr = ref !== undefined && ref !== null ? ref : (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : bz); if (rr === undefined || rr === null || rr > bz - 2.2) return bz; } }
   if (!inCore(x, y) && !TIE.ext(x, y)) return Math.max(TZs(x, y), TZg(x, y) + 0.14);      // (21.11.2026: Tiilimäen ja Isomäen kadut ovat roads.js:ssä, 0105_tie_kaytava.js)      // outside the centre the airport and its roads lie 0.1-0.15 m above the true ground (20.11.2026)
   if (inHall(x, y)) return hallZ(x, y);   // parking hall floor (test)
   if (ROAD.kiviZ) { const k = ROAD.kiviZ(x, y); if (k !== null) return k; }      // on the stone paving of the pedestrian streets and the square

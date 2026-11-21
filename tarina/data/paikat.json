@@ -118,12 +118,11 @@
     "_huom": "maailma.json: Terttu seisoo kojullaan [53.3, 45.4]"
   },
   "LOC_GRILLI": {
-    "x": 463,
-    "y": -273,
+    "x": 220.4,
+    "y": -209.7,
     "nimi": "Grilli Kaksi Siivua",
     "keksitty": true,
-    "tarkista": true,
-    "_huom": "keksitty grilli (omistaja 21.11.2026: omat nimet) yksikerroksisessa rakennuksessa b917 (25 × 9 m), pohjoisseinän edusta"
+    "_huom": "keksitty grilli (omistaja 21.11.2026: omat nimet). Siirretty omistajan pyynnöstä 21.11.2026 kohtaan [220.4, -209.7] (\"Grilli tähän paikkaan\"); ennen [463, -273], rakennus b917"
   },
   "LOC_VAUHTIS_OVI": {
     "x": -37,
