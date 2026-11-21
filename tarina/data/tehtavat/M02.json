@@ -168,14 +168,16 @@
  },
  "antajaPaikka": {
   "paikka": "LOC_KORJAAMO_OVI",
-  "dx": 2
+  "dx": 3.2,
+  "dy": -1.5
  },
  "hahmot": [
   {
    "h": "TAPSA",
    "paikka": {
     "paikka": "LOC_KORJAAMO_OVI",
-    "dx": 2
+    "dx": 3.2,
+    "dy": -1.5
    },
    "suunta": "pelaaja",
    "asti": 1

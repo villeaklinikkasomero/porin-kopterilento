@@ -527,6 +527,18 @@ for _k in np.where(np.array([in_tun(p, 1.5) for p in pts]))[0]:
     t_, l_ = tcoord(pts[_k])
     if t_ > T1 + 3: continue   # lounaassa ajorata on maan tasossa
     fz_ = float(np.interp(t_, _ft, _fz)); fl[_k] = min(fl[_k], fz_ - 0.15)
+# Porttaalin lounaispää (omistaja 21.11.: "tasoitetaan"): ratapenkan luiska portaalin sivuilla tasaiseksi 1:4,5-luiskaksi
+# ratapihan tasosta (t1 + 2) tien tasoon (t1 + 22), sivuilla tukimuurin vierestä 1:1,4; nurmi päälle rata.js:ssä (RATA.tun.gr)
+_hw = TW / 2; _yard = 5.2
+for _k in range(len(pts)):
+    p = pts[_k]; t_, l_ = tcoord(p)
+    if not (T1 - 1 < t_ < T1 + 34 and _hw + 0.3 < abs(l_) < _hw + 26): continue
+    road = float(np.interp(t_, _ft, _fz)) + 0.04
+    prof = _yard if t_ < T1 + 2 else max(road + 0.2, _yard - (t_ - T1 - 2) / 20 * (_yard - road - 0.2))
+    side = road + (abs(l_) - _hw - 0.3) * 0.7 if t_ > T1 + 8 else 1e9
+    z = min(prof, side)
+    if t_ > T1 + 22: z = min(z, float(fl[_k]))
+    fl[_k] = z
 zc = np.where(cm, allz[np.minimum(idx, len(allz) - 1)] - 0.35, 1e9)
 fl[cm] = np.minimum(fl[cm], zc[cm])
 newH = fl.reshape(ny, nx)
@@ -540,7 +552,7 @@ openm = fillbox & ~fillm & (H.ravel() < 3.0)
 op = pts[openm]
 print('open pit cells', len(op), op.min(0) if len(op) else None, op.max(0) if len(op) else None)
 out['ter'] = ovr
-out['tun'] = dict(a=[round(float(v), 2) for v in TA], b=[round(float(v), 2) for v in TB], w=TW, t0=round(T0, 2), t1=round(T1, 2), ft0=-40, fz=[round(float(v), 2) for v in _fz])
+out['tun'] = dict(gr=1, a=[round(float(v), 2) for v in TA], b=[round(float(v), 2) for v in TB], w=TW, t0=round(T0, 2), t1=round(T1, 2), ft0=-40, fz=[round(float(v), 2) for v in _fz])
 json.dump(out, open('rata_data.json', 'w'), separators=(',', ':'))
 
 # ---------------------------------------------------------------- ulkokehän 18 m maaruudukko: raiteiden kohdalta solut pois (rata.js rakentaa niihin 6 m ruudukon)

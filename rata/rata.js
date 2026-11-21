@@ -348,6 +348,7 @@ function buildTunnel(root, G, plats) {
   const tileM = new THREE.MeshStandardMaterial({ map: tileTex, color: 0xffffff, emissive: 0x9aa0a6, emissiveMap: tileTex, roughness: 0.08, metalness: 0.0, side: THREE.DoubleSide });   // kirkkaan valkoinen kiiltävä laatta 10 × 15 cm
   const glowM = new THREE.MeshBasicMaterial({ color: 0xfdfcf6, side: THREE.DoubleSide });                                                    // valaistu valkoinen taustaseinä
   const glassM = new THREE.MeshStandardMaterial({ color: 0xdfeef2, roughness: 0.04, metalness: 0.2, transparent: true, opacity: 0.18, depthWrite: false, side: THREE.DoubleSide });
+  const deckM = new THREE.MeshStandardMaterial({ map: platTex, color: 0x9a9a9a, roughness: 0.9, side: THREE.DoubleSide });
   const frameM = new THREE.MeshStandardMaterial({ color: 0xc8ccd0, roughness: 0.3, metalness: 0.6, side: THREE.DoubleSide });
   const quads = new Map(); const Q = (m, a, b, c, d) => { let L2 = quads.get(m); if (!L2) quads.set(m, L2 = []); L2.push(a, b, c, a, c, d); };
   const V = (t, l, z) => { const [x, y] = P(t, l); return W(x, y, z); };
@@ -386,6 +387,15 @@ function buildTunnel(root, G, plats) {
     Q(wallM, V(t0, -hw - 7.0, top + 0.35), V(t0, hw + 12.0, top + 0.35), V(t0 + s * 0.6, hw + 12.0, top + 0.35), V(t0 + s * 0.6, -hw - 7.0, top + 0.35)); }
   // kansilaatan yläpinta ja sivut (raiteiden ja laitureiden alla, ei näy ylhäältä)
   Q(ceilM, V(TUN.t0, -hw - 1, slabTop), V(TUN.t1, -hw - 1, slabTop), V(TUN.t1, hw + 1, slabTop), V(TUN.t0, hw + 1, slabTop));
+  // kansi aukkojen päälle (omistaja 21.11.: "aukkojen kohdalle voisi lisätä kantta, päädyissä sulkea myös muodolla"): maan ruudukko on leikattu 8,3 m akselista,
+  // joten kansi jatkuu tunnelin sivuille 9 m:iin kiveyksenä ratapihan tasossa, ja sen reunat suljetaan pystypinnalla maahan asti
+  const dk = slabTop + 0.55, DW = hw + 9;
+  for (let t = TUN.t0; t < TUN.t1; t += 2) { const t2 = Math.min(TUN.t1, t + 2);
+    for (const sd of [-1, 1]) { Q(deckM, V(t, sd * (hw + 0.6), dk), V(t2, sd * (hw + 0.6), dk), V(t2, sd * DW, dk), V(t, sd * DW, dk));
+      const g1 = Math.min(dk - 0.3, TZ(...P(t, sd * (DW + 0.8)))), g2 = Math.min(dk - 0.3, TZ(...P(t2, sd * (DW + 0.8))));
+      Q(wallM, V(t, sd * DW, g1 - 0.4), V(t2, sd * DW, g2 - 0.4), V(t2, sd * DW, dk), V(t, sd * DW, dk)); } }
+  for (const [t0, s] of [[TUN.t0, -1], [TUN.t1, 1]]) for (const sd of [-1, 1])   // päätypinnat kannen reunalle portaalin vierestä
+    Q(wallM, V(t0, sd * (hw + 0.6), dk), V(t0, sd * DW, dk), V(t0, sd * DW, tunFloor(t0) - 0.2), V(t0, sd * (hw + 0.6), tunFloor(t0) - 0.2));
   for (const [m, arr] of quads) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(arr.flat(), 3));
     const sc = m === tileM ? 0.6 : 2, uv = []; for (let i = 0; i < arr.length; i++) uv.push(m === tileM ? (arr[i][0] * u[0] - arr[i][2] * u[1]) / sc : (arr[i][0] + arr[i][2]) / sc, arr[i][1] / sc); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.computeVertexNormals();
     const me = new THREE.Mesh(g, m); m.side = THREE.DoubleSide; me.userData.noT = true; root.add(me); }
@@ -401,6 +411,16 @@ function buildTunnel(root, G, plats) {
       for (const k of (sd > 0 ? [0, 1, 2, 0, 2, 3] : [0, 2, 1, 0, 3, 2])) { const [x, y, z] = pts[k]; gp.push(x, z, -y); gu.push((x - OX0) / OXS, (y - OY0) / OYS); } } }
   { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(gu, 2)); g.computeVertexNormals();
     const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ map: G.outerMat ? G.outerMat.map : null, color: 0xffffff })); m.userData.noT = true; root.add(m); }
+  // nurmiluiskat lounaispään portaalin sivuilla (omistaja 21.11.: "pitäisikö lisätä nurmikkoa"): pelin oma nurmitekstuuri (nurmi_albedo/normal/orm.jpg)
+  if (TUN.gr) { const ld = n => { const t = texL.load(new URL('../' + n, import.meta.url).href); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; return t; };
+    const na = ld('nurmi_albedo.jpg'); na.colorSpace = THREE.SRGBColorSpace;
+    const gm = new THREE.MeshStandardMaterial({ map: na, normalMap: ld('nurmi_normal.jpg'), aoMap: ld('nurmi_orm.jpg'), color: 0xb8c0a8, roughness: 0.95, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 }); gm.userData.noT = true;
+    const gp = [], gu = [], gI = []; const S = 1.5;
+    for (const [T0g, LEN, WID] of [[TUN.t1 - 0.5, 34, 25.5], [TUN.t0 - 38, 37.5, 7.5]]) for (const sd of [-1, 1]) { const NT = Math.round(LEN / S), NL = Math.round(WID / S), base = gp.length / 3;   // lounaan luiskat ja koillisrampin reunat
+      for (let i = 0; i <= NT; i++) for (let j = 0; j <= NL; j++) { const t = T0g + i * S, l = sd * (hw + (T0g < TUN.t0 ? 0.35 : 0.4) + j * S) + (sd < 0 && t > TUN.t1 ? off(t) - (t > TUN.t1 + 20 ? 1 + (t - TUN.t1 - 20) * 0.25 : 0) : 0), [x, y] = P(t, l); gp.push(...W(x, y, TZ(x, y) + 0.06)); gu.push(x / 3, y / 3); }
+      for (let i = 0; i < NT; i++) for (let j = 0; j < NL; j++) { const a = base + i * (NL + 1) + j, b = a + NL + 1; if (sd > 0) gI.push(a, b, b + 1, a, b + 1, a + 1); else gI.push(a, b + 1, b, a, a + 1, b + 1); } }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(gp, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(gu, 2)); g.setIndex(gI); g.computeVertexNormals();
+    const m = new THREE.Mesh(g, gm); m.userData.noT = true; root.add(m); }
   window.__porttaali = { top, ceil, slabTop };
   console.log('[rata] Porttaali: lattia', tunFloor(50).toFixed(2), 'katto', ceil.toFixed(2), 'vapaa korkeus', (ceil - tunFloor(50)).toFixed(2), 'm');
 }

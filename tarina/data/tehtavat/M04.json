@@ -90,14 +90,16 @@
  },
  "antajaPaikka": {
   "paikka": "LOC_KORJAAMO_OVI",
-  "dx": 2
+  "dx": 3.2,
+  "dy": -1.5
  },
  "hahmot": [
   {
    "h": "TAPSA",
    "paikka": {
     "paikka": "LOC_KORJAAMO_OVI",
-    "dx": 2.5
+    "dx": 3.2,
+    "dy": -1.5
    },
    "suunta": "pelaaja"
   },
@@ -105,20 +107,20 @@
    "h": "VARTIJA",
    "paikka": {
     "paikka": "LOC_KORJAAMO_OVI",
-    "dx": -2,
-    "dy": -3
+    "dx": -1.6,
+    "dy": -2.4
    },
-   "suunta": 0,
+   "suunta": 180,
    "asti": 1
   },
   {
    "h": "VARTIJA",
    "paikka": {
     "paikka": "LOC_KORJAAMO_OVI",
-    "dx": -5,
-    "dy": -1
+    "dx": -5.5,
+    "dy": 0.5
    },
-   "suunta": 45,
+   "suunta": 120,
    "asti": 1,
    "malli": "npc_vartija_b"
   },
@@ -126,8 +128,8 @@
    "h": "VARTIJA",
    "paikka": {
     "paikka": "LOC_KORJAAMO_OVI",
-    "dx": 1,
-    "dy": -5
+    "dx": 5,
+    "dy": 2.5
    },
    "suunta": "pelaaja",
    "asti": 1,

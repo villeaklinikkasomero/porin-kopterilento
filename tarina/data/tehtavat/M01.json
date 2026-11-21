@@ -77,7 +77,7 @@
    "paikka": "LOC_KORJAAMO",
    "r": 10,
    "kulku": "auto",
-   "teksti": "Aja korjaamolle Isosillan yli",
+   "teksti": "Aja Tapsan korjaamolle Äestäjänkadulle",
    "merkki": "Tapsan korjaamo",
    "cp": true
   }
@@ -104,5 +104,6 @@
    "suunta": "pelaaja",
    "asti": 1
   }
- ]
+ ],
+ "_huom_korjaamo": "Korjaamo siirtyi 21.11.2026 paikkaan [-598.9, -443.0] (ei enää Isosillan takana); CUT_M01_A:n kamera katsoo yhä Isosillalle."
 }

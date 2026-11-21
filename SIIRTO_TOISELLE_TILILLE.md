@@ -2250,3 +2250,31 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
 - **Tiedossa:** viiksekkäillä (Tapsa, Harju, Vartija B) viiksen kärjet liikkuvat hieman leuan mukana. Rami ei liikuta suutaan. Kadun kävelijöillä (npc_mies_a ym.)
   ei ole suun liikettä, vain aiemmat käsieleet.
 - **Huom. rinnakkainen istunto:** lokiin oli tullut rata/juna-merkinnät toisesta istunnosta tämän työn aikana. Tässä muutoksessa ei koskettu `index.html`:ään.
+
+
+## 21.11.2026 – Tapsan korjaamo: halli ja liikkuva nosto-ovi (omistaja: "voidaanko lisätä tapsan halli tähän: [-598.9, -443.0]", "saadaanko nosto-oveen liike")
+- **Uusi `korjaamo/`** (korjaamo.js, korjaamo_mallit.js, README.md) + `tools/korjaamo/tee_mallit.py`; lähdemallit `hahmot/konseptit/3d_lahde/korjaamo/`.
+  Omistajan Meshy-mallit "Rusty Metal Warehouse" (11,7 × 15,1 × 6,7 m) ja "Weathered Garage Door" (skaalattu oviaukkoon 4,15 × 3,9 m).
+- **Paikka:** [-598.9, -443.0], avoin tontti Äestäjänkadun ja Karhunkadun välissä. Ovi katsoo pohjoiseen Äestäjänkadulle (8°), valittu ilmakuvasta: tontti aukeaa sinne.
+- **Nosto-ovi** rullautuu ylös 2,6 s, kun pelaaja on alle 10 m ovesta, ja sulkeutuu yli 13 m päässä. Halliin voi kävellä ja ajaa; seinät ja suljettu ovi kiinteitä (`window.__furn`).
+- **index.html, kaksi lisäystä:** `carGround`iin rivi `window.__korjaamoZ` (lattia ja ajoluiska) quay-rivin jälkeen, ja loppuun `<script type="module" src="korjaamo/korjaamo.js">` ennen tarinaa.
+  (Huom. rata-istunnon `patch_index.py`: jos index.html palautetaan vanhasta kopiosta, nämä kaksi riviä pitää lisätä uudestaan.)
+- **Tarina:** `paikat.json` LOC_KORJAAMO = [-598.9, -443.0], LOC_KORJAAMO_OVI = [-597.2, -433.6] (ennen keksitty paikka joen pohjoispuolella [110, 720]).
+  M01: tavoiteteksti "Aja Tapsan korjaamolle Äestäjänkadulle" (oli "Isosillan yli" – **repliikit ja välianimaation kamera viittaavat yhä Isosiltaan/jokeen, tarkista käsikirjoituksesta**).
+  M02 ja M04: Tapsa oven itäpuolella ulkona; M04: vartijat oven edessä (yksi ovella selin pelaajaan); M05: kuriiri juoksee tontin poikki kadulle itään.
+- **Testattu:** oikea peli headless (ilman rata-/junamoduuleja, ks. alla): halli paikallaan, ovi kiinni → aukeaa pelaajan lähestyessä → sulkeutuu, oven törmäyslaatikko pois/päälle,
+  lattia 5,19 m ja luiska, näkymä sisältä, M04:n hahmot oven edessä; `testi.mjs` 15/15; ei konsolivirheitä.
+- **Ei testattu:** ajaminen sisään autolla ja käveleminen käsin, seinien törmäys käytännössä, toimivuus yhdessä rata/juna-muutosten kanssa (testikopiossa oli index.html ennen niitä;
+  laitteen index.html:ään tehtiin samat kaksi lisäystä tekstikorvauksina), puhelin (mallit 3,1 Mt lisää).
+- **Tiedossa:** ei sisustusta, valoja eikä oven ääntä; katto ei ole kiinteä; hallin vieressä lännessä on LoD-rakennuksen seinä 2–3 m päässä; Kespan kisan ja muiden tehtävien
+  ajomatkat korjaamolle muuttuivat (korjaamo on nyt lounaassa, 1 km Etelärannasta).
+
+
+## 21.11.2026 – Tapsan korjaamon ulkoasu (omistaja: "saadaanko ulkoasua yhtään paremmaksi?")
+- **Mustat laikut seinissä pois:** Meshyn mallissa oli nollanormaaleja (halli 197 pistettä, ovi 30) → pinnat piirtyivät mustina. `tools/korjaamo/tee_mallit.py` laskee ne kolmioista.
+- **Väri ja muoto:** pelissä on vain tasainen, lämmin taivasvalo (HemisphereLight), joten pelti näytti ruskealta ja latteaa. Skripti leipoo pisteväreihin suuntavalon (ovipääty ja katto
+  valoisampia, taka- ja sivuseinä varjossa), tummemman alareunan ja viileämmän sävyn. Sisältä katsottuna seinät ovat samasta syystä hämärät.
+- **Tarkkuus:** hallin tekstuuri 2048 px (oli 1024). `korjaamo_mallit.js` 3,9 Mt (oli 3,1).
+- **Sisustus ja piha (`korjaamo.js` `sisustus()`):** loisteputket, keltamusta ajoruutu ja öljyläikät lattiassa, työpöytä ruuvipenkkeineen ja työkalutauluineen, punainen
+  työkaluvaunu, hylly purkkeineen, rengaspinot, tynnyrit; ulkona renkaat, lava ja valo kyltin päällä. Isoimmille viisi törmäyslaatikkoa lisää (`__furn`).
+- **Testattu** headless-pelissä kuudesta kuvakulmasta (ulkoa kolmesta suunnasta, ovi auki, sisältä molempiin suuntiin), ei konsolivirheitä. **Ei testattu** käsin pelaamalla eikä puhelimella.
