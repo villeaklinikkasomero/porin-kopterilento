@@ -3847,7 +3847,11 @@ $('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.tog
   const mWhite = flatM(0xf1f1ec, -7), mYel = flatM(0xe8b923, -7);
   const B = { rwy: [], twy: [], apn: [], road: [], white: [], yel: [] };
   const push = (k, p) => { const a = B[k]; for (const q of p) a.push(q); };
-  const tri = (k, a, b, c, dz) => { if ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0) { const t = b; b = c; c = t; } push(k, [[a[0], a[1], dz], [b[0], b[1], dz], [c[0], c[1], dz]]); };      /* clockwise in game x/y = counter-clockwise in three's x/-z = facing up */
+  /* 21.11.2026 (omistaja: "portaalin jälkeen kaksi siltaa noudattelevat maastoa … pidemmiksi ja maan tasolle"): Helsingintien sillat Porttaalin yli
+     suoraan pidennettyjen päiden välillä (RATA.silta, rata/rata.js rakentaa kannet); muut tiet (Ratapihantie sillan ali) seuraavat maata */
+  let RSN = ''; const RSZ = p => { if (RSN !== 'Helsingintie' || !RATA.silta) return 0; for (const S of RATA.silta) { const dx = S.b[0] - S.a[0], dy = S.b[1] - S.a[1], L = Math.hypot(dx, dy), t = ((p[0] - S.a[0]) * dx + (p[1] - S.a[1]) * dy) / L, l = ((p[0] - S.a[0]) * dy - (p[1] - S.a[1]) * dx) / L;
+      if (t > 0 && t < L && Math.abs(l) < S.w / 2 + 1) return S.za + (S.zb - S.za) * t / L - G(p[0], p[1]); } return 0; };
+  const tri = (k, a, b, c, dz) => { if ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0) { const t = b; b = c; c = t; } push(k, [[a[0], a[1], dz + RSZ(a)], [b[0], b[1], dz + RSZ(b)], [c[0], c[1], dz + RSZ(c)]]); };      /* clockwise in game x/y = counter-clockwise in three's x/-z = facing up */
   /* split long edges so the surface follows the ground */
   const tris = (k, T, dz, L = 9) => { const st = [...T]; while (st.length) { const [a, b, c] = st.pop(), ab = Math.hypot(a[0] - b[0], a[1] - b[1]), bc = Math.hypot(b[0] - c[0], b[1] - c[1]), ca = Math.hypot(c[0] - a[0], c[1] - a[1]), m = Math.max(ab, bc, ca);
       if (m <= L) { tri(k, a, b, c, dz); continue; } const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
@@ -3876,7 +3880,7 @@ $('tdance').addEventListener('pointerdown', e => { e.preventDefault(); DANCE.tog
       while (s < l) { const left = (on ? len : gap) - acc, step = Math.min(left, l - s); s += step; acc += step; const p = [a[0] + (b[0] - a[0]) * s / l, a[1] + (b[1] - a[1]) * s / l];
         if (on) cur.push(p); if (acc >= (on ? len : gap) - 1e-6) { if (on && cur.length > 1) out.push(cur); on = !on; acc = 0; cur = [p]; } } }
     if (on && cur.length > 1) out.push(cur); for (const q of out) ribbon('white', q, w, dz2, o, 12); };
-  for (const [k, n, w0, lanes, ow, br, tu, P] of ROADS.r) { if (tu) continue; const w = w0 || (lanes ? lanes * 3.4 + 0.8 : RWID[k] || 5);
+  for (const [k, n, w0, lanes, ow, br, tu, P] of ROADS.r) { RSN = n; if (tu) continue; const w = w0 || (lanes ? lanes * 3.4 + 0.8 : RWID[k] || 5);
     let run = []; const flush = () => { if (run.length > 1) { ribbon('road', run, w / 2, 0.12, 0, 10); disc('road', run[0][0], run[0][1], w / 2, 0.12); disc('road', run[run.length - 1][0], run[run.length - 1][1], w / 2, 0.12);
         if (!ow && w >= 5.5 && k !== 'service') dashed(run, 0.06, 0.135, 3, 9);
         if (/^(trunk|primary)$/.test(k)) for (const sd of [1, -1]) ribbon('white', run, 0.06, 0.135, sd * (w / 2 - 0.4), 12); } run = []; };

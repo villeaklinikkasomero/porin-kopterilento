@@ -405,6 +405,30 @@ function buildTunnel(root, G, plats) {
   console.log('[rata] Porttaali: lattia', tunFloor(50).toFixed(2), 'katto', ceil.toFixed(2), 'vapaa korkeus', (ceil - tunFloor(50)).toFixed(2), 'm');
 }
 
+// Helsingintien sillat Porttaalin lounaispään yli (RATA.silta; index.html nostaa tienpinnan suoraksi päiden välille): kansi, reunapalkit, kaiteet, maatuet
+function buildRoadBridges(root, G) {
+  const TZ = G.TZg || G.TZs, conc = M.bridge;
+  for (const S of RATA.silta || []) { const dx = S.b[0] - S.a[0], dy = S.b[1] - S.a[1], L = Math.hypot(dx, dy), u = [dx / L, dy / L], n = [u[1], -u[0]], hw = S.w / 2;
+    const P = (t, l) => [S.a[0] + u[0] * t + n[0] * l, S.a[1] + u[1] * t + n[1] * l], Z = t => S.za + (S.zb - S.za) * t / L + 0.12;
+    const tg = p => (p[0] - S.a[0]) * u[0] + (p[1] - S.a[1]) * u[1], t0 = tg(S.ga) - 4, t1 = tg(S.gb) + 4;   // kansi OSM-sillan päistä 4 m yli
+    const tp = [], tu = [], tI = [];
+    const p = [], I = []; const quad = (a, b, c, d) => { const k = p.length / 3; p.push(...a, ...b, ...c, ...d); I.push(k, k + 1, k + 2, k, k + 2, k + 3, k, k + 2, k + 1, k, k + 3, k + 2); };
+    const V = (t, l, dz) => { const [x, y] = P(t, l); return W(x, y, Z(t) + dz); };
+    for (let t = t0; t < t1; t += 2) { const t2 = Math.min(t1, t + 2);
+      { const k = tp.length / 3; for (const [tt, ll] of [[t, -hw], [t2, -hw], [t2, hw], [t, hw]]) { const v = V(tt, ll, 0.02); tp.push(...v); tu.push((v[0] + 2504.1) / 4954.9, (-v[2] + 3501.6) / 5396.0); } tI.push(k, k + 1, k + 2, k, k + 2, k + 3, k, k + 2, k + 1, k, k + 3, k + 2); }   // kannen pinta: ilmakuvan tie
+      quad(V(t, -hw, -1.0), V(t2, -hw, -1.0), V(t2, hw, -1.0), V(t, hw, -1.0));                // alapinta
+      for (const sd of [-1, 1]) { const l = sd * hw; quad(V(t, l, -1.0), V(t2, l, -1.0), V(t2, l, 0.75), V(t, l, 0.75)); quad(V(t, l, 0.75), V(t2, l, 0.75), V(t2, l - sd * 0.35, 0.75), V(t, l - sd * 0.35, 0.75)); } }
+    // maatuet OSM-sillan päihin: seinä maasta kanteen
+    for (const tt of [tg(S.ga) - 0.5, tg(S.gb) + 0.5]) { const [x0, y0] = P(tt, 0), g = TZ(x0, y0); quad(V(tt, -hw - 1, -1.0), V(tt, hw + 1, -1.0), V(tt, hw + 1, g - Z(tt) - 0.3), V(tt, -hw - 1, g - Z(tt) - 0.3)); }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); g.setIndex(I); g.computeVertexNormals();
+    const m = new THREE.Mesh(g, conc); m.userData.noT = true; root.add(m);
+    { const g2 = new THREE.BufferGeometry(); g2.setAttribute('position', new THREE.Float32BufferAttribute(tp, 3)); g2.setAttribute('uv', new THREE.Float32BufferAttribute(tu, 2)); g2.setIndex(tI); g2.computeVertexNormals();
+      const m2 = new THREE.Mesh(g2, new THREE.MeshBasicMaterial({ map: G.outerMat ? G.outerMat.map : null })); m2.userData.noT = true; root.add(m2); }
+    for (const sd of [-1, 1]) { const pts = []; for (let t = t0; t <= t1; t += 2) pts.push(new THREE.Vector3(...V(t, sd * (hw - 0.17), 1.75)));
+      const tg2 = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), pts.length * 2, 0.04, 5), M.frame); tg2.userData.noT = true; root.add(tg2); }
+  }
+}
+
 // sillat: kansilaatta, reunapalkit ja kaiteet sepelin alle
 function buildBridges(root) {
   const p = [], I = [], rails = [];
@@ -586,6 +610,7 @@ function luoRata({ scene, TZg, G }) {
   buildUnderpass(root, plats, TZg);
   buildCanopy(root, plats);
   buildTunnel(root, G, plats);
+  buildRoadBridges(root, G);
   buildBallastField(root, G, plats);
   buildBridges(root);
   buildCrossings(root);

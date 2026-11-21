@@ -35,5 +35,13 @@ rep(i, """// 21.11.2026: Porttaali-tunnelin kohdalta maan ruudukko pois (rata/ra
 const rataTun = (x, y) => { const T = RATA.tun; if (!T) return false; const ux = T.b[0] - T.a[0], uy = T.b[1] - T.a[1], L = Math.hypot(ux, uy), dx = x - T.a[0], dy = y - T.a[1], t = (dx * ux + dy * uy) / L, l = (dx * uy - dy * ux) / L;
   return t > T.t0 - 40 && t < T.t1 + 36 && l < T.w / 2 + 4.5 && l > -(T.w / 2 + 4.5 + (t > T.t1 ? 4.5 + Math.max(0, t - T.t1 - 20) * 0.25 : 0)); };
 const tSkip = (x, y) => { if (rataTun(x, y)) return true; if (!QUAY_MODEL) return false;""", "T.w / 2 + 4.5")
+t1 = "  const tri = (k, a, b, c, dz) => { if ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0) { const t = b; b = c; c = t; } push(k, [[a[0], a[1], dz], [b[0], b[1], dz], [c[0], c[1], dz]]); };"
+rep(t1, """  /* 21.11.2026 (omistaja: "portaalin jälkeen kaksi siltaa noudattelevat maastoa … pidemmiksi ja maan tasolle"): Helsingintien sillat Porttaalin yli
+     suoraan pidennettyjen päiden välillä (RATA.silta, rata/rata.js rakentaa kannet); muut tiet (Ratapihantie sillan ali) seuraavat maata */
+  let RSN = ''; const RSZ = p => { if (RSN !== 'Helsingintie' || !RATA.silta) return 0; for (const S of RATA.silta) { const dx = S.b[0] - S.a[0], dy = S.b[1] - S.a[1], L = Math.hypot(dx, dy), t = ((p[0] - S.a[0]) * dx + (p[1] - S.a[1]) * dy) / L, l = ((p[0] - S.a[0]) * dy - (p[1] - S.a[1]) * dx) / L;
+      if (t > 0 && t < L && Math.abs(l) < S.w / 2 + 1) return S.za + (S.zb - S.za) * t / L - G(p[0], p[1]); } return 0; };
+  const tri = (k, a, b, c, dz) => { if ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0) { const t = b; b = c; c = t; } push(k, [[a[0], a[1], dz + RSZ(a)], [b[0], b[1], dz + RSZ(b)], [c[0], c[1], dz + RSZ(c)]]); };""", "const RSZ")
+t2 = "  for (const [k, n, w0, lanes, ow, br, tu, P] of ROADS.r) { if (tu) continue;"
+rep(t2, "  for (const [k, n, w0, lanes, ow, br, tu, P] of ROADS.r) { RSN = n; if (tu) continue;", "RSN = n;")
 open(sys.argv[2], 'w', encoding='utf-8').write(s)
 print('ok', len(s))
