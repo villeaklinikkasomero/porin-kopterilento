@@ -51,16 +51,21 @@ async function kuvaa(p) {
   const q = await pg.evaluate(([x, y]) => { const G = window.__game, ok = (a, b) => !(G.bldTopAt && G.bldTopAt(a, b) > G.TZs(a, b) + 1.2);
     if (ok(x, y)) return [x, y, 0]; for (let r = 1; r <= 20; r++) for (let k = 0; k < 16; k++) { const a = x + r * Math.cos(k * Math.PI / 8), b = y + r * Math.sin(k * Math.PI / 8); if (ok(a, b)) return [a, b, r]; } return [x, y, -1]; }, [p.x, p.y]);
   const [X, Y] = q;
-  await pg.evaluate(([X, Y]) => { const G = window.__game, S = G.S; S.x = X; S.y = Y; S.alt = 1500; S.vx = S.vy = S.vz = 0; G.camera.position.set(X, G.TZs(X, Y) + 1.7, -Y); G.world(X, Y); window.__rataCam && window.__rataCam(X, Y); }, [X, Y]);
-  await pg.waitForTimeout(first ? +(process.env.WAIT || 20000) : 7000); first = false;
+  // 21.11.2026: kävelytilassa (WALK.on) peli palauttaa S:n kävelijän paikkaan joka ruudulla ja lataa tarkat ilmakuvalaatat (033) sen mukaan,
+  // joten kävelijä siirretään pisteeseen ja paikka pidetään odotuksen ajan (muuten laatat eivät lataudu ja maa näyttää karkealta ilmakuvalta)
+  const aseta = () => pg.evaluate(([X, Y]) => { const G = window.__game, S = G.S, W = G.WALK; if (W && W.on) { W.x = X; W.y = Y; W.v = 0; W.vs = 0; }
+    S.x = X; S.y = Y; S.vx = S.vy = S.vz = 0; G.camera.position.set(X, G.TZs(X, Y) + 1.7, -Y); G.world(X, Y); window.__rataCam && window.__rataCam(X, Y); }, [X, Y]);
+  const odota = first ? +(process.env.WAIT || 20000) : 7000; first = false;
+  for (let t = 0; t < odota; t += 250) { await aseta(); await pg.waitForTimeout(250); }
   for (const [v, pitch] of [['s', -8], ['m', -38]]) {
     await pg.evaluate(([X, Y, hd, pt]) => { const G = window.__game; G.camera.position.set(X, G.TZs(X, Y) + 1.7, -Y); G.world(X, Y);
       const fc = G.camera.clone(); fc.fov = 65; fc.aspect = innerWidth / innerHeight; fc.near = 0.1; fc.far = 8000; fc.updateProjectionMatrix();
       const z = (window.__game.carGround ? (window.__game.carGround(X, Y, G.TZs(X, Y) + 5) ?? G.TZs(X, Y)) : G.TZs(X, Y)) + 1.7;
       fc.position.set(X, z, -Y); fc.rotation.order = 'YXZ'; fc.rotation.set(pt * Math.PI / 180, -hd * Math.PI / 180, 0); fc.updateMatrixWorld();
       G.camera.position.copy(fc.position); G.camera.quaternion.copy(fc.quaternion);
-      window.__fc = fc; if (!G.renderer.__p) { const o = G.renderer.render.bind(G.renderer); G.renderer.__p = 1; G.renderer.render = (s, c) => o(s, (c === G.camera && window.__fc) ? window.__fc : c); } G.renderer.render(G.scene, fc); }, [X, Y, p.katse, pitch]);
-    await pg.waitForTimeout(3000);
+      // kävelijähahmo (walkG) piiloon kuvasta: se seisoo kameran paikalla
+      window.__fc = fc; if (!G.renderer.__p) { const o = G.renderer.render.bind(G.renderer); G.renderer.__p = 1; G.renderer.render = (s, c) => { if (G.walkG) G.walkG.visible = false; o(s, (c === G.camera && window.__fc) ? window.__fc : c); }; } G.renderer.render(G.scene, fc); }, [X, Y, p.katse, pitch]);
+    await aseta(); await pg.waitForTimeout(3000);
     await pg.screenshot({ path: path.join(OUT, `${p.id}_${v}.jpg`), type: 'jpeg', quality: 85 });
   }
   meta.push({ ...p, x_kuva: +X.toFixed(1), y_kuva: +Y.toFixed(1), siirto_m: q[2] });

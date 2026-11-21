@@ -26,7 +26,7 @@ const LUOKAT = [
   ['jalkakaytava', [1, 1, 1], 1],                 // 2 jalkakäytävä / piha
   ['kiveys', [1, 1, 1], 1],                       // 3 kiveys
   ['pysakointi', [1, 1, 1], 1],                   // 4 pysäköinti
-  ['nurmi', [1, 1, 1], 1],                        // 5 nurmi
+  ['nurmi', [1.1, 1.12, 1.0], 1],                // 5 nurmi (hieman kirkkaampi: testikuvissa tumma)
   ['betoni', [1.08, 0.98, 0.82], 0.6],            // 6 sora (väliaikainen: betoni lämpimänä, tiheämpi)
   ['jalkakaytava', [1.45, 1.25, 0.88], 0.8],      // 7 hiekka (väliaikainen)
   ['multa', [1, 1, 1], 1],                        // 8 multa / istutus
@@ -43,7 +43,7 @@ const PALETTI = [[255, 0, 255], [60, 60, 64], [150, 150, 155], [175, 120, 95], [
   [110, 80, 50], [40, 95, 45], [160, 190, 90], [200, 60, 60], [60, 110, 200], [120, 100, 90], [200, 90, 40], [150, 110, 70]];
 
 export default function kaynnista(P) {
-  const { HR, renderer } = P, M = !!P.isTouch, S = M ? 512 : 1024, SN = 512, PX = 1024;
+  const { HR, renderer, ROOFT } = P, M = !!P.isTouch, S = M ? 512 : 1024, SN = 512, PX = 1024;
   const R0 = M ? 60 : 110, R1 = M ? 90 : 150;
   const sRGBlin = v => Math.pow(v, 2.2);
 
@@ -194,6 +194,9 @@ export default function kaynnista(P) {
   const kierros = () => {
     const nyt = new Set();
     for (const [key, rec] of HR.t) { nyt.add(rec.m); if (!rec.m.userData.maa) laajenna(rec.m, key); }
+    // 0335 (Luvianpuistokadun käytävä) ja muut ROOFT-maapinnat (userData.maa): 033 vaihtaa niille tarkan laatan materiaalin (groundTileMat)
+    if (ROOFT) for (const [key, L] of ROOFT) { if (!HR.t.has(key)) continue; for (const me of L) { if (!me.userData || !me.userData.maa) continue; const m = me.material;
+      if (m && m.map && m !== me.userData.fb) { nyt.add(m); if (!m.userData.maa) laajenna(m, key); } } }
     for (const U of kaikki) { let elossa = false; for (const m of nyt) if (m.userData.maaU === U) { elossa = true; break; } if (!elossa) kaikki.delete(U); }
     // peitelaattojen välimuisti: pidetään vain lähellä olevat (HR.t:n avaimet)
     for (const k of [...peiteVälimuisti.keys()]) if (!HR.t.has(k)) { peiteVälimuisti.get(k).then(t => t && t.dispose()); peiteVälimuisti.delete(k); }

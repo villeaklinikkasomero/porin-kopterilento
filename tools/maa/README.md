@@ -1,7 +1,7 @@
 # tools/maa – maan pinnan työkalut (21.11.2026)
 
-Suunnitelma: `tarvittavat_ominaisuudet/MAAN_PINTA_SUUNNITELMA.md`. Nämä työkalut ovat **valmistelu** (vaiheet 0–2 data): peliin ei ole vielä kytketty
-mitään. Pelin puoli (shaderi `maa/`-moduuliin + kutsupala `src/js/`) tehdään seuraavaksi.
+Suunnitelma: `tarvittavat_ominaisuudet/MAAN_PINTA_SUUNNITELMA.md` (tila: osa 9). **Pelissä 21.11.2026**: sävykorjattu ilmakuva `maa/ot_s/` ja
+maan materiaalimoduuli `maa/maa.js` (kutsu `src/js/0337_maa.js`).
 
 | Työkalu | Tekee | Tulos |
 |---|---|---|
@@ -59,3 +59,8 @@ tagit, pisteet pelin metreinä 0,1 m:iin) ja siirrettiin gzip+base64-paloina (5 
 - Sadevesikaivot ja kaivonkannet ovat sääntöjä OSM-keskiviivasta; peli siirtää ne reunakivelle (`ROAD.paveAt`).
 - Ilmakuvaluokittelu on yksinkertainen (vihreys / hiekanväri / muu = piha): korjataan `korjaukset.json`:lla, missä vertailukuvat näyttävät väärää.
 - `orto_savy.py`: samat ot-laatat ovat myös kattojen tekstuuri (033 `roofTile`), joten korjattujen käyttöönotto muuttaa kattojakin – tarkista kuvista.
+
+## kuvat.mjs: kävelytila (21.11.2026)
+Peli on yleensä kävelytilassa (`WALK.on`): pelaaja palautuu kävelijän paikkaan joka ruudulla ja 033 lataa tarkat laatat sen mukaan. kuvat.mjs siirtää nyt
+kävelijän pisteeseen ja pitää sen siellä odotuksen ajan sekä piilottaa kävelijähahmon. Ilman tätä kaukaiset pisteet kuvautuivat karkealla ilmakuvalla.
+Kuvat voi ottaa myös sovelluksen selaimessa omalla koneella (localhost:8000, `pelaa_paikallisesti.cmd`) – nopea oikealla näytönohjaimella.

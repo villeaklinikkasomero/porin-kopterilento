@@ -2713,3 +2713,16 @@ Tämä osio kokoaa tarinan (Satamakaupunki) ja käyttöliittymän tilanteen. Muu
 - `src/html/01_runko.html`: esittely kahtena kappaleena (Rami palaa, Pori on myynnissä; Varjo ostaa kaupunkia talo kerrallaan, Tapsan korjaamo seuraavana, väärennetyt paperit, joku seuraa Ramia) + kultainen koukku "Kenen kaupunki tämä on, kun Varjo on valmis?" (`p.koukku`).
 - Sarjakuvaruudussa kaksi puhekuplaa käsikirjoituksen M01:stä: Rami "Tulin katsomaan, onko joki vielä paikallaan." / Tapsa "On se. Mut kaikki muu ei kohta oo." (`.kupla.k2`).
 - Kopteri poistettu esittelystä ja korteista: päivän kierros "Avautuu tarinan edetessä." (myös `130_tulostaulu.js` Aloita alusta), VIUH "Keikkoja ympäri Poria. Avautuu tarinassa." / M01:n jälkeen "Jokainen keikka kasvattaa kassaa."
+
+## 21.11.2026 ilta – Maan pinta vaihe 1 ja 2 pelissä (omistaja: "maasta katsottuna maa näyttää materiaaleilta eikä venytetyltä ilmakuvalta"; "uskon värikorjauksiin, ne voidaan toteuttaa")
+- **Sävykorjaus käytössä**: `maa/ot_s/` (108 laattaa + orto.jpg + outer.jpg, tools/maa/orto_savy.py) → 033 (laatat + katot), 030 (outer), 130 (orto). Alkuperäiset ennallaan.
+  `.gitignore`: maa/ot_s/ pois ignoresta (menee repoon, ~56 Mt).
+- **`maa/maa.js`** + kutsupala **`src/js/0337_maa.js`** (osat.txt:ssä 0335:n jälkeen): 0–150 m maa maankäyttökartan mukaisina PBR-materiaaleina (laajentaa 033:n laattojen ja
+  0335:n käytävän materiaalia onBeforeCompile-laajennuksella). Testaus `window.__maa.pois()/.paalle()/.tila()`. Yksityiskohdat: MAAN_PINTA_SUUNNITELMA.md osa 9.
+- `032_heina.js`: vihreysraja nostettu (sävykorjattu orto vihreämpi). `tools/maa/kuvat.mjs`: kävelytilan korjaus.
+- **Testikuvat**: `tools/maa/kuvat/ennen/`, `jalkeen/`, `koonti_ennen_jalkeen.html` (otettu omistajan koneella sovelluksen selaimessa). Lumi ja ilmakuvan autot/varjot
+  poissa ulkoalueilla (Asema-aukio, Lentoasemantie, Mäntyluodontie, Koillisväylä, Tapsan piha); keskustassa maa on jo 060:n katugeometriaa.
+- **Rinnakkaiset chatit**: toinen chat kirjoitti index.html:n vanhoista paloista kesken työn (0337 ja 130:n polku putosivat) → koottu uudelleen; lopputila tarkistettu
+  `kokoa.py --tarkista` = ajan tasalla. Lue aina laitteelta juuri ennen kirjoitusta.
+- **Kesken / seuraavaksi**: Tiilimäen (u03) sumea alue, OSM-lähdemerkintä 01_runko.html:ään (maapeite on OSM-pohjainen ja nyt pelissä!), puuttuvat 5 tekstuuria
+  (latauslupa), vaihe 3 tien yksityiskohdat, vaihe 4 esineet + Meshy. Ei GitHubiin viety (omistaja pushaa itse).

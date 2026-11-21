@@ -157,3 +157,32 @@ Kaikki työkalut ovat `tools/maa/` (ohje `tools/maa/README.md`). Peliin ei ole v
   `tools/maa/kuvat/ennen/` (ei repoon).
 Seuraavaksi (toinen tili): vaihe 1 (sävy käyttöön omistajan luvalla + Lambert-valaistus) ja vaihe 2: `maa/maa.js`-moduuli, joka lataa
 `peite_i_j.png` + `maa/tex/*` ja korvaa 0–150 m maan materiaalin (031 grassify / 033 laatat) luokkapohjaisella PBR-sekoituksella.
+
+## 9. Tila 21.11.2026 myöhäisilta: vaihe 1 käytössä, vaihe 2 ensimmäinen versio pelissä
+- **Sävykorjaus käytössä** (omistaja: "uskon värikorjauksiin, ne voidaan toteuttaa"): `maa/ot_s/` (108 laattaa + orto.jpg + outer.jpg, `tools/maa/orto_savy.py`)
+  on nyt pelin ilmakuva: 033 (laatat ja katot), 030 (outer.jpg), 130 (orto.jpg). Alkuperäiset `ot/`, `orto.jpg`, `outer.jpg` ennallaan (palautus = polut takaisin).
+  `.gitignore`: `maa/ot_s/` poistettu ignoresta → menee repoon (~56 Mt).
+- **`maa/maa.js` + kutsupala `src/js/0337_maa.js`** (`{ HR, renderer, isTouch }`): laajentaa 033:n tarkkojen ilmakuvalaattojen materiaalia (onBeforeCompile,
+  033:a ei muutettu materiaalin osalta). Lataa laatan `maa/peite/peite_I_J.png` (palettikuva → R8-luokkatekstuuri selaimessa) ja `maa/tex/*` (8 kerrosta
+  DataArrayTextureina; tietokone: albedo 1024, normaali+ORM 512; puhelin: kaikki `_m`, ei normaalikarttaa, ei toista näytettä).
+  - 0–110 m materiaali, 110–150 m liuku ilmakuvaan (puhelin 60–90 m). Luokkaraja: 4 naapuritekseliä, kohinasiirto ±0,35 m, korkeussekoitus (ORM B).
+  - Tiilauksen rikkominen: toinen näyte (0,857× + siirto) kohinamaskilla + makrokirkkausvaihtelu 11 m / 2,7 m.
+  - Valo: aurinko (0.79, 0.81, 0.62) kuten 020, normaalikartta; tasainen maa = 1,0 (ilmakuva on valaisematon → sama taso). Yö tulee aika.js:n sävytyksestä.
+  - 25–110 m: ilmakuvan sumea kirkkaus (mip 4,5) sävyttää ±20 %, jotta raja ilmakuvaan ei näy.
+  - Luokat ilmakuva / vesi / rata → ilmakuva. Puuttuvat tekstuurit väliaikaisesti: sora = betoni lämmin, hiekka = jalkakäytävä sävytetty, metsä = multa,
+    niitty = nurmi kellertävä, puu = laatoitus ruskea, rakennus = jalkakäytävä, urheilu = nurmi (`LUOKAT` maa.js:n alussa).
+  - Vertailu pelissä: `window.__maa.pois()` / `.paalle()`, tila `window.__maa.tila()`.
+  - Ei vielä: 0335:n Luvianpuistokadun käytävän 1 m täyte (näyttää ilmakuvaa), ulkokehä (18 m, alueen ulkopuolella), tien yksityiskohdat (vaihe 3), esineet (vaihe 4).
+- **Testikuvat**: `tools/maa/kuvat/ennen/` ja `tools/maa/kuvat/jalkeen/` + `koonti_ennen_jalkeen.html` (otettu omistajan koneella sovelluksen selaimessa,
+  localhost:8000, oikea näytönohjain). **Korjaus `kuvat.mjs`:ään**: kävelytilassa `WALK` palauttaa pelaajan paikan joka ruudulla → kävelijä siirretään pisteeseen
+  ja pidetään siellä odotuksen ajan (muuten tarkat laatat eivät lataudu ja maa on karkeaa ilmakuvaa), kävelijähahmo piilotetaan kuvasta.
+- Lisäksi 21.11. myöhemmin: `032_heina.js` vihreysraja 0.9/0.5 → 1.25/0.75 (sävykorjattu orto oli vihreämpi → tupsut katosivat); maa.js kattaa myös
+  0335:n käytävän 1 m täytteen (ROOFT, `kaynnista_maa({ HR, ROOFT, renderer, isTouch })`); nurmen sävy 1.1/1.12/1.0.
+- **Avoimet**: u03 Tiilimäki – iso sumea alue edelleen ilmakuvana (luokka tarkistamatta: ehkä vesi/ilmakuva/rata maapeitteessä, tai jokin muu verkko;
+  tarkista `peite_1_0.png` px ≈ (60…140, 872)); u10 Linnansilta = sillan kansi (0301, ei maa.js:n alaa); heinätupsut ovat vaaleampia kuin uusi nurmi
+  (032 värittää ilmakuvasta) → sävytä tupsut nurmitekstuurin mukaan; puhelimella ei vielä testattu; FPS ei mitattu.
+- **Seuraavaksi**: (1) puuttuvat 5 ambientCG-tekstuuria (sora Gravel022, hiekka Ground033, metsä Ground026, niitty Grass001, puu Planks021) – **kysy
+  latauslupa**, lataa `tex/`, aja `python tools/maa/tekstuurit.py`, lisää KERROKSET-listaan maa.js:ssä; (2) vaihe 3 tien yksityiskohdat (kaivot, urat,
+  paikkaukset; esineet.json:n sadevesikaivot/kaivonkannet); (3) vaihe 4 esineet esineet.json:n mukaan + Meshy (kysy mallimäärä/krediitit ja GLB-latauslupa
+  ennen erää); (4) OSM-lähdemerkintä `src/html/01_runko.html`:ään – maapeite (OSM-pohjainen) on nyt pelissä, joten "© OpenStreetMap contributors" pitää lisätä
+  tekijätietoihin (EI vielä tehty).

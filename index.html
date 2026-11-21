@@ -870,7 +870,7 @@ const GRASS = (() => {
       float gmin = min(min(c.g - max(c.r, c.b), c1.g - max(c1.r, c1.b)), min(min(c2.g - max(c2.r, c2.b), c3.g - max(c3.r, c3.b)), c4.g - max(c4.r, c4.b)));
       float inside = step(0.0, ou.x) * step(ou.x, 1.0) * step(0.0, ou.y) * step(ou.y, 1.0);
       vec2 ru = (w - uRB.xy) / uRB.zw; if (uRB.z > 0.0 && ru.x > 0.0 && ru.x < 1.0 && ru.y > 0.0 && ru.y < 1.0 && texture2D(uRM, ru).g > 0.4) inside = 0.0;   // street surfaces
-      float gr = smoothstep(0.015, 0.04, gmin) * smoothstep(0.9, 0.5, c.g * 3.0 - c.r - c.b);
+      float gr = smoothstep(0.015, 0.04, gmin) * smoothstep(1.25, 0.75, c.g * 3.0 - c.r - c.b);   // 21.11.2026: raja 0.9/0.5 -> 1.25/0.75, koska sävykorjattu ilmakuva (maa/ot_s) on vihreämpi
       float rnd = fract(iOff.z * 7.13), h = (0.5 + 0.8 * rnd) * uTile.y * gr * fade * inside * smoothstep(0.02, 0.09, c.g);
       if (h < 0.04) { gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
       float a = iOff.z * 6.2832, ca = cos(a), sa = sin(a);
@@ -975,7 +975,7 @@ function hrUpdate(x, y) {
 // maan pinta 0–150 m (puhelimella 0–90 m) maankäyttökartan (maa/peite/) mukaisina PBR-materiaaleina (maa/tex/). Koodi: maa/maa.js.
 // Laajentaa 033:n tarkkojen ilmakuvalaattojen materiaalia (HR.t); kaukana ja kopterista ilmakuva ennallaan. Vertailu: window.__maa.pois() / .paalle().
 import kaynnista_maa from './maa/maa.js';
-kaynnista_maa({ HR, renderer, isTouch });
+kaynnista_maa({ HR, ROOFT, renderer, isTouch });
 // @osa js/0336_alikulut.js
 // ---------- Pyörätien alikulut (21.11.2026, maasto ja data: js/0106_maastokorjaukset.js ALIK) ----------
 // Omistaja: "Sielläkin alikulku" (Tiilimäki, Luvianpuistokatu). Rakenne kuten tyypillinen Porin kevyen liikenteen alikulku: betoninen kehä (seinät ja
