@@ -38,5 +38,6 @@ function readInput() {
   input.s = k('KeyE') - k('KeyQ');
   input.l = k('Space') + k('KeyR') - k('ShiftLeft') - k('ShiftRight') - k('KeyF') + touchIn.l;
   for (const a of ['f', 't', 's', 'l']) input[a] = Math.max(-1, Math.min(1, input[a]));
+  if (window.__syoteLukko) input.f = input.t = input.s = input.l = 0;      // 21.11.2026: tarina ohjaa (esim. drooni M05, tarina/mekaniikat.js)
 }
 

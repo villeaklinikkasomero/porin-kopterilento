@@ -14,6 +14,7 @@ import { luoMoottori } from './moottori.js';
 import { luoUI } from './ui.js';
 import { luoHahmot } from './hahmot.js';
 import { luoTalous } from './talous.js';
+import { luoMekaniikat } from './mekaniikat.js';      // 21.11.2026: Luvun 1 hiiviskely, vesiletku, drooni
 
 const POHJA = new URL('./data/', import.meta.url);
 const hae = async p => (await fetch(new URL(p, POHJA), { cache: 'no-cache' })).json();
@@ -49,7 +50,7 @@ export const KASITTELIJAT = {
     },
     paivita() { return 'valmis'; }
   },
-  // tulossa: hiiviskely, vesiletku, drooni (ks. tarvittavat_ominaisuudet/README.md)
+  // hiiviskely, vesiletku ja drooni: tarina/mekaniikat.js (liitetään käynnistyksessä, tarvitsee pelin scenen)
 };
 let UI = null, tahdetLoppuu = 0, NAUHA = null, kyytiPisteet = null;
 // Kyydit: pelin pisteet = suora matka m / 10, enintään +50 % nopeusbonus, kolhut vähentävät → 1 km = 100–150 pistettä.
@@ -134,6 +135,7 @@ export async function kaynnista() {
   const HH = luoHahmot(G.scene, { hahmot, korkeus: maa });
   M.on('hahmot', l => HH.aseta(l));
   M.on('repliikki', d => HH.puhuu(d && d.hahmo, d && d.toiminta));
+  Object.assign(KASITTELIJAT, luoMekaniikat({ THREE, G, hahmot, maa, luoHahmot }));
   M.lataa(); MK.aseta(M.merkit()); HH.aseta(M.hahmolista());
   TAL = luoTalous(M, { G, ilmoita: (t, ms) => UI.ilmoita(t, ms) }); Object.assign(KASITTELIJAT, TAL.kasittelijat);
 

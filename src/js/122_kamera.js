@@ -6,6 +6,7 @@ function updateCamera(dt) {
   if (!started) { // slow orbit around the square
     introA += dt * 0.12; camera.position.set(HOME.x + Math.sin(introA) * 210, 120, -HOME.y + Math.cos(introA) * 210); camera.lookAt(HOME.x, 10, -HOME.y); return;
   }
+  if (window.__kameraKoukku && window.__kameraKoukku(camera, dt)) return;      // 21.11.2026: tarinan kamera (drooni M05, tarina/mekaniikat.js)
   if (window.__jump && window.__jump.on) return window.__jump.cam(dt, camMode);      // parachute jump
   if (window.__plane && window.__plane.on) return window.__plane.cam(dt, camMode);      // jump plane: cockpit / chase / top-down
   if (window.__bus && window.__bus.cam(dt)) return;      // riding a live bus

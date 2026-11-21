@@ -13,12 +13,12 @@ Järjestetty sen mukaan, kuinka moni tehtävä hyötyy ja kuinka aikaisin ne tul
 | Prioriteetti | Toiminto | Tehtävät | Mitä tarvitaan |
 |---|---|---|---|
 | **1** | Varjo-mittarin jahti (`varjo_mittari` näyttää nyt vain tähdet) + `karista_jahtaajat` | M03, M13, M18, M26 | Vartijabotit ja uutiskopteri jahtaavat; tähdet laskevat katveessa/sillan alla; kiinni jäänti = FAIL "Ammattilaisia ei jää kiinni". PEGI 7: ei vahinkoa, vain kiinniotto. |
-| **1** | `hiiviskely` | M03, M22 (+ M13, M14, M17 käyttävät samaa) | Näkökartiot (vartija, myyjä), kyykky/hidas kävely, huomattu-mittari, laserit (M22). |
+| ✅ (M03) | `hiiviskely` – tehty 21.11.2026 `tarina/mekaniikat.js`; M22 laserit ja M13/M14/M17 käyttävät samaa pohjaa | M03, M22 (+ M13, M14, M17 käyttävät samaa) | Näkökartiot (vartija, myyjä), kyykky/hidas kävely, huomattu-mittari, laserit (M22). |
 | **2** | `vene` + `veneen_takaa_ajo` + `soutukilpa` | M19, M26 | Vene on pelissä (vene.js, perämoottori). Tarvitaan kulku `vene` moottoriin (`maailma()` peli.js:ssä), veneeseen nousu tarinasta ja Varjon veneen botti joella. |
 | **2** | `torni_sisatila`, `torni_kerros20`, `kassakaappi` | M13, M17, M21, M24 | Varjo-tornin sisätila (näyttelykerros, 12. krs palvelinsali, 20. krs toimisto, kattoravintola) – sisätilajärjestelmä on jo olemassa (kirkko, teatteri, kauppahalli). |
 | **2** | `hakkerointi`, `holvi_rytmipeli`, `tiirikka`, `kassakaappi` | M14, M23, M24 | Minipelit (johtojen yhdistäminen, rytmi, tiirikka, kolmivaiheinen kassakaappi). Yksi yhteinen minipelikehys riittää. |
-| **3** | `vesiletku` | M04 | Vesisuihku, vartija liukastuu ja pakenee, tarran repiminen. |
-| **3** | `drooni` | M05 | Drooni kulkuneuvona (kameranäkymä, akku 90 s, valokuvaus). |
+| ✅ | `vesiletku` – tehty 21.11.2026 (`tarina/mekaniikat.js`); Meshyn letku- ja sammutinmalli Ramin käteen puuttuu | M04 | Vesisuihku, vartija liukastuu ja pakenee, tarran repiminen. |
+| ✅ | `drooni` – tehty 21.11.2026 (`tarina/mekaniikat.js`, drooni koodissa, Meshyn drooni.glb korvaa myöhemmin) | M05 | Drooni kulkuneuvona (kameranäkymä, akku 90 s, valokuvaus). |
 | **3** | `juna_rinnalla`, `nappaa_kansio` | M07 | Juna on pelissä (juna/). Tarvitaan junan aikataulu tehtävään, huoltotie radan vieressä ja etäisyysmittari. |
 | **3** | `salakuuntelu` | M09 | Kuuloetäisyysmittari, Varjo kävelee salissa reittiä (moottorin `seuraa`-vaihe käy pohjaksi). |
 | **3** | `seuraa_konetta`, `hyppy_kiitotielle` | M20 | AI-lentokone kiitotiellä ja ilmassa; hyppy kopterista laskuvarjolla (laskuvarjo/hyppy.js on olemassa); kiitotiemerkki. |

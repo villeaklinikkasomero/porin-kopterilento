@@ -32,7 +32,7 @@
    "tyyppi": "toiminto",
    "nimi": "drooni",
    "cp": true,
-   "teksti": "Lennätä drooni Varjo-tornin työmaalle ja kuvaa kolme suunnitelmataulua",
+   "teksti": "Lennätä drooni Varjo-tornin työmaalle, kuvaa kolme suunnitelmataulua ja palaa Ramin luo",
    "param": {
     "paikka": "LOC_VARJOTORNI",
     "taulut": [
@@ -49,10 +49,12 @@
       -135
      ]
     ],
-    "akku": 90,
-    "tormayksia": 3
+    "akku": 200,
+    "tormayksia": 3,
+    "nopeus": 24
    },
-   "failTeksti": "Droonin akku loppui."
+   "failTeksti": "Droonin akku loppui.",
+   "_huom": "Työmaa on 1 km korjaamolta: 24 m/s → n. 45 s suuntaansa. Akku 200 s (käsikirjoituksen 90 s ei riitä tälle matkalle; testilento ilman taloja 145 s)."
   },
   {
    "tyyppi": "repliikit",

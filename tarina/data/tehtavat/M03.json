@@ -49,30 +49,36 @@
    "tyyppi": "toiminto",
    "nimi": "hiiviskely",
    "cp": true,
-   "teksti": "Hiivi myyjän ohi toimistoon",
+   "teksti": "Hiivi myyjän ohi toimiston ovelle (kävele, älä juokse)",
    "param": {
     "vartijat": [
      {
       "hahmo": "MYYJA",
-      "paikka": "LOC_KIILTO",
       "kierros": [
        [
-        -388,
-        -96
+        -565,
+        -424
        ],
        [
-        -372,
-        -96
+        -540,
+        -429.5
        ],
        [
-        -372,
-        -86
+        -541,
+        -421
+       ],
+       [
+        -563,
+        -416
        ]
       ],
-      "nako": 12
+      "nako": 12,
+      "nopeus": 1.15,
+      "tauko": 2.5
      }
     ],
-    "kohde": "LOC_KIILTO_TOIMISTO"
+    "kohde": "LOC_KIILTO_TOIMISTO",
+    "r": 2.2
    },
    "failTeksti": "SYS_FAIL_SPOTTED"
   },
@@ -99,6 +105,21 @@
      "Hei! Tää on yksityisalue!"
     ]
    ]
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "anna_ajoneuvo",
+   "teksti": "Avaimet sopivat asiakkaan farmariin",
+   "param": {
+    "paikka": "LOC_KIILTO",
+    "dx": 8,
+    "dy": -1,
+    "yaw": 1.8,
+    "tyyppi": "estate",
+    "vari": "#3a5f8a",
+    "viesti": "🔑 Asiakkaan farmari – avaimet sopivat"
+   },
+   "puuttuuOhita": 0.5
   },
   {
    "tyyppi": "kulku",
@@ -133,6 +154,21 @@
    "paikka": "LOC_KIILTO",
    "r": 25,
    "teksti": "Hae toinen auto Kiillosta"
+  },
+  {
+   "tyyppi": "toiminto",
+   "nimi": "anna_ajoneuvo",
+   "teksti": "Toinen asiakkaan auto",
+   "param": {
+    "paikka": "LOC_KIILTO",
+    "dx": -6,
+    "dy": 2,
+    "yaw": 1.8,
+    "tyyppi": "hatch",
+    "vari": "#b33a2e",
+    "viesti": "🔑 Toinen asiakkaan auto"
+   },
+   "puuttuuOhita": 0.5
   },
   {
    "tyyppi": "kulku",
@@ -173,12 +209,25 @@
   {
    "h": "MYYJA",
    "paikka": {
+    "paikka": "LOC_KIILTO",
+    "dx": -12,
+    "dy": -5
+   },
+   "suunta": 90,
+   "alkaen": 1,
+   "asti": 2
+  },
+  {
+   "h": "MYYJA",
+   "paikka": {
     "paikka": "LOC_KIILTO_TOIMISTO",
-    "dx": -4
+    "dx": -4,
+    "dy": 2
    },
    "suunta": "pelaaja",
-   "alkaen": 1,
-   "asti": 5
+   "alkaen": 4,
+   "asti": 6
   }
- ]
+ ],
+ "_huom_hiiviskely": "21.11.2026: myyjä partioi pihalla tarina/mekaniikat.js hiiviskely-käsittelijällä; kierros hallin b557 edessä. Asiakkaiden autot antaa anna_ajoneuvo."
 }

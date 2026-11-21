@@ -168,7 +168,10 @@ Kokeilusivulla **Z** vaihtaa lähikuvaan, jossa hahmot näkyvät.
 - **Oikeassa pelissä testattu vain headless 21.11.2026** (hahmot paikoillaan, M04:n vartijat, M05:n kuriiri, ei konsolivirheitä); tehtäviä ei ole pelattu käsin. Sovitin olettaa, että `window.__walk.on`, `window.__car.type`, body-luokka `car` ja `__game.S.{x, y, alt, hp, dead}` toimivat kuten 20.11. koodissa.
 - **Paikat ovat arvioita** (`tarkista: true`), samoin M02:n kilpaportit. Mittaa ne pelissä kehittäjätilassa (Ctrl+Shift+K).
 - Hahmot seisovat paikoillaan (Idle) tai kulkevat suoraa viivaa (`mene`); reitinhakua ei ole, ja Tapsan kilpa on yhä aikaraja. Hyppykoneessa ja laskuvarjohypyssä X, P ja O ovat koneen omia eivätkä ohjaa tarinaa.
-- **Puuttuvat toiminnot:** hiiviskely, vesiletku, drooni ja Varjo-mittarin varsinainen jahtaus. Ne ohitetaan automaattisesti. `varjo_mittari` näyttää nyt vain tähdet.
+- **Luvun 1 mekaniikat valmiit (21.11.2026, `mekaniikat.js`):** `hiiviskely` (M03: partioiva myyjä, näkökartio maassa, talot katveena, juoksu kuuluu 7 m, huomattu-mittari),
+  `vesiletku` (M04: X pohjassa suihkuttaa, kastunut vartija liukastuu ja juoksee pois, tarrat ovissa = FAIL) ja `drooni` (M05: oma ohjaus ja kamera, työmaan taulut ja nosturit,
+  akku, törmäykset). Pelin koukut: `window.__syoteLukko` (src/js/110) ja `window.__kameraKoukku` (src/js/122).
+  Meshyn mallit `mallit/vesiletku.js` ja `mallit/sammutin.js` (base64-GLB, tekstuurit pienennetty `tools/glb_tekstuurit.py`:llä; lähteet `hahmot/konseptit/3d_lahde/korjaamo/`): kela ja sammutin korjaamon seinän vieressä, M04:ssä letku kelalta Ramin käteen. Varjo-mittarin jahtaus puuttuu yhä (`varjo_mittari` näyttää tähdet).
 - **Merkkien korkeus:** pilari ulottuu 6 m maan alle ja 64 m ylös, joten maaston korkeus ei haittaa. Rengas on tasolla 0.
 - **Kun index.html pilkotaan:** `peli.js`:n `maailma()` ja `siirra()` ovat ainoat kohdat, jotka lukevat pelin sisäistä tilaa.
 

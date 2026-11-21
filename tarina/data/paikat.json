@@ -1,39 +1,235 @@
 {
-  "_ohje": "Pelin karttametrit (x itään, y pohjoiseen) kuten window.__walk / __car. 'tarkista': true = arvio, mittaa pelissä kehittäjätilassa (Ctrl+Shift+D, sitten Ctrl+Shift+K kopioi oman paikan).",
-  "LOC_ALOITUS":       { "x": -169, "y": 676, "nimi": "Kirjurinluodon nokka", "_huom": "omistaja 21.11.2026: tarina alkaa tästä jalan; Taavi-silta [-166, 652] → [-149, 526] vie Etelärannalle Tapsan luo. Maa tarkistettu (inRiver 0)." },
-  "LOC_ETELARANTA":    { "x": -8.1, "y": 478.9, "nimi": "Eteläranta" },
-  "LOC_ISOSILTA":      { "x": 229,  "y": 560, "nimi": "Isosilta" },
-  "LOC_POHJOISRANTA":  { "x": 0,    "y": 650, "nimi": "Pohjoisranta", "tarkista": true },
-  "LOC_KESPA_LAHTO":   { "x": 32.6, "y": -339.0, "nimi": "Kespan lenkin lähtö (Mikonkatu)" },
-  "LOC_TORI":          { "x": 64,   "y": 65,  "nimi": "Kauppatori" },
-  "LOC_RAATIHUONE":    { "x": -116, "y": 394, "nimi": "Vanha raatihuone" },
-  "LOC_KAUPUNGINTALO": { "x": -58,  "y": 331, "nimi": "Junneliuksen palatsi" },
-  "LOC_TEATTERI":      { "x": -201, "y": 378, "nimi": "Porin Teatteri" },
-  "LOC_KIRKKO":        { "x": 293,  "y": 370, "nimi": "Keski-Porin kirkko" },
-  "LOC_KIRJURINLUOTO": { "x": -420, "y": 1000, "nimi": "Kirjurinluoto", "tarkista": true },
-  "LOC_ASEMA":         { "x": -443, "y": -940, "nimi": "Rautatieasema", "tarkista": true, "_huom": "21.11.2026 siirretty asemarakennuksen malliin (040 LMAT asema [-443, -954]); mittaa laituri" },
-  "LOC_MUSEO":         { "x": -265, "y": 456, "nimi": "Satakunnan Museo" },
-  "LOC_TAIDEMUSEO":    { "x": -95,  "y": 463, "nimi": "Porin taidemuseo" },
-  "LOC_LENTOASEMA":    { "x": -170, "y": -1972, "nimi": "Porin lentoasema", "tarkista": true, "_huom": "21.11.2026: terminaalin edusta (180_lentoasema.js bld terminal [-159, -1987.6])" },
-  "LOC_KORJAAMO":      { "x": -598.9, "y": -443.0, "nimi": "Tapsan korjaamo", "keksitty": true, "_huom": "omistajan paikka 21.11.2026; halli korjaamo/korjaamo.js, ovi katsoo pohjoiseen Äestäjänkadulle" },
-  "LOC_KORJAAMO_OVI":  { "x": -597.2, "y": -433.6, "nimi": "Korjaamon ovi", "keksitty": true, "_huom": "3,4 m nosto-oven edessä ulkona (korjaamo.js OVI_ULKONA)" },
-  "LOC_KORJAAMO_PIHA": { "x": -596.4, "y": -427.7, "nimi": "Korjaamon piha", "keksitty": true, "_huom": "6 m oven edessä: Ramin vanha farmari (M01), yaw 0.14 = nokka kadulle" },
-  "LOC_VAUHTIS": { "x": -37, "y": -518, "nimi": "Ravintola Vauhtipyörä (Vauhtis)", "keksitty": true, "tarkista": true, "_huom": "keksitty ravintola (omistaja 21.11.2026: omat nimet) rakennuksen b109 katutasossa; r 18 ulottuu kadulle" },
-  "LOC_TERTUN_KOJU": { "x": 53.3, "y": 48.5, "nimi": "Tertun torikoju", "_huom": "maailma.json: Terttu seisoo kojullaan [53.3, 45.4]" },
-  "LOC_GRILLI": { "x": 463, "y": -273, "nimi": "Grilli Kaksi Siivua", "keksitty": true, "tarkista": true, "_huom": "keksitty grilli (omistaja 21.11.2026: omat nimet) yksikerroksisessa rakennuksessa b917 (25 × 9 m), pohjoisseinän edusta" },
-  "LOC_VAUHTIS_OVI": { "x": -37, "y": -500, "nimi": "Vauhtiksen ovi", "keksitty": true, "tarkista": true, "_huom": "arvio: rakennuksen b109 pohjoisseinä; keittiön takaovi lisätään sisätilan kanssa" },
-  "LOC_VARAOSALIIKE": { "x": -490, "y": -441, "nimi": "Satakunnan Varaosa", "keksitty": true, "tarkista": true, "_huom": "omistaja 21.11.2026: teollisuusalueen halli b558 (90 m pitkä, 16 m), uusi julkisivu Meshyllä; myymälän ovi pohjoisseinällä (arvio)" },
-  "LOC_VARAOSA_LAITURI": { "x": -490, "y": -468, "nimi": "Varaosaliikkeen lastauslaituri", "keksitty": true, "tarkista": true, "_huom": "hallin b558 eteläseinä (arvio)" },
-  "LOC_KAUPPAHALLI": { "x": 150, "y": -15, "nimi": "Kauppahalli", "_huom": "040 LMAT kauppahalli [150, -32.8], edusta" },
-  "LOC_TEHDAS": { "x": 160.2, "y": 763.6, "nimi": "Vanha tehdasalue", "_huom": "040 LMAT tehdas (bl_tehdas.js)" },
-  "LOC_HOTELLI": { "x": 200, "y": 40, "nimi": "Hotelli Varjo", "keksitty": true, "tarkista": true },
-  "LOC_VARASTO": { "x": -650, "y": 560, "nimi": "Varjon varasto", "keksitty": true, "tarkista": true, "_huom": "satamakontit joen rannassa" },
-  "LOC_TUHOLAISTORJUJA": { "x": 300, "y": -80, "nimi": "Tuholaistorjuja Ötökkä-Oy", "keksitty": true, "tarkista": true },
-  "LOC_MUSEO_TAKAOVI": { "x": -280, "y": 445, "nimi": "Satakunnan Museon takaovi", "tarkista": true },
-  "LOC_LENTOASEMA_HALLI": { "x": -373.7, "y": -1976.2, "nimi": "Lentoaseman huoltohalli ja asemataso", "tarkista": true },
-  "LOC_KIITOTIE": { "x": -703.9, "y": -2048.9, "nimi": "Kiitotien 12 pää", "_huom": "180_lentoasema.js rwy 12/30 ta" },
-  "LOC_PIILO":         { "x": -80, "y": 903, "nimi": "Lumin piilo", "keksitty": true, "tarkista": true, "_huom": "omistaja 21.11.2026: Isosanta. Isosannan vanha sähköasema (1939, punatiili, b1307, 28 × 37 m), eteläpääty (arvio); mittaa ovi" },
-  "LOC_VARJOTORNI":    { "x": 420,  "y": -150, "nimi": "Varjo-tornin työmaa", "keksitty": true, "tarkista": true },
-  "LOC_KIILTO":        { "x": -550, "y": -427, "nimi": "Autoliike Kiilto", "keksitty": true, "tarkista": true, "_huom": "omistaja 21.11.2026: teollisuusalueen halli b557 korjaamon naapurissa, uusi julkisivu Meshyllä (näyttelyikkunat); ovi pohjoiseen (arvio). Ennen kerrostalon kohdalla [-380, -90]." },
-  "LOC_KIILTO_TOIMISTO": { "x": -372, "y": -82, "nimi": "Kiillon toimisto", "keksitty": true, "tarkista": true }
+ "_ohje": "Pelin karttametrit (x itään, y pohjoiseen) kuten window.__walk / __car. 'tarkista': true = arvio, mittaa pelissä kehittäjätilassa (Ctrl+Shift+D, sitten Ctrl+Shift+K kopioi oman paikan).",
+ "LOC_ALOITUS": {
+  "x": -169,
+  "y": 676,
+  "nimi": "Kirjurinluodon nokka",
+  "_huom": "omistaja 21.11.2026: tarina alkaa tästä jalan; Taavi-silta [-166, 652] → [-149, 526] vie Etelärannalle Tapsan luo. Maa tarkistettu (inRiver 0)."
+ },
+ "LOC_ETELARANTA": {
+  "x": -8.1,
+  "y": 478.9,
+  "nimi": "Eteläranta"
+ },
+ "LOC_ISOSILTA": {
+  "x": 229,
+  "y": 560,
+  "nimi": "Isosilta"
+ },
+ "LOC_POHJOISRANTA": {
+  "x": 0,
+  "y": 650,
+  "nimi": "Pohjoisranta",
+  "tarkista": true
+ },
+ "LOC_KESPA_LAHTO": {
+  "x": 32.6,
+  "y": -339.0,
+  "nimi": "Kespan lenkin lähtö (Mikonkatu)"
+ },
+ "LOC_TORI": {
+  "x": 64,
+  "y": 65,
+  "nimi": "Kauppatori"
+ },
+ "LOC_RAATIHUONE": {
+  "x": -116,
+  "y": 394,
+  "nimi": "Vanha raatihuone"
+ },
+ "LOC_KAUPUNGINTALO": {
+  "x": -58,
+  "y": 331,
+  "nimi": "Junneliuksen palatsi"
+ },
+ "LOC_TEATTERI": {
+  "x": -201,
+  "y": 378,
+  "nimi": "Porin Teatteri"
+ },
+ "LOC_KIRKKO": {
+  "x": 293,
+  "y": 370,
+  "nimi": "Keski-Porin kirkko"
+ },
+ "LOC_KIRJURINLUOTO": {
+  "x": -420,
+  "y": 1000,
+  "nimi": "Kirjurinluoto",
+  "tarkista": true
+ },
+ "LOC_ASEMA": {
+  "x": -443,
+  "y": -940,
+  "nimi": "Rautatieasema",
+  "tarkista": true,
+  "_huom": "21.11.2026 siirretty asemarakennuksen malliin (040 LMAT asema [-443, -954]); mittaa laituri"
+ },
+ "LOC_MUSEO": {
+  "x": -265,
+  "y": 456,
+  "nimi": "Satakunnan Museo"
+ },
+ "LOC_TAIDEMUSEO": {
+  "x": -95,
+  "y": 463,
+  "nimi": "Porin taidemuseo"
+ },
+ "LOC_LENTOASEMA": {
+  "x": -170,
+  "y": -1972,
+  "nimi": "Porin lentoasema",
+  "tarkista": true,
+  "_huom": "21.11.2026: terminaalin edusta (180_lentoasema.js bld terminal [-159, -1987.6])"
+ },
+ "LOC_KORJAAMO": {
+  "x": -598.9,
+  "y": -443.0,
+  "nimi": "Tapsan korjaamo",
+  "keksitty": true,
+  "_huom": "omistajan paikka 21.11.2026; halli korjaamo/korjaamo.js, ovi katsoo pohjoiseen Äestäjänkadulle"
+ },
+ "LOC_KORJAAMO_OVI": {
+  "x": -597.2,
+  "y": -433.6,
+  "nimi": "Korjaamon ovi",
+  "keksitty": true,
+  "_huom": "3,4 m nosto-oven edessä ulkona (korjaamo.js OVI_ULKONA)"
+ },
+ "LOC_KORJAAMO_PIHA": {
+  "x": -596.4,
+  "y": -427.7,
+  "nimi": "Korjaamon piha",
+  "keksitty": true,
+  "_huom": "6 m oven edessä: Ramin vanha farmari (M01), yaw 0.14 = nokka kadulle"
+ },
+ "LOC_VAUHTIS": {
+  "x": -37,
+  "y": -518,
+  "nimi": "Ravintola Vauhtipyörä (Vauhtis)",
+  "keksitty": true,
+  "tarkista": true,
+  "_huom": "keksitty ravintola (omistaja 21.11.2026: omat nimet) rakennuksen b109 katutasossa; r 18 ulottuu kadulle"
+ },
+ "LOC_TERTUN_KOJU": {
+  "x": 53.3,
+  "y": 48.5,
+  "nimi": "Tertun torikoju",
+  "_huom": "maailma.json: Terttu seisoo kojullaan [53.3, 45.4]"
+ },
+ "LOC_GRILLI": {
+  "x": 463,
+  "y": -273,
+  "nimi": "Grilli Kaksi Siivua",
+  "keksitty": true,
+  "tarkista": true,
+  "_huom": "keksitty grilli (omistaja 21.11.2026: omat nimet) yksikerroksisessa rakennuksessa b917 (25 × 9 m), pohjoisseinän edusta"
+ },
+ "LOC_VAUHTIS_OVI": {
+  "x": -37,
+  "y": -500,
+  "nimi": "Vauhtiksen ovi",
+  "keksitty": true,
+  "tarkista": true,
+  "_huom": "arvio: rakennuksen b109 pohjoisseinä; keittiön takaovi lisätään sisätilan kanssa"
+ },
+ "LOC_VARAOSALIIKE": {
+  "x": -490,
+  "y": -441,
+  "nimi": "Satakunnan Varaosa",
+  "keksitty": true,
+  "tarkista": true,
+  "_huom": "omistaja 21.11.2026: teollisuusalueen halli b558 (90 m pitkä, 16 m), uusi julkisivu Meshyllä; myymälän ovi pohjoisseinällä (arvio)"
+ },
+ "LOC_VARAOSA_LAITURI": {
+  "x": -490,
+  "y": -468,
+  "nimi": "Varaosaliikkeen lastauslaituri",
+  "keksitty": true,
+  "tarkista": true,
+  "_huom": "hallin b558 eteläseinä (arvio)"
+ },
+ "LOC_KAUPPAHALLI": {
+  "x": 150,
+  "y": -15,
+  "nimi": "Kauppahalli",
+  "_huom": "040 LMAT kauppahalli [150, -32.8], edusta"
+ },
+ "LOC_TEHDAS": {
+  "x": 160.2,
+  "y": 763.6,
+  "nimi": "Vanha tehdasalue",
+  "_huom": "040 LMAT tehdas (bl_tehdas.js)"
+ },
+ "LOC_HOTELLI": {
+  "x": 200,
+  "y": 40,
+  "nimi": "Hotelli Varjo",
+  "keksitty": true,
+  "tarkista": true
+ },
+ "LOC_VARASTO": {
+  "x": -650,
+  "y": 560,
+  "nimi": "Varjon varasto",
+  "keksitty": true,
+  "tarkista": true,
+  "_huom": "satamakontit joen rannassa"
+ },
+ "LOC_TUHOLAISTORJUJA": {
+  "x": 300,
+  "y": -80,
+  "nimi": "Tuholaistorjuja Ötökkä-Oy",
+  "keksitty": true,
+  "tarkista": true
+ },
+ "LOC_MUSEO_TAKAOVI": {
+  "x": -280,
+  "y": 445,
+  "nimi": "Satakunnan Museon takaovi",
+  "tarkista": true
+ },
+ "LOC_LENTOASEMA_HALLI": {
+  "x": -373.7,
+  "y": -1976.2,
+  "nimi": "Lentoaseman huoltohalli ja asemataso",
+  "tarkista": true
+ },
+ "LOC_KIITOTIE": {
+  "x": -703.9,
+  "y": -2048.9,
+  "nimi": "Kiitotien 12 pää",
+  "_huom": "180_lentoasema.js rwy 12/30 ta"
+ },
+ "LOC_PIILO": {
+  "x": -80,
+  "y": 903,
+  "nimi": "Lumin piilo",
+  "keksitty": true,
+  "tarkista": true,
+  "_huom": "omistaja 21.11.2026: Isosanta. Isosannan vanha sähköasema (1939, punatiili, b1307, 28 × 37 m), eteläpääty (arvio); mittaa ovi"
+ },
+ "LOC_VARJOTORNI": {
+  "x": 420,
+  "y": -150,
+  "nimi": "Varjo-tornin työmaa",
+  "keksitty": true,
+  "tarkista": true
+ },
+ "LOC_KIILTO": {
+  "x": -552,
+  "y": -419,
+  "nimi": "Autoliike Kiilto",
+  "keksitty": true,
+  "tarkista": true,
+  "_huom": "omistaja 21.11.2026: teollisuusalueen halli b557 korjaamon naapurissa; piha hallin pohjoisseinän edessä (seinä [-567.3,-428.8]–[-537.1,-435.8]). Julkisivu Meshyllä (näyttelyikkunat)."
+ },
+ "LOC_KIILTO_TOIMISTO": {
+  "x": -552.5,
+  "y": -430.6,
+  "nimi": "Kiillon toimisto",
+  "keksitty": true,
+  "tarkista": true,
+  "_huom": "21.11.2026: toimiston ovi hallin b557 pohjoisseinässä (seinästä 1 m ulos). Ennen vanhassa paikassa [-372, -82]."
+ }
 }

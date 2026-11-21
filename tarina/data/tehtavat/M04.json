@@ -47,11 +47,13 @@
    "tyyppi": "toiminto",
    "nimi": "vesiletku",
    "cp": true,
-   "teksti": "Aja vartijat pois pihalta vesiletkulla",
+   "teksti": "Aja vartijat pois pihalta vesiletkulla (pidä X pohjassa)",
    "param": {
-    "paikka": "LOC_KORJAAMO",
+    "ovi": "LOC_KORJAAMO_OVI",
     "vartijoita": 3,
-    "ovet": 3
+    "ovet": 3,
+    "tarraS": 9,
+    "kantama": 9
    },
    "failTeksti": "Vartijat saivat tarrat kaikkiin oviin."
   },
@@ -111,7 +113,7 @@
     "dy": -2.4
    },
    "suunta": 180,
-   "asti": 1
+   "asti": 0
   },
   {
    "h": "VARTIJA",
@@ -121,7 +123,7 @@
     "dy": 0.5
    },
    "suunta": 120,
-   "asti": 1,
+   "asti": 0,
    "malli": "npc_vartija_b"
   },
   {
@@ -132,7 +134,7 @@
     "dy": 2.5
    },
    "suunta": "pelaaja",
-   "asti": 1,
+   "asti": 0,
    "malli": "npc_vartija_c"
   }
  ],
