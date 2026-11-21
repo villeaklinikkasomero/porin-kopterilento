@@ -12,11 +12,11 @@ const SUF = TOUCH ? '_m' : '';
 const OY0 = -3501.6;
 // kokoonpano saapuessa keulasta alkaen; puolipituus puskimineen (m), pyörän säde, telien keskiöt (m keskeltä)
 const CONSIST = [
-  { m: 'edo', half: 13.55, r: 0.46, flip: false },
-  { m: 'ed', half: 13.55, r: 0.46, flip: false },
-  { m: 'ed', half: 13.55, r: 0.46, flip: true },
-  { m: 'ed', half: 13.55, r: 0.46, flip: false },
-  { m: 'sr3', half: 9.7, r: 0.625, flip: false },
+  { m: 'edo', half: 13.0, r: 0.46, flip: false },
+  { m: 'ed', half: 13.0, r: 0.46, flip: false },
+  { m: 'ed', half: 13.0, r: 0.46, flip: true },
+  { m: 'ed', half: 13.0, r: 0.46, flip: false },
+  { m: 'sr3', half: 9.25, r: 0.625, flip: false },
 ];
 const BOGIE = { sr3: 4.75, ed: 9.5, edo: 9.5 };
 const V_LINE = 80 / 3.6, V_YARD = 35 / 3.6, ACC = 0.45, DEC = 0.6, DWELL = 150, AWAY = 150;
