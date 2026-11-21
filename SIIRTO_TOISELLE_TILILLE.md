@@ -2623,3 +2623,10 @@ aikataulujen kellonaikoja pelin kellosta; kaikki valo lämpimän keltaista **pai
   (S_GRILLI seuraa). `K_GRILLI.json`: uusi vaihtoehto "Kahvi ja munkki talon piikkiin (+20 ⚡)", näkyy kun ENERGIA ≤ 10 – muuten tyhjällä kukkarolla
   nälkäinen Rami jäi jumiin (nälkä estää keikat → rahaa ei saa → ruokaa ei saa).
 - Skannausskripti (pilvi): juna/test/scan.mjs – ks. keskustelu; työkaluksi `tools/`:iin tarvittaessa.
+
+## 21.11.2026 – SUUNNITELMA: maan pinta jalan ja autolla (omistaja: "maa näyttää … että olisi lunta ja tapahtuu kaikkea vuotoa ilmakuvista … mahdollisimman autenttinen kokemus")
+- Koko suunnitelma: **`tarvittavat_ominaisuudet/MAAN_PINTA_SUUNNITELMA.md`** (nykytila, maankäyttökartta, maan materiaali-shaderi, tien yksityiskohdat,
+  maasta nousevat esineet, vaiheet 0–6 arvioineen, aloitusohje toiselle tilille).
+- Omistajan päätökset: **kesä**, **keskusta ensin**, **esineet Meshyllä – Claude tekee ne itse omistajan selaimessa** (omistaja kirjautuu Meshyyn kerran;
+  ennen erää kysytään mallimäärä/krediitit ja latauslupa), **avoin data (Pori, MML) saa käyttää, jos löytyy**. Tehdään toisella tilillä.
+- Ei vielä aloitettu (vaihe 0 = testikuvat keskustan 20 pisteestä).

@@ -688,7 +688,7 @@ function luoRata({ scene, TZg, G }) {
   // tasolla (viite r tai pelaajan auto / jalankulkija). Ennen radan alta ajavan auton pyörä osui 2,3 m:n säteelle raiteesta ja sai 5 m korkeamman pinnan.
   const viite = (r, x, y) => { if (r !== undefined && r !== null) return r; const W2 = G.WALK, C = window.__car; if (W2 && W2.on) return W2.z; if (C && Math.hypot(C.x - x, C.y - y) < 30) return C.z; return null; };
   window.__rataZ = (x, y, r) => { { const s = silZ(x, y, r); if (s !== undefined) return s; } const c = inTun(x, y);
-    if (c) { const fl = c.t <= TUN.t1 ? tunFloor(c.t) : Math.max(tunFloor(c.t), TZr(x, y) + 0.04), f = fl + 0.04, W2 = G.WALK; const up = c.t > TUN.t0 && c.t < TUN.t1 && W2 && W2.on && W2.z > f + 2.2;   // tunnelissa: lattia, paitsi kävelijä ylhäällä laiturilla
+    if (c) { const fl = c.t <= TUN.t1 ? tunFloor(c.t) : Math.max(tunFloor(c.t), TZr(x, y) + 0.04), f = fl + 0.04, rv0 = viite(r, x, y); const up = c.t > TUN.t0 && c.t < TUN.t1 && rv0 !== null && rv0 > f + 2.2;   // tunnelissa: lattia, paitsi ylhäällä kulkeva (kävelijä tai auto, omistaja 21.11.: "autolla tippuu välitilaan")
       if (!up) { const l = c.l - tunOff(c.t); return f + (l > TUN.w / 2 - 1.4 && l < TUN.w / 2 + 0.3 ? 0.15 : 0); } }
     const rf = viite(r, x, y);
     for (const p of plats) if (inPoly(x, y, p.poly) && (rf === null || rf > p.z - 2)) return p.z;

@@ -76,6 +76,13 @@ const SILTA = { list: [] }; window.__SILTA = SILTA;
       for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
         if (t < -0.02 || t > 1.02) continue; const tc = Math.min(1, Math.max(0, t)); if (Math.hypot(x - ax - dx * tc, y - ay - dy * tc) > wi - 0.1) continue;
         if (Math.abs(z - (P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA)) < 1.6) return true; } } return false; };
+  // sillan alla ja vieressä: paino 1 (maa TZg:n mukaan, js/082 carGround) 4 m:iin kannen reunasta, siitä 12 m:n matkalla liukuen 0:aan (pinnan malli),
+  // vain jos kansi on yli 2,5 m maan yläpuolella (sillan päiden penkereet jäävät ennalleen)
+  SILTA.alla = (x, y) => { let w = 0; for (const b of SILTA.list) { if (x < b.bb[0] - 16 || y < b.bb[1] - 16 || x > b.bb[2] + 16 || y > b.bb[3] + 16) continue; const P = b.P;
+      for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L2));
+        const d = Math.hypot(x - ax - dx * t, y - ay - dy * t) - b.hw; if (d > 16) continue;
+        if (P[k][2] + (P[k + 1][2] - P[k][2]) * t - TZg(ax + dx * t, ay + dy * t) <= 2.5) continue;
+        w = Math.max(w, d < 4 ? 1 : 1 - (d - 4) / 12); } } return w; };
   SILTA.kaide = (x, y, z) => { let best = 0; if (SILTA.ajorata(x, y, z)) return 0;
     for (const b of SILTA.list) { if (x < b.bb[0] - 1 || y < b.bb[1] - 1 || x > b.bb[2] + 1 || y > b.bb[3] + 1) continue; const P = b.P, wi = b.hw - PW;
       for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
