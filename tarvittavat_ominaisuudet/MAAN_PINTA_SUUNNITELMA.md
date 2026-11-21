@@ -186,3 +186,12 @@ Seuraavaksi (toinen tili): vaihe 1 (sävy käyttöön omistajan luvalla + Lamber
   paikkaukset; esineet.json:n sadevesikaivot/kaivonkannet); (3) vaihe 4 esineet esineet.json:n mukaan + Meshy (kysy mallimäärä/krediitit ja GLB-latauslupa
   ennen erää); (4) OSM-lähdemerkintä `src/html/01_runko.html`:ään – maapeite (OSM-pohjainen) on nyt pelissä, joten "© OpenStreetMap contributors" pitää lisätä
   tekijätietoihin (EI vielä tehty).
+
+## 10. Tila 21.11.2026 klo 22: tekstuurit valmiit, vaihe 3 alku pelissä
+- Osa 9:n avoimet: **u03 Tiilimäki korjattu** (ulkokehä peitti tarkan laatan koverassa maastossa → 030/031/033 `OUTER_HR`); **heinätupsut** nurmen sävyyn (032);
+  **OSM-lähdemerkintä** tekijätiedoissa (01_runko.html). u10 Linnansilta (sillan kansi) ja puhelin/FPS edelleen tarkistamatta.
+- **Kaikki 13 tekstuuria** `maa/tex/` (uudet: sora, hiekka, metsä, niitty, puu) ja maa.js käyttää niitä (ei enää korvikkeita). Metsänpohja (Ground026) on tasainen tumma maa:
+  vaihtoehto havu-/lehtikarike myöhemmin.
+- **Vaihe 3 (osa C) aloitettu**: `maa/tie.js` (+ `src/js/0826_tie_yksityiskohdat.js`): kaivonkannet, sadevesikaivot reunakiven vieressä, asfalttipaikkaukset.
+  Vielä tekemättä vaiheesta 3: pyörän urat ja asfalttisävyt (060:n `surf`-shaderiin), kulunut tiemaalaus, ulkoalueen sorapiennar/ojat, pysäköintiruudut, hidastetöyssyt (esineet.json `toyssy`, `korotettu`).
+- **Seuraavaksi**: loput vaiheesta 3 → vaihe 4 esineet (esineet.json + Meshy; kysy mallimäärä/krediitit ja GLB-latauslupa ennen erää).

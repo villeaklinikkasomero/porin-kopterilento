@@ -5,6 +5,10 @@ orto.anisotropy = renderer.capabilities.getMaxAnisotropy();
 const groundMat = new THREE.MeshBasicMaterial({ map: orto, color: 0x30383a });
 const outerTex = new THREE.TextureLoader().load('./maa/ot_s/outer.jpg'); outerTex.colorSpace = THREE.SRGBColorSpace; outerTex.anisotropy = renderer.capabilities.getMaxAnisotropy();
 const outerMat = new THREE.MeshBasicMaterial({ map: outerTex }), roofMat2 = new THREE.MeshBasicMaterial({ map: outerTex, side: THREE.DoubleSide });
+// 21.11.2026 (maan pinta, Tiilimäki u03 "iso sumea alue"): 18 m ulkokehä on kaikkialla tarkkojen laattojen (033) alla, mutta koverassa maastossa sen
+// 18 m kolmiot nousevat 6 m ruudukon yläpuolelle (jopa 0,3 m) ja sumea outer.jpg peitti tarkan laatan ja maa.js:n materiaalit. Ladattujen tarkkojen
+// laattojen alueella ulkokehän pikselit hylätään (033 päivittää OUTER_HR:n, 031 lisää shaderiin); kauempana ulkokehä näkyy kuten ennen.
+const OUTER_HR = { u: { value: Array.from({ length: 24 }, () => new THREE.Vector4(1e9, 1e9, -1e9, -1e9)) }, n: { value: 0 } };   // shaderiin: 031 (grassify:n jälkeen)
 {
   // ground with the river cut out: the core photo, the coarser frame around it, sloped banks / stone quays and the water
   const tris = (a, uvf, y = 0) => { const p = [], u = []; for (let i = 0; i < a.length; i += 2) { p.push(a[i], y, -a[i + 1]); u.push(...uvf(a[i], a[i + 1])); }

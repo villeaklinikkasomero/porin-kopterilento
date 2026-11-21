@@ -2726,3 +2726,36 @@ Tämä osio kokoaa tarinan (Satamakaupunki) ja käyttöliittymän tilanteen. Muu
   `kokoa.py --tarkista` = ajan tasalla. Lue aina laitteelta juuri ennen kirjoitusta.
 - **Kesken / seuraavaksi**: Tiilimäen (u03) sumea alue, OSM-lähdemerkintä 01_runko.html:ään (maapeite on OSM-pohjainen ja nyt pelissä!), puuttuvat 5 tekstuuria
   (latauslupa), vaihe 3 tien yksityiskohdat, vaihe 4 esineet + Meshy. Ei GitHubiin viety (omistaja pushaa itse).
+
+## 21.11.2026 klo 21.20–22 – Maan pinta jatkuu: Tiilimäen sumea alue, heinätupsut, 5 tekstuuria, vaihe 3 tien yksityiskohdat, OSM-lähdemerkintä (+ illan törmäyskorjaukset)
+Omistaja: "jatketaan tuosta mihin edellinen jäi"; latauslupa ambientCG-tekstuureille annettu.
+- **Tiilimäki u03 "iso sumea alue" korjattu** (`030_maa_ilmakuva.js`, `031_maa_nurmi.js`, `033_ilmakuva_tarkka.js`): syy ei ollut maapeite, vaan 18 m ulkokehä (outer.jpg),
+  jonka kolmiot nousevat koverassa maastossa jopa 0,3 m tarkan 6 m laatan yläpuolelle. `OUTER_HR` (030) = ladattujen tarkkojen laattojen suorakaiteet,
+  033:n `hrOuter()` päivittää, 031 lisää outerMat-shaderiin (grassify:n jälkeen) discardin niiden alueella. Kaukana ulkokehä ennallaan. Porttaali tarkistettu: ei reikiä.
+- **Heinätupsut** (`032_heina.js`): väri maa.js:n nurmitekstuurista (lin. ka. 0.070/0.090/0.019), ilmakuvasta vain 20 % → ei enää vaaleita tupsuja uuden nurmen päällä.
+- **5 puuttuvaa tekstuuria** `maa/tex/`: sora (Gravel022), hiekka (Ground033), metsä (Ground026), niitty (Grass001), puu (Planks021), ambientCG CC0.
+  Ladattu sovelluksen selaimella ambientcg.com-välilehdessä (fetch `/get?file=…_1K-JPG.zip`), zip purettu selaimessa, kirkkaus tasattu kuten tekstuurit.py,
+  siirretty base64-paloina. Albedo 1024 + 512, normaali ja ORM 512 (1024-versio skaalattu 512:sta). `maa.js`: KERROKSET 13, LUOKAT 6/7/9/10/15 omilla tekstuureillaan.
+  Zip-tiedostoja ei tallennettu `tex/`-kansioon (tekstuurit.py ei siis voi tehdä niitä uudelleen ilman uutta latausta). Huom: Ground026 on tasaisen tumma maa – metsänpohjaksi
+  voisi vaihtaa havu-/lehtikarikkeen (esim. ambientCG Ground037 / Leaves) myöhemmin.
+- **Vaihe 3: tien yksityiskohdat** – uusi moduuli **`maa/tie.js`** + kutsupala **`src/js/0826_tie_yksityiskohdat.js`** (osat.txt 082:n jälkeen):
+  kaivonkannet (valurauta Ø 0,66 m, "PORI"), sadevesikaivot (ritilä betonikehyksessä, siirretty reunakiven viereen ROAD.asphAt/paveAt-haulla) ja asfalttipaikkaukset
+  (kansien ympärillä 45 % + satunnaiset saumapaikat). Data `maa/esineet.json`, vain katugeometria-alueella (roads.js). 1180 kantta, 1808 kaivoa, 901 paikkausta;
+  InstancedMesh 140 m säteellä, kallistus maan mukaan, piilossa kopterista (> 120 m). Testaus `window.__tieYks.tila() / .pois() / .paalle()`.
+  Puuttuu vielä: pyörän urat ja 2–3 asfalttisävyä (060:n asfalttishaderiin), ulkoalueen piennar ja ojat.
+- **OSM-lähdemerkintä** `src/html/01_runko.html`: "Kartta-aineisto, maanpeite, … © OpenStreetMapin tekijät (ODbL)", "ortokuva … sävyjä muokattu", "maan tekstuurit: ambientCG (CC0)".
+- Samana iltana (ennen tätä) korjattu omistajan ilmoitukset: jalat asfaltin sisällä (060 `flat` jakaa roads.js-kolmiot, kun maa poikkeaa > 4 cm), kävelijä hyppäsi radan
+  penkalle Luvianpuistokadun sillan alla (121 `walkSteep`: ei yli ~33° ylös; rata.js: jalankulkija ratapenkalle vain 0,8 m tasoerosta; juna.js-kääre välittää viitekorkeuden r),
+  Porttaalin katon läpi putoaminen [-422, -1000.5] (rata.js buildTunnel: kiveyskansi myös tunnelin päälle raiteiden ulkopuolelle + __rataZ palauttaa kannen ylhäällä kulkevalle).
+
+## 21.11.2026 klo 22.05–22.30 – Taavi-silta rakennettu uudelleen ponttonisillaksi, heinätupsut lyhyemmiksi ja maan tasoon (omistaja: "Kirjurista ei pääse taavisillalle. Silta pitää rakentaa kokonaan uudelleen … 137 metriä pitkä ja neljä metriä leveä", 3 valokuvaa; "heinää lyhentää … Kirjurissa rannalla tämä ei seuraa rannan muotoja")
+- **Uusi silta**: `silta/taavi.js` + kutsupala `src/js/0302_taavisilta.js` (osat.txt 0301:n jälkeen). Akseli `TAAVI` (010) [-165.8, 651.6] → [-147.5, 513.4] (139 m).
+  Betoniponttonit (11,5 m, 4 m leveät) vedenpinnassa, kansi TER.wl + 0,58 = −3,05, harmaantunut puukansi pitkittäisin lankuin (maa/tex/puu), galvanoidut kaiteet
+  X-ristikolla 2 m välein, pallovalaisimet 10 m välein vuorotellen, ohjauspaalut, punaiset poijut. Kirjurinluodon päässä betonimaatuki rannan tasolla (zK ≈ −1,81)
+  ja 14 m luiska ponttonille; Etelärannan päässä 6 m leveä ponttonilaituri ja teräsristikkoinen portaikkosilta (askelmat) rannan tasolle (zE ≈ −1,12).
+- Kävely: `window.__taaviZ(x, y, ref)` (082 carGround heti __siltaZ:n jälkeen), kaiteet kiinteitä ketjuttamalla `window.__siltaKaide` (121 wallIn, 090 carBlocked).
+  Testattu: kävely Kirjurinluodolta Etelärannalle läpi, sivuttain kaiteet pysäyttävät (ponttoni, laituri, portaikko).
+- **Vanha silta pois**: 010 poistaa Taavi-sillan osat `RIV.br`- ja `CITY.br`-listoista ennen käyttöä (ei kaarevaa kantta, ilmakuvakantta, kaiteita eikä
+  maan madallusta päissä). Syy, ettei Kirjurista päässyt: vanhan kannen ja maan väliin jäi 0,75 m kuoppa, jota uusi jyrkkyysraja (121 walkSteep) ei päästänyt yli.
+- **Heinätupsut** (032): korkeus 0,5–1,3 m → 0,14–0,36 m; korkeus todellisesta maasta (THG, uusi `maaTexG`) eikä tasoitetusta kentästä (THS) → rannan luiskissa
+  ja kaivannoissa tupsut eivät enää leiju.

@@ -53,8 +53,10 @@ tagit, pisteet pelin metreinä 0,1 m:iin) ja siirrettiin gzip+base64-paloina (5 
 (21.11.2026, maan pinta: valmistelu). Lisenssi: © OpenStreetMap contributors, ODbL – lähdemerkintä pelin tekijätietoihin, kun data on pelissä.
 
 ## Puuttuu / tiedossa
-- **Tekstuurit puuttuvat 5 luokalta**: sora (ehd. ambientCG Gravel022), hiekka (Ground033), metsänpohja (Ground026), niitty (Grass001),
-  puu (Planks021). Lataa 1K-JPG-zip `tex/`-kansioon ja aja `tekstuurit.py` (taulu `LAHTEET`). Rata käyttää jo `rata/sepeli_*`.
+- **Tekstuurit valmiina kaikille 13 luokalle** (21.11.2026 ilta). Viimeiset 5 (sora Gravel022, hiekka Ground033, metsä Ground026, niitty Grass001, puu Planks021)
+  tehtiin sovelluksen selaimessa ilman zip-tiedostoja (ks. SIIRTO 21.11. klo 21.20): niiden normaali- ja ORM-kuvat ovat 512 px (1024 skaalattu). Jos haluat ajaa
+  `tekstuurit.py`:n niille, lataa zipit `tex/`-kansioon ensin. Rata käyttää jo `rata/sepeli_*`.
+- Tien yksityiskohdat pelissä: `maa/tie.js` lukee `maa/esineet.json`:n kaivonkannet ja sadevesikaivot (vaihe 3).
 - OSM:ssä on vähän penkkejä (35) ja roska-astioita (19): puistoihin ja toreille tarvitaan sääntösijoitus (polkujen varret 40–60 m välein) pelin puolella.
 - Sadevesikaivot ja kaivonkannet ovat sääntöjä OSM-keskiviivasta; peli siirtää ne reunakivelle (`ROAD.paveAt`).
 - Ilmakuvaluokittelu on yksinkertainen (vihreys / hiekanväri / muu = piha): korjataan `korjaukset.json`:lla, missä vertailukuvat näyttävät väärää.

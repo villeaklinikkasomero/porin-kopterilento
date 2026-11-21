@@ -58,6 +58,10 @@ import('./roads.js').then(mod => {
   // 21.11.2026 (omistaja: "pelaajan jalat uppoavat asfaltin sisään"): roads.js:n kolmiot ovat jopa 10 m kokoisia, ja kärkien välissä maa (groundTop: käytävän
   // 1 m pinta, tasoitukset, alikulut) taipuu – piirretty asfaltti oli paikoin 0,4 m sen pinnan yllä, jolla auto ja jalankulkija seisovat. Kolmio jaetaan
   // neljään (enintään 5 kertaa), kun maa sen keskellä tai sivujen puolivälissä poikkeaa tasosta yli 4 cm.
+  // 21.11.2026 (omistaja: "Juna-asemalla portaalista ei pääse ajamaan vaan tulee seinä vastaan"): roads.js:n nurmi-, polku- ja katukolmiot Porttaalin
+  // kaivannon kohdalla (OSM:n nurmikko ja Ratapihantien pää) piirtyivät maan korkeudelle ja peittivät lounaisrampin ajoradan. Kaivannossa vain rata.js:n ajorata.
+  const porttaaliKaivanto = (x, y, dz) => { const T = RATA.tun; if (!T) return false; const ux = T.b[0] - T.a[0], uy = T.b[1] - T.a[1], L = Math.hypot(ux, uy), dx = x - T.a[0], dy = y - T.a[1], t = (dx * ux + dy * uy) / L, l = (dx * uy - dy * ux) / L;
+    const tmax = T.t1 + (dz === ROAD.asph || dz === ROAD.mark ? 20 : 34); return t > T.t0 - 40 && t < tmax && l < T.w / 2 + 3.5 && l > -(T.w / 2 + 3.5 + (t > T.t1 ? 4.5 + Math.max(0, t - T.t1 - 20) * 0.25 : 0)); };
   const flat = (a, dz) => { const out = [];
     const tri = (A, B, C, d) => { const m = (p, q) => { const x = (p[0] + q[0]) / 2, y = (p[1] + q[1]) / 2; return [x, y, groundTop(x, y)]; };
       if (d < 5 && Math.max(Math.hypot(A[0] - B[0], A[1] - B[1]), Math.hypot(B[0] - C[0], B[1] - C[1]), Math.hypot(C[0] - A[0], C[1] - A[1])) > 0.7) {
@@ -65,7 +69,8 @@ import('./roads.js').then(mod => {
         const dev = Math.max(Math.abs(ab[2] - (A[2] + B[2]) / 2), Math.abs(bc[2] - (B[2] + C[2]) / 2), Math.abs(ca[2] - (C[2] + A[2]) / 2), Math.abs(groundTop(cx, cy) - (A[2] + B[2] + C[2]) / 3));
         if (dev > 0.04) { tri(A, ab, ca, d + 1); tri(ab, B, bc, d + 1); tri(ca, bc, C, d + 1); tri(ab, bc, ca, d + 1); return; } }
       for (const p of [A, B, C]) out.push(p[0], p[2] + dz, -p[1]); };
-    for (let i = 0; i + 5 < a.length; i += 6) { const v = [0, 2, 4].map(o => { const x = a[i + o] / 10, y = a[i + o + 1] / 10; return [x, y, groundTop(x, y)]; }); tri(v[0], v[1], v[2], 0); }
+    for (let i = 0; i + 5 < a.length; i += 6) { const cx = (a[i] + a[i + 2] + a[i + 4]) / 30, cy = (a[i + 1] + a[i + 3] + a[i + 5]) / 30; if (porttaaliKaivanto(cx, cy, dz)) continue;
+      const v = [0, 2, 4].map(o => { const x = a[i + o] / 10, y = a[i + o + 1] / 10; return [x, y, groundTop(x, y)]; }); tri(v[0], v[1], v[2], 0); }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(new Float32Array(out), 3)); g.computeVertexNormals(); return g; };
   const add = (g, m) => { const me = noT(new THREE.Mesh(g, m)); me.matrixAutoUpdate = false; scene.add(me); (window.__roadM = window.__roadM || []).push(me); return me; };
   add(flat(dec(R.asph), ROAD.asph), mAsph); add(flat(dec(R.pave), ROAD.pave), mPave); add(flat(dec(R.mark), ROAD.mark), mMark);

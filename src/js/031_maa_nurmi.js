@@ -32,3 +32,7 @@ function grassify(mat) {
   }; mat.needsUpdate = true; return mat;
 }
 grassify(groundMat); grassify(outerMat);
+{ const gb = outerMat.onBeforeCompile; outerMat.onBeforeCompile = sh => { gb(sh); sh.uniforms.uHR = OUTER_HR.u; sh.uniforms.uHRn = OUTER_HR.n;      // 21.11.2026: ulkokehä ei tarkkojen laattojen päälle (030 OUTER_HR)
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform vec4 uHR[24]; uniform int uHRn;').replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
+      for (int i = 0; i < 24; i++) { if (i >= uHRn) break; vec4 r = uHR[i]; if (vGw.x > r.x && vGw.x < r.z && -vGw.z > r.y && -vGw.z < r.w) discard; }`); };
+  outerMat.customProgramCacheKey = () => 'outer_hr'; outerMat.needsUpdate = true; }

@@ -15,11 +15,11 @@
 import * as THREE from '../three.module.min.js';
 
 // maa/tex: kerrokset tekstuuritaulukossa. kirkkaus = tools/maa/tekstuurit.py:n tavoitekirkkaus (sRGB), toisto metreinä (tex.json)
-const KERROKSET = ['ajorata', 'pysakointi', 'jalkakaytava', 'betoni', 'kiveys', 'laatoitus', 'nurmi', 'multa'];
-const TEXI = { ajorata: [3.0, 0.30], pysakointi: [3.0, 0.33], jalkakaytava: [2.5, 0.48], betoni: [2.5, 0.50], kiveys: [2.0, 0.42], laatoitus: [2.0, 0.50], nurmi: [2.0, 0.30], multa: [2.5, 0.25] };
+const KERROKSET = ['ajorata', 'pysakointi', 'jalkakaytava', 'betoni', 'kiveys', 'laatoitus', 'nurmi', 'multa', 'sora', 'hiekka', 'metsa', 'niitty', 'puu'];
+const TEXI = { ajorata: [3.0, 0.30], pysakointi: [3.0, 0.33], jalkakaytava: [2.5, 0.48], betoni: [2.5, 0.50], kiveys: [2.0, 0.42], laatoitus: [2.0, 0.50], nurmi: [2.0, 0.30], multa: [2.5, 0.25],
+  sora: [2.5, 0.45], hiekka: [3.0, 0.55], metsa: [3.0, 0.22], niitty: [2.5, 0.32], puu: [2.0, 0.40] };      // 21.11.2026 ilta: ambientCG Gravel022, Ground033, Ground026, Grass001, Planks021
 // maapeitteen luokka (maa/peite/peite.json) -> [kerros tai null = ilmakuva, sävy (lineaarinen kerroin), toisto-kerroin]
-// Puuttuvat tekstuurit (sora, hiekka, metsä, niitty, puu) korvataan toistaiseksi sävytetyllä lähimmällä; kun ambientCG-zipit on ladattu
-// ja tools/maa/tekstuurit.py ajettu, lisää ne KERROKSET-listaan ja vaihda tähän.
+// 21.11.2026 ilta: kaikki 13 tekstuuria ladattu (sora, hiekka, metsä, niitty, puu omistajan luvalla ambientCG:stä, CC0).
 const LUOKAT = [
   [null],                                         // 0 ilmakuva (ei tietoa)
   ['ajorata', [1, 1, 1], 1],                      // 1 ajorata
@@ -27,16 +27,16 @@ const LUOKAT = [
   ['kiveys', [1, 1, 1], 1],                       // 3 kiveys
   ['pysakointi', [1, 1, 1], 1],                   // 4 pysäköinti
   ['nurmi', [1.1, 1.12, 1.0], 1],                // 5 nurmi (hieman kirkkaampi: testikuvissa tumma)
-  ['betoni', [1.08, 0.98, 0.82], 0.6],            // 6 sora (väliaikainen: betoni lämpimänä, tiheämpi)
-  ['jalkakaytava', [1.45, 1.25, 0.88], 0.8],      // 7 hiekka (väliaikainen)
+  ['sora', [1, 1, 1], 1],                         // 6 sora
+  ['hiekka', [1, 1, 1], 1],                       // 7 hiekka
   ['multa', [1, 1, 1], 1],                        // 8 multa / istutus
-  ['multa', [0.82, 0.86, 0.72], 1.3],             // 9 metsänpohja (väliaikainen)
-  ['nurmi', [1.18, 1.10, 0.78], 1.25],            // 10 niitty (väliaikainen: kellertävämpi nurmi)
+  ['metsa', [1, 1, 1], 1],                        // 9 metsänpohja
+  ['niitty', [1.05, 1.05, 0.9], 1],               // 10 niitty / pitkä heinä
   ['jalkakaytava', [1, 1, 1], 1],                 // 11 rakennuksen juuri: piha (rakennus peittää)
   [null],                                         // 12 vesi (vesi/vesi.js)
   [null],                                         // 13 rata (rata/rata.js piirtää sepelin)
   ['nurmi', [0.95, 1.05, 0.95], 1],               // 14 urheilu
-  ['laatoitus', [0.85, 0.66, 0.48], 1],           // 15 puu (väliaikainen)
+  ['puu', [1, 1, 1], 1],                          // 15 puu (laiturit)
 ];
 // maapeite-PNG:n paletti (maapeite.py) -> luokka
 const PALETTI = [[255, 0, 255], [60, 60, 64], [150, 150, 155], [175, 120, 95], [95, 95, 120], [90, 170, 70], [200, 180, 140], [235, 215, 160],

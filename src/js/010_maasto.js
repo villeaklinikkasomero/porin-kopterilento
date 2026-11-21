@@ -4,6 +4,14 @@ const THG = new Int16Array(TDEC(TER.hg).buffer), THS = new Int16Array(TDEC(TER.h
 function tBil(A, x, y) { const fx = Math.min(TER.nx - 1.001, Math.max(0, (x - TER.x0) / TER.g)), fy = Math.min(TER.ny - 1.001, Math.max(0, (y - TER.y0) / TER.g)), i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j, k = j * TER.nx + i;
   return ((A[k] * (1 - u) + A[k + 1] * u) * (1 - v) + (A[k + TER.nx] * (1 - u) + A[k + TER.nx + 1] * u) * v) / 10; }
 const TZg = (x, y) => tBil(THG, x, y), TZs = (x, y) => tBil(THS, x, y);
+// 21.11.2026 (omistaja: "Kirjurista ei pääse Taavi-sillalle. Silta pitää rakentaa kokonaan uudelleen", 137 m × 4 m ponttonisilta): vanha Taavi-silta
+// (yleinen jokisilta: kaareva kansi, ilmakuva kannessa, maan madallus päissä) poistetaan river.js:n ja city.js:n siltalistoista; uusi silta on silta/taavi.js
+// (kutsu src/js/0302_taavisilta.js, kävelypinta window.__taaviZ -> 082 carGround). TAAVI = akseli Kirjurinluodolta Etelärannalle.
+const TAAVI = { a: [-165.8, 651.6], b: [-147.5, 513.4] };
+{ const ax = TAAVI.a[0], ay = TAAVI.a[1], dx = TAAVI.b[0] - ax, dy = TAAVI.b[1] - ay, L = Math.hypot(dx, dy);
+  const lahella = (x, y) => { const t = ((x - ax) * dx + (y - ay) * dy) / L; return t > -6 && t < L + 8 && Math.abs(((x - ax) * dy - (y - ay) * dx) / L) < 3; };
+  const pois = b => { const P = b.p; for (let i = 0; i + 1 < P.length; i += 2) if (!lahella(P[i], P[i + 1])) return false; return true; };
+  for (const A of [RIV.br, CITY.br]) if (A) for (let i = A.length - 1; i >= 0; i--) if (pois(A[i])) A.splice(i, 1); }
 // 20.11.2026 (omistaja: "sillat pitää tarkastaa ja ne alueet"): the laser elevation model has the bridge abutments and ramps in it, so the true ground
 // rose 2-3 m in a hump at the bridge ends (Porinsilta, Linnansilta, Kirjurinluodontie, Pormestarinsilta, Niittäjänsilta...) and stuck through the deck.
 // The ground grid is lowered under every bridge to just below its deck line (straight between the street levels at its ends) and, past the ends, kept

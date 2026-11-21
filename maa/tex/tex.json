@@ -49,13 +49,37 @@
    "lahde": "ambientCG Ground054 (CC0, ambientcg.com)",
    "toisto_m": 2.5,
    "kirkkaus": 0.25
+  },
+  "sora": {
+   "lahde": "ambientCG Gravel022 (CC0, ambientcg.com)",
+   "toisto_m": 2.5,
+   "kirkkaus": 0.45,
+   "huom": "21.11.2026: tehty sovelluksen selaimessa (kirkkaus tasattu kuten tekstuurit.py); normaali ja ORM 512 px, 1024-versio skaalattu 512:sta"
+  },
+  "hiekka": {
+   "lahde": "ambientCG Ground033 (CC0, ambientcg.com)",
+   "toisto_m": 3.0,
+   "kirkkaus": 0.55,
+   "huom": "21.11.2026: tehty sovelluksen selaimessa (kirkkaus tasattu kuten tekstuurit.py); normaali ja ORM 512 px, 1024-versio skaalattu 512:sta"
+  },
+  "metsa": {
+   "lahde": "ambientCG Ground026 (CC0, ambientcg.com)",
+   "toisto_m": 3.0,
+   "kirkkaus": 0.22,
+   "huom": "21.11.2026: tehty sovelluksen selaimessa (kirkkaus tasattu kuten tekstuurit.py); normaali ja ORM 512 px, 1024-versio skaalattu 512:sta"
+  },
+  "niitty": {
+   "lahde": "ambientCG Grass001 (CC0, ambientcg.com)",
+   "toisto_m": 2.5,
+   "kirkkaus": 0.32,
+   "huom": "21.11.2026: tehty sovelluksen selaimessa (kirkkaus tasattu kuten tekstuurit.py); normaali ja ORM 512 px, 1024-versio skaalattu 512:sta"
+  },
+  "puu": {
+   "lahde": "ambientCG Planks021 (CC0, ambientcg.com)",
+   "toisto_m": 2.0,
+   "kirkkaus": 0.4,
+   "huom": "21.11.2026: tehty sovelluksen selaimessa (kirkkaus tasattu kuten tekstuurit.py); normaali ja ORM 512 px, 1024-versio skaalattu 512:sta"
   }
  },
- "puuttuu": [
-  "sora (Gravel022)",
-  "hiekka (Ground033)",
-  "metsa (Ground026)",
-  "niitty (Grass001)",
-  "puu (Planks021)"
- ]
+ "puuttuu": []
 }

@@ -11,6 +11,7 @@ js    js/0106_maastokorjaukset.js
 js    js/020_renderoija.js
 js    js/030_maa_ilmakuva.js
 js    js/0301_sillat.js
+js    js/0302_taavisilta.js
 js    js/031_maa_nurmi.js
 js    js/032_heina.js
 js    js/033_ilmakuva_tarkka.js
@@ -30,6 +31,7 @@ js    js/073_maamerkit_kierros.js
 js    js/080_kopteri.js
 js    js/081_auto.js
 js    js/082_pysakointihalli.js
+js    js/0826_tie_yksityiskohdat.js
 js    js/090_tormaykset.js
 js    js/091_navigaattori.js
 js    js/092_liikenne.js

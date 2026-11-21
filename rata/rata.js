@@ -335,7 +335,7 @@ const inTun = (x, y, m = 0) => { const c = tunT(x, y); return tunIn(c, 0.8 + m) 
 const tunOff = t => t <= TUN.t1 + 6 ? 0 : -4.2 * Math.min(1, (t - TUN.t1 - 6) / 28) ** 2;   // lounaan ajoradan kaarre Ratapihantielle (buildTunnel)
 // 21.11.2026: Porttaalin seinät kiinteiksi (ennen auto ajoi laattaseinän läpi ja hyppäsi ratapihan tasolle). Palauttaa, kuinka syvällä (m) piste (x, y) on
 // seinävyöhykkeessä, kun kulkija on korkeudella z seinän yläreunan alapuolella; 0 = vapaa. carBlocked (js/090) estää liikkeen, joka vie syvemmälle.
-function tunWallDepth(x, y, z, TZ) { const c = tunT(x, y); if (!c) return 0; const tA = TUN.t0 - 38; if (c.t < tA - 0.5 || c.t > TUN.t1 + 8) return 0;
+function tunWallDepth(x, y, z, TZ) { const c = tunT(x, y); if (!c) return 0; const tA = TUN.t0 - 38; if (c.t < tA - 0.5 || c.t > TUN.t1 + 14) return 0;
   const hw = TUN.w / 2, al = Math.abs(c.l), d = al - (hw - 0.05); if (d <= 0 || al > hw + 1.2) return 0;
   const f = tunFloor(c.t), cov = c.t >= TUN.t0 && c.t <= TUN.t1, P = window.__porttaali;
   const top = cov ? (P ? P.ceil : f + 4) : Math.max(f + 0.3, TZ ? TZ(x, y) : f) + 0.25 + (c.t < TUN.t0 ? 1.25 : 0);   // rampin tukimuuri + kaide
@@ -370,7 +370,7 @@ function buildTunnel(root, G, plats) {
   const tA = TUN.t0 - 38, tB = TUN.t1 + 36, st = 2;
   // lounaispää (omistaja 21.11.: "lounaispään liittymä"): ajorata jatkuu portaalista 34 m ja kääntyy Ratapihantien päähän (akselilla t 134, sivussa -7 m)
   const off = t => t <= TUN.t1 + 6 ? 0 : -4.2 * Math.min(1, (t - TUN.t1 - 6) / 28) ** 2;
-  const zr = t => t <= TUN.t1 ? tunFloor(t) : Math.max(tunFloor(t), TZ(...P(t, off(t))) + 0.04);
+  const zr = t => t <= TUN.t1 + 14 ? tunFloor(t) : Math.max(tunFloor(t), TZ(...P(t, off(t))) + 0.04);   // 21.11.2026 (omistaja: "portaalista ei pääse ajamaan vaan tulee seinä vastaan"): lounaisportaalin takana ratapenkan kumpu (t1…t1+12) ei nosta ajorataa
   for (let t = tA; t < tB; t += st) { const t2 = Math.min(tB, t + st), f1 = tunFloor(t), f2 = tunFloor(t2), cov = t >= TUN.t0 && t2 <= TUN.t1 + 0.01;
     const r1 = zr(t), r2 = zr(t2), o1 = off(t), o2 = off(t2), fl1 = t > TUN.t1 + 20 ? 1 + (t - TUN.t1 - 20) * 0.25 : 0, fl2 = t2 > TUN.t1 + 20 ? 1 + (t2 - TUN.t1 - 20) * 0.25 : 0;   // levennys liittymään
     // ajorata + jalkakäytävä (1,4 m, +0,15) koillisen puolella
@@ -387,7 +387,7 @@ function buildTunnel(root, G, plats) {
         Q(glassM, V(t, l, mid1 + 0.02), V(t2, l, mid2 + 0.02), V(t2, l, ceil - 0.02), V(t, l, ceil - 0.02));   // kirkas lasi
         Q(frameM, V(t, l * 1.002, mid1), V(t + 0.06, l * 1.002, mid1), V(t + 0.06, l * 1.002, ceil), V(t, l * 1.002, ceil));   // lasin karmi 2 m välein
         Q(frameM, V(t, l * 1.002, mid1 - 0.03), V(t2, l * 1.002, mid2 - 0.03), V(t2, l * 1.002, mid1 + 0.05), V(t, l * 1.002, mid1 + 0.05)); } }
-    else if (t < TUN.t1 + 8) for (const sd of [-1, 1]) { const e1 = sd < 0 ? fl1 : 0, e2 = sd < 0 ? fl2 : 0, la = o1 + sd * (hw + 0.01 + e1), lb = o2 + sd * (hw + 0.01 + e2), b1 = Math.min(f1, r1), b2 = Math.min(f2, r2);
+    else if (t < TUN.t1 + 14) for (const sd of [-1, 1]) { const e1 = sd < 0 ? fl1 : 0, e2 = sd < 0 ? fl2 : 0, la = o1 + sd * (hw + 0.01 + e1), lb = o2 + sd * (hw + 0.01 + e2), b1 = Math.min(f1, r1), b2 = Math.min(f2, r2);
       const g1 = cov ? ceil : Math.max(r1 + 0.3, TZ(...P(t, la + sd * 1.2))), g2 = cov ? ceil : Math.max(r2 + 0.3, TZ(...P(t2, lb + sd * 1.2)));
       Q(wallM, V(t, la, b1), V(t2, lb, b2), V(t2, lb, g2 + (cov ? 0 : 0.25)), V(t, la, g1 + (cov ? 0 : 0.25)));
       if (!cov && g1 - r1 > 0.6) Q(wallM, V(t, la, g1 + 0.25), V(t2, lb, g2 + 0.25), V(t2, lb + sd * 0.3, g2 + 0.25), V(t, la + sd * 0.3, g1 + 0.25)); }
@@ -688,7 +688,7 @@ function luoRata({ scene, TZg, G }) {
   // tasolla (viite r tai pelaajan auto / jalankulkija). Ennen radan alta ajavan auton pyörä osui 2,3 m:n säteelle raiteesta ja sai 5 m korkeamman pinnan.
   const viite = (r, x, y) => { if (r !== undefined && r !== null) return r; const W2 = G.WALK, C = window.__car; if (W2 && W2.on) return W2.z; if (C && Math.hypot(C.x - x, C.y - y) < 30) return C.z; return null; };
   window.__rataZ = (x, y, r) => { { const s = silZ(x, y, r); if (s !== undefined) return s; } const c = inTun(x, y);
-    if (c) { const fl = c.t <= TUN.t1 ? tunFloor(c.t) : Math.max(tunFloor(c.t), TZr(x, y) + 0.04), f = fl + 0.04, rv0 = viite(r, x, y); const up = c.t > TUN.t0 && c.t < TUN.t1 && rv0 !== null && rv0 > f + 2.2;   // tunnelissa: lattia, paitsi ylhäällä kulkeva (kävelijä tai auto, omistaja 21.11.: "autolla tippuu välitilaan")
+    if (c) { const fl = c.t <= TUN.t1 + 14 ? tunFloor(c.t) : Math.max(tunFloor(c.t), TZr(x, y) + 0.04), f = fl + 0.04, rv0 = viite(r, x, y); const up = c.t > TUN.t0 && c.t < TUN.t1 && rv0 !== null && rv0 > f + 2.2;   // tunnelissa: lattia, paitsi ylhäällä kulkeva (kävelijä tai auto, omistaja 21.11.: "autolla tippuu välitilaan")
       if (!up) { const l = c.l - tunOff(c.t); return f + (l > TUN.w / 2 - 1.4 && l < TUN.w / 2 + 0.3 ? 0.15 : 0); } }
     const rf = viite(r, x, y);
     for (const p of plats) if (inPoly(x, y, p.poly) && (rf === null || rf > p.z - 2)) return p.z;

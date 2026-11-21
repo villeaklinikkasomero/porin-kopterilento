@@ -25,7 +25,8 @@ window.__hallTest = { HALL, inHall, carBlocked: (x, y, yaw) => carBlocked(x, y, 
 function carGround(x, y, ref) {
   if (onPorinsilta(x, y) !== null) return TZs(x, y) + bridgeZ(x, y);
   { const qz = window.__quayZ ? window.__quayZ(x, y) : null; if (qz !== null) return qz; }      // Eteläranta's hand-built quay
-  { const sz = window.__siltaZ ? window.__siltaZ(x, y, ref) : null; if (sz !== null) return sz; }      // 21.11.2026: maasiltojen asfalttikansi (js/0301_sillat.js)
+  { const sz = window.__siltaZ ? window.__siltaZ(x, y, ref) : null; if (sz !== null) return sz; }
+  { const tz = window.__taaviZ ? window.__taaviZ(x, y, ref) : null; if (tz !== null) return tz; }      // 21.11.2026: Taavi-silta (ponttonisilta, silta/taavi.js)      // 21.11.2026: maasiltojen asfalttikansi (js/0301_sillat.js)
   { const kz = window.__korjaamoZ ? window.__korjaamoZ(x, y) : null; if (kz !== null) return kz; }      // 21.11.2026: Tapsan korjaamon lattia ja ajoluiska (korjaamo/korjaamo.js)
   { const az = window.__alikZ ? window.__alikZ(x, y, ref) : null; if (az !== null) return az; }      // 21.11.2026: alikulun lattia kannen alla (0106)
   { const rz = window.__rataZ ? window.__rataZ(x, y, ref) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: "pelaaja uppoaa"): aseman laiturit ja ratapenkka (rata/rata.js)

@@ -11,6 +11,9 @@ function roofTile(k, tex) {
     else me.material = me.userData.fb;
   }
 }
+// ladattujen laattojen suorakaiteet 030:n ulkokehän shaderille (ulkokehä ei peitä tarkkaa maata koverissa kohdissa)
+function hrOuter() { let n = 0; for (const [k, e] of HR.t) { if (!e.ok || n >= 24) continue; const [i, j] = k.split('_').map(Number);
+    OUTER_HR.u.value[n++].set(HR.X0 + i * HR.S, HR.Y0 + j * HR.S, HR.X0 + (i + 1) * HR.S, HR.Y0 + (j + 1) * HR.S); } OUTER_HR.n.value = n; }
 function hrUpdate(x, y) {
   for (let i = HR.I0; i <= HR.I1; i++) for (let j = HR.J0; j <= HR.J1; j++) { if (j < -1 && (i < 0 || i > 4)) continue;
     const k = i + '_' + j, cx = HR.X0 + (i + 0.5) * HR.S, cy = HR.Y0 + (j + 0.5) * HR.S, d = Math.max(Math.abs(cx - x), Math.abs(cy - y)) - HR.S / 2, e = HR.t.get(k);
@@ -20,8 +23,8 @@ function hrUpdate(x, y) {
       const me = noT(new THREE.Mesh(g, m)); me.position.set(cx, 0, -cy); me.renderOrder = -1;
       const rec = { me, m, alive: true }; HR.t.set(k, rec);
       HR.loader.load(`./maa/ot_s/ot_${i}_${j}.jpg`, tex => { if (!rec.alive) { tex.dispose(); return; } tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-        m.map = tex; m.transparent = false; m.opacity = 1; m.needsUpdate = true; scene.add(me); roofTile(k, tex); });
-    } else if (e && d > (isTouch ? 380 : 520)) { roofTile(k, null); e.alive = false; scene.remove(e.me); e.me.geometry.dispose(); if (e.m.map) e.m.map.dispose(); e.m.dispose(); HR.t.delete(k); }
+        m.map = tex; m.transparent = false; m.opacity = 1; m.needsUpdate = true; scene.add(me); roofTile(k, tex); rec.ok = true; hrOuter(); });
+    } else if (e && d > (isTouch ? 380 : 520)) { roofTile(k, null); e.alive = false; e.ok = false; scene.remove(e.me); e.me.geometry.dispose(); if (e.m.map) e.m.map.dispose(); e.m.dispose(); HR.t.delete(k); hrOuter(); }
   }
 }
 
