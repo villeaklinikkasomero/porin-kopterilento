@@ -282,6 +282,33 @@ for tr in TR:
     tr['lc'] = lcm
     tr['crest'] = zs + CREST
 
+# sillat (omistaja 21.11.: "silta romahtanut"): sillalla oleva osuus ei saa seurata maastomallin notkoa. Jos sillan jakso ulottuu raiteen päähän,
+# pään korkeus otetaan viereisen raiteen tasoitetusta korkeudesta (raide kokonaan sillalla -> molemmat päät naapureista); välissä suora.
+def _anchor(p, ti):
+    best = None
+    for tj, o in enumerate(TR):
+        if tj == ti: continue
+        d = np.linalg.norm(o['S'] - p, axis=1); j = int(np.argmin(d))
+        if d[j] < 6.0 and not (o['bridge'].all()) and (best is None or d[j] < best[0]): best = (d[j], float(o['crest'][j]))
+    return None if best is None else best[1]
+for _pass in range(2):
+    for ti, tr in enumerate(TR):
+        br = tr['bridge']; n = len(br)
+        if not br.any(): continue
+        c = tr['crest']; i = 0
+        while i < n:
+            if not br[i]: i += 1; continue
+            j = i
+            while j + 1 < n and br[j + 1]: j += 1
+            za = float(c[i - 1]) if i > 0 else _anchor(tr['S'][0], ti)
+            zb = float(c[j + 1]) if j + 1 < n else _anchor(tr['S'][-1], ti)
+            if za is None: za = zb
+            if zb is None: zb = za
+            if za is not None:
+                for k in range(i, j + 1): c[k] = za + (zb - za) * (k - i + 1) / (j - i + 2)
+            i = j + 1
+        tr['crest'] = c
+
 # asema-alue tasaiseksi (omistaja 21.11.: "asema-alueella korkeus tasaiseksi eikä maaston mukaan"): laitureiden kohdalla ja 60 m ympärillä
 # pölkyn yläpinta = yksi taso (laituriraiteiden mediaani), siitä 200 m:n matkalla liukuen takaisin maaston mukaiseksi
 from matplotlib.path import Path as _MP

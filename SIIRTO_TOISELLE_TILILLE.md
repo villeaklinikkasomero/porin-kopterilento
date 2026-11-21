@@ -1,4 +1,4 @@
-# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 20.11.2026; UUSIN TILA: osio "20.11.2026 iltapäivä–ilta" aivan lopussa, sitä ennen "20.11.2026 klo 14 – KONSEPTI VAIHTUU")
+# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 21.11.2026; UUSIN TILA: osio "TILANNE 21.11.2026" aivan lopussa, sen yläpuolella päivän merkinnät aikajärjestyksessä)
 
 Liitä tämä tiedosto uuden keskustelun alkuun. Pyydä Claudea lukemaan myös repon `SIIRTO.md`, `pipeline/README.md` ja `HANDOFF_Y-PAKKI.md` (jos repossa).
 Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
@@ -2233,6 +2233,23 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
   Maan ruudukko leikattu käytävän kohdalta (index.html `rataTun` -> `tSkip`; rata.js ulkokehän 6 m ruudukko), rampin reunoille kaistat ilmakuvalla.
   Vanha jalankulkuportaali poistettu. **Ei vielä:** bussireitin kytkentä tunneliin (citylinja), lounaispään liittymä katuun, tunnelin taideteos (Porisontti).
 
+## 21.11.2026 – Porttaali valmiiksi: lounaspää, laatoitus, Helsingintien sillat, nurmi ja kansi (omistaja: "lounaspään liittymät", "kiiltävää valkoista laattaa 10x15, yläosa kirkasta lasia jonka takana valkoinen seinä ja valoa", "sillat pidemmiksi ja maan tasolle", "pitäisikö lisätä nurmikkoa", "aukkojen kohdalle kantta, päädyissä sulkea")
+- **Tunnelin seinät** (`rata.js` `buildTunnel`): lattiasta +2,2 m asti kiiltävä valkoinen 10×15 cm laatta (canvas-tekstuuri, emissiivinen), sen yläpuolella kirkas lasi
+  (`glassM`) ja 0,2 m takana valaistu valkoinen seinä (`glowM`, MeshBasic) sekä pystypuitteet. Ramppien tukimuurit ja otsamuurien siivet hw+12 m.
+- **Lounaspään liittymä Ratapihantielle:** tie kaartuu 4,2 m sivuun ja levenee (`off(t)`, `tB = t1+36`), korkeus `fz`-profiilista. `build_data.py` tasoittaa
+  lounaispään luiskat (pihan taso 5,2 → tien taso, sivukaltevuus 0,7) ja `out['tun'].gr = 1`. Käytävä (`tunIn`/`in_tun`/index.html `rataTun`) levenee lounaaseen,
+  jotta 6 m:n maaruudukon kulmat eivät enää pistä tunneliin (marginaali w/2+4,5).
+- **Helsingintien sillat** (`buildRoadBridges`, data `RATA.silta`): kaksi pidennettyä betonilaattasiltaa maan tasolla, maatuet ja putkikaiteet.
+  index.html: lentokenttäteiden `tri()`-lohkossa `RSN/RSZ`-ohitus, ettei tie seuraa `TZg`:tä sillan kohdalla; vanhat `TER.bd`-kannet ohitetaan (`bdSkip`).
+- **Nurmiluiskat** molemmissa päissä: `nurmi_albedo/normal/orm.jpg`, DoubleSide, polygonOffset −6, alueet `[[t1-0.5, 34, 25.5], [t0-38, 37.5, 7.5]]`.
+  Ramppien ja tien reunoilla ilmakuvakaistat hw+6,6 m asti.
+- **Kansi aukkojen päälle:** katetun osan päällä kivetty kansi (`platTex`) tasossa `slabTop+0.55`, leveys hw+0,6 … hw+9 molemmin puolin, reunamuurit maahan
+  ja umpinaiset päätyseinät t0/t1. Sepelikenttä tunnelin päällä korkeudessa slabTop+0,6, ramppien päältä ei sepeliä.
+- `window.__rataZ`: tunnelissa lattia (+0,15 jalkakäytävällä), paitsi jos kävelijä on katetun osan kohdalla yli lattia+2,2 → laituri/ratapenkka.
+- Tekstuurit käytettävissä maastoon: nurmi, sepeli, kivetys, `road_asph`, `road_pave`, `tori_pave`, rantakivi.
+- **Kesken:** citylinjan bussireitti tunnelin kautta, lounaispään kaukaisimmat reunaluiskat vielä hieman vinot, tunnelin katossa yksi harmaa laatikko,
+  Porisontti-taideteos puuttuu. index.html:n pilkkominen sovittu tehtäväksi seuraavaksi (omistaja: "ehkä tehdään tämä aamulla").
+
 
 ## 21.11.2026 – Tarinahahmot: jalat maan pinnalle, puhuessa suu liikkuu ja hahmot elehtivät (omistaja: "tapsan jalat oli asfaltin sisällä", "osallistuvat botit voisivat kanssakäymisessä myös vähän liikkua, saadaanko suuhun liikettä?")
 - **Jalat (`tarina/peli.js`):** hahmojen korkeus tuli `roofAt`ista, joka on kadulla 0,13–0,28 m asfaltin pinnan alla. Nyt `carGround` (sama kuin pelaajan jalat);
@@ -2292,3 +2309,33 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
 - Kaksipilarinostin (4,1 × 3,8 × 3,4 m) ajoruudun keskelle, `korjaamo.js` `KALUSTEET` (nyt `laatikot`-lista per kaluste: nostimella vain pilarit kiinteitä, auto ajaa välistä varsien yli).
 - `korjaamo_mallit.js` 7,2 Mt (halli, ovi, hylly, nostin). Lähde `hahmot/konseptit/3d_lahde/korjaamo/nostin_meshy.glb`.
 - Testattu headless-pelissä kolmesta kuvakulmasta, ei konsolivirheitä. **Ei testattu:** ajaminen pilarien välistä autolla. **Tiedossa:** nostin ei liiku eikä nosta autoa; pilarit osuvat lähes lattiaviivojen kohdalle.
+
+
+## TILANNE 21.11.2026 (yhteenveto – lue tämä ensin, yksityiskohdat yllä olevissa 21.11. merkinnöissä)
+
+**Kaksi istuntoa on kirjoittanut samaan kansioon samana päivänä** (tämä: hahmot, hyppy, tarina, korjaamo; toinen: rata, asema, juna). Ennen kuin muokkaat
+`index.html`:ää tai tätä tiedostoa: lue tuore versio laitteelta, tee muutos tekstikorvauksena, kirjoita heti ja lue takaisin. Älä koskaan kirjoita vanhasta kopiosta.
+
+**index.html:n loppuun ladattavat moduulit (järjestys):** `vesi/vesi.js`, `tori/torikojut.js`, `ranta/ranta.js`, `lento/lento.js`, `laskuvarjo/hyppy.js`, `rata/rata.js`,
+`juna/juna.js`, `korjaamo/korjaamo.js`, `tarina/peli.js`. Jos jokin näistä riveistä puuttuu, se on jäänyt toisen istunnon tallennuksen alle.
+Muut tämän päivän koukut index.html:ssä: `window.__jump` (kolme riviä: `step`, `walkAction`, `updateCamera`), `carGround`issa `window.__korjaamoZ` ja `window.__rataZ`,
+`window.__game`ssa `walkOutAt, walkG, loadWalker, TZg`, `loadWalker`issa `window.__walker` ja `window.__walkerClips`.
+
+**Pelissä nyt (tehty 21.11.):**
+- Laskuvarjohyppy hyppykoneesta: Enter yli 250 m → Väli/Enter avaa → A/D ohjaa, S/Väli jarru. `laskuvarjo/README.md`.
+- Tarinatila Satamakaupunki päällä pysyvästi (X, P, 1–3), luku 1 = M01–M06. `tarina/README.md`.
+- Tarinahahmot maailmassa omilla malleillaan (10 mallia `npc_*.js`): Terttu torilla, Harju Etelärannan laiturilla, Tapsa tehtävien merkeillä, vartijat A/B/C (M04), kuriiri (M05).
+  Puhuessa suu liikkuu ja hahmot elehtivät.
+- Tapsan korjaamo [-598.9, -443.0]: halli, liikkuva nosto-ovi, sisustus, Meshy-hylly ja -nostin. `korjaamo/README.md`.
+- Aiemmin samassa istunnossa (19.–20.11.): IK-kävely pelaajalle ja boteille, törmäykset (`SOLID`), istuvat botit ulkona, tanssi (B).
+
+**Kesken tai tekemättä (tämän istunnon asiat):**
+- Botit istumaan sisätiloihin (teatterin kahvila ja sali, jäähallin katsomo, kirkon penkit) – omistaja valitsi, ei tehty.
+- Käsikirjoitusartifaktia (https://claude.ai/artifact/YYef6VTmqtmEmZJPU8M6mN) ei voi lukea tältä tililtä. Luvut 2–5 (M07–M26) puuttuvat reposta → Harjun paikka ja rooli
+  ovat arvioita, ja M01:n repliikit ja välianimaation kamera viittaavat yhä Isosiltaan, vaikka korjaamo siirtyi lounaaseen. Pyydä omistajaa liittämään käsikirjoitus.
+- Nostin ei nosta autoa (tarjottu). Rami ja kadun kävelijät eivät liikuta suutaan (tarjottu). Korjaamossa ei oikeaa valaistusta eikä oven ääntä.
+- Puuttuvat tarinamekaniikat: hiiviskely, vesiletku, drooni, Varjo-mittarin jahtaus (`tarvittavat_ominaisuudet/README.md`).
+
+**Kaikki 21.11. työ on testattu vain headless** (pilven Playwright + swiftshader, yksittäiset ruudut). Omistaja ei ole vielä vahvistanut pelaamalla: hypyn ohjaus ja loppuveto,
+tarinan tehtävät käsin, puheen ja eleiden ulkonäkö liikkeessä, autolla ajo korjaamoon ja nostimen pilarien välistä, rata/juna yhdessä korjaamon ja tarinan kanssa, puhelin.
+Latauskoko kasvoi: korjaamon mallit 7,2 Mt, tarinahahmot 2–2,6 Mt kappale (ladataan tarvittaessa).
