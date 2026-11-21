@@ -246,7 +246,7 @@ function quayCut(x, y) { if (x > 190 && x < 263 && y > 467 && y < 478) return tr
 // 21.11.2026: Porttaali-tunnelin kohdalta maan ruudukko pois (rata/rata.js rakentaa tunnelin, rampit ja reunat)
 const rataTun = (x, y) => { const T = RATA.tun; if (!T) return false; const ux = T.b[0] - T.a[0], uy = T.b[1] - T.a[1], L = Math.hypot(ux, uy), dx = x - T.a[0], dy = y - T.a[1], t = (dx * ux + dy * uy) / L, l = (dx * uy - dy * ux) / L;
   return t > T.t0 - 40 && t < T.t1 + 36 && l < T.w / 2 + 4.5 && l > -(T.w / 2 + 4.5 + (t > T.t1 ? 4.5 + Math.max(0, t - T.t1 - 20) * 0.25 : 0)); };
-const tSkip = (x, y) => { if (rataTun(x, y)) return true; if (!QUAY_MODEL) return false; if (x > -160 && x < 265 && y > 460 && y < 545 && quayCut(x, y)) return true; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
+const tSkip = (x, y) => { if (rataTun(x, y)) return true; if (window.__tieSkip && window.__tieSkip(x, y)) return true;      /* 21.11.2026: Luvianpuistokadun käytävä (0105/0335) */ if (!QUAY_MODEL) return false; if (x > -160 && x < 265 && y > 460 && y < 545 && quayCut(x, y)) return true; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
 let gridGeo;
 const WREL = (x, y) => TER.wl - TZs(x, y);          // water level relative to the lifted objects at (x, y)
 const terrainTex = (() => { const n = TER.nx * TER.ny, d = new Uint16Array(n); for (let i = 0; i < n; i++) d[i] = THREE.DataUtils.toHalfFloat(THS[i] / 10);
@@ -299,6 +299,30 @@ const $ = id => document.getElementById(id);
 const isTouch = matchMedia('(pointer:coarse)').matches;
 if (isTouch) document.body.classList.add('touch');
 
+// @osa js/0105_tie_kaytava.js
+// ---------- Luvianpuistokatu ja Maamiehenkatu kahdessa tasossa, kadut Tiilimäelle ja Isomäelle (21.11.2026) ----------
+// Omistaja: "pyörätie menee ylemmällä tasolla noin 2m ja autotie kaistoineen alempana, nyt myös mäki piirretty asfaltille. Tie on todella kumpurainen".
+// 6 m korkeusruudukko ei esitä 2-3 m levyistä luiskaa: ajorata kallistui reunoiltaan ja radan sillan kohdalla oli 1,4 m kumpu. tools/roads/tie_luvianpuisto.py
+// suunnittelee käytävän pinnan 1 m ruudukkona (tie/tie_data.js): tasainen ajorata, yläpenkereet pyöräteille, nurmiluiskat välissä.
+//   window.__tieZ(x, y)    käytävän pinta (groundTop käyttää sitä, siis myös asfaltti, auto ja jalankulkijat), muualla null
+//   window.__tieSkip(x, y) 6 m maaruudukon solu (keskipiste) jätetään pois käytävän kohdalta (010_maasto.js tSkip); 0335_tie_maa.js piirtää tilalle 1 m pinnan
+//   window.__tieExt(x, y)  roads.js:n katugeometria jatkuu ytimen ulkopuolelle Tiilimäelle ja Isomäelle (tools/roads/osm_ways_tie.json): auto ajaa siellä
+//                          asfaltilla (082 carGround) eikä lentoaseman yksinkertaisia nauhateitä piirretä päälle (180)
+import TIE_D from './tie/tie_data.js';
+const TIE = (() => {
+  const D = TIE_D, dec = b => new Int16Array(TDEC(b).buffer), runs = dec(D.runs), zv = dec(D.z), Z = new Float32Array(D.nx * D.ny).fill(NaN);
+  let k = 0; for (let r = 0; r + 2 < runs.length; r += 3) { const j = runs[r], i0 = runs[r + 1], n = runs[r + 2]; for (let q = 0; q < n; q++) Z[j * D.nx + i0 + q] = zv[k++] / 1000; }
+  const at = (i, j) => (i < 0 || j < 0 || i >= D.nx || j >= D.ny) ? NaN : Z[j * D.nx + i];
+  const z = (x, y) => { const fx = x - D.x0 - 0.5, fy = y - D.y0 - 0.5, i = Math.floor(fx), j = Math.floor(fy), u = fx - i, v = fy - j;
+    const a = at(i, j), b = at(i + 1, j), c = at(i, j + 1), d = at(i + 1, j + 1); if (a !== a || b !== b || c !== c || d !== d) return null;
+    return (a * (1 - u) + b * u) * (1 - v) + (c * (1 - u) + d * u) * v; };
+  const has = (x, y) => { const v = at(Math.floor(x - D.x0), Math.floor(y - D.y0)); return v === v; };
+  const skip = (cx, cy) => { if (cx < D.x0 - 3 || cy < D.y0 - 3 || cx > D.x0 + D.nx + 3 || cy > D.y0 + D.ny + 3) return false;
+    for (let dy = -2.5; dy <= 2.5; dy += 1) for (let dx = -2.5; dx <= 2.5; dx += 1) if (has(cx + dx, cy + dy)) return true; return false; };
+  const ext = (x, y) => x > -1785 && x < -768 && y > -1490 && y < -669;      // laajennetun roads.js:n OSM-alue ytimen ulkopuolella
+  return { D, z, has, skip, ext };
+})();
+window.__tieZ = TIE.z; window.__tieSkip = TIE.skip; window.__tieExt = TIE.ext;
 // @osa js/020_renderoija.js
 // ---------- renderer / scene ----------
 // Baked model textures by distance: every Blender model carries a 2048 px atlas (22 MB on the GPU with mipmaps) and there are over forty of them,
@@ -571,6 +595,30 @@ function hrUpdate(x, y) {
   }
 }
 
+// @osa js/0335_tie_maa.js
+// ---------- Luvianpuistokadun käytävän maapinta (21.11.2026): 6 m maaruudukosta (ydin ja tarkat ilmakuvalaatat) leikattu aukko täytetään 1 m ruudukolla ----------
+// Korkeus: käytävän suunniteltu pinta (TIE.z), aukon reunoilla sama kuin viereisillä 6 m kolmioilla (groundTop ilman koukkua), joten saumaa ei näy.
+// Kuva: ytimen ilmakuva (uv) ja tarkka 512 m ilmakuvalaatta (uv1, ROOFT vaihtaa sen kun laatta latautuu).
+{ const D = TIE.D, LS = 512;
+  const g0 = (x, y) => { const ti = Math.floor((x + 1280) / LS), tj = Math.floor((y + 1280) / LS);
+    return Math.max(TZg(x, y), gridTop(x, y, -HW, YS, 6, 0), gridTop(x, y, -1280 + ti * LS, -1280 + tj * LS, 6, 0.03)); };
+  const zz = (x, y) => { const t = TIE.z(x, y); return t !== null ? t : g0(x, y); };
+  const cut = (x, y) => { const ci = Math.floor((x + HW) / 6), cj = Math.floor((y - YS) / 6), ti = Math.floor((x + 1280) / LS), tj = Math.floor((y + 1280) / LS),
+      x0t = -1280 + ti * LS, y0t = -1280 + tj * LS, hi = Math.floor((x - x0t) / 6), hj = Math.floor((y - y0t) / 6);
+    return TIE.skip(-HW + (ci + 0.5) * 6, YS + (cj + 0.5) * 6) || TIE.skip(x0t + (hi + 0.5) * 6, y0t + (hj + 0.5) * 6); };
+  const per = new Map();      // ilmakuvalaatta 'i_j' -> 1 m solujen vasemmat alakulmat
+  for (let j = -6; j < D.ny + 6; j++) for (let i = -6; i < D.nx + 6; i++) { const x = D.x0 + i, y = D.y0 + j; if (!cut(x + 0.5, y + 0.5)) continue;
+    const key = Math.floor((x + 0.5 + 1280) / LS) + '_' + Math.floor((y + 0.5 + 1280) / LS); if (!per.has(key)) per.set(key, []); per.get(key).push(x, y); }
+  let nq = 0;
+  for (const [key, C] of per) { const [ti, tj] = key.split('_').map(Number), x0t = -1280 + ti * LS, y0t = -1280 + tj * LS, V = new Map(), P = [], U = [], U1 = [], I = [];
+    const vid = (x, y) => { const k = x * 100003 + y; let v = V.get(k); if (v === undefined) { v = P.length / 3; V.set(k, v); P.push(x, zz(x, y), -y); U.push((x + HW) / (2 * HW), (y - YS) / YSPAN); U1.push((x - x0t) / LS, (y - y0t) / LS); } return v; };
+    for (let q = 0; q < C.length; q += 2) { const x = C[q], y = C[q + 1], a = vid(x, y), b = vid(x + 1, y), c = vid(x + 1, y + 1), d = vid(x, y + 1); I.push(a, b, c, a, c, d); nq++; }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
+    g.setAttribute('uv1', new THREE.Float32BufferAttribute(U1, 2)); g.setIndex(I);
+    const me = noT(new THREE.Mesh(g, groundMat)); me.userData.fb = groundMat; me.userData.tie = key; scene.add(me);
+    if (!ROOFT.has(key)) ROOFT.set(key, []); ROOFT.get(key).push(me);
+    const e = HR.t.get(key); if (e && e.m.map) { const t = e.m.map.clone(); t.channel = 1; t.needsUpdate = true; me.material = new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }); } }
+  window.__tieMaa = nq; }
 // @osa js/040_rakennukset.js
 // ---------- buildings ----------
 const PAL = [0xe9dcc0, 0xd9c7a2, 0xf0ead9, 0xcdb593, 0xb9805e, 0xa8563f, 0xd8d5cc, 0xbfc4c6, 0xe6cf9a, 0xc7a988, 0x9aa3a8, 0xe3d6c4, 0xb46a4c, 0xdcd0b8];
@@ -962,14 +1010,15 @@ function gridTop(x, y, x0, y0, st, dy) { const fx = (x - x0) / st, fy = (y - y0)
   const X = a => x0 + a * st, Y = b => y0 + b * st, z00 = TZg(X(i), Y(j)), z10 = TZg(X(i + 1), Y(j)), z11 = TZg(X(i + 1), Y(j + 1)), z01 = TZg(X(i), Y(j + 1));
   return (u >= v ? z00 + (z10 - z00) * u + (z11 - z10) * v : z00 + (z11 - z01) * u + (z01 - z00) * v) + dy; }
 function groundTop(x, y) {
-  if (window.__quayZ) { const q = window.__quayZ(x, y, 8.2); if (q !== null) return q - ROAD.pave; }   // Eteläranta: the hand-built walk and steps (the callers add the pavement height)
+  if (window.__quayZ) { const q = window.__quayZ(x, y, 8.2); if (q !== null) return q - ROAD.pave; }
+  if (window.__tieZ) { const t = window.__tieZ(x, y); if (t !== null) return t; }      // 21.11.2026: Luvianpuistokadun ja Maamiehenkadun käytävä kahdessa tasossa (0105_tie_kaytava.js)   // Eteläranta: the hand-built walk and steps (the callers add the pavement height)
   const S = 512, ti = Math.floor((x + 1280) / S), tj = Math.floor((y + 1280) / S), st = 6;   // gridGeo steps exactly 6 m
   return Math.max(TZg(x, y), gridTop(x, y, -HW, YS, 6, 0), gridTop(x, y, -1280 + ti * S, -1280 + tj * S, st, 0.03));
 }
 // cars stand on the asphalt: the car meshes follow the smoothed field TZs, the street surface the true ground TZg
 const ONEWAY = new Map();   // 'road index,segment' -> +1 driving along the way's point order, -1 against (tools/roads/build_roads.py, OSM oneway / roundabouts)
 const owOk = (ri, si, fw) => { const d = ONEWAY.get(ri + ',' + si); return !d || (d > 0) === fw; };
-const roadDZ = (x, y) => ROAD.on && inCore(x, y) ? groundTop(x, y) + ROAD.asph - TZs(x, y) : 0;
+const roadDZ = (x, y) => ROAD.on && (inCore(x, y) || TIE.ext(x, y)) ? groundTop(x, y) + ROAD.asph - TZs(x, y) : 0;
 import('./roads.js').then(mod => {
   const R = mod.default, dec = b => new Int16Array(TDEC(b).buffer);
   const noiseTex = (seed, base, amp, spots, N = 512) => {
@@ -1470,7 +1519,7 @@ function carGround(x, y) {
   { const kz = window.__korjaamoZ ? window.__korjaamoZ(x, y) : null; if (kz !== null) return kz; }      // 21.11.2026: Tapsan korjaamon lattia ja ajoluiska (korjaamo/korjaamo.js)
   { const rz = window.__rataZ ? window.__rataZ(x, y) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: "pelaaja uppoaa"): aseman laiturit ja ratapenkka (rata/rata.js)
   if (inRiver(x, y)) return onBridgeDeck(x, y) ? brDeckZ(x, y) ?? Math.max(TZs(x, y), TER.wl + 2.2) : null;
-  if (!inCore(x, y)) return Math.max(TZs(x, y), TZg(x, y) + 0.14);      // outside the centre the airport and its roads lie 0.1-0.15 m above the true ground (20.11.2026)
+  if (!inCore(x, y) && !TIE.ext(x, y)) return Math.max(TZs(x, y), TZg(x, y) + 0.14);      // (21.11.2026: Tiilimäen ja Isomäen kadut ovat roads.js:ssä, 0105_tie_kaytava.js)      // outside the centre the airport and its roads lie 0.1-0.15 m above the true ground (20.11.2026)
   if (inHall(x, y)) return hallZ(x, y);   // parking hall floor (test)
   if (ROAD.kiviZ) { const k = ROAD.kiviZ(x, y); if (k !== null) return k; }      // on the stone paving of the pedestrian streets and the square
   return groundTop(x, y) + (ROAD.paveAt(x, y) ? ROAD.pave : ROAD.asph);
@@ -2797,7 +2846,7 @@ kaynnista_bussi({
     let run = []; const flush = () => { if (run.length > 1) { ribbon('road', run, w / 2, 0.12, 0, 10); disc('road', run[0][0], run[0][1], w / 2, 0.12); disc('road', run[run.length - 1][0], run[run.length - 1][1], w / 2, 0.12);
         if (!ow && w >= 5.5 && k !== 'service') dashed(run, 0.06, 0.135, 3, 9);
         if (/^(trunk|primary)$/.test(k)) for (const sd of [1, -1]) ribbon('white', run, 0.06, 0.135, sd * (w / 2 - 0.4), 12); } run = []; };
-    for (let i = 0; i + 1 < P.length; i++) { const a = P[i], b = P[i + 1]; if (inCore((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)) { flush(); continue; } if (!run.length) run.push(a); run.push(b); } flush(); }
+    for (let i = 0; i + 1 < P.length; i++) { const a = P[i], b = P[i + 1]; if (inCore((a[0] + b[0]) / 2, (a[1] + b[1]) / 2) || TIE.ext((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)) { flush(); continue; } if (!run.length) run.push(a); run.push(b); } flush(); }
   for (const P of ROADS.pk) poly('road', P, 0.11, 12);
   for (const R of RW) { rect('rwy', R, 0, R.L, -R.w / 2, R.w / 2, 0.15, 10); if (R.sa !== undefined && A.rwy[RW.indexOf(R)].sa) { const r = A.rwy[RW.indexOf(R)]; ribbon('rwy', [r.sa, r.a], R.w / 2, 0.15); ribbon('rwy', [r.b, r.sb], R.w / 2, 0.15); } }
 

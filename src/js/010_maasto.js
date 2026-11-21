@@ -36,7 +36,7 @@ function quayCut(x, y) { if (x > 190 && x < 263 && y > 467 && y < 478) return tr
 // 21.11.2026: Porttaali-tunnelin kohdalta maan ruudukko pois (rata/rata.js rakentaa tunnelin, rampit ja reunat)
 const rataTun = (x, y) => { const T = RATA.tun; if (!T) return false; const ux = T.b[0] - T.a[0], uy = T.b[1] - T.a[1], L = Math.hypot(ux, uy), dx = x - T.a[0], dy = y - T.a[1], t = (dx * ux + dy * uy) / L, l = (dx * uy - dy * ux) / L;
   return t > T.t0 - 40 && t < T.t1 + 36 && l < T.w / 2 + 4.5 && l > -(T.w / 2 + 4.5 + (t > T.t1 ? 4.5 + Math.max(0, t - T.t1 - 20) * 0.25 : 0)); };
-const tSkip = (x, y) => { if (rataTun(x, y)) return true; if (!QUAY_MODEL) return false; if (x > -160 && x < 265 && y > 460 && y < 545 && quayCut(x, y)) return true; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
+const tSkip = (x, y) => { if (rataTun(x, y)) return true; if (window.__tieSkip && window.__tieSkip(x, y)) return true;      /* 21.11.2026: Luvianpuistokadun käytävä (0105/0335) */ if (!QUAY_MODEL) return false; if (x > -160 && x < 265 && y > 460 && y < 545 && quayCut(x, y)) return true; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
 let gridGeo;
 const WREL = (x, y) => TER.wl - TZs(x, y);          // water level relative to the lifted objects at (x, y)
 const terrainTex = (() => { const n = TER.nx * TER.ny, d = new Uint16Array(n); for (let i = 0; i < n; i++) d[i] = THREE.DataUtils.toHalfFloat(THS[i] / 10);

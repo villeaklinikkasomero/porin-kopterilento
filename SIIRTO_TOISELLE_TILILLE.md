@@ -1,4 +1,4 @@
-# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 21.11.2026; UUSIN TILA: osio "TILANNE 21.11.2026" aivan lopussa, sen yläpuolella päivän merkinnät aikajärjestyksessä)
+# Porin kopterilento – siirto toiselle Claude-tilille (päivitetty 21.11.2026 ilta; LUE ENSIN: osio "TILANNE 21.11.2026" ja aivan lopussa "JATKO-OHJE: vuorokausirytmin loppuosa ja mainokset")
 
 Liitä tämä tiedosto uuden keskustelun alkuun. Pyydä Claudea lukemaan myös repon `SIIRTO.md`, `pipeline/README.md` ja `HANDOFF_Y-PAKKI.md` (jos repossa).
 Vastaukset suomeksi, lyhyesti, ja kuvat todisteeksi muutoksista.
@@ -2329,9 +2329,11 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
 palaa tai tätä tiedostoa: lue tuore versio laitteelta, tee muutos tekstikorvauksena, kirjoita heti ja lue takaisin. Älä koskaan kirjoita vanhasta kopiosta.
 
 **index.html:n loppuun ladattavat moduulit (järjestys):** `vesi/vesi.js`, `tori/torikojut.js`, `ranta/ranta.js`, `lento/lento.js`, `laskuvarjo/hyppy.js`, `rata/rata.js`,
-`juna/juna.js`, `korjaamo/korjaamo.js`, `tarina/peli.js`. Jos jokin näistä riveistä puuttuu, se on jäänyt toisen istunnon tallennuksen alle.
+`juna/juna.js`, `juna/tavarajuna.js`, `korjaamo/korjaamo.js`, `tarina/peli.js`, `aika/aika.js` (rivit ovat palassa `src/html/99_loppu.html`). Jos jokin näistä riveistä puuttuu,
+se on jäänyt toisen istunnon tallennuksen alle.
 Muut tämän päivän koukut index.html:ssä: `window.__jump` (kolme riviä: `step`, `walkAction`, `updateCamera`), `carGround`issa `window.__korjaamoZ` ja `window.__rataZ`,
-`window.__game`ssa `walkOutAt, walkG, loadWalker, TZg`, `loadWalker`issa `window.__walker` ja `window.__walkerClips`.
+`window.__game`ssa `carG, walkOutAt, walkG, loadWalker, TZg`, `loadWalker`issa `window.__walker` ja `window.__walkerClips`, `SOLID.frame`issa `CAR.lifted` ja `TAKE.left.lifted` (nostin),
+paloissa `020`/`040`/`061` ikkunoiden yövalo (`WINGLOW`, `WINGLOWB`, `yovalo`).
 
 **Pelissä nyt (tehty 21.11.):**
 - Laskuvarjohyppy hyppykoneesta: Enter yli 250 m → Väli/Enter avaa → A/D ohjaa, S/Väli jarru. `laskuvarjo/README.md`.
@@ -2339,13 +2341,16 @@ Muut tämän päivän koukut index.html:ssä: `window.__jump` (kolme riviä: `st
 - Tarinahahmot maailmassa omilla malleillaan (10 mallia `npc_*.js`): Terttu torilla, Harju Etelärannan laiturilla, Tapsa tehtävien merkeillä, vartijat A/B/C (M04), kuriiri (M05).
   Puhuessa suu liikkuu ja hahmot elehtivät.
 - Tapsan korjaamo [-598.9, -443.0]: halli, liikkuva nosto-ovi, sisustus, Meshy-hylly ja -nostin. `korjaamo/README.md`.
+- **Kello ja vuorokausi (`aika/`, `window.__aika`):** 1 pelitunti = 10 min, aamu–päivä–ilta–yö koko kuvan sävytyksenä, tähdet, noin 4 600 katulamppua, ikkunoiden haalea keltainen hohka
+  osassa ikkunoista, autojen ajo- ja takavalot. `aika/README.md`.
+- Korjaamon nostin nostaa auton (U): varret kääntyvät auton alle, auton alta voi kävellä. `korjaamo/README.md`.
 - Aiemmin samassa istunnossa (19.–20.11.): IK-kävely pelaajalle ja boteille, törmäykset (`SOLID`), istuvat botit ulkona, tanssi (B).
 
 **Kesken tai tekemättä (tämän istunnon asiat):**
 - Botit istumaan sisätiloihin (teatterin kahvila ja sali, jäähallin katsomo, kirkon penkit) – omistaja valitsi, ei tehty.
-- Käsikirjoitusartifaktia (https://claude.ai/artifact/YYef6VTmqtmEmZJPU8M6mN) ei voi lukea tältä tililtä. Luvut 2–5 (M07–M26) puuttuvat reposta → Harjun paikka ja rooli
-  ovat arvioita, ja M01:n repliikit ja välianimaation kamera viittaavat yhä Isosiltaan, vaikka korjaamo siirtyi lounaaseen. Pyydä omistajaa liittämään käsikirjoitus.
-- Nostin ei nosta autoa (tarjottu). Rami ja kadun kävelijät eivät liikuta suutaan (tarjottu). Korjaamossa ei oikeaa valaistusta eikä oven ääntä.
+- Käsikirjoitus on nyt repossa (`tarina/KASIKIRJOITUS.md`, ks. merkintä klo 9.10). **Harjun paikka Etelärannan laiturilla on yhä arvio – tarkista se käsikirjoituksesta.**
+- Rami ja kadun kävelijät eivät liikuta suutaan (tarjottu). Korjaamossa ei oikeaa valaistusta eikä oven ääntä. Nostimessa ei turvarajaa.
+- Vuorokausirytmin loppuosa ja mainokset: **ks. JATKO-OHJE tämän tiedoston lopussa.**
 - Puuttuvat tarinamekaniikat: hiiviskely, vesiletku, drooni, Varjo-mittarin jahtaus (`tarvittavat_ominaisuudet/README.md`).
 
 **Kaikki 21.11. työ on testattu vain headless** (pilven Playwright + swiftshader, yksittäiset ruudut). Omistaja ei ole vielä vahvistanut pelaamalla: hypyn ohjaus ja loppuveto,
@@ -2443,3 +2448,116 @@ Latauskoko kasvoi: korjaamon mallit 7,2 Mt, tarinahahmot 2–2,6 Mt kappale (lad
   (tavarajuna- ja aika.js-rivit molemmat mukana). `tools/rata/patch_index.py` päivitetty samaan.
 - Testattu headless (askeleet käsin `__juna.tick` + `__game.step`): sisään ovesta, portaat, ala/yläkerta, yhdyskäytävä, matka kartan reunalle ja takaisin.
   Ei vielä: istuutuminen penkille, kuulutukset, sisävalaistus yöllä (aika.js), muut vaunutyypit (ravintolavaunu).
+
+
+> **Palautettu 21.11.2026 illalla:** seuraavat neljä merkintää (nostin ×3, ikkunat) olivat kadonneet, kun tiedosto tallennettiin toisesta istunnosta vanhan kopion päälle. Koodi on tallella; vain loki puuttui.
+
+## 21.11.2026 – Korjaamo: nostin nostaa auton (omistaja: "pakettiautokin mahtuu, joten toiminto voidaan laittaa")
+- **Käyttö:** auto pilarien väliin, ulos autosta, **U** tai ruudun painike "Nosta auto" (jalan alle 4,5 m nostimesta) → varret ja auto nousevat 1,75 m, U uudestaan laskee.
+  Painike toimii myös kosketusnäytöllä. Nostettuun autoon noustessa auto palaa lattialle.
+- **Missä:** `korjaamo/korjaamo.js` (`NOSTIN`, `irrotaVarret`, nostimen tila `__korjaamo.nostin`); `index.html`: `window.__game`iin lisätty `carG` (yksi sana). U-näppäin oli vapaa.
+- **Testattu** headless-pelissä: painike näkyy, auto (koelaatikko – automalli ei lataudu headless-tilassa) ja varret nousevat 1,75 m ja palaavat, lattiaan ei jää varsia.
+  **Ei testattu:** oikea auto ja pakettiauto nostimella, nouseminen nostettuun autoon, kosketus. **Tiedossa:** auton alle ei voi kävellä (auton törmäyslaatikko ei nouse),
+  ei ääntä, pyörät eivät roiku, edellinen jätetty auto (`TAKE.left`) ei nouse – vain se, josta pelaaja juuri nousi.
+
+
+## 21.11.2026 – Korjaamo: nostimen rajoitukset korjattu (omistaja: "saadaanko rajaukset korjattua?")
+- **Auton alle voi kävellä:** yli 1,25 m korkeudella nostettu auto saa lipun `.lifted`, ja `index.html`:n `SOLID.frame` ohittaa sen (kaksi ehtoa: `!(foot && CAR.lifted)` ja `!TAKE.left.lifted`).
+- **Myös aiemmin jätetty auto nousee** (`window.__take.left`), ei vain se, josta pelaaja juuri nousi.
+- **Pyörät roikkuvat** 7 cm (auton solmut, joilla on `userData.front`), **ääni:** hurina liikkeen ajan (vaimenee etäisyyden mukaan) ja kolahdus päätyasennossa, pelin oma `actx`, vain kun äänet ovat päällä.
+- **Testattu** headless-pelissä kolme tapausta: oma auto ylös ja alas (lippu ja pyörät palautuvat), nouseminen nostettuun autoon (irtoaa, varret laskeutuvat), jätetty auto ylös ja alas;
+  `solid_test.js` läpi. **Ei testattu:** kävely auton alta käytännössä, ääni (pilvessä ei kuulu), oikea auto ja pakettiauto, kosketus.
+- **Tiedossa:** nostin voi laskea auton pelaajan päälle (ei turvarajaa; auto muuttuu esteeksi alle 1,25 m ja peli työntää pelaajan sivuun).
+
+
+## 21.11.2026 – Korjaamo: nostovarret kääntyvät auton alle + auto ei noussut oikeassa pelissä (omistajan kuva: varret ylhäällä, auto lattialla; "ne pitäisi kääntää eka auton alle")
+- **Vika:** auto tunnistettiin ehdolla "body-luokka `car` ei päällä", mutta pelissä luokka pysyy päällä myös jalan (se kertoo kulkuneuvon lajin) → autoa ei koskaan kiinnitetty.
+  Headless-testi ei huomannut, koska siinä luokka poistettiin käsin. Nyt ehto on kävelytila (`window.__walk.on`). Tunnistusalue väljemmäksi (±1,1 m sivusuunnassa, ±2,3 m pituussuunnassa).
+- **Varret:** neljä vartta omissa saranoissaan; ylös = varret kääntyvät ensin 62° auton alle (tyynyt akselien väliin), sitten nosto; alas = lasku, sitten varret takaisin sivuille.
+  Meshyn mallissa varret olivat 0,37–0,64 m korkeudella, joten varsiryhmä on laskettu 0,27 m alemmas, että ne mahtuvat auton pohjan alle.
+- **index.html:** `SOLID.frame`in kaksi `.lifted`-ehtoa (edellisen merkinnän muutos, jonka tallennus hylättiin kerran, koska toinen istunto oli juuri muuttanut tiedostoa) on nyt mukana.
+- **Testattu** headless: varret kääntyvät (kuva ylhäältä ilman autoa), auto nousee 1,81 m ja palaa. **Ei testattu** oikealla autolla – omistajan kuvakaappaus pyydetty.
+
+
+## 21.11.2026 – Yö: ikkunoiden haalea hohka ja autojen valot (omistaja: "tehdään yksi ja kaksi, ei valaista kaikkia ikkunoita ja tehdään vain haalean keltainen hohka")
+
+- **`aika/aika.js`:** `luoIkkunat` (asettaa `window.__winGlow` / `__winGlowB`), `luoAjovalot` (ajo- ja takavalopisteet + valokeila tiessä liikenteen ja pelaajan autolle).
+- **Pääskripti, samat muutokset `index.html`:ssä ja paloissa `src/js/020_renderoija.js`, `040_rakennukset.js`, `061_kaupunkilohkot.js`:**
+  `WINGLOW`, `WINGLOWB`, `YOHASH`, `yovalo(m)` (020); koodista piirrettyjen julkisivujen varjostimeen hohka + välimuistiavain `'dy'` (040); poltettujen lohkojen materiaalit `yovalo(...)` (040, 061).
+  Päivällä arvo on nolla → kuva ennallaan. **kokoa.py:tä ei voitu ajaa pilvessä – aja `python tools/osat/kokoa.py --tarkista`.**
+- **Koodista piirretyt julkisivut:** osa ikkunoista (illalla 36 %, yöllä 7 %) hohtaa haalean keltaisena; seuraa julkisivun jakoa, joten inventaarin muutokset eivät vaadi mitään.
+- **Poltetut lohkot (kokeilu ilman uutta polttoa):** toimii kohtalaisesti – useimmat ikkunat löytyvät tummasta sinertävästä lasista, mutta lasijulkisivut (torin BePOP) näkyvät ruudukkona ja osa
+  ikkunoista jää pimeäksi. Jätetty päälle himmeänä; `__aika.poltetutIkkunat = 0` sammuttaa. Oikea korjaus = ikkunamaski polttoon inventaarin jälkeen.
+- **Löytynyt sudenkuoppa:** `terrainizeScene` (palassa 010) tekee ohjelman välimuistiavaimen `onBeforeCompile`-kääreen pituudesta; kaksi samanpituista käärettä eri varjostimilla
+  menisi sekaisin. `yovalo`ssa siksi kaksi eri mittaista käärettä. Ks. `aika/README.md`.
+- **Testattu** headless nykyisellä pilkotulla pelillä (index + moduulit + rata, ilman junaa): koodista piirretty tiilitalo yöllä (osa ikkunoista hohtaa), poltetut lohkot tori0/tori1/c048–c052
+  kadulta ja ilmasta, ei varjostin- eikä konsolivirheitä. **Ei testattu:** autojen valot kuvasta (liikennettä ei osunut kuviin; 36 autoa sai valot), tiilikuvion säilyminen poltetuissa
+  tiilitaloissa uuden kääreen kanssa (katso Fiini tai Kivi-Pori päivällä), suorituskyky puhelimella.
+
+
+## JATKO-OHJE: vuorokausirytmin loppuosa ja mainokset (kirjoitettu 21.11.2026 illalla toiselle tilille / Opukselle; omistaja: "mieti miten toisella tilillä opuksella tuo toteutetaan. Käytetäänkö Meshyä tekemään mainoksia")
+
+Lue ensin `aika/README.md` (kello, valo, lamput, ikkunat) ja `src/README.md` (palat ja kokoaminen). Omistajan linjaukset: 1 pelitunti = 10 min; bussit ja junat ajavat oikeiden
+aikataulujen kellonaikoja pelin kellosta; kaikki valo lämpimän keltaista **paitsi neon**; ikkunoista vain osa valaistu, haalea hohka; mainokset ensin vain inventaarissa läpikäydyille kaduille.
+
+### Mitä on valmiina ja mitä puuttuu
+| Osa | Tila |
+|---|---|
+| Kello, valo, tähdet, katulamput, ikkunahohka, autojen valot | Tehty (`aika/aika.js`). Omistaja ei ole vielä pelannut yötä – kysy kuvakaappaus ja sujuvuus (myös puhelin). |
+| **A. Neonkyltit ja mainokset** | Tekemättä. |
+| **B. Aikataulut: bussi ja juna pelin kellosta** | Tekemättä. Kello on valmis (`__aika.t`, `valilla`, `tasatunnein`). |
+| **C. Ihmiset ja liikenne kellon mukaan, kojut ja hahmot** | Tekemättä. |
+| **D. Ikkunamaski polttoon** | Vasta inventaarin jälkeen (Modal-ajo maksaa; älä polta kahdesti). Siihen asti arvio (`yovalo`), säätö `__aika.poltetutIkkunat`. |
+
+### A. Neonkyltit ja mainokset – suositus: EI Meshyä tekstiin
+- **Meshy tekee 3D-kappaleita, ei luettavaa tekstiä.** Kyltin kirjaimet ja logot tulevat siitä sotkuna, eikä litteä kyltti tarvitse 3D-mallia. Tee kyltit **koodilla**: teksti ja muodot
+  canvas-tekstuuriin → taso seinään, materiaali `MeshBasicMaterial({ toneMapped: false })` → ei himmene yöllä. Neonputken hehku = sama teksti sumennettuna (canvas `shadowBlur`)
+  lisäävällä sekoituksella takana. Päivällä kyltti näkyy himmeänä (väri × 0,35, kun `__aika.lamput` on epätosi). Mallia: `korjaamo/korjaamo.js`:n kyltti (canvas → `CanvasTexture`)
+  ja `aika.js`:n lampun lasi.
+- **Meshyä kannattaa käyttää kappaleisiin, joissa ei ole tekstiä:** valomainoskaappi, kattomainoksen teline, bussipysäkin mainosvitriini, mainospylväs. Teksti ja kuva lisätään niihin
+  koodilla omana tasonaan. Muunnos: `tools/korjaamo/tee_mallit.py` käy sellaisenaan (tekstuurin pienennys, normaalien korjaus). Meshyn asetukset: Origin = Bottom, Resize oikeaan kokoon, 15–20 k kolmiota.
+- **Julisteiden kuvat** (bussipysäkit; M01: "Sen kasvot on joka bussipysäkillä"): `hahmot/konseptit/muotokuvat/varjo_iloinen.png` + teksti canvasissa on valmis Varjo-juliste.
+  Uudet kuvat omistaja tekee kuvageneraattorilla kuten hahmokonseptit; ne ovat kuvia, eivät Meshy-malleja.
+- **Ei oikeita tavaramerkkejä.** Käytä pelin omia keksittyjä nimiä: radion mainokset (`tools/radio/puhe.json`, osiot `tuulipesu`, `lokkivakuutus`, `patjapori`, `karhunkammen`, `mutteri`,
+  `loylykopteri`, `kaksisiivua` – lue nimet tiedostosta) ja tarinan paikat (Grilli-Pori, Rattis, Satakunnan Varaosa, Autoliike Kiilto, Varjo Holdings, Radio Kirjuri). Kysy omistajalta lista ennen kuin keksit lisää.
+- **Sijainnit:** liiketilat `styles.json` → `b[i].shop` (vain keskustan kaupalliset kadut). Aloita inventoiduista kaduista (Yrjönkatu, Antinkatu, Pohjois- ja Eteläpuisto; ks. tämän tiedoston
+  alusta "Katujen läpikäynti"). Kyltti liiketilakerroksen yläreunaan seinän suuntaisesti: seinät rakennuksen pohjasta (`city.js` `b[i].p`, kymmenesosametrejä), korkeus `G.carGround` + noin 3,4 m.
+  Yksi kyltti per liiketila kadun puoleiselle seinälle (seinä alle 12 m kadun keskilinjasta, `city.js` `r`).
+- **Toteutus omana moduulinaan** `mainokset/mainokset.js` (ladataan palassa `src/html/99_loppu.html` kuten `aika/aika.js`), data `mainokset/kyltit.json`:
+  `[{ b: rakennus, teksti, vari, tyyli: 'neon' | 'valokaappi' | 'juliste' }]`. Ei muutoksia pääskriptiin. Kyltit piirretään alle 250 m päästä, enintään noin 150 kerrallaan.
+- **Neonin värit:** magenta, syaani, vihreä, punainen, sininen – ainoa paikka, jossa valo ei ole lämmintä keltaista. Yksi välkkyvä tai sammunut kirjain siellä täällä tekee kyltistä elävän.
+
+### B. Aikataulut pelin kellosta
+- Lue ensin `moduulit/bussi.js`, `juna/juna.js` ja `juna/tavarajuna.js` (toisen istunnon työtä: IC-juna tulee, seisoo 150 s ja lähtee; tavarajunien järjestys Digitrafficista).
+  Muuta lähtöehto muotoon "kun `__aika.t` ylittää aikataulun kellonajan" ja pidä vanha ajastin varalla, jos `window.__aika` puuttuu.
+- Aikataulut dataan (esim. `juna/aikataulu.json`): oikeat arkipäivän lähtöajat Porin asemalta ja citylinjojen pääpysäkeiltä. Hae ajat verkosta ja kirjaa lähde ja päivämäärä tiedostoon.
+  Vuorokausi on 240 min, joten 24 lähtöä päivässä = yksi 10 minuutin välein; se riittää siihen, että "ympäri vuorokauden tapahtuu asioita".
+- Näytä seuraava lähtö aseman ja pysäkin lähellä (taulu tai HUD-rivi): se tekee kellosta pelaajalle merkityksellisen.
+
+### C. Ihmiset, liikenne, kojut ja hahmot
+- Kävelijöiden ja istujien määrä: `moduulit/kavelijat.js`. Kerroin kellon mukaan: yö 0,1 · aamu 7–9 1,0 · päivä 0,8 · ilta 17–21 1,0 (terassit täynnä).
+  Liikenne: `src/js/092_liikenne.js` (autoja nyt 300). Älä poista autoja pelaajan näkyvistä – vähennä uudelleensyntymistä.
+- Torikojut ja Terttu vain 7–17 (`tori/torikojut.js` ryhmän `visible`; `tarina/data/maailma.json` `ehto` – lisää moottoriin ehtotyyppi `kello: [a, b]`, joka lukee `__aika.valilla`).
+  Korjaamon ovi auki vain 7–18 ilman tarinatehtävää. Harju laiturilla aamuisin ("soutaa joka aamu").
+- Tarinan tehtävät voivat vaatia kellonajan samalla ehdolla. Tarkista `tarina/KASIKIRJOITUS.md`, onko yötehtäviä.
+
+### Sudenkuopat (kaikki tulivat vastaan 21.11.)
+- **Pääskriptin muutos = pala + index.html samalla tekstillä**, sitten `python tools/osat/kokoa.py --tarkista`. Pilvestä skriptiä ei voi ajaa laitteella → tee sama tekstikorvaus molempiin
+  ja pyydä omistajaa ajamaan tarkistus. 21.11. illan ikkunamuutokset (palat 020, 040, 061) ovat vielä tarkistamatta.
+- **Rinnakkaiset istunnot ylikirjoittavat tämän tiedoston vanhasta kopiosta:** 21.11. tästä katosi kahdesti merkintöjä (nostin ×3, ikkunat) – ne on palautettu alle. Lue tiedosto laitteelta juuri
+  ennen kirjoitusta, lisää vain loppuun ja käytä muutosaikatarkistusta. Sama koskee `index.html`:ää (muuttui neljä kertaa kesken työn).
+- **`terrainizeScene` (pala 010):** ohjelman välimuistiavain = `onBeforeCompile`-kääreen lähdekoodin pituus. Kaksi samanpituista käärettä eri varjostimilla sekoittuvat. Tee kääreistä eri mittaisia.
+- **`toneMapped: false`** kaikkeen, mikä hohtaa; muuten se himmenee yöllä noin 4 %:iin. Varjostimeen lisätty valo pitää jakaa yön kertoimella (`savy()` `aika.js`:ssä).
+- **GLSL:** `smoothstep(a, b, x)`, jossa a > b, on määrittelemätön ja toimi testiympäristössä väärin. Käytä `step` tai käännä itse.
+- **Body-luokka `car`** pysyy päällä myös jalan (kulkuneuvon laji). "Pelaaja on jalan" = `window.__walk.on`. Tämä virhe piti nostimen auton lattialla oikeassa pelissä, vaikka testi meni läpi.
+- **Headless-testi ei riitä:** siinä ei ole oikeaa automallia, ääntä eikä pelaajan syötettä, ja se näyttää yksittäisiä ruutuja. Pyydä omistajalta kuvakaappaus jokaisesta näkyvästä muutoksesta.
+- **Testiresepti:** kopioi repo työtilaan, palvele paikallisesti, avaa `index.html?city` Playwrightilla (swiftshader), odota `window.__game && window.__ready`, siirrä `G.S.x/y`, kutsu `G.world(x, y)`
+  muutaman kerran, aseta kamera käsin ja `G.renderer.render(G.scene, G.camera)`. Aika: `__aika.pysaytetty = true; __aika.aseta(21)`. Puuttuvat `bl_*.js`-lohkot näkyvät sijaisseininä.
+
+## 21.11.2026 klo 10 – Luvianpuistokatu kahdessa tasossa, ajorata tasaiseksi, asfaltti Tiilimäelle ja Isomäelle (omistaja: "laajennetaan asfaltin määrää tiilimäelle ja isoonmäkeen saakka, luvianpuistokadulla satakunnankadun ympyrän ja tiilimäen välillä, asfalttikenttä on nyt vedetty kahdelta tasolta yhteen. pyörätie menee ylemmällä tasolla noin 2m ja autotie kaistoineen alempana, nyt myös mäki piirretty asfaltille. Tie on todella kumpurainen pelatessa")
+- **Syy:** korkeusmalli on 6 m ruudukko. Ajoradan ja 2 m ylempänä kulkevan pyörätien välinen 2–3 m luiska levisi 6 m:n kolmioiksi: ajorata kallistui reunoiltaan, roads.js:n 7 m jalkakäytäväkaista peitti luiskan ("mäki asfaltilla") ja radan sillan kohdalla lounaaseen menevällä kaistalla oli 1,4 m kumpu (laserkeilaus osui ratasiltaan). Lisäksi roads.js loppui x −790:ssa ja ytimen rajalla (y −947) auto hyppäsi 0,5 m (`carGround` vaihtui `TZs`:ään).
+- **Mitattu pelin `carGround`illa, pystykiihtyvyys 50 km/h (huippu / rms):** Luvianpuistokatu lounaaseen 31 / 3,4 → **0,3 / 0,13 m/s²**, koilliseen 4,3 / 0,6 → **0,4 / 0,13**. Maamiehenkatu Tiilimäelle 2,3 / 0,44 (luonnollinen maasto), ei porrasta ytimen rajalla.
+- **Käytävä (`tools/roads/tie_luvianpuisto.py` → `tie/tie_data.js`, 1 m ruudukko, mm):** ajorata = korkeusmallin näytteet leikatulta ajoradalta (rautatiesillan kohta maskattu) tasoitettuna, poikkileikkaus suora; yläpenkereet = pyörätiet 40214524 (luoteispuoli), 93630644 (Maamiehenkadun länsipuoli Helsingintien sillan ali), 40320335 (kaakkoispuoli radan sillalla), 3,5 m levyinä, korkeus pyörätien ulkoreunan maasta; välissä 2,5 m nurmiluiska; muualla liu'utus luonnolliseen maahan 6 m ja käytävän rajalla 25 m.
+- **Peli:** uudet palat `js/0105_tie_kaytava.js` (TIE: `__tieZ`, `__tieSkip`, `__tieExt`) ja `js/0335_tie_maa.js` (6 m maaruudukoista leikattu aukko täytetään 1 m pinnalla, ilmakuva ytimen kuvasta / tarkasta laatasta ROOFT:n kautta). Koukut: `010_maasto.js` tSkip, `060_kadut.js` groundTop + roadDZ, `082_pysakointihalli.js` carGround (laajennusalue asfalttina), `180_lentoasema.js` (nauhatiet pois laajennusalueelta).
+- **roads.js laajennettu:** OSM (api.openstreetmap.org map.json, sovelluksen selaimella) lon 21.7625–21.7816, lat 61.4726–61.4800 → `tools/roads/osm_ways_tie.json` (keskusta + 397 uutta tietä, rajattu x −1785…−768, y −1490…−669). bb −1790 −1495 900 995 (roads_ao.png 2690×2490). `build_roads.py --rinteet=tools/roads/tie_rinteet.json`: luiskilta pois ajorata ja jalkakäytävä, tilalle nurmi. Koko ajo: `sh tools/roads/tie_aja.sh` (järjestys: roads ilman luiskia → käytävä → roads luiskilla). Tarkistettu: alkuperäisillä syötteillä build_roads.py tuottaa tavulleen saman roads.js:n kuin repossa oli.
+- Avoinna: laajennusalueen pohjoisraja y −669 (Ratakatu, Malminkatu, Päärnäistenkatu, Kustaanpolku katkeavat siihen) ja itäraja x −768 y < −995 (Tiilimäentie itään) – jatko vaatii lisää OSM-dataa. Pyörätien tasoristeyksissä reunakivi 13 cm kuten muuallakin.

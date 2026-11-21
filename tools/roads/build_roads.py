@@ -1,6 +1,8 @@
 """Streets as geometry (18.11.2026): carriageways, raised pavements with kerbs, traffic islands and zebra crossings for the game.
 
-usage: python3 tools/roads/build_roads.py ways.json out_roads.js [x0 y0 x1 y1]
+usage: python3 tools/roads/build_roads.py ways.json out_roads.js [x0 y0 x1 y1] [--rinteet=tools/roads/tie_rinteet.json]
+  21.11.2026 laajennus Tiilimäelle ja Isomäelle: ways = tools/roads/osm_ways_tie.json, bb -1790 -1495 900 995;
+  --rinteet: luiskat (tools/roads/tie_luvianpuisto.py), joilta ajorata ja jalkakäytävä poistetaan ja tilalle nurmi
   ways.json  OSM ways in game metres: [{"id", "t": {h: highway, f: footway, l: lanes, a: area:highway, o: oneway, n: name, br, tu, ly ...},
              "g": [[x, y], ...]}] (fetched from api.openstreetmap.org map.json, see the handoff notes)
 Widths: the carriageway edge (kerb) on each side of a road is measured, not guessed, wherever OSM has the sidewalk / cycle path mapped as its
@@ -17,7 +19,8 @@ import shapely, time
 T0 = time.time()
 def tick(m): print(f'{time.time() - T0:6.1f}s', m, flush=True)
 
-A = sys.argv[1:]
+A = [a for a in sys.argv[1:] if not a.startswith('--')]
+OPT = dict(a[2:].split('=', 1) for a in sys.argv[1:] if a.startswith('--') and '=' in a)
 W = json.load(open(A[0])); OUT = A[1]
 BB = tuple(map(float, A[2:6])) if len(A) >= 6 else (-1012, -1000, 1012, 1000)
 G = '/home/claude/pori'
@@ -134,6 +137,9 @@ CARR = CARR.buffer(2.5, join_style='round').buffer(-2.5, join_style='round')    
 CARR = CARR.difference(BLD.buffer(0.8)).difference(SQ)
 ISL = unary_union([i.intersection(CARR.buffer(1)) for i in islands]) if islands else Polygon()
 CARR = CARR.difference(ISL)
+from shapely.geometry import shape as _shape
+RINNE = _shape(json.load(open(OPT['rinteet']))).buffer(0) if 'rinteet' in OPT else Polygon()   # luiskat (21.11.2026)
+if not RINNE.is_empty: CARR = CARR.difference(RINNE)
 tick('CARR')
 
 # ---------------------------------------------------------------- esplanades (owner 18.11.2026): the park strip between the two carriageways of
@@ -186,13 +192,17 @@ WALK = unary_union(walkp) if walkp else Polygon()
 strip = CARR.buffer(7.0, join_style='mitre').difference(CARR)
 PAVE = unary_union([strip, WALK.intersection(CARR.buffer(12.0)), ISL])
 PAVE = PAVE.difference(CARR).difference(BLD).difference(GREEN.buffer(-0.3)).difference(SQ).difference(PK)
-PAVE = PAVE.difference(STONE).difference(MED).buffer(-0.35).buffer(0.35)
+PAVE = PAVE.difference(STONE).difference(MED)
+if not RINNE.is_empty: PAVE = PAVE.difference(RINNE)
+PAVE = PAVE.buffer(-0.35).buffer(0.35)
 tick('PAVE')
 PAVE = PAVE.intersection(CLIP).simplify(0.25); CARR = CARR.intersection(CLIP).simplify(0.2)
 FLATW = WALK.difference(CARR.buffer(12.0)).difference(BLD).intersection(CLIP).buffer(-0.2).buffer(0.2)   # paths in parks: flat, not raised
 
 # other lawns: OSM grass and parks in the centre (the game blends back to the photo where the photo is not green: paths, sand, flower beds)
 LAWN = GREEN.intersection(CLIP).difference(MED.buffer(0.2)).difference(CARR.buffer(0.2)).difference(PAVE).difference(STONE).difference(BLD).difference(SQ).difference(FLATW)
+if BB[0] < -1012.3: LAWN = LAWN.intersection(box(-1012.3, -995, 1012.3, 1281.5))      # nurmishaderi lukee ytimen ilmakuvaa: sen ulkopuolella koko nurmikkoalue muuttui tasavihreäksi (21.11.2026)
+if not RINNE.is_empty: LAWN = LAWN.union(RINNE.intersection(CLIP).difference(PAVE).difference(CARR.buffer(0.2)))
 LAWN = LAWN.buffer(-0.3).buffer(0.3).simplify(0.3)
 PATHS = FLATW.difference(MED).simplify(0.2)
 

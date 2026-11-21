@@ -59,7 +59,7 @@
     let run = []; const flush = () => { if (run.length > 1) { ribbon('road', run, w / 2, 0.12, 0, 10); disc('road', run[0][0], run[0][1], w / 2, 0.12); disc('road', run[run.length - 1][0], run[run.length - 1][1], w / 2, 0.12);
         if (!ow && w >= 5.5 && k !== 'service') dashed(run, 0.06, 0.135, 3, 9);
         if (/^(trunk|primary)$/.test(k)) for (const sd of [1, -1]) ribbon('white', run, 0.06, 0.135, sd * (w / 2 - 0.4), 12); } run = []; };
-    for (let i = 0; i + 1 < P.length; i++) { const a = P[i], b = P[i + 1]; if (inCore((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)) { flush(); continue; } if (!run.length) run.push(a); run.push(b); } flush(); }
+    for (let i = 0; i + 1 < P.length; i++) { const a = P[i], b = P[i + 1]; if (inCore((a[0] + b[0]) / 2, (a[1] + b[1]) / 2) || TIE.ext((a[0] + b[0]) / 2, (a[1] + b[1]) / 2)) { flush(); continue; } if (!run.length) run.push(a); run.push(b); } flush(); }
   for (const P of ROADS.pk) poly('road', P, 0.11, 12);
   for (const R of RW) { rect('rwy', R, 0, R.L, -R.w / 2, R.w / 2, 0.15, 10); if (R.sa !== undefined && A.rwy[RW.indexOf(R)].sa) { const r = A.rwy[RW.indexOf(R)]; ribbon('rwy', [r.sa, r.a], R.w / 2, 0.15); ribbon('rwy', [r.b, r.sb], R.w / 2, 0.15); } }
 

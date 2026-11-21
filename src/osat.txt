@@ -6,11 +6,13 @@ css   css/peli.css
 css   html/01_runko.html
 js    js/000_tuonnit.js
 js    js/010_maasto.js
+js    js/0105_tie_kaytava.js
 js    js/020_renderoija.js
 js    js/030_maa_ilmakuva.js
 js    js/031_maa_nurmi.js
 js    js/032_heina.js
 js    js/033_ilmakuva_tarkka.js
+js    js/0335_tie_maa.js
 js    js/040_rakennukset.js
 js    js/041_kivipori_maamerkit.js
 js    js/050_etelaranta.js

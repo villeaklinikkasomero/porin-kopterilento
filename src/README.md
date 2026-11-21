@@ -78,11 +78,13 @@ Siirrä lisää samalla mallilla, kun pala alkaa olla usean chatin työmaa. Test
 | `html/01_runko.html` | 75 | body-HTML: HUD-elementit, napit, intro; avaa pääskriptin |
 | `js/000_tuonnit.js` | 19 | importit (three, GLTFLoader, data: city, terrain, roads, RATA…) |
 | `js/010_maasto.js` | 91 | maasto TER/TZg/TZs, jokiuoma, siltakummut, `isTouch` |
+| `js/0105_tie_kaytava.js` | 20 | Luvianpuistokadun/Maamiehenkadun käytävä kahdessa tasossa (`tie/tie_data.js`), roads.js-laajennus Tiilimäelle ja Isomäelle |
 | `js/020_renderoija.js` | 83 | renderer, scene, kamera, valot |
 | `js/030_maa_ilmakuva.js` | 45 | maa ja ilmakuva |
 | `js/031_maa_nurmi.js` | 24 | nurmitekstuuri |
 | `js/032_heina.js` | 71 | korkea heinä (instanssit) |
 | `js/033_ilmakuva_tarkka.js` | 26 | tarkka ilmakuva (WMS-ruudut) |
+| `js/0335_tie_maa.js` | 25 | käytävän 1 m maapinta 6 m ruudukon aukkoon |
 | `js/040_rakennukset.js` | 314 | rakennukset (LoD2, julkisivut, katot) |
 | `js/041_kivipori_maamerkit.js` | → moduuli | Kivi-Porin maamerkit, sillat (kaiteet, valot) |
 | `js/050_etelaranta.js` | → moduuli | Eteläranta (laituritaso, portaat, alikulku) |

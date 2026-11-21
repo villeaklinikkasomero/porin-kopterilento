@@ -8,14 +8,15 @@ function gridTop(x, y, x0, y0, st, dy) { const fx = (x - x0) / st, fy = (y - y0)
   const X = a => x0 + a * st, Y = b => y0 + b * st, z00 = TZg(X(i), Y(j)), z10 = TZg(X(i + 1), Y(j)), z11 = TZg(X(i + 1), Y(j + 1)), z01 = TZg(X(i), Y(j + 1));
   return (u >= v ? z00 + (z10 - z00) * u + (z11 - z10) * v : z00 + (z11 - z01) * u + (z01 - z00) * v) + dy; }
 function groundTop(x, y) {
-  if (window.__quayZ) { const q = window.__quayZ(x, y, 8.2); if (q !== null) return q - ROAD.pave; }   // Eteläranta: the hand-built walk and steps (the callers add the pavement height)
+  if (window.__quayZ) { const q = window.__quayZ(x, y, 8.2); if (q !== null) return q - ROAD.pave; }
+  if (window.__tieZ) { const t = window.__tieZ(x, y); if (t !== null) return t; }      // 21.11.2026: Luvianpuistokadun ja Maamiehenkadun käytävä kahdessa tasossa (0105_tie_kaytava.js)   // Eteläranta: the hand-built walk and steps (the callers add the pavement height)
   const S = 512, ti = Math.floor((x + 1280) / S), tj = Math.floor((y + 1280) / S), st = 6;   // gridGeo steps exactly 6 m
   return Math.max(TZg(x, y), gridTop(x, y, -HW, YS, 6, 0), gridTop(x, y, -1280 + ti * S, -1280 + tj * S, st, 0.03));
 }
 // cars stand on the asphalt: the car meshes follow the smoothed field TZs, the street surface the true ground TZg
 const ONEWAY = new Map();   // 'road index,segment' -> +1 driving along the way's point order, -1 against (tools/roads/build_roads.py, OSM oneway / roundabouts)
 const owOk = (ri, si, fw) => { const d = ONEWAY.get(ri + ',' + si); return !d || (d > 0) === fw; };
-const roadDZ = (x, y) => ROAD.on && inCore(x, y) ? groundTop(x, y) + ROAD.asph - TZs(x, y) : 0;
+const roadDZ = (x, y) => ROAD.on && (inCore(x, y) || TIE.ext(x, y)) ? groundTop(x, y) + ROAD.asph - TZs(x, y) : 0;
 import('./roads.js').then(mod => {
   const R = mod.default, dec = b => new Int16Array(TDEC(b).buffer);
   const noiseTex = (seed, base, amp, spots, N = 512) => {
