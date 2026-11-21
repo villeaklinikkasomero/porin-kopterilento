@@ -18,7 +18,7 @@ const outerMat = new THREE.MeshBasicMaterial({ map: outerTex }), roofMat2 = new 
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I); g.rotateX(0); return g; };
   scene.add(noT(new THREE.Mesh(gridGeo(-HW, YS, HW, YN, 6, cuv, tSkip), groundMat)));
   const RSK = new Set(RATA.osk || []), onx = Math.round((OX1 - OX0) / 18);   // rataverkon kohdalla 18 m solut pois: rata/rata.js rakentaa niihin 6 m ruudukon (ratapenkka painettu)
-  scene.add(noT(new THREE.Mesh(gridGeo(OX0, OY0, OX1, OY1, 18, ouv, (x, y) => (Math.abs(x) < HW - 9 && y > YS + 9 && y < YN - 9) || RSK.has(Math.floor((y - OY0) / 18) * onx + Math.floor((x - OX0) / 18))), outerMat)));
+  scene.add(noT(new THREE.Mesh(gridGeo(OX0, OY0, OX1, OY1, 18, ouv, (x, y) => (Math.abs(x) < HW - 9 && y > YS + 9 && y < YN - 9) || RSK.has(Math.floor((y - OY0) / 18) * onx + Math.floor((x - OX0) / 18)) || (window.__alikSkip18 && window.__alikSkip18(x, y))), outerMat)));      // 21.11.2026: alikulut (0106/0336)
   { const pc = [], po = [], A = RIV.water;               // the water keeps the river's own colours from the photo, with the sky in it
     for (let i = 0; i < A.length; i += 6) { const cx = (A[i] + A[i + 2] + A[i + 4]) / 3, cy = (A[i + 1] + A[i + 3] + A[i + 5]) / 3; (inCore(cx, cy) ? pc : po).push(...A.slice(i, i + 6)); }
     scene.add(noT(new THREE.Mesh(tris(pc, cuv, TER.wl), waterify(new THREE.MeshBasicMaterial({ map: orto })))));

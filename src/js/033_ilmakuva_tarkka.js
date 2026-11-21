@@ -6,7 +6,7 @@ const ROOFT = new Map();   // aerial tile key -> roof meshes that switch to that
 function roofTile(k, tex) {
   for (const me of ROOFT.get(k) || []) {
     if (me.material !== me.userData.fb) { if (me.material.map) me.material.map.dispose(); me.material.dispose(); }
-    if (tex) { const t = tex.clone(); t.channel = 1; t.needsUpdate = true; me.material = new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }); }
+    if (tex) { const t = tex.clone(); t.channel = 1; t.needsUpdate = true; me.material = me.userData.maa ? groundTileMat(t) : new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }); }      // maa: tienleikkaus (031 roadCut)
     else me.material = me.userData.fb;
   }
 }

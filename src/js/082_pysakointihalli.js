@@ -25,6 +25,7 @@ function carGround(x, y) {
   { const qz = window.__quayZ ? window.__quayZ(x, y) : null; if (qz !== null) return qz; }      // Eteläranta's hand-built quay
   { const sz = window.__siltaZ ? window.__siltaZ(x, y) : null; if (sz !== null) return sz; }      // 21.11.2026: maasiltojen asfalttikansi (js/0301_sillat.js)
   { const kz = window.__korjaamoZ ? window.__korjaamoZ(x, y) : null; if (kz !== null) return kz; }      // 21.11.2026: Tapsan korjaamon lattia ja ajoluiska (korjaamo/korjaamo.js)
+  { const az = window.__alikZ ? window.__alikZ(x, y) : null; if (az !== null) return az; }      // 21.11.2026: alikulun lattia kannen alla (0106)
   { const rz = window.__rataZ ? window.__rataZ(x, y) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: "pelaaja uppoaa"): aseman laiturit ja ratapenkka (rata/rata.js)
   if (inRiver(x, y)) return onBridgeDeck(x, y) ? brDeckZ(x, y) ?? Math.max(TZs(x, y), TER.wl + 2.2) : null;
   if (!inCore(x, y) && !TIE.ext(x, y)) return Math.max(TZs(x, y), TZg(x, y) + 0.14);      // (21.11.2026: Tiilimäen ja Isomäen kadut ovat roads.js:ssä, 0105_tie_kaytava.js)      // outside the centre the airport and its roads lie 0.1-0.15 m above the true ground (20.11.2026)

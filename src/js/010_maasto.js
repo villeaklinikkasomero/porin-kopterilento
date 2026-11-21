@@ -27,6 +27,52 @@ const TZg = (x, y) => tBil(THG, x, y), TZs = (x, y) => tBil(THS, x, y);
 // (korkeusmallissa tunneli näkyi 4 m syvänä kuoppana koko ratapihan poikki; rata kulkee suoraan sen yli, asema-aukion puolella portaali). juna/build/build_data.py
 { const o = RATA.ter || []; for (let k = 0; k + 1 < o.length; k += 2) { const i = o[k], v = o[k + 1], old = THG[i]; THG[i] = v; THS[i] = v > old ? Math.max(THS[i], v) : (THS[i] - old < 3 ? Math.min(THS[i], v) : THS[i]); } }
 { const o = RATA.terS || []; for (let k = 0; k + 1 < o.length; k += 2) THS[o[k]] = Math.min(THS[o[k]], o[k + 1]); }   // 21.11.2026: Porttaalin jatke vt 2:n siltojen ali (pinta todelliseen maahan)
+// 21.11.2026 (omistaja: "voidaanko tuolta alueelta poistaa nuo maanpinnan muodot ja pitää valmiiksi tasaisena ... tasainen tunneli ja tasainen nousu lentokentän
+// puoleiselle tielle"): Porttaalin käytävä on suunniteltu pinta, korkeusmallin kuoppia ja kumpuja ei käytetä.
+//   - asema-aukio (koillinen) tasossa ZP (aukion keskiarvo), ramppi suoraan ZP -> PF tunnelin suulle, katettu osa tasan PF
+//   - lounaassa PF Ratapihantielle vt 2:n siltojen alle asti, siitä tasainen nousu Ratapihantietä lentoaseman suuntaan luonnolliseen maahan
+//   - ajoradan ympärillä 8 m tasainen, 8-18 m loiva luiska; rampin muurien takana aukion / ratapihan taso (ei kaivantoa)
+//   - ratapenkan solmuihin (RATA.ter) ja katetun osan päälle ei kosketa. Myös TZs = suunniteltu pinta, joten auto, botit ja puut ovat samalla pinnalla.
+//   RATA.tun.fz kirjoitetaan uudelleen: rata/rata.js piirtää tunnelin, rampit ja lattian (__rataZ) samasta profiilista.
+{ const T = RATA.tun; if (T) {
+  const G0 = THG.slice(), bil0 = (x, y) => tBil(G0, x, y), bed = new Set();      // ratapenkan solmut: 4,5 m raiteesta (kiskot ja sepeli ovat rata_data.js:n korkeuksilla)
+  for (const tr of RATA.t || []) { const p = tr.p; for (let q = 0; q + 2 < p.length; q += 3) { const ci = Math.round((p[q] - TER.x0) / TER.g), cj = Math.round((p[q + 1] - TER.y0) / TER.g);
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const ii = ci + di, jj = cj + dj; if (Math.hypot(TER.x0 + ii * TER.g - p[q], TER.y0 + jj * TER.g - p[q + 1]) < 4.5) bed.add(jj * TER.nx + ii); } } }
+  const ux = T.b[0] - T.a[0], uy = T.b[1] - T.a[1], L = Math.hypot(ux, uy), u = [ux / L, uy / L], nr = [u[1], -u[0]], hw = T.w / 2;
+  const P = (t, l) => [T.a[0] + u[0] * t + nr[0] * l, T.a[1] + u[1] * t + nr[1] * l];
+  const tA = T.t0 - 38, PF = 0.75;
+  let zp = 0, zn = 0; for (let t = -58; t <= -42; t += 4) for (let l = -10; l <= 10; l += 5) { zp += bil0(...P(t, l)); zn++; } const ZP = Math.round(zp / zn * 100) / 100;
+  const prof0 = t => t <= tA ? ZP : t < T.t0 ? ZP + (PF - ZP) * (t - tA) / (T.t0 - tA) : PF;
+  // pystykaaret: suoran rampin taitteet pyöristetään 12 m liukuvalla keskiarvolla (= paraabelikaari kuten tiensuunnittelussa), ei terävää notkoa / harjaa
+  const prof = t => { let a = 0; for (let q = -6; q <= 6; q++) a += prof0(t + q); return a / 13; };
+  const off = t => t <= T.t1 + 6 ? 0 : -4.2 * Math.min(1, (t - T.t1 - 6) / 28) ** 2;      // sama kaarre kuin rata.js:n lounaan ajoradalla
+  const S = [];      // keskilinjan näytteet 2 m välein: x, y, z, tyyppi 'auki' | 'muuri' | 'katettu'
+  for (let t = -62; t <= T.t1 + 34; t += 2) { const [x, y] = P(t, off(t)); S.push({ x, y, z: prof(t), k: t >= T.t0 - 1 && t <= T.t1 + 1 ? 'katettu' : (t >= tA && t < T.t0) || (t > T.t1 && t <= T.t1 + 8) ? 'muuri' : 'auki' }); }
+  { const R = [[-525, -1088], [-546, -1105], [-563, -1120], [-576, -1138], [-609, -1205]], Q = [];      // Ratapihantie (OSM) lentoaseman suuntaan
+    let A = [S[S.length - 1].x, S[S.length - 1].y];
+    for (const B of R) { const d = Math.hypot(B[0] - A[0], B[1] - A[1]), m = Math.max(1, Math.ceil(d / 2)); for (let q = 1; q <= m; q++) Q.push({ x: A[0] + (B[0] - A[0]) * q / m, y: A[1] + (B[1] - A[1]) * q / m, z: PF, k: 'auki' }); A = B; }
+    const iS = Q.findIndex(p => Math.hypot(p.x + 546, p.y + 1105) < 0.01), zEnd = bil0(-609, -1205);      // PF vt 2:n siltojen alle asti, sitten tasainen nousu
+    let tot = 0; for (let i = iS + 1; i < Q.length; i++) tot += Math.hypot(Q[i].x - Q[i - 1].x, Q[i].y - Q[i - 1].y);
+    let s = 0; for (let i = iS + 1; i < Q.length; i++) { s += Math.hypot(Q[i].x - Q[i - 1].x, Q[i].y - Q[i - 1].y); Q[i].z = PF + (zEnd - PF) * s / tot; }
+    { const z = Q.map(p => p.z); for (let i = 0; i < Q.length; i++) { let a = 0, m = 0; for (let q = -3; q <= 3; q++) { const v = z[Math.max(0, Math.min(Q.length - 1, i + q))]; a += v; m++; } Q[i].z = a / m; } }   // pystykaaret
+    S.push(...Q); }
+  const sm = v => v * v * (3 - 2 * v);
+  let bx0 = 1e9, by0 = 1e9, bx1 = -1e9, by1 = -1e9; for (const p of S) { bx0 = Math.min(bx0, p.x); by0 = Math.min(by0, p.y); bx1 = Math.max(bx1, p.x); by1 = Math.max(by1, p.y); }
+  const i0 = Math.max(0, Math.floor((bx0 - 30 - TER.x0) / TER.g)), i1 = Math.min(TER.nx - 1, Math.ceil((bx1 + 30 - TER.x0) / TER.g)), j0 = Math.max(0, Math.floor((by0 - 30 - TER.y0) / TER.g)), j1 = Math.min(TER.ny - 1, Math.ceil((by1 + 30 - TER.y0) / TER.g));
+  let n = 0;
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const k = j * TER.nx + i; if (bed.has(k)) continue; const x = TER.x0 + i * TER.g, y = TER.y0 + j * TER.g;
+    let best = null, bd = 1e9; for (const p of S) { const d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = p; } }
+    if (bd > 22 || best.k === 'katettu') continue;
+    let target, w;
+    if (best.k === 'muuri') { const dx = x - T.a[0], dy = y - T.a[1], l = dx * nr[0] + dy * nr[1], t = dx * u[0] + dy * u[1], al = Math.abs(l);      // muurien rampit: pohja tai muurin takana aukion taso
+      if (al <= hw + 0.3) { target = prof(t); w = 1; }
+      else { target = bil0(...P(t, Math.sign(l) * 20)); w = al < 16 ? 1 : al > 22 ? 0 : 1 - sm((al - 16) / 6); } }
+    else { target = best.z; w = bd <= 8 ? 1 : bd >= 18 ? 0 : 1 - sm((bd - 8) / 10); }
+    if (w <= 0) continue;
+    THG[k] = Math.round(((G0[k] / 10) * (1 - w) + target * w) * 10); THS[k] = Math.round(((THS[k] / 10) * (1 - w) + target * w) * 10); n++; }
+  T.fz = T.fz.map((_, q) => Math.round(prof(T.ft0 + q * 2) * 100) / 100);      // tunnelin lattia samasta profiilista (rata/rata.js tunFloor)
+  window.__porttaaliTasoitus = { solmuja: n, ZP, PF };
+} }
 const QUAY_MODEL = true;    // 20.11.2026 (omistaja: "Etelärannan pinnat pitänee rakentaa myös itse, ilmakuva ei toimi tuossa"): the hand-built walk, steps, hedges and railing are back and the photo ground is cut out under them (15.11 they were off for the MML 2025 photo)
 const QUAY_WALK = TER.wl + 1.05;   // Etelärannan alempi kävelytaso (absoluuttinen), myös ranta/ranta.js:n kulkusillat
 function quayCut(x, y) { if (x > 190 && x < 263 && y > 467 && y < 478) return true;      /* the underpass under Porinsilta (Eteläranta block) */
@@ -36,7 +82,7 @@ function quayCut(x, y) { if (x > 190 && x < 263 && y > 467 && y < 478) return tr
 // 21.11.2026: Porttaali-tunnelin kohdalta maan ruudukko pois (rata/rata.js rakentaa tunnelin, rampit ja reunat)
 const rataTun = (x, y) => { const T = RATA.tun; if (!T) return false; const ux = T.b[0] - T.a[0], uy = T.b[1] - T.a[1], L = Math.hypot(ux, uy), dx = x - T.a[0], dy = y - T.a[1], t = (dx * ux + dy * uy) / L, l = (dx * uy - dy * ux) / L;
   return t > T.t0 - 40 && t < T.t1 + 36 && l < T.w / 2 + 4.5 && l > -(T.w / 2 + 4.5 + (t > T.t1 ? 4.5 + Math.max(0, t - T.t1 - 20) * 0.25 : 0)); };
-const tSkip = (x, y) => { if (rataTun(x, y)) return true; if (window.__tieSkip && window.__tieSkip(x, y)) return true;      /* 21.11.2026: Luvianpuistokadun käytävä (0105/0335) */ if (!QUAY_MODEL) return false; if (x > -160 && x < 265 && y > 460 && y < 545 && quayCut(x, y)) return true; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
+const tSkip = (x, y) => { if (rataTun(x, y)) return true; if (window.__tieSkip && window.__tieSkip(x, y)) return true; if (window.__alikSkip && window.__alikSkip(x, y)) return true;      /* 21.11.2026: alikulut (0106/0336) */      /* 21.11.2026: Luvianpuistokadun käytävä (0105/0335) */ if (!QUAY_MODEL) return false; if (x > -160 && x < 265 && y > 460 && y < 545 && quayCut(x, y)) return true; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
 let gridGeo;
 const WREL = (x, y) => TER.wl - TZs(x, y);          // water level relative to the lifted objects at (x, y)
 const terrainTex = (() => { const n = TER.nx * TER.ny, d = new Uint16Array(n); for (let i = 0; i < n; i++) d[i] = THREE.DataUtils.toHalfFloat(THS[i] / 10);

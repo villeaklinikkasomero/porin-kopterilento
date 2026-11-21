@@ -12,12 +12,14 @@ const SOLID = (() => {
   const DIM = [[2.1, 0.95], [2.3, 0.97], [2.1, 0.95], [2.45, 1.1], [2.45, 1.1], [2.45, 1.1], [2.45, 1.1]], PR = 0.3, NR = 0.35, out = [0, 0], ME = { x: 0, y: 0 };   // DIM: cars.js car0..car3 (mirrors left out)
   let dyn = [], wk = [], lastF = -1, pg = null, pn = -1, pA = null, pF = null; const NONE = [];
   // kind: 0 standing, 1 traffic, 2 the player's car when driven or a race car (people step aside), 3 the player on foot
-  const mk = (x, y, yaw, hl, hw, v, kind) => ({ x, y, sn: Math.sin(yaw), cs: Math.cos(yaw), hl, hw, v, kind, me: false });
+  // z (21.11.2026): laatikon pohjan korkeus; törmäys vain, kun korkeusero < 2,5 m (Porttaalissa junat ja laiturit ovat yläpuolella, sillan alla kulkeva auto kannen alla)
+  const mk = (x, y, yaw, hl, hw, v, kind, z) => ({ x, y, sn: Math.sin(yaw), cs: Math.cos(yaw), hl, hw, v, kind, me: false, z });
+  const lvl = (b, z) => b.z === undefined || b.z === null || z === undefined || Math.abs(b.z - z) < 2.5;
   const frame = () => { const f = renderer.info.render.frame; if (f === lastF) return; lastF = f; dyn = []; wk = [];
     try { const T = window.__sig && window.__sig.cars, foot = WALK.on;
-      if (T) for (const c of T) if (c.wx !== undefined && Math.abs(c.wx - S.x) < 190 && Math.abs(c.wy - S.y) < 190) { const d = DIM[c.k || 0]; dyn.push(mk(c.wx, c.wy, c.yaw, d[0], d[1], c.s || 0, 1)); }
+      if (T) for (const c of T) if (c.wx !== undefined && Math.abs(c.wx - S.x) < 190 && Math.abs(c.wy - S.y) < 190) { const d = DIM[c.k || 0]; dyn.push(mk(c.wx, c.wy, c.yaw, d[0], d[1], c.s || 0, 1, c.wz)); }
       if (window.__race) for (const b of window.__race.bots) if (b.wx !== undefined) dyn.push(mk(b.wx, b.wy, b.yaw, 2.1, 0.9, b.v || 0, 2));
-      if (VEH === 'car') { if (carG.visible && !(foot && CAR.lifted)) { const b = mk(CAR.x, CAR.y, CAR.yaw, CAR.hl || 2.1, CAR.hw || 0.9, foot ? 0 : CAR.v, foot ? 0 : 2); b.me = !foot; dyn.push(b); } }
+      if (VEH === 'car') { if (carG.visible && !(foot && CAR.lifted)) { const b = mk(CAR.x, CAR.y, CAR.yaw, CAR.hl || 2.1, CAR.hw || 0.9, foot ? 0 : CAR.v, foot ? 0 : 2, CAR.z); b.me = !foot; dyn.push(b); } }
       else if (heli.visible && (foot || S.landed)) { const h = foot && WALK.veh ? WALK.veh : S, b = mk(h.x, h.y, h.yaw, 2.6, 1.0, 0, 0); b.me = !foot; dyn.push(b); }
       if (TAKE.left && !TAKE.left.lifted) { const l = TAKE.left, y = CARTY[l.type] || CARTY.hatch; dyn.push(mk(l.x, l.y, l.yaw, y.hl, y.hw, 0, 0)); }
       if (TAKE.heli && VEH === 'car') dyn.push(mk(TAKE.heli.x, TAKE.heli.y, TAKE.heli.yaw, 2.6, 1.0, 0, 0));
@@ -25,13 +27,13 @@ const SOLID = (() => {
       // kävelijä ei astu vaunuun, liikkuva juna työntää kävelijän sivuun (pushOut), eikä pelaajan auto aja vaunuun (carHit)
       // IC-vaunu, jonka ovet ovat auki, jätetään pois: sisään noustaan ovista (juna.js __walkBlock, __aboard; kyydissä SOLIDia ei käytetä)
       const juna = (cars, v) => { for (const c of cars) { const g = c.g; if (!g || !g.visible || c.rects && c.open && (c.open.L || c.open.R)) continue; const x = g.position.x, y = -g.position.z;
-        if (Math.abs(x - S.x) > 190 || Math.abs(y - S.y) > 190) continue; const b = mk(x, y, 0, c.half - 0.35, 1.55, v, 0); b.sn = Math.sin(g.rotation.y); b.cs = -Math.cos(g.rotation.y); dyn.push(b); } };
+        if (Math.abs(x - S.x) > 190 || Math.abs(y - S.y) > 190) continue; const b = mk(x, y, 0, c.half - 0.35, 1.55, v, 0, g.position.y); b.sn = Math.sin(g.rotation.y); b.cs = -Math.cos(g.rotation.y); dyn.push(b); } };
       if (window.__juna) juna(window.__juna.cars, window.__juna.T.v);
       if (window.__tavara) { const TS = window.__tavara.S; for (const T of TS.junat) juna(T.cars, T.v); for (const P of Object.values(TS.pysak)) juna(P.cars, 0); }
-      if (foot && !WALK.in) { ME.x = WALK.x; ME.y = WALK.y; wk.push(ME); dyn.push(mk(WALK.x, WALK.y, 0, 0.12, 0.12, 0, 3)); }
+      if (foot && !WALK.in) { ME.x = WALK.x; ME.y = WALK.y; wk.push(ME); dyn.push(mk(WALK.x, WALK.y, 0, 0.12, 0.12, 0, 3, WALK.z)); }
       if (window.__npc) { for (const p of window.__npc.parties) for (const c of p.m) if (c.g.visible) wk.push(c); for (const c of window.__npc.sitters || []) if (c.g.visible) wk.push(c); }
     } catch (e) {} };
-  const parked = (x, y, L) => { const P0 = window.__parked || NONE, F = window.__furn || NONE; if (pn !== P0.length + F.length || pA !== P0 || pF !== F) { pg = new Map(); pn = P0.length + F.length; pA = P0; pF = F; for (const p of P0.concat(F)) {      /* parked cars and the street furniture (benches, terraces) */ const k = Math.floor(p.x / 8) * 4096 + Math.floor(p.y / 8); let l = pg.get(k); if (!l) pg.set(k, l = []); if (!p.box) { const d = DIM[p.k] || DIM[0]; p.box = p.hl ? mk(p.x, p.y, p.yaw, p.hl, p.hw, 0, 0) : mk(p.x, p.y, p.yaw, d[0] * 0.97, d[1] * 0.97, 0, 0); } l.push(p); } }
+  const parked = (x, y, L) => { const P0 = window.__parked || NONE, F = window.__furn || NONE; if (pn !== P0.length + F.length || pA !== P0 || pF !== F) { pg = new Map(); pn = P0.length + F.length; pA = P0; pF = F; for (const p of P0.concat(F)) {      /* parked cars and the street furniture (benches, terraces) */ const k = Math.floor(p.x / 8) * 4096 + Math.floor(p.y / 8); let l = pg.get(k); if (!l) pg.set(k, l = []); if (!p.box) { const d = DIM[p.k] || DIM[0]; p.box = p.hl ? mk(p.x, p.y, p.yaw, p.hl, p.hw, 0, 0) : mk(p.x, p.y, p.yaw, d[0] * 0.97, d[1] * 0.97, 0, 0, TZs(p.x, p.y) + roadDZ(p.x, p.y)); } l.push(p); } }
     const cx = Math.floor(x / 8), cy = Math.floor(y / 8); for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const l = pg.get((cx + i) * 4096 + cy + j); if (l) for (const p of l) if (!p.gone) L.push(p.box); } };
   const near = (x, y, r) => { frame(); const L = []; for (const b of dyn) if (Math.abs(b.x - x) < r + b.hl && Math.abs(b.y - y) < r + b.hl) L.push(b); parked(x, y, L); return L; };
   const sd = (b, x, y) => { const dx = x - b.x, dy = y - b.y, qx = Math.abs(dx * b.sn + dy * b.cs) - b.hl, qy = Math.abs(dx * b.cs - dy * b.sn) - b.hw; return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0); };
@@ -45,13 +47,13 @@ const SOLID = (() => {
   return { DIM, near, sd,
     walkers: () => { frame(); return wk; },
     // the player on foot: would the step from (ox, oy) to (nx, ny) walk into a car or a person
-    walkHit: (ox, oy, nx, ny) => { for (const b of near(nx, ny, 1)) { if (b.kind === 3) continue; const d = sd(b, nx, ny); if (d < PR && d < sd(b, ox, oy) - 1e-6) return true; }
+    walkHit: (ox, oy, nx, ny) => { for (const b of near(nx, ny, 1)) { if (b.kind === 3 || !lvl(b, WALK.z)) continue; const d = sd(b, nx, ny); if (d < PR && d < sd(b, ox, oy) - 1e-6) return true; }
       for (const c of wk) { if (c === ME) continue; const dx = c.x - nx, dy = c.y - ny, d2 = dx * dx + dy * dy; if (d2 < 0.3 && d2 < (c.x - ox) ** 2 + (c.y - oy) ** 2 - 1e-6) return true; } return false; },
     // a car has driven onto the player on foot: the free spot beside it, or null
-    pushOut: (x, y) => { for (const b of near(x, y, 1)) if (b.kind !== 3 && sd(b, x, y) < PR - 0.08) return side(b, x, y, PR); return null; },
+    pushOut: (x, y) => { for (const b of near(x, y, 1)) if (b.kind !== 3 && lvl(b, WALK.z) && sd(b, x, y) < PR - 0.08) return side(b, x, y, PR); return null; },
     // the player's car at (x, y), heading (sn, cs): inside a parked car, the car left behind or the parked helicopter (only when moving closer to it)
     carHit: (x, y, sn, cs) => { const a = { x, y, sn, cs, hl: (CAR.hl || 2.1) - 0.1, hw: (CAR.hw || 0.9) - 0.05 };
-      for (const b of near(x, y, 4)) { if (b.kind !== 0 || b.me) continue; if (sat(a, b) && (b.x - x) ** 2 + (b.y - y) ** 2 < (b.x - S.x) ** 2 + (b.y - S.y) ** 2 - 1e-4) return true; } return false; },
+      for (const b of near(x, y, 4)) { if (b.kind !== 0 || b.me || !lvl(b, CAR.z)) continue; if (sat(a, b) && (b.x - x) ** 2 + (b.y - y) ** 2 < (b.x - S.x) ** 2 + (b.y - S.y) ** 2 - 1e-4) return true; } return false; },
     // is a car about to drive over the crossing that starts at (ax, ay) towards (bx, by): within 3 s at its present speed
     coming: (ax, ay, bx, by) => { frame(); const ex = (bx - ax) * 2, ey = (by - ay) * 2, el = ex * ex + ey * ey || 1;
       for (const b of dyn) { if (b.kind === 0 || b.kind === 3 || Math.abs(b.v) < 2 || Math.abs(b.x - ax) > 70 || Math.abs(b.y - ay) > 70) continue;
@@ -84,16 +86,25 @@ const SOLID = (() => {
 function carBlocked(x, y, yaw) {   // a corner of the car inside a house or over open water
   const sn = Math.sin(yaw), cs = Math.cos(yaw), g = TZs(x, y);
   // a traffic car in the way (19.11.2026): three circles along each car; only a move that brings the two closer is refused, so the player can always back away
-  if (window.__sig && window.__sig.cars && VEH === 'car') { const C = window.__race && window.__race.bots.length ? window.__sig.cars.concat(window.__race.bots) : window.__sig.cars; for (let i = 0; i < C.length; i++) { const o = C[i]; if (o.wx === undefined) continue; const dx = o.wx - x, dy = o.wy - y, d2 = dx * dx + dy * dy; if (d2 > 30) continue;
+  if (window.__sig && window.__sig.cars && VEH === 'car') { const C = window.__race && window.__race.bots.length ? window.__sig.cars.concat(window.__race.bots) : window.__sig.cars; for (let i = 0; i < C.length; i++) { const o = C[i]; if (o.wx === undefined || (o.wz !== undefined && Math.abs(o.wz - CAR.z) > 2.5)) continue; const dx = o.wx - x, dy = o.wy - y, d2 = dx * dx + dy * dy; if (d2 > 30) continue;
       const os = Math.sin(o.yaw), oc = Math.cos(o.yaw); let hit = false; for (const f of [1.4, 0, -1.4]) for (const h of [1.4, 0, -1.4]) { const ex = (x + sn * f) - (o.wx + os * h), ey = (y + cs * f) - (o.wy + oc * h); if (ex * ex + ey * ey < 3.06) hit = true; }
       if (hit && d2 < (o.wx - S.x) ** 2 + (o.wy - S.y) ** 2 - 1e-4) return true; } }
   if (VEH === 'car' && !WALK.on && SOLID.carHit(x, y, sn, cs)) return true;      // a parked car, the car left behind (20.11.2026)
   if (x > HALL.bb[0] - 3 && x < HALL.bb[2] + 3 && y > HALL.bb[1] - 3 && y < HALL.bb[3] + 3) for (let f = -2.1; f < 2.11; f += 0.3) for (const r of [0.9, -0.9]) {   // near the hall: both sides sampled every 0.3 m, so its 0.4 m walls cannot slip between the corner points
     const px = x + sn * f + cs * r, py = y + cs * f - sn * r; if (!inHall(px, py) && bldTopAt(px, py) > Math.max(g, TZg(px, py)) + 1.4) return true; }
   const HL = CAR.hl || 2.1, HW = CAR.hw || 0.9;      // the box of the model being driven (van and estate are longer)
-  for (const [f, r] of [[HL, HW], [HL, -HW], [-HL, HW], [-HL, -HW], [0, HW + 0.05], [0, -HW - 0.05]]) {
+  const so = Math.sin(CAR.yaw), co = Math.cos(CAR.yaw), SK = window.__siltaKaide, RS = window.__rataSeina, AS = window.__alikSeina;
+  for (const [f, r] of [[HL, HW], [HL, -HW], [-HL, HW], [-HL, -HW], [0, HW + 0.05], [0, -HW - 0.05], [HL * 0.5, HW], [HL * 0.5, -HW], [-HL * 0.5, HW], [-HL * 0.5, -HW]]) {
     const px = x + sn * f + cs * r, py = y + cs * f - sn * r;
-    if (carGround(px, py) === null) return true;
+    const gz = carGround(px, py); if (gz === null) return true;
+    // 21.11.2026 (omistaja: "auto törmäilee näkymättömään, hyppii oudosti"): maasiltojen kaiteet ja Porttaalin seinät ovat kiinteitä. Vain liike, joka vie
+    // kulman syvemmälle kaiteeseen / seinään, estetään (kiinni jäänyt pääsee aina pois). Lisäksi yli 1 m pystysuora nousu kulman alla on seinä,
+    // ei ramppi: ennen auto loikkasi seinän läpi ratapihan tai kannen tasolle.
+    const ox = CAR.x + so * f + co * r, oy = CAR.y + co * f - so * r;
+    if (SK && SK(px, py, CAR.z) > SK(ox, oy, CAR.z) + 1e-4) return true;
+    if (RS && RS(px, py, CAR.z) > RS(ox, oy, CAR.z) + 1e-4) return true;
+    if (AS && AS(px, py, CAR.z) > AS(ox, oy, CAR.z) + 1e-4) return true;
+    { const g0 = carGround(ox, oy); if (g0 !== null && gz - g0 > 1.0 && Math.hypot(px - ox, py - oy) < 3) return true; }
     if (inHall(px, py)) { if (HALL.pil.some(q => Math.abs(px - q[0]) < 0.3 && Math.abs(py - q[1]) < 0.3)) return true; continue; }   // inside the parking hall: only its pillars stop the car
     if (onPorinsilta(px, py) === null && bldTopAt(px, py) > Math.max(g, TZg(px, py)) + 1.4) return true;
   }

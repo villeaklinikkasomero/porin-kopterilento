@@ -9,6 +9,15 @@ const grassTex = (() => {
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { let s2 = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) s2 += v[((y + dy + N) % N) * N + (x + dx + N) % N]; w[y * N + x] = s2 / 9; }
   for (let i = 0; i < N * N; i++) { const q = Math.max(0, Math.min(255, w[i] * 255)); d.data[i * 4] = d.data[i * 4 + 1] = d.data[i * 4 + 2] = q; d.data[i * 4 + 3] = 255; }
   g.putImageData(d, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; return t; })();
+// 21.11.2026: tien kohdalla ilmakuvamaata ei piirretä (rasteri js/060_kadut.js, ROADCUT); kaikki grassify-maat ja tarkkojen laattojen pinnat
+const ROADCUT = { t: { value: (() => { const t = new THREE.DataTexture(new Uint8Array([0]), 1, 1, THREE.RedFormat, THREE.UnsignedByteType); t.needsUpdate = true; return t; })() }, b: { value: new THREE.Vector4(0, 0, 1, 1) } };
+function roadCut(sh, wv) { sh.uniforms.tRoadCut = ROADCUT.t; sh.uniforms.uRoadCut = ROADCUT.b;
+  if (!wv) { sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vRcw;').replace('#include <project_vertex>', '#include <project_vertex>\nvRcw = (modelMatrix * vec4(transformed, 1.0)).xyz;'); wv = 'vRcw'; }
+  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\n' + (wv === 'vRcw' ? 'varying vec3 vRcw;\n' : '') + 'uniform sampler2D tRoadCut; uniform vec4 uRoadCut;')
+    .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
+      { vec2 rq = (vec2(${wv}.x, -${wv}.z) - uRoadCut.xy) / uRoadCut.zw; if (rq.x > 0.0 && rq.y > 0.0 && rq.x < 1.0 && rq.y < 1.0 && texture2D(tRoadCut, rq).r > 0.99) discard; }`); }
+// tarkan ilmakuvalaatan pinta maan täytteille (0335, 0336): sama tienleikkaus
+const groundTileMat = t => { const m = new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }); m.onBeforeCompile = sh => roadCut(sh); m.customProgramCacheKey = () => 'roadcut'; return m; };
 function grassify(mat) {
   mat.onBeforeCompile = sh => {
     sh.uniforms.grassTex = { value: grassTex };
@@ -19,6 +28,7 @@ function grassify(mat) {
         float n1 = texture2D(grassTex, vGw.xz * 0.42).r, n2 = texture2D(grassTex, vGw.xz * 0.061 + 0.37).r, n3 = texture2D(grassTex, vGw.xz * 1.7).r;
         float det = 0.62 + 0.38 * n1 + 0.30 * (n2 - 0.5) + 0.22 * (n3 - 0.5) * (1.0 - smoothstep(10.0, 45.0, dist));
         diffuseColor.rgb = mix(cc, cc * det * vec3(0.97, 1.03, 0.93), gr * fade); }`);
+    roadCut(sh, 'vGw');
   }; mat.needsUpdate = true; return mat;
 }
 grassify(groundMat); grassify(outerMat);

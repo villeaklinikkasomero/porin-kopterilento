@@ -17,7 +17,7 @@
     for (let q = 0; q < C.length; q += 2) { const x = C[q], y = C[q + 1], a = vid(x, y), b = vid(x + 1, y), c = vid(x + 1, y + 1), d = vid(x, y + 1); I.push(a, b, c, a, c, d); nq++; }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
     g.setAttribute('uv1', new THREE.Float32BufferAttribute(U1, 2)); g.setIndex(I);
-    const me = noT(new THREE.Mesh(g, groundMat)); me.userData.fb = groundMat; me.userData.tie = key; scene.add(me);
+    const me = noT(new THREE.Mesh(g, groundMat)); me.userData.fb = groundMat; me.userData.tie = key; me.userData.maa = true; scene.add(me);
     if (!ROOFT.has(key)) ROOFT.set(key, []); ROOFT.get(key).push(me);
-    const e = HR.t.get(key); if (e && e.m.map) { const t = e.m.map.clone(); t.channel = 1; t.needsUpdate = true; me.material = new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }); } }
+    const e = HR.t.get(key); if (e && e.m.map) { const t = e.m.map.clone(); t.channel = 1; t.needsUpdate = true; me.material = groundTileMat(t); } }
   window.__tieMaa = nq; }

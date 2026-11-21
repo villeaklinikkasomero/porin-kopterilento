@@ -332,6 +332,15 @@ const tunFloor = t => { const k = (t - TUN.ft0) / 2, i = Math.max(0, Math.min(TU
 // käytävä (maa pois): katettu osa, koillisramppi ja lounaan ajorata Ratapihantielle (kääntyy -l-suuntaan)
 const tunIn = (c, m) => c && c.t > TUN.t0 - 40 && c.t < TUN.t1 + 36 && c.l < TUN.w / 2 + m && c.l > -(TUN.w / 2 + m + (c.t > TUN.t1 ? 4.5 + Math.max(0, c.t - TUN.t1 - 20) * 0.25 : 0));
 const inTun = (x, y, m = 0) => { const c = tunT(x, y); return tunIn(c, 0.8 + m) ? c : null; };
+const tunOff = t => t <= TUN.t1 + 6 ? 0 : -4.2 * Math.min(1, (t - TUN.t1 - 6) / 28) ** 2;   // lounaan ajoradan kaarre Ratapihantielle (buildTunnel)
+// 21.11.2026: Porttaalin seinät kiinteiksi (ennen auto ajoi laattaseinän läpi ja hyppäsi ratapihan tasolle). Palauttaa, kuinka syvällä (m) piste (x, y) on
+// seinävyöhykkeessä, kun kulkija on korkeudella z seinän yläreunan alapuolella; 0 = vapaa. carBlocked (js/090) estää liikkeen, joka vie syvemmälle.
+function tunWallDepth(x, y, z, TZ) { const c = tunT(x, y); if (!c) return 0; const tA = TUN.t0 - 38; if (c.t < tA - 0.5 || c.t > TUN.t1 + 8) return 0;
+  const hw = TUN.w / 2, al = Math.abs(c.l), d = al - (hw - 0.05); if (d <= 0 || al > hw + 1.2) return 0;
+  const f = tunFloor(c.t), cov = c.t >= TUN.t0 && c.t <= TUN.t1, P = window.__porttaali;
+  const top = cov ? (P ? P.ceil : f + 4) : Math.max(f + 0.3, TZ ? TZ(x, y) : f) + 0.25 + (c.t < TUN.t0 ? 1.25 : 0);   // rampin tukimuuri + kaide
+  if (z > top + 0.2) return 0;                          // ylhäällä (ratapihalla, kannella): seinä on alapuolella
+  return d; }
 function buildTunnel(root, G, plats) {
   if (!TUN) return; const TZ = G.TZg || G.TZs;
   const ux = (TUN.b[0] - TUN.a[0]), uy = (TUN.b[1] - TUN.a[1]), L = Math.hypot(ux, uy), u = [ux / L, uy / L], nrm = [u[1], -u[0]];
@@ -661,11 +670,19 @@ function luoRata({ scene, TZg, G }) {
       const W2 = G.WALK, C = window.__car; let ref = null;
       if (W2 && W2.on && Math.hypot(W2.x - x, W2.y - y) < 25) ref = W2.z; else if (C && Math.hypot(C.x - x, C.y - y) < 25) ref = C.z;
       return ref !== null && ref < dz - 2 ? null : dz; } return undefined; };
+  // 21.11.2026 (omistaja: "auto törmäilee näkymättömään, hyppii oudosti tiellä"): ajopinta on täsmälleen piirretty asfaltti (buildTunnel zr + 0,04, lounaassa
+  // kaarre tunOff) eikä pelkkä tunFloor, jonka alle auto ennen painui lounaan rampissa. Maasto on tasoitettu (010_maasto.js), joten ero on pieni.
+  const TZr = G.TZg || G.TZs;
   window.__rataZ = (x, y) => { { const s = silZ(x, y); if (s !== undefined) return s; } const c = inTun(x, y);
-    if (c) { const f = tunFloor(c.t) + 0.04, W2 = G.WALK; const up = c.t > TUN.t0 && c.t < TUN.t1 && W2 && W2.on && W2.z > f + 2.2;   // tunnelissa: lattia, paitsi kävelijä ylhäällä laiturilla
-      if (!up) return f + (c.l > TUN.w / 2 - 1.4 ? 0.15 : 0); }
+    if (c) { const fl = c.t <= TUN.t1 ? tunFloor(c.t) : Math.max(tunFloor(c.t), TZr(x, y) + 0.04), f = fl + 0.04, W2 = G.WALK; const up = c.t > TUN.t0 && c.t < TUN.t1 && W2 && W2.on && W2.z > f + 2.2;   // tunnelissa: lattia, paitsi kävelijä ylhäällä laiturilla
+      if (!up) { const l = c.l - tunOff(c.t); return f + (l > TUN.w / 2 - 1.4 && l < TUN.w / 2 + 0.3 ? 0.15 : 0); } }
     for (const p of plats) if (inPoly(x, y, p.poly)) return p.z;
     const b = NZ(x, y, 2.3); if (b && !b.a.lc) return b.a.z + 0.02; return null; };
+  window.__rataSeina = (x, y, z) => tunWallDepth(x, y, z, TZr);
+  // bottiautot (js/092): vt 2:n sillan kansi, jos piste on kannella ja auto ajaa sillan suuntaan (alla Ratapihantietä ajava jää alas)
+  window.__rataSiltaAjo = (x, y, yaw) => { const sx = Math.sin(yaw), sy = Math.cos(yaw);
+    for (const B of SIL) { const dx = x - B.S.a[0], dy = y - B.S.a[1], t = dx * B.u[0] + dy * B.u[1], l = dx * B.u[1] - dy * B.u[0];
+      if (t < B.t0 || t > B.t1 || Math.abs(l) > B.hw + 1.5 || Math.abs(sx * B.u[0] + sy * B.u[1]) < 0.7) continue; return B.S.za + (B.S.zb - B.S.za) * t / B.L + 0.14; } return null; };
   window.__rata = { tracks, at, nearestOn, plats, wires: cat.wires, upd, root, RATA, RAIL };
   console.log('[rata] raiteita', tracks.length, 'ruutuja', tiles.size, 'laitureita', plats.length);
   return root;

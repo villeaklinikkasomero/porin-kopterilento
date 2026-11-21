@@ -1,5 +1,13 @@
 // ---------- traffic: cars wandering the street network, sized like the cars in the aerial image ----------
 const cars = [];
+// 21.11.2026 (omistaja: "bottiautot eivät aja siltaa vaan maanmuotoja pitkin"): bottiauton korkeus tasoitetun kentän TZs päällä (mesh nostetaan sillä).
+// Sillalla (Porinsilta, joen sillat, maasillat js/0301, vt 2:n sillat rata/rata.js) kansi vain, kun botti ajaa sillan suuntaan: alla ristiin kulkeva katu jää alas.
+const botDZ = (x, y, yaw) => { const sx = Math.sin(yaw), sy = Math.cos(yaw);
+  if (onPorinsilta(x, y) !== null && Math.abs(sx * Math.sin(PSIL.head) + sy * Math.cos(PSIL.head)) > 0.7) return bridgeZ(x, y);
+  const s = window.__siltaAjo ? window.__siltaAjo(x, y, yaw) : null; if (s !== null) return s - TZs(x, y);
+  const r = window.__rataSiltaAjo ? window.__rataSiltaAjo(x, y, yaw) : null; if (r !== null) return r - TZs(x, y);
+  if (inRiver(x, y) && onBridgeDeck(x, y)) { const d = brDeckZ(x, y); if (d !== null) return d - TZs(x, y); }
+  return roadDZ(x, y); };
 {
   const nodes = new Map(), key = (x, y) => x + ',' + y, inb = (x, y) => x > OX0 + 8 && x < OX1 - 8 && y > OY0 + 8 && y < OY1 - 8;
   const node = (x, y) => { const k = key(x, y); if (!nodes.has(k)) nodes.set(k, { x, y, nb: [] }); return nodes.get(k); };
@@ -90,7 +98,7 @@ const cars = [];
         dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; } }
       const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * c.lat, y = c.a.y + dy * c.t - ux * c.lat;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
-      const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); c.wx = x; c.wy = y; c.st = c.s < 0.05 && !c.pk ? (c.st || 0) + dt : 0;
+      const dz = botDZ(x, y, Math.atan2(ux, uy)); p3.set(x, 0.09 + dz, -y); c.wz = TZs(x, y) + 0.09 + dz; q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); c.wx = x; c.wy = y; c.st = c.s < 0.05 && !c.pk ? (c.st || 0) + dt : 0;
       if (c.st > 30 && Math.hypot(x - S.x, y - S.y) > 120) { const a = list[Math.floor(rnd() * list.length)]; if (Math.hypot(a.x - S.x, a.y - S.y) > 150) { c.a = a; c.b = a.nb[Math.floor(rnd() * a.nb.length)]; c.t = 0; c.st = 0; c.blk = 0; c.s = c.v; } }   /* stood 30 s in a jam out of the player's sight: start again somewhere else */
       if (c.pk && c.pk.door) { const D = c.pk.door, a = (c.pk.ang || 0) * 1.15; D.g.position.copy(p3); D.g.quaternion.copy(q4); D.g.visible = true; D.R.rotation.y = -a; D.L.rotation.y = c.pk.two ? a : 0; D.oR.visible = a > 0.02; D.oL.visible = c.pk.two && a > 0.02; } }
     for (const q of parts) q.instanceMatrix.needsUpdate = true;

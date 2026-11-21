@@ -9,7 +9,8 @@ function gridTop(x, y, x0, y0, st, dy) { const fx = (x - x0) / st, fy = (y - y0)
   return (u >= v ? z00 + (z10 - z00) * u + (z11 - z10) * v : z00 + (z11 - z01) * u + (z01 - z00) * v) + dy; }
 function groundTop(x, y) {
   if (window.__quayZ) { const q = window.__quayZ(x, y, 8.2); if (q !== null) return q - ROAD.pave; }
-  if (window.__tieZ) { const t = window.__tieZ(x, y); if (t !== null) return t; }      // 21.11.2026: Luvianpuistokadun ja Maamiehenkadun käytävä kahdessa tasossa (0105_tie_kaytava.js)   // Eteläranta: the hand-built walk and steps (the callers add the pavement height)
+  if (window.__tieZ) { const t = window.__tieZ(x, y); if (t !== null) return t; }
+  if (window.__alikPinta) { const a = window.__alikPinta(x, y); if (a !== null) return a; }      // 21.11.2026: alikulkujen kaivannot ja kansi (0106)      // 21.11.2026: Luvianpuistokadun ja Maamiehenkadun käytävä kahdessa tasossa (0105_tie_kaytava.js)   // Eteläranta: the hand-built walk and steps (the callers add the pavement height)
   const S = 512, ti = Math.floor((x + 1280) / S), tj = Math.floor((y + 1280) / S), st = 6;   // gridGeo steps exactly 6 m
   return Math.max(TZg(x, y), gridTop(x, y, -HW, YS, 6, 0), gridTop(x, y, -1280 + ti * S, -1280 + tj * S, st, 0.03));
 }
@@ -206,6 +207,13 @@ import('./roads.js').then(mod => {
         if (GP.length) add(laattaGeo(GP), mLaatta);
         ROAD.etGap = GP.length / 18; console.log('[eteläranta] laattaa: aukio', ROAD.etFill, 'm², väli', ROAD.etGap, 'm²'); }
     }
+    // 21.11.2026 (omistaja: "voidaanko asfaltoiduilta alueilta tiputtaa tai poistaa ilmakuvan tiet, nyt joissakin kohdissa se vuotaa asfaltin läpi"):
+    // sama 1 m rasteri (asfaltti, jalkakäytävä, kiveys, täytteet) GPU:lle: ilmakuvamaa (031 grassify -> roadCut) jättää pikselinsä piirtämättä tien
+    // kohdalla, joten 6 m / 18 m maakolmiot eivät enää pistä asfaltin läpi. Lineaarinen suodatus ja kynnys 0,99: vain vähintään puoli metriä tien
+    // reunasta sisäänpäin, joten reunalle ei jää reikiä.
+    { const D = new Uint8Array(nx * ny); for (let i = 0; i < D.length; i++) D[i] = M[i] ? 255 : 0;
+      const t = new THREE.DataTexture(D, nx, ny, THREE.RedFormat, THREE.UnsignedByteType); t.minFilter = t.magFilter = THREE.LinearFilter; t.generateMipmaps = false; t.needsUpdate = true;
+      ROADCUT.t.value = t; ROADCUT.b.value.set(x0, y0, nx, ny); }
   }
   if (R.ow) { const O = dec(R.ow); for (let i = 0; i < O.length; i += 3) ONEWAY.set(O[i] + ',' + O[i + 1], O[i + 2]); }
   if (R.tmv && TREES.move) { const s0 = atob(R.tmv), u8 = new Uint8Array(s0.length); for (let i = 0; i < s0.length; i++) u8[i] = s0.charCodeAt(i); TREES.move(new Int32Array(u8.buffer)); }

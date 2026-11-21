@@ -237,6 +237,52 @@ const TZg = (x, y) => tBil(THG, x, y), TZs = (x, y) => tBil(THS, x, y);
 // (korkeusmallissa tunneli näkyi 4 m syvänä kuoppana koko ratapihan poikki; rata kulkee suoraan sen yli, asema-aukion puolella portaali). juna/build/build_data.py
 { const o = RATA.ter || []; for (let k = 0; k + 1 < o.length; k += 2) { const i = o[k], v = o[k + 1], old = THG[i]; THG[i] = v; THS[i] = v > old ? Math.max(THS[i], v) : (THS[i] - old < 3 ? Math.min(THS[i], v) : THS[i]); } }
 { const o = RATA.terS || []; for (let k = 0; k + 1 < o.length; k += 2) THS[o[k]] = Math.min(THS[o[k]], o[k + 1]); }   // 21.11.2026: Porttaalin jatke vt 2:n siltojen ali (pinta todelliseen maahan)
+// 21.11.2026 (omistaja: "voidaanko tuolta alueelta poistaa nuo maanpinnan muodot ja pitää valmiiksi tasaisena ... tasainen tunneli ja tasainen nousu lentokentän
+// puoleiselle tielle"): Porttaalin käytävä on suunniteltu pinta, korkeusmallin kuoppia ja kumpuja ei käytetä.
+//   - asema-aukio (koillinen) tasossa ZP (aukion keskiarvo), ramppi suoraan ZP -> PF tunnelin suulle, katettu osa tasan PF
+//   - lounaassa PF Ratapihantielle vt 2:n siltojen alle asti, siitä tasainen nousu Ratapihantietä lentoaseman suuntaan luonnolliseen maahan
+//   - ajoradan ympärillä 8 m tasainen, 8-18 m loiva luiska; rampin muurien takana aukion / ratapihan taso (ei kaivantoa)
+//   - ratapenkan solmuihin (RATA.ter) ja katetun osan päälle ei kosketa. Myös TZs = suunniteltu pinta, joten auto, botit ja puut ovat samalla pinnalla.
+//   RATA.tun.fz kirjoitetaan uudelleen: rata/rata.js piirtää tunnelin, rampit ja lattian (__rataZ) samasta profiilista.
+{ const T = RATA.tun; if (T) {
+  const G0 = THG.slice(), bil0 = (x, y) => tBil(G0, x, y), bed = new Set();      // ratapenkan solmut: 4,5 m raiteesta (kiskot ja sepeli ovat rata_data.js:n korkeuksilla)
+  for (const tr of RATA.t || []) { const p = tr.p; for (let q = 0; q + 2 < p.length; q += 3) { const ci = Math.round((p[q] - TER.x0) / TER.g), cj = Math.round((p[q + 1] - TER.y0) / TER.g);
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const ii = ci + di, jj = cj + dj; if (Math.hypot(TER.x0 + ii * TER.g - p[q], TER.y0 + jj * TER.g - p[q + 1]) < 4.5) bed.add(jj * TER.nx + ii); } } }
+  const ux = T.b[0] - T.a[0], uy = T.b[1] - T.a[1], L = Math.hypot(ux, uy), u = [ux / L, uy / L], nr = [u[1], -u[0]], hw = T.w / 2;
+  const P = (t, l) => [T.a[0] + u[0] * t + nr[0] * l, T.a[1] + u[1] * t + nr[1] * l];
+  const tA = T.t0 - 38, PF = 0.75;
+  let zp = 0, zn = 0; for (let t = -58; t <= -42; t += 4) for (let l = -10; l <= 10; l += 5) { zp += bil0(...P(t, l)); zn++; } const ZP = Math.round(zp / zn * 100) / 100;
+  const prof0 = t => t <= tA ? ZP : t < T.t0 ? ZP + (PF - ZP) * (t - tA) / (T.t0 - tA) : PF;
+  // pystykaaret: suoran rampin taitteet pyöristetään 12 m liukuvalla keskiarvolla (= paraabelikaari kuten tiensuunnittelussa), ei terävää notkoa / harjaa
+  const prof = t => { let a = 0; for (let q = -6; q <= 6; q++) a += prof0(t + q); return a / 13; };
+  const off = t => t <= T.t1 + 6 ? 0 : -4.2 * Math.min(1, (t - T.t1 - 6) / 28) ** 2;      // sama kaarre kuin rata.js:n lounaan ajoradalla
+  const S = [];      // keskilinjan näytteet 2 m välein: x, y, z, tyyppi 'auki' | 'muuri' | 'katettu'
+  for (let t = -62; t <= T.t1 + 34; t += 2) { const [x, y] = P(t, off(t)); S.push({ x, y, z: prof(t), k: t >= T.t0 - 1 && t <= T.t1 + 1 ? 'katettu' : (t >= tA && t < T.t0) || (t > T.t1 && t <= T.t1 + 8) ? 'muuri' : 'auki' }); }
+  { const R = [[-525, -1088], [-546, -1105], [-563, -1120], [-576, -1138], [-609, -1205]], Q = [];      // Ratapihantie (OSM) lentoaseman suuntaan
+    let A = [S[S.length - 1].x, S[S.length - 1].y];
+    for (const B of R) { const d = Math.hypot(B[0] - A[0], B[1] - A[1]), m = Math.max(1, Math.ceil(d / 2)); for (let q = 1; q <= m; q++) Q.push({ x: A[0] + (B[0] - A[0]) * q / m, y: A[1] + (B[1] - A[1]) * q / m, z: PF, k: 'auki' }); A = B; }
+    const iS = Q.findIndex(p => Math.hypot(p.x + 546, p.y + 1105) < 0.01), zEnd = bil0(-609, -1205);      // PF vt 2:n siltojen alle asti, sitten tasainen nousu
+    let tot = 0; for (let i = iS + 1; i < Q.length; i++) tot += Math.hypot(Q[i].x - Q[i - 1].x, Q[i].y - Q[i - 1].y);
+    let s = 0; for (let i = iS + 1; i < Q.length; i++) { s += Math.hypot(Q[i].x - Q[i - 1].x, Q[i].y - Q[i - 1].y); Q[i].z = PF + (zEnd - PF) * s / tot; }
+    { const z = Q.map(p => p.z); for (let i = 0; i < Q.length; i++) { let a = 0, m = 0; for (let q = -3; q <= 3; q++) { const v = z[Math.max(0, Math.min(Q.length - 1, i + q))]; a += v; m++; } Q[i].z = a / m; } }   // pystykaaret
+    S.push(...Q); }
+  const sm = v => v * v * (3 - 2 * v);
+  let bx0 = 1e9, by0 = 1e9, bx1 = -1e9, by1 = -1e9; for (const p of S) { bx0 = Math.min(bx0, p.x); by0 = Math.min(by0, p.y); bx1 = Math.max(bx1, p.x); by1 = Math.max(by1, p.y); }
+  const i0 = Math.max(0, Math.floor((bx0 - 30 - TER.x0) / TER.g)), i1 = Math.min(TER.nx - 1, Math.ceil((bx1 + 30 - TER.x0) / TER.g)), j0 = Math.max(0, Math.floor((by0 - 30 - TER.y0) / TER.g)), j1 = Math.min(TER.ny - 1, Math.ceil((by1 + 30 - TER.y0) / TER.g));
+  let n = 0;
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const k = j * TER.nx + i; if (bed.has(k)) continue; const x = TER.x0 + i * TER.g, y = TER.y0 + j * TER.g;
+    let best = null, bd = 1e9; for (const p of S) { const d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = p; } }
+    if (bd > 22 || best.k === 'katettu') continue;
+    let target, w;
+    if (best.k === 'muuri') { const dx = x - T.a[0], dy = y - T.a[1], l = dx * nr[0] + dy * nr[1], t = dx * u[0] + dy * u[1], al = Math.abs(l);      // muurien rampit: pohja tai muurin takana aukion taso
+      if (al <= hw + 0.3) { target = prof(t); w = 1; }
+      else { target = bil0(...P(t, Math.sign(l) * 20)); w = al < 16 ? 1 : al > 22 ? 0 : 1 - sm((al - 16) / 6); } }
+    else { target = best.z; w = bd <= 8 ? 1 : bd >= 18 ? 0 : 1 - sm((bd - 8) / 10); }
+    if (w <= 0) continue;
+    THG[k] = Math.round(((G0[k] / 10) * (1 - w) + target * w) * 10); THS[k] = Math.round(((THS[k] / 10) * (1 - w) + target * w) * 10); n++; }
+  T.fz = T.fz.map((_, q) => Math.round(prof(T.ft0 + q * 2) * 100) / 100);      // tunnelin lattia samasta profiilista (rata/rata.js tunFloor)
+  window.__porttaaliTasoitus = { solmuja: n, ZP, PF };
+} }
 const QUAY_MODEL = true;    // 20.11.2026 (omistaja: "Etelärannan pinnat pitänee rakentaa myös itse, ilmakuva ei toimi tuossa"): the hand-built walk, steps, hedges and railing are back and the photo ground is cut out under them (15.11 they were off for the MML 2025 photo)
 const QUAY_WALK = TER.wl + 1.05;   // Etelärannan alempi kävelytaso (absoluuttinen), myös ranta/ranta.js:n kulkusillat
 function quayCut(x, y) { if (x > 190 && x < 263 && y > 467 && y < 478) return true;      /* the underpass under Porinsilta (Eteläranta block) */
@@ -246,7 +292,7 @@ function quayCut(x, y) { if (x > 190 && x < 263 && y > 467 && y < 478) return tr
 // 21.11.2026: Porttaali-tunnelin kohdalta maan ruudukko pois (rata/rata.js rakentaa tunnelin, rampit ja reunat)
 const rataTun = (x, y) => { const T = RATA.tun; if (!T) return false; const ux = T.b[0] - T.a[0], uy = T.b[1] - T.a[1], L = Math.hypot(ux, uy), dx = x - T.a[0], dy = y - T.a[1], t = (dx * ux + dy * uy) / L, l = (dx * uy - dy * ux) / L;
   return t > T.t0 - 40 && t < T.t1 + 36 && l < T.w / 2 + 4.5 && l > -(T.w / 2 + 4.5 + (t > T.t1 ? 4.5 + Math.max(0, t - T.t1 - 20) * 0.25 : 0)); };
-const tSkip = (x, y) => { if (rataTun(x, y)) return true; if (window.__tieSkip && window.__tieSkip(x, y)) return true;      /* 21.11.2026: Luvianpuistokadun käytävä (0105/0335) */ if (!QUAY_MODEL) return false; if (x > -160 && x < 265 && y > 460 && y < 545 && quayCut(x, y)) return true; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
+const tSkip = (x, y) => { if (rataTun(x, y)) return true; if (window.__tieSkip && window.__tieSkip(x, y)) return true; if (window.__alikSkip && window.__alikSkip(x, y)) return true;      /* 21.11.2026: alikulut (0106/0336) */      /* 21.11.2026: Luvianpuistokadun käytävä (0105/0335) */ if (!QUAY_MODEL) return false; if (x > -160 && x < 265 && y > 460 && y < 545 && quayCut(x, y)) return true; const i = Math.floor((x - TER.x0) / TER.g), j = Math.floor((y - TER.y0) / TER.g); if (i < 0 || j < 0 || i >= TER.nx || j >= TER.ny) return false; const k = j * TER.nx + i; return (TSKIP[k >> 3] >> (7 - (k & 7))) & 1; };
 let gridGeo;
 const WREL = (x, y) => TER.wl - TZs(x, y);          // water level relative to the lifted objects at (x, y)
 const terrainTex = (() => { const n = TER.nx * TER.ny, d = new Uint16Array(n); for (let i = 0; i < n; i++) d[i] = THREE.DataUtils.toHalfFloat(THS[i] / 10);
@@ -323,6 +369,144 @@ const TIE = (() => {
   return { D, z, has, skip, ext };
 })();
 window.__tieZ = TIE.z; window.__tieSkip = TIE.skip; window.__tieExt = TIE.ext;
+// 21.11.2026 (omistaja: "tee suoriksi tienpintaa myös Luvianpuistokadulta, Satakunnankadun poliisilaitoksen ympyrän ja Tiilimäen Hesburgerin välistä"):
+// käytävän (yllä, 1 m ruudukko) länsipuolella ajorata seurasi suoraan 6 m korkeusmallia: pientä aaltoilua ja Tiilimäellä (-1204, -786) 1,7 m syvä kuoppa
+// (laserkeilauksessa alikulun kohta). Ajoradalle suunnitellaan pituusprofiili kuten tiensuunnittelussa: mediaani 40 m (kuopat ja kummut pois) ja kaksi
+// 60 m liukuvaa keskiarvoa (loivat pystykaaret). Molempien ajoratojen ympärillä maa 9 m:iin profiilin tasossa (ei sivukallistumaa), 9-20 m loiva luiska
+// luonnolliseen maahan. Profiili liittyy käytävän päähän (s 380-420 m) ja Hesburgerin jälkeen takaisin maastoon (s 1090-1120 m).
+// Vain THG (todellinen maa: groundTop, asfaltti, auto, botit, ilmakuvamaa); TZs ennallaan, joten talot ja puut eivät liiku.
+{ const A = [[-575, -598], [-609, -589], [-620, -607], [-627, -618], [-637, -629], [-649, -640], [-709, -692], [-768, -738], [-773, -742], [-784, -750], [-823, -782], [-850, -800], [-867, -807], [-890, -816], [-910, -822], [-927, -825], [-948, -828], [-977, -828], [-1024, -823], [-1210, -785], [-1345, -754], [-1417, -738], [-1539, -710], [-1559, -705]];
+  const B = [[-845, -811], [-862, -818], [-891, -828], [-925, -835], [-946, -836], [-976, -835], [-1024, -823]];      // eteläinen ajorata (kaksiajoratainen osuus)
+  const S = []; { let s = 0; for (let i = 1; i < A.length; i++) { const [ax, ay] = A[i - 1], [bx, by] = A[i], L = Math.hypot(bx - ax, by - ay); for (let q = 0; q < L; q += 2) { const x = ax + (bx - ax) * q / L, y = ay + (by - ay) * q / L; S.push({ s: s + q, x, y, z: TIE.z(x, y) ?? TZg(x, y) }); } s += L; } }
+  const med = (a, w) => a.map((_, i) => { const b = a.slice(Math.max(0, i - w), i + w + 1).sort((p, q) => p - q); return b[b.length >> 1]; });
+  const avg = (a, w) => a.map((_, i) => { let t = 0, n = 0; for (let q = -w; q <= w; q++) { t += a[Math.max(0, Math.min(a.length - 1, i + q))]; n++; } return t / n; });
+  const sm = avg(avg(med(S.map(p => p.z), 10), 15), 15), ss = v => v * v * (3 - 2 * v);
+  const ramp = s => s <= 380 ? 0 : s < 420 ? ss((s - 380) / 40) : s <= 1090 ? 1 : s < 1120 ? 1 - ss((s - 1090) / 30) : 0;
+  S.forEach((p, i) => { p.t = p.z + (sm[i] - p.z) * ramp(p.s); });
+  const BS = []; for (let i = 1; i < B.length; i++) { const [ax, ay] = B[i - 1], [bx, by] = B[i], L = Math.hypot(bx - ax, by - ay); for (let q = 0; q < L; q += 2) BS.push([ax + (bx - ax) * q / L, ay + (by - ay) * q / L]); }
+  const G0 = THG.slice(); let n = 0;
+  const i0 = Math.floor((-1580 - TER.x0) / TER.g), i1 = Math.ceil((-870 - TER.x0) / TER.g), j0 = Math.floor((-870 - TER.y0) / TER.g), j1 = Math.ceil((-680 - TER.y0) / TER.g);
+  for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const x = TER.x0 + i * TER.g, y = TER.y0 + j * TER.g; if (x > -878) continue;
+    let bp = null, bd = 1e9; for (const p of S) { const d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; bp = p; } }
+    let d = bd; for (const q of BS) d = Math.min(d, Math.hypot(q[0] - x, q[1] - y));      // etäisyys lähimpään ajorataan, korkeus pohjoisen ajoradan profiilista
+    if (!bp || bp.s < 370 || d > 20) continue;
+    const w = d <= 9 ? 1 : 1 - ss((d - 9) / 11), k = j * TER.nx + i;
+    THG[k] = Math.round(((G0[k] / 10) * (1 - w) + bp.t * w) * 10); n++; }
+  window.__luvianProfiili = { solmuja: n, S };
+}
+// @osa js/0106_maastokorjaukset.js
+// ---------- Koko kartan tienpintojen korjaukset (21.11.2026) ----------
+// Omistaja: "Sielläkin alikulku. Analysoi myös muu kartan alue. Ja korjaa mahdollisia muita ongelmakohtia." + "mahdollisimman oikean näköinen peli".
+// Analyysi (kaikki CITY.r-tiet, 2 m välein, poikkeama 50 m mediaanista): korkeusmallin 6 m ruudukossa tiet sukelsivat kuoppiin siellä, missä tien alla
+// kulkee jotain (silta puuttuu) tai on alikulku, ja aaltoilivat ojien ja rumpujen kohdalla. Tässä palassa:
+//   (A) ALIK: pyörätien alikulut (OSM tunnel=yes) Tiilimäellä (Luvianpuistokatu + Helsingintie, välissä 44 m painanne) ja Luvianpuistokadun länsipäässä.
+//       Maasto kaivetaan suunnitellun profiilin mukaan: lattia 3,3 m tienpinnan alla, rampit 7 %, luiskat 1:1,7. Rakenteet: js/0336_alikulut.js
+//   (B) automaattiset sillat: pääkatu (k >= 2), jonka alla maa on yli 2,5 m tienpintaa alempana 6-50 m matkalla (esim. Helsingintie Ratapihantien yllä,
+//       Mäntyluodontie ja Ulvilantie purojen yllä). Lisätään js/0301_sillat.js:n maasiltoihin (betoni, asfaltti, kaiteet, auto ja botit kannella).
+//   (C) muiden teiden pituusprofiili: tien keskilinjan 0,3 m ylittävät kummut ja kuopat (rummut, ojat, laserin roskat) tasoitetaan 32 m mediaanilla
+//       ja 26 m liukuvilla keskiarvoilla; tien kohdalta maa suoraksi 4 m:iin, 4-10 m loiva siirtymä. Ydinkeskusta, Luvianpuiston käytävä, sillat,
+//       Porttaali ja alikulut jätetään rauhaan (niillä on omat pintansa).
+const ALIK = [
+  { nimi: 'Tiilimäki (Luvianpuistokatu ja Helsingintie)', P: [[-1194.6, -741.0], [-1197.9, -756.8], [-1202.8, -780.1], [-1204.7, -790.9], [-1214.8, -833.7], [-1216.5, -844.2], [-1226.3, -865.3], [-1232.5, -881.2]], kat: [[2, 3], [4, 5]] },
+  { nimi: 'Luvianpuistokatu, Urheilutie', P: [[-1559.0, -662.0], [-1561.6, -672.7], [-1567.3, -697.3], [-1569.9, -708.5], [-1572.8, -721.0], [-1574.0, -730.8], [-1574.5, -736.0]], kat: [[2, 3]] } ];
+const ALIK_W = 4.2, ALIK_H = 2.7, ALIK_KANSI = 0.6;      // kulkuaukon leveys ja vapaa korkeus, kansilaatta
+{
+  const G0 = THG.slice(), z0 = (x, y) => tBil(G0, x, y), ss = v => v * v * (3 - 2 * v);
+  const med = (a, w) => a.map((_, i) => { const b = a.slice(Math.max(0, i - w), i + w + 1).sort((p, q) => p - q); return b[b.length >> 1]; });
+  const avg = (a, w) => a.map((_, i) => { let t = 0, n = 0; for (let q = -w; q <= w; q++) { t += a[Math.max(0, Math.min(a.length - 1, i + q))]; n++; } return t / n; });
+  const segD = (P, x, y) => { let d = 1e9; for (let k = 0; k + 1 < P.length; k++) { const [ax, ay] = P[k], [bx, by] = P[k + 1], dx = bx - ax, dy = by - ay, L2 = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / L2)); d = Math.min(d, Math.hypot(ax + dx * t - x, ay + dy * t - y)); } return d; };
+  // tunnetut sillat ja erikoisalueet (niillä on omat pintansa)
+  const BR = []; for (const r of TER.bd) { const P = []; for (let k = 1; k + 2 < r.length; k += 3) P.push([r[k], r[k + 1]]); BR.push({ P, w: r[0] }); }
+  for (const b of RIV.br) { const P = []; for (let i = 0; i + 1 < b.p.length; i += 2) P.push([b.p[i], b.p[i + 1]]); BR.push({ P, w: b.w / 2 }); }
+  for (const S of RATA.silta || []) BR.push({ P: [S.a, S.b], w: S.w / 2 });
+  { const sx = Math.sin(PSIL.head), sy = Math.cos(PSIL.head); BR.push({ P: [[PSIL.x - sx * 10, PSIL.y - sy * 10], [PSIL.x + sx * (PSIL.len + 10), PSIL.y + sy * (PSIL.len + 10)]], w: PSIL.half }); }
+  const nearBr = (x, y, m) => BR.some(b => segD(b.P, x, y) < b.w + m);
+  const T = RATA.tun, inPort = (x, y) => { if (!T) return false; const ux = T.b[0] - T.a[0], uy = T.b[1] - T.a[1], L = Math.hypot(ux, uy), dx = x - T.a[0], dy = y - T.a[1], t = (dx * ux + dy * uy) / L, l = (dx * uy - dy * ux) / L; return t > -80 && t < 300 && Math.abs(l) < 45; };
+  const nearAlik = (x, y, m) => ALIK.some(A => segD(A.P, x, y) < m);
+  const special = (x, y) => inCore(x, y) || TIE.has(x, y) || (x > -905 && x < -570 && y > -945 && y < -573) || inPort(x, y) || inRiver(x, y);
+  const roads = CITY.r.filter(r => r.k).map(r => { const S = []; let s = 0; for (let i = 2; i < r.p.length; i += 2) { const ax = r.p[i - 2], ay = r.p[i - 1], bx = r.p[i], by = r.p[i + 1], L = Math.hypot(bx - ax, by - ay); if (L < 0.01) continue;
+      for (let q = 0; q < L; q += 2) { const x = ax + (bx - ax) * q / L, y = ay + (by - ay) * q / L; S.push({ s: s + q, x, y, z: z0(x, y), ux: (bx - ax) / L, uy: (by - ay) / L }); } s += L; } return { r, S }; });
+
+  // (B) automaattiset sillat
+  const AUTO = []; window.__autoSillat = AUTO;
+  for (const { r, S } of roads) { if (r.k < 2 || S.length < 10) continue; const z = S.map(p => p.z), n = S.length;
+    const mx = (i0, i1) => { let m = -1e9; for (let i = Math.max(0, i0); i <= Math.min(n - 1, i1); i++) m = Math.max(m, z[i]); return m; };
+    let i = 0; while (i < n) { const zl = mx(i - 15, i), zr = mx(i, i + 15); if (Math.min(zl, zr) - z[i] < 2.5) { i++; continue; }
+      let a = i, b = i; while (b + 1 < n && Math.min(mx(b - 15, b), mx(b, b + 16)) - z[b + 1] > 1.0) b++;      // kuopan alue
+      const ref = Math.min(mx(a - 15, a), mx(b, b + 15));
+      while (a > 0 && z[a] < ref - 0.3) a--; while (b < n - 1 && z[b] < ref - 0.3) b++;                  // pengerten päät
+      const L = S[b].s - S[a].s, p = S[Math.floor((a + b) / 2)], turn = Math.abs(S[a].ux * S[b].ux + S[a].uy * S[b].uy);
+      if (L >= 6 && L <= 50 && turn > 0.96 && !special(p.x, p.y) && !nearBr(p.x, p.y, 8) && !nearAlik(p.x, p.y, 30)) {
+        const za = z[a], zb = z[b], e = [r.k >= 3 ? 5.0 : 4.0]; for (let q = a; q <= b; q++) e.push(S[q].x, S[q].y, za + (zb - za) * (S[q].s - S[a].s) / L);
+        if (!AUTO.some(o => Math.hypot(o[1] - e[1], o[2] - e[2]) < 4 && Math.hypot(o[o.length - 3] - e[e.length - 3], o[o.length - 2] - e[e.length - 2]) < 4)) AUTO.push(e); }
+      i = b + 1; } }
+  const BRA = AUTO.map(e => { const P = []; for (let k = 1; k + 2 < e.length; k += 3) P.push([e[k], e[k + 1]]); return { P, w: e[0] }; });
+  const nearAuto = (x, y, m) => BRA.some(b => segD(b.P, x, y) < b.w + m);
+
+  // (C) teiden pituusprofiili (vain selvät poikkeamat)
+  const bed = new Set(); for (const tr of RATA.t || []) { const p = tr.p; for (let q = 0; q + 2 < p.length; q += 3) { const ci = Math.round((p[q] - TER.x0) / TER.g), cj = Math.round((p[q + 1] - TER.y0) / TER.g); for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) bed.add((cj + dj) * TER.nx + ci + di); } }
+  const best = new Map();      // solmu -> [paino, kohde, etäisyys]
+  let nSm = 0;
+  for (const { S } of roads) { if (S.length < 6) continue; const z = S.map(p => p.z), t = avg(avg(med(z, 8), 6), 6);
+    S.forEach((p, i) => { const d = t[i] - z[i]; if (Math.abs(d) < 0.3) return; if (special(p.x, p.y) || nearBr(p.x, p.y, 6) || nearAuto(p.x, p.y, 6)) return;
+      const wd = ss(Math.min(1, (Math.abs(d) - 0.3) / 0.3)), i0 = Math.floor((p.x - 10 - TER.x0) / TER.g), i1 = Math.ceil((p.x + 10 - TER.x0) / TER.g), j0 = Math.floor((p.y - 10 - TER.y0) / TER.g), j1 = Math.ceil((p.y + 10 - TER.y0) / TER.g);
+      for (let jj = j0; jj <= j1; jj++) for (let ii = i0; ii <= i1; ii++) { const k = jj * TER.nx + ii; if (bed.has(k)) continue; const dd = Math.hypot(TER.x0 + ii * TER.g - p.x, TER.y0 + jj * TER.g - p.y); if (dd > 10) continue;
+        const w = wd * (dd <= 4 ? 1 : 1 - ss((dd - 4) / 6)), o = best.get(k); if (!o || dd < o[2]) best.set(k, [w, t[i], dd]); } }); }
+  for (const [k, [w, tz]] of best) { if (w <= 0) continue; THG[k] = Math.round(((THG[k] / 10) * (1 - w) + tz * w) * 10); nSm++; }
+
+  // (A) alikulkujen maasto: suunniteltu pinta hz (lattia, rampit, luiskat), kansi = tienpinta katetulla osuudella
+  const G1 = THG.slice(), z1 = (x, y) => tBil(G1, x, y);      // maa teiden tasoituksen jälkeen, ennen kaivantoa (tie katetun osuuden päällä)
+  window.__alikTie = z1;
+  for (const A of ALIK) { const P = A.P, S = [0]; for (let k = 1; k < P.length; k++) S.push(S[k - 1] + Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]));
+    A.S = S; A.L = S[S.length - 1]; A.kat = A.kat.map(([i, j]) => { const s0 = S[i] - 1.0, s1 = S[j] + 1.0, sm = (s0 + s1) / 2, k = i, f = (sm - S[k]) / (S[k + 1] - S[k] || 1);
+      const x = P[k][0] + (P[k + 1][0] - P[k][0]) * Math.min(1, f), y = P[k][1] + (P[k + 1][1] - P[k][1]) * Math.min(1, f), zt = tBil(THG, x, y);
+      return { s0, s1, zt, f: zt - ALIK_KANSI - ALIK_H - 0.05, ux: (P[j][0] - P[i][0]) / (S[j] - S[i]), uy: (P[j][1] - P[i][1]) / (S[j] - S[i]) }; });
+    // projektio polulle: s, sivuetäisyys l (etumerkki), suunta
+    A.proj = (x, y) => { let b = null; for (let k = 0; k + 1 < P.length; k++) { const [ax, ay] = P[k], [bx, by] = P[k + 1], dx = bx - ax, dy = by - ay, L = Math.hypot(dx, dy) || 1, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / (L * L)));
+        const px = ax + dx * t, py = ay + dy * t, d = Math.hypot(x - px, y - py); if (!b || d < Math.abs(b.l)) b = { s: S[k] + t * L, l: ((x - ax) * dy - (y - ay) * dx) / L >= 0 ? d : -d, ux: dx / L, uy: dy / L }; } return b; };
+    // pituusprofiili: katetut osuudet tasan f, välissä suora, päissä 7 % ramppi luonnolliseen maahan (polkua pitkin), pystykaaret 10 m
+    const n = Math.ceil(A.L) + 1, raw = new Float32Array(n), nat = new Float32Array(n), at = s => { let k = 0; while (k + 2 < P.length && S[k + 1] < s) k++; const f = (s - S[k]) / (S[k + 1] - S[k] || 1); return [P[k][0] + (P[k + 1][0] - P[k][0]) * f, P[k][1] + (P[k + 1][1] - P[k][1]) * f]; };
+    for (let q = 0; q < n; q++) nat[q] = z1(...at(q));
+    const K = A.kat; for (let q = 0; q < n; q++) { let v;
+      if (q <= K[0].s0) v = K[0].f + (K[0].s0 - q) * 0.07;
+      else if (q >= K[K.length - 1].s1) v = K[K.length - 1].f + (q - K[K.length - 1].s1) * 0.07;
+      else { v = null; for (let c = 0; c < K.length; c++) { if (q >= K[c].s0 && q <= K[c].s1) v = K[c].f; else if (c + 1 < K.length && q > K[c].s1 && q < K[c + 1].s0) v = K[c].f + (K[c + 1].f - K[c].f) * (q - K[c].s1) / (K[c + 1].s0 - K[c].s1); } }
+      raw[q] = Math.min(v, nat[q]); }
+    const prof = Float32Array.from(raw, (v, q) => { if (K.some(c => q >= c.s0 - 1 && q <= c.s1 + 1)) return v; let t = 0, m = 0; for (let d = -5; d <= 5; d++) { t += raw[Math.max(0, Math.min(n - 1, q + d))]; m++; } return Math.min(t / m, nat[q]); });
+    A.at = at; A.f = s => { const q = Math.max(0, Math.min(n - 1.001, s)), i = Math.floor(q), u = q - i; return prof[i] * (1 - u) + prof[Math.min(n - 1, i + 1)] * u; };
+    A.covered = s => A.kat.find(c => s >= c.s0 && s <= c.s1) || null;
+    // pinta pisteessä: katetulla osuudella null (kansi = tie, maan ruudukko), muuten lattia / luiska / luonnollinen
+    A.hz = (x, y) => { const p = A.proj(x, y); if (!p || p.s <= 0.01 && Math.abs(p.l) > 0 || p.s >= A.L - 0.01) return null; const al = Math.abs(p.l), f = A.f(p.s), g = z1(x, y);
+      if (A.covered(p.s) && al < ALIK_W / 2 + 6) return null;
+      const z = al <= ALIK_W / 2 ? f : f + (al - ALIK_W / 2) / 1.7; return z < g - 0.02 ? z : null; };
+    let bx0 = 1e9, by0 = 1e9, bx1 = -1e9, by1 = -1e9; for (const [x, y] of P) { bx0 = Math.min(bx0, x); by0 = Math.min(by0, y); bx1 = Math.max(bx1, x); by1 = Math.max(by1, y); }
+    A.bb = [bx0 - 16, by0 - 16, bx1 + 16, by1 + 16];
+    // 1 m maski: kaivanto ja katettu osuus (+1 m), maan ruudukon solut, joihin osuu, jätetään pois ja 0336 piirtää tilalle 1 m pinnan
+    const mx0 = Math.floor(A.bb[0]), my0 = Math.floor(A.bb[1]), mnx = Math.ceil(A.bb[2]) - mx0, mny = Math.ceil(A.bb[3]) - my0, M = new Uint8Array(mnx * mny);
+    for (let j = 0; j < mny; j++) for (let i = 0; i < mnx; i++) { const x = mx0 + i + 0.5, y = my0 + j + 0.5, p = A.proj(x, y); if (!p) continue;
+      const c = A.covered(p.s), in1 = (c && Math.abs(p.l) < ALIK_W / 2 + 6) || A.hz(x, y) !== null; if (in1) for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const ii = i + di, jj = j + dj; if (ii >= 0 && jj >= 0 && ii < mnx && jj < mny) M[jj * mnx + ii] = 1; } }
+    A.M = { x0: mx0, y0: my0, nx: mnx, ny: mny, a: M };
+    A.inM = (x, y) => { const i = Math.floor(x - mx0), j = Math.floor(y - my0); return i >= 0 && j >= 0 && i < mnx && j < mny && M[j * mnx + i] === 1; };
+    // maan solmut kaivannon kohdalla suunniteltuun pintaan (myös tasoitettu kenttä TZs: puut ja pensaat eivät jää ilmaan)
+    const i0 = Math.floor((A.bb[0] - TER.x0) / TER.g), i1 = Math.ceil((A.bb[2] - TER.x0) / TER.g), j0 = Math.floor((A.bb[1] - TER.y0) / TER.g), j1 = Math.ceil((A.bb[3] - TER.y0) / TER.g);
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const x = TER.x0 + i * TER.g, y = TER.y0 + j * TER.g, h = A.hz(x, y); if (h === null) continue; const k = j * TER.nx + i;
+      THG[k] = Math.min(THG[k], Math.round(h * 10)); THS[k] = Math.min(THS[k], Math.round(h * 10)); } }
+  const inBB = (A, x, y, m = 0) => x > A.bb[0] - m && y > A.bb[1] - m && x < A.bb[2] + m && y < A.bb[3] + m;
+  // koukut: maan 6 m solu (keskipiste) / ulkokehän 18 m solu pois, jos se osuu maskiin
+  const cellHit = (cx, cy, h) => { for (const A of ALIK) { if (!inBB(A, cx, cy, h)) continue; for (let y = cy - h + 0.5; y < cy + h; y += 1) for (let x = cx - h + 0.5; x < cx + h; x += 1) if (A.inM(x, y)) return true; } return false; };
+  window.__alikSkip = (cx, cy) => cellHit(cx, cy, 3);
+  window.__alikSkip18 = (cx, cy) => cellHit(cx, cy, 9);
+  // pinta groundTop:lle (asfaltti, roads.js, kävelijä): kaivannossa hz, katetun osuuden alla lattia vain alhaalla kulkevalle (alikZ)
+  window.__alikPinta = (x, y) => { for (const A of ALIK) { if (!inBB(A, x, y)) continue; const h = A.hz(x, y); if (h !== null) return h;
+      if (A.inM(x, y)) { const p = A.proj(x, y); if (p && A.covered(p.s)) return z1(x, y); } } return null; };      // katetun osuuden päällä tie (kaivetut solmut eivät painu sen alle)
+  window.__alikZ = (x, y) => { for (const A of ALIK) { if (!inBB(A, x, y)) continue; const p = A.proj(x, y); if (!p) continue; const c = A.covered(p.s); if (!c || Math.abs(p.l) > ALIK_W / 2 + 0.6) continue;
+      const ref = (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : null); if (ref !== null && ref !== undefined && ref < c.zt - 1.6) return c.f + 0.04; } return null; };
+  // seinät: katetun osuuden sivuseinät (alhaalla kulkevalle), otsamuurien kaiteet ja siivet (tiellä kulkevalle: ei pudota kaivantoon)
+  window.__alikSeina = (x, y, z) => { let dep = 0; for (const A of ALIK) { if (!inBB(A, x, y)) continue; const p = A.proj(x, y); if (!p) continue; const al = Math.abs(p.l);
+      for (const c of A.kat) { if (p.s > c.s0 - 0.3 && p.s < c.s1 + 0.3 && z < c.zt - 1.6 && al > ALIK_W / 2 - 0.05 && al < ALIK_W / 2 + 1.2) dep = Math.max(dep, al - (ALIK_W / 2 - 0.05));
+        if (z > c.zt - 1.2) for (const e of [c.s0, c.s1]) { const de = Math.abs(p.s - e); if (de < 0.5 && al < ALIK_W / 2 + 4) dep = Math.max(dep, 0.5 - de + 0.01); } } } return dep; };
+  window.__maastokorjaukset = { sillat: AUTO.length, tasoitetutSolmut: nSm, alikulut: ALIK.map(A => ({ nimi: A.nimi, katettu: A.kat.map(c => [c.s0.toFixed(1), c.s1.toFixed(1), 'lattia ' + c.f.toFixed(2), 'tie ' + c.zt.toFixed(2)]) })) };
+}
 // @osa js/020_renderoija.js
 // ---------- renderer / scene ----------
 // Baked model textures by distance: every Blender model carries a 2048 px atlas (22 MB on the GPU with mipmaps) and there are over forty of them,
@@ -446,7 +630,7 @@ const outerMat = new THREE.MeshBasicMaterial({ map: outerTex }), roofMat2 = new 
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); g.setIndex(I); g.rotateX(0); return g; };
   scene.add(noT(new THREE.Mesh(gridGeo(-HW, YS, HW, YN, 6, cuv, tSkip), groundMat)));
   const RSK = new Set(RATA.osk || []), onx = Math.round((OX1 - OX0) / 18);   // rataverkon kohdalla 18 m solut pois: rata/rata.js rakentaa niihin 6 m ruudukon (ratapenkka painettu)
-  scene.add(noT(new THREE.Mesh(gridGeo(OX0, OY0, OX1, OY1, 18, ouv, (x, y) => (Math.abs(x) < HW - 9 && y > YS + 9 && y < YN - 9) || RSK.has(Math.floor((y - OY0) / 18) * onx + Math.floor((x - OX0) / 18))), outerMat)));
+  scene.add(noT(new THREE.Mesh(gridGeo(OX0, OY0, OX1, OY1, 18, ouv, (x, y) => (Math.abs(x) < HW - 9 && y > YS + 9 && y < YN - 9) || RSK.has(Math.floor((y - OY0) / 18) * onx + Math.floor((x - OX0) / 18)) || (window.__alikSkip18 && window.__alikSkip18(x, y))), outerMat)));      // 21.11.2026: alikulut (0106/0336)
   { const pc = [], po = [], A = RIV.water;               // the water keeps the river's own colours from the photo, with the sky in it
     for (let i = 0; i < A.length; i += 6) { const cx = (A[i] + A[i + 2] + A[i + 4]) / 3, cy = (A[i + 1] + A[i + 3] + A[i + 5]) / 3; (inCore(cx, cy) ? pc : po).push(...A.slice(i, i + 6)); }
     scene.add(noT(new THREE.Mesh(tris(pc, cuv, TER.wl), waterify(new THREE.MeshBasicMaterial({ map: orto })))));
@@ -474,7 +658,7 @@ const SILTA = { list: [] }; window.__SILTA = SILTA;
   const B = { p: [], u: [] }, A = { p: [], u: [] }, V = { p: [] }, TA = 0.13, PH = 0.95, PW = 0.3, BH = 1.0;
   // nelikulmio kolmesta-neljästä 3D-pisteestä (pelin x, y, z) ja uv metreinä (betoni 3 m / kuva, asfaltti 6 m / kuva)
   const quad = (G, a, b, c, d, s) => { const P = [a, b, c, a, c, d]; for (const q of P) { G.p.push(q[0], q[2], -q[1]); if (G.u) G.u.push(q[3] / s, q[4] / s); } };
-  for (const r of TER.bd) { if ((RATA.bdSkip || []).some(([x, y]) => Math.hypot(r[1] - x, r[2] - y) < 1.5)) continue;   /* rautatiesillat: rata/rata.js */
+  for (const r of TER.bd.concat(window.__autoSillat || [])) { if ((RATA.bdSkip || []).some(([x, y]) => Math.hypot(r[1] - x, r[2] - y) < 1.5)) continue;   /* rautatiesillat: rata/rata.js */
     const hw = r[0], P = []; for (let k = 1; k + 2 < r.length; k += 3) P.push([r[k], r[k + 1], r[k + 2]]);
     if (P.length < 2) continue;
     // pidennys: kulje päästä ulospäin niin kauan kuin maa on selvästi kannen alapuolella
@@ -518,6 +702,25 @@ const SILTA = { list: [] }; window.__SILTA = SILTA;
         return P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA; } } return null; };
   window.__siltaZ = (x, y) => { const d = SILTA.deck(x, y); if (d === null) return null; const ref = (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : d);
     return (ref === undefined || ref === null || ref > d - 2.2) ? d : null; };
+  // 21.11.2026 (omistaja: "auto törmäilee näkymättömään, hyppii oudosti ... bottiautot eivät aja siltaa vaan maanmuotoja pitkin"):
+  // SILTA.ajo(x, y, yaw): kannen pinta bottiautolle, jos se on kannella (leveämpi marginaali: OSM-tien keskilinja ei osu tarkasti sillan linjaan) ja ajaa
+  //   sillan suuntaan; alla ristiin kulkeva tie jää alas. Ajosuunta (sin yaw, cos yaw) kuten muuallakin.
+  SILTA.ajo = (x, y, yaw) => { const sx = Math.sin(yaw), sy = Math.cos(yaw);
+    for (const b of SILTA.list) { if (x < b.bb[0] - 2 || y < b.bb[1] - 2 || x > b.bb[2] + 2 || y > b.bb[3] + 2) continue; const P = b.P;
+      for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L = Math.hypot(dx, dy) || 1, t = ((x - ax) * dx + (y - ay) * dy) / (L * L);
+        if (t < -0.05 || t > 1.05) continue; const tc = Math.min(1, Math.max(0, t)); if (Math.hypot(x - ax - dx * tc, y - ay - dy * tc) > b.hw + 2) continue;
+        if (Math.abs(sx * dx + sy * dy) / L < 0.7) continue;
+        return P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA; } } return null; };
+  // SILTA.kaide(x, y, z): kuinka syvällä (m) piste on kaiteessa, kun kulkija on kannen tasolla (z); 0 = vapaa. carBlocked (js/090) estää liikkeen syvemmälle,
+  //   joten auto ei enää aja kaiteen läpi ja putoa kannelta alla olevaan leikkaukseen.
+  SILTA.kaide = (x, y, z) => { let best = 0;
+    for (const b of SILTA.list) { if (x < b.bb[0] - 1 || y < b.bb[1] - 1 || x > b.bb[2] + 1 || y > b.bb[3] + 1) continue; const P = b.P, wi = b.hw - PW;
+      for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
+        if (t < 0 || t > 1) continue; const s = Math.hypot(x - ax - dx * t, y - ay - dy * t), d = s - (wi - 0.05); if (d <= 0 || s > b.hw + 0.8) continue;
+        const dz = P[k][2] + (P[k + 1][2] - P[k][2]) * t + TA; if (Math.abs(z - dz) > 1.6) continue;
+        best = Math.max(best, d); } }
+    return best; };
+  window.__siltaAjo = SILTA.ajo; window.__siltaKaide = SILTA.kaide;
 }
 // @osa js/031_maa_nurmi.js
 // ---------- ground detail: grass texture where the photo is green ----------
@@ -531,6 +734,15 @@ const grassTex = (() => {
   for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { let s2 = 0; for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) s2 += v[((y + dy + N) % N) * N + (x + dx + N) % N]; w[y * N + x] = s2 / 9; }
   for (let i = 0; i < N * N; i++) { const q = Math.max(0, Math.min(255, w[i] * 255)); d.data[i * 4] = d.data[i * 4 + 1] = d.data[i * 4 + 2] = q; d.data[i * 4 + 3] = 255; }
   g.putImageData(d, 0, 0); const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; return t; })();
+// 21.11.2026: tien kohdalla ilmakuvamaata ei piirretä (rasteri js/060_kadut.js, ROADCUT); kaikki grassify-maat ja tarkkojen laattojen pinnat
+const ROADCUT = { t: { value: (() => { const t = new THREE.DataTexture(new Uint8Array([0]), 1, 1, THREE.RedFormat, THREE.UnsignedByteType); t.needsUpdate = true; return t; })() }, b: { value: new THREE.Vector4(0, 0, 1, 1) } };
+function roadCut(sh, wv) { sh.uniforms.tRoadCut = ROADCUT.t; sh.uniforms.uRoadCut = ROADCUT.b;
+  if (!wv) { sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vRcw;').replace('#include <project_vertex>', '#include <project_vertex>\nvRcw = (modelMatrix * vec4(transformed, 1.0)).xyz;'); wv = 'vRcw'; }
+  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\n' + (wv === 'vRcw' ? 'varying vec3 vRcw;\n' : '') + 'uniform sampler2D tRoadCut; uniform vec4 uRoadCut;')
+    .replace('#include <clipping_planes_fragment>', `#include <clipping_planes_fragment>
+      { vec2 rq = (vec2(${wv}.x, -${wv}.z) - uRoadCut.xy) / uRoadCut.zw; if (rq.x > 0.0 && rq.y > 0.0 && rq.x < 1.0 && rq.y < 1.0 && texture2D(tRoadCut, rq).r > 0.99) discard; }`); }
+// tarkan ilmakuvalaatan pinta maan täytteille (0335, 0336): sama tienleikkaus
+const groundTileMat = t => { const m = new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }); m.onBeforeCompile = sh => roadCut(sh); m.customProgramCacheKey = () => 'roadcut'; return m; };
 function grassify(mat) {
   mat.onBeforeCompile = sh => {
     sh.uniforms.grassTex = { value: grassTex };
@@ -541,6 +753,7 @@ function grassify(mat) {
         float n1 = texture2D(grassTex, vGw.xz * 0.42).r, n2 = texture2D(grassTex, vGw.xz * 0.061 + 0.37).r, n3 = texture2D(grassTex, vGw.xz * 1.7).r;
         float det = 0.62 + 0.38 * n1 + 0.30 * (n2 - 0.5) + 0.22 * (n3 - 0.5) * (1.0 - smoothstep(10.0, 45.0, dist));
         diffuseColor.rgb = mix(cc, cc * det * vec3(0.97, 1.03, 0.93), gr * fade); }`);
+    roadCut(sh, 'vGw');
   }; mat.needsUpdate = true; return mat;
 }
 grassify(groundMat); grassify(outerMat);
@@ -625,7 +838,7 @@ const ROOFT = new Map();   // aerial tile key -> roof meshes that switch to that
 function roofTile(k, tex) {
   for (const me of ROOFT.get(k) || []) {
     if (me.material !== me.userData.fb) { if (me.material.map) me.material.map.dispose(); me.material.dispose(); }
-    if (tex) { const t = tex.clone(); t.channel = 1; t.needsUpdate = true; me.material = new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }); }
+    if (tex) { const t = tex.clone(); t.channel = 1; t.needsUpdate = true; me.material = me.userData.maa ? groundTileMat(t) : new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }); }      // maa: tienleikkaus (031 roadCut)
     else me.material = me.userData.fb;
   }
 }
@@ -663,10 +876,71 @@ function hrUpdate(x, y) {
     for (let q = 0; q < C.length; q += 2) { const x = C[q], y = C[q + 1], a = vid(x, y), b = vid(x + 1, y), c = vid(x + 1, y + 1), d = vid(x, y + 1); I.push(a, b, c, a, c, d); nq++; }
     const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2));
     g.setAttribute('uv1', new THREE.Float32BufferAttribute(U1, 2)); g.setIndex(I);
-    const me = noT(new THREE.Mesh(g, groundMat)); me.userData.fb = groundMat; me.userData.tie = key; scene.add(me);
+    const me = noT(new THREE.Mesh(g, groundMat)); me.userData.fb = groundMat; me.userData.tie = key; me.userData.maa = true; scene.add(me);
     if (!ROOFT.has(key)) ROOFT.set(key, []); ROOFT.get(key).push(me);
-    const e = HR.t.get(key); if (e && e.m.map) { const t = e.m.map.clone(); t.channel = 1; t.needsUpdate = true; me.material = new THREE.MeshBasicMaterial({ map: t, side: THREE.DoubleSide }); } }
+    const e = HR.t.get(key); if (e && e.m.map) { const t = e.m.map.clone(); t.channel = 1; t.needsUpdate = true; me.material = groundTileMat(t); } }
   window.__tieMaa = nq; }
+// @osa js/0336_alikulut.js
+// ---------- Pyörätien alikulut (21.11.2026, maasto ja data: js/0106_maastokorjaukset.js ALIK) ----------
+// Omistaja: "Sielläkin alikulku" (Tiilimäki, Luvianpuistokatu). Rakenne kuten tyypillinen Porin kevyen liikenteen alikulku: betoninen kehä (seinät ja
+// kansilaatta), otsamuurit kaiteineen tien reunoilla, asfalttilattia ja valonauha katossa. Rampit ja luiskat ovat maastoa (0106 kaivaa korkeusmallin).
+// Maan 6 m / 18 m solut, joihin kaivanto osuu, on jätetty pois (tSkip ja ulkokehä, koukut __alikSkip, __alikSkip18): tilalle 1 m pinta ilmakuvalla,
+// joka vaihtuu tarkkaan ilmakuvalaattaan (ROOFT) kun se latautuu.
+{ const tl = new THREE.TextureLoader(), ld = (f, srgb, r) => { const t = tl.load(f); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; if (srgb) t.colorSpace = THREE.SRGBColorSpace; return t; };
+  const mBet = new THREE.MeshStandardMaterial({ map: ld('./silta/betoni_albedo.jpg', true), normalMap: ld('./silta/betoni_normal.jpg', false), color: 0xc4c0b7, roughness: 0.92, metalness: 0, side: THREE.DoubleSide });
+  const mAs = new THREE.MeshStandardMaterial({ map: ld('./road_asph.jpg', true), color: 0x8e8e8e, roughness: 0.95, metalness: 0, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3 });
+  const mLamp = new THREE.MeshBasicMaterial({ color: 0xfff3d6 }), mRail = new THREE.MeshStandardMaterial({ color: 0x6f7377, roughness: 0.5, metalness: 0.6 });
+  const LS = 512, OS = 18, hw = ALIK_W / 2;
+  const mk = (pos, uv, m) => { if (!pos.length) return; const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); if (uv) g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.computeVertexNormals();
+    const me = noT(new THREE.Mesh(g, m)); me.receiveShadow = true; scene.add(me); return me; };
+  let nq = 0;
+  for (const A of ALIK) {
+    const B = [], BU = [], AS = [], AU = [], LA = [];
+    const pt = (s, l) => { const [x, y] = A.at(s), k = Math.max(0, Math.min(A.P.length - 2, A.S.findIndex((v, i) => i + 1 < A.S.length && A.S[i + 1] >= s))), ux = (A.P[k + 1][0] - A.P[k][0]) / (A.S[k + 1] - A.S[k] || 1), uy = (A.P[k + 1][1] - A.P[k][1]) / (A.S[k + 1] - A.S[k] || 1);
+      return [x + uy * l, y - ux * l]; };
+    const quad = (G, U, a, b, c, d, sc) => { for (const q of [a, b, c, a, c, d]) { G.push(q[0], q[2], -q[1]); if (U) U.push(q[3] / sc, q[4] / sc); } };
+    const V = (s, l, z, u, v) => { const [x, y] = pt(s, l); return [x, y, z, u === undefined ? s : u, v === undefined ? z : v]; };
+    // asfalttilattia koko kaivannon ja tunnelin matkalta
+    for (let s = 0; s < A.L - 0.5; s += 1) { const s2 = Math.min(A.L, s + 1), f1 = A.f(s), f2 = A.f(s2), [cx, cy] = A.at(s + 0.5);
+      if (!A.covered(s + 0.5) && A.f(s + 0.5) > window.__alikTie(cx, cy) - 0.08) continue;
+      quad(AS, AU, V(s, -hw + 0.15, f1 + 0.03, s, -hw), V(s2, -hw + 0.15, f2 + 0.03, s2, -hw), V(s2, hw - 0.15, f2 + 0.03, s2, hw), V(s, hw - 0.15, f1 + 0.03, s, hw), 6); }
+    for (const c of A.kat) { const f = c.f, top = f + ALIK_H, zt = c.zt;
+      for (let s = c.s0; s < c.s1 - 0.01; s += 1) { const s2 = Math.min(c.s1, s + 1);
+        for (const sd of [-1, 1]) { const l = sd * hw; quad(B, BU, V(s, l, f - 0.1), V(s2, l, f - 0.1), V(s2, l, top), V(s, l, top), 3);              // sivuseinät
+          quad(B, BU, V(s, l, f + 0.03, s, sd * 0.3), V(s2, l, f + 0.03, s2, sd * 0.3), V(s2, l - sd * 0.3, f + 0.03, s2, 0), V(s, l - sd * 0.3, f + 0.03, s, 0), 3); }   // reunakaista
+        quad(B, BU, V(s, -hw, top, s, -hw), V(s2, -hw, top, s2, -hw), V(s2, hw, top, s2, hw), V(s, hw, top, s, hw), 3);                                  // kansilaatan alapinta
+        quad(LA, null, V(s, -0.12, top - 0.02), V(s2, -0.12, top - 0.02), V(s2, 0.12, top - 0.02), V(s, 0.12, top - 0.02)); }
+      // otsamuurit: aukon yläpuolelta ja sivuilta tien tasoon + 1,0 m kaide; paksuus 0,35 m ulospäin, päälle kansi
+      for (const [e, sg] of [[c.s0, -1], [c.s1, 1]]) { const W2 = hw + 4, e2 = e + sg * 0.35, low = f - 0.4, cap = zt + 1.0;
+        for (const ee of [e, e2]) { quad(B, BU, V(ee, -hw, top, -hw, top), V(ee, hw, top, hw, top), V(ee, hw, cap, hw, cap), V(ee, -hw, cap, -hw, cap), 3);
+          for (const sd of [-1, 1]) quad(B, BU, V(ee, sd * hw, low, sd * hw, low), V(ee, sd * W2, low, sd * W2, low), V(ee, sd * W2, cap, sd * W2, cap), V(ee, sd * hw, cap, sd * hw, cap), 3); }
+        quad(B, BU, V(e, -W2, cap, -W2, 0), V(e2, -W2, cap, -W2, 0.35), V(e2, W2, cap, W2, 0.35), V(e, W2, cap, W2, 0), 3);
+        quad(B, BU, V(e, -hw, top, -hw, 0), V(e2, -hw, top, -hw, 0.35), V(e2, hw, top, hw, 0.35), V(e, hw, top, hw, 0), 3);
+        for (const sd of [-1, 1]) { quad(B, BU, V(e, sd * W2, low, 0, low), V(e2, sd * W2, low, 0.35, low), V(e2, sd * W2, cap, 0.35, cap), V(e, sd * W2, cap, 0, cap), 3);
+          quad(B, BU, V(e, sd * hw, low, 0, low), V(e2, sd * hw, low, 0.35, low), V(e2, sd * hw, top, 0.35, top), V(e, sd * hw, top, 0, top), 3); }
+        // kaiteen putki muurin päällä (tienpuolella)
+        const pts = []; for (let l = -W2; l <= W2 + 0.01; l += 1) { const [x, y] = pt(e + sg * 0.17, l); pts.push(new THREE.Vector3(x, cap + 0.12, -y)); }
+        const tg = noT(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), pts.length * 2, 0.04, 6), mRail)); scene.add(tg); } }
+    mk(B, BU, mBet); mk(AS, AU, mAs); mk(LA, null, mLamp);
+    // maa 1 m ruudukkona pois jätettyjen ulkokehän solujen kohdalle
+    const OX = OX0, OY = OY0, i0 = Math.floor((A.bb[0] - 9 - OX) / OS), i1 = Math.floor((A.bb[2] + 9 - OX) / OS), j0 = Math.floor((A.bb[1] - 9 - OY) / OS), j1 = Math.floor((A.bb[3] + 9 - OY) / OS);
+    const hrSurf = (x, y) => { const ti = Math.floor((x + 1280) / LS), tj = Math.floor((y + 1280) / LS), x0t = -1280 + ti * LS, y0t = -1280 + tj * LS, ci = Math.floor((x - x0t) / 6), cj = Math.floor((y - y0t) / 6);
+      return window.__alikSkip(x0t + (ci + 0.5) * 6, y0t + (cj + 0.5) * 6) ? null : gridTop(x, y, x0t, y0t, 6, 0.03); };
+    const vz = (x, y) => { const h = window.__alikPinta(x, y); if (h !== null) return h; if (A.inM(x, y)) return TZg(x, y); const g = hrSurf(x, y); return g !== null ? Math.min(g - 0.03, gridTop(x, y, OX, OY, OS, 0)) : gridTop(x, y, OX, OY, OS, 0); };
+    const per = new Map();
+    for (let j = j0; j <= j1; j++) for (let i = i0; i <= i1; i++) { const cx = OX + (i + 0.5) * OS, cy = OY + (j + 0.5) * OS; if (!window.__alikSkip18(cx, cy)) continue;
+      for (let y = cy - 9; y < cy + 9; y += 1) for (let x = cx - 9; x < cx + 9; x += 1) {
+        const c = [[x, y], [x + 1, y], [x + 1, y + 1], [x, y + 1]], pp = c.map(([px, py]) => A.proj(px, py)), cov = pp.map(p => p && A.covered(p.s) ? 1 : 0), sumc = cov[0] + cov[1] + cov[2] + cov[3];
+        if (sumc > 0 && sumc < 4 && pp.some(p => p && Math.abs(p.l) < hw + 4.2)) continue;       // tunnelin suu: otsamuuri peittää
+        const key = Math.floor((x + 0.5 + 1280) / LS) + '_' + Math.floor((y + 0.5 + 1280) / LS); let e = per.get(key); if (!e) per.set(key, e = { P: [], U: [], U1: [] });
+        const ti = Math.floor((x + 0.5 + 1280) / LS), tj = Math.floor((y + 0.5 + 1280) / LS), x0t = -1280 + ti * LS, y0t = -1280 + tj * LS;
+        for (const k of [0, 1, 2, 0, 2, 3]) { const [px, py] = c[k]; e.P.push(px, vz(px, py), -py); e.U.push((px - OX0) / OXS, (py - OY0) / OYS); e.U1.push((px - x0t) / LS, (py - y0t) / LS); } nq++; } }
+    for (const [key, e] of per) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(e.P, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(e.U, 2)); g.setAttribute('uv1', new THREE.Float32BufferAttribute(e.U1, 2));
+      const me = noT(new THREE.Mesh(g, outerMat)); me.userData.fb = outerMat; me.userData.maa = true; scene.add(me); if (!ROOFT.has(key)) ROOFT.set(key, []); ROOFT.get(key).push(me);
+      const h = HR.t.get(key); if (h && h.m.map) { const t = h.m.map.clone(); t.channel = 1; t.needsUpdate = true; me.material = groundTileMat(t); } }
+  }
+  window.__alikulut = { maaSoluja: nq };
+}
 // @osa js/040_rakennukset.js
 // ---------- buildings ----------
 const PAL = [0xe9dcc0, 0xd9c7a2, 0xf0ead9, 0xcdb593, 0xb9805e, 0xa8563f, 0xd8d5cc, 0xbfc4c6, 0xe6cf9a, 0xc7a988, 0x9aa3a8, 0xe3d6c4, 0xb46a4c, 0xdcd0b8];
@@ -1059,7 +1333,8 @@ function gridTop(x, y, x0, y0, st, dy) { const fx = (x - x0) / st, fy = (y - y0)
   return (u >= v ? z00 + (z10 - z00) * u + (z11 - z10) * v : z00 + (z11 - z01) * u + (z01 - z00) * v) + dy; }
 function groundTop(x, y) {
   if (window.__quayZ) { const q = window.__quayZ(x, y, 8.2); if (q !== null) return q - ROAD.pave; }
-  if (window.__tieZ) { const t = window.__tieZ(x, y); if (t !== null) return t; }      // 21.11.2026: Luvianpuistokadun ja Maamiehenkadun käytävä kahdessa tasossa (0105_tie_kaytava.js)   // Eteläranta: the hand-built walk and steps (the callers add the pavement height)
+  if (window.__tieZ) { const t = window.__tieZ(x, y); if (t !== null) return t; }
+  if (window.__alikPinta) { const a = window.__alikPinta(x, y); if (a !== null) return a; }      // 21.11.2026: alikulkujen kaivannot ja kansi (0106)      // 21.11.2026: Luvianpuistokadun ja Maamiehenkadun käytävä kahdessa tasossa (0105_tie_kaytava.js)   // Eteläranta: the hand-built walk and steps (the callers add the pavement height)
   const S = 512, ti = Math.floor((x + 1280) / S), tj = Math.floor((y + 1280) / S), st = 6;   // gridGeo steps exactly 6 m
   return Math.max(TZg(x, y), gridTop(x, y, -HW, YS, 6, 0), gridTop(x, y, -1280 + ti * S, -1280 + tj * S, st, 0.03));
 }
@@ -1256,6 +1531,13 @@ import('./roads.js').then(mod => {
         if (GP.length) add(laattaGeo(GP), mLaatta);
         ROAD.etGap = GP.length / 18; console.log('[eteläranta] laattaa: aukio', ROAD.etFill, 'm², väli', ROAD.etGap, 'm²'); }
     }
+    // 21.11.2026 (omistaja: "voidaanko asfaltoiduilta alueilta tiputtaa tai poistaa ilmakuvan tiet, nyt joissakin kohdissa se vuotaa asfaltin läpi"):
+    // sama 1 m rasteri (asfaltti, jalkakäytävä, kiveys, täytteet) GPU:lle: ilmakuvamaa (031 grassify -> roadCut) jättää pikselinsä piirtämättä tien
+    // kohdalla, joten 6 m / 18 m maakolmiot eivät enää pistä asfaltin läpi. Lineaarinen suodatus ja kynnys 0,99: vain vähintään puoli metriä tien
+    // reunasta sisäänpäin, joten reunalle ei jää reikiä.
+    { const D = new Uint8Array(nx * ny); for (let i = 0; i < D.length; i++) D[i] = M[i] ? 255 : 0;
+      const t = new THREE.DataTexture(D, nx, ny, THREE.RedFormat, THREE.UnsignedByteType); t.minFilter = t.magFilter = THREE.LinearFilter; t.generateMipmaps = false; t.needsUpdate = true;
+      ROADCUT.t.value = t; ROADCUT.b.value.set(x0, y0, nx, ny); }
   }
   if (R.ow) { const O = dec(R.ow); for (let i = 0; i < O.length; i += 3) ONEWAY.set(O[i] + ',' + O[i + 1], O[i + 2]); }
   if (R.tmv && TREES.move) { const s0 = atob(R.tmv), u8 = new Uint8Array(s0.length); for (let i = 0; i < s0.length; i++) u8[i] = s0.charCodeAt(i); TREES.move(new Int32Array(u8.buffer)); }
@@ -1566,6 +1848,7 @@ function carGround(x, y) {
   { const qz = window.__quayZ ? window.__quayZ(x, y) : null; if (qz !== null) return qz; }      // Eteläranta's hand-built quay
   { const sz = window.__siltaZ ? window.__siltaZ(x, y) : null; if (sz !== null) return sz; }      // 21.11.2026: maasiltojen asfalttikansi (js/0301_sillat.js)
   { const kz = window.__korjaamoZ ? window.__korjaamoZ(x, y) : null; if (kz !== null) return kz; }      // 21.11.2026: Tapsan korjaamon lattia ja ajoluiska (korjaamo/korjaamo.js)
+  { const az = window.__alikZ ? window.__alikZ(x, y) : null; if (az !== null) return az; }      // 21.11.2026: alikulun lattia kannen alla (0106)
   { const rz = window.__rataZ ? window.__rataZ(x, y) : null; if (rz !== null) return rz; }      // 21.11.2026 (omistaja: "pelaaja uppoaa"): aseman laiturit ja ratapenkka (rata/rata.js)
   if (inRiver(x, y)) return onBridgeDeck(x, y) ? brDeckZ(x, y) ?? Math.max(TZs(x, y), TER.wl + 2.2) : null;
   if (!inCore(x, y) && !TIE.ext(x, y)) return Math.max(TZs(x, y), TZg(x, y) + 0.14);      // (21.11.2026: Tiilimäen ja Isomäen kadut ovat roads.js:ssä, 0105_tie_kaytava.js)      // outside the centre the airport and its roads lie 0.1-0.15 m above the true ground (20.11.2026)
@@ -1588,12 +1871,14 @@ const SOLID = (() => {
   const DIM = [[2.1, 0.95], [2.3, 0.97], [2.1, 0.95], [2.45, 1.1], [2.45, 1.1], [2.45, 1.1], [2.45, 1.1]], PR = 0.3, NR = 0.35, out = [0, 0], ME = { x: 0, y: 0 };   // DIM: cars.js car0..car3 (mirrors left out)
   let dyn = [], wk = [], lastF = -1, pg = null, pn = -1, pA = null, pF = null; const NONE = [];
   // kind: 0 standing, 1 traffic, 2 the player's car when driven or a race car (people step aside), 3 the player on foot
-  const mk = (x, y, yaw, hl, hw, v, kind) => ({ x, y, sn: Math.sin(yaw), cs: Math.cos(yaw), hl, hw, v, kind, me: false });
+  // z (21.11.2026): laatikon pohjan korkeus; törmäys vain, kun korkeusero < 2,5 m (Porttaalissa junat ja laiturit ovat yläpuolella, sillan alla kulkeva auto kannen alla)
+  const mk = (x, y, yaw, hl, hw, v, kind, z) => ({ x, y, sn: Math.sin(yaw), cs: Math.cos(yaw), hl, hw, v, kind, me: false, z });
+  const lvl = (b, z) => b.z === undefined || b.z === null || z === undefined || Math.abs(b.z - z) < 2.5;
   const frame = () => { const f = renderer.info.render.frame; if (f === lastF) return; lastF = f; dyn = []; wk = [];
     try { const T = window.__sig && window.__sig.cars, foot = WALK.on;
-      if (T) for (const c of T) if (c.wx !== undefined && Math.abs(c.wx - S.x) < 190 && Math.abs(c.wy - S.y) < 190) { const d = DIM[c.k || 0]; dyn.push(mk(c.wx, c.wy, c.yaw, d[0], d[1], c.s || 0, 1)); }
+      if (T) for (const c of T) if (c.wx !== undefined && Math.abs(c.wx - S.x) < 190 && Math.abs(c.wy - S.y) < 190) { const d = DIM[c.k || 0]; dyn.push(mk(c.wx, c.wy, c.yaw, d[0], d[1], c.s || 0, 1, c.wz)); }
       if (window.__race) for (const b of window.__race.bots) if (b.wx !== undefined) dyn.push(mk(b.wx, b.wy, b.yaw, 2.1, 0.9, b.v || 0, 2));
-      if (VEH === 'car') { if (carG.visible && !(foot && CAR.lifted)) { const b = mk(CAR.x, CAR.y, CAR.yaw, CAR.hl || 2.1, CAR.hw || 0.9, foot ? 0 : CAR.v, foot ? 0 : 2); b.me = !foot; dyn.push(b); } }
+      if (VEH === 'car') { if (carG.visible && !(foot && CAR.lifted)) { const b = mk(CAR.x, CAR.y, CAR.yaw, CAR.hl || 2.1, CAR.hw || 0.9, foot ? 0 : CAR.v, foot ? 0 : 2, CAR.z); b.me = !foot; dyn.push(b); } }
       else if (heli.visible && (foot || S.landed)) { const h = foot && WALK.veh ? WALK.veh : S, b = mk(h.x, h.y, h.yaw, 2.6, 1.0, 0, 0); b.me = !foot; dyn.push(b); }
       if (TAKE.left && !TAKE.left.lifted) { const l = TAKE.left, y = CARTY[l.type] || CARTY.hatch; dyn.push(mk(l.x, l.y, l.yaw, y.hl, y.hw, 0, 0)); }
       if (TAKE.heli && VEH === 'car') dyn.push(mk(TAKE.heli.x, TAKE.heli.y, TAKE.heli.yaw, 2.6, 1.0, 0, 0));
@@ -1601,13 +1886,13 @@ const SOLID = (() => {
       // kävelijä ei astu vaunuun, liikkuva juna työntää kävelijän sivuun (pushOut), eikä pelaajan auto aja vaunuun (carHit)
       // IC-vaunu, jonka ovet ovat auki, jätetään pois: sisään noustaan ovista (juna.js __walkBlock, __aboard; kyydissä SOLIDia ei käytetä)
       const juna = (cars, v) => { for (const c of cars) { const g = c.g; if (!g || !g.visible || c.rects && c.open && (c.open.L || c.open.R)) continue; const x = g.position.x, y = -g.position.z;
-        if (Math.abs(x - S.x) > 190 || Math.abs(y - S.y) > 190) continue; const b = mk(x, y, 0, c.half - 0.35, 1.55, v, 0); b.sn = Math.sin(g.rotation.y); b.cs = -Math.cos(g.rotation.y); dyn.push(b); } };
+        if (Math.abs(x - S.x) > 190 || Math.abs(y - S.y) > 190) continue; const b = mk(x, y, 0, c.half - 0.35, 1.55, v, 0, g.position.y); b.sn = Math.sin(g.rotation.y); b.cs = -Math.cos(g.rotation.y); dyn.push(b); } };
       if (window.__juna) juna(window.__juna.cars, window.__juna.T.v);
       if (window.__tavara) { const TS = window.__tavara.S; for (const T of TS.junat) juna(T.cars, T.v); for (const P of Object.values(TS.pysak)) juna(P.cars, 0); }
-      if (foot && !WALK.in) { ME.x = WALK.x; ME.y = WALK.y; wk.push(ME); dyn.push(mk(WALK.x, WALK.y, 0, 0.12, 0.12, 0, 3)); }
+      if (foot && !WALK.in) { ME.x = WALK.x; ME.y = WALK.y; wk.push(ME); dyn.push(mk(WALK.x, WALK.y, 0, 0.12, 0.12, 0, 3, WALK.z)); }
       if (window.__npc) { for (const p of window.__npc.parties) for (const c of p.m) if (c.g.visible) wk.push(c); for (const c of window.__npc.sitters || []) if (c.g.visible) wk.push(c); }
     } catch (e) {} };
-  const parked = (x, y, L) => { const P0 = window.__parked || NONE, F = window.__furn || NONE; if (pn !== P0.length + F.length || pA !== P0 || pF !== F) { pg = new Map(); pn = P0.length + F.length; pA = P0; pF = F; for (const p of P0.concat(F)) {      /* parked cars and the street furniture (benches, terraces) */ const k = Math.floor(p.x / 8) * 4096 + Math.floor(p.y / 8); let l = pg.get(k); if (!l) pg.set(k, l = []); if (!p.box) { const d = DIM[p.k] || DIM[0]; p.box = p.hl ? mk(p.x, p.y, p.yaw, p.hl, p.hw, 0, 0) : mk(p.x, p.y, p.yaw, d[0] * 0.97, d[1] * 0.97, 0, 0); } l.push(p); } }
+  const parked = (x, y, L) => { const P0 = window.__parked || NONE, F = window.__furn || NONE; if (pn !== P0.length + F.length || pA !== P0 || pF !== F) { pg = new Map(); pn = P0.length + F.length; pA = P0; pF = F; for (const p of P0.concat(F)) {      /* parked cars and the street furniture (benches, terraces) */ const k = Math.floor(p.x / 8) * 4096 + Math.floor(p.y / 8); let l = pg.get(k); if (!l) pg.set(k, l = []); if (!p.box) { const d = DIM[p.k] || DIM[0]; p.box = p.hl ? mk(p.x, p.y, p.yaw, p.hl, p.hw, 0, 0) : mk(p.x, p.y, p.yaw, d[0] * 0.97, d[1] * 0.97, 0, 0, TZs(p.x, p.y) + roadDZ(p.x, p.y)); } l.push(p); } }
     const cx = Math.floor(x / 8), cy = Math.floor(y / 8); for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const l = pg.get((cx + i) * 4096 + cy + j); if (l) for (const p of l) if (!p.gone) L.push(p.box); } };
   const near = (x, y, r) => { frame(); const L = []; for (const b of dyn) if (Math.abs(b.x - x) < r + b.hl && Math.abs(b.y - y) < r + b.hl) L.push(b); parked(x, y, L); return L; };
   const sd = (b, x, y) => { const dx = x - b.x, dy = y - b.y, qx = Math.abs(dx * b.sn + dy * b.cs) - b.hl, qy = Math.abs(dx * b.cs - dy * b.sn) - b.hw; return Math.hypot(Math.max(qx, 0), Math.max(qy, 0)) + Math.min(Math.max(qx, qy), 0); };
@@ -1621,13 +1906,13 @@ const SOLID = (() => {
   return { DIM, near, sd,
     walkers: () => { frame(); return wk; },
     // the player on foot: would the step from (ox, oy) to (nx, ny) walk into a car or a person
-    walkHit: (ox, oy, nx, ny) => { for (const b of near(nx, ny, 1)) { if (b.kind === 3) continue; const d = sd(b, nx, ny); if (d < PR && d < sd(b, ox, oy) - 1e-6) return true; }
+    walkHit: (ox, oy, nx, ny) => { for (const b of near(nx, ny, 1)) { if (b.kind === 3 || !lvl(b, WALK.z)) continue; const d = sd(b, nx, ny); if (d < PR && d < sd(b, ox, oy) - 1e-6) return true; }
       for (const c of wk) { if (c === ME) continue; const dx = c.x - nx, dy = c.y - ny, d2 = dx * dx + dy * dy; if (d2 < 0.3 && d2 < (c.x - ox) ** 2 + (c.y - oy) ** 2 - 1e-6) return true; } return false; },
     // a car has driven onto the player on foot: the free spot beside it, or null
-    pushOut: (x, y) => { for (const b of near(x, y, 1)) if (b.kind !== 3 && sd(b, x, y) < PR - 0.08) return side(b, x, y, PR); return null; },
+    pushOut: (x, y) => { for (const b of near(x, y, 1)) if (b.kind !== 3 && lvl(b, WALK.z) && sd(b, x, y) < PR - 0.08) return side(b, x, y, PR); return null; },
     // the player's car at (x, y), heading (sn, cs): inside a parked car, the car left behind or the parked helicopter (only when moving closer to it)
     carHit: (x, y, sn, cs) => { const a = { x, y, sn, cs, hl: (CAR.hl || 2.1) - 0.1, hw: (CAR.hw || 0.9) - 0.05 };
-      for (const b of near(x, y, 4)) { if (b.kind !== 0 || b.me) continue; if (sat(a, b) && (b.x - x) ** 2 + (b.y - y) ** 2 < (b.x - S.x) ** 2 + (b.y - S.y) ** 2 - 1e-4) return true; } return false; },
+      for (const b of near(x, y, 4)) { if (b.kind !== 0 || b.me || !lvl(b, CAR.z)) continue; if (sat(a, b) && (b.x - x) ** 2 + (b.y - y) ** 2 < (b.x - S.x) ** 2 + (b.y - S.y) ** 2 - 1e-4) return true; } return false; },
     // is a car about to drive over the crossing that starts at (ax, ay) towards (bx, by): within 3 s at its present speed
     coming: (ax, ay, bx, by) => { frame(); const ex = (bx - ax) * 2, ey = (by - ay) * 2, el = ex * ex + ey * ey || 1;
       for (const b of dyn) { if (b.kind === 0 || b.kind === 3 || Math.abs(b.v) < 2 || Math.abs(b.x - ax) > 70 || Math.abs(b.y - ay) > 70) continue;
@@ -1660,16 +1945,25 @@ const SOLID = (() => {
 function carBlocked(x, y, yaw) {   // a corner of the car inside a house or over open water
   const sn = Math.sin(yaw), cs = Math.cos(yaw), g = TZs(x, y);
   // a traffic car in the way (19.11.2026): three circles along each car; only a move that brings the two closer is refused, so the player can always back away
-  if (window.__sig && window.__sig.cars && VEH === 'car') { const C = window.__race && window.__race.bots.length ? window.__sig.cars.concat(window.__race.bots) : window.__sig.cars; for (let i = 0; i < C.length; i++) { const o = C[i]; if (o.wx === undefined) continue; const dx = o.wx - x, dy = o.wy - y, d2 = dx * dx + dy * dy; if (d2 > 30) continue;
+  if (window.__sig && window.__sig.cars && VEH === 'car') { const C = window.__race && window.__race.bots.length ? window.__sig.cars.concat(window.__race.bots) : window.__sig.cars; for (let i = 0; i < C.length; i++) { const o = C[i]; if (o.wx === undefined || (o.wz !== undefined && Math.abs(o.wz - CAR.z) > 2.5)) continue; const dx = o.wx - x, dy = o.wy - y, d2 = dx * dx + dy * dy; if (d2 > 30) continue;
       const os = Math.sin(o.yaw), oc = Math.cos(o.yaw); let hit = false; for (const f of [1.4, 0, -1.4]) for (const h of [1.4, 0, -1.4]) { const ex = (x + sn * f) - (o.wx + os * h), ey = (y + cs * f) - (o.wy + oc * h); if (ex * ex + ey * ey < 3.06) hit = true; }
       if (hit && d2 < (o.wx - S.x) ** 2 + (o.wy - S.y) ** 2 - 1e-4) return true; } }
   if (VEH === 'car' && !WALK.on && SOLID.carHit(x, y, sn, cs)) return true;      // a parked car, the car left behind (20.11.2026)
   if (x > HALL.bb[0] - 3 && x < HALL.bb[2] + 3 && y > HALL.bb[1] - 3 && y < HALL.bb[3] + 3) for (let f = -2.1; f < 2.11; f += 0.3) for (const r of [0.9, -0.9]) {   // near the hall: both sides sampled every 0.3 m, so its 0.4 m walls cannot slip between the corner points
     const px = x + sn * f + cs * r, py = y + cs * f - sn * r; if (!inHall(px, py) && bldTopAt(px, py) > Math.max(g, TZg(px, py)) + 1.4) return true; }
   const HL = CAR.hl || 2.1, HW = CAR.hw || 0.9;      // the box of the model being driven (van and estate are longer)
-  for (const [f, r] of [[HL, HW], [HL, -HW], [-HL, HW], [-HL, -HW], [0, HW + 0.05], [0, -HW - 0.05]]) {
+  const so = Math.sin(CAR.yaw), co = Math.cos(CAR.yaw), SK = window.__siltaKaide, RS = window.__rataSeina, AS = window.__alikSeina;
+  for (const [f, r] of [[HL, HW], [HL, -HW], [-HL, HW], [-HL, -HW], [0, HW + 0.05], [0, -HW - 0.05], [HL * 0.5, HW], [HL * 0.5, -HW], [-HL * 0.5, HW], [-HL * 0.5, -HW]]) {
     const px = x + sn * f + cs * r, py = y + cs * f - sn * r;
-    if (carGround(px, py) === null) return true;
+    const gz = carGround(px, py); if (gz === null) return true;
+    // 21.11.2026 (omistaja: "auto törmäilee näkymättömään, hyppii oudosti"): maasiltojen kaiteet ja Porttaalin seinät ovat kiinteitä. Vain liike, joka vie
+    // kulman syvemmälle kaiteeseen / seinään, estetään (kiinni jäänyt pääsee aina pois). Lisäksi yli 1 m pystysuora nousu kulman alla on seinä,
+    // ei ramppi: ennen auto loikkasi seinän läpi ratapihan tai kannen tasolle.
+    const ox = CAR.x + so * f + co * r, oy = CAR.y + co * f - so * r;
+    if (SK && SK(px, py, CAR.z) > SK(ox, oy, CAR.z) + 1e-4) return true;
+    if (RS && RS(px, py, CAR.z) > RS(ox, oy, CAR.z) + 1e-4) return true;
+    if (AS && AS(px, py, CAR.z) > AS(ox, oy, CAR.z) + 1e-4) return true;
+    { const g0 = carGround(ox, oy); if (g0 !== null && gz - g0 > 1.0 && Math.hypot(px - ox, py - oy) < 3) return true; }
     if (inHall(px, py)) { if (HALL.pil.some(q => Math.abs(px - q[0]) < 0.3 && Math.abs(py - q[1]) < 0.3)) return true; continue; }   // inside the parking hall: only its pillars stop the car
     if (onPorinsilta(px, py) === null && bldTopAt(px, py) > Math.max(g, TZg(px, py)) + 1.4) return true;
   }
@@ -1790,6 +2084,14 @@ const NAV = { route: null, t: 0, tgt: null }; window.__nav = NAV;
 // @osa js/092_liikenne.js
 // ---------- traffic: cars wandering the street network, sized like the cars in the aerial image ----------
 const cars = [];
+// 21.11.2026 (omistaja: "bottiautot eivät aja siltaa vaan maanmuotoja pitkin"): bottiauton korkeus tasoitetun kentän TZs päällä (mesh nostetaan sillä).
+// Sillalla (Porinsilta, joen sillat, maasillat js/0301, vt 2:n sillat rata/rata.js) kansi vain, kun botti ajaa sillan suuntaan: alla ristiin kulkeva katu jää alas.
+const botDZ = (x, y, yaw) => { const sx = Math.sin(yaw), sy = Math.cos(yaw);
+  if (onPorinsilta(x, y) !== null && Math.abs(sx * Math.sin(PSIL.head) + sy * Math.cos(PSIL.head)) > 0.7) return bridgeZ(x, y);
+  const s = window.__siltaAjo ? window.__siltaAjo(x, y, yaw) : null; if (s !== null) return s - TZs(x, y);
+  const r = window.__rataSiltaAjo ? window.__rataSiltaAjo(x, y, yaw) : null; if (r !== null) return r - TZs(x, y);
+  if (inRiver(x, y) && onBridgeDeck(x, y)) { const d = brDeckZ(x, y); if (d !== null) return d - TZs(x, y); }
+  return roadDZ(x, y); };
 {
   const nodes = new Map(), key = (x, y) => x + ',' + y, inb = (x, y) => x > OX0 + 8 && x < OX1 - 8 && y > OY0 + 8 && y < OY1 - 8;
   const node = (x, y) => { const k = key(x, y); if (!nodes.has(k)) nodes.set(k, { x, y, nb: [] }); return nodes.get(k); };
@@ -1880,7 +2182,7 @@ const cars = [];
         dx = c.b.x - c.a.x; dy = c.b.y - c.a.y; len = Math.hypot(dx, dy) || 1; } }
       const ux = dx / len, uy = dy / len, x = c.a.x + dx * c.t + uy * c.lat, y = c.a.y + dy * c.t - ux * c.lat;        // keep to the right-hand lane
       let d = Math.atan2(ux, uy) - c.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); c.yaw += d * Math.min(1, dt * 6);
-      const bz = bridgeZ(x, y); p3.set(x, 0.09 + bz + (bz ? 0 : roadDZ(x, y)), -y); q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); c.wx = x; c.wy = y; c.st = c.s < 0.05 && !c.pk ? (c.st || 0) + dt : 0;
+      const dz = botDZ(x, y, Math.atan2(ux, uy)); p3.set(x, 0.09 + dz, -y); c.wz = TZs(x, y) + 0.09 + dz; q4.setFromAxisAngle(UP, -c.yaw); m4.compose(p3, q4, s3); if (typed) parts[c.k].setMatrixAt(c.j, m4); else for (const q of parts) q.setMatrixAt(i, m4); c.wx = x; c.wy = y; c.st = c.s < 0.05 && !c.pk ? (c.st || 0) + dt : 0;
       if (c.st > 30 && Math.hypot(x - S.x, y - S.y) > 120) { const a = list[Math.floor(rnd() * list.length)]; if (Math.hypot(a.x - S.x, a.y - S.y) > 150) { c.a = a; c.b = a.nb[Math.floor(rnd() * a.nb.length)]; c.t = 0; c.st = 0; c.blk = 0; c.s = c.v; } }   /* stood 30 s in a jam out of the player's sight: start again somewhere else */
       if (c.pk && c.pk.door) { const D = c.pk.door, a = (c.pk.ang || 0) * 1.15; D.g.position.copy(p3); D.g.quaternion.copy(q4); D.g.visible = true; D.R.rotation.y = -a; D.L.rotation.y = c.pk.two ? a : 0; D.oR.visible = a > 0.02; D.oL.visible = c.pk.two && a > 0.02; } }
     for (const q of parts) q.instanceMatrix.needsUpdate = true;
@@ -2244,6 +2546,9 @@ const placeDoor = P => { if (!P.ok()) return null;
     for (let t = 0; t < 9; t += 0.3) { a = P.map(sx + dx * t, sy + dy * t); if (walkFree(a[0], a[1])) { a = P.map(sx + dx * (t + 0.5), sy + dy * (t + 0.5)); break; } }   // first free spot in front of the door
     P.door = { x: a[0], y: a[1], out: Math.atan2(a[0] - b[0], a[1] - b[1]) }; } return P.door; };
 const churchDoor = () => placeDoor(PLACES[0]);
+// 21.11.2026: Porttaalin seinät ja maasiltojen kaiteet kiinteitä myös jalan (rata/rata.js __rataSeina, js/0301 __siltaKaide): askel syvemmälle estetään
+function wallIn(x, y) { const z = WALK.z;
+  for (const F of [window.__rataSeina, window.__siltaKaide, window.__alikSeina]) if (F && F(x, y, z) > F(WALK.x, WALK.y, z) + 1e-4) return true; return false; }
 function walkFree(x, y) {
   const g = carGround(x, y); if (g === null) return false; const tb = Math.max(TZs(x, y), TZg(x, y));
   if (onPorinsilta(x, y) !== null) return true;
@@ -2323,7 +2628,7 @@ function stepWalk(dt) {
     const m0 = WALK.in.map(WALK.ix, WALK.iy), m1 = WALK.in.map(WALK.ix + sn, WALK.iy + cs); S.x = WALK.x = m0[0]; S.y = WALK.y = m0[1]; S.yaw = WALK.yaw = Math.atan2(m1[0] - m0[0], m1[1] - m0[1]);
   } else {
     WALK.yaw += tr; const sn = Math.sin(WALK.yaw), cs = Math.cos(WALK.yaw), dx = (sn * WALK.v + cs * WALK.vs) * dt, dy = (cs * WALK.v - sn * WALK.vs) * dt;
-    const ride = window.__aboard && window.__aboard(), wf = (x, y) => ride ? !window.__walkBlock(x, y) : walkFree(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y) && !(window.__walkBlock && window.__walkBlock(x, y));      // houses, and (20.11.2026) cars and people; 21.11.2026: junassa vain vaunun seinät ja penkit (juna/juna.js)
+    const ride = window.__aboard && window.__aboard(), wf = (x, y) => ride ? !window.__walkBlock(x, y) : walkFree(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y) && !(window.__walkBlock && window.__walkBlock(x, y)) && !wallIn(x, y);      // houses, and (20.11.2026) cars and people; 21.11.2026: junassa vain vaunun seinät ja penkit (juna/juna.js)
     if (moving) { if (wf(WALK.x + dx, WALK.y + dy)) { WALK.x += dx; WALK.y += dy; } else if (wf(WALK.x + dx, WALK.y)) WALK.x += dx; else if (wf(WALK.x, WALK.y + dy)) WALK.y += dy; else WALK.v *= 0.5; }
     if (!ride) { const q = SOLID.pushOut(WALK.x, WALK.y); if (q && walkFree(q[0], q[1])) { const k = Math.min(1, dt * 10); WALK.x += (q[0] - WALK.x) * k; WALK.y += (q[1] - WALK.y) * k; } }      // a car drove onto the player: step out beside it
     WALK.x = Math.max(OX0 - 100, Math.min(OX1 + 100, WALK.x)); WALK.y = Math.max(OY0 - 100, Math.min(OY1 + 100, WALK.y));

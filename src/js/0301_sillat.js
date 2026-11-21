@@ -15,7 +15,7 @@ const SILTA = { list: [] }; window.__SILTA = SILTA;
   const B = { p: [], u: [] }, A = { p: [], u: [] }, V = { p: [] }, TA = 0.13, PH = 0.95, PW = 0.3, BH = 1.0;
   // nelikulmio kolmesta-neljästä 3D-pisteestä (pelin x, y, z) ja uv metreinä (betoni 3 m / kuva, asfaltti 6 m / kuva)
   const quad = (G, a, b, c, d, s) => { const P = [a, b, c, a, c, d]; for (const q of P) { G.p.push(q[0], q[2], -q[1]); if (G.u) G.u.push(q[3] / s, q[4] / s); } };
-  for (const r of TER.bd) { if ((RATA.bdSkip || []).some(([x, y]) => Math.hypot(r[1] - x, r[2] - y) < 1.5)) continue;   /* rautatiesillat: rata/rata.js */
+  for (const r of TER.bd.concat(window.__autoSillat || [])) { if ((RATA.bdSkip || []).some(([x, y]) => Math.hypot(r[1] - x, r[2] - y) < 1.5)) continue;   /* rautatiesillat: rata/rata.js */
     const hw = r[0], P = []; for (let k = 1; k + 2 < r.length; k += 3) P.push([r[k], r[k + 1], r[k + 2]]);
     if (P.length < 2) continue;
     // pidennys: kulje päästä ulospäin niin kauan kuin maa on selvästi kannen alapuolella
@@ -59,4 +59,23 @@ const SILTA = { list: [] }; window.__SILTA = SILTA;
         return P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA; } } return null; };
   window.__siltaZ = (x, y) => { const d = SILTA.deck(x, y); if (d === null) return null; const ref = (typeof WALK !== 'undefined' && WALK.on) ? WALK.z : (typeof CAR !== 'undefined' ? CAR.z : d);
     return (ref === undefined || ref === null || ref > d - 2.2) ? d : null; };
+  // 21.11.2026 (omistaja: "auto törmäilee näkymättömään, hyppii oudosti ... bottiautot eivät aja siltaa vaan maanmuotoja pitkin"):
+  // SILTA.ajo(x, y, yaw): kannen pinta bottiautolle, jos se on kannella (leveämpi marginaali: OSM-tien keskilinja ei osu tarkasti sillan linjaan) ja ajaa
+  //   sillan suuntaan; alla ristiin kulkeva tie jää alas. Ajosuunta (sin yaw, cos yaw) kuten muuallakin.
+  SILTA.ajo = (x, y, yaw) => { const sx = Math.sin(yaw), sy = Math.cos(yaw);
+    for (const b of SILTA.list) { if (x < b.bb[0] - 2 || y < b.bb[1] - 2 || x > b.bb[2] + 2 || y > b.bb[3] + 2) continue; const P = b.P;
+      for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L = Math.hypot(dx, dy) || 1, t = ((x - ax) * dx + (y - ay) * dy) / (L * L);
+        if (t < -0.05 || t > 1.05) continue; const tc = Math.min(1, Math.max(0, t)); if (Math.hypot(x - ax - dx * tc, y - ay - dy * tc) > b.hw + 2) continue;
+        if (Math.abs(sx * dx + sy * dy) / L < 0.7) continue;
+        return P[k][2] + (P[k + 1][2] - P[k][2]) * tc + TA; } } return null; };
+  // SILTA.kaide(x, y, z): kuinka syvällä (m) piste on kaiteessa, kun kulkija on kannen tasolla (z); 0 = vapaa. carBlocked (js/090) estää liikkeen syvemmälle,
+  //   joten auto ei enää aja kaiteen läpi ja putoa kannelta alla olevaan leikkaukseen.
+  SILTA.kaide = (x, y, z) => { let best = 0;
+    for (const b of SILTA.list) { if (x < b.bb[0] - 1 || y < b.bb[1] - 1 || x > b.bb[2] + 1 || y > b.bb[3] + 1) continue; const P = b.P, wi = b.hw - PW;
+      for (let k = 0; k + 1 < P.length; k++) { const ax = P[k][0], ay = P[k][1], dx = P[k + 1][0] - ax, dy = P[k + 1][1] - ay, L2 = dx * dx + dy * dy || 1, t = ((x - ax) * dx + (y - ay) * dy) / L2;
+        if (t < 0 || t > 1) continue; const s = Math.hypot(x - ax - dx * t, y - ay - dy * t), d = s - (wi - 0.05); if (d <= 0 || s > b.hw + 0.8) continue;
+        const dz = P[k][2] + (P[k + 1][2] - P[k][2]) * t + TA; if (Math.abs(z - dz) > 1.6) continue;
+        best = Math.max(best, d); } }
+    return best; };
+  window.__siltaAjo = SILTA.ajo; window.__siltaKaide = SILTA.kaide;
 }
