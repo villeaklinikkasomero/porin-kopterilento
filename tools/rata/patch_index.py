@@ -45,5 +45,14 @@ rep(t1, """  /* 21.11.2026 (omistaja: "portaalin jälkeen kaksi siltaa noudattel
   const tri = (k, a, b, c, dz) => { if ((b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0]) > 0) { const t = b; b = c; c = t; } push(k, [[a[0], a[1], dz + RSZ(a)], [b[0], b[1], dz + RSZ(b)], [c[0], c[1], dz + RSZ(c)]]); };""", "const RSZ")
 t2 = "  for (const [k, n, w0, lanes, ow, br, tu, P] of ROADS.r) { if (tu) continue;"
 rep(t2, "  for (const [k, n, w0, lanes, ow, br, tu, P] of ROADS.r) { RSN = n; if (tu) continue;", "RSN = n;")
+# 21.11.2026 junan sisätilat (juna/juna.js): kyydissä vain junan omat seinät rajoittavat (talot, autot ja ihmiset ovat maailman koordinaateissa),
+# muuten talot/autot/ihmiset + junan kuori; törmäyksen ulostyöntö pois kyydissä
+w0 = "    const wf = (x, y) => walkFree(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y);      // houses, and (20.11.2026) cars and people\n"
+w1 = "    const wf = (x, y) => walkFree(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y) && !(window.__walkBlock && window.__walkBlock(x, y));      // houses, and (20.11.2026) cars and people; 21.11.2026: junan seinät ja penkit (juna/juna.js)\n"
+w2 = "    const ride = window.__aboard && window.__aboard(), wf = (x, y) => ride ? !window.__walkBlock(x, y) : walkFree(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y) && !(window.__walkBlock && window.__walkBlock(x, y));      // houses, and (20.11.2026) cars and people; 21.11.2026: junassa vain vaunun seinät ja penkit (juna/juna.js)\n"
+if w1 in s: s = s.replace(w1, w0)
+rep(w0, w2, "window.__aboard()")
+p0 = "    { const q = SOLID.pushOut(WALK.x, WALK.y);"
+rep(p0, "    if (!ride) { const q = SOLID.pushOut(WALK.x, WALK.y);", "if (!ride) { const q = SOLID.pushOut")
 open(sys.argv[2], 'w', encoding='utf-8').write(s)
 print('ok', len(s))

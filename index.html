@@ -1461,6 +1461,7 @@ function carGround(x, y) {
 //  - driving, the player's car cannot enter a parked car (carHit, called by carBlocked; the moving traffic was already there)
 //  - a walker (npcStep) waits for a moving car, walks round a standing one by its corners, walks round the player, and steps aside from the
 //    player's moving car and from the race cars (the car is not stopped by people)
+//  - trains (window.__juna, window.__tavara): every coach is a standing box, 3.1 m wide (21.11.2026)
 //  - the traffic brakes for people on its lane (cars.update asks walkers()), and a party waits at the kerb while a car is coming (coming)
 const SOLID = (() => {
   const DIM = [[2.1, 0.95], [2.3, 0.97], [2.1, 0.95], [2.45, 1.1], [2.45, 1.1], [2.45, 1.1], [2.45, 1.1]], PR = 0.3, NR = 0.35, out = [0, 0], ME = { x: 0, y: 0 };   // DIM: cars.js car0..car3 (mirrors left out)
@@ -1475,6 +1476,12 @@ const SOLID = (() => {
       else if (heli.visible && (foot || S.landed)) { const h = foot && WALK.veh ? WALK.veh : S, b = mk(h.x, h.y, h.yaw, 2.6, 1.0, 0, 0); b.me = !foot; dyn.push(b); }
       if (TAKE.left && !TAKE.left.lifted) { const l = TAKE.left, y = CARTY[l.type] || CARTY.hatch; dyn.push(mk(l.x, l.y, l.yaw, y.hl, y.hw, 0, 0)); }
       if (TAKE.heli && VEH === 'car') dyn.push(mk(TAKE.heli.x, TAKE.heli.y, TAKE.heli.yaw, 2.6, 1.0, 0, 0));
+      // 21.11.2026 (omistaja: junien läpi ei saa kävellä): IC-junan (juna/juna.js) ja tavarajunien (juna/tavarajuna.js) vaunut seisovina laatikoina (kind 0):
+      // kävelijä ei astu vaunuun, liikkuva juna työntää kävelijän sivuun (pushOut), eikä pelaajan auto aja vaunuun (carHit)
+      const juna = (cars, v) => { for (const c of cars) { const g = c.g; if (!g || !g.visible) continue; const x = g.position.x, y = -g.position.z;
+        if (Math.abs(x - S.x) > 190 || Math.abs(y - S.y) > 190) continue; const b = mk(x, y, 0, c.half - 0.35, 1.55, v, 0); b.sn = Math.sin(g.rotation.y); b.cs = -Math.cos(g.rotation.y); dyn.push(b); } };
+      if (window.__juna) juna(window.__juna.cars, window.__juna.T.v);
+      if (window.__tavara) { const TS = window.__tavara.S; for (const T of TS.junat) juna(T.cars, T.v); for (const P of Object.values(TS.pysak)) juna(P.cars, 0); }
       if (foot && !WALK.in) { ME.x = WALK.x; ME.y = WALK.y; wk.push(ME); dyn.push(mk(WALK.x, WALK.y, 0, 0.12, 0.12, 0, 3)); }
       if (window.__npc) { for (const p of window.__npc.parties) for (const c of p.m) if (c.g.visible) wk.push(c); for (const c of window.__npc.sitters || []) if (c.g.visible) wk.push(c); }
     } catch (e) {} };
@@ -2194,9 +2201,9 @@ function stepWalk(dt) {
     const m0 = WALK.in.map(WALK.ix, WALK.iy), m1 = WALK.in.map(WALK.ix + sn, WALK.iy + cs); S.x = WALK.x = m0[0]; S.y = WALK.y = m0[1]; S.yaw = WALK.yaw = Math.atan2(m1[0] - m0[0], m1[1] - m0[1]);
   } else {
     WALK.yaw += tr; const sn = Math.sin(WALK.yaw), cs = Math.cos(WALK.yaw), dx = (sn * WALK.v + cs * WALK.vs) * dt, dy = (cs * WALK.v - sn * WALK.vs) * dt;
-    const wf = (x, y) => walkFree(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y);      // houses, and (20.11.2026) cars and people
+    const ride = window.__aboard && window.__aboard(), wf = (x, y) => ride ? !window.__walkBlock(x, y) : walkFree(x, y) && !SOLID.walkHit(WALK.x, WALK.y, x, y) && !(window.__walkBlock && window.__walkBlock(x, y));      // houses, and (20.11.2026) cars and people; 21.11.2026: junassa vain vaunun seinät ja penkit (juna/juna.js)
     if (moving) { if (wf(WALK.x + dx, WALK.y + dy)) { WALK.x += dx; WALK.y += dy; } else if (wf(WALK.x + dx, WALK.y)) WALK.x += dx; else if (wf(WALK.x, WALK.y + dy)) WALK.y += dy; else WALK.v *= 0.5; }
-    { const q = SOLID.pushOut(WALK.x, WALK.y); if (q && walkFree(q[0], q[1])) { const k = Math.min(1, dt * 10); WALK.x += (q[0] - WALK.x) * k; WALK.y += (q[1] - WALK.y) * k; } }      // a car drove onto the player: step out beside it
+    if (!ride) { const q = SOLID.pushOut(WALK.x, WALK.y); if (q && walkFree(q[0], q[1])) { const k = Math.min(1, dt * 10); WALK.x += (q[0] - WALK.x) * k; WALK.y += (q[1] - WALK.y) * k; } }      // a car drove onto the player: step out beside it
     WALK.x = Math.max(OX0 - 100, Math.min(OX1 + 100, WALK.x)); WALK.y = Math.max(OY0 - 100, Math.min(OY1 + 100, WALK.y));
     const g = carGround(WALK.x, WALK.y); if (g !== null) WALK.z += (g - WALK.z) * Math.min(1, dt * 14);
     walkG.position.set(WALK.x, WALK.z, -WALK.y); walkG.rotation.y = -WALK.yaw;
@@ -2958,9 +2965,13 @@ requestAnimationFrame(frame);
 <!-- 20.11.2026: rataverkko, aseman laiturit ja alikulun portaali (rata/rata.js) sekä IC-juna (juna/juna.js) -->
 <script type="module" src="rata/rata.js"></script>
 <script type="module" src="juna/juna.js"></script>
+<!-- 21.11.2026: tavarajunat (juna/tavarajuna.js): todellisen arkiliikenteen järjestys Digitrafficista, reitit rata/tavara_reitit.js -->
+<script type="module" src="juna/tavarajuna.js"></script>
 <!-- 21.11.2026: tarinatila Satamakaupunki (tarina/peli.js): tehtävämoottori, merkit ja tarinan hahmot maailmassa. Näppäimet X, P, 1–3 -->
 <!-- 21.11.2026: Tapsan korjaamo, peltihalli ja nosto-ovi (korjaamo/korjaamo.js) -->
 <script type="module" src="korjaamo/korjaamo.js"></script>
 <script type="module" src="tarina/peli.js"></script>
+<!-- 21.11.2026: pelin kello (1 pelitunti = 10 min), aamu–päivä–ilta–yö ja katulamput (aika/aika.js) -->
+<script type="module" src="aika/aika.js"></script>
 </body>
 </html>

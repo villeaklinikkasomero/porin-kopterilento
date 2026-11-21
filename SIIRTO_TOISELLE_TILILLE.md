@@ -2416,3 +2416,30 @@ Latauskoko kasvoi: korjaamon mallit 7,2 Mt, tarinahahmot 2–2,6 Mt kappale (lad
   korjaus vaurion mukaan, tuunausketju, mikrotehtävän jäähtyminen. Pelissä (headless): kaikki 38 tehtävää läpi kehittäjäohituksella ilman virheitä; korjaus 25 € → kunto 100; tuunaus kiihtyvyys ×1,25 ja maali.
 - **Puutelista:** `tarvittavat_ominaisuudet/PUUTTUU_RAUTALANGASTA.md` (mekaniikat prioriteetein, talouden puutteet, hahmot, paikat, kulkuneuvot, välianimaatiot, UI).
 - Generaattorit `tools/tarina/gen_tarina.py`, `gen_sivu.py` – vain uudelleenrakennukseen; muokkaa JSONia suoraan.
+
+
+## 21.11.2026 – Pelin kello, vuorokausirytmi ja katulamput (omistaja: "saadaanko peli noudattamaan jonkinlaista päivärytmiä?"; "yksi tunti voisi olla 10 minuuttia … bussit ja junat voivat käyttää reaalimaailman kellonaikoja … katulampuissa lämpimän keltainen sävy, kuten myös kaikessa muussa. Paitsi neonvaloissa")
+
+- **Uusi `aika/`** (aika.js, katuvalo_malli.js, README.md) + `tools/aika/tee_katuvalo.py`; lähde `hahmot/konseptit/3d_lahde/katuvalo/katuvalo_meshy.glb` (omistajan Meshy-katulamppu).
+  Ladataan rivillä `<script type="module" src="aika/aika.js">` – lisätty **sekä `src/html/99_loppu.html`:ään että `index.html`:ään** samana tekstinä (kokoa.py:tä ei voitu ajaa pilvessä; aja `kokoa.py --tarkista`).
+- **Kello `window.__aika`:** 1 pelitunti = 10 min, vuorokausi 240 min, alkaa 9.00, tallentuu selaimeen. Ruudun yläreunassa kello (☀ / ☾). Aikataulut luetaan tästä (`t`, `valilla`, `tasatunnein`).
+- **Valo:** aamu–päivä–ilta–yö koko kuvan sävytyksenä (CustomToneMapping; päivällä kuva on täsmälleen ennallaan), ruskon lämmin sävy, yöllä tähdet. Varjot eivät käänny (poltettu).
+  Hohtavat pinnat = `toneMapped: false`.
+- **Katulamput:** noin 4 600 kpl kaikille kaduille katuverkosta, syttyvät hämärässä, lämmin keltainen lasi + valoläikkä maassa, kaukaa valopisteinä.
+- **Testattu** headless-pelissä (index ennen pilkkomista + sama moduuli): päivä / ilta / yö kadulta, läheltä ja ilmasta; 4 617 / 4 633 lamppua kelpasi; ei konsolivirheitä.
+  **Ei testattu:** pilkotun index.html:n kanssa oikeassa selaimessa, suorituskyky puhelimella (380 lamppua × 1 200 kolmiota + 4 600 pistettä), 240 min kierto alusta loppuun.
+- **Tekemättä (sovittu järjestys):** ikkunoiden valot ja autojen valot → neonkyltit → ihmiset, liikenne, kojut, bussi ja juna kellon mukaan. Ks. `aika/README.md`.
+- **Tiedossa:** pilvet eivät himmene yöllä; ikkunat ovat yöllä pimeät; lamput eivät ole esteitä ja voivat osua pihoille.
+
+## 21.11.2026 – IC-junan sisätilat ja kyydissä matkustaminen (omistaja: "miten saadaan rakennettua autenttiset junavaunut sisältä. Veturiin ei tarvitse päästä" → "kyytiin matkaan")
+- Ed- ja Edo-vaunuihin käsin mallinnettu IC2-sisätila (`tools/juna/juna_sisa.py` → `juna/ed_sisa.glb`, `edo_sisa.glb`, `_m`, kävelyalueet `juna/sisa.json`):
+  eteiset ja portaat kummassakin päässä, alakerta, yläkerta, 2+2-pöytäosastot, WC:t, opasteet, näyttö, yhdyskäytävät. Edo: ohjaamon ovi lukossa.
+  Lähteet julkisia (Škoda/Transtech-mitat, Resiina-lehti), ei kuvia peliin. Tasot sovitettu Meshyn kuoreen (alakerta 0,85, eteinen 1,25, yläkerta 2,85 m).
+- `tools/juna/meshy_juna.py`: kuoreen aukot ovien ja yhdyskäytävien kohdalle, sisäänpäin katsovat ikkunakehykset pois, oikeat liukuovet, musta helma.
+- juna.js: ovet aukeavat laiturin puolelta asemalla → pelaaja kävelee sisään; kerrokset, portaat, vaunusta toiseen. Kyydissä juna kuljettaa pelaajaa,
+  kamera silmien korkeudelle; lähtevä juna jarruttaa kartan reunalle, odottaa 25 s ja palaa asemalle. Rajapinnat `window.__aboard`, `window.__walkBlock`,
+  `window.__rataZ`-ketju. Yhdistetty toisen istunnon tavarajunamuutoksiin (`estaaIC`, `T.s < -5`).
+- **src/js/121_jalan.js** (index.html koottu `kokoa.py`:llä): kyydissä vain vaunun seinät rajoittavat, SOLID-ulostyöntö pois. `src/html/99_loppu.html` yhdistetty
+  (tavarajuna- ja aika.js-rivit molemmat mukana). `tools/rata/patch_index.py` päivitetty samaan.
+- Testattu headless (askeleet käsin `__juna.tick` + `__game.step`): sisään ovesta, portaat, ala/yläkerta, yhdyskäytävä, matka kartan reunalle ja takaisin.
+  Ei vielä: istuutuminen penkille, kuulutukset, sisävalaistus yöllä (aika.js), muut vaunutyypit (ravintolavaunu).

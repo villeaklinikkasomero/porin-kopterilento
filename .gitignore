@@ -5,3 +5,5 @@ tex/*.zip
 Claude outputs/
 # puheäänimalli (63 Mt) vain tools/radio/speak.py:lle, ei peliin eikä GitHubiin
 radio/voice/
+# Meshyn lähdemallit (kymmeniä Mt) eivät kuulu repoon
+tools/juna/src/

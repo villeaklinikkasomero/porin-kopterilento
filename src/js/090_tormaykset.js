@@ -6,6 +6,7 @@
 //  - driving, the player's car cannot enter a parked car (carHit, called by carBlocked; the moving traffic was already there)
 //  - a walker (npcStep) waits for a moving car, walks round a standing one by its corners, walks round the player, and steps aside from the
 //    player's moving car and from the race cars (the car is not stopped by people)
+//  - trains (window.__juna, window.__tavara): every coach is a standing box, 3.1 m wide (21.11.2026)
 //  - the traffic brakes for people on its lane (cars.update asks walkers()), and a party waits at the kerb while a car is coming (coming)
 const SOLID = (() => {
   const DIM = [[2.1, 0.95], [2.3, 0.97], [2.1, 0.95], [2.45, 1.1], [2.45, 1.1], [2.45, 1.1], [2.45, 1.1]], PR = 0.3, NR = 0.35, out = [0, 0], ME = { x: 0, y: 0 };   // DIM: cars.js car0..car3 (mirrors left out)
@@ -20,6 +21,12 @@ const SOLID = (() => {
       else if (heli.visible && (foot || S.landed)) { const h = foot && WALK.veh ? WALK.veh : S, b = mk(h.x, h.y, h.yaw, 2.6, 1.0, 0, 0); b.me = !foot; dyn.push(b); }
       if (TAKE.left && !TAKE.left.lifted) { const l = TAKE.left, y = CARTY[l.type] || CARTY.hatch; dyn.push(mk(l.x, l.y, l.yaw, y.hl, y.hw, 0, 0)); }
       if (TAKE.heli && VEH === 'car') dyn.push(mk(TAKE.heli.x, TAKE.heli.y, TAKE.heli.yaw, 2.6, 1.0, 0, 0));
+      // 21.11.2026 (omistaja: junien läpi ei saa kävellä): IC-junan (juna/juna.js) ja tavarajunien (juna/tavarajuna.js) vaunut seisovina laatikoina (kind 0):
+      // kävelijä ei astu vaunuun, liikkuva juna työntää kävelijän sivuun (pushOut), eikä pelaajan auto aja vaunuun (carHit)
+      const juna = (cars, v) => { for (const c of cars) { const g = c.g; if (!g || !g.visible) continue; const x = g.position.x, y = -g.position.z;
+        if (Math.abs(x - S.x) > 190 || Math.abs(y - S.y) > 190) continue; const b = mk(x, y, 0, c.half - 0.35, 1.55, v, 0); b.sn = Math.sin(g.rotation.y); b.cs = -Math.cos(g.rotation.y); dyn.push(b); } };
+      if (window.__juna) juna(window.__juna.cars, window.__juna.T.v);
+      if (window.__tavara) { const TS = window.__tavara.S; for (const T of TS.junat) juna(T.cars, T.v); for (const P of Object.values(TS.pysak)) juna(P.cars, 0); }
       if (foot && !WALK.in) { ME.x = WALK.x; ME.y = WALK.y; wk.push(ME); dyn.push(mk(WALK.x, WALK.y, 0, 0.12, 0.12, 0, 3)); }
       if (window.__npc) { for (const p of window.__npc.parties) for (const c of p.m) if (c.g.visible) wk.push(c); for (const c of window.__npc.sitters || []) if (c.g.visible) wk.push(c); }
     } catch (e) {} };

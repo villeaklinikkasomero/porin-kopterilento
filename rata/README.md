@@ -14,10 +14,17 @@ Lisätty 20.–21.11.2026 (omistaja: "rakennetaan pelikentälle oikeille paikoil
 - `rata_data.js` (generoitu, älä muokkaa käsin): raiteet 2 m välein (x, y, pölkyn yläpinnan korkeus), vaihteet, laiturit, opastimet, bottijunan reitit, maastokorjaukset `ter`, ulkokehän poistettavat 18 m solut `osk`, `hideB`, `bdSkip`.
 - **index.html** (`tools/rata/patch_index.py`, voi ajaa uudelleen): `import RATA`, maastokorjaukset heti siltakumpujen jälkeen, ulkokehän 18 m ruudukosta solut pois rataverkon kohdalta, rautatiesiltojen vanhat kannet pois, LoD2-laatikot 2298 ja 2299 pois, `window.__game`iin `TZg` ja `outerMat` sekä `<script>`-rivit `rata/rata.js` ja `juna/juna.js`.
 
+- `tavara_reitit.js` (generoitu, `tools/rata/tavara_reitit.py`): tavarajunien reitit ratapihan läpi samassa muodossa kuin `RATA.r` (kiskon yläpinta 2 m välein).
+  SE = kaakko (Tampere/Harjavalta, kartan eteläreuna), NW = luode (Mäntyluoto, kartan länsireuna). Reitit: `SE-2-NW`, `NW-803-SE`, `SE-804`/`804-SE`,
+  `NW-804`/`804-NW`, `SE-808`/`808-SE`/`808-NW`, `SE-810`/`810-SE`. Pääteraiteella reitti päättyy 20 m ennen raiteen perää. `s` = raiteen osuus reitillä.
+  OSM:n `railway:track_ref` = Digitrafficin raideosuus (PRI_8xx): raide 1 = 801, raide 2 = 802. Reitit vastaavat Digitrafficin todellisia kulkuja
+  (esim. 3871 Harjavalta–Mäntyluoto: 838 > 837 > 820 > 821 > 802 > 823 > 826).
+
 ## Uudelleenrakennus (`tools/rata/`)
 ```
 python3 tools/rata/build_data.py   # osm_rail.json + terrain.js -> rata_data.json
 python3 tools/rata/mkjs.py         # -> rata/rata_data.js
+python3 tools/rata/tavara_reitit.py # -> rata/tavara_reitit.js (aja rata_data.js:n jälkeen)
 python3 tools/rata/tex.py          # sepelitekstuurit (proseduraaliset)
 ```
 `osm_rail.json` = Overpass-haku 20.11.2026 (railway=*, laiturit, asemarakennukset kartan alueelta) muunnettuna pelikoordinaateiksi.
