@@ -1,5 +1,6 @@
 // Tapsan korjaamo – peltihalli ja nosto-ovi (omistajan Meshy-mallit, 21.11.2026) paikassa [-598.9, -443.0], Äestäjänkadun eteläpuolen tontilla.
 // Ovi katsoo kadulle (suunta 8° pohjoisesta itään) ja rullautuu ylös, kun pelaaja tulee jalan tai autolla alle 10 m päähän; sulkeutuu yli 13 m päässä.
+// Nostin: aja auto pilarien väliin, nouse ulos ja paina U (tai ruudun painiketta) → auto nousee 1,75 m; U uudestaan laskee.
 // Halliin voi kävellä ja ajaa sisään: seinät ja suljettu ovi ovat kiinteitä (window.__furn → index.html SOLID), lattian korkeus tulee
 // funktiosta window.__korjaamoZ (index.html carGround kysyy sitä). Tarinan paikat LOC_KORJAAMO ja LOC_KORJAAMO_OVI: tarina/data/paikat.json.
 import * as THREE from '../three.module.min.js';
@@ -57,12 +58,23 @@ function sisustus(ox) {
   return g;
 }
 
+// Nostimen malli on yksi verkko: nostovarret ja kelkat (kolmiot korkeudella 0,28–1,05 m pilarien sisäpuolella) irrotetaan omaksi verkokseen, jotta ne voivat nousta.
+const NOSTIN = { x: (AUKKO.x0 + AUKKO.x1) / 2, z: -0.9, korkeus: 1.75, nopeus: 0.32, sade: 4.5 };
+function irrotaVarret(o) {
+  let m = null; o.traverse(q => { if (q.isMesh && !m) m = q; }); if (!m || !m.geometry.index) return null;
+  const g = m.geometry, p = g.attributes.position, ix = g.index.array, runko = [], varsi = [];
+  for (let i = 0; i < ix.length; i += 3) { let lo = 1e9, hi = -1e9, mx = 0; for (let k = 0; k < 3; k++) { const v = ix[i + k], y = p.getY(v); lo = Math.min(lo, y); hi = Math.max(hi, y); mx = Math.max(mx, Math.abs(p.getX(v))); }
+    (lo > 0.28 && hi < 1.05 && mx < 1.64 ? varsi : runko).push(ix[i], ix[i + 1], ix[i + 2]); }
+  if (varsi.length < 300) return null;
+  const gv = g.clone(); gv.setIndex(varsi); g.setIndex(runko); const v = new THREE.Mesh(gv, m.material); v.frustumCulled = false; m.parent.add(v); return v;
+}
+
 // Meshy-kalusteet hallin sisään: malli (korjaamo_mallit.js), paikka mallin akseleissa (x, z), kierto (rad; 0 = etupuoli ovelle päin), törmäyslaatikot [dx, dz, pitkin z-akselia?, puolipituus, puolileveys] kalusteen paikasta.
 // Uusi kaluste (esim. ajoneuvonostin): lisää malli tee_mallit.py:llä ja rivi tähän.
 const KALUSTEET = [
   { malli: 'hylly', x: 4.28, z: -2.6, ry: -Math.PI / 2, laatikot: [[0, 0, true, 1.7, 0.5]] },      // työkaluhylly sivuseinällä, etupuoli hallin keskelle
   // kaksipilarinostin ajoruudun keskellä (4,1 × 3,8 m, pilarit ±1,78 m): vain pilarit ovat kiinteitä, auto ajaa niiden välistä varsien yli
-  { malli: 'nostin', x: (AUKKO.x0 + AUKKO.x1) / 2, z: -0.9, ry: 0, laatikot: [[-1.78, 0, true, 0.3, 0.28], [1.78, 0, true, 0.3, 0.28]] },
+  { malli: 'nostin', x: NOSTIN.x, z: NOSTIN.z, ry: 0, laatikot: [[-1.78, 0, true, 0.3, 0.28], [1.78, 0, true, 0.3, 0.28]] },
 ];
 
 export async function luoKorjaamo(G) {
@@ -90,7 +102,9 @@ export async function luoKorjaamo(G) {
   const kt = new THREE.CanvasTexture(c); kt.colorSpace = THREE.SRGBColorSpace; kt.anisotropy = 4;
   const kyltti = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 0.86), new THREE.MeshLambertMaterial({ map: kt })); kyltti.position.set(ox, AUKKO.yla + 0.72, 6.66); ryhma.add(kyltti);
   ryhma.add(sisustus(ox));
-  for (const q of KALUSTEET) { if (!MALLIT[q.malli]) continue; const o = (await lataa(MALLIT[q.malli])).scene; o.position.set(q.x, LATTIA, q.z); o.rotation.y = q.ry || 0; if (q.s) o.scale.setScalar(q.s); ryhma.add(o); }
+  let varret = null;      // nostimen nousevat osat (nostovarret ja kelkat)
+  for (const q of KALUSTEET) { if (!MALLIT[q.malli]) continue; const o = (await lataa(MALLIT[q.malli])).scene; o.position.set(q.x, LATTIA, q.z); o.rotation.y = q.ry || 0; if (q.s) o.scale.setScalar(q.s); ryhma.add(o);
+    if (q.malli === 'nostin') varret = irrotaVarret(o); }
   eiNostoa(ryhma); G.scene.add(ryhma);
 
   // kiinteät seinät ja ovi (SOLID lukee window.__furn-listaa: { x, y, yaw, hl = puolipituus suuntaan yaw, hw, gone })
@@ -110,6 +124,22 @@ export async function luoKorjaamo(G) {
     if (Math.abs(lx - ox) <= w && lz > LAATTA.z1 && lz <= z1) return lattia + (rampinPaa - lattia) * (lz - LAATTA.z1) / RAMPPI;
     return null; };
 
+  // nostin: U-näppäin tai ruudun painike, kun pelaaja on jalan alle 4,5 m nostimesta. Pilarien väliin pysäköity auto nousee varsien mukana.
+  const N = { h: 0, tavoite: 0, auto: false }, nk = kartalle(NOSTIN.x, NOSTIN.z);
+  const jalan = () => { const Wk = window.__walk; return Wk && Wk.on && !Wk.in ? Wk : null; };
+  const autoNostimella = () => { const C = window.__car, cg = G.carG; if (!C || !cg || !cg.visible || document.body.classList.contains('car')) return false; const { lx, lz } = paikalliseen(C.x, C.y); return Math.abs(lx - NOSTIN.x) < 0.9 && Math.abs(lz - NOSTIN.z) < 1.5; };
+  const nappi = document.createElement('button'); nappi.id = 'korjaamo-nostin'; nappi.style.cssText = 'position:fixed;left:50%;bottom:22%;transform:translateX(-50%);z-index:60;display:none;padding:10px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:rgba(20,28,38,.82);color:#fff;font:600 15px system-ui,sans-serif;cursor:pointer';
+  document.body.appendChild(nappi);
+  const kayta = () => { const w = jalan(); if (!w || !varret || Math.hypot(w.x - nk.x, w.y - nk.y) > NOSTIN.sade) return; if (N.tavoite === 0) { N.auto = autoNostimella(); N.tavoite = NOSTIN.korkeus; } else N.tavoite = 0; };
+  nappi.addEventListener('click', e => { e.preventDefault(); kayta(); nappi.blur(); });
+  addEventListener('keydown', e => { if (e.code === 'KeyU' && !e.repeat && !e.ctrlKey && !e.metaKey && !(e.target && /INPUT|TEXTAREA/.test(e.target.tagName))) kayta(); });
+  const nostin = dt => { if (!varret) return; const w = jalan(), lahella = !!w && Math.hypot(w.x - nk.x, w.y - nk.y) < NOSTIN.sade;
+    nappi.style.display = lahella ? 'block' : 'none'; if (lahella) { const t = (N.tavoite > 0 ? 'Nostin alas' : autoNostimella() ? 'Nosta auto' : 'Nostin ylös') + ' (U)'; if (nappi.textContent !== t) nappi.textContent = t; }
+    if (N.auto && document.body.classList.contains('car')) { N.auto = false; N.tavoite = 0; }      // pelaaja nousi nostettuun autoon: peli laskee auton lattialle, varret tulevat perässä
+    if (N.h !== N.tavoite) N.h = N.tavoite > N.h ? Math.min(N.tavoite, N.h + NOSTIN.nopeus * dt) : Math.max(N.tavoite, N.h - NOSTIN.nopeus * dt);
+    varret.position.y = N.h;
+    if (N.auto && G.carG) { G.carG.position.y = lattia + N.h; G.carG.rotation.x = 0; G.carG.rotation.z = 0; if (N.h === 0 && N.tavoite === 0) N.auto = false; } };
+
   // oven liike
   let auki = 0, tavoite = 0, edell = performance.now();
   const ovella = kartalle(ox, SEINA_Z);
@@ -119,10 +149,11 @@ export async function luoKorjaamo(G) {
   const kierros = nyt => { const dt = Math.min(0.1, (nyt - edell) / 1000); edell = nyt; const p = pelaaja();
     if (p) { const d = Math.hypot(p.x - ovella.x, p.y - ovella.y); if (d < AUKI) tavoite = 1; else if (d > KIINNI) tavoite = 0; }
     if (auki !== tavoite) { auki = tavoite > auki ? Math.min(1, auki + dt / KESTO) : Math.max(0, auki - dt / KESTO); aseta(); }
+    nostin(dt);
     requestAnimationFrame(kierros); };
   requestAnimationFrame(kierros);
 
-  const api = { ryhma, ovi, seinat, oviLaatikko, lattia, get auki() { return auki; }, avaa(b) { tavoite = b ? 1 : 0; }, oviUlkona: OVI_ULKONA };
+  const api = { ryhma, ovi, seinat, oviLaatikko, lattia, nostin: N, nostinKayta: kayta, varret, get auki() { return auki; }, avaa(b) { tavoite = b ? 1 : 0; }, oviUlkona: OVI_ULKONA };
   window.__korjaamo = api; console.log('[korjaamo] Tapsan korjaamo paikallaan, lattia', lattia.toFixed(2), 'm'); return api;
 }
 

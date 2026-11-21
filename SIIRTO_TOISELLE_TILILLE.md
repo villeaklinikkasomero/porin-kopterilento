@@ -2311,6 +2311,15 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
 - Testattu headless-pelissä kolmesta kuvakulmasta, ei konsolivirheitä. **Ei testattu:** ajaminen pilarien välistä autolla. **Tiedossa:** nostin ei liiku eikä nosta autoa; pilarit osuvat lähes lattiaviivojen kohdalle.
 
 
+## 21.11.2026 – Korjaamo: nostin nostaa auton (omistaja: "pakettiautokin mahtuu, joten toiminto voidaan laittaa")
+- **Käyttö:** auto pilarien väliin, ulos autosta, **U** tai ruudun painike "Nosta auto" (jalan alle 4,5 m nostimesta) → varret ja auto nousevat 1,75 m, U uudestaan laskee.
+  Painike toimii myös kosketusnäytöllä. Nostettuun autoon noustessa auto palaa lattialle.
+- **Missä:** `korjaamo/korjaamo.js` (`NOSTIN`, `irrotaVarret`, nostimen tila `__korjaamo.nostin`); `index.html`: `window.__game`iin lisätty `carG` (yksi sana). U-näppäin oli vapaa.
+- **Testattu** headless-pelissä: painike näkyy, auto (koelaatikko – automalli ei lataudu headless-tilassa) ja varret nousevat 1,75 m ja palaavat, lattiaan ei jää varsia.
+  **Ei testattu:** oikea auto ja pakettiauto nostimella, nouseminen nostettuun autoon, kosketus. **Tiedossa:** auton alle ei voi kävellä (auton törmäyslaatikko ei nouse),
+  ei ääntä, pyörät eivät roiku, edellinen jätetty auto (`TAKE.left`) ei nouse – vain se, josta pelaaja juuri nousi.
+
+
 ## TILANNE 21.11.2026 (yhteenveto – lue tämä ensin, yksityiskohdat yllä olevissa 21.11. merkinnöissä)
 
 **Kaksi istuntoa on kirjoittanut samaan kansioon samana päivänä** (tämä: hahmot, hyppy, tarina, korjaamo; toinen: rata, asema, juna). Ennen kuin muokkaat
@@ -2319,21 +2328,21 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
 **index.html:n loppuun ladattavat moduulit (järjestys):** `vesi/vesi.js`, `tori/torikojut.js`, `ranta/ranta.js`, `lento/lento.js`, `laskuvarjo/hyppy.js`, `rata/rata.js`,
 `juna/juna.js`, `korjaamo/korjaamo.js`, `tarina/peli.js`. Jos jokin näistä riveistä puuttuu, se on jäänyt toisen istunnon tallennuksen alle.
 Muut tämän päivän koukut index.html:ssä: `window.__jump` (kolme riviä: `step`, `walkAction`, `updateCamera`), `carGround`issa `window.__korjaamoZ` ja `window.__rataZ`,
-`window.__game`ssa `walkOutAt, walkG, loadWalker, TZg`, `loadWalker`issa `window.__walker` ja `window.__walkerClips`.
+`window.__game`ssa `carG, walkOutAt, walkG, loadWalker, TZg`, `loadWalker`issa `window.__walker` ja `window.__walkerClips`.
 
 **Pelissä nyt (tehty 21.11.):**
 - Laskuvarjohyppy hyppykoneesta: Enter yli 250 m → Väli/Enter avaa → A/D ohjaa, S/Väli jarru. `laskuvarjo/README.md`.
 - Tarinatila Satamakaupunki päällä pysyvästi (X, P, 1–3), luku 1 = M01–M06. `tarina/README.md`.
 - Tarinahahmot maailmassa omilla malleillaan (10 mallia `npc_*.js`): Terttu torilla, Harju Etelärannan laiturilla, Tapsa tehtävien merkeillä, vartijat A/B/C (M04), kuriiri (M05).
   Puhuessa suu liikkuu ja hahmot elehtivät.
-- Tapsan korjaamo [-598.9, -443.0]: halli, liikkuva nosto-ovi, sisustus, Meshy-hylly ja -nostin. `korjaamo/README.md`.
+- Tapsan korjaamo [-598.9, -443.0]: halli, liikkuva nosto-ovi, sisustus, Meshy-hylly ja -nostin, joka nostaa auton (U). `korjaamo/README.md`.
 - Aiemmin samassa istunnossa (19.–20.11.): IK-kävely pelaajalle ja boteille, törmäykset (`SOLID`), istuvat botit ulkona, tanssi (B).
 
 **Kesken tai tekemättä (tämän istunnon asiat):**
 - Botit istumaan sisätiloihin (teatterin kahvila ja sali, jäähallin katsomo, kirkon penkit) – omistaja valitsi, ei tehty.
 - Käsikirjoitusartifaktia (https://claude.ai/artifact/YYef6VTmqtmEmZJPU8M6mN) ei voi lukea tältä tililtä. Luvut 2–5 (M07–M26) puuttuvat reposta → Harjun paikka ja rooli
   ovat arvioita, ja M01:n repliikit ja välianimaation kamera viittaavat yhä Isosiltaan, vaikka korjaamo siirtyi lounaaseen. Pyydä omistajaa liittämään käsikirjoitus.
-- Nostin ei nosta autoa (tarjottu). Rami ja kadun kävelijät eivät liikuta suutaan (tarjottu). Korjaamossa ei oikeaa valaistusta eikä oven ääntä.
+- Rami ja kadun kävelijät eivät liikuta suutaan (tarjottu). Korjaamossa ei oikeaa valaistusta eikä oven ääntä.
 - Puuttuvat tarinamekaniikat: hiiviskely, vesiletku, drooni, Varjo-mittarin jahtaus (`tarvittavat_ominaisuudet/README.md`).
 
 **Kaikki 21.11. työ on testattu vain headless** (pilven Playwright + swiftshader, yksittäiset ruudut). Omistaja ei ole vielä vahvistanut pelaamalla: hypyn ohjaus ja loppuveto,

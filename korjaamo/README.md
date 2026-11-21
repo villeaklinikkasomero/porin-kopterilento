@@ -26,4 +26,9 @@ Tiedossa: valot eivät oikeasti valaise (hohtavat vain), ovella ei ole ääntä,
 2. Kopioi malli kansioon `hahmot/konseptit/3d_lahde/korjaamo/` ja aja `tee_mallit.py` lisäten rivi `nostin=nostin_meshy.glb:1024:0:0.5`.
 3. Lisää rivi `korjaamo.js`:n taulukkoon `KALUSTEET`: malli, paikka (x, z mallin akseleissa: ovi on +z-päädyssä, hallin keski 0, 0), kierto ja törmäyslaatikot (`laatikot: [[dx, dz, pitkin z:aa?, puolipituus, puolileveys], …]`).
 
-Nostin ("Weathered Blue Car Lift", 4,1 × 3,8 × 3,4 m) on ajoruudun keskellä; vain pilarit ovat kiinteitä ja auto ajaa niiden välistä. Nostin ei vielä nosta.
+Nostin ("Weathered Blue Car Lift", 4,1 × 3,8 × 3,4 m) on ajoruudun keskellä; vain pilarit ovat kiinteitä ja auto ajaa niiden välistä.
+
+**Nostin nostaa (21.11.2026):** aja auto pilarien väliin, nouse ulos ja paina **U** tai ruudun painiketta "Nosta auto" (näkyy jalan alle 4,5 m nostimesta) → varret ja auto
+nousevat 1,75 m (0,32 m/s); U uudestaan laskee. Ilman autoa varret nousevat tyhjinä. Jos nouset nostettuun autoon, auto palaa lattialle. Nostovarret irrotetaan mallista
+koodissa (`irrotaVarret`: kolmiot korkeudella 0,28–1,05 m pilarien sisäpuolella) – uusi nostinmalli → tarkista rajat. Tarvitsee `window.__game.carG` (index.html).
+Konsolista: `__korjaamo.nostinKayta()`, tila `__korjaamo.nostin` (`h`, `tavoite`, `auto`).
