@@ -7,3 +7,6 @@ Claude outputs/
 radio/voice/
 # Meshyn lähdemallit (kymmeniä Mt) eivät kuulu repoon
 tools/juna/src/
+# maan pinta (tools/maa): testikuvat ja sävykorjatut ilmakuvat tehdään koneella, ei repoon ennen omistajan hyväksyntää
+tools/maa/kuvat/
+maa/ot_s/

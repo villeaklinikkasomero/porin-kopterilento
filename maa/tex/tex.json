@@ -1,0 +1,61 @@
+{
+ "versio": 1,
+ "koot": {
+  "": 1024,
+  "_m": 512
+ },
+ "kanavat": {
+  "a": "albedo sRGB",
+  "n": "normaali GL",
+  "orm": "R AO, G karheus, B korkeus"
+ },
+ "luokat": {
+  "ajorata": {
+   "lahde": "ambientCG Asphalt025C (CC0, ambientcg.com)",
+   "toisto_m": 3.0,
+   "kirkkaus": 0.3
+  },
+  "pysakointi": {
+   "lahde": "ambientCG Asphalt025C (CC0, ambientcg.com)",
+   "toisto_m": 3.0,
+   "kirkkaus": 0.33
+  },
+  "jalkakaytava": {
+   "lahde": "ambientCG Concrete034 (CC0, ambientcg.com)",
+   "toisto_m": 2.5,
+   "kirkkaus": 0.48
+  },
+  "betoni": {
+   "lahde": "ambientCG Concrete031 (CC0, ambientcg.com)",
+   "toisto_m": 2.5,
+   "kirkkaus": 0.5
+  },
+  "kiveys": {
+   "lahde": "ambientCG PavingStones070 (CC0, ambientcg.com)",
+   "toisto_m": 2.0,
+   "kirkkaus": 0.42
+  },
+  "laatoitus": {
+   "lahde": "ambientCG Tiles074 (CC0, ambientcg.com)",
+   "toisto_m": 2.0,
+   "kirkkaus": 0.5
+  },
+  "nurmi": {
+   "lahde": "ambientCG Grass004 (CC0, ambientcg.com)",
+   "toisto_m": 2.0,
+   "kirkkaus": 0.3
+  },
+  "multa": {
+   "lahde": "ambientCG Ground054 (CC0, ambientcg.com)",
+   "toisto_m": 2.5,
+   "kirkkaus": 0.25
+  }
+ },
+ "puuttuu": [
+  "sora (Gravel022)",
+  "hiekka (Ground033)",
+  "metsa (Ground026)",
+  "niitty (Grass001)",
+  "puu (Planks021)"
+ ]
+}

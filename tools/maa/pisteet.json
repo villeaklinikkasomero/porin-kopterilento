@@ -1,0 +1,242 @@
+[
+ {
+  "id": "k01",
+  "nimi": "Kauppatori",
+  "alue": "keskusta",
+  "x": 64,
+  "y": 65,
+  "katse": 120
+ },
+ {
+  "id": "k02",
+  "nimi": "Yrjönkatu kävelykatu",
+  "alue": "keskusta",
+  "x": 83.5,
+  "y": -65.4,
+  "katse": 193.0
+ },
+ {
+  "id": "k03",
+  "nimi": "Antinkatu",
+  "alue": "keskusta",
+  "x": -65.7,
+  "y": -144.2,
+  "katse": 12.8
+ },
+ {
+  "id": "k04",
+  "nimi": "Eteläranta",
+  "alue": "keskusta",
+  "x": -55.7,
+  "y": 484.2,
+  "katse": 287.0
+ },
+ {
+  "id": "k05",
+  "nimi": "Itäpuisto",
+  "alue": "keskusta",
+  "x": 55.5,
+  "y": -69.9,
+  "katse": 282.8
+ },
+ {
+  "id": "k06",
+  "nimi": "Länsipuisto",
+  "alue": "keskusta",
+  "x": -414,
+  "y": 31,
+  "katse": 80
+ },
+ {
+  "id": "k07",
+  "nimi": "Kauppahallin edusta",
+  "alue": "keskusta",
+  "x": 40,
+  "y": 20,
+  "katse": 200
+ },
+ {
+  "id": "k08",
+  "nimi": "Isosilta (sillan pää)",
+  "alue": "keskusta",
+  "x": 229,
+  "y": 520,
+  "katse": 10
+ },
+ {
+  "id": "k09",
+  "nimi": "Satakunnankatu",
+  "alue": "keskusta",
+  "x": -182.4,
+  "y": -961.8,
+  "katse": 275.3
+ },
+ {
+  "id": "k10",
+  "nimi": "Itsenäisyydenkatu",
+  "alue": "keskusta",
+  "x": 97.8,
+  "y": -489.8,
+  "katse": 102.8
+ },
+ {
+  "id": "k11",
+  "nimi": "Valtakatu",
+  "alue": "keskusta",
+  "x": -104.3,
+  "y": 251.9,
+  "katse": 103.3
+ },
+ {
+  "id": "k12",
+  "nimi": "Pysäköintialue (Raatihuoneen taus)",
+  "alue": "keskusta",
+  "x": -60,
+  "y": 420,
+  "katse": 270
+ },
+ {
+  "id": "k13",
+  "nimi": "Porin teatterin edusta",
+  "alue": "keskusta",
+  "x": -201,
+  "y": 360,
+  "katse": 0
+ },
+ {
+  "id": "k14",
+  "nimi": "Raatihuoneenpuisto",
+  "alue": "keskusta",
+  "x": -137,
+  "y": 309,
+  "katse": 90
+ },
+ {
+  "id": "k15",
+  "nimi": "Kirjurinluodon silta (Taavi-silta, etelä)",
+  "alue": "keskusta",
+  "x": -149,
+  "y": 515,
+  "katse": 350
+ },
+ {
+  "id": "k16",
+  "nimi": "Hallituskatu",
+  "alue": "keskusta",
+  "x": -226.4,
+  "y": 400.2,
+  "katse": 283.3
+ },
+ {
+  "id": "k17",
+  "nimi": "Isolinnankatu",
+  "alue": "keskusta",
+  "x": 174.1,
+  "y": -98.7,
+  "katse": 192.5
+ },
+ {
+  "id": "k18",
+  "nimi": "Pohjoisranta",
+  "alue": "keskusta",
+  "x": 105.9,
+  "y": 725.1,
+  "katse": 103.2
+ },
+ {
+  "id": "k19",
+  "nimi": "Keskusaukio",
+  "alue": "keskusta",
+  "x": 29,
+  "y": -491,
+  "katse": 0
+ },
+ {
+  "id": "k20",
+  "nimi": "Kirkkopuisto",
+  "alue": "keskusta",
+  "x": 296,
+  "y": 340,
+  "katse": 0
+ },
+ {
+  "id": "u01",
+  "nimi": "Asema-aukio",
+  "alue": "asema",
+  "x": -443,
+  "y": -915,
+  "katse": 180
+ },
+ {
+  "id": "u02",
+  "nimi": "Porttaali",
+  "alue": "asema",
+  "x": -515.6,
+  "y": -1071.1,
+  "katse": 168.0
+ },
+ {
+  "id": "u03",
+  "nimi": "Tiilimäki",
+  "alue": "ulko",
+  "x": -743,
+  "y": -1204,
+  "katse": 90
+ },
+ {
+  "id": "u04",
+  "nimi": "Isomäentie",
+  "alue": "ulko",
+  "x": -1899.8,
+  "y": -1171.7,
+  "katse": 90.4
+ },
+ {
+  "id": "u05",
+  "nimi": "Kirjurinluoto",
+  "alue": "ulko",
+  "x": -420,
+  "y": 1000,
+  "katse": 270
+ },
+ {
+  "id": "u06",
+  "nimi": "Tapsan korjaamo, piha",
+  "alue": "ulko",
+  "x": -596.4,
+  "y": -420,
+  "katse": 180
+ },
+ {
+  "id": "u07",
+  "nimi": "Lentoasemantie",
+  "alue": "ulko",
+  "x": -111.6,
+  "y": -1803.0,
+  "katse": 317.3
+ },
+ {
+  "id": "u08",
+  "nimi": "Mäntyluodontie",
+  "alue": "ulko",
+  "x": -2381.6,
+  "y": -44.9,
+  "katse": 331.2
+ },
+ {
+  "id": "u09",
+  "nimi": "Koillisväylä",
+  "alue": "ulko",
+  "x": 2355.8,
+  "y": 164.1,
+  "katse": 188.0
+ },
+ {
+  "id": "u10",
+  "nimi": "Linnansilta (eteläpää)",
+  "alue": "ulko",
+  "x": 395,
+  "y": 520,
+  "katse": 0
+ }
+]

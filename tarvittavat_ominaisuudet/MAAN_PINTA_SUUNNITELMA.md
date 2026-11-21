@@ -140,3 +140,20 @@ ja suorituskyvyn säätö isommalla alueella). Vaiheet 0–2 tuovat suurimman mu
    lisäksi asema-aukio, Porttaali, Tiilimäki, Isomäentie, Kirjurinluoto, Tapsan korjaamo, lentoaseman tie, Mäntyluodontie, Koillisväylä, Linnansilta.
 3. Vaihe 1 (pikakorjaus) → näytä kuvat omistajalle → vaihe 2.
 4. Muista: muut chatit muokkaavat samoja paloja (030, 031, 033, 060, 082, 090, 0301) – lue laitteelta juuri ennen muokkausta ja kirjoita heti.
+
+## 8. Tila 21.11.2026 ilta: valmistelu ja työkalut tehty (vaiheet 0–2 data)
+Kaikki työkalut ovat `tools/maa/` (ohje `tools/maa/README.md`). Peliin ei ole vielä kytketty mitään.
+- **OSM-data koko pelialueelta**: `tools/maa/osm_maa.json` (10 326 viivaa/aluetta, 43 multipolygonia, 10 220 pistettä; haettu sovelluksen selaimella
+  api.openstreetmap.org:sta 90 ruutuna). Sisältää tiet pintoineen, landuse/natural/leisure, pysäköinnit, aidat, pensasaidat, penkit, lamput, pysäkit, puut ym.
+- **Maankäyttökartta valmis**: `maa/peite/peite_I_J.png` (132 laattaa à 512 m = samat kuin `ot/ot_I_J.jpg`, 0,5 m, 16 luokkaa, 3,9 Mt) + `maa/peite/peite.json`; yleiskuva `tools/maa/out/yleis.png`.
+  Osuudet: jalkakäytävä/piha 33 %, nurmi 18 %, metsä 14 %, niitty 9 %, rakennus 7 %, ajorata 7 %, vesi 4 %, ei tietoa 4 % (vain alueen kulmat, joissa ei ilmakuvaa).
+  Ydinkeskustassa roads.js voittaa OSM:n, joten rajat osuvat pelin reunakiviin.
+- **Esineet**: `maa/esineet.json` – 38 pistetyyppiä (mm. 1145 katulamppua, 349 pysäkkiä, 1424 suojatietä, 11 708 sadevesikaivoa ja 4702 kaivonkantta
+  säännöllä) ja viivat (aidat 40 km, pensasaidat 11,6 km, ojat, muurit). OSM:ssä vähän penkkejä (35) ja roska-astioita (19) → sääntösijoitus pelissä.
+- **Tekstuurit**: `maa/tex/` 8 luokkaa valmiina (ajorata, pysäköinti, jalkakäytävä, betoni, kiveys, laatoitus, nurmi, multa), 1024 + 512 px (_m),
+  ORM = AO/karheus/korkeus. **Puuttuu 5**: sora, hiekka, metsänpohja, niitty, puu → ambientCG-zipit `tex/`-kansioon (ks. README) – vaatii latausluvan.
+- **Sävykorjaus**: `tools/maa/orto_savy.py` tekee `maa/ot_s/` (ei repoon ennen hyväksyntää); vertailu `python tools/maa/orto_savy.py --vertailu 2 3`.
+- **Testikuvat (vaihe 0)**: `tools/maa/pisteet.json` (30 pistettä) + `node tools/maa/kuvat.mjs <tunniste> [url]`; "ennen"-sarja otettu:
+  `tools/maa/kuvat/ennen/` (ei repoon).
+Seuraavaksi (toinen tili): vaihe 1 (sävy käyttöön omistajan luvalla + Lambert-valaistus) ja vaihe 2: `maa/maa.js`-moduuli, joka lataa
+`peite_i_j.png` + `maa/tex/*` ja korvaa 0–150 m maan materiaalin (031 grassify / 033 laatat) luokkapohjaisella PBR-sekoituksella.

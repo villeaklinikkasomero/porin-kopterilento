@@ -1,0 +1,185 @@
+{
+ "versio": 1,
+ "tehty": "2026-11-21",
+ "laatta_m": 512.0,
+ "px_per_m": 2,
+ "koko_px": 1024,
+ "x0": -1280.0,
+ "y0": -1280.0,
+ "i": [
+  -3,
+  7
+ ],
+ "j": [
+  -5,
+  6
+ ],
+ "huom": "sama ruudukko kuin ot/ot_i_j.jpg (033_ilmakuva_tarkka.js HR)",
+ "tiedosto": "peite_{i}_{j}.png",
+ "rivi0": "pohjoinen",
+ "luokat": [
+  {
+   "k": 0,
+   "nimi": "ilmakuva",
+   "vari": [
+    255,
+    0,
+    255
+   ]
+  },
+  {
+   "k": 1,
+   "nimi": "ajorata",
+   "vari": [
+    60,
+    60,
+    64
+   ]
+  },
+  {
+   "k": 2,
+   "nimi": "jalkakaytava",
+   "vari": [
+    150,
+    150,
+    155
+   ]
+  },
+  {
+   "k": 3,
+   "nimi": "kiveys",
+   "vari": [
+    175,
+    120,
+    95
+   ]
+  },
+  {
+   "k": 4,
+   "nimi": "pysakointi",
+   "vari": [
+    95,
+    95,
+    120
+   ]
+  },
+  {
+   "k": 5,
+   "nimi": "nurmi",
+   "vari": [
+    90,
+    170,
+    70
+   ]
+  },
+  {
+   "k": 6,
+   "nimi": "sora",
+   "vari": [
+    200,
+    180,
+    140
+   ]
+  },
+  {
+   "k": 7,
+   "nimi": "hiekka",
+   "vari": [
+    235,
+    215,
+    160
+   ]
+  },
+  {
+   "k": 8,
+   "nimi": "multa",
+   "vari": [
+    110,
+    80,
+    50
+   ]
+  },
+  {
+   "k": 9,
+   "nimi": "metsa",
+   "vari": [
+    40,
+    95,
+    45
+   ]
+  },
+  {
+   "k": 10,
+   "nimi": "niitty",
+   "vari": [
+    160,
+    190,
+    90
+   ]
+  },
+  {
+   "k": 11,
+   "nimi": "rakennus",
+   "vari": [
+    200,
+    60,
+    60
+   ]
+  },
+  {
+   "k": 12,
+   "nimi": "vesi",
+   "vari": [
+    60,
+    110,
+    200
+   ]
+  },
+  {
+   "k": 13,
+   "nimi": "rata",
+   "vari": [
+    120,
+    100,
+    90
+   ]
+  },
+  {
+   "k": 14,
+   "nimi": "urheilu",
+   "vari": [
+    200,
+    90,
+    40
+   ]
+  },
+  {
+   "k": 15,
+   "nimi": "puu",
+   "vari": [
+    150,
+    110,
+    70
+   ]
+  }
+ ],
+ "osuus": {
+  "ilmakuva": 0.0407,
+  "ajorata": 0.0705,
+  "jalkakaytava": 0.3266,
+  "kiveys": 0.0012,
+  "pysakointi": 0.0128,
+  "nurmi": 0.1803,
+  "sora": 0.0183,
+  "hiekka": 0.0025,
+  "multa": 0.0031,
+  "metsa": 0.136,
+  "niitty": 0.093,
+  "rakennus": 0.0723,
+  "vesi": 0.0365,
+  "rata": 0.0037,
+  "urheilu": 0.0025,
+  "puu": 0.0
+ },
+ "lahteet": "OSM (© OpenStreetMap contributors, ODbL) tools/maa/osm_maa.json; roads.js; river.js; city.js; ot/ ilmakuva; tools/maa/korjaukset.json"
+}

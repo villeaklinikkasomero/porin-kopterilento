@@ -2630,3 +2630,15 @@ aikataulujen kellonaikoja pelin kellosta; kaikki valo lämpimän keltaista **pai
 - Omistajan päätökset: **kesä**, **keskusta ensin**, **esineet Meshyllä – Claude tekee ne itse omistajan selaimessa** (omistaja kirjautuu Meshyyn kerran;
   ennen erää kysytään mallimäärä/krediitit ja latauslupa), **avoin data (Pori, MML) saa käyttää, jos löytyy**. Tehdään toisella tilillä.
 - Ei vielä aloitettu (vaihe 0 = testikuvat keskustan 20 pisteestä).
+
+## 21.11.2026 ilta – Maan pinta: valmistelevat työt ja työkalut (omistaja: "tee valmistelevat työt nyt ja rakenna työkalut valmiiksi")
+- Uusi kansio `tools/maa/` (README siellä): `maapeite.py`, `esineet.py`, `tekstuurit.py`, `orto_savy.py`, `pisteet.py`, `kuvat.mjs`, `yhteiset.py`,
+  `korjaukset.json` (tyhjä), `osm_maa.json` (OSM-raakadata koko pelialueelta, ODbL).
+- Tuotettu data: `maa/peite/` (132 maapeitelaattaa 512 m, samat indeksit kuin ot/ + peite.json), `maa/esineet.json`, `maa/tex/` (8 materiaalia). Ei vielä kytketty peliin.
+- OSM-haku: pilvi ei pääse Overpassiin → sovelluksen selain, `api.openstreetmap.org/api/0.6/map.json?bbox=…` 90 ruutua (0,012° × 0,006°),
+  tiivistys selaimessa (tagisuodatus + pelin metrit), siirto gzip+base64 200 000 merkin paloina javascript_tool-tuloksina (laitesilta katkaisee
+  ~290 000 merkin kohdalla; isot tulokset tallentuvat /tmp/claude-tool-results/ -tiedostoiksi, joista palat kootaan).
+- city.js-rakennusten `p` on desimetreinä (/10), roads.js-kolmiot Int16/10, river.js `water` = kolmiot metreinä.
+- `.gitignore`: `tools/maa/kuvat/`, `maa/ot_s/`.
+- Puuttuu: 5 tekstuuria (sora, hiekka, metsänpohja, niitty, puu – ambientCG 1K-JPG, lataus vaatii omistajan luvan), pelin `maa/maa.js`-moduuli (vaihe 2).
+  Tila ja seuraavat askeleet: `tarvittavat_ominaisuudet/MAAN_PINTA_SUUNNITELMA.md` osa 8.
