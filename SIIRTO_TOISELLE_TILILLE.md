@@ -2278,3 +2278,17 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
 - **Sisustus ja piha (`korjaamo.js` `sisustus()`):** loisteputket, keltamusta ajoruutu ja öljyläikät lattiassa, työpöytä ruuvipenkkeineen ja työkalutauluineen, punainen
   työkaluvaunu, hylly purkkeineen, rengaspinot, tynnyrit; ulkona renkaat, lava ja valo kyltin päällä. Isoimmille viisi törmäyslaatikkoa lisää (`__furn`).
 - **Testattu** headless-pelissä kuudesta kuvakulmasta (ulkoa kolmesta suunnasta, ovi auki, sisältä molempiin suuntiin), ei konsolivirheitä. **Ei testattu** käsin pelaamalla eikä puhelimella.
+
+
+## 21.11.2026 – Korjaamo: kuluneet lattiaviivat ja Meshy-työkaluhylly (omistaja: "pitäisikö nuo olla hieman kuluneet viivat. voin tehdä meshyssä työkaluhyllyn ja ajoneuvonosturin")
+- **Viivat:** ajoruudun maali on lohkeillut (eniten renkaiden kohdalta ja oven päästä), naarmuja, koko pinta himmeämpi (`korjaamo.js` `sisustus()`, canvas, kiinteä siemen).
+- **Hylly:** omistajan Meshy-malli "Workshop Supply Shelf" (3,3 × 2,2 × 0,9 m) sivuseinälle koodilla tehdyn hyllyn tilalle. Uusi taulukko `KALUSTEET` (malli, paikka, kierto, törmäyslaatikko)
+  ja `tee_mallit.py` ottaa nyt mielivaltaisen määrän malleja (`nimi=tiedosto:tekstuuri:alareunan tummennus:valon voimakkuus`). Ohje nostimen lisäämiseen `korjaamo/README.md`:ssä.
+- `korjaamo_mallit.js` 5,6 Mt. Lähde `hahmot/konseptit/3d_lahde/korjaamo/hylly_meshy.glb`.
+- Testattu headless-pelissä (ovelta, sisältä kahteen suuntaan), ei konsolivirheitä. **Ajoneuvonostin puuttuu vielä** – odottaa omistajan mallia.
+
+
+## 21.11.2026 – Korjaamo: ajoneuvonostin (omistajan Meshy-malli "Weathered Blue Car Lift")
+- Kaksipilarinostin (4,1 × 3,8 × 3,4 m) ajoruudun keskelle, `korjaamo.js` `KALUSTEET` (nyt `laatikot`-lista per kaluste: nostimella vain pilarit kiinteitä, auto ajaa välistä varsien yli).
+- `korjaamo_mallit.js` 7,2 Mt (halli, ovi, hylly, nostin). Lähde `hahmot/konseptit/3d_lahde/korjaamo/nostin_meshy.glb`.
+- Testattu headless-pelissä kolmesta kuvakulmasta, ei konsolivirheitä. **Ei testattu:** ajaminen pilarien välistä autolla. **Tiedossa:** nostin ei liiku eikä nosta autoa; pilarit osuvat lähes lattiaviivojen kohdalle.

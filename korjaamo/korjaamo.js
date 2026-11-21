@@ -19,7 +19,7 @@ const lataa = b64 => { const bin = atob(b64), buf = new Uint8Array(bin.length); 
 const eiNostoa = o => o.traverse(q => { q.userData.noT = true; if (q.isMesh) { q.castShadow = q.receiveShadow = false; for (const m of [].concat(q.material)) m.userData.noT = true; } });
 
 // Sisustus ja pihan tavarat yksinkertaisista kappaleista (mallin akselit, lattia y = LATTIA): loisteputket, lattiamaalaus ja öljyläikät,
-// työpöytä ja työkalutaulu, punainen työkaluvaunu, hylly purkkeineen, rengaspinot, tynnyrit, lava ja ulkovalo.
+// työpöytä ja työkalutaulu, punainen työkaluvaunu, rengaspinot, tynnyrit, lava ja ulkovalo.
 function sisustus(ox) {
   const g = new THREE.Group(), y0 = LATTIA + 0.005, M = (c, o = {}) => new THREE.MeshLambertMaterial({ color: c, ...o });
   const lisaa = (geo, mat, x, y, z, ry = 0) => { const m = new THREE.Mesh(geo, mat); m.position.set(x, y, z); m.rotation.y = ry; g.add(m); return m; };
@@ -27,7 +27,13 @@ function sisustus(ox) {
   const cyl = (r, h, mat, x, y, z) => lisaa(new THREE.CylinderGeometry(r, r, h, 20), mat, x, y + h / 2, z);
   // lattia: ajoruudun keltamusta raidoitus ja öljyläikät
   const c = document.createElement('canvas'); c.width = 512; c.height = 1024; const k = c.getContext('2d'); k.clearRect(0, 0, 512, 1024);
-  k.lineWidth = 22; k.strokeStyle = '#d8b21c'; k.strokeRect(40, 40, 432, 944); k.save(); k.beginPath(); k.rect(29, 29, 454, 22); k.rect(29, 973, 454, 22); k.clip(); k.strokeStyle = '#1c1c1c'; k.lineWidth = 14; for (let i = -40; i < 560; i += 44) { k.beginPath(); k.moveTo(i, 0); k.lineTo(i + 60, 1024); k.stroke(); } k.restore();
+  k.lineWidth = 22; k.strokeStyle = '#c9a427'; k.strokeRect(40, 40, 432, 944); k.save(); k.beginPath(); k.rect(29, 29, 454, 22); k.rect(29, 973, 454, 22); k.clip(); k.strokeStyle = '#1c1c1c'; k.lineWidth = 14; for (let i = -40; i < 560; i += 44) { k.beginPath(); k.moveTo(i, 0); k.lineTo(i + 60, 1024); k.stroke(); } k.restore();
+  // kuluma (omistaja 21.11.2026: "pitäisikö olla hieman kuluneet viivat"): maali lohkeillut, renkaiden kohdalta ja oven päästä eniten, koko pinta himmennyt
+  { let sd = 7; const R = () => (sd = (sd * 16807) % 2147483647) / 2147483647; k.globalCompositeOperation = 'destination-out';
+    for (let i = 0; i < 5200; i++) { const x = R() * 512, y = R() * 1024, ura = Math.exp(-(((x - 150) / 46) ** 2)) + Math.exp(-(((x - 362) / 46) ** 2)), ovi = y < 150 ? 1 - y / 150 : 0, p = 0.2 + 0.55 * ura + 0.5 * ovi;
+      if (R() > p) continue; k.globalAlpha = 0.25 + R() * 0.75; const w = 2 + R() * R() * 26, h = 2 + R() * R() * (ura > 0.3 ? 46 : 16); k.beginPath(); k.ellipse(x, y, w / 2, h / 2, R() * 0.6 - 0.3, 0, 6.2832); k.fill(); }
+    for (let i = 0; i < 90; i++) { k.globalAlpha = 0.15 + R() * 0.35; k.lineWidth = 1 + R() * 2.5; const x = R() * 512, y = R() * 1024, a = R() * 6.2832, l = 15 + R() * 70; k.beginPath(); k.moveTo(x, y); k.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l); k.stroke(); }
+    k.globalAlpha = 0.22; k.fillRect(0, 0, 512, 1024); k.globalAlpha = 1; k.globalCompositeOperation = 'source-over'; }
   for (const [x, y, r] of [[250, 420, 90], [300, 520, 55], [200, 700, 40], [330, 250, 30]]) { const gr = k.createRadialGradient(x, y, 2, x, y, r); gr.addColorStop(0, 'rgba(20,18,16,0.75)'); gr.addColorStop(1, 'rgba(20,18,16,0)'); k.fillStyle = gr; k.fillRect(x - r, y - r, 2 * r, 2 * r); }
   const lt = new THREE.CanvasTexture(c); lt.colorSpace = THREE.SRGBColorSpace; lt.anisotropy = 4;
   const lm = lisaa(new THREE.PlaneGeometry(4.4, 8.8), new THREE.MeshLambertMaterial({ map: lt, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 }), ox, y0 + 0.01, 0.6); lm.rotation.x = -Math.PI / 2;
@@ -42,9 +48,6 @@ function sisustus(ox) {
   box(3.0, 1.1, 0.04, M(0x8b7355), -2.4, y0 + 1.25, -5.88); const tv = [0xb03020, 0x303438, 0xd0a020, 0x303438, 0x2f5f9a, 0x303438, 0xb03020]; tv.forEach((v, i) => box(0.07, 0.3 + (i % 3) * 0.14, 0.03, M(v), -3.6 + i * 0.4, y0 + 1.5 + (i % 2) * 0.2, -5.84));
   // punainen työkaluvaunu laatikoineen
   box(0.95, 0.95, 0.5, M(0xb3261e), 0.3, y0 + 0.1, -5.5); for (let i = 0; i < 5; i++) box(0.85, 0.02, 0.02, M(0xd8d8d8), 0.3, y0 + 0.25 + i * 0.17, -5.24); for (const x of [-0.1, 0.7]) cyl(0.05, 0.1, tumma, x, y0, -5.5);
-  // hylly sivuseinällä: purkit ja laatikot
-  for (const z of [-3.9, -1.3]) for (const x of [4.05, 4.55]) box(0.05, 2.1, 0.05, teras, x, y0, z); for (let i = 0; i < 4; i++) box(0.55, 0.03, 2.65, teras, 4.3, y0 + 0.15 + i * 0.62, -2.6);
-  const tav = [0x2f5f9a, 0xc8a040, 0x8a8f94, 0xb03020, 0x3c7a4a, 0xd8d0c0]; for (let i = 0; i < 4; i++) for (let jj = 0; jj < 5; jj++) { const h = 0.18 + ((i * 7 + jj * 3) % 4) * 0.07, v = tav[(i * 5 + jj * 2) % 6]; if ((i + jj) % 2) cyl(0.11, h, M(v), 4.3, y0 + 0.18 + i * 0.62, -3.65 + jj * 0.52); else box(0.34, h, 0.36, M(v), 4.3, y0 + 0.18 + i * 0.62, -3.65 + jj * 0.52); }
   // rengaspinot, tynnyrit, lava
   const kumi = M(0x1b1c1e), vanne = M(0x8d9196); const rengas = (x, z, n, y = y0) => { for (let i = 0; i < n; i++) { const t = lisaa(new THREE.TorusGeometry(0.24, 0.1, 10, 22), kumi, x + (i % 2) * 0.03, y + 0.1 + i * 0.2, z + (i % 3) * 0.02); t.rotation.x = Math.PI / 2; cyl(0.15, 0.12, vanne, x + (i % 2) * 0.03, y + 0.04 + i * 0.2, z + (i % 3) * 0.02); } };
   rengas(3.95, -5.35, 5); rengas(3.2, -5.4, 3); rengas(3.4, 7.1, 3, 0.1); rengas(4.1, 7.0, 2, 0.1);
@@ -53,6 +56,14 @@ function sisustus(ox) {
   for (let i = 0; i < 2; i++) { box(1.2, 0.03, 0.8, puu, -3.95, 0.1 + i * 0.15 + 0.11, 7.0); for (const dx of [-0.5, 0, 0.5]) box(0.1, 0.1, 0.8, puu, -3.95 + dx, 0.1 + i * 0.15, 7.0); }
   return g;
 }
+
+// Meshy-kalusteet hallin sisään: malli (korjaamo_mallit.js), paikka mallin akseleissa (x, z), kierto (rad; 0 = etupuoli ovelle päin), törmäyslaatikot [dx, dz, pitkin z-akselia?, puolipituus, puolileveys] kalusteen paikasta.
+// Uusi kaluste (esim. ajoneuvonostin): lisää malli tee_mallit.py:llä ja rivi tähän.
+const KALUSTEET = [
+  { malli: 'hylly', x: 4.28, z: -2.6, ry: -Math.PI / 2, laatikot: [[0, 0, true, 1.7, 0.5]] },      // työkaluhylly sivuseinällä, etupuoli hallin keskelle
+  // kaksipilarinostin ajoruudun keskellä (4,1 × 3,8 m, pilarit ±1,78 m): vain pilarit ovat kiinteitä, auto ajaa niiden välistä varsien yli
+  { malli: 'nostin', x: (AUKKO.x0 + AUKKO.x1) / 2, z: -0.9, ry: 0, laatikot: [[-1.78, 0, true, 0.3, 0.28], [1.78, 0, true, 0.3, 0.28]] },
+];
 
 export async function luoKorjaamo(G) {
   const maa = (x, y) => { const z = G.carGround(x, y); return z == null ? (G.TZs ? G.TZs(x, y) : 0) : z; };
@@ -79,6 +90,7 @@ export async function luoKorjaamo(G) {
   const kt = new THREE.CanvasTexture(c); kt.colorSpace = THREE.SRGBColorSpace; kt.anisotropy = 4;
   const kyltti = new THREE.Mesh(new THREE.PlaneGeometry(4.6, 0.86), new THREE.MeshLambertMaterial({ map: kt })); kyltti.position.set(ox, AUKKO.yla + 0.72, 6.66); ryhma.add(kyltti);
   ryhma.add(sisustus(ox));
+  for (const q of KALUSTEET) { if (!MALLIT[q.malli]) continue; const o = (await lataa(MALLIT[q.malli])).scene; o.position.set(q.x, LATTIA, q.z); o.rotation.y = q.ry || 0; if (q.s) o.scale.setScalar(q.s); ryhma.add(o); }
   eiNostoa(ryhma); G.scene.add(ryhma);
 
   // kiinteät seinät ja ovi (SOLID lukee window.__furn-listaa: { x, y, yaw, hl = puolipituus suuntaan yaw, hw, gone })
@@ -86,7 +98,8 @@ export async function luoKorjaamo(G) {
   const oviLaatikko = laatikko(ox, SEINA_Z + 0.1, false, (AUKKO.x1 - AUKKO.x0) / 2);
   const seinat = [laatikko(-SEINA_X, 0, true, SEINA_Z + 0.3), laatikko(SEINA_X, 0, true, SEINA_Z + 0.3), laatikko(0, -SEINA_Z, false, SEINA_X),
     laatikko((-SEINA_X + AUKKO.x0) / 2, SEINA_Z + 0.1, false, (AUKKO.x0 + SEINA_X) / 2), laatikko((SEINA_X + AUKKO.x1) / 2, SEINA_Z + 0.1, false, (SEINA_X - AUKKO.x1) / 2), oviLaatikko,
-    laatikko(-1.35, -5.5, false, 3.3, 0.5), laatikko(4.3, -2.6, true, 1.4, 0.4), laatikko(3.6, -5.2, false, 0.9, 0.6), laatikko(-4.25, 2.9, true, 0.8, 0.4), laatikko(3.75, 7.05, false, 0.75, 0.45)];      // + työpöytä ja kaappi, hylly, renkaat, tynnyrit, ulkorenkaat
+    laatikko(-1.35, -5.5, false, 3.3, 0.5), laatikko(3.6, -5.2, false, 0.9, 0.6), laatikko(-4.25, 2.9, true, 0.8, 0.4), laatikko(3.75, 7.05, false, 0.75, 0.45)]
+    .concat(KALUSTEET.filter(q => MALLIT[q.malli]).flatMap(q => (q.laatikot || []).map(l => laatikko(q.x + l[0], q.z + l[1], l[2], l[3], l[4]))));      // + työpöytä ja kaappi, renkaat, tynnyrit, ulkorenkaat, Meshy-kalusteet
   const vieSeinat = () => { const F = window.__furn; if (F && !F.includes(oviLaatikko)) for (const s of seinat) F.push(s); };      // pelin penkkilohko luo listan vasta kun pelaaja on lähellä keskustaa → yritetään uudestaan
   if (!window.__furn) window.__furn = [];
   vieSeinat(); setInterval(vieSeinat, 2000);

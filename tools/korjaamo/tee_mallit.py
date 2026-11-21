@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-"""Tapsan korjaamon Meshy-mallit pelin muotoon: python tee_mallit.py halli_meshy.glb ovi_meshy.glb ../../korjaamo/korjaamo_mallit.js
+"""Tapsan korjaamon Meshy-mallit pelin muotoon:
+python tee_mallit.py halli=halli_meshy.glb:2048:0.22:1 ovi=nosto_ovi_meshy.glb:1024:0.12:1 hylly=hylly_meshy.glb:1024:0:0.5 ../../korjaamo/korjaamo_mallit.js
+(nimi=tiedosto:tekstuurin koko:alareunan tummennus:suuntavalon voimakkuus; uusi malli = uusi nimi=... ja sijoitus korjaamo.js:n taulukkoon KALUSTEET)
 Pitaa verkon ja varitekstuurin (halli 2048 px, ovi 1024 px, JPEG 85), jattaa normaali- ja metallisuuskartat pois (karheus 0,9).
 Korjaa Meshyn nollanormaalit (naistä tuli pelissa mustia laikkuja seiniin) laskemalla normaalit kolmioista, ja leipoo pisteväreihin (COLOR_0)
 suuntavalon: pelissa on vain tasainen taivasvalo, joten ilman tata seinat ja katto ovat yhta latteaa savya. Savy viilennetaan pelin lampimalle valolle.
@@ -11,7 +13,7 @@ from PIL import Image
 VALO = np.array([0.45, 0.70, 0.55]); VALO /= np.linalg.norm(VALO)      # mallin akseleissa: edesta (ovipaaty +z), ylhaalta, hieman oikealta
 SAVY = np.array([0.86, 0.90, 1.00])
 
-def pienenna(polku, tex=1024, maa_varjo=0.0):
+def pienenna(polku, tex=1024, maa_varjo=0.0, valo=1.0):
     b = open(polku, "rb").read(); n = struct.unpack("<I", b[12:16])[0]; j = json.loads(b[20:20 + n]); bin0 = b[20 + n + 8:]
     def view(i):
         v = j["bufferViews"][i]; return bin0[v.get("byteOffset", 0):v.get("byteOffset", 0) + v["byteLength"]]
@@ -38,7 +40,7 @@ def pienenna(polku, tex=1024, maa_varjo=0.0):
     Nk = np.where(huono[:, None], N, N0 / np.maximum(l0, 1e-12)[:, None])
     # kaksipuolinen pinta: valo osuu kummalle puolelle tahansa, joten seinille |n·valo| olisi vaarin -> kaytetaan ulkonormaalia (poispain mallin keskiakselista)
     kesk = np.array([0.0, P[:, 1].mean(), 0.0]); ulos = np.sign(np.einsum("ij,ij->i", Nk, P - kesk)); ulos[ulos == 0] = 1; Nu = Nk * ulos[:, None]
-    v = 0.52 + 0.48 * np.clip(Nu @ VALO, 0, 1)
+    v = 1 - valo * 0.48 * (1 - np.clip(Nu @ VALO, 0, 1))
     if maa_varjo > 0: v *= 1 - maa_varjo * np.clip(1 - P[:, 1] / 0.9, 0, 1) ** 2      # tummempi alareuna (lika, kosketusvarjo)
     C = np.clip(v[:, None] * SAVY[None, :], 0, 1); C = np.round(np.c_[C, np.ones(len(C))] * 255).astype(np.uint8)
     def uusi(arr, ctype, typ, target, minmax=False):
@@ -61,7 +63,10 @@ def pienenna(polku, tex=1024, maa_varjo=0.0):
     while len(js) % 4: js += b" "
     return struct.pack("<III", 0x46546C67, 2, 28 + len(js) + len(buf)) + struct.pack("<I", len(js)) + b"JSON" + js + struct.pack("<I", len(buf)) + b"BIN\x00" + bytes(buf)
 
-halli, ovi, ulos = sys.argv[1:4]
-h, o = pienenna(halli, 2048, 0.22), pienenna(ovi, 1024, 0.12)
-open(ulos, "w", encoding="utf-8", newline="").write("// Tapsan korjaamon mallit (Meshy): halli ja nosto-ovi, base64-GLB. Tehty: tools/korjaamo/tee_mallit.py\nexport default {\n  halli: \"%s\",\n  ovi: \"%s\"\n};\n" % (base64.b64encode(h).decode(), base64.b64encode(o).decode()))
-print("halli %d kt, ovi %d kt -> %s" % (len(h) // 1024, len(o) // 1024, ulos))
+*mallit, ulos = sys.argv[1:]
+rivit = []
+for m in mallit:
+    nimi, loput = m.split("=", 1); o = loput.split(":"); polku = o[0]; tex = int(o[1]) if len(o) > 1 else 1024; mv = float(o[2]) if len(o) > 2 else 0.0; vl = float(o[3]) if len(o) > 3 else 1.0
+    g = pienenna(polku, tex, mv, vl); rivit.append('  %s: "%s"' % (nimi, base64.b64encode(g).decode())); print("%s %d kt" % (nimi, len(g) // 1024))
+open(ulos, "w", encoding="utf-8", newline="").write("// Tapsan korjaamon mallit (Meshy), base64-GLB. Tehty: tools/korjaamo/tee_mallit.py\nexport default {\n" + ",\n".join(rivit) + "\n};\n")
+print("->", ulos)
