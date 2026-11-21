@@ -139,7 +139,12 @@ Lisäkentät: `"malli": "npc_vartija_b"` vaihtaa mallin tälle sijoitukselle (va
 
 Missä uudet hahmot ovat: **Harju** seisoo aina Etelärannan toisella ponttonilaiturilla (`maailma.json`, paikka on omistajan valinta, tarkista käsikirjoituksesta M07–M26),
 **vartijat A, B ja C** korjaamon ovella M04:n alussa, **kuriiri** juoksee korjaamon ovelta M05:n alussa.
-Puhuva hahmo kääntyy pelaajaa kohti. Korkeus tulee pelin `roofAt`-funktiosta (katu, laituri, silta). Mallit ladataan vasta tarvittaessa, kerran per malli.
+Puhuva hahmo kääntyy pelaajaa kohti. Korkeus tulee pelin `carGround`-funktiosta kuten pelaajan jalat (joessa ja varalla `roofAt` + laiturit).
+
+**Puhe ja eleet (21.11.2026):** puhujan suu liikkuu (leuan muodonmuutos + tumma suuaukko; suun paikka mallikohtaisesti `hahmot.js`:n taulukossa `SUU` – uusi tai
+uudelleen riggattu malli pitää mitata siihen, muuten suu ei liiku), pää nyökkää ja kääntyy ja kädet viittovat vuorotellen. Muut alle 30 m päässä olevat hahmot
+kuuntelevat: nyökkäilevät ja vaihtavat painoa. Toimintarivillä (`toiminta: true`) eleet ilman suuta. Jos samaa hahmoa on monta (vartijat), äänessä on pelaajaa lähin.
+Eleet lasketaan koodissa Idle-klipin päälle (`elehdi`), erillisiä klippejä ei tarvita. Rami (pelaajan hahmo) ei vielä liikuta suutaan. Mallit ladataan vasta tarvittaessa, kerran per malli.
 Kokeilusivulla **Z** vaihtaa lähikuvaan, jossa hahmot näkyvät.
 
 ## Raha ja päivän kierros

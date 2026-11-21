@@ -2232,3 +2232,21 @@ Porinsillan eteläpään uusi tieosuus ja Etelärannan aukion kiveys (roads.js-l
   lattia kaivannon pohjasta (~0,8), katto 4,21 -> vapaa korkeus 3,4 m, koillisessa ramppi asema-aukiolle tukimuureineen ja kaiteineen, otsamuurit, kattovalot.
   Maan ruudukko leikattu käytävän kohdalta (index.html `rataTun` -> `tSkip`; rata.js ulkokehän 6 m ruudukko), rampin reunoille kaistat ilmakuvalla.
   Vanha jalankulkuportaali poistettu. **Ei vielä:** bussireitin kytkentä tunneliin (citylinja), lounaispään liittymä katuun, tunnelin taideteos (Porisontti).
+
+
+## 21.11.2026 – Tarinahahmot: jalat maan pinnalle, puhuessa suu liikkuu ja hahmot elehtivät (omistaja: "tapsan jalat oli asfaltin sisällä", "osallistuvat botit voisivat kanssakäymisessä myös vähän liikkua, saadaanko suuhun liikettä?")
+- **Jalat (`tarina/peli.js`):** hahmojen korkeus tuli `roofAt`ista, joka on kadulla 0,13–0,28 m asfaltin pinnan alla. Nyt `carGround` (sama kuin pelaajan jalat);
+  joessa ja varalla `roofAt`, laitureilla `__laituriZ`. Tapsa Etelärannassa nousi 0,28 m.
+- **Suu (`tarina/hahmot.js`, `teeSuu`):** malleissa ei ole leukaluuta, joten latauksessa tehdään muodonmuutos (alahuuli ja leuka alas enintään 11 mm) ja tumma
+  suuaukko pään luun lapseksi. Suun ja leuan korkeus on mitattu kaikille kymmenelle mallille taulukkoon `SUU` (sidosasennon metrit, lähikuvat senttiviivaimella).
+  **Uusi tai uudelleen riggattu malli → mittaa `SUU` uudestaan.** Puheen rytmi on keksitty (noin 3 tavua/s tauoilla), ei tekstistä eikä äänestä.
+- **Eleet (`elehdi`):** puhuja nyökkää, kääntää päätä, kiertää vartaloa ja nostaa käsiä vuorotellen; kuulijat (alle 30 m) nyökkäilevät sarjoina ja vaihtavat painoa.
+  Lasketaan Idle-klipin päälle hahmon omilla akseleilla. Huom: AnimationMixer kirjoittaa luun vain arvon muuttuessa, joten edellisen ruudun ele perutaan ensin
+  (ilman tätä kierrot kasautuivat ja Tapsa kaatui selälleen – löytyi headless-testissä).
+- Samaa hahmoa monta (M04:n kolme vartijaa) → vain pelaajaa lähin puhuu. Toimintarivit ([hakasulkeissa]) ilman suun liikettä.
+- **Testattu:** kaikkien 10 mallin suu kiinni/auki lähikuvina katselusivulla; oikeassa pelissä headless M04:n välianimaatio (vartija puhuu → yksi suu liikkuu,
+  Tapsa puhuu → Tapsan suu ja kädet, muut pystyssä), jalat asfaltin pinnalla (Tapsa, Terttu, vartijat, Harju laiturilla), `testi.mjs` 15/15, ei konsolivirheitä.
+- **Ei testattu:** miltä puhe ja eleet näyttävät liikkeessä oikealla ruudunpäivityksellä (headless vain yksittäisiä ruutuja), puhelin.
+- **Tiedossa:** viiksekkäillä (Tapsa, Harju, Vartija B) viiksen kärjet liikkuvat hieman leuan mukana. Rami ei liikuta suutaan. Kadun kävelijöillä (npc_mies_a ym.)
+  ei ole suun liikettä, vain aiemmat käsieleet.
+- **Huom. rinnakkainen istunto:** lokiin oli tullut rata/juna-merkinnät toisesta istunnosta tämän työn aikana. Tässä muutoksessa ei koskettu `index.html`:ään.

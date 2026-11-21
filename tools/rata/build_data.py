@@ -468,7 +468,7 @@ for tr in TR:
     tr['tn'] = tn_
 for _i, tr in enumerate(TR): out['t'][_i]['tn'] = [int(i) for i in np.where(tr['tn'])[0]]
 def in_tun(p, m=0.0):
-    t_, l_ = tcoord(p); return abs(l_) < TW / 2 + 0.8 + m and T0 - 26 < t_ < T1 + 26
+    t_, l_ = tcoord(p); return T0 - 40 < t_ < T1 + 36 and l_ < TW / 2 + 0.8 + m and l_ > -(TW / 2 + 0.8 + m + (4.5 + max(0, t_ - T1 - 20) * 0.25 if t_ > T1 else 0))
 
 # ---------------------------------------------------------------- maaston muokkaus (index.html soveltaa ennen maan rakentamista)
 # 1) ratapenkka: ruudukon solmut alle 3,6 m raiteesta painetaan pölkyn yläpinnan alle, jotta maa ei puhkaise sepeliä
@@ -524,7 +524,9 @@ if LEVEL is not None:
 cm = ok & (d < 3.6) & ~TUNM
 # Porttaali: tunnelin ja rampin kohdalta maa lattian alle (6 m ruudukko ei muuten anna kaivantoa näkyviin ajoradan päälle)
 for _k in np.where(np.array([in_tun(p, 1.5) for p in pts]))[0]:
-    t_, l_ = tcoord(pts[_k]); fz_ = float(np.interp(t_, _ft, _fz)); fl[_k] = min(fl[_k], fz_ - 0.15)
+    t_, l_ = tcoord(pts[_k])
+    if t_ > T1 + 3: continue   # lounaassa ajorata on maan tasossa
+    fz_ = float(np.interp(t_, _ft, _fz)); fl[_k] = min(fl[_k], fz_ - 0.15)
 zc = np.where(cm, allz[np.minimum(idx, len(allz) - 1)] - 0.35, 1e9)
 fl[cm] = np.minimum(fl[cm], zc[cm])
 newH = fl.reshape(ny, nx)

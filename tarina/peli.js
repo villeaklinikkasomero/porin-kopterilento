@@ -101,10 +101,14 @@ export async function kaynnista() {
   const MK = luoMerkit(G.scene);
   M.on('merkit', m => MK.aseta(m));
   M.on('siirto', d => siirra(d.paikka));
-  // tarinan hahmot (npc_tapsa.js ym.) maailmaan; korkeus pelin omasta roofAt-funktiosta (katu, laituri, silta)
-  const HH = luoHahmot(G.scene, { hahmot, korkeus: (x, y) => { try { return G.roofAt ? G.roofAt(x, y) : 0; } catch (e) { return 0; } } });
+  // tarinan hahmot (npc_tapsa.js ym.) maailmaan
+  // Korkeus samasta funktiosta kuin pelaajan ja kävelijöiden jalat (carGround: kadun, kiveyksen, sillan ja rantamuurin pinta). roofAt jäi
+  // kadulla asfaltin alle (omistaja 21.11.2026: "tapsan jalat oli asfaltin sisällä"); sitä käytetään vain joessa (laiturit) ja varalla.
+  const maa = (x, y) => { try { let z = G.carGround ? G.carGround(x, y) : null; const lz = window.__laituriZ ? window.__laituriZ(x, y) : null;
+    if (z == null) z = G.roofAt ? G.roofAt(x, y) : 0; if (lz !== null && lz > z) z = lz; return z; } catch (e) { return 0; } };
+  const HH = luoHahmot(G.scene, { hahmot, korkeus: maa });
   M.on('hahmot', l => HH.aseta(l));
-  M.on('repliikki', d => HH.puhuu(d && d.hahmo));
+  M.on('repliikki', d => HH.puhuu(d && d.hahmo, d && d.toiminta));
   M.lataa(); MK.aseta(M.merkit()); HH.aseta(M.hahmolista());
 
   // radio hiljaisemmalle repliikkien ajaksi
